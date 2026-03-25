@@ -175,7 +175,7 @@ namespace ApostlesWar
         /// <param name="ataque">Valor de ataque do atacante</param>
         public void ReceberDano(int ataque)
         {
-            double reducao = Math.Min((Defesa / 400.0) * 0.75, 0.75);
+            double reducao = Math.Min((Defesa / 1000.0) * 0.75, 0.75);
             int danoFinal = (int)(ataque * (1 - reducao));
             HPAtual -= danoFinal;
         }

@@ -43,12 +43,6 @@ namespace ApostlesWar
             return capitulos.First(c => c.Faccao == faccao);
         }
 
-        public static bool EstaDesbloqueado(Faccao faccao, Fases fase)
-        {
-            Capitulos cap = ObterCapitulo(faccao);
-            return cap.CapDesblock && cap.FaseDesblock[(int)fase - 1];
-        }
-
         public static bool EstaDesbloqueado(Faccao faccao) => ObterCapitulo(faccao).CapDesblock;
 
         public static void DesbloquearFase(Faccao faccao, Fases fase)
@@ -86,29 +80,7 @@ namespace ApostlesWar
             File.WriteAllText("save.txt", json);
         }
 
-        /// <summary>
-        /// Carrega o progresso salvo em arquivo, restaurando capítulos, campeões desbloqueados e itens obtidos
-        /// </summary>
-        public static void CarregarProgresso()
-        {
-            if (File.Exists("save.txt"))
-            {
-                var json = File.ReadAllText("save.txt");
-                var lista = JsonSerializer.Deserialize<List<Capitulos>>(json);
 
-                if (lista != null)
-                {
-                    capitulos.Clear();
-                    capitulos.AddRange(lista);
-                }
-
-                foreach (Capitulos cap in capitulos)
-                    foreach (Fases fase in Enum.GetValues<Fases>())
-                        if (cap.FaseConcluida[(int)fase - 1])
-                            Campeoes.DesbloquearCampeoes(cap.Faccao, fase);
-                Arsenal.CarregarItens();
-            }
-        }
 
         public static List<Capitulos> ObterTodos() => capitulos;
     }

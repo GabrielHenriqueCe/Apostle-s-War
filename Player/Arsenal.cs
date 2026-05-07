@@ -104,20 +104,7 @@ namespace ApostlesWar
             File.WriteAllText("itens.txt", json);
         }
 
-        /// <summary>
-        /// Restaura os itens equipados a partir do arquivo salvo anteriormente
-        /// </summary>
-        public static void CarregarItensEquipados()
-        {
-            if (File.Exists("itens.txt"))
-            {
-                var json = File.ReadAllText("itens.txt");
-                var lista = JsonSerializer.Deserialize<Item?[]>(json);
-                if (lista != null)
-                    for (int i = 0; i < lista.Length; i++)
-                        equipados[i] = lista[i];
-            }
-        }
+
     }
 
     #endregion

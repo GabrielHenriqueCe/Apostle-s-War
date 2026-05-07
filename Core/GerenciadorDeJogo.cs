@@ -113,50 +113,6 @@
 
             return jogador.Any(j => j.EstaVivo());
         }
-
-        /// <summary>
-        /// Monta e executa as duas rodadas de uma fase, retornando true se o jogador vencer ambas
-        /// </summary>
-        public static bool ExecutarFase(Faccao capitulo, Fases fase)
-        {
-            Capitulos cap = Capitulos.ObterCapitulo(capitulo);
-            Fase fas = Campanha.ObterFase((int)fase);
-            MultiplicadorFase mult = new MultiplicadorFase
-            {
-                HP = (0.5f * (float)capitulo) + (0.1f * (float)fase),
-                Ataque = (0.5f * (float)capitulo) + (0.1f * (float)fase),
-                Defesa = (0.5f * (float)capitulo) + (0.1f * (float)fase)
-            };
-
-            var time = Campeoes.SelecionarTime();
-            var jogador = time.Select(p => (Combate)new Jogador(p)).ToList();
-
-            foreach (Combate c in jogador)
-                Arsenal.AplicarItens(c);
-
-            var inimigo = new List<Combate>();
-            var combatentes = new List<Combate>();
-
-            foreach (Slot slot in fas.Rodada1)
-                inimigo.Add(new Inimigo(SelecaoSimbolo.ObterPersonagem(cap.Faccao, slot), mult));
-
-            combatentes.AddRange(jogador);
-            combatentes.AddRange(inimigo);
-
-            if (!ExecutarCombate(jogador, inimigo, combatentes)) return false;
-
-            inimigo.Clear();
-            combatentes.Clear();
-
-            foreach (Slot slot in fas.Rodada2)
-                inimigo.Add(new Inimigo(SelecaoSimbolo.ObterPersonagem(cap.Faccao, slot), mult));
-
-            combatentes.AddRange(jogador);
-            combatentes.AddRange(inimigo);
-
-            return ExecutarCombate(jogador, inimigo, combatentes);
-        }
-
     }
 
     #endregion

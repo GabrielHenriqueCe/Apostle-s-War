@@ -2,9 +2,6 @@
 {
     #region Item
 
-    /// Tipos de stat que um item pode alterar
-    enum TipoStat { ATKFlat, HPFlat, DEFFlat, HPPct, DEFPct, TaxaCritPct, DanoCritPct }
-
     /// <summary>
     /// Representa um item equipável obtido ao concluir uma fase
     /// </summary>
@@ -36,7 +33,7 @@
         /// <summary>
         /// Calcula o valor do stat do item com base no capítulo e tipo de stat
         /// </summary>
-        private static double CalcularValor(Faccao faccao, Fases fase, TipoStat tipoStat)
+        private double CalcularValor(Faccao faccao, Fases fase, TipoStat tipoStat)
         {
             int cap = (int)faccao;
             return tipoStat switch

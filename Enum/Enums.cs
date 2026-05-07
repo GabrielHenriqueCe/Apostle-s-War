@@ -11,6 +11,14 @@
     
     enum EventoCombate { AntesDeReceberDano, DepoisDeReceberDano }
 
+    // Opções de confirmação
+    enum SimOuNao { Sim = 1, Nao = 2 }
+    // Opções do menu principal
+    enum OpcoesMenu { JogarCampanha = 1, Inventario = 2 }
+
+    /// Tipos de stat que um item pode alterar
+    enum TipoStat { ATKFlat, HPFlat, DEFFlat, HPPct, DEFPct, TaxaCritPct, DanoCritPct }
+
     #endregion
 }
 

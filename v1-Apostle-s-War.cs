@@ -131,6 +131,23 @@ namespace ApostlesWar
         public HabilidadeAtiva(string nome, int turnos, string descricao = "") : base(nome, turnos, descricao) { }
     }
 
+    class Necromancia : HabilidadePassiva
+    {
+        public Necromancia() : base("Necromancia", 6, "Revive o personagem com 50% do HP máximo ao morrer. Cooldown de 6 turnos.") { }
+        public override bool Revive() => true;
+        public override bool DeveAtivar(EventoCombate evento) => evento == EventoCombate.DepoisDeReceberDano;
+        public override string MensagemSobreviveu(Personagem personagem) => $"{personagem.Simbolo} {personagem.Nome} foi ressuscitado pela Necromancia!";
+        public override string MensagemMorreu(Personagem personagem) => $"{personagem.Simbolo} {personagem.Nome} caiu em batalha e não pode ser ressuscitado.";
+        
+        public override void Ativar(Combate alvo)
+        {
+            if (alvo.HPAtual <= 0)
+            {
+                alvo.Reviver(alvo.Personagem.HP / 2);
+            }
+        }
+    }
+
     #endregion
 
     #region Personagem
@@ -149,8 +166,9 @@ namespace ApostlesWar
         public int Defesa { get; private set; }
         public double TaxaCrit { get; private set; } = 0.15;
         public double DanoCrit { get; private set; } = 0.60;
+        public Habilidade? Habilidade { get; private set; }
 
-        public Personagem(int slot, Faccao faccao, string nome, string simbolo, int hp, int ataque, int def)
+        public Personagem(int slot, Faccao faccao, string nome, string simbolo, int hp, int ataque, int def, Habilidade? habilidade = null)
         {
             Slot = slot;
             Faccao = faccao;
@@ -159,6 +177,7 @@ namespace ApostlesWar
             HP = hp;
             Ataque = ataque;
             Defesa = def;
+            Habilidade = habilidade;
         }
     }
 
@@ -176,13 +195,13 @@ namespace ApostlesWar
             new Personagem(4, Faccao.Humanos, "Sushiman ", "👲",  800, 280, 160),
             
             // O Reino
-            new Personagem(1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200),
+            new Personagem(1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200, new Necromancia()),
             new Personagem(2, Faccao.Reino, "Ninja", "🥷", 600, 280, 200),
             new Personagem(3, Faccao.Reino, "Mago", "🧙", 1000, 280, 120),
             new Personagem(4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200),
 
             // Lado Sombrio
-            new Personagem(1, Faccao.LadoSombrio, "Caveira", "💀",  600, 280, 200),
+            new Personagem(1, Faccao.LadoSombrio, "Caveira", "💀",  600, 280, 200, new Necromancia()),
             new Personagem(2, Faccao.LadoSombrio, "Fantasma", "👻", 1400, 120, 200),
             new Personagem(3, Faccao.LadoSombrio, "Abóbora", "🎃",  600, 200, 280),
             new Personagem(4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120),
@@ -261,6 +280,11 @@ namespace ApostlesWar
             Defesa = personagem.Defesa;
             TaxaCrit = personagem.TaxaCrit;
             DanoCrit = personagem.DanoCrit;
+        }
+
+        public void Reviver(int hp)
+        {
+            HPAtual = hp;
         }
 
         /// <summary>
@@ -803,6 +827,7 @@ namespace ApostlesWar
                     }
                 }
             }
+
             else if (atacante is Inimigo)
             {
                 while (true)
@@ -813,6 +838,19 @@ namespace ApostlesWar
                         break;
                     }
                 }
+            }
+
+            var alvoAtacado = defensor[alvo - 1];
+            if (alvoAtacado.Personagem.Habilidade is HabilidadePassiva passiva
+                && passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano)
+                && passiva.Cooldown.Disponivel)
+            {
+                passiva.Ativar(alvoAtacado);
+                passiva.Cooldown.Usar();
+                if (passiva.Revive())
+                    Console.WriteLine(passiva.MensagemSobreviveu(alvoAtacado.Personagem));
+                else
+                    Console.WriteLine(passiva.MensagemMorreu(alvoAtacado.Personagem));
             }
 
             if (atacante is Inimigo)
@@ -826,7 +864,7 @@ namespace ApostlesWar
 
             if (atacante is Inimigo)
             {
-                Thread.Sleep(1500);
+                Thread.Sleep(2000);
             }
         }
 

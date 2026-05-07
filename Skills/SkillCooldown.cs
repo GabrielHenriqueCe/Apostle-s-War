@@ -33,20 +33,6 @@
         {
             this.turnosRestantes = 0;
         }
-
-        /// <summary>
-        /// Retorna o emoji de relógio proporcional ao progresso do cooldown
-        /// </summary>
-        public static string ObterRelogio(int turnosRestantes, int cooldownTotal)
-        {
-            if (turnosRestantes == 0) return "🕛";
-
-            string[] relogios = { "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙" };
-            int turnosPassados = cooldownTotal - turnosRestantes;
-            int indice = (int)Math.Round((double)turnosPassados * 9 / cooldownTotal) - 1;
-            indice = Math.Clamp(indice, 0, 8);
-            return relogios[indice];
-        }
     }
 
     #endregion

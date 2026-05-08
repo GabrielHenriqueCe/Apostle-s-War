@@ -9,7 +9,10 @@
     {
         private static readonly Random random = new Random();
         public abstract Personagem Personagem { get; }
+        public SkillCooldown? Cooldown { get; private set; }
+        public int HPMaximo { get; protected set; }
         public int HPAtual { get; protected set; }
+        public int HPBase { get; private set; }
         public int Ataque { get; protected set; }
         public int Defesa { get; protected set; }
         public double TaxaCrit { get; protected set; }
@@ -17,11 +20,15 @@
 
         public Combate(Personagem personagem)
         {
+            HPBase = personagem.HP;
+            HPMaximo = personagem.HP;
             HPAtual = personagem.HP;
             Ataque = personagem.Ataque;
             Defesa = personagem.Defesa;
             TaxaCrit = personagem.TaxaCrit;
             DanoCrit = personagem.DanoCrit;
+            if (personagem.Habilidade != null)
+                Cooldown = new SkillCooldown(personagem.Habilidade.Turnos);
         }
 
         /// <summary>
@@ -68,9 +75,15 @@
             switch (item.TipoStat)
             {
                 case TipoStat.ATKFlat: Ataque += (int)item.Valor; break;
-                case TipoStat.HPFlat: HPAtual += (int)item.Valor; break;
+                case TipoStat.HPFlat:
+                    HPMaximo += (int)item.Valor;
+                    HPAtual += (int)item.Valor;
+                    break;
                 case TipoStat.DEFFlat: Defesa += (int)item.Valor; break;
-                case TipoStat.HPPct: HPAtual += (int)(HPAtual * item.Valor); break;
+                case TipoStat.HPPct:
+                    HPMaximo += (int)(HPBase * item.Valor);
+                    HPAtual += (int)(HPBase * item.Valor);
+                    break;
                 case TipoStat.DEFPct: Defesa += (int)(Defesa * item.Valor); break;
                 case TipoStat.TaxaCritPct: TaxaCrit += item.Valor; break;
                 case TipoStat.DanoCritPct: DanoCrit += item.Valor; break;

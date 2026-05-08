@@ -14,7 +14,7 @@ namespace ApostlesWar
         public override void Ativar(Combate alvo)
         {
             if (alvo.HPAtual <= 0)
-                alvo.Reviver(alvo.Personagem.HP / 2);
+                alvo.Reviver(alvo.HPMaximo / 2);
         }
     }
 

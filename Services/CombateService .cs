@@ -87,10 +87,11 @@ namespace v1_Apostle_s_War.Services
             if (!alvoAtacado.EstaVivo()
                 && alvoAtacado.Personagem.Habilidade is HabilidadePassiva passiva
                 && passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano)
-                && passiva.Cooldown.Disponivel)
+                && alvoAtacado.Cooldown != null
+                && alvoAtacado.Cooldown.Disponivel)
             {
                 passiva.Ativar(alvoAtacado);
-                passiva.Cooldown.Usar();
+                alvoAtacado.Cooldown.Usar();
                 if (passiva.Revive())
                 {
                     Console.WriteLine(passiva.MensagemSobreviveu(alvoAtacado.Personagem));

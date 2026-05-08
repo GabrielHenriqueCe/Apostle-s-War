@@ -17,7 +17,8 @@
         public Inimigo(Personagem personagem, MultiplicadorFase mult) : base(personagem)
         {
             Personagem = personagem;
-            HPAtual = (int)(HPAtual * mult.HP);
+            HPMaximo = (int)(HPBase * mult.HP);
+            HPAtual = (int)(HPBase * mult.HP);
             Ataque = (int)(Ataque * mult.Ataque);
             Defesa = (int)(Defesa * mult.Defesa);
         }

@@ -37,5 +37,7 @@ var personagemService = new PersonagemService();
 var faccaoService = new FaccaoService();
 var menuService = new MenuService(faccaoService, arsenalService, capitulosService);
 var campeoesService = new CampeoesService(personagemService, campanhaService, menuService, capitulosService);
-new GerenciadorDeJogoService(arsenalService, campanhaService, campeoesService, capitulosService, faccaoService, menuService, personagemService).Executar();
+var combateService = new CombateService(arsenalService, campanhaService, campeoesService, personagemService);
+new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, menuService, combateService).Executar();
+
 #endregion

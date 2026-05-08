@@ -746,6 +746,11 @@ void ExecutarTurno(Combate atacante, List<Combate> defensor)
     atacante.Atacar(defensor[alvo - 1]);
     Console.WriteLine($"hp atual do {defensor[alvo - 1].Personagem.Simbolo} é de {defensor[alvo - 1].HPAtual}");
 
+    if (atacante is Jogador)
+    {
+        Thread.Sleep(1500);
+    }
+
     var alvoAtacado = defensor[alvo - 1];
     if (!alvoAtacado.EstaVivo()
         && alvoAtacado.Personagem.Habilidade is HabilidadePassiva passiva
@@ -757,12 +762,12 @@ void ExecutarTurno(Combate atacante, List<Combate> defensor)
         if (passiva.Revive())
         {
             Console.WriteLine(passiva.MensagemSobreviveu(alvoAtacado.Personagem));
-            Thread.Sleep(2000);
+            Thread.Sleep(1500);
         }
         else
         {
             Console.WriteLine(passiva.MensagemMorreu(alvoAtacado.Personagem));
-            Thread.Sleep(2000);
+            Thread.Sleep(1500);
         }
     }
 

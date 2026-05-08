@@ -33,35 +33,6 @@ namespace v1_Apostle_s_War.Services
             Console.WriteLine("\nDigite o número da opção desejada:");
         }
 
-        /// <summary>
-        /// Lê uma tecla do console e tenta converter para o enum informado. Retorna null se Esc for pressionado
-        /// </summary>
-        public T? LerOpcao<T>() where T : struct
-        {
-            while (true)
-            {
-                ConsoleKeyInfo first = Console.ReadKey(false);
-
-                if (first.Key == ConsoleKey.Escape)
-                    return null;
-
-                string input = first.KeyChar + Console.ReadLine();
-
-                if (int.TryParse(input, out int opcao) && opcao > 0)
-                {
-                    var valor = (T)Enum.ToObject(typeof(T), opcao);
-                    if (Enum.IsDefined(typeof(T), valor))
-                        return valor;
-                    else
-                        Console.WriteLine("Opção inválida, digite uma opção válida.");
-                }
-                else
-                {
-                    Console.WriteLine("Opção inválida, digite uma opção válida.");
-                }
-            }
-        }
-
         public void MenuCapitulos()
         {
             Console.Clear();

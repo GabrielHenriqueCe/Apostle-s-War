@@ -36,8 +36,11 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Adiciona um item à lista de obtidos ao concluir uma fase
         /// </summary>
-        public void DroparItem(Faccao faccao, Fases fase)
+        public Item? DroparItem(Faccao faccao, Fases fase)
         {
+            if (obtidos.Any(i => i.Faccao == faccao && i.Fase == fase))
+                return null;
+
             string simbolo = simbolosPorFaccao[faccao][(int)fase - 1];
 
             (string nome, TipoStat tipo) = fase switch
@@ -51,7 +54,9 @@ namespace v1_Apostle_s_War.Services
                 Fases.Fase7 => ("Bota", TipoStat.DanoCritPct),
                 _ => throw new ArgumentOutOfRangeException()
             };
-            obtidos.Add(new Item(nome, simbolo, faccao, fase, tipo));
+            var item = new Item(nome, simbolo, faccao, fase, tipo);
+            obtidos.Add(item);
+            return item;
         }
 
         public ArsenalService(CapitulosService capitulosService)

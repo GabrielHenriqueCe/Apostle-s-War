@@ -12,4 +12,8 @@
     <Compile Remove="v1-Apostle-s-War.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GHUtils\GHUtils.csproj" />
+  </ItemGroup>
+
 </Project>

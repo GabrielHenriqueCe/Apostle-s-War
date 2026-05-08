@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using GHUtils;
+using static GHUtils.ConsoleUtils;
 
 namespace v1_Apostle_s_War.Services
 {
@@ -45,13 +47,13 @@ namespace v1_Apostle_s_War.Services
             do
             {
                 _menuService.ExibirMenu();
-                OpcoesMenu? opcao = _menuService.LerOpcao<OpcoesMenu>();
+                OpcoesMenu? opcao = LerOpcao<OpcoesMenu>();
 
                 if (opcao == null)
                 {
                     Console.Clear();
                     Console.WriteLine("Deseja sair do jogo? 1 - Sim | 2 - Não");
-                    SimOuNao? escolha = _menuService.LerOpcao<SimOuNao>();
+                    SimOuNao? escolha = LerOpcao<SimOuNao>();
                     if (escolha == SimOuNao.Sim)
                     {
                         Console.WriteLine("Obrigado por jogar! Até a próxima!");
@@ -68,7 +70,7 @@ namespace v1_Apostle_s_War.Services
                         do
                         {
                             _menuService.MenuCapitulos();
-                            faccao = _menuService.LerOpcao<Faccao>();
+                            faccao = LerOpcao<Faccao>();
                             if (faccao == null) break;
                             if (_capitulosService.EstaCapituloDesbloqueado(faccao.Value))
                             {
@@ -76,7 +78,7 @@ namespace v1_Apostle_s_War.Services
                                 do
                                 {
                                     _menuService.MenuFases(faccao.Value);
-                                    fases = _menuService.LerOpcao<Fases>();
+                                    fases = LerOpcao<Fases>();
                                     if (fases == null) break;
                                     if (_capitulosService.EstaDesbloqueado(faccao.Value, fases.Value))
                                     {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using v1_Apostle_s_War.Skills.Passivas;
 
 namespace v1_Apostle_s_War.Services
 {
@@ -18,13 +19,13 @@ namespace v1_Apostle_s_War.Services
             new Personagem(4, Faccao.Humanos, "Sushiman ", "👲",  800, 280, 160),
             
             // O Reino
-            new Personagem(1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200, new Necromancia()),
+            new Personagem(1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200),
             new Personagem(2, Faccao.Reino, "Ninja", "🥷", 600, 280, 200),
             new Personagem(3, Faccao.Reino, "Mago", "🧙", 1000, 280, 120),
             new Personagem(4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200),
 
             // Lado Sombrio
-            new Personagem(1, Faccao.LadoSombrio, "Caveira", "💀",  600, 280, 200),
+            new Personagem(1, Faccao.LadoSombrio, "Caveira", "💀",  600, 280, 200, new Necromancia()),
             new Personagem(2, Faccao.LadoSombrio, "Fantasma", "👻", 1400, 120, 200),
             new Personagem(3, Faccao.LadoSombrio, "Abóbora", "🎃",  600, 200, 280),
             new Personagem(4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120),

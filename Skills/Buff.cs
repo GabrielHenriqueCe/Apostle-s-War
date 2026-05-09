@@ -11,13 +11,10 @@ namespace v1_Apostle_s_War.Skills
     /// Efeitos positivos que aumentam as capacidades do personagem, como aumento de ataque, defesa, velocidade, etc. 
     /// Geralmente duram por um número limitado de turnos e podem ser aplicados por habilidades ativas ou passivas.
     /// </summary>
-    abstract class Buff : Habilidade
+    abstract class Buff : StatusEffect
     {
-        public Buff(string nome, int turnos, string descricao = "") : base(nome, turnos, descricao) { }
-        public virtual bool Revive() => false;
-        public abstract bool DeveAtivar(EventoCombate evento);
-        public abstract string MensagemSobreviveu(Personagem personagem);
-        public abstract string MensagemMorreu(Personagem personagem);
+        public Buff(string nome, int turnosRestantes, double valor, string descricao = "")
+            : base(nome, turnosRestantes, valor, descricao) { }
     }
 
     #endregion

@@ -84,23 +84,25 @@ namespace v1_Apostle_s_War.Services
             }
 
             var alvoAtacado = defensor[alvo - 1];
-            if (!alvoAtacado.EstaVivo()
-                && alvoAtacado.Personagem.Habilidade is HabilidadePassiva passiva
-                && passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano)
-                && alvoAtacado.Cooldown != null
-                && alvoAtacado.Cooldown.Disponivel)
+            foreach (Habilidade hab in alvoAtacado.Personagem.Habilidades)
             {
-                passiva.Ativar(alvoAtacado);
-                alvoAtacado.Cooldown.Usar();
-                if (passiva.Revive())
+                if (!alvoAtacado.EstaVivo() 
+                    && hab is HabilidadePassiva passiva
+                    && passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano)
+                    && alvoAtacado.Cooldowns[hab].Disponivel)
                 {
-                    Console.WriteLine(passiva.MensagemSobreviveu(alvoAtacado.Personagem));
-                    Thread.Sleep(1500);
-                }
-                else
-                {
-                    Console.WriteLine(passiva.MensagemMorreu(alvoAtacado.Personagem));
-                    Thread.Sleep(1500);
+                    passiva.Ativar(alvoAtacado);
+                    alvoAtacado.Cooldowns[hab].Usar();
+                    if (passiva.Revive())
+                    {
+                        Console.WriteLine(passiva.MensagemSobreviveu(alvoAtacado.Personagem));
+                        Thread.Sleep(1500);
+                    }
+                    else
+                    {
+                        Console.WriteLine(passiva.MensagemMorreu(alvoAtacado.Personagem));
+                        Thread.Sleep(1500);
+                    }
                 }
             }
 
@@ -121,17 +123,20 @@ namespace v1_Apostle_s_War.Services
                 for (int c = 0; c < combatentes.Count; c++)
                 {
                     if (!combatentes[c].EstaVivo()) continue;
-                    if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo()))
-                    { break; }
+                    if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
+
                     if (combatentes[c] is Jogador)
                     {
                         ExecutarTurno(combatentes[c], inimigo);
-                        combatentes[c].Personagem.Habilidade?.Cooldown.PassarTurno();
                     }
                     else
                     {
                         ExecutarTurno(combatentes[c], jogador);
-                        combatentes[c].Personagem.Habilidade?.Cooldown.PassarTurno();
+                    }
+
+                    foreach (var cd in combatentes[c].Cooldowns.Values)
+                    {
+                        cd.PassarTurno();
                     }
                 }
             } while (jogador.Any(j => j.EstaVivo()) && inimigo.Any(i => i.EstaVivo()));

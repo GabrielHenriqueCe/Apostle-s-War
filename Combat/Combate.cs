@@ -1,4 +1,6 @@
-﻿namespace ApostlesWar
+﻿using v1_Apostle_s_War.Skills.Ativas;
+
+namespace ApostlesWar
 {
     #region Combate
 
@@ -9,7 +11,7 @@
     {
         private static readonly Random random = new Random();
         public abstract Personagem Personagem { get; }
-        public SkillCooldown? Cooldown { get; private set; }
+        public Dictionary<Habilidade, SkillCooldown> Cooldowns { get; private set; }
         public int HPMaximo { get; protected set; }
         public int HPAtual { get; protected set; }
         public int HPBase { get; private set; }
@@ -17,6 +19,7 @@
         public int Defesa { get; protected set; }
         public double TaxaCrit { get; protected set; }
         public double DanoCrit { get; protected set; }
+        public List<StatusEffect> StatusAtivos { get; }
 
         public Combate(Personagem personagem)
         {
@@ -27,8 +30,12 @@
             Defesa = personagem.Defesa;
             TaxaCrit = personagem.TaxaCrit;
             DanoCrit = personagem.DanoCrit;
-            if (personagem.Habilidade != null)
-                Cooldown = new SkillCooldown(personagem.Habilidade.Turnos);
+            StatusAtivos = new List<StatusEffect>();
+            Cooldowns = new Dictionary<Habilidade, SkillCooldown>();
+            foreach (Habilidade hab in personagem.Habilidades)
+            {
+                Cooldowns[hab] = new SkillCooldown(hab.Turnos);
+            }
         }
 
         /// <summary>
@@ -37,6 +44,7 @@
         /// <param name="ataque">Valor de ataque do atacante</param>
         public void ReceberDano(int ataque)
         {
+            if (StatusAtivos.Any(s => s is BloqueioTotal)) return;
             double reducao = Math.Min((Defesa / 1000.0) * 0.75, 0.75);
             int danoFinal = (int)(ataque * (1 - reducao));
             HPAtual -= danoFinal;

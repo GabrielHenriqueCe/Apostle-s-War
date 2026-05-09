@@ -16,9 +16,9 @@
         public int Defesa { get; private set; }
         public double TaxaCrit { get; private set; } = 0.15;
         public double DanoCrit { get; private set; } = 0.60;
-        public Habilidade? Habilidade { get; private set; }
+        public List<Habilidade> Habilidades { get; private set; }
 
-        public Personagem(int slot, Faccao faccao, string nome, string simbolo, int hp, int ataque, int def, Habilidade? habilidade = null)
+        public Personagem(int slot, Faccao faccao, string nome, string simbolo, int hp, int ataque, int def, params Habilidade[] habilidades)
         {
             Slot = slot;
             Faccao = faccao;
@@ -27,7 +27,7 @@
             HP = hp;
             Ataque = ataque;
             Defesa = def;
-            Habilidade = habilidade;
+            Habilidades = new List<Habilidade>(habilidades);
         }
     }
 

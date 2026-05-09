@@ -1,6 +1,7 @@
-﻿using System;
+﻿using ApostlesWar;
+using System;
 
-namespace ApostlesWar
+namespace v1_Apostle_s_War.Skills.Passivas
 {
     #region Necromancia
 

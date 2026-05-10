@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using v1_Apostle_s_War.Skills.Ativas;
 using v1_Apostle_s_War.Skills.Passivas;
 
 namespace v1_Apostle_s_War.Services
@@ -13,7 +14,7 @@ namespace v1_Apostle_s_War.Services
         List<Personagem> personagens = new List<Personagem>
         {
             // Humanos
-            new Personagem(1, Faccao.Humanos, "Operário", "👷",  1200, 240, 120),
+            new Personagem(1, Faccao.Humanos, "Operário", "👷",  1200, 240, 120, new ParedeDeTijolos()),
             new Personagem(2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160),
             new Personagem(3, Faccao.Humanos, "Policial", "👮",  1000, 120, 280),
             new Personagem(4, Faccao.Humanos, "Sushiman ", "👲",  800, 280, 160),

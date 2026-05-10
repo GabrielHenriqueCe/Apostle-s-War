@@ -13,8 +13,8 @@ namespace v1_Apostle_s_War.Skills
     /// </summary>
     abstract class Buff : StatusEffect
     {
-        public Buff(string nome, int turnosRestantes, double valor, string descricao = "")
-            : base(nome, turnosRestantes, valor, descricao) { }
+        public Buff(string nome, string simbolo, int turnosRestantes, double valor, string descricao = "")
+            : base(nome, simbolo, turnosRestantes, valor, descricao) { }
     }
 
     #endregion

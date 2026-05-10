@@ -148,6 +148,83 @@ namespace v1_Apostle_s_War.Services
             }
         }
 
+        public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)
+        {
+            Console.Clear();
+            Console.WriteLine("Seu time:");
+            foreach (Combate j in jogadores)
+            {
+                string status = string.Join(" ", j.StatusAtivos.Select(s => $"{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
+                Console.WriteLine($"{j.Personagem.Simbolo} {j.Personagem.Nome} | HP:{j.HPAtual} ATK:{j.Ataque} DEF:{j.Defesa} {status}");
+            }
+
+            Console.WriteLine("\nInimigos:");
+            int i = 1;
+            foreach (Combate inimigo in inimigos.Where(d => d.EstaVivo()))
+            {
+                string status = string.Join(" ", inimigo.StatusAtivos.Select(s => $"{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
+                Console.WriteLine($"{i} - {inimigo.Personagem.Simbolo} {inimigo.Personagem.Nome} | HP:{inimigo.HPAtual} ATK:{inimigo.Ataque} DEF:{inimigo.Defesa} {status}");
+                i++;
+            }
+        }
+
+        public void ExibirAcoes(Combate atacante, int acaoSelecionada = 1)
+        {
+            Console.WriteLine("\nAções:");
+            string cursor1 = acaoSelecionada == 1 ? "▶" : " ";
+            Console.WriteLine($"{cursor1} 1 - ⚔️ Atacar");
+
+            int i = 2;
+            foreach (Habilidade hab in atacante.Personagem.Habilidades)
+            {
+                if (hab is HabilidadeAtiva)
+                {
+                    var cd = atacante.Cooldowns[hab];
+                    string relogio = ObterRelogio(cd.TurnosRestantes, cd.CooldownTotal);
+                    string cursor = acaoSelecionada == i ? "▶" : " ";
+                    Console.WriteLine($"{cursor} {i} - {hab.Simbolo} {hab.Nome} {relogio}");
+                    i++;
+                }
+            }
+
+            bool temPassiva = atacante.Personagem.Habilidades.Any(h => h is HabilidadePassiva);
+            if (temPassiva)
+            {
+                Console.WriteLine("\nPassivas:");
+                foreach (Habilidade hab in atacante.Personagem.Habilidades)
+                {
+                    if (hab is HabilidadePassiva)
+                    {
+                        var cd = atacante.Cooldowns[hab];
+                        string relogio = ObterRelogio(cd.TurnosRestantes, cd.CooldownTotal);
+                        Console.WriteLine($"{hab.Simbolo} {hab.Nome} {relogio}");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retorna o emoji de relógio proporcional ao progresso do cooldown
+        /// </summary>
+        string ObterRelogio(int turnosRestantes, int cooldownTotal)
+        {
+            if (turnosRestantes == 0) return "🕛";
+
+            string[] relogios = { "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙" };
+            int turnosPassados = cooldownTotal - turnosRestantes;
+            int indice = (int)Math.Round((double)turnosPassados * 9 / cooldownTotal) - 1;
+            indice = Math.Clamp(indice, 0, 8);
+            return relogios[indice];
+        }
+
+        private string ObterNumeroEmoji(int numero)
+        {
+            string[] numeros = { "①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩" };
+            if (numero >= 1 && numero <= 10)
+                return numeros[numero - 1];
+            return numero.ToString();
+        }
+
         #endregion
     }
 }

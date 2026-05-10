@@ -7,7 +7,9 @@
     /// </summary>
     abstract class HabilidadeAtiva : Habilidade
     {
-        public HabilidadeAtiva(string nome, int turnos, string descricao = "") : base(nome, turnos, descricao) { }
+        public HabilidadeAtiva(string nome, string simbolo, int turnos, string descricao = "")
+            : base(nome, simbolo, turnos, descricao) { }
+        public abstract int NumeroDeAlvos { get; }
     }
 
     #endregion

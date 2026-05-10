@@ -3,24 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace v1_Apostle_s_War.Skills.Buffs
 {
     #region Bloqueio Total
 
     class BloqueioTotal : Buff
     {
-        public BloqueioTotal() : base("Bloqueio Total", 6, 1,"Bloqueia todo o dano recebido por um turno.") { }
-
-        public override void Aplicar(Combate alvo)
-        {
-            alvo.StatusAtivos.Add(this);
-        }
+        public BloqueioTotal(int turnos = 1) : base("Bloqueio Total", "🧱", turnos, 1) { }
 
         public override void Remover(Combate alvo)
         {
             alvo.StatusAtivos.Remove(this);
         }
-
     }
 
     #endregion

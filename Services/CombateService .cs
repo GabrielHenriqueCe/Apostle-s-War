@@ -13,15 +13,17 @@ namespace v1_Apostle_s_War.Services
         private readonly CampanhaService _campanhaService;
         private readonly CampeoesService _campeoesService;
         private readonly PersonagemService _personagemService;
+        private readonly MenuService _menuService;
 
         #endregion
         public CombateService(ArsenalService arsenalService, CampanhaService campanhaService,
-            CampeoesService campeoesService, PersonagemService personagemService)
+            CampeoesService campeoesService, PersonagemService personagemService, MenuService menuService)
         {
             _arsenalService = arsenalService;
             _campanhaService = campanhaService;
             _campeoesService = campeoesService;
             _personagemService = personagemService;
+            _menuService = menuService;
         }
 
         #region Combate
@@ -31,29 +33,132 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Exibe os alvos vivos, lê a escolha do jogador ou sorteia um alvo para o inimigo, executa o ataque e exibe o HP resultante
         /// </summary>
-        void ExecutarTurno(Combate atacante, List<Combate> defensor)
+        void ExecutarTurno(Combate atacante, List<Combate> defensor, List<Combate> jogadores)
         {
             Console.Clear();
-            Console.WriteLine($"{atacante.Personagem.Simbolo} ataca! | HP:{atacante.HPAtual} ATK:{atacante.Ataque} DEF:{atacante.Defesa}");
-            Console.WriteLine("Alvos disponíveis:");
-            for (int i = 0; i < defensor.Count; i++)
-            {
-                if (defensor[i].EstaVivo())
-                    Console.WriteLine($"{i + 1} - {defensor[i].Personagem.Simbolo} | HP:{defensor[i].HPAtual} ATK:{defensor[i].Ataque} DEF:{defensor[i].Defesa}");
-            }
-
             int alvo = 0;
+            bool usouHabilidade = false;
+
             if (atacante is Jogador)
             {
+                int acao = 1;
                 while (true)
                 {
-                    if (int.TryParse(Console.ReadLine(), out alvo) && alvo >= 1 && alvo <= defensor.Count && defensor[alvo - 1].EstaVivo())
-                    {
+                    Console.Clear();
+                    _menuService.ExibirPartida(jogadores, defensor);
+                    _menuService.ExibirAcoes(atacante, acao);
+
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+
+                    if (key.Key == ConsoleKey.Enter)
                         break;
+
+                    if (int.TryParse(key.KeyChar.ToString(), out int num) && num >= 1)
+                    {
+                        int totalAtivas = atacante.Personagem.Habilidades.Count(h => h is HabilidadeAtiva) + 1;
+                        if (num <= totalAtivas)
+                        {
+                            if (num == 1)
+                            {
+                                acao = num;
+                            }
+                            else
+                            {
+                                var habs = atacante.Personagem.Habilidades.Where(h => h is HabilidadeAtiva).ToList();
+                                int idx = num - 2;
+                                if (idx >= 0 && idx < habs.Count)
+                                {
+                                    var cdKey = atacante.Cooldowns.Keys.FirstOrDefault(k => k.Nome == habs[idx].Nome);
+                                    if (cdKey != null && atacante.Cooldowns[cdKey].Disponivel)
+                                        acao = num;
+                                    // se não disponível, ignora — seta fica onde está
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (acao == 1)
+                {
+                    var alvosVivos = defensor.Where(d => d.EstaVivo()).ToList();
+                    int alvoSelecionado = 1;
+
+                    while (true)
+                    {
+                        Console.Clear();
+                        _menuService.ExibirPartida(jogadores, defensor);
+                        _menuService.ExibirAcoes(atacante, acao);
+                        Console.WriteLine("\nAlvos:");
+                        for (int i = 0; i < alvosVivos.Count; i++)
+                        {
+                            string cursor = alvoSelecionado == i + 1 ? "▶" : " ";
+                            Console.WriteLine($"{cursor} {i + 1} - {alvosVivos[i].Personagem.Simbolo} {alvosVivos[i].Personagem.Nome} | HP:{alvosVivos[i].HPAtual} ATK:{alvosVivos[i].Ataque} DEF:{alvosVivos[i].Defesa}");
+                        }
+
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+
+                        if (key.Key == ConsoleKey.Enter)
+                        {
+                            alvo = defensor.IndexOf(alvosVivos[alvoSelecionado - 1]) + 1;
+                            break;
+                        }
+
+                        if (int.TryParse(key.KeyChar.ToString(), out int num) && num >= 1 && num <= alvosVivos.Count)
+                            alvoSelecionado = num;
+                    }
+                }
+                else
+                {
+                    var habilidadesAtivas = atacante.Personagem.Habilidades
+                        .Where(h => h is HabilidadeAtiva)
+                        .ToList();
+
+                    int indiceHab = acao - 2;
+                    if (indiceHab >= 0 && indiceHab < habilidadesAtivas.Count)
+                    {
+                        var hab = (HabilidadeAtiva)habilidadesAtivas[indiceHab];
+
+                        if (hab.NumeroDeAlvos == 1)
+                        {
+                            Console.WriteLine("\nAlvos disponíveis:");
+                            for (int i = 0; i < defensor.Count; i++)
+                            {
+                                if (defensor[i].EstaVivo())
+                                    Console.WriteLine($"{i + 1} - {defensor[i].Personagem.Simbolo} | HP:{defensor[i].HPAtual} ATK:{defensor[i].Ataque} DEF:{defensor[i].Defesa}");
+                            }
+                            while (true)
+                            {
+                                if (int.TryParse(Console.ReadLine(), out alvo) && alvo >= 1 && alvo <= defensor.Count && defensor[alvo - 1].EstaVivo())
+                                    break;
+                                Console.WriteLine($"Digite entre 1 e {defensor.Count}, o alvo precisa estar vivo");
+                            }
+                            hab.Ativar(defensor[alvo - 1]);
+                        }
+                        else if (hab.NumeroDeAlvos == int.MaxValue)
+                        {
+                            hab.Ativar(defensor.First(), jogadores);
+                        }
+                        else
+                        {
+                            var alvosAleatorios = defensor.Where(d => d.EstaVivo())
+                                .OrderBy(_ => random.Next())
+                                .Take(hab.NumeroDeAlvos);
+                            foreach (Combate alvoAleatorio in alvosAleatorios)
+                                hab.Ativar(alvoAleatorio);
+                        }
+
+                        usouHabilidade = true;
+
+                        var cdKey = atacante.Cooldowns.Keys.FirstOrDefault(k => k.Nome == hab.Nome);
+                        if (cdKey != null)
+                            atacante.Cooldowns[cdKey].Usar();
+
+                        Console.WriteLine($"{atacante.Personagem.Simbolo} usou {hab.Nome}!");
+                        Thread.Sleep(1500);
                     }
                     else
                     {
-                        Console.WriteLine($"Digite entre 1 e {defensor.Count}, o alvo precisa estar vivo");
+                        Console.WriteLine("Habilidade inválida.");
                     }
                 }
             }
@@ -63,52 +168,54 @@ namespace v1_Apostle_s_War.Services
                 {
                     alvo = random.Next(1, defensor.Count + 1);
                     if (alvo >= 1 && alvo <= defensor.Count && defensor[alvo - 1].EstaVivo())
-                    {
                         break;
-                    }
                 }
             }
 
             if (atacante is Inimigo)
             {
-                Console.WriteLine($"{atacante.Personagem.Simbolo} prepara o ataque!");
+                _menuService.ExibirPartida(defensor, new List<Combate>());
+                Console.WriteLine($"\n{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} prepara o ataque!");
                 Thread.Sleep(1500);
             }
 
-            atacante.Atacar(defensor[alvo - 1]);
-            Console.WriteLine($"hp atual do {defensor[alvo - 1].Personagem.Simbolo} é de {defensor[alvo - 1].HPAtual}");
-
-            if (atacante is Jogador)
+            if (!usouHabilidade)
             {
-                Thread.Sleep(1500);
-            }
+                atacante.Atacar(defensor[alvo - 1]);
+                Console.WriteLine($"hp atual do {defensor[alvo - 1].Personagem.Simbolo} é de {defensor[alvo - 1].HPAtual}");
 
-            var alvoAtacado = defensor[alvo - 1];
-            foreach (Habilidade hab in alvoAtacado.Personagem.Habilidades)
-            {
-                if (!alvoAtacado.EstaVivo() 
-                    && hab is HabilidadePassiva passiva
-                    && passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano)
-                    && alvoAtacado.Cooldowns[hab].Disponivel)
+                if (atacante is Jogador)
                 {
-                    passiva.Ativar(alvoAtacado);
-                    alvoAtacado.Cooldowns[hab].Usar();
-                    if (passiva.Revive())
+                    Thread.Sleep(1500);
+                }
+
+                var alvoAtacado = defensor[alvo - 1];
+                foreach (Habilidade hab in alvoAtacado.Personagem.Habilidades)
+                {
+                    if (!alvoAtacado.EstaVivo()
+                        && hab is HabilidadePassiva passiva
+                        && passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano)
+                        && alvoAtacado.Cooldowns[hab].Disponivel)
                     {
-                        Console.WriteLine(passiva.MensagemSobreviveu(alvoAtacado.Personagem));
-                        Thread.Sleep(1500);
-                    }
-                    else
-                    {
-                        Console.WriteLine(passiva.MensagemMorreu(alvoAtacado.Personagem));
-                        Thread.Sleep(1500);
+                        passiva.Ativar(alvoAtacado);
+                        alvoAtacado.Cooldowns[hab].Usar();
+                        if (passiva.Revive())
+                        {
+                            Console.WriteLine(passiva.MensagemSobreviveu(alvoAtacado.Personagem));
+                            Thread.Sleep(1500);
+                        }
+                        else
+                        {
+                            Console.WriteLine(passiva.MensagemMorreu(alvoAtacado.Personagem));
+                            Thread.Sleep(1500);
+                        }
                     }
                 }
-            }
 
-            if (atacante is Inimigo)
-            {
-                Thread.Sleep(1500);
+                if (atacante is Inimigo)
+                {
+                    Thread.Sleep(1500);
+                }
             }
         }
 
@@ -125,13 +232,20 @@ namespace v1_Apostle_s_War.Services
                     if (!combatentes[c].EstaVivo()) continue;
                     if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
 
+                    foreach (StatusEffect status in combatentes[c].StatusAtivos.ToList())
+                    {
+                        status.PassarTurno();
+                        if (status.Expirou)
+                            status.Remover(combatentes[c]);
+                    }
+
                     if (combatentes[c] is Jogador)
                     {
-                        ExecutarTurno(combatentes[c], inimigo);
+                        ExecutarTurno(combatentes[c], inimigo, jogador);
                     }
                     else
                     {
-                        ExecutarTurno(combatentes[c], jogador);
+                        ExecutarTurno(combatentes[c], jogador, jogador);
                     }
 
                     foreach (var cd in combatentes[c].Cooldowns.Values)

@@ -1,4 +1,5 @@
 ﻿using ApostlesWar;
+using GHUtils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -61,23 +62,30 @@ namespace v1_Apostle_s_War.Services
         {
             var time = new List<Personagem>();
             var desbloqueados = ObterDesbloqueados();
+            int selecionado = 1;
 
             while (time.Count < 4)
             {
-                _menuService.MenuSelecaoTime(desbloqueados);
+                _menuService.MenuSelecaoTime(desbloqueados, selecionado);
                 Console.WriteLine($"Slot {time.Count + 1}/4 — já selecionados: {string.Join(" ", time.Select(p => p.Simbolo))}");
 
-                if (int.TryParse(Console.ReadLine(), out int escolha) && escolha >= 1 && escolha <= desbloqueados.Count)
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                if (key.Key == ConsoleKey.Enter)
                 {
-                    Personagem selecionado = desbloqueados[escolha - 1];
-                    if (time.Contains(selecionado))
+                    Personagem escolhido = desbloqueados[selecionado - 1];
+                    if (time.Contains(escolhido))
                         Console.WriteLine("Campeão já selecionado, escolha outro.");
                     else
-                        time.Add(selecionado);
+                        time.Add(escolhido);
+                }
+                else if (key.Key == ConsoleKey.Escape)
+                {
+                    // tratar depois
                 }
                 else
                 {
-                    Console.WriteLine("Opção inválida.");
+                    selecionado = ConsoleUtils.SelecionarComCursor(selecionado, 1, desbloqueados.Count, key.Key, false);
                 }
             }
             return time;

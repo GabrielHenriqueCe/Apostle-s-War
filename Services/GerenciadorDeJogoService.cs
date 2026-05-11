@@ -42,79 +42,107 @@ namespace v1_Apostle_s_War.Services
 
             do
             {
-                _menuService.ExibirMenu();
-                OpcoesMenu? opcao = LerOpcao<OpcoesMenu>();
-
-                if (opcao == null)
+                int opcaoMenu = 1;
+                while (true)
                 {
-                    Console.Clear();
-                    Console.WriteLine("Deseja sair do jogo? 1 - Sim | 2 - Não");
-                    SimOuNao? escolha = LerOpcao<SimOuNao>();
-                    if (escolha == SimOuNao.Sim)
+                    _menuService.ExibirMenu(opcaoMenu);
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+
+                    if (key.Key == ConsoleKey.Enter) break;
+
+                    if (key.Key == ConsoleKey.Escape)
                     {
-                        Console.WriteLine("Obrigado por jogar! Até a próxima!");
-                        Console.ReadLine();
-                        sair = true;
+                        Console.Clear();
+                        Console.WriteLine("Deseja sair do jogo? 1 - Sim | 2 - Não");
+                        SimOuNao? escolha = LerOpcao<SimOuNao>();
+                        if (escolha == SimOuNao.Sim)
+                        {
+                            Console.WriteLine("Obrigado por jogar! Até a próxima!");
+                            Console.ReadLine();
+                            sair = true;
+                        }
+                        break;
                     }
-                    continue;
+
+                    opcaoMenu = ConsoleUtils.SelecionarComCursor(opcaoMenu, 1, 2, key.Key);
                 }
 
-                switch (opcao.Value)
+                if (sair) break;
+
+                switch (opcaoMenu)
                 {
-                    case OpcoesMenu.JogarCampanha:
-                        Faccao? faccao;
+                    case 1:
+                        int opcaoFaccao = 1;
+                        bool voltouCampanha = false;
                         do
                         {
-                            _menuService.MenuCapitulos();
-                            faccao = LerOpcao<Faccao>();
-                            if (faccao == null) break;
-                            if (_capitulosService.EstaCapituloDesbloqueado(faccao.Value))
+                            _menuService.MenuCapitulos(opcaoFaccao);
+                            ConsoleKeyInfo key = Console.ReadKey(true);
+
+                            if (key.Key == ConsoleKey.Escape) { voltouCampanha = true; break; }
+                            if (key.Key == ConsoleKey.Enter)
                             {
-                                Fases? fases;
-                                do
+                                var faccoes = Enum.GetValues<Faccao>().Where(f => f != Faccao.Humanos).ToList();
+                                Faccao faccao = faccoes[opcaoFaccao - 1];
+
+                                if (_capitulosService.EstaCapituloDesbloqueado(faccao))
                                 {
-                                    _menuService.MenuFases(faccao.Value);
-                                    fases = LerOpcao<Fases>();
-                                    if (fases == null) break;
-                                    if (_capitulosService.EstaDesbloqueado(faccao.Value, fases.Value))
+                                    int opcaoFase = 1;
+                                    bool voltouFase = false;
+                                    do
                                     {
-                                        if (_combateService.ExecutarFase(faccao.Value, fases.Value))
+                                        _menuService.MenuFases(faccao, opcaoFase);
+                                        ConsoleKeyInfo keyFase = Console.ReadKey(true);
+
+                                        if (keyFase.Key == ConsoleKey.Escape) { voltouFase = true; break; }
+                                        if (keyFase.Key == ConsoleKey.Enter)
                                         {
-                                            var antes = _campeoesService.ObterDesbloqueados().ToList();
+                                            Fases fase = (Fases)opcaoFase;
+                                            if (_capitulosService.EstaDesbloqueado(faccao, fase))
+                                            {
+                                                if (_combateService.ExecutarFase(faccao, fase))
+                                                {
+                                                    var antes = _campeoesService.ObterDesbloqueados().ToList();
 
-                                            _capitulosService.DesbloquearFase(faccao.Value, fases.Value);
-                                            _capitulosService.ConcluirFase(faccao.Value, fases.Value);
-                                            _campeoesService.DesbloquearCampeoes(faccao.Value, fases.Value);
-                                            _arsenalService.DroparItem(faccao.Value, fases.Value);
-                                            _capitulosService.DesbloquearFaccao(faccao.Value, fases.Value);
-                                            _capitulosService.SalvarProgresso();
-                                            _arsenalService.SalvarItens();
+                                                    _capitulosService.DesbloquearFase(faccao, fase);
+                                                    _capitulosService.ConcluirFase(faccao, fase);
+                                                    _campeoesService.DesbloquearCampeoes(faccao, fase);
+                                                    Item? item = _arsenalService.DroparItem(faccao, fase);
+                                                    _capitulosService.DesbloquearFaccao(faccao, fase);
+                                                    _capitulosService.SalvarProgresso();
+                                                    _arsenalService.SalvarItens();
 
-                                            Console.Clear();
-                                            Console.WriteLine("=====Fase Concluída!=====\n");
+                                                    Console.Clear();
+                                                    Console.WriteLine("=====Fase Concluída!=====\n");
 
-                                            var novos = _campeoesService.ObterDesbloqueados().Except(antes).ToList();
-                                            foreach (Personagem p in novos)
-                                                Console.WriteLine($"Novo campeão: {p.Simbolo} {p.Nome}!");
+                                                    var novos = _campeoesService.ObterDesbloqueados().Except(antes).ToList();
+                                                    foreach (Personagem p in novos)
+                                                        Console.WriteLine($"Novo campeão: {p.Simbolo} {p.Nome}!");
 
-                                            Item? item = _arsenalService.ObterObtidos().LastOrDefault();
-                                            if (item != null)
-                                                Console.WriteLine($"Novo item: {item.Simbolo} {item.Nome} | {item.NomeStat()} + {item.ValorFormatado()}");
+                                                    if (item != null)
+                                                        Console.WriteLine($"Novo item: {item.Simbolo} {item.Nome} | {item.NomeStat()} + {item.ValorFormatado()}");
 
-                                            Console.WriteLine("\nPressione Enter para continuar...");
-                                            Console.ReadLine();
+                                                    Console.WriteLine("\nPressione Enter para continuar...");
+                                                    Console.ReadLine();
+                                                }
+                                            }
                                         }
-                                    }
-                                } while (true);
+                                        else
+                                        {
+                                            opcaoFase = ConsoleUtils.SelecionarComCursor(opcaoFase, 1, 7, keyFase.Key);
+                                        }
+                                    } while (!voltouFase);
+                                }
                             }
-                        } while (true);
+                            else
+                            {
+                                opcaoFaccao = ConsoleUtils.SelecionarComCursor(opcaoFaccao, 1, 8, key.Key);
+                            }
+                        } while (!voltouCampanha);
+                        break;
 
-                        break;
-                    case OpcoesMenu.Inventario:
+                    case 2:
                         _menuService.MenuInventario();
-                        break;
-                    default:
-                        Console.WriteLine("Opção inválida, tente novamente.");
                         break;
                 }
             } while (!sair);

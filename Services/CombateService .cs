@@ -1,4 +1,5 @@
 ﻿using ApostlesWar;
+using GHUtils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -53,28 +54,20 @@ namespace v1_Apostle_s_War.Services
                     if (key.Key == ConsoleKey.Enter)
                         break;
 
-                    if (int.TryParse(key.KeyChar.ToString(), out int num) && num >= 1)
+                    int totalAtivas = atacante.Personagem.Habilidades.Count(h => h is HabilidadeAtiva) + 1;
+                    int novaAcao = ConsoleUtils.SelecionarComCursor(acao, 1, totalAtivas, key.Key);
+
+                    if (novaAcao != acao && novaAcao != 1)
                     {
-                        int totalAtivas = atacante.Personagem.Habilidades.Count(h => h is HabilidadeAtiva) + 1;
-                        if (num <= totalAtivas)
-                        {
-                            if (num == 1)
-                            {
-                                acao = num;
-                            }
-                            else
-                            {
-                                var habs = atacante.Personagem.Habilidades.Where(h => h is HabilidadeAtiva).ToList();
-                                int idx = num - 2;
-                                if (idx >= 0 && idx < habs.Count)
-                                {
-                                    var cdKey = atacante.Cooldowns.Keys.FirstOrDefault(k => k.Nome == habs[idx].Nome);
-                                    if (cdKey != null && atacante.Cooldowns[cdKey].Disponivel)
-                                        acao = num;
-                                    // se não disponível, ignora — seta fica onde está
-                                }
-                            }
-                        }
+                        var habs = atacante.Personagem.Habilidades.Where(h => h is HabilidadeAtiva).ToList();
+                        int idx = novaAcao - 2;
+                        var cdKey = atacante.Cooldowns.Keys.FirstOrDefault(k => k.Nome == habs[idx].Nome);
+                        if (cdKey != null && atacante.Cooldowns[cdKey].Disponivel)
+                            acao = novaAcao;
+                    }
+                    else if (novaAcao == 1)
+                    {
+                        acao = 1;
                     }
                 }
 
@@ -103,8 +96,7 @@ namespace v1_Apostle_s_War.Services
                             break;
                         }
 
-                        if (int.TryParse(key.KeyChar.ToString(), out int num) && num >= 1 && num <= alvosVivos.Count)
-                            alvoSelecionado = num;
+                        alvoSelecionado = ConsoleUtils.SelecionarComCursor(alvoSelecionado, 1, alvosVivos.Count, key.Key);
                     }
                 }
                 else
@@ -120,19 +112,32 @@ namespace v1_Apostle_s_War.Services
 
                         if (hab.NumeroDeAlvos == 1)
                         {
-                            Console.WriteLine("\nAlvos disponíveis:");
-                            for (int i = 0; i < defensor.Count; i++)
-                            {
-                                if (defensor[i].EstaVivo())
-                                    Console.WriteLine($"{i + 1} - {defensor[i].Personagem.Simbolo} | HP:{defensor[i].HPAtual} ATK:{defensor[i].Ataque} DEF:{defensor[i].Defesa}");
-                            }
+                            var alvosVivos = defensor.Where(d => d.EstaVivo()).ToList();
+                            int alvoSelecionado = 1;
+
                             while (true)
                             {
-                                if (int.TryParse(Console.ReadLine(), out alvo) && alvo >= 1 && alvo <= defensor.Count && defensor[alvo - 1].EstaVivo())
+                                Console.Clear();
+                                _menuService.ExibirPartida(jogadores, defensor);
+                                _menuService.ExibirAcoes(atacante, acao);
+                                Console.WriteLine("\nAlvos:");
+                                for (int i = 0; i < alvosVivos.Count; i++)
+                                {
+                                    string cursor = alvoSelecionado == i + 1 ? "▶" : " ";
+                                    Console.WriteLine($"{cursor} {i + 1} - {alvosVivos[i].Personagem.Simbolo} {alvosVivos[i].Personagem.Nome} | HP:{alvosVivos[i].HPAtual} ATK:{alvosVivos[i].Ataque} DEF:{alvosVivos[i].Defesa}");
+                                }
+
+                                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                                if (key.Key == ConsoleKey.Enter)
+                                {
+                                    alvo = defensor.IndexOf(alvosVivos[alvoSelecionado - 1]) + 1;
+                                    hab.Ativar(defensor[alvo - 1]);
                                     break;
-                                Console.WriteLine($"Digite entre 1 e {defensor.Count}, o alvo precisa estar vivo");
+                                }
+
+                                alvoSelecionado = ConsoleUtils.SelecionarComCursor(alvoSelecionado, 1, alvosVivos.Count, key.Key);
                             }
-                            hab.Ativar(defensor[alvo - 1]);
                         }
                         else if (hab.NumeroDeAlvos == int.MaxValue)
                         {
@@ -245,7 +250,7 @@ namespace v1_Apostle_s_War.Services
                     }
                     else
                     {
-                        ExecutarTurno(combatentes[c], jogador, jogador);
+                        ExecutarTurno(combatentes[c], jogador, inimigo);
                     }
 
                     foreach (var cd in combatentes[c].Cooldowns.Values)

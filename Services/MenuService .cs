@@ -23,27 +23,29 @@ namespace v1_Apostle_s_War.Services
         }
         #region Menu
 
-        public void ExibirMenu()
+        public void ExibirMenu(int selecionado)
         {
             Console.Clear();
             Console.WriteLine("=====Apostle's War=====\n");
-            Console.WriteLine("1 - Jogar Campanha");
-            Console.WriteLine("2 - Inventario");
-            Console.WriteLine("Esc - Sair");
-            Console.WriteLine("\nDigite o número da opção desejada:");
+            string[] opcoes = { "📜 - Jogar Campanha", "💰 - Inventário" };
+            for (int i = 0; i < opcoes.Length; i++)
+            {
+                string cursor = selecionado == i + 1 ? "▶" : " ";
+                Console.WriteLine($"{cursor} {i + 1} - {opcoes[i]}");
+            }
+            Console.WriteLine("\nEsc - Sair");
         }
 
-        public void MenuCapitulos()
+        public void MenuCapitulos(int selecionado)
         {
             Console.Clear();
             Console.WriteLine("=====Apostle's War=====\n");
 
-            foreach (Faccao faccao in Enum.GetValues<Faccao>())
+            var faccoes = Enum.GetValues<Faccao>().Where(f => f != Faccao.Humanos).ToList();
+            for (int i = 0; i < faccoes.Count; i++)
             {
-                if (faccao == Faccao.Humanos) continue;
-
+                Faccao faccao = faccoes[i];
                 string icone;
-
                 if (!_capitulosService.EstaCapituloDesbloqueado(faccao))
                     icone = " ❌ ";
                 else if (_capitulosService.CapituloConcluido(faccao))
@@ -51,25 +53,22 @@ namespace v1_Apostle_s_War.Services
                 else
                     icone = " ☑️  ";
 
-                Console.WriteLine($"{(int)faccao} - {icone} {_faccaoService.ObterSimbolo(faccao)}  {_faccaoService.ObterNome(faccao)}");
+                string cursor = selecionado == i + 1 ? "▶" : " ";
+                Console.WriteLine($"{cursor} {(int)faccao} - {icone} {_faccaoService.ObterSimbolo(faccao)}  {_faccaoService.ObterNome(faccao)}");
             }
-
-            Console.WriteLine("Esc - Voltar");
-            Console.WriteLine("\nDigite o número da opção desejada:");
+            Console.WriteLine("\nEsc - Voltar");
         }
 
-        public void MenuFases(Faccao faccao)
+        public void MenuFases(Faccao faccao, int selecionado)
         {
             Console.Clear();
             Console.WriteLine("=====Apostle's War=====\n");
-
             string[] nomes = { "Arma", "Elmo", "Escudo", "Manopla", "Peitoral", "Calça", "Bota" };
 
             foreach (Fases fase in Enum.GetValues<Fases>())
             {
                 int idx = (int)fase - 1;
                 string icone;
-
                 if (!_capitulosService.EstaDesbloqueado(faccao, fase))
                     icone = " ❌ ";
                 else if (_capitulosService.FaseConcluida(faccao, fase))
@@ -77,17 +76,16 @@ namespace v1_Apostle_s_War.Services
                 else
                     icone = " ☑️  ";
 
-                Console.WriteLine($"{(int)fase} - {icone}  {nomes[idx]}");
+                string cursor = selecionado == idx + 1 ? "▶" : " ";
+                Console.WriteLine($"{cursor} {(int)fase} - {icone}  {nomes[idx]}");
             }
-
-            Console.WriteLine("Esc - Voltar");
-            Console.WriteLine("\nDigite o número da opção desejada:");
+            Console.WriteLine("\nEsc - Voltar");
         }
 
         /// <summary>
         /// Exibe a lista de campeões desbloqueados para seleção do time
         /// </summary>
-        public void MenuSelecaoTime(List<Personagem> desbloqueados)
+        public void MenuSelecaoTime(List<Personagem> desbloqueados, int selecionado)
         {
             Console.Clear();
             Console.WriteLine("=====Apostle's War=====\n");
@@ -96,10 +94,9 @@ namespace v1_Apostle_s_War.Services
             {
                 Jogador temp = new Jogador(desbloqueados[i]);
                 _arsenalService.AplicarItens(temp);
-
-                Console.WriteLine($"{i + 1} - {desbloqueados[i].Simbolo} {desbloqueados[i].Nome} | HP:{temp.HPAtual} ATK:{temp.Ataque} DEF:{temp.Defesa}");
+                string cursor = selecionado == i + 1 ? "▶" : " ";
+                Console.WriteLine($"{cursor} {i + 1} - {desbloqueados[i].Simbolo} {desbloqueados[i].Nome} | HP:{temp.HPAtual} ATK:{temp.Ataque} DEF:{temp.Defesa}");
             }
-            Console.WriteLine("\nDigite o número do campeão desejado:");
         }
 
         /// <summary>

@@ -14,10 +14,26 @@ namespace v1_Apostle_s_War.Services
         List<Personagem> personagens = new List<Personagem>
         {
             // Humanos
-            new Personagem(1, Faccao.Humanos, "Operário", "👷",  1200, 240, 120, new ParedeDeTijolos()),
-            new Personagem(2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160),
-            new Personagem(3, Faccao.Humanos, "Policial", "👮",  1000, 120, 280),
-            new Personagem(4, Faccao.Humanos, "Sushiman ", "👲",  800, 280, 160),
+new Personagem(1, Faccao.Humanos, "Operário", "👷",  1200, 240, 120,
+    new ParedeDeTijolos(),
+    new Marretada(),
+    new PassivaOperario()),
+
+new Personagem(2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160,
+    new Espionagem(),
+    new Furtividade(),
+    new PassivaDetetive(danoCritBase: 0.60)),   // 0.60 = DanoCrit padrão do Personagem
+
+new Personagem(3, Faccao.Humanos, "Policial", "👮",  1000, 120, 280,
+    new Tiroteio(),
+    new Prender(),
+    new PassivaPolicial()),
+
+new Personagem(4, Faccao.Humanos, "Sushiman ", "👲",  800, 280, 160,
+    new Sushi(),
+    new Nigiri(),
+    new PassivaSushiman()),
+
             
             // O Reino
             new Personagem(1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200),

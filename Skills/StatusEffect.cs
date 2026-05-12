@@ -40,6 +40,11 @@
             }
             alvo.StatusAtivos.Add(this);
         }
+
+        // /// <summary>
+        // /// Estende a duração do efeito em 1 turno. Usado pela PassivaPolicial.
+        // /// </summary>
+        public void EstenderTurno() => TurnosRestantes++;
     }
 
     #endregion

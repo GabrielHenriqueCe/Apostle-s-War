@@ -15,6 +15,12 @@
         public double Valor { get; }
         public int TurnosRestantes { get; private set; }
 
+        /// <summary>
+        /// Indica que o status foi aplicado neste turno e não deve ser contado ainda.
+        /// Resetado automaticamente pelo AvancarStatus após o turno do portador.
+        /// </summary>
+        public bool AcabouDeAplicar { get; private set; }
+
         public StatusEffect(string nome, string simbolo, int turnosRestantes, double valor, string descricao = "")
         {
             Nome = nome;
@@ -23,22 +29,23 @@
             Valor = valor;
             Descricao = descricao;
             TurnosRestantes = turnosRestantes;
+            AcabouDeAplicar = true;
         }
 
-        public void PassarTurno() => TurnosRestantes--;
+        public void PassarTurno()
+        {
+            if (AcabouDeAplicar)
+            {
+                AcabouDeAplicar = false;
+                return;
+            }
+            TurnosRestantes--;
+        }
+
         public bool Expirou => TurnosRestantes <= 0;
         public abstract void Remover(Combate alvo);
-
-        /// <summary>
-        /// Estende a duração do efeito em 1 turno. Usado pela PassivaPolicial.
-        /// </summary>
         public void EstenderTurno() => TurnosRestantes++;
 
-        /// <summary>
-        /// Aplica o status ao alvo, gerenciando deduplicação por tipo.
-        /// Subclasses que precisam de efeito colateral (modificar stat, etc.)
-        /// devem sobrescrever este método e chamar base.Aplicar(alvo) ao final.
-        /// </summary>
         public virtual void Aplicar(Combate alvo)
         {
             var existente = alvo.StatusAtivos.FirstOrDefault(s => s.GetType() == this.GetType());

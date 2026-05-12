@@ -164,7 +164,7 @@ namespace v1_Apostle_s_War.Services
         {
             Console.WriteLine("\nAções:");
             string cursor1 = acaoSelecionada == 1 ? "▶" : " ";
-            Console.WriteLine($"{cursor1} 1 - ⚔️ Atacar");
+            Console.WriteLine($"{cursor1} 1 - ⚔️  Atacar");
 
             int i = 2;
             foreach (Habilidade hab in atacante.Personagem.Habilidades)
@@ -173,8 +173,9 @@ namespace v1_Apostle_s_War.Services
                 {
                     var cd = atacante.Cooldowns[hab];
                     string relogio = ObterRelogio(cd.TurnosRestantes, cd.CooldownTotal);
+                    string disponivel = cd.Disponivel ? "✅" : "🟣";
                     string cursor = acaoSelecionada == i ? "▶" : " ";
-                    Console.WriteLine($"{cursor} {i} - {hab.Simbolo} {hab.Nome} {relogio}");
+                    Console.WriteLine($"{cursor} {i} - {hab.Simbolo} {hab.Nome} {disponivel} {relogio}  {hab.Descricao}");
                     i++;
                 }
             }
@@ -189,7 +190,8 @@ namespace v1_Apostle_s_War.Services
                     {
                         var cd = atacante.Cooldowns[hab];
                         string relogio = ObterRelogio(cd.TurnosRestantes, cd.CooldownTotal);
-                        Console.WriteLine($"{hab.Simbolo} {hab.Nome} {relogio}");
+                        string disponivel = cd.Disponivel ? "✅" : "🟣";
+                        Console.WriteLine($"  {hab.Simbolo} {hab.Nome} {disponivel} {relogio}  {hab.Descricao}");
                     }
                 }
             }

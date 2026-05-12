@@ -1,32 +1,19 @@
 ﻿using ApostlesWar;
-
 namespace v1_Apostle_s_War.Skills.Ativas
 {
     class Tiroteio : HabilidadeAtiva
     {
-        public Tiroteio() : base("Tiroteio", "🔫", 4, "Ataca 2 inimigos aleatórios com 75% ATK.") { }
+        public Tiroteio() : base("Tiroteio", "🔫", 4,
+            "Ataca 2 inimigos aleatórios com 75% ATK. Pode acertar o mesmo alvo duas vezes.")
+        { }
         public override int NumeroDeAlvos => 2;
-
-        public override void Ativar(Combate alvo, List<Combate>? aliados = null) { }
-
-        /// <summary>
-        /// Retorna lista de (alvo, resultado) para exibição de dano individual.
-        /// </summary>
-        public List<(Combate Alvo, ResultadoAtaque Resultado)> AtivarComAtacante(Combate atacante, List<Combate> inimigos)
+        public override TipoAlvo TipoAlvo => TipoAlvo.Aleatorio;
+        public override TipoLista TipoLista => TipoLista.Inimigos;
+        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
         {
-            var resultados = new List<(Combate, ResultadoAtaque)>();
-
-            var alvos = inimigos
-                .Where(i => i.EstaVivo())
-                .OrderBy(_ => Guid.NewGuid())
-                .Take(NumeroDeAlvos);
-
-            foreach (Combate alvo in alvos)
-            {
-                var resultado = atacante.AtacarComMultiplicador(alvo, 0.75);
-                resultados.Add((alvo, resultado));
-            }
-
+            var resultados = new List<ResultadoAtaque>();
+            foreach (Combate a in ResolverAlvos(alvo, lista))
+                resultados.Add(AplicarDano(atacante, a, 0.75));
             return resultados;
         }
     }

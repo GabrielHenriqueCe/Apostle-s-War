@@ -3,7 +3,8 @@
     #region Habilidade
 
     /// <summary>
-    /// Classe base para todas as habilidades — define nome, cooldown e o contrato de Ativar()
+    /// Classe base para todas as habilidades.
+    /// Ativar recebe atacante, alvo selecionado e lista completa (aliados ou inimigos).
     /// </summary>
     abstract class Habilidade
     {
@@ -22,7 +23,13 @@
             Cooldown = new SkillCooldown(turnos);
         }
 
-        public abstract void Ativar(Combate alvo, List<Combate>? aliados = null);
+        /// <summary>
+        /// Executa a habilidade.
+        /// atacante = quem usou a habilidade
+        /// alvo     = alvo primário selecionado pelo jogador/inimigo
+        /// lista    = lista completa de defensores ou aliados (contexto da habilidade)
+        /// </summary>
+        public abstract List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista);
     }
 
     #endregion

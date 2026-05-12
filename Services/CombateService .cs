@@ -118,11 +118,15 @@ namespace v1_Apostle_s_War.Services
 
                 int novaAcao = ConsoleUtils.SelecionarComCursor(acao, 1, totalOpcoes, key.Key);
 
-                // Bloqueia seleção de habilidade indisponível
-                if (novaAcao >= 2)
+                // Pula habilidades em cooldown na direção do movimento
+                bool descendo = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
+                while (novaAcao >= 2 && novaAcao != acao)
                 {
                     var hab = habilidadesAtivas[novaAcao - 2];
-                    if (!atacante.Cooldowns[hab].Disponivel) continue;
+                    if (atacante.Cooldowns[hab].Disponivel) break;
+                    novaAcao = descendo
+                        ? Math.Min(totalOpcoes, novaAcao + 1)
+                        : Math.Max(1, novaAcao - 1);
                 }
 
                 acao = novaAcao;
@@ -184,8 +188,9 @@ namespace v1_Apostle_s_War.Services
             _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
             Thread.Sleep(1500);
 
-            ProcessarPassivasAlvo(alvo, atacante);
+            ProcessarPassivasAlvo(alvo, atacante, aliados, resultado.Critico);  // ← aliados + critico
             ProcessarPassivasAtacante(atacante, alvo, aliados);
+
         }
 
         #endregion
@@ -198,52 +203,27 @@ namespace v1_Apostle_s_War.Services
         /// </summary>
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
         {
-            if (hab is Marretada marretada)
+            // A habilidade declara em qual lista age — sem ifs aqui
+            List<Combate> lista = hab.TipoLista switch
             {
-                Combate alvo = EscolherAlvoUnico(atacante, hab, defensores, aliados);
-                var resultado = marretada.AtivarComAtacante(atacante, alvo);
-                _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
-            }
-            else if (hab is Tiroteio tiroteio)
-            {
-                var resultados = tiroteio.AtivarComAtacante(atacante, defensores);
-                foreach (var (alvo, resultado) in resultados)
-                    _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
-            }
-            else if (hab is Sushi || hab is Nigiri || hab is ParedeDeTijolos)
-            {
-                hab.Ativar(atacante, aliados);
-            }
-            else if (hab is Espionagem)
-            {
-                hab.Ativar(defensores.First(d => d.EstaVivo()), defensores);
-            }
-            else if (hab is Furtividade)
-            {
-                hab.Ativar(atacante, defensores);
-            }
-            else if (hab.NumeroDeAlvos == 1)
-            {
-                Combate alvo = EscolherAlvoUnico(atacante, hab, defensores, aliados);
-                hab.Ativar(alvo);
-            }
-            else if (hab.NumeroDeAlvos > 1 && hab.NumeroDeAlvos != int.MaxValue)
-            {
-                var alvos = defensores
-                    .Where(d => d.EstaVivo())
-                    .OrderBy(_ => _random.Next())
-                    .Take(hab.NumeroDeAlvos);
-                foreach (Combate a in alvos)
-                    hab.Ativar(a);
-            }
-            else
-            {
-                hab.Ativar(defensores.First(), defensores);
-            }
+                TipoLista.Aliados => aliados,
+                TipoLista.Inimigos => defensores,
+                TipoLista.Self => new List<Combate> { atacante },
+                _ => defensores
+            };
+
+            // Self e Aliados não precisam de seleção de alvo — começa no próprio atacante
+            Combate alvoInicial = hab.TipoLista == TipoLista.Inimigos
+                ? EscolherAlvoJogador(atacante, defensores, aliados)
+                : atacante;
+
+            var resultados = hab.Ativar(atacante, alvoInicial, lista);
+            foreach (var r in resultados)
+                _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
 
             atacante.Cooldowns[hab].Usar();
             Console.WriteLine($"{atacante.Personagem.Simbolo} usou {hab.Nome}!");
-            Thread.Sleep(1500);
+            Thread.Sleep(2500);
         }
 
         #endregion
@@ -322,31 +302,29 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Processa passivas do alvo que reagem a receber dano (ex: Necromancia).
         /// </summary>
-        private void ProcessarPassivasAlvo(Combate alvo, Combate atacante)
+        private void ProcessarPassivasAlvo(Combate alvo, Combate atacante, List<Combate> aliados, bool foiCritico)
         {
+            var ctx = new ContextoPassiva(alvo.EstaVivo(), foiCritico, aliados, atacante);
+
             foreach (Habilidade hab in alvo.Personagem.Habilidades)
             {
                 if (hab is not HabilidadePassiva passiva) continue;
-                if (!passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano)) continue;
+                if (!passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano, ctx)) continue;
                 if (!alvo.Cooldowns[hab].Disponivel) continue;
-                if (alvo.EstaVivo() && !(hab is Skills.Passivas.PassivaOperario)) continue;
 
-                // Passiva do Operário: contra-ataque com Marretada (alvo vivo)
-                if (hab is Skills.Passivas.PassivaOperario && alvo.EstaVivo())
-                {
-                    passiva.Ativar(alvo, new List<Combate> { atacante });
-                    alvo.Cooldowns[hab].Usar();
-                    continue;
-                }
+                var resultados = passiva.Ativar(alvo, atacante, aliados);
+                foreach (var r in resultados)
+                    _menuService.ExibirResultadoAtaque(alvo, r.Alvo, r);
 
-                // Passivas que reagem à morte (Necromancia)
-                if (!alvo.EstaVivo())
+                alvo.Cooldowns[hab].Usar();
+
+                string msg = passiva.Revive()
+                    ? passiva.MensagemSobreviveu(alvo.Personagem)
+                    : passiva.MensagemMorreu(alvo.Personagem);
+
+                if (!string.IsNullOrEmpty(msg))
                 {
-                    passiva.Ativar(alvo);
-                    alvo.Cooldowns[hab].Usar();
-                    Console.WriteLine(passiva.Revive()
-                        ? passiva.MensagemSobreviveu(alvo.Personagem)
-                        : passiva.MensagemMorreu(alvo.Personagem));
+                    Console.WriteLine(msg);
                     Thread.Sleep(1500);
                 }
             }
@@ -355,18 +333,18 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Processa passivas do atacante que reagem após atacar (ex: PassivaPolicial estender Preso).
         /// </summary>
-        private void ProcessarPassivasAtacante(Combate atacante, Combate alvo, List<Combate> aliados)
+        private void ProcessarPassivasAtacante(Combate atacante, Combate alvo, List<Combate> inimigos)
         {
+            var ctx = new ContextoPassiva(alvo.EstaVivo(), false, inimigos, atacante);
+
             foreach (Habilidade hab in atacante.Personagem.Habilidades)
             {
-                if (hab is Skills.Passivas.PassivaPolicial policial)
-                    policial.Ativar(alvo);
+                if (hab is not HabilidadePassiva passiva) continue;
+                if (!passiva.DeveAtivar(EventoCombate.DepoisDeAtacar, ctx)) continue;
+                if (!atacante.Cooldowns[hab].Disponivel) continue;
 
-                if (hab is Skills.Passivas.PassivaDetetive detetive)
-                {
-                    // Recalcula DanoCrit do Detetive baseado em debuffs inimigos
-                    detetive.Ativar(atacante, /* inimigos = */ aliados);
-                }
+                passiva.Ativar(atacante, alvo, inimigos);
+                // passivas de atacante não causam dano visível — sem exibição de resultado
             }
         }
 

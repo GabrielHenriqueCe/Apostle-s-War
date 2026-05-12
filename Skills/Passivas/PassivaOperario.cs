@@ -1,40 +1,24 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Ativas;
-
 namespace v1_Apostle_s_War.Skills.Passivas
 {
-    /// <summary>
-    /// Ao receber dano, tem 10% de chance de contra-atacar com Marretada.
-    /// Não consome nem afeta o cooldown da Marretada.
-    /// </summary>
     class PassivaOperario : HabilidadePassiva
     {
-        private static readonly Random random = new Random();
-        private readonly Marretada _marretada = new();
-
+        private static readonly Random _random = new Random();
         public PassivaOperario() : base("Instinto do Operário", "🛠️", 0,
             "10% de chance de contra-atacar com Marretada ao receber dano.")
         { }
-
-        public override bool DeveAtivar(EventoCombate evento) =>
-            evento == EventoCombate.DepoisDeReceberDano;
-
-        // Revive() herdado já retorna false — sem override necessário
-
-        public override void Ativar(Combate alvo, List<Combate>? aliados = null)
+        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
+            evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo;
+        public override string MensagemSobreviveu(Personagem p) =>
+            $"{p.Simbolo} {p.Nome} contra-atacou com Marretada!";
+        public override string MensagemMorreu(Personagem p) => string.Empty;
+        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
         {
-            // alvo aqui é o próprio Operário (quem recebeu dano)
-            // aliados[0] será o atacante inimigo — convenção a seguir no CombateService
-            if (aliados == null || aliados.Count == 0) return;
-            if (random.NextDouble() >= 0.10) return;
-
-            Combate atacanteOriginal = aliados[0];
-            _marretada.AtivarComAtacante(alvo, atacanteOriginal);
+            if (_random.NextDouble() >= 0.10) return SemDano();
+            var resultado = atacante.AtacarComMultiplicador(alvo, 1.25);
+            Console.WriteLine(MensagemSobreviveu(atacante.Personagem));
+            Thread.Sleep(1500);
+            return new List<ResultadoAtaque> { resultado };
         }
-
-        public override string MensagemSobreviveu(Personagem personagem) =>
-            $"{personagem.Simbolo} {personagem.Nome} contra-atacou com Marretada!";
-
-        public override string MensagemMorreu(Personagem personagem) => string.Empty;
     }
 }

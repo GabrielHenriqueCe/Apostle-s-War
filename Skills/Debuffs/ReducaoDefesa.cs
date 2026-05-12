@@ -4,7 +4,7 @@ namespace v1_Apostle_s_War.Skills.Debuffs
 {
     /// <summary>
     /// Reduz a DEF do alvo em 30% pelo número de turnos especificado.
-    /// Ao expirar, restaura a DEF original.
+    /// Ao expirar, restaura o valor reduzido.
     /// </summary>
     class ReducaoDefesa : Debuff
     {
@@ -13,10 +13,7 @@ namespace v1_Apostle_s_War.Skills.Debuffs
         public ReducaoDefesa(int turnos = 2)
             : base("Redução DEF", "🔎", turnos, 0.30, "-30% DEF.") { }
 
-        /// <summary>
-        /// Aplica a redução de DEF e registra o status. Chame este método, não Aplicar().
-        /// </summary>
-        public void AplicarEfeito(Combate alvo)
+        public override void Aplicar(Combate alvo)
         {
             _valorReduzido = (int)(alvo.Defesa * Valor);
             alvo.ModificarDefesa(-_valorReduzido);

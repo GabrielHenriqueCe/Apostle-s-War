@@ -13,12 +13,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
 
         public override void Ativar(Combate alvo, List<Combate>? aliados = null)
         {
-            // aliados aqui = lista de todos os inimigos (passada pelo CombateService)
             var alvos = aliados ?? new List<Combate> { alvo };
             foreach (Combate inimigo in alvos.Where(a => a.EstaVivo()))
             {
-                var debuff = new ReducaoDefesa(turnos: 2);
-                debuff.AplicarEfeito(inimigo);
+                new ReducaoDefesa(turnos: 2).Aplicar(inimigo);
             }
         }
     }

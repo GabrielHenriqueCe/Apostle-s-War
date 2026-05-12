@@ -4,7 +4,7 @@ using v1_Apostle_s_War.Skills.Buffs;
 namespace v1_Apostle_s_War.Skills.Ativas
 {
     /// <summary>
-    /// Revive todos os aliados mortos com 1 HP e aplica +25% ATK em todos os aliados por 2 turnos.
+    /// Revive todos os aliados mortos com 1 HP e aplica +25% ATK em todos por 2 turnos.
     /// </summary>
     class Nigiri : HabilidadeAtiva
     {
@@ -22,8 +22,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
                 if (!aliado.EstaVivo())
                     aliado.Reviver(1);
 
-                var buff = new BuffAtaque(turnos: 2, percentual: 0.25);
-                buff.AplicarEfeito(aliado);
+                new BuffAtaque(turnos: 2, percentual: 0.25).Aplicar(aliado);
             }
         }
     }

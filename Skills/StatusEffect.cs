@@ -3,7 +3,8 @@
     #region StatusEffect
 
     /// <summary>
-    /// Classe base para todas os efeitos de status — define nome, cooldown e o contrato de Ativar()
+    /// Classe base para todos os efeitos de status (Buffs e Debuffs).
+    /// Subclasses podem sobrescrever Aplicar para adicionar efeitos colaterais.
     /// </summary>
     abstract class StatusEffect
     {
@@ -28,7 +29,17 @@
         public bool Expirou => TurnosRestantes <= 0;
         public abstract void Remover(Combate alvo);
 
-        public void Aplicar(Combate alvo)
+        /// <summary>
+        /// Estende a duração do efeito em 1 turno. Usado pela PassivaPolicial.
+        /// </summary>
+        public void EstenderTurno() => TurnosRestantes++;
+
+        /// <summary>
+        /// Aplica o status ao alvo, gerenciando deduplicação por tipo.
+        /// Subclasses que precisam de efeito colateral (modificar stat, etc.)
+        /// devem sobrescrever este método e chamar base.Aplicar(alvo) ao final.
+        /// </summary>
+        public virtual void Aplicar(Combate alvo)
         {
             var existente = alvo.StatusAtivos.FirstOrDefault(s => s.GetType() == this.GetType());
             if (existente != null)
@@ -40,11 +51,6 @@
             }
             alvo.StatusAtivos.Add(this);
         }
-
-        // /// <summary>
-        // /// Estende a duração do efeito em 1 turno. Usado pela PassivaPolicial.
-        // /// </summary>
-        public void EstenderTurno() => TurnosRestantes++;
     }
 
     #endregion

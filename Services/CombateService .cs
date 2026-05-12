@@ -54,11 +54,10 @@ namespace v1_Apostle_s_War.Services
                     if (!combatentes[c].EstaVivo()) continue;
                     if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
 
-                    AvancarStatus(combatentes[c]);
-
-                    // Se está Preso, pula o turno
+                    // Preso é verificado antes do turno, mas AvancarStatus vem depois
                     if (combatentes[c].StatusAtivos.Any(s => s is Skills.Debuffs.Preso))
                     {
+                        AvancarStatus(combatentes[c]);
                         AvancarCooldowns(combatentes[c]);
                         continue;
                     }
@@ -67,12 +66,15 @@ namespace v1_Apostle_s_War.Services
                     List<Combate> aliados = combatentes[c] is Jogador ? jogador : inimigo;
 
                     ExecutarTurno(combatentes[c], defensores, aliados);
+
+                    AvancarStatus(combatentes[c]);   // ← depois do turno
                     AvancarCooldowns(combatentes[c]);
                 }
             } while (jogador.Any(j => j.EstaVivo()) && inimigo.Any(i => i.EstaVivo()));
 
             return jogador.Any(j => j.EstaVivo());
         }
+
 
         #endregion
 

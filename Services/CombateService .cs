@@ -180,8 +180,8 @@ namespace v1_Apostle_s_War.Services
                 Thread.Sleep(1500);
             }
 
-            atacante.Atacar(alvo);
-            Console.WriteLine($"hp atual do {alvo.Personagem.Simbolo} é de {alvo.HPAtual}");
+            var resultado = atacante.Atacar(alvo);
+            _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
             Thread.Sleep(1500);
 
             ProcessarPassivasAlvo(alvo, atacante);
@@ -201,11 +201,14 @@ namespace v1_Apostle_s_War.Services
             if (hab is Marretada marretada)
             {
                 Combate alvo = EscolherAlvoUnico(atacante, hab, defensores, aliados);
-                marretada.AtivarComAtacante(atacante, alvo);
+                var resultado = marretada.AtivarComAtacante(atacante, alvo);
+                _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
             }
             else if (hab is Tiroteio tiroteio)
             {
-                tiroteio.AtivarComAtacante(atacante, defensores);
+                var resultados = tiroteio.AtivarComAtacante(atacante, defensores);
+                foreach (var (alvo, resultado) in resultados)
+                    _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
             }
             else if (hab is Sushi || hab is Nigiri || hab is ParedeDeTijolos)
             {

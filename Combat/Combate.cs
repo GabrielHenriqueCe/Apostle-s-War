@@ -5,6 +5,11 @@ namespace ApostlesWar
     #region Combate
 
     /// <summary>
+    /// Resultado de um ataque: dano causado e se foi crítico.
+    /// </summary>
+    record ResultadoAtaque(int Dano, bool Critico);
+
+    /// <summary>
     /// Conduz o combate e status
     /// </summary>
     abstract class Combate
@@ -52,14 +57,14 @@ namespace ApostlesWar
          }
 
         /// <summary>
-        /// Executa um ataque contra o alvo informado
+        /// Executa um ataque contra o alvo e retorna o resultado.
         /// </summary>
-        /// <param name="alvo">Combatente que receberá o dano</param>
-        public void Atacar(Combate alvo)
+        public ResultadoAtaque Atacar(Combate alvo)
         {
             bool critico = random.NextDouble() < TaxaCrit;
             int dano = critico ? (int)(Ataque * (1 + DanoCrit)) : Ataque;
-            alvo.ReceberDano(dano);
+            int danoReal = alvo.ReceberDano(dano);
+            return new ResultadoAtaque(danoReal, critico);
         }
 
         /// <summary>
@@ -108,15 +113,15 @@ namespace ApostlesWar
         }
 
         /// <summary>
-        /// Ataca o alvo com um multiplicador de dano sobre o ATK base.
-        /// Usado por habilidades que escalam com o ATK do atacante.
+        /// Ataca o alvo com multiplicador e retorna o resultado.
         /// </summary>
-        public void AtacarComMultiplicador(Combate alvo, double multiplicador)
+        public ResultadoAtaque AtacarComMultiplicador(Combate alvo, double multiplicador)
         {
             bool critico = random.NextDouble() < TaxaCrit;
             int danoBase = (int)(Ataque * multiplicador);
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
-            alvo.ReceberDano(dano);
+            int danoReal = alvo.ReceberDano(dano);
+            return new ResultadoAtaque(danoReal, critico);
         }
 
         /// <summary>

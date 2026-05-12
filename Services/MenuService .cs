@@ -217,6 +217,17 @@ namespace v1_Apostle_s_War.Services
             return numero.ToString();
         }
 
+        /// <summary>
+        /// Exibe o dano causado, HP restante do alvo e indicação de crítico.
+        /// </summary>
+        public void ExibirResultadoAtaque(Combate atacante, Combate alvo, ResultadoAtaque resultado)
+        {
+            string critico = resultado.Critico ? " 💥 ATAQUE CRÍTICO!" : "";
+            Console.WriteLine($"{atacante.Personagem.Simbolo} causou {resultado.Dano} de dano em {alvo.Personagem.Simbolo} {alvo.Personagem.Nome}{critico}");
+            Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {Math.Max(0, alvo.HPAtual)}/{alvo.HPMaximo}");
+        }
+
+
         #endregion
     }
 }

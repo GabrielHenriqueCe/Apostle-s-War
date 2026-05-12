@@ -86,16 +86,57 @@ namespace v1_Apostle_s_War.Services
 
         private bool ConfirmarSaida()
         {
-            Console.Clear();
-            Console.WriteLine("Deseja sair do jogo? 1 - Sim | 2 - Não");
-            SimOuNao? escolha = ConsoleUtils.LerOpcao<SimOuNao>();
-            if (escolha == SimOuNao.Sim)
+            int opcao = 1;
+            while (true)
             {
-                Console.WriteLine("Obrigado por jogar! Até a próxima!");
-                Console.ReadLine();
-                return true;
+                Console.Clear();
+                Console.WriteLine("Deseja sair do jogo?\n");
+                Console.WriteLine(opcao == 1 ? "▶ 1 - Sim" : "  1 - Sim");
+                Console.WriteLine(opcao == 2 ? "▶ 2 - Não" : "  2 - Não");
+
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    if (opcao == 1)
+                    {
+                        ExibirCreditos();
+                        return true;
+                    }
+                    return false;
+                }
+
+                if (key.Key == ConsoleKey.Escape) return false;
+
+                opcao = ConsoleUtils.SelecionarComCursor(opcao, 1, 2, key.Key);
             }
-            return false;
+        }
+
+        private void ExibirCreditos()
+        {
+            string[] linhas =
+            {
+        "",
+        "    ⚔️  Apostle's War  ⚔️",
+        "",
+        "    Obrigado por jogar, Apóstolo...",
+        "",
+        "    👑  Desenvolvido por: Gabriel Henrique Cé",
+        "    🛠️  Versão: 1.0",
+        "    🌑  GitHub: GabrielHenriqueCe",
+        "",
+        "    Que a guerra dos Apóstolos nunca termine. 🌬️",
+        "",
+    };
+
+            Console.Clear();
+            foreach (string linha in linhas)
+            {
+                Console.WriteLine(linha);
+                Thread.Sleep(180);
+            }
+
+            Thread.Sleep(2000);
         }
 
         #endregion

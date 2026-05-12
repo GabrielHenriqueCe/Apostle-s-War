@@ -7,7 +7,7 @@ namespace ApostlesWar
     /// <summary>
     /// Resultado de um ataque: dano causado e se foi crítico.
     /// </summary>
-    record ResultadoAtaque(int Dano, bool Critico);
+    record ResultadoAtaque(int Dano, bool Critico, Combate Alvo);
 
     /// <summary>
     /// Conduz o combate e status
@@ -64,7 +64,7 @@ namespace ApostlesWar
             bool critico = random.NextDouble() < TaxaCrit;
             int dano = critico ? (int)(Ataque * (1 + DanoCrit)) : Ataque;
             int danoReal = alvo.ReceberDano(dano);
-            return new ResultadoAtaque(danoReal, critico);
+            return new ResultadoAtaque(danoReal, critico, alvo);
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace ApostlesWar
             int danoBase = (int)(Ataque * multiplicador);
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
             int danoReal = alvo.ReceberDano(dano);
-            return new ResultadoAtaque(danoReal, critico);
+            return new ResultadoAtaque(danoReal, critico, alvo);
         }
 
         /// <summary>

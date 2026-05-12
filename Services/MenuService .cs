@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using GHUtils;
+using static GHUtils.ConsoleUtils;
+using static GHUtils.Helper;
 
 namespace v1_Apostle_s_War.Services
 {
@@ -54,7 +57,7 @@ namespace v1_Apostle_s_War.Services
                     icone = " ☑️  ";
 
                 string cursor = selecionado == i + 1 ? "▶" : " ";
-                Console.WriteLine($"{cursor} {(int)faccao} - {icone} {_faccaoService.ObterSimbolo(faccao)}  {_faccaoService.ObterNome(faccao)}");
+                Console.WriteLine($"{cursor} {(int)faccao} - {icone} {_faccaoService.ObterSimbolo(faccao)}  {Helper.GetDescricao(faccao)}");
             }
             Console.WriteLine("\nEsc - Voltar");
         }
@@ -63,7 +66,6 @@ namespace v1_Apostle_s_War.Services
         {
             Console.Clear();
             Console.WriteLine("=====Apostle's War=====\n");
-            string[] nomes = { "Arma", "Elmo", "Escudo", "Manopla", "Peitoral", "Calça", "Bota" };
 
             foreach (Fases fase in Enum.GetValues<Fases>())
             {
@@ -77,7 +79,7 @@ namespace v1_Apostle_s_War.Services
                     icone = " ☑️  ";
 
                 string cursor = selecionado == idx + 1 ? "▶" : " ";
-                Console.WriteLine($"{cursor} {(int)fase} - {icone}  {nomes[idx]}");
+                Console.WriteLine($"{cursor} {(int)fase} - {icone}  {Helper.GetDescricao(fase)}");
             }
             Console.WriteLine("\nEsc - Voltar");
         }

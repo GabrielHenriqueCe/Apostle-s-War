@@ -244,14 +244,27 @@ namespace v1_Apostle_s_War.Services
         {
             while (true)
             {
-                Item? escolhido = _menuService.MenuInventario();
-                if (escolhido == null) return; // Esc → volta
+                int slot = _menuService.NavegarBoneco();
+                if (slot == -1) return;
 
-                _arsenalService.EquiparItem(escolhido);
-                Console.WriteLine($"\n{escolhido.Simbolo} {escolhido.Nome} equipado!");
-                Console.ReadLine();
+                Fases faseDoSlot = (Fases)(slot + 1);
+                List<Item> itensDoTipo = _arsenalService.ObterObtidos()
+                    .Where(i => i.Fase == faseDoSlot)
+                    .ToList();
+
+                if (itensDoTipo.Count == 0)
+                {
+                    Console.WriteLine("\nNenhum item desse tipo disponível.");
+                    Thread.Sleep(1200);
+                    continue;
+                }
+
+                Item? escolhido = _menuService.NavegarTrocaItem(slot, itensDoTipo);
+                if (escolhido != null)
+                    _arsenalService.EquiparItem(escolhido);
             }
         }
+
 
         #endregion
     }

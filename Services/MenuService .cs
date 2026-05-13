@@ -84,23 +84,6 @@ namespace v1_Apostle_s_War.Services
             Console.WriteLine("\nEsc - Voltar");
         }
 
-        /// <summary>
-        /// Exibe a lista de campeões desbloqueados para seleção do time
-        /// </summary>
-        public void MenuSelecaoTime(List<Personagem> desbloqueados, int selecionado)
-        {
-            Console.Clear();
-            Console.WriteLine("=====Apostle's War=====\n");
-            Console.WriteLine("Escolha 4 campeões para o seu time:\n");
-            for (int i = 0; i < desbloqueados.Count; i++)
-            {
-                Jogador temp = new Jogador(desbloqueados[i]);
-                _arsenalService.AplicarItens(temp);
-                string cursor = selecionado == i + 1 ? "▶" : " ";
-                Console.WriteLine($"{cursor} {i + 1} - {desbloqueados[i].Simbolo} {desbloqueados[i].Nome} | HP:{temp.HPAtual} ATK:{temp.Ataque} DEF:{temp.Defesa}");
-            }
-        }
-
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)
         {
             Console.WriteLine("Seu time:");
@@ -366,6 +349,228 @@ namespace v1_Apostle_s_War.Services
 
             return atual;
         }
+
+        /// <summary>
+        /// Resultado de uma iteração de navegação na seleção de time.
+        /// </summary>
+        public record ResultadoSelecaoTime(bool Cancelou, bool Confirmar);
+
+        private const int COLUNAS_GRID = 4;
+
+        /// <summary>
+        /// Desenha a tela de seleção de time: 4 slots em cima, grid de campeões embaixo.
+        /// </summary>
+        private void DesenharSelecaoTime(
+    Personagem?[] time,
+    List<Personagem> desbloqueados,
+    bool cursorNoBotao,
+    bool cursorNoTime,
+    int idxTime,
+    int idxGrid)
+        {
+            Console.Clear();
+            Console.WriteLine("=====Seleção de Time=====\n");
+
+            // Botão de iniciar fase
+            int qtdSelecionados = time.Count(p => p != null);
+            string prefixoBotao = cursorNoBotao ? "▶ " : "  ";
+            string estadoBotao = qtdSelecionados >= 1 ? "✅" : "❌";
+            Console.WriteLine($"{prefixoBotao}{estadoBotao} Iniciar Fase ({qtdSelecionados}/4)\n");
+
+            // Linha do time
+            Console.Write("Time: ");
+            for (int i = 0; i < 4; i++)
+            {
+                string prefixo = (cursorNoTime && idxTime == i) ? "▶" : " ";
+                string emoji = time[i]?.Simbolo ?? "⬜";
+                Console.Write($"{prefixo}{emoji}  ");
+            }
+            Console.WriteLine("\n");
+
+            // Grid
+            Console.WriteLine("Campeões:");
+            for (int i = 0; i < desbloqueados.Count; i++)
+            {
+                bool jaSelecionado = time.Any(p => p == desbloqueados[i]);
+                string prefixo;
+                if (jaSelecionado) prefixo = "🔹";
+                else if (!cursorNoTime && !cursorNoBotao && idxGrid == i) prefixo = "▶ ";
+                else prefixo = "   ";
+
+                Console.Write($"{prefixo}{desbloqueados[i].Simbolo}  ");
+
+                if ((i + 1) % 4 == 0) Console.WriteLine();
+            }
+            if (desbloqueados.Count % 4 != 0) Console.WriteLine();
+
+            // Info do personagem sob cursor
+            Console.WriteLine();
+            Personagem? sob = null;
+            if (cursorNoTime) sob = time[idxTime];
+            else if (!cursorNoBotao && idxGrid < desbloqueados.Count) sob = desbloqueados[idxGrid];
+
+            if (sob != null)
+            {
+                Jogador temp = new Jogador(sob);
+                _arsenalService.AplicarItens(temp);
+                Console.WriteLine($"{sob.Simbolo} {sob.Nome} ({sob.Faccao}) | HP:{temp.HPAtual} ATK:{temp.Ataque} DEF:{temp.Defesa}");
+                if (sob.Habilidades.Any())
+                {
+                    Console.WriteLine("Habilidades:");
+                    foreach (Habilidade hab in sob.Habilidades)
+                        Console.WriteLine($"  {hab.Simbolo} {hab.Nome} — {hab.Descricao}");
+                }
+            }
+
+            Console.WriteLine("\nWASD - Navegar | Enter - Selecionar/Remover/Iniciar | Esc - Voltar");
+        }
+
+        /// <summary>
+        /// Loop de navegação da seleção de time.
+        /// Retorna time preenchido ou lista vazia se cancelou.
+        /// </summary>
+        public List<Personagem> NavegarSelecaoTime(List<Personagem> desbloqueados)
+        {
+            Personagem?[] time = new Personagem?[4];
+
+            // Estados do cursor:
+            // -1 = no botão "Iniciar Fase"
+            //  0..3 = nos slots do time
+            //  outros = no grid (controlado por idxGrid)
+            bool cursorNoBotao = false;
+            bool cursorNoTime = false;
+            int idxTime = 0;
+            int idxGrid = 0;
+
+            int ProximoGridValido(int inicio, int direcao)
+            {
+                int i = inicio;
+                while (i >= 0 && i < desbloqueados.Count)
+                {
+                    if (!time.Contains(desbloqueados[i])) return i;
+                    i += direcao;
+                }
+                return inicio;
+            }
+
+            while (true)
+            {
+                DesenharSelecaoTime(time, desbloqueados, cursorNoBotao, cursorNoTime, idxTime, idxGrid);
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                if (key.Key == ConsoleKey.Escape) return new List<Personagem>();
+
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    if (cursorNoBotao)
+                    {
+                        // Inicia fase com quem tiver no time
+                        var selecionados = time.Where(p => p != null).Select(p => p!).ToList();
+                        if (selecionados.Count >= 1) return selecionados;
+                    }
+                    else if (cursorNoTime)
+                    {
+                        // Remove e desloca pra esquerda
+                        if (time[idxTime] != null)
+                        {
+                            for (int i = idxTime; i < 3; i++)
+                                time[i] = time[i + 1];
+                            time[3] = null;
+                        }
+                    }
+                    else
+                    {
+                        // Adiciona ao primeiro slot vazio
+                        if (idxGrid < desbloqueados.Count && !time.Contains(desbloqueados[idxGrid]))
+                        {
+                            int vazio = Array.FindIndex(time, p => p == null);
+                            if (vazio >= 0)
+                            {
+                                time[vazio] = desbloqueados[idxGrid];
+                                // Se completou 4, pula direto pro botão
+                                if (time.All(p => p != null))
+                                {
+                                    cursorNoBotao = true;
+                                    cursorNoTime = false;
+                                }
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                bool sobe = key.Key == ConsoleKey.W || key.Key == ConsoleKey.UpArrow;
+                bool desce = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
+                bool esq = key.Key == ConsoleKey.A || key.Key == ConsoleKey.LeftArrow;
+                bool dir = key.Key == ConsoleKey.D || key.Key == ConsoleKey.RightArrow;
+
+                if (cursorNoBotao)
+                {
+                    if (desce)
+                    {
+                        cursorNoBotao = false;
+                        cursorNoTime = true;
+                        idxTime = 0;
+                    }
+                }
+                else if (cursorNoTime)
+                {
+                    if (esq) idxTime = Math.Max(0, idxTime - 1);
+                    if (dir) idxTime = Math.Min(3, idxTime + 1);
+                    if (sobe)
+                    {
+                        cursorNoTime = false;
+                        cursorNoBotao = true;
+                    }
+                    if (desce)
+                    {
+                        cursorNoTime = false;
+                        idxGrid = idxTime;
+                        if (idxGrid >= desbloqueados.Count) idxGrid = desbloqueados.Count - 1;
+                        if (time.Contains(desbloqueados[idxGrid])) idxGrid = ProximoGridValido(idxGrid, 1);
+                    }
+                }
+                else
+                {
+                    if (esq)
+                    {
+                        int novo = idxGrid - 1;
+                        if (novo >= 0 && time.Contains(desbloqueados[novo])) novo = ProximoGridValido(novo, -1);
+                        if (novo >= 0) idxGrid = novo;
+                    }
+                    if (dir)
+                    {
+                        int novo = idxGrid + 1;
+                        if (novo < desbloqueados.Count && time.Contains(desbloqueados[novo])) novo = ProximoGridValido(novo, 1);
+                        if (novo < desbloqueados.Count) idxGrid = novo;
+                    }
+                    if (sobe)
+                    {
+                        int novo = idxGrid - 4;
+                        if (novo < 0)
+                        {
+                            cursorNoTime = true;
+                            idxTime = Math.Min(3, idxGrid % 4);
+                        }
+                        else
+                        {
+                            if (time.Contains(desbloqueados[novo])) novo = ProximoGridValido(novo, -1);
+                            if (novo >= 0) idxGrid = novo;
+                        }
+                    }
+                    if (desce)
+                    {
+                        int novo = idxGrid + 4;
+                        if (novo < desbloqueados.Count)
+                        {
+                            if (time.Contains(desbloqueados[novo])) novo = ProximoGridValido(novo, 1);
+                            if (novo < desbloqueados.Count) idxGrid = novo;
+                        }
+                    }
+                }
+            }
+        }
+
 
         #endregion
     }

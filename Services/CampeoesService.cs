@@ -60,35 +60,7 @@ namespace v1_Apostle_s_War.Services
         /// </summary>
         public List<Personagem> SelecionarTime()
         {
-            var time = new List<Personagem>();
-            var desbloqueados = ObterDesbloqueados();
-            int selecionado = 1;
-
-            while (time.Count < 4)
-            {
-                _menuService.MenuSelecaoTime(desbloqueados, selecionado);
-                Console.WriteLine($"Slot {time.Count + 1}/4 — já selecionados: {string.Join(" ", time.Select(p => p.Simbolo))}");
-
-                ConsoleKeyInfo key = Console.ReadKey(true);
-
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    Personagem escolhido = desbloqueados[selecionado - 1];
-                    if (time.Contains(escolhido))
-                        Console.WriteLine("Campeão já selecionado, escolha outro.");
-                    else
-                        time.Add(escolhido);
-                }
-                else if (key.Key == ConsoleKey.Escape)
-                {
-                    // tratar depois
-                }
-                else
-                {
-                    selecionado = ConsoleUtils.SelecionarComCursor(selecionado, 1, desbloqueados.Count, key.Key, false);
-                }
-            }
-            return time;
+            return _menuService.NavegarSelecaoTime(ObterDesbloqueados());
         }
 
         public void CarregarCampeoes()

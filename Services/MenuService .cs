@@ -107,42 +107,43 @@ namespace v1_Apostle_s_War.Services
         /// </summary>
         public Item? MenuInventario()
         {
-            Console.Clear();
-            Console.WriteLine("=====Inventário=====\n");
-            Console.WriteLine("Itens equipados:");
-            Item?[] itensEquipados = _arsenalService.ObterEquipados();
-            for (int i = 0; i < itensEquipados.Length; i++)
+            while (true)
             {
-                Item? item = itensEquipados[i];
-                if (item == null)
-                    Console.WriteLine($"Slot {i + 1} - vazio");
-                else
-                    Console.WriteLine($"Slot {i + 1} - {item.Simbolo} {item.Nome} ({item.Faccao}) {item.NomeStat()} {item.ValorFormatado()}");
+                Console.Clear();
+                Console.WriteLine("=====Inventário=====\n");
+                Console.WriteLine("Itens equipados:");
+                Item?[] itensEquipados = _arsenalService.ObterEquipados();
+                for (int i = 0; i < itensEquipados.Length; i++)
+                {
+                    Item? item = itensEquipados[i];
+                    if (item == null)
+                        Console.WriteLine($"Slot {i + 1} - vazio");
+                    else
+                        Console.WriteLine($"Slot {i + 1} - {item.Simbolo} {item.Nome} ({item.Faccao}) {item.NomeStat()} {item.ValorFormatado()}");
+                }
+
+                Console.WriteLine("\nItens obtidos:");
+                List<Item> obtidos = _arsenalService.ObterObtidos();
+                for (int i = 0; i < obtidos.Count; i++)
+                    Console.WriteLine($"{i + 1} - {obtidos[i].Simbolo} {obtidos[i].Nome} ({obtidos[i].Faccao}) {obtidos[i].NomeStat()} +{obtidos[i].ValorFormatado()}");
+
+                Console.Write("Digite o número do item para equipar ou Esc para voltar: ");
+                ConsoleKeyInfo first = Console.ReadKey(false);
+
+                if (first.Key == ConsoleKey.Escape) return null;
+
+                string input = first.KeyChar + Console.ReadLine();
+
+                if (int.TryParse(input, out int escolha) && escolha >= 1 && escolha <= obtidos.Count)
+                    return obtidos[escolha - 1];
+
+                Console.WriteLine("Opção inválida.");
+                Console.ReadLine();
             }
-
-            Console.WriteLine("\nItens obtidos:");
-            List<Item> obtidos = _arsenalService.ObterObtidos();
-            for (int i = 0; i < obtidos.Count; i++)
-                Console.WriteLine($"{i + 1} - {obtidos[i].Simbolo} {obtidos[i].Nome} ({obtidos[i].Faccao}) {obtidos[i].NomeStat()} +{obtidos[i].ValorFormatado()}");
-
-            Console.Write("Digite o número do item para equipar ou Esc para voltar: ");
-            ConsoleKeyInfo first = Console.ReadKey(false);
-
-            if (first.Key == ConsoleKey.Escape) return null;
-
-            string input = first.KeyChar + Console.ReadLine();
-
-            if (int.TryParse(input, out int escolha) && escolha >= 1 && escolha <= obtidos.Count)
-                return obtidos[escolha - 1];
-
-            Console.WriteLine("Opção inválida.");
-            Console.ReadLine();
-            return MenuInventario(); // tenta de novo
         }
 
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)
         {
-            Console.Clear();
             Console.WriteLine("Seu time:");
             foreach (Combate j in jogadores)
             {
@@ -213,11 +214,12 @@ namespace v1_Apostle_s_War.Services
 
         private string ObterNumeroEmoji(int numero)
         {
-            string[] numeros = { "①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩" };
+            string[] numeros = { "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩" };
             if (numero >= 1 && numero <= 10)
                 return numeros[numero - 1];
-            return numero.ToString();
+            return $"({numero})";
         }
+
 
         /// <summary>
         /// Exibe o dano causado, HP restante do alvo e indicação de crítico.

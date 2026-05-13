@@ -355,6 +355,8 @@ namespace v1_Apostle_s_War.Services
             };
 
             var time = _campeoesService.SelecionarTime();
+            if (time.Count == 0) return false; // jogador cancelou com Esc
+
             var jogador = time.Select(p => (Combate)new Jogador(p)).ToList();
             foreach (Combate c in jogador)
                 _arsenalService.AplicarItens(c);
@@ -362,6 +364,7 @@ namespace v1_Apostle_s_War.Services
             if (!ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)) return false;
             return ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
         }
+
 
         /// <summary>
         /// Executa uma rodada da fase: monta inimigos e roda o combate.

@@ -104,7 +104,7 @@ namespace v1_Apostle_s_War.Services
         private AcaoEscolhida EscolherAcaoJogador(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
             var habilidadesAtivas = atacante.Personagem.Habilidades.OfType<HabilidadeAtiva>().ToList();
-            int totalOpcoes = habilidadesAtivas.Count + 1; // +1 = ataque básico
+            int totalOpcoes = habilidadesAtivas.Count + 1;
             int acao = 1;
 
             while (true)
@@ -118,7 +118,6 @@ namespace v1_Apostle_s_War.Services
 
                 int novaAcao = ConsoleUtils.SelecionarComCursor(acao, 1, totalOpcoes, key.Key);
 
-                // Pula habilidades em cooldown na direção do movimento
                 bool descendo = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
                 while (novaAcao >= 2 && novaAcao != acao)
                 {
@@ -174,11 +173,12 @@ namespace v1_Apostle_s_War.Services
         private void ExecutarAtaqueBasico(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
             Combate alvo = atacante is Jogador
-                ? EscolherAlvoJogador(atacante, defensores, aliados)
+                ? EscolherAlvoDaLista(atacante, defensores, aliados, defensores)
                 : EscolherAlvoAleatorio(defensores);
 
             if (atacante is Inimigo)
             {
+                Console.Clear();
                 _menuService.ExibirPartida(defensores, new List<Combate>());
                 Console.WriteLine($"\n{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} prepara o ataque!");
                 Thread.Sleep(1500);
@@ -188,9 +188,8 @@ namespace v1_Apostle_s_War.Services
             _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
             Thread.Sleep(1500);
 
-            ProcessarPassivasAlvo(alvo, atacante, aliados, resultado.Critico);  // ← aliados + critico
+            ProcessarPassivasAlvo(alvo, atacante, aliados, resultado.Critico);
             ProcessarPassivasAtacante(atacante, alvo, aliados);
-
         }
 
         #endregion
@@ -203,7 +202,6 @@ namespace v1_Apostle_s_War.Services
         /// </summary>
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
         {
-            // A habilidade declara em qual lista age — sem ifs aqui
             List<Combate> lista = hab.TipoLista switch
             {
                 TipoLista.Aliados => aliados,
@@ -212,9 +210,8 @@ namespace v1_Apostle_s_War.Services
                 _ => defensores
             };
 
-            // Self e Aliados não precisam de seleção de alvo — começa no próprio atacante
             Combate alvoInicial = hab.TipoLista == TipoLista.Inimigos
-                ? EscolherAlvoJogador(atacante, defensores, aliados)
+                ? EscolherAlvoDaLista(atacante, defensores, aliados, defensores)
                 : atacante;
 
             var resultados = hab.Ativar(atacante, alvoInicial, lista);
@@ -231,11 +228,11 @@ namespace v1_Apostle_s_War.Services
         #region Seleção de alvos
 
         /// <summary>
-        /// Permite ao jogador escolher um único alvo com cursor.
+        /// Permite ao jogador escolher um alvo de uma lista (inimigos ou aliados) com cursor.
         /// </summary>
-        private Combate EscolherAlvoJogador(Combate atacante, List<Combate> defensores, List<Combate> aliados)
+        private Combate EscolherAlvoDaLista(Combate atacante, List<Combate> lista, List<Combate> aliados, List<Combate> defensores)
         {
-            var alvosVivos = defensores.Where(d => d.EstaVivo()).ToList();
+            var alvosVivos = lista.Where(d => d.EstaVivo()).ToList();
             int idx = 1;
 
             while (true)
@@ -254,14 +251,6 @@ namespace v1_Apostle_s_War.Services
 
                 idx = ConsoleUtils.SelecionarComCursor(idx, 1, alvosVivos.Count, key.Key);
             }
-        }
-
-        /// <summary>
-        /// Wrapper para escolha de alvo único de habilidade (mesma UX do ataque básico).
-        /// </summary>
-        private Combate EscolherAlvoUnico(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
-        {
-            return EscolherAlvoJogador(atacante, defensores, aliados);
         }
 
         /// <summary>

@@ -101,47 +101,6 @@ namespace v1_Apostle_s_War.Services
             }
         }
 
-        /// <summary>
-        /// Exibe os itens obtidos e retorna o item escolhido pelo jogador,
-        /// ou null se o jogador pressionar Esc para voltar.
-        /// </summary>
-        public Item? MenuInventario()
-        {
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("=====Inventário=====\n");
-                Console.WriteLine("Itens equipados:");
-                Item?[] itensEquipados = _arsenalService.ObterEquipados();
-                for (int i = 0; i < itensEquipados.Length; i++)
-                {
-                    Item? item = itensEquipados[i];
-                    if (item == null)
-                        Console.WriteLine($"Slot {i + 1} - vazio");
-                    else
-                        Console.WriteLine($"Slot {i + 1} - {item.Simbolo} {item.Nome} ({item.Faccao}) {item.NomeStat()} {item.ValorFormatado()}");
-                }
-
-                Console.WriteLine("\nItens obtidos:");
-                List<Item> obtidos = _arsenalService.ObterObtidos();
-                for (int i = 0; i < obtidos.Count; i++)
-                    Console.WriteLine($"{i + 1} - {obtidos[i].Simbolo} {obtidos[i].Nome} ({obtidos[i].Faccao}) {obtidos[i].NomeStat()} +{obtidos[i].ValorFormatado()}");
-
-                Console.Write("Digite o número do item para equipar ou Esc para voltar: ");
-                ConsoleKeyInfo first = Console.ReadKey(false);
-
-                if (first.Key == ConsoleKey.Escape) return null;
-
-                string input = first.KeyChar + Console.ReadLine();
-
-                if (int.TryParse(input, out int escolha) && escolha >= 1 && escolha <= obtidos.Count)
-                    return obtidos[escolha - 1];
-
-                Console.WriteLine("Opção inválida.");
-                Console.ReadLine();
-            }
-        }
-
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)
         {
             Console.WriteLine("Seu time:");
@@ -231,7 +190,184 @@ namespace v1_Apostle_s_War.Services
             Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {Math.Max(0, alvo.HPAtual)}/{alvo.HPMaximo}");
         }
 
+        /// <summary>
+        /// Layout do boneco. Mapeia cada slot (índice = Fases - 1) para uma posição (linha, coluna) num grid 3x3.
+        ///   [0,1]=Acessório   [0,2]=Elmo
+        ///   [1,0]=Arma        [1,1]=Peitoral   [1,2]=Escudo
+        ///   [2,1]=Bota        [2,2]=Calça
+        /// </summary>
+        private static readonly (int linha, int coluna)[] _posicoesBoneco = new[]
+        {
+    (1, 0), // 0 Arma
+    (0, 2), // 1 Elmo
+    (1, 2), // 2 Escudo
+    (0, 1), // 3 Acessório (era Manopla)
+    (1, 1), // 4 Peitoral
+    (2, 2), // 5 Calça
+    (2, 1), // 6 Bota
+};
+
+        private static readonly string[] _nomesSlot =
+        {
+    "Arma", "Elmo", "Escudo", "Acessório", "Peitoral", "Calça", "Bota"
+};
+
+        /// <summary>
+        /// Desenha o boneco com cursor no slot selecionado.
+        /// </summary>
+        private void DesenharBoneco(int slotComCursor, int slotEmEdicao)
+        {
+            Item?[] equipados = _arsenalService.ObterEquipados();
+            string[,] grid = new string[3, 3];
+            for (int l = 0; l < 3; l++)
+                for (int c = 0; c < 3; c++)
+                    grid[l, c] = "      ";
+
+            for (int i = 0; i < 7; i++)
+            {
+                var (linha, coluna) = _posicoesBoneco[i];
+                string emoji = equipados[i]?.Simbolo ?? "⬜";
+                string prefixo;
+                if (i == slotEmEdicao) prefixo = "🔹";
+                else if (i == slotComCursor) prefixo = "▶ ";
+                else prefixo = "   ";
+                grid[linha, coluna] = $"{prefixo}{emoji}  ";
+            }
+
+            for (int l = 0; l < 3; l++)
+            {
+                for (int c = 0; c < 3; c++)
+                    Console.Write(grid[l, c]);
+                Console.WriteLine();
+            }
+        }
+
+        /// <summary>
+        /// Tela inicial do inventário: boneco navegável.
+        /// </summary>
+        public void ExibirBonecoInventario(int slotSelecionado)
+        {
+            Console.Clear();
+            Console.WriteLine("=====Inventário=====\n");
+
+            DesenharBoneco(slotSelecionado, slotEmEdicao: -1);
+
+            Console.WriteLine();
+            Item? selecionado = _arsenalService.ObterEquipados()[slotSelecionado];
+            if (selecionado != null)
+                Console.WriteLine($"{selecionado.Simbolo} {selecionado.Nome} ({selecionado.Faccao}) {selecionado.NomeStat()} +{selecionado.ValorFormatado()}");
+            else
+                Console.WriteLine($"Slot {_nomesSlot[slotSelecionado]} - vazio");
+
+            Console.WriteLine("\nWASD - Navegar | Enter - Trocar item | Esc - Voltar");
+        }
+
+        /// <summary>
+        /// Tela de troca de item: boneco com slot em edição + comparação + lista horizontal.
+        /// </summary>
+        public void ExibirTrocaItem(int slotEmEdicao, List<Item> itensDoTipo, int idxItemSelecionado)
+        {
+            Console.Clear();
+            Console.WriteLine("=====Inventário — Trocar Item=====\n");
+
+            DesenharBoneco(slotComCursor: -1, slotEmEdicao: slotEmEdicao);
+
+            Item? equipadoAgora = _arsenalService.ObterEquipados()[slotEmEdicao];
+            Item itemNovo = itensDoTipo[idxItemSelecionado];
+
+            Console.WriteLine();
+            Console.WriteLine($"Equipado: {(equipadoAgora == null ? "(nenhum)" : $"{equipadoAgora.Simbolo} {equipadoAgora.Nome} ({equipadoAgora.Faccao}) {equipadoAgora.NomeStat()} +{equipadoAgora.ValorFormatado()}")}");
+            Console.WriteLine($"Novo:     {itemNovo.Simbolo} {itemNovo.Nome} ({itemNovo.Faccao}) {itemNovo.NomeStat()} +{itemNovo.ValorFormatado()}");
+
+            if (equipadoAgora != null && equipadoAgora.TipoStat == itemNovo.TipoStat)
+            {
+                double diff = itemNovo.Valor - equipadoAgora.Valor;
+                string diffFormatado = itemNovo.TipoStat switch
+                {
+                    TipoStat.ATKFlat or TipoStat.HPFlat or TipoStat.DEFFlat => $"{(diff >= 0 ? "+" : "")}{(int)diff}",
+                    _ => $"{(diff >= 0 ? "+" : "")}{diff * 100:F0}%"
+                };
+                string seta = diff > 0 ? "▲" : (diff < 0 ? "▼" : "=");
+                Console.WriteLine($"Diferença: {seta} {diffFormatado}");
+            }
+
+            Console.WriteLine("\nItens disponíveis:");
+            for (int i = 0; i < itensDoTipo.Count; i++)
+            {
+                string prefixo = i == idxItemSelecionado ? "▶" : " ";
+                Console.Write($"{prefixo}{itensDoTipo[i].Simbolo}  ");
+            }
+            Console.WriteLine();
+
+            Console.WriteLine("\nA/D - Navegar | Enter - Equipar | Esc - Voltar");
+        }
+
+        /// <summary>
+        /// Navega o boneco. Retorna o slot escolhido para troca (0..6), ou -1 se Esc.
+        /// </summary>
+        public int NavegarBoneco()
+        {
+            int slot = 0;
+            while (true)
+            {
+                ExibirBonecoInventario(slot);
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                if (key.Key == ConsoleKey.Escape) return -1;
+                if (key.Key == ConsoleKey.Enter) return slot;
+
+                slot = MoverNoBoneco(slot, key.Key);
+            }
+        }
+
+        /// <summary>
+        /// Navega a lista de itens daquele tipo. Retorna o item escolhido, ou null se Esc.
+        /// </summary>
+        public Item? NavegarTrocaItem(int slotEmEdicao, List<Item> itensDoTipo)
+        {
+            if (itensDoTipo.Count == 0) return null;
+
+            int idx = 0;
+            while (true)
+            {
+                ExibirTrocaItem(slotEmEdicao, itensDoTipo, idx);
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                if (key.Key == ConsoleKey.Escape) return null;
+                if (key.Key == ConsoleKey.Enter) return itensDoTipo[idx];
+
+                // navegação horizontal
+                if (key.Key == ConsoleKey.A || key.Key == ConsoleKey.LeftArrow)
+                    idx = Math.Max(0, idx - 1);
+                if (key.Key == ConsoleKey.D || key.Key == ConsoleKey.RightArrow)
+                    idx = Math.Min(itensDoTipo.Count - 1, idx + 1);
+            }
+        }
+
+        /// <summary>
+        /// Calcula o próximo slot no boneco com base na tecla (WASD).
+        /// </summary>
+        private int MoverNoBoneco(int atual, ConsoleKey tecla)
+        {
+            var (linha, coluna) = _posicoesBoneco[atual];
+            int novaLinha = linha;
+            int novaColuna = coluna;
+
+            if (tecla == ConsoleKey.W || tecla == ConsoleKey.UpArrow) novaLinha--;
+            if (tecla == ConsoleKey.S || tecla == ConsoleKey.DownArrow) novaLinha++;
+            if (tecla == ConsoleKey.A || tecla == ConsoleKey.LeftArrow) novaColuna--;
+            if (tecla == ConsoleKey.D || tecla == ConsoleKey.RightArrow) novaColuna++;
+
+            for (int i = 0; i < _posicoesBoneco.Length; i++)
+            {
+                if (_posicoesBoneco[i].linha == novaLinha && _posicoesBoneco[i].coluna == novaColuna)
+                    return i;
+            }
+
+            return atual;
+        }
 
         #endregion
     }
 }
+

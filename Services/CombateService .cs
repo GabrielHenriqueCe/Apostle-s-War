@@ -178,9 +178,7 @@ namespace v1_Apostle_s_War.Services
 
             if (atacante is Inimigo)
             {
-                Console.Clear();
-                _menuService.ExibirPartida(defensores, new List<Combate>());
-                Console.WriteLine($"\n{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} prepara o ataque!");
+                _menuService.ExibirPreparacaoAtaque(atacante, defensores);
                 Thread.Sleep(1500);
             }
 
@@ -219,7 +217,7 @@ namespace v1_Apostle_s_War.Services
                 _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
 
             atacante.Cooldowns[hab].Usar();
-            Console.WriteLine($"{atacante.Personagem.Simbolo} usou {hab.Nome}!");
+            _menuService.ExibirUsoHabilidade(atacante, hab);
             Thread.Sleep(2500);
         }
 
@@ -313,7 +311,7 @@ namespace v1_Apostle_s_War.Services
 
                 if (!string.IsNullOrEmpty(msg))
                 {
-                    Console.WriteLine(msg);
+                    _menuService.ExibirMensagemPassiva(msg);
                     Thread.Sleep(1500);
                 }
             }

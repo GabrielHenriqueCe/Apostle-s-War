@@ -571,6 +571,33 @@ namespace v1_Apostle_s_War.Services
             }
         }
 
+        /// <summary>
+        /// Exibe a mensagem de preparação de ataque do inimigo.
+        /// </summary>
+        public void ExibirPreparacaoAtaque(Combate atacante, List<Combate> defensores)
+        {
+            Console.Clear();
+            ExibirPartida(defensores, new List<Combate>());
+            Console.WriteLine($"\n{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} prepara o ataque!");
+        }
+
+        /// <summary>
+        /// Exibe a mensagem de uso de habilidade.
+        /// </summary>
+        public void ExibirUsoHabilidade(Combate atacante, Habilidade hab)
+        {
+            Console.WriteLine($"{atacante.Personagem.Simbolo} usou {hab.Nome}!");
+        }
+
+        /// <summary>
+        /// Exibe a mensagem de uma passiva (sobreviveu ou morreu).
+        /// </summary>
+        public void ExibirMensagemPassiva(string mensagem)
+        {
+            if (!string.IsNullOrEmpty(mensagem))
+                Console.WriteLine(mensagem);
+        }
+
 
         #endregion
     }

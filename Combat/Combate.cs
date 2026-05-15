@@ -5,9 +5,9 @@ namespace ApostlesWar
     #region Combate
 
     /// <summary>
-    /// Resultado de um ataque: dano causado e se foi crítico.
+    /// Resultado de um ataque: dano causado, se foi crítico, alvo e HP restante no momento do hit.
     /// </summary>
-    record ResultadoAtaque(int Dano, bool Critico, Combate Alvo);
+    record ResultadoAtaque(int Dano, bool Critico, Combate Alvo, int HPRestante);
 
     /// <summary>
     /// Conduz o combate e status
@@ -38,15 +38,9 @@ namespace ApostlesWar
             StatusAtivos = new List<StatusEffect>();
             Cooldowns = new Dictionary<Habilidade, SkillCooldown>();
             foreach (Habilidade hab in personagem.Habilidades)
-            {
                 Cooldowns[hab] = new SkillCooldown(hab.Turnos);
-            }
         }
 
-        /// <summary>
-        /// Calcula e aplica o dano recebido descontando a redução por defesa
-        /// </summary>
-        /// <param name="ataque">Valor de ataque do atacante</param>
         public int ReceberDano(int ataque)
         {
             if (StatusAtivos.Any(s => s is BloqueioTotal || s is Intocavel)) return 0;
@@ -54,36 +48,32 @@ namespace ApostlesWar
             int danoFinal = (int)(ataque * (1 - reducao));
             HPAtual -= danoFinal;
             return danoFinal;
-         }
+        }
 
-        /// <summary>
-        /// Executa um ataque contra o alvo e retorna o resultado.
-        /// </summary>
         public ResultadoAtaque Atacar(Combate alvo)
         {
             bool critico = random.NextDouble() < TaxaCrit;
             int dano = critico ? (int)(Ataque * (1 + DanoCrit)) : Ataque;
             int danoReal = alvo.ReceberDano(dano);
-            return new ResultadoAtaque(danoReal, critico, alvo);
+            return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
 
-        /// <summary>
-        /// Verifica se o combatente ainda está vivo
-        /// </summary>
-        /// <returns>True se HP atual for maior que zero</returns>
-        public bool EstaVivo()
+        public ResultadoAtaque AtacarComMultiplicador(Combate alvo, double multiplicador)
         {
-            return HPAtual > 0;
+            bool critico = random.NextDouble() < TaxaCrit;
+            int danoBase = (int)(Ataque * multiplicador);
+            int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
+            int danoReal = alvo.ReceberDano(dano);
+            return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
 
-        public void Reviver(int hp)
-        {
-            HPAtual = hp;
-        }
+        public bool EstaVivo() => HPAtual > 0;
+        public void Reviver(int hp) => HPAtual = hp;
+        public void DefinirDanoCrit(double valor) => DanoCrit = valor;
+        public void ModificarDefesa(int delta) => Defesa = Math.Max(0, Defesa + delta);
+        public void ModificarAtaque(int delta) => Ataque = Math.Max(0, Ataque + delta);
+        public void Curar(int valor) => HPAtual = Math.Min(HPMaximo, HPAtual + valor);
 
-        /// <summary>
-        /// Aplica o stat de um item ao combatente
-        /// </summary>
         public void AplicarItem(Item item)
         {
             switch (item.TipoStat)
@@ -103,51 +93,6 @@ namespace ApostlesWar
                 case TipoStat.DanoCritPct: DanoCrit += item.Valor; break;
             }
         }
-
-        /// <summary>
-        /// Define o DanoCrit diretamente. Usado por passivas que recalculam o stat.
-        /// </summary>
-        public void DefinirDanoCrit(double valor)
-        {
-            DanoCrit = valor;
-        }
-
-        /// <summary>
-        /// Ataca o alvo com multiplicador e retorna o resultado.
-        /// </summary>
-        public ResultadoAtaque AtacarComMultiplicador(Combate alvo, double multiplicador)
-        {
-            bool critico = random.NextDouble() < TaxaCrit;
-            int danoBase = (int)(Ataque * multiplicador);
-            int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
-            int danoReal = alvo.ReceberDano(dano);
-            return new ResultadoAtaque(danoReal, critico, alvo);
-        }
-
-        /// <summary>
-        /// Aplica um modificador flat na Defesa (pode ser negativo para debuffs).
-        /// </summary>
-        public void ModificarDefesa(int delta)
-        {
-            Defesa = Math.Max(0, Defesa + delta);
-        }
-
-        /// <summary>
-        /// Aplica um modificador flat no Ataque (pode ser negativo para debuffs).
-        /// </summary>
-        public void ModificarAtaque(int delta)
-        {
-            Ataque = Math.Max(0, Ataque + delta);
-        }
-
-        /// <summary>
-        /// Cura o combatente por um valor flat, respeitando o HP máximo.
-        /// </summary>
-        public void Curar(int valor)
-        {
-            HPAtual = Math.Min(HPMaximo, HPAtual + valor);
-        }
-
     }
 
     #endregion

@@ -1,8 +1,8 @@
 ﻿using ApostlesWar;
 using GHUtils;
-using System;
-using System.Collections.Generic;
 using v1_Apostle_s_War.Skills.Ativas;
+using v1_Apostle_s_War.Skills.Buffs;
+using v1_Apostle_s_War.Skills.Debuffs;
 
 namespace v1_Apostle_s_War.Services
 {
@@ -31,20 +31,12 @@ namespace v1_Apostle_s_War.Services
 
         #region Estrutura de ação
 
-        /// <summary>
-        /// Representa o que o atacante decidiu fazer no turno.
-        /// Habilidade null = ataque básico.
-        /// </summary>
         private record AcaoEscolhida(HabilidadeAtiva? Habilidade);
 
         #endregion
 
         #region Loop principal de combate
 
-        /// <summary>
-        /// Itera pelos combatentes em ordem, alternando turnos até que um lado seja eliminado.
-        /// Retorna true se o jogador vencer.
-        /// </summary>
         private bool ExecutarCombate(List<Combate> jogador, List<Combate> inimigo, List<Combate> combatentes)
         {
             do
@@ -54,8 +46,7 @@ namespace v1_Apostle_s_War.Services
                     if (!combatentes[c].EstaVivo()) continue;
                     if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
 
-                    // Preso é verificado antes do turno, mas AvancarStatus vem depois
-                    if (combatentes[c].StatusAtivos.Any(s => s is Skills.Debuffs.Preso))
+                    if (combatentes[c].StatusAtivos.Any(s => s is Preso))
                     {
                         AvancarStatus(combatentes[c]);
                         AvancarCooldowns(combatentes[c]);
@@ -67,7 +58,7 @@ namespace v1_Apostle_s_War.Services
 
                     ExecutarTurno(combatentes[c], defensores, aliados);
 
-                    AvancarStatus(combatentes[c]);   // ← depois do turno
+                    AvancarStatus(combatentes[c]);
                     AvancarCooldowns(combatentes[c]);
                 }
             } while (jogador.Any(j => j.EstaVivo()) && inimigo.Any(i => i.EstaVivo()));
@@ -75,17 +66,28 @@ namespace v1_Apostle_s_War.Services
             return jogador.Any(j => j.EstaVivo());
         }
 
-
         #endregion
 
         #region Turno individual
 
-        /// <summary>
-        /// Conduz o turno de um único combatente: escolhe ação, escolhe alvo, executa.
-        /// </summary>
         private void ExecutarTurno(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
             Console.Clear();
+
+            // Irritar — força A1 automático no aplicador, sem input
+            var irritar = atacante.StatusAtivos.OfType<Irritar>().FirstOrDefault();
+            if (irritar != null)
+            {
+                _menuService.ExibirPartida(aliados, defensores);
+                _menuService.ExibirMensagemPassiva($"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
+                Thread.Sleep(1500);
+                var resultado = atacante.Atacar(irritar.Aplicador);
+                _menuService.ExibirResultadoAtaque(atacante, irritar.Aplicador, resultado);
+                Thread.Sleep(1500);
+                ProcessarPassivasAlvo(irritar.Aplicador, atacante, aliados, resultado.Critico);
+                ProcessarPassivasAtacante(atacante, irritar.Aplicador, aliados);
+                return;
+            }
 
             AcaoEscolhida acao = atacante is Jogador
                 ? EscolherAcaoJogador(atacante, defensores, aliados)
@@ -98,9 +100,6 @@ namespace v1_Apostle_s_War.Services
 
         #region Escolha de ação — Jogador
 
-        /// <summary>
-        /// Exibe o menu de ações e aguarda o jogador escolher entre ataque básico e habilidades disponíveis.
-        /// </summary>
         private AcaoEscolhida EscolherAcaoJogador(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
             var habilidadesAtivas = atacante.Personagem.Habilidades.OfType<HabilidadeAtiva>().ToList();
@@ -119,13 +118,21 @@ namespace v1_Apostle_s_War.Services
                 int novaAcao = ConsoleUtils.SelecionarComCursor(acao, 1, totalOpcoes, key.Key);
 
                 bool descendo = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
+
                 while (novaAcao >= 2 && novaAcao != acao)
                 {
                     var hab = habilidadesAtivas[novaAcao - 2];
                     if (atacante.Cooldowns[hab].Disponivel) break;
-                    novaAcao = descendo
-                        ? Math.Min(totalOpcoes, novaAcao + 1)
-                        : Math.Max(1, novaAcao - 1);
+
+                    int proximo = descendo ? novaAcao + 1 : novaAcao - 1;
+
+                    if (proximo < 1 || proximo > totalOpcoes)
+                    {
+                        novaAcao = acao;
+                        break;
+                    }
+
+                    novaAcao = proximo;
                 }
 
                 acao = novaAcao;
@@ -140,9 +147,6 @@ namespace v1_Apostle_s_War.Services
 
         #region Escolha de ação — Inimigo
 
-        /// <summary>
-        /// Inimigo sempre ataca básico (sem IA de habilidade por enquanto).
-        /// </summary>
         private AcaoEscolhida EscolherAcaoInimigo(Combate atacante)
         {
             return new AcaoEscolhida(null);
@@ -152,9 +156,6 @@ namespace v1_Apostle_s_War.Services
 
         #region Execução de ação
 
-        /// <summary>
-        /// Dispatcher: roteia para ataque básico ou habilidade.
-        /// </summary>
         private void ExecutarAcao(Combate atacante, AcaoEscolhida acao, List<Combate> defensores, List<Combate> aliados)
         {
             if (acao.Habilidade == null)
@@ -167,14 +168,13 @@ namespace v1_Apostle_s_War.Services
 
         #region Ataque básico
 
-        /// <summary>
-        /// Executa o ataque básico: escolhe alvo, ataca, processa passivas pós-ataque.
-        /// </summary>
         private void ExecutarAtaqueBasico(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
+            var alvosDisponiveis = ResolverListaDeAlvosDisponiveis(defensores, atacante);
+
             Combate alvo = atacante is Jogador
-                ? EscolherAlvoDaLista(atacante, defensores, aliados, defensores)
-                : EscolherAlvoAleatorio(defensores);
+                ? EscolherAlvoDaLista(atacante, alvosDisponiveis, aliados, defensores)
+                : EscolherAlvoAleatorio(alvosDisponiveis);
 
             if (atacante is Inimigo)
             {
@@ -194,10 +194,6 @@ namespace v1_Apostle_s_War.Services
 
         #region Habilidade
 
-        /// <summary>
-        /// Executa uma habilidade ativa. Centraliza o cast para AtivarComAtacante quando necessário,
-        /// resolvendo o problema de habilidades que escalam com ATK do atacante.
-        /// </summary>
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
         {
             List<Combate> lista = hab.TipoLista switch
@@ -208,9 +204,18 @@ namespace v1_Apostle_s_War.Services
                 _ => defensores
             };
 
-            Combate alvoInicial = hab.TipoLista == TipoLista.Inimigos
-                ? EscolherAlvoDaLista(atacante, defensores, aliados, defensores)
-                : atacante;
+            Combate alvoInicial;
+            if (hab.TipoLista == TipoLista.Inimigos)
+            {
+                var alvosDisponiveis = ResolverListaDeAlvosDisponiveis(defensores, atacante);
+                alvoInicial = atacante is Jogador
+                    ? EscolherAlvoDaLista(atacante, alvosDisponiveis, aliados, defensores)
+                    : EscolherAlvoAleatorio(alvosDisponiveis);
+            }
+            else
+            {
+                alvoInicial = atacante;
+            }
 
             var resultados = hab.Ativar(atacante, alvoInicial, lista);
             foreach (var r in resultados)
@@ -226,8 +231,35 @@ namespace v1_Apostle_s_War.Services
         #region Seleção de alvos
 
         /// <summary>
-        /// Permite ao jogador escolher um alvo de uma lista (inimigos ou aliados) com cursor.
+        /// Resolve a lista de alvos disponíveis conforme prioridade:
+        /// 1. Provocar — só quem tem (ignora Intocável e BloqueioTotal)
+        /// 2. Sem BloqueioTotal e sem Intocável — prioridade
+        /// 3. Sem BloqueioTotal (mas com Intocável)
+        /// 4. Todos têm BloqueioTotal — sem filtro
         /// </summary>
+        private List<Combate> ResolverListaDeAlvosDisponiveis(List<Combate> candidatos, Combate atacante)
+        {
+            var vivos = candidatos.Where(c => c.EstaVivo()).ToList();
+
+            // Provocar — prioridade máxima, ignora tudo
+            var comProvocar = vivos.Where(c => c.StatusAtivos.Any(s => s is Provocar)).ToList();
+            if (comProvocar.Count > 0) return comProvocar;
+
+            // Sem BloqueioTotal e sem Intocável
+            var semTudo = vivos.Where(c =>
+                !c.StatusAtivos.Any(s => s is BloqueioTotal) &&
+                !c.StatusAtivos.Any(s => s is Intocavel)).ToList();
+            if (semTudo.Count > 0) return semTudo;
+
+            // Sem BloqueioTotal (pode ter Intocável)
+            var semBloqueio = vivos.Where(c =>
+                !c.StatusAtivos.Any(s => s is BloqueioTotal)).ToList();
+            if (semBloqueio.Count > 0) return semBloqueio;
+
+            // Todos têm BloqueioTotal — sem filtro
+            return vivos;
+        }
+
         private Combate EscolherAlvoDaLista(Combate atacante, List<Combate> lista, List<Combate> aliados, List<Combate> defensores)
         {
             var alvosVivos = lista.Where(d => d.EstaVivo()).ToList();
@@ -251,12 +283,9 @@ namespace v1_Apostle_s_War.Services
             }
         }
 
-        /// <summary>
-        /// Sorteia um alvo vivo aleatório (usado pelo inimigo).
-        /// </summary>
-        private Combate EscolherAlvoAleatorio(List<Combate> defensores)
+        private Combate EscolherAlvoAleatorio(List<Combate> candidatos)
         {
-            var vivos = defensores.Where(d => d.EstaVivo()).ToList();
+            var vivos = candidatos.Where(d => d.EstaVivo()).ToList();
             return vivos[_random.Next(vivos.Count)];
         }
 
@@ -264,18 +293,12 @@ namespace v1_Apostle_s_War.Services
 
         #region Passivas e status
 
-        /// <summary>
-        /// Avança o cooldown de todas as habilidades do combatente.
-        /// </summary>
         private void AvancarCooldowns(Combate combatente)
         {
             foreach (var cd in combatente.Cooldowns.Values)
                 cd.PassarTurno();
         }
 
-        /// <summary>
-        /// Avança a contagem de turnos de todos os status ativos e remove os expirados.
-        /// </summary>
         private void AvancarStatus(Combate combatente)
         {
             foreach (StatusEffect status in combatente.StatusAtivos.ToList())
@@ -286,9 +309,6 @@ namespace v1_Apostle_s_War.Services
             }
         }
 
-        /// <summary>
-        /// Processa passivas do alvo que reagem a receber dano (ex: Necromancia).
-        /// </summary>
         private void ProcessarPassivasAlvo(Combate alvo, Combate atacante, List<Combate> aliados, bool foiCritico)
         {
             var ctx = new ContextoPassiva(alvo.EstaVivo(), foiCritico, aliados, atacante);
@@ -317,9 +337,6 @@ namespace v1_Apostle_s_War.Services
             }
         }
 
-        /// <summary>
-        /// Processa passivas do atacante que reagem após atacar (ex: PassivaPolicial estender Preso).
-        /// </summary>
         private void ProcessarPassivasAtacante(Combate atacante, Combate alvo, List<Combate> inimigos)
         {
             var ctx = new ContextoPassiva(alvo.EstaVivo(), false, inimigos, atacante);
@@ -331,7 +348,6 @@ namespace v1_Apostle_s_War.Services
                 if (!atacante.Cooldowns[hab].Disponivel) continue;
 
                 passiva.Ativar(atacante, alvo, inimigos);
-                // passivas de atacante não causam dano visível — sem exibição de resultado
             }
         }
 
@@ -339,9 +355,6 @@ namespace v1_Apostle_s_War.Services
 
         #region Fluxo de fase
 
-        /// <summary>
-        /// Executa uma fase completa (rodada 1 + rodada 2).
-        /// </summary>
         public bool ExecutarFase(Faccao capitulo, Fases fase)
         {
             Fase fas = _campanhaService.ObterFase((int)fase);
@@ -353,7 +366,7 @@ namespace v1_Apostle_s_War.Services
             };
 
             var time = _campeoesService.SelecionarTime();
-            if (time.Count == 0) return false; // jogador cancelou com Esc
+            if (time.Count == 0) return false;
 
             var jogador = time.Select(p => (Combate)new Jogador(p)).ToList();
             foreach (Combate c in jogador)
@@ -363,10 +376,6 @@ namespace v1_Apostle_s_War.Services
             return ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
         }
 
-
-        /// <summary>
-        /// Executa uma rodada da fase: monta inimigos e roda o combate.
-        /// </summary>
         private bool ExecutarRodada(List<Combate> jogador, List<Slot> slotsInimigos, Faccao capitulo, MultiplicadorFase mult)
         {
             var inimigo = new List<Combate>();

@@ -89,7 +89,7 @@ namespace v1_Apostle_s_War.Services
             Console.WriteLine("Seu time:");
             foreach (Combate j in jogadores)
             {
-                string status = string.Join(" ", j.StatusAtivos.Select(s => $"{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
+                string status = string.Join(" ", j.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
                 Console.WriteLine($"{j.Personagem.Simbolo} {j.Personagem.Nome} | HP:{j.HPAtual} ATK:{j.Ataque} DEF:{j.Defesa} {status}");
             }
 
@@ -97,7 +97,7 @@ namespace v1_Apostle_s_War.Services
             int i = 1;
             foreach (Combate inimigo in inimigos.Where(d => d.EstaVivo()))
             {
-                string status = string.Join(" ", inimigo.StatusAtivos.Select(s => $"{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
+                string status = string.Join(" ", inimigo.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
                 Console.WriteLine($"{i} - {inimigo.Personagem.Simbolo} {inimigo.Personagem.Nome} | HP:{inimigo.HPAtual} ATK:{inimigo.Ataque} DEF:{inimigo.Defesa} {status}");
                 i++;
             }
@@ -164,14 +164,15 @@ namespace v1_Apostle_s_War.Services
 
 
         /// <summary>
-        /// Exibe o dano causado, HP restante do alvo e indicação de crítico.
+        /// Exibe o dano causado, HP restante no momento do hit e indicação de crítico.
         /// </summary>
         public void ExibirResultadoAtaque(Combate atacante, Combate alvo, ResultadoAtaque resultado)
         {
             string critico = resultado.Critico ? " 💥 ATAQUE CRÍTICO!" : "";
             Console.WriteLine($"{atacante.Personagem.Simbolo} causou {resultado.Dano} de dano em {alvo.Personagem.Simbolo} {alvo.Personagem.Nome}{critico}");
-            Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {Math.Max(0, alvo.HPAtual)}/{alvo.HPMaximo}");
+            Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {resultado.HPRestante}/{alvo.HPMaximo}");
         }
+
 
         /// <summary>
         /// Layout do boneco. Mapeia cada slot (índice = Fases - 1) para uma posição (linha, coluna) num grid 3x3.
@@ -182,12 +183,12 @@ namespace v1_Apostle_s_War.Services
         private static readonly (int linha, int coluna)[] _posicoesBoneco = new[]
         {
     (1, 0), // 0 Arma
-    (0, 2), // 1 Elmo
+    (0, 1), // 1 Elmo
     (1, 2), // 2 Escudo
-    (0, 1), // 3 Acessório (era Manopla)
+    (0, 0), // 3 Acessório
     (1, 1), // 4 Peitoral
-    (2, 2), // 5 Calça
-    (2, 1), // 6 Bota
+    (2, 1), // 5 Calça
+    (2, 0), // 6 Bota
 };
 
         private static readonly string[] _nomesSlot =

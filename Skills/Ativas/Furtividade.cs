@@ -7,15 +7,18 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public Furtividade() : base("Furtividade", "🕳️", 4,
             "Intocável por 2 turnos. Ao expirar, ataca todos os inimigos com 100% ATK.")
         { }
-        public override int NumeroDeAlvos => 0;
-        public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
-        public override TipoLista TipoLista => TipoLista.Self;
         public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
         {
-            // lista = inimigos, guardada pelo FurtividadeAtaque para atacar ao expirar
             AplicarBuff(atacante, new Intocavel(turnos: 2));
-            AplicarBuff(atacante, new FurtividadeAtaque(lista, turnos: 2));
-            return SemDano();
+
+            var resultados = new List<ResultadoAtaque>();
+            foreach (Combate a in ResolverAlvos(alvo, lista))
+                resultados.Add(AplicarDano(atacante, a, 1.0));
+            return resultados;
         }
+
+        public override int NumeroDeAlvos => int.MaxValue;
+        public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
+        public override TipoLista TipoLista => TipoLista.Inimigos;
     }
 }

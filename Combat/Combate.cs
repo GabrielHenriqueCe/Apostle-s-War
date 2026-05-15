@@ -12,6 +12,14 @@
         private static readonly Random random = new Random();
         public abstract Personagem Personagem { get; }
         public Dictionary<Habilidade, SkillCooldown> Cooldowns { get; private set; }
+
+        /// <summary>
+        /// Estado de runtime das habilidades nesta partida.
+        /// Cada habilidade que precisa de estado guarda aqui, type-safe via HabilidadePassiva.ObterEstado.
+        /// Nasce vazio com o Combate e morre com ele — sem vazamento entre fases.
+        /// </summary>
+        public Dictionary<Habilidade, object> EstadoHabilidades { get; private set; }
+
         public int HPMaximo { get; protected set; }
         public int HPAtual { get; protected set; }
         public int HPBase { get; private set; }
@@ -32,6 +40,7 @@
             DanoCrit = personagem.DanoCrit;
             StatusAtivos = new List<StatusEffect>();
             Cooldowns = new Dictionary<Habilidade, SkillCooldown>();
+            EstadoHabilidades = new Dictionary<Habilidade, object>();
             foreach (Habilidade hab in personagem.Habilidades)
                 Cooldowns[hab] = new SkillCooldown(hab.Turnos);
         }
@@ -86,6 +95,7 @@
         public void DefinirDanoCrit(double valor) => DanoCrit = valor;
         public void ModificarDefesa(int delta) => Defesa = Math.Max(0, Defesa + delta);
         public void ModificarAtaque(int delta) => Ataque = Math.Max(0, Ataque + delta);
+        public void ModificarTaxaCrit(double delta) => TaxaCrit = Math.Clamp(TaxaCrit + delta, 0, 1);
         public void Curar(int valor) => HPAtual = Math.Min(HPMaximo, HPAtual + valor);
 
         public void AplicarItem(Item item)

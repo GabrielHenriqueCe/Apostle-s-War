@@ -21,6 +21,21 @@
         protected List<ResultadoAtaque> SemDano() => new List<ResultadoAtaque>();
 
         public override abstract List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista);
+
+        /// <summary>
+        /// Obtém (ou cria) o estado de runtime desta passiva para o combatente.
+        /// Estado vive no Combate, então é descartado entre fases automaticamente.
+        /// Cada passiva define seu próprio tipo de estado (type-safe).
+        /// </summary>
+        protected T ObterEstado<T>(Combate combate) where T : new()
+        {
+            if (!combate.EstadoHabilidades.TryGetValue(this, out var estado) || estado is not T)
+            {
+                estado = new T();
+                combate.EstadoHabilidades[this] = estado;
+            }
+            return (T)estado;
+        }
     }
 
     #endregion

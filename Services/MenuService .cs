@@ -90,7 +90,8 @@ namespace v1_Apostle_s_War.Services
             foreach (Combate j in jogadores)
             {
                 string status = string.Join(" ", j.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
-                Console.WriteLine($"{j.Personagem.Simbolo} {j.Personagem.Nome} | HP:{j.HPAtual} ATK:{j.Ataque} DEF:{j.Defesa} {status}");
+                string escudo = FormatarEscudo(j);
+                Console.WriteLine($"{j.Personagem.Simbolo} {j.Personagem.Nome} | HP:{j.HPAtual}{escudo} ATK:{j.Ataque} DEF:{j.Defesa} {status}");
             }
 
             Console.WriteLine("\nInimigos:");
@@ -98,10 +99,21 @@ namespace v1_Apostle_s_War.Services
             foreach (Combate inimigo in inimigos.Where(d => d.EstaVivo()))
             {
                 string status = string.Join(" ", inimigo.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
-                Console.WriteLine($"{i} - {inimigo.Personagem.Simbolo} {inimigo.Personagem.Nome} | HP:{inimigo.HPAtual} ATK:{inimigo.Ataque} DEF:{inimigo.Defesa} {status}");
+                string escudo = FormatarEscudo(inimigo);
+                Console.WriteLine($"{i} - {inimigo.Personagem.Simbolo} {inimigo.Personagem.Nome} | HP:{inimigo.HPAtual}{escudo} ATK:{inimigo.Ataque} DEF:{inimigo.Defesa} {status}");
                 i++;
             }
         }
+
+        /// <summary>
+        /// Retorna " 🛡️N" se o combatente tem Escudo ativo, ou string vazia.
+        /// </summary>
+        private string FormatarEscudo(Combate c)
+        {
+            var escudo = c.StatusAtivos.OfType<Skills.Buffs.Escudo>().FirstOrDefault();
+            return escudo != null ? $" 🛡️{escudo.PontosRestantes}" : "";
+        }
+
 
         public void ExibirAcoes(Combate atacante, int acaoSelecionada = 1)
         {

@@ -1,17 +1,12 @@
-﻿using v1_Apostle_s_War.Skills.Buffs;
-
-namespace ApostlesWar
+﻿namespace ApostlesWar
 {
     #region Combate
 
     /// <summary>
-    /// Resultado de um ataque: dano causado, se foi crítico, alvo e HP restante no momento do hit.
+    /// Resultado de um ataque: dano causado, se foi crítico, alvo e HP restante.
     /// </summary>
     record ResultadoAtaque(int Dano, bool Critico, Combate Alvo, int HPRestante);
 
-    /// <summary>
-    /// Conduz o combate e status
-    /// </summary>
     abstract class Combate
     {
         private static readonly Random random = new Random();
@@ -41,11 +36,19 @@ namespace ApostlesWar
                 Cooldowns[hab] = new SkillCooldown(hab.Turnos);
         }
 
+        /// <summary>
+        /// Calcula dano após defesa, depois pergunta aos status ativos como modificar.
+        /// Cada status decide seu próprio comportamento — sem ifs específicos aqui.
+        /// </summary>
         public int ReceberDano(int ataque)
         {
-            if (StatusAtivos.Any(s => s is BloqueioTotal || s is Intocavel)) return 0;
             double reducao = Math.Min((Defesa / 1000.0) * 0.75, 0.75);
             int danoFinal = (int)(ataque * (1 - reducao));
+
+            // Cada status modifica o dano conforme sua própria lógica
+            foreach (var status in StatusAtivos.ToList())
+                danoFinal = status.ModificarDanoRecebido(this, danoFinal);
+
             HPAtual -= danoFinal;
             return danoFinal;
         }
@@ -58,12 +61,23 @@ namespace ApostlesWar
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
 
-        public ResultadoAtaque AtacarComMultiplicador(Combate alvo, double multiplicador)
+        /// <summary>
+        /// Ataca com multiplicador. Suporta ignorar percentual da defesa e forçar crítico.
+        /// </summary>
+        public ResultadoAtaque AtacarComMultiplicador(Combate alvo, double multiplicador,
+            double ignorarDefesaPct = 0.0, bool forcaCritico = false)
         {
-            bool critico = random.NextDouble() < TaxaCrit;
+            bool critico = forcaCritico || random.NextDouble() < TaxaCrit;
             int danoBase = (int)(Ataque * multiplicador);
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
+
+            int defesaOriginal = alvo.Defesa;
+            if (ignorarDefesaPct > 0)
+                alvo.Defesa = (int)(alvo.Defesa * (1.0 - ignorarDefesaPct));
+
             int danoReal = alvo.ReceberDano(dano);
+            alvo.Defesa = defesaOriginal;
+
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
 
@@ -93,7 +107,14 @@ namespace ApostlesWar
                 case TipoStat.DanoCritPct: DanoCrit += item.Valor; break;
             }
         }
+
+        public void ModificarHPMaximo(int delta)
+        {
+            HPMaximo = Math.Max(1, HPMaximo + delta);
+            HPAtual = Math.Min(HPAtual, HPMaximo);
+        }
     }
+
 
     #endregion
 }

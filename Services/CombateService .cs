@@ -1,6 +1,5 @@
 ﻿using ApostlesWar;
 using GHUtils;
-using v1_Apostle_s_War.Skills.Ativas;
 using v1_Apostle_s_War.Skills.Buffs;
 using v1_Apostle_s_War.Skills.Debuffs;
 
@@ -35,7 +34,7 @@ namespace v1_Apostle_s_War.Services
 
         #endregion
 
-        #region Loop principal de combate
+        #region Loop principal
 
         private bool ExecutarCombate(List<Combate> jogador, List<Combate> inimigo, List<Combate> combatentes)
         {
@@ -68,13 +67,13 @@ namespace v1_Apostle_s_War.Services
 
         #endregion
 
-        #region Turno individual
+        #region Turno
 
         private void ExecutarTurno(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
             Console.Clear();
 
-            // Irritar — força A1 automático no aplicador, sem input
+            // Irritar — força A1 automático no aplicador
             var irritar = atacante.StatusAtivos.OfType<Irritar>().FirstOrDefault();
             if (irritar != null)
             {
@@ -98,7 +97,7 @@ namespace v1_Apostle_s_War.Services
 
         #endregion
 
-        #region Escolha de ação — Jogador
+        #region Escolha de ação
 
         private AcaoEscolhida EscolherAcaoJogador(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
@@ -116,7 +115,6 @@ namespace v1_Apostle_s_War.Services
                 if (key.Key == ConsoleKey.Enter) break;
 
                 int novaAcao = ConsoleUtils.SelecionarComCursor(acao, 1, totalOpcoes, key.Key);
-
                 bool descendo = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
 
                 while (novaAcao >= 2 && novaAcao != acao)
@@ -125,13 +123,11 @@ namespace v1_Apostle_s_War.Services
                     if (atacante.Cooldowns[hab].Disponivel) break;
 
                     int proximo = descendo ? novaAcao + 1 : novaAcao - 1;
-
                     if (proximo < 1 || proximo > totalOpcoes)
                     {
                         novaAcao = acao;
                         break;
                     }
-
                     novaAcao = proximo;
                 }
 
@@ -143,18 +139,11 @@ namespace v1_Apostle_s_War.Services
                 : new AcaoEscolhida(habilidadesAtivas[acao - 2]);
         }
 
-        #endregion
-
-        #region Escolha de ação — Inimigo
-
-        private AcaoEscolhida EscolherAcaoInimigo(Combate atacante)
-        {
-            return new AcaoEscolhida(null);
-        }
+        private AcaoEscolhida EscolherAcaoInimigo(Combate atacante) => new AcaoEscolhida(null);
 
         #endregion
 
-        #region Execução de ação
+        #region Execução
 
         private void ExecutarAcao(Combate atacante, AcaoEscolhida acao, List<Combate> defensores, List<Combate> aliados)
         {
@@ -163,10 +152,6 @@ namespace v1_Apostle_s_War.Services
             else
                 ExecutarHabilidade(atacante, acao.Habilidade, defensores, aliados);
         }
-
-        #endregion
-
-        #region Ataque básico
 
         private void ExecutarAtaqueBasico(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
@@ -189,10 +174,6 @@ namespace v1_Apostle_s_War.Services
             ProcessarPassivasAlvo(alvo, atacante, aliados, resultado.Critico);
             ProcessarPassivasAtacante(atacante, alvo, aliados);
         }
-
-        #endregion
-
-        #region Habilidade
 
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
         {
@@ -219,7 +200,11 @@ namespace v1_Apostle_s_War.Services
 
             var resultados = hab.Ativar(atacante, alvoInicial, lista);
             foreach (var r in resultados)
+            {
                 _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
+                // Processa passivas do alvo após cada hit (Invencível pode salvar)
+                ProcessarPassivasAlvo(r.Alvo, atacante, aliados, r.Critico);
+            }
 
             atacante.Cooldowns[hab].Usar();
             _menuService.ExibirUsoHabilidade(atacante, hab);
@@ -232,31 +217,26 @@ namespace v1_Apostle_s_War.Services
 
         /// <summary>
         /// Resolve a lista de alvos disponíveis conforme prioridade:
-        /// 1. Provocar — só quem tem (ignora Intocável e BloqueioTotal)
-        /// 2. Sem BloqueioTotal e sem Intocável — prioridade
-        /// 3. Sem BloqueioTotal (mas com Intocável)
-        /// 4. Todos têm BloqueioTotal — sem filtro
+        /// 1. Provocar — só quem tem
+        /// 2. Sem BloqueioTotal e sem Intocável
+        /// 3. Sem BloqueioTotal
+        /// 4. Sem filtro
         /// </summary>
         private List<Combate> ResolverListaDeAlvosDisponiveis(List<Combate> candidatos, Combate atacante)
         {
             var vivos = candidatos.Where(c => c.EstaVivo()).ToList();
 
-            // Provocar — prioridade máxima, ignora tudo
             var comProvocar = vivos.Where(c => c.StatusAtivos.Any(s => s is Provocar)).ToList();
             if (comProvocar.Count > 0) return comProvocar;
 
-            // Sem BloqueioTotal e sem Intocável
             var semTudo = vivos.Where(c =>
                 !c.StatusAtivos.Any(s => s is BloqueioTotal) &&
                 !c.StatusAtivos.Any(s => s is Intocavel)).ToList();
             if (semTudo.Count > 0) return semTudo;
 
-            // Sem BloqueioTotal (pode ter Intocável)
-            var semBloqueio = vivos.Where(c =>
-                !c.StatusAtivos.Any(s => s is BloqueioTotal)).ToList();
+            var semBloqueio = vivos.Where(c => !c.StatusAtivos.Any(s => s is BloqueioTotal)).ToList();
             if (semBloqueio.Count > 0) return semBloqueio;
 
-            // Todos têm BloqueioTotal — sem filtro
             return vivos;
         }
 

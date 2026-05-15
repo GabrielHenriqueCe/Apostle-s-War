@@ -14,32 +14,48 @@ namespace v1_Apostle_s_War.Services
         List<Personagem> personagens = new List<Personagem>
         {
             // Humanos
-new Personagem(1, Faccao.Humanos, "Operário", "👷",  1200, 240, 120,
-    new ParedeDeTijolos(),
-    new Marretada(),
-    new PassivaOperario()),
+            new Personagem(1, Faccao.Humanos, "Operário", "👷",  1200, 240, 120,
+            new ParedeDeTijolos(),
+            new Marretada(),
+            new PassivaOperario()),
 
-new Personagem(2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160,
-    new Espionagem(),
-    new Furtividade(),
-    new PassivaDetetive(danoCritBase: 0.60)),   // 0.60 = DanoCrit padrão do Personagem
+            new Personagem(2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160,
+            new Espionagem(),
+            new Furtividade(),
+            new PassivaDetetive()), 
 
-new Personagem(3, Faccao.Humanos, "Policial", "👮",  1000, 120, 280,
-    new Tiroteio(),
-    new Prender(),
-    new PassivaPolicial()),
+            new Personagem(3, Faccao.Humanos, "Policial", "👮",  1000, 120, 280,
+            new Tiroteio(),
+            new Prender(),
+            new PassivaPolicial()),
 
-new Personagem(4, Faccao.Humanos, "Sushiman ", "👲",  800, 280, 160,
-    new Sushi(),
-    new Nigiri(),
-    new PassivaSushiman()),
+            new Personagem(4, Faccao.Humanos, "Sushiman ", "👲",  800, 280, 160,
+            new Sushi(),
+            new Nigiri(),
+            new PassivaSushiman()),
 
             
             // O Reino
-            new Personagem(1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200),
-            new Personagem(2, Faccao.Reino, "Ninja", "🥷", 600, 280, 200),
-            new Personagem(3, Faccao.Reino, "Mago", "🧙", 1000, 280, 120),
-            new Personagem(4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200),
+            new Personagem(1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200,
+            new Protetor(),
+            new Esgrima(),
+            new PassivaGuarda()),
+
+            new Personagem(2, Faccao.Reino, "Ninja", "🥷", 600, 280, 200,
+            new Shuriken(),
+            new Kunai(),
+            new PassivaSorrateiro()),
+
+            new Personagem(3, Faccao.Reino, "Mago", "🧙", 1000, 280, 120,
+            new BolaDeFogo(),
+            new Incendio(),
+            new PassivaPiromancer()),
+
+            new Personagem(4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200,
+            new Democracia(),
+            new Lealdade(),
+            new PassivaRei()),
+
 
             // Lado Sombrio
             new Personagem(1, Faccao.LadoSombrio, "Caveira", "💀",  600, 280, 200, new Necromancia()),

@@ -1,31 +1,43 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills;
 
-class PassivaDetetive : HabilidadePassiva
+namespace v1_Apostle_s_War.Skills.Passivas
 {
-    private double? _danoCritBase = null;
-
-    public PassivaDetetive() : base("Olho Clínico", "🚬", 0,
-        "+10% dano crítico por debuff ativo no time inimigo. Máx: +100%.")
-    { }
-
-    public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-        evento == EventoCombate.DepoisDeAtacar;
-
-    public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+    /// <summary>
+    /// A cada ataque, ganha +5% de TaxaCrit acumulável, até 25%.
+    /// Estado vive no Combate — reseta a cada fase automaticamente.
+    /// </summary>
+    class PassivaDetetive : HabilidadePassiva
     {
-        // Captura o valor base na primeira ativação (após itens)
-        _danoCritBase ??= atacante.DanoCrit;
+        private const double AumentoPorHit = 0.05;
+        private const double Cap = 0.25;
 
-        int totalDebuffs = lista
-            .Where(i => i.EstaVivo())
-            .Sum(i => i.StatusAtivos.Count(s => s is Debuff));
+        /// <summary>
+        /// Estado per-combate desta passiva.
+        /// </summary>
+        private class Estado
+        {
+            public double TotalAumentado;
+        }
 
-        double bonus = Math.Min(totalDebuffs * 0.10, 1.00);
-        atacante.DefinirDanoCrit(_danoCritBase.Value + bonus);
-        return SemDano();
+        public PassivaDetetive() : base("Olho Clínico", "🚬", 0,
+            "A cada ataque, ganha +5% de TaxaCrit, até 25%.")
+        { }
+
+        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
+            evento == EventoCombate.DepoisDeAtacar;
+
+        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        {
+            var estado = ObterEstado<Estado>(atacante);
+            if (estado.TotalAumentado >= Cap) return SemDano();
+
+            double aumentar = Math.Min(AumentoPorHit, Cap - estado.TotalAumentado);
+            atacante.ModificarTaxaCrit(aumentar);
+            estado.TotalAumentado += aumentar;
+            return SemDano();
+        }
+
+        public override string MensagemSobreviveu(Personagem p) => string.Empty;
+        public override string MensagemMorreu(Personagem p) => string.Empty;
     }
-
-    public override string MensagemSobreviveu(Personagem p) => string.Empty;
-    public override string MensagemMorreu(Personagem p) => string.Empty;
 }

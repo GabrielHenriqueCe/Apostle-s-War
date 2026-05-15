@@ -4,9 +4,16 @@ namespace v1_Apostle_s_War.Skills.Passivas
 {
     class Ambicao : HabilidadePassiva
     {
-        private double _totalAumentado = 0;
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;
+
+        /// <summary>
+        /// Estado per-combate desta passiva.
+        /// </summary>
+        private class Estado
+        {
+            public double TotalAumentado;
+        }
 
         public Ambicao() : base("Ambição", "???", 0,
             "Ao receber golpe, aumenta o próprio ATK em 5% até 25%.")
@@ -17,14 +24,15 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
         {
-            if (_totalAumentado >= Cap) return SemDano();
+            var estado = ObterEstado<Estado>(atacante);
+            if (estado.TotalAumentado >= Cap) return SemDano();
 
-            double aumentar = Math.Min(AumentoPorHit, Cap - _totalAumentado);
+            double aumentar = Math.Min(AumentoPorHit, Cap - estado.TotalAumentado);
             int delta = (int)(atacante.Ataque * aumentar);
             if (delta <= 0) return SemDano();
 
             atacante.ModificarAtaque(delta);
-            _totalAumentado += aumentar;
+            estado.TotalAumentado += aumentar;
             return SemDano();
         }
 

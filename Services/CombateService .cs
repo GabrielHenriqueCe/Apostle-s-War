@@ -38,12 +38,22 @@ namespace v1_Apostle_s_War.Services
 
         private bool ExecutarCombate(List<Combate> jogador, List<Combate> inimigo, List<Combate> combatentes)
         {
+            // Trigger inicial de combate — passivas que devem agir no setup (ex: PassivaFantasma aplica Intocavel)
+            foreach (var c in combatentes)
+                AtivarPassivasIniciais(c);
+
             do
             {
                 for (int c = 0; c < combatentes.Count; c++)
                 {
                     if (!combatentes[c].EstaVivo()) continue;
                     if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
+
+                    // Início do turno — Veneno e similares tickam aqui
+                    ExecutarInicioDeTurno(combatentes[c]);
+
+                    // Pode ter morrido pelo Veneno
+                    if (!combatentes[c].EstaVivo()) continue;
 
                     if (combatentes[c].StatusAtivos.Any(s => s is Preso))
                     {
@@ -63,6 +73,35 @@ namespace v1_Apostle_s_War.Services
             } while (jogador.Any(j => j.EstaVivo()) && inimigo.Any(i => i.EstaVivo()));
 
             return jogador.Any(j => j.EstaVivo());
+        }
+
+        #endregion
+
+        #region Hooks de turno
+
+        /// <summary>
+        /// Aplica efeitos no início do turno do combatente.
+        /// Cada status decide se age (Veneno causa dano, outros ignoram).
+        /// </summary>
+        private void ExecutarInicioDeTurno(Combate combatente)
+        {
+            foreach (StatusEffect status in combatente.StatusAtivos.ToList())
+                status.AoIniciarTurno(combatente);
+        }
+
+        /// <summary>
+        /// Dispara passivas que devem agir no início do combate (não em resposta a evento).
+        /// Cada passiva decide se aplica via DeveAtivar — aqui usamos um evento sintético.
+        /// </summary>
+        private void AtivarPassivasIniciais(Combate combatente)
+        {
+            // Procura passivas que se autoaplicam no setup do combate
+            foreach (Habilidade hab in combatente.Personagem.Habilidades.OfType<HabilidadePassiva>())
+            {
+                var passiva = (HabilidadePassiva)hab;
+                if (passiva is IPassivaInicial inicial)
+                    inicial.AplicarInicial(combatente);
+            }
         }
 
         #endregion

@@ -22,7 +22,7 @@ namespace v1_Apostle_s_War.Services
             new Personagem(2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160,
             new Espionagem(),
             new Furtividade(),
-            new PassivaDetetive()), 
+            new PassivaDetetive()),
 
             new Personagem(3, Faccao.Humanos, "Policial", "👮",  1000, 120, 280,
             new Tiroteio(),
@@ -58,10 +58,25 @@ namespace v1_Apostle_s_War.Services
 
 
             // Lado Sombrio
-            new Personagem(1, Faccao.LadoSombrio, "Caveira", "💀",  600, 280, 200, new Necromancia()),
-            new Personagem(2, Faccao.LadoSombrio, "Fantasma", "👻", 1400, 120, 200),
-            new Personagem(3, Faccao.LadoSombrio, "Abóbora", "🎃",  600, 200, 280),
-            new Personagem(4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120),
+            new Personagem(1, Faccao.LadoSombrio, "Caveira", "💀",  600, 280, 200,
+            new Ossinho(),
+            new OssoDuroDeRoer(),
+            new Necromancia()),
+
+            new Personagem(2, Faccao.LadoSombrio, "Fantasma", "👻", 1400, 120, 200,
+            new Assombracao(),
+            new VindoDoAlem(),
+            new PassivaFantasma()),
+
+            new Personagem(3, Faccao.LadoSombrio, "Abóbora", "🎃",  600, 200, 280,
+            new DocesOuTravessuras(),
+            new DocesDeAbobora(),
+            new PassivaAbobora()),
+
+            new Personagem(4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120,
+            new Fedorento(),
+            new Putridao(),
+            new PassivaZumbi()),
 
             // Tecnológicos
             new Personagem(1, Faccao.Tecnologicos, "Invasor", "👾",  600, 240, 240),
@@ -103,8 +118,6 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Retorna o personagem correspondente à facção e slot informados
         /// </summary>
-        /// <param name="faccao">Facção do personagem</param>
-        /// <param name="slot">Slot do personagem dentro da facção</param>
         public Personagem ObterPersonagem(Faccao faccao, Slot slot)
         {
             return personagens.First(p => p.Faccao == faccao && p.Slot == (int)slot);

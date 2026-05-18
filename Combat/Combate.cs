@@ -1,4 +1,6 @@
-﻿namespace ApostlesWar
+﻿using v1_Apostle_s_War.Skills.Debuffs;
+
+namespace ApostlesWar
 {
     #region Combate
 
@@ -16,7 +18,6 @@
         /// <summary>
         /// Estado de runtime das habilidades nesta partida.
         /// Cada habilidade que precisa de estado guarda aqui, type-safe via HabilidadePassiva.ObterEstado.
-        /// Nasce vazio com o Combate e morre com ele — sem vazamento entre fases.
         /// </summary>
         public Dictionary<Habilidade, object> EstadoHabilidades { get; private set; }
 
@@ -46,9 +47,7 @@
         }
 
         /// <summary>
-        /// Porteiro de status — decide se um novo status pode entrar.
-        /// Pergunta a cada status ativo se ele bloqueia o que está tentando entrar.
-        /// Mantém SRP: o Combate não conhece tipos específicos, só orquestra a pergunta.
+        /// Porteiro de status — algum ativo bloqueia o novo?
         /// </summary>
         public bool PodeReceber(StatusEffect novo)
         {
@@ -58,15 +57,16 @@
         }
 
         /// <summary>
-        /// Calcula dano após defesa, depois pergunta aos status ativos como modificar.
-        /// Cada status decide seu próprio comportamento — sem ifs específicos aqui.
+        /// Indica que o portador não pode ser ressuscitado por habilidades que respeitem essa regra.
+        /// Convenção opt-in: habilidades de revive verificam antes de aplicar; habilidades especiais ignoram.
         /// </summary>
+        public bool TemBloqueioRessurreicao() => StatusAtivos.Any(s => s is MortePermanente);
+
         public int ReceberDano(int ataque)
         {
             double reducao = Math.Min((Defesa / 1000.0) * 0.75, 0.75);
             int danoFinal = (int)(ataque * (1 - reducao));
 
-            // Cada status modifica o dano conforme sua própria lógica
             foreach (var status in StatusAtivos.ToList())
                 danoFinal = status.ModificarDanoRecebido(this, danoFinal);
 
@@ -76,7 +76,7 @@
 
         /// <summary>
         /// Aplica dano direto: ignora defesa e modificadores de status.
-        /// Usado por Veneno, contra-dano de habilidades, etc.
+        /// Usado por Veneno, auto-dano, redirecionamento, etc.
         /// </summary>
         public int ReceberDanoDireto(int dano)
         {
@@ -92,9 +92,6 @@
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
 
-        /// <summary>
-        /// Ataca com multiplicador. Suporta ignorar percentual da defesa e forçar crítico.
-        /// </summary>
         public ResultadoAtaque AtacarComMultiplicador(Combate alvo, double multiplicador,
             double ignorarDefesaPct = 0.0, bool forcaCritico = false)
         {
@@ -146,7 +143,6 @@
             HPAtual = Math.Min(HPAtual, HPMaximo);
         }
     }
-
 
     #endregion
 }

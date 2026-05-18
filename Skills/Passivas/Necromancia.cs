@@ -15,6 +15,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
             $"{p.Simbolo} {p.Nome} caiu em batalha e não pode ser ressuscitado.";
         public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
         {
+            if (atacante.TemBloqueioRessurreicao()) return SemDano();
             if (atacante.HPAtual <= 0)
                 atacante.Reviver(atacante.HPMaximo / 2);
             return SemDano();

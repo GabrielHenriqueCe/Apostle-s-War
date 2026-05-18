@@ -79,10 +79,25 @@ namespace v1_Apostle_s_War.Services
             new PassivaZumbi()),
 
             // Tecnológicos
-            new Personagem(1, Faccao.Tecnologicos, "Invasor", "👾",  600, 240, 240),
-            new Personagem(2, Faccao.Tecnologicos, "Alien", "👽", 1200, 240, 120),
-            new Personagem(3, Faccao.Tecnologicos, "Robô", "🤖", 1200, 120, 240),
-            new Personagem(4, Faccao.Tecnologicos, "Cientista", "🧑‍🔬", 1000, 200, 200),
+            new Personagem(1, Faccao.Tecnologicos, "Invasor", "👾",  600, 240, 240,
+            new Glitch(),
+            new Barata(),
+            new PassivaInvasor()),
+
+            new Personagem(2, Faccao.Tecnologicos, "Alien", "👽", 1200, 240, 120,
+            new Abduzir(),
+            new Galaxia(),
+            new PassivaAlien()),
+
+            new Personagem(3, Faccao.Tecnologicos, "Robô", "🤖", 1200, 120, 240,
+            new RaioX(),
+            new Tecnology(),
+            new PassivaRobo()),
+
+            new Personagem(4, Faccao.Tecnologicos, "Cientista", "🧑‍🔬", 1000, 200, 200,
+            new Quimica(),
+            new Fisica(),
+            new PassivaCientista()),
 
             // Folclore
             new Personagem(1, Faccao.Folclore, "Ogro", "👹", 1400, 160, 160),
@@ -115,9 +130,6 @@ namespace v1_Apostle_s_War.Services
             new Personagem(4, Faccao.Apostolos, "Papai Noel", "🎅", 1400, 160, 160),
         };
 
-        /// <summary>
-        /// Retorna o personagem correspondente à facção e slot informados
-        /// </summary>
         public Personagem ObterPersonagem(Faccao faccao, Slot slot)
         {
             return personagens.First(p => p.Faccao == faccao && p.Slot == (int)slot);

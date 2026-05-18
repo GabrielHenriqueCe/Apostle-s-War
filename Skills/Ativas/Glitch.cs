@@ -1,0 +1,33 @@
+﻿using ApostlesWar;
+using v1_Apostle_s_War.Skills.Buffs;
+using v1_Apostle_s_War.Skills.Debuffs;
+
+namespace v1_Apostle_s_War.Skills.Ativas
+{
+    /// <summary>
+    /// +25% ATK em si (2t), -30% DEF no alvo (2t), ataca com +50% ATK.
+    /// </summary>
+    class Glitch : HabilidadeAtiva
+    {
+        public Glitch() : base("Glitch", "📺", 3,
+            "+25% ATK em si, -30% DEF no alvo, ataca com +50% ATK.")
+        { }
+
+        public override int NumeroDeAlvos => 1;
+        public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
+        public override TipoLista TipoLista => TipoLista.Inimigos;
+
+        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        {
+            new BuffAtaque(turnos: 2, percentual: 0.25).Aplicar(atacante);
+
+            var resultados = new List<ResultadoAtaque>();
+            foreach (Combate a in ResolverAlvos(alvo, lista))
+            {
+                new ReducaoDefesa(turnos: 2).Aplicar(a);
+                resultados.Add(AplicarDano(atacante, a, 1.5));
+            }
+            return resultados;
+        }
+    }
+}

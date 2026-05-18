@@ -5,7 +5,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
     /// Ao receber ataque que zeraria o HP, restaura para 1 e aplica Invencível por 1 turno.
-    /// CD: 4 turnos.
+    /// CD: 4 turnos. Não age se houver bloqueio de ressurreição.
     /// </summary>
     class PassivaGuarda : HabilidadePassiva
     {
@@ -20,6 +20,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
         {
+            if (atacante.TemBloqueioRessurreicao()) return SemDano();
             atacante.Reviver(1);
             new Invencivel(turnos: 1).Aplicar(atacante);
             return SemDano();

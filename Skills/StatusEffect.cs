@@ -6,9 +6,9 @@
     /// Classe base para todos os efeitos de status (Buffs e Debuffs).
     /// Subclasses podem sobrescrever:
     /// - Aplicar: efeitos colaterais ao aplicar
-    /// - ModificarDanoRecebido: alterar o dano que o portador recebe
+    /// - ModificarDanoRecebido: alterar o dano recebido pelo portador
     /// - Bloqueia: bloquear a entrada de outros status
-    /// - AoIniciarTurno: efeitos no início do turno do portador (ex: Veneno)
+    /// - AoIniciarTurno: efeitos no início do turno do portador (Veneno, CuraContinua)
     /// </summary>
     abstract class StatusEffect
     {
@@ -46,26 +46,21 @@
         public void EstenderTurno() => TurnosRestantes++;
 
         /// <summary>
-        /// Sobrescreva para alterar o dano recebido pelo portador.
-        /// Recebe o dano calculado (após defesa) e retorna o dano final aplicado.
+        /// Aumenta a duração em N turnos. Usado por Raio-X do Robô.
         /// </summary>
+        public void AumentarDuracao(int turnos) => TurnosRestantes += turnos;
+
+        /// <summary>
+        /// Reduz a duração em N turnos. Mínimo 0 (vai expirar).
+        /// </summary>
+        public void ReduzirDuracao(int turnos) => TurnosRestantes = Math.Max(0, TurnosRestantes - turnos);
+
         public virtual int ModificarDanoRecebido(Combate portador, int dano) => dano;
-
-        /// <summary>
-        /// Sobrescreva pra bloquear a entrada de outros status no mesmo portador.
-        /// Ex: ImpedirBeneficios retorna true se o novo status for Buff.
-        /// </summary>
         public virtual bool Bloqueia(StatusEffect novo) => false;
-
-        /// <summary>
-        /// Hook executado no início do turno do portador, antes da escolha de ação.
-        /// Usado por Veneno (causa dano) e similares.
-        /// </summary>
         public virtual void AoIniciarTurno(Combate portador) { }
 
         public virtual void Aplicar(Combate alvo)
         {
-            // Porteiro de status — algum ativo bloqueia este?
             if (!alvo.PodeReceber(this)) return;
 
             var existente = alvo.StatusAtivos.FirstOrDefault(s => s.GetType() == this.GetType());

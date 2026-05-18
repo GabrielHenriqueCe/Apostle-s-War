@@ -46,6 +46,18 @@
         }
 
         /// <summary>
+        /// Porteiro de status — decide se um novo status pode entrar.
+        /// Pergunta a cada status ativo se ele bloqueia o que está tentando entrar.
+        /// Mantém SRP: o Combate não conhece tipos específicos, só orquestra a pergunta.
+        /// </summary>
+        public bool PodeReceber(StatusEffect novo)
+        {
+            foreach (var ativo in StatusAtivos)
+                if (ativo.Bloqueia(novo)) return false;
+            return true;
+        }
+
+        /// <summary>
         /// Calcula dano após defesa, depois pergunta aos status ativos como modificar.
         /// Cada status decide seu próprio comportamento — sem ifs específicos aqui.
         /// </summary>
@@ -60,6 +72,16 @@
 
             HPAtual -= danoFinal;
             return danoFinal;
+        }
+
+        /// <summary>
+        /// Aplica dano direto: ignora defesa e modificadores de status.
+        /// Usado por Veneno, contra-dano de habilidades, etc.
+        /// </summary>
+        public int ReceberDanoDireto(int dano)
+        {
+            HPAtual -= dano;
+            return dano;
         }
 
         public ResultadoAtaque Atacar(Combate alvo)

@@ -1,0 +1,32 @@
+﻿using ApostlesWar;
+using v1_Apostle_s_War.Skills.Buffs;
+
+namespace v1_Apostle_s_War.Skills.Ativas
+{
+    /// <summary>
+    /// Revive 1 aliado morto com HP cheio (primeiro encontrado).
+    /// Depois aplica RefletirDano em todos os aliados vivos.
+    /// </summary>
+    class DocesDeAbobora : HabilidadeAtiva
+    {
+        public DocesDeAbobora() : base("Doces de Abóbora", "🍭", 4,
+            "Revive 1 aliado e aplica Reflexo de dano em todos os aliados.")
+        { }
+
+        public override int NumeroDeAlvos => int.MaxValue;
+        public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
+        public override TipoLista TipoLista => TipoLista.Aliados;
+
+        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        {
+            var morto = lista.FirstOrDefault(a => !a.EstaVivo());
+            if (morto != null)
+                morto.Reviver(morto.HPMaximo);
+
+            foreach (Combate a in lista.Where(a => a.EstaVivo()))
+                new RefletirDano(turnos: 2, percentual: 0.15).Aplicar(a);
+
+            return SemDano();
+        }
+    }
+}

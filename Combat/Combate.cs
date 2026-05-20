@@ -4,9 +4,6 @@ namespace ApostlesWar
 {
     #region Combate
 
-    /// <summary>
-    /// Resultado de um ataque: dano causado, se foi crítico, alvo e HP restante.
-    /// </summary>
     record ResultadoAtaque(int Dano, bool Critico, Combate Alvo, int HPRestante);
 
     abstract class Combate
@@ -14,16 +11,25 @@ namespace ApostlesWar
         private static readonly Random random = new Random();
         public abstract Personagem Personagem { get; }
         public Dictionary<Habilidade, SkillCooldown> Cooldowns { get; private set; }
-
-        /// <summary>
-        /// Estado de runtime das habilidades nesta partida.
-        /// Cada habilidade que precisa de estado guarda aqui, type-safe via HabilidadePassiva.ObterEstado.
-        /// </summary>
         public Dictionary<Habilidade, object> EstadoHabilidades { get; private set; }
 
         public int HPMaximo { get; protected set; }
         public int HPAtual { get; protected set; }
         public int HPBase { get; private set; }
+
+        /// <summary>
+        /// HP máximo capturado uma vez, depois de aplicar multiplicadores de fase e itens.
+        /// Usado por status como Queima e Maldição que referenciam o "HP cheio" do combate.
+        /// Inicializado via IniciarCombate(), chamado pelo CombateService.
+        /// </summary>
+        public int HPMaximoInicial { get; private set; }
+
+        /// <summary>
+        /// Total de HP máximo reduzido neste combate (acumulado).
+        /// Cada habilidade redutora soma aqui; cada habilidade restauradora abate daqui.
+        /// </summary>
+        public int HPMaximoReduzidoTotal { get; private set; }
+
         public int Ataque { get; protected set; }
         public int Defesa { get; protected set; }
         public double TaxaCrit { get; protected set; }
@@ -47,8 +53,15 @@ namespace ApostlesWar
         }
 
         /// <summary>
-        /// Porteiro de status — algum ativo bloqueia o novo?
+        /// Captura o HP máximo "cheio" do combate, depois de multiplicadores e itens.
+        /// Deve ser chamado APÓS toda configuração inicial estar pronta (mult + itens),
+        /// e ANTES do primeiro turno.
         /// </summary>
+        public void IniciarCombate()
+        {
+            HPMaximoInicial = HPMaximo;
+        }
+
         public bool PodeReceber(StatusEffect novo)
         {
             foreach (var ativo in StatusAtivos)
@@ -56,10 +69,6 @@ namespace ApostlesWar
             return true;
         }
 
-        /// <summary>
-        /// Indica que o portador não pode ser ressuscitado por habilidades que respeitem essa regra.
-        /// Convenção opt-in: habilidades de revive verificam antes de aplicar; habilidades especiais ignoram.
-        /// </summary>
         public bool TemBloqueioRessurreicao() => StatusAtivos.Any(s => s is MortePermanente);
 
         public int ReceberDano(int ataque)
@@ -74,10 +83,6 @@ namespace ApostlesWar
             return danoFinal;
         }
 
-        /// <summary>
-        /// Aplica dano direto: ignora defesa e modificadores de status.
-        /// Usado por Veneno, auto-dano, redirecionamento, etc.
-        /// </summary>
         public int ReceberDanoDireto(int dano)
         {
             HPAtual -= dano;
@@ -116,6 +121,28 @@ namespace ApostlesWar
         public void ModificarAtaque(int delta) => Ataque = Math.Max(0, Ataque + delta);
         public void ModificarTaxaCrit(double delta) => TaxaCrit = Math.Clamp(TaxaCrit + delta, 0, 1);
         public void Curar(int valor) => HPAtual = Math.Min(HPMaximo, HPAtual + valor);
+
+        /// <summary>
+        /// Reduz o HP máximo do portador. HPAtual é cortado se ficar acima do novo máximo.
+        /// Soma no contador HPMaximoReduzidoTotal pra rastreio por habilidades redutoras/restauradoras.
+        /// </summary>
+        public void ReduzirHPMaximo(int delta)
+        {
+            HPMaximoReduzidoTotal += delta;
+            HPMaximo = Math.Max(1, HPMaximo - delta);
+            HPAtual = Math.Min(HPAtual, HPMaximo);
+        }
+
+        /// <summary>
+        /// Restaura HP máximo perdido. Só aumenta HPMaximo, não cura HPAtual.
+        /// Limitado ao total já reduzido (não passa do HP original).
+        /// </summary>
+        public void RestaurarHPMaximo(int delta)
+        {
+            int restaurar = Math.Min(delta, HPMaximoReduzidoTotal);
+            HPMaximoReduzidoTotal -= restaurar;
+            HPMaximo += restaurar;
+        }
 
         public void AplicarItem(Item item)
         {

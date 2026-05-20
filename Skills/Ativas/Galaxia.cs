@@ -16,13 +16,13 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Aliados;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            foreach (Combate a in ResolverAlvos(alvo, lista))
+            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
                 new BuffDefesa(turnos: 2, percentual: 0.30).Aplicar(a);
-                if (a != atacante)
-                    new ProtecaoAliado(atacante, turnos: 2, percentual: 0.30).Aplicar(a);
+                if (a != ctx.Atacante)
+                    new ProtecaoAliado(ctx.Atacante, turnos: 2, percentual: 0.30).Aplicar(a);
             }
             return SemDano();
         }

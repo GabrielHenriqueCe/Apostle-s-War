@@ -15,10 +15,10 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
             evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            int pontos = (int)(atacante.HPMaximo * 0.05);
-            new Escudo(pontos, turnos: 1).Aplicar(atacante);
+            int pontos = (int)(ctx.Atacante.HPMaximo * 0.05);
+            new Escudo(pontos, turnos: 1).Aplicar(ctx.Atacante);
             return SemDano();
         }
 

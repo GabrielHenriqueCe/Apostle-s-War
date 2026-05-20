@@ -10,8 +10,9 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override int NumeroDeAlvos => int.MaxValue;
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Aliados;
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
+            var lista = ObterListaPrincipal(ctx);
             foreach (Combate aliado in lista.Where(a => !a.EstaVivo() && !a.TemBloqueioRessurreicao()))
                 aliado.Reviver(1);
             foreach (Combate a in ResolverAlvos(alvo, lista))

@@ -11,8 +11,8 @@ namespace v1_Apostle_s_War.Skills.Passivas
             evento == EventoCombate.DepoisDeAtacar;
         public override string MensagemSobreviveu(Personagem p) => string.Empty;
         public override string MensagemMorreu(Personagem p) => string.Empty;
-        // atacante = Policial; alvo = inimigo atacado
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        // ctx.Atacante = Policial; alvo = inimigo atacado
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
             alvo.StatusAtivos.OfType<Preso>().FirstOrDefault()?.EstenderTurno();
             return SemDano();

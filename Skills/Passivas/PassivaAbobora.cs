@@ -5,7 +5,6 @@ namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
     /// Aplica ImunidadeDebuffs permanente no início do combate.
-    /// O bloqueio em si é feito pelo status (Bloqueia(novo) retorna true para Debuff).
     /// </summary>
     class PassivaAbobora : HabilidadePassiva, IPassivaInicial
     {
@@ -20,7 +19,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
             => SemDano();
 
         public override string MensagemSobreviveu(Personagem p) => string.Empty;

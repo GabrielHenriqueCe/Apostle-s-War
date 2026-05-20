@@ -4,16 +4,12 @@ namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
     /// A cada ataque, ganha +5% de TaxaCrit acumulável, até 25%.
-    /// Estado vive no Combate — reseta a cada fase automaticamente.
     /// </summary>
     class PassivaDetetive : HabilidadePassiva
     {
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;
 
-        /// <summary>
-        /// Estado per-combate desta passiva.
-        /// </summary>
         private class Estado
         {
             public double TotalAumentado;
@@ -26,13 +22,13 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
             evento == EventoCombate.DepoisDeAtacar;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            var estado = ObterEstado<Estado>(atacante);
+            var estado = ObterEstado<Estado>(ctx.Atacante);
             if (estado.TotalAumentado >= Cap) return SemDano();
 
             double aumentar = Math.Min(AumentoPorHit, Cap - estado.TotalAumentado);
-            atacante.ModificarTaxaCrit(aumentar);
+            ctx.Atacante.ModificarTaxaCrit(aumentar);
             estado.TotalAumentado += aumentar;
             return SemDano();
         }

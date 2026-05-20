@@ -17,15 +17,15 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            new BuffAtaque(turnos: 2, percentual: 0.25).Aplicar(atacante);
+            new BuffAtaque(turnos: 2, percentual: 0.25).Aplicar(ctx.Atacante);
 
             var resultados = new List<ResultadoAtaque>();
-            foreach (Combate a in ResolverAlvos(alvo, lista))
+            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
                 new ReducaoDefesa(turnos: 2).Aplicar(a);
-                resultados.Add(AplicarDano(atacante, a, 1.5));
+                resultados.Add(AplicarDano(ctx.Atacante, a, 1.5));
             }
             return resultados;
         }

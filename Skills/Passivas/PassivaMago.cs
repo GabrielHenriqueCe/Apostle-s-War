@@ -11,12 +11,11 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
             => SemDano();
 
         /// <summary>
         /// Multiplicador extra se o atacante tem essa passiva e o alvo tem Queima.
-        /// Chamado pelas habilidades do Mago.
         /// </summary>
         public static double MultExtra(Combate atacante, Combate alvo)
         {

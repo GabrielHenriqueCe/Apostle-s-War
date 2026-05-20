@@ -4,7 +4,7 @@
 
     /// <summary>
     /// Classe base para todas as habilidades.
-    /// Ativar recebe atacante, alvo selecionado e lista completa (aliados ou inimigos).
+    /// Ativar recebe ContextoCombate (atacante + aliados + inimigos) e o alvo selecionado.
     /// </summary>
     abstract class Habilidade
     {
@@ -25,11 +25,10 @@
 
         /// <summary>
         /// Executa a habilidade.
-        /// atacante = quem usou a habilidade
-        /// alvo     = alvo primário selecionado pelo jogador/inimigo
-        /// lista    = lista completa de defensores ou aliados (contexto da habilidade)
+        /// ctx contém o atacante, aliados e inimigos.
+        /// alvo é o alvo primário selecionado (jogador escolhe, ou aleatório pra inimigo).
         /// </summary>
-        public abstract List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista);
+        public abstract List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo);
     }
 
     #endregion

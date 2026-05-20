@@ -18,15 +18,15 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
             var resultados = new List<ResultadoAtaque>();
             double somaPercentual = 0;
             int comVeneno = 0;
 
-            foreach (Combate a in ResolverAlvos(alvo, lista))
+            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
-                resultados.Add(AplicarDano(atacante, a, 1.0));
+                resultados.Add(AplicarDano(ctx.Atacante, a, 1.0));
 
                 var veneno = a.StatusAtivos.OfType<Veneno>().FirstOrDefault();
                 if (veneno == null) continue;
@@ -42,7 +42,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
             if (comVeneno > 0)
             {
                 double percentualMedio = somaPercentual / comVeneno;
-                atacante.Curar((int)(atacante.HPMaximo * percentualMedio));
+                ctx.Atacante.Curar((int)(ctx.Atacante.HPMaximo * percentualMedio));
             }
 
             return resultados;

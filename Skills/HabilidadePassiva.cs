@@ -11,7 +11,6 @@
 
         /// <summary>
         /// Cada passiva decide sozinha se deve disparar com base no evento e contexto.
-        /// Sem ifs externos — o CombateService só passa o contexto.
         /// </summary>
         public abstract bool DeveAtivar(EventoCombate evento, ContextoPassiva contexto);
 
@@ -20,12 +19,10 @@
 
         protected List<ResultadoAtaque> SemDano() => new List<ResultadoAtaque>();
 
-        public override abstract List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista);
+        public override abstract List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo);
 
         /// <summary>
         /// Obtém (ou cria) o estado de runtime desta passiva para o combatente.
-        /// Estado vive no Combate, então é descartado entre fases automaticamente.
-        /// Cada passiva define seu próprio tipo de estado (type-safe).
         /// </summary>
         protected T ObterEstado<T>(Combate combate) where T : new()
         {

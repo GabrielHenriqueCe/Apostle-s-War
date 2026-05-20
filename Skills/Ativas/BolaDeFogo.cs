@@ -13,14 +13,14 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
             var resultados = new List<ResultadoAtaque>();
-            foreach (Combate a in ResolverAlvos(alvo, lista))
+            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
-                double mult = 2.0 * PassivaPiromancer.MultExtra(atacante, a);
-                resultados.Add(AplicarDano(atacante, a, mult));
-                AplicarDebuff(a, new Queima(turnos: 2));
+                double mult = 2.0 * PassivaPiromancer.MultExtra(ctx.Atacante, a);
+                resultados.Add(AplicarDano(ctx.Atacante, a, mult));
+                AplicarDebuff(a, new Queima(2));
             }
             return resultados;
         }

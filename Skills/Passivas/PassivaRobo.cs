@@ -5,7 +5,6 @@ namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
     /// Ao atacar, aplica CuraContinua 1t no aliado vivo com menor HP atual (inclui o Robô).
-    /// Em ContextoPassiva DepoisDeAtacar, ctx.Aliados é o time inteiro do atacante.
     /// </summary>
     class PassivaRobo : HabilidadePassiva
     {
@@ -16,10 +15,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
             evento == EventoCombate.DepoisDeAtacar;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            // `lista` aqui é o time do atacante (vide ProcessarPassivasAtacante no CombateService).
-            var aliadoMenorHP = lista
+            var aliadoMenorHP = ctx.Aliados
                 .Where(a => a.EstaVivo())
                 .OrderBy(a => a.HPAtual)
                 .FirstOrDefault();

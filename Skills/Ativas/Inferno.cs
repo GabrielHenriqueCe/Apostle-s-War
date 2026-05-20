@@ -4,12 +4,13 @@ using v1_Apostle_s_War.Skills.Debuffs;
 namespace v1_Apostle_s_War.Skills.Ativas
 {
     /// <summary>
-    /// Remove todos os buffs ativos dos inimigos e aplica ImpedirBeneficios (2t).
+    /// Aplica 2 stacks de Queima em todos os inimigos e imediatamente explode a Queima.
+    /// Não causa ataque básico — só queima e explosão.
     /// </summary>
-    class DocesOuTravessuras : HabilidadeAtiva
+    class Inferno : HabilidadeAtiva
     {
-        public DocesOuTravessuras() : base("Doces ou Travessuras", "🍬", 4,
-            "Remove benefícios dos inimigos e bloqueia novos por 2 turnos.")
+        public Inferno() : base("Inferno", "🔥", 3,
+            "Aplica 2 stacks de Queima em todos os inimigos e explode imediatamente.")
         { }
 
         public override int NumeroDeAlvos => int.MaxValue;
@@ -20,11 +21,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         {
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
-                var buffs = a.StatusAtivos.OfType<Buff>().ToList();
-                foreach (var b in buffs)
-                    b.Remover(a);
+                new Queima(stacks: 2).Aplicar(a);
 
-                new ImpedirBeneficios(turnos: 2).Aplicar(a);
+                var queima = a.StatusAtivos.OfType<Queima>().FirstOrDefault();
+                queima?.Explodir(a);
             }
             return SemDano();
         }

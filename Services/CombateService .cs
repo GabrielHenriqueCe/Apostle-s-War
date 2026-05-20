@@ -38,7 +38,7 @@ namespace v1_Apostle_s_War.Services
 
         private bool ExecutarCombate(List<Combate> jogador, List<Combate> inimigo, List<Combate> combatentes)
         {
-            // Trigger inicial de combate — passivas que devem agir no setup (ex: PassivaFantasma aplica Intocavel)
+            // Trigger inicial — passivas que aplicam efeito no setup do combate
             foreach (var c in combatentes)
                 AtivarPassivasIniciais(c);
 
@@ -49,10 +49,7 @@ namespace v1_Apostle_s_War.Services
                     if (!combatentes[c].EstaVivo()) continue;
                     if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
 
-                    // Início do turno — Veneno e similares tickam aqui
                     ExecutarInicioDeTurno(combatentes[c]);
-
-                    // Pode ter morrido pelo Veneno
                     if (!combatentes[c].EstaVivo()) continue;
 
                     if (combatentes[c].StatusAtivos.Any(s => s is Preso))
@@ -79,23 +76,14 @@ namespace v1_Apostle_s_War.Services
 
         #region Hooks de turno
 
-        /// <summary>
-        /// Aplica efeitos no início do turno do combatente.
-        /// Cada status decide se age (Veneno causa dano, outros ignoram).
-        /// </summary>
         private void ExecutarInicioDeTurno(Combate combatente)
         {
             foreach (StatusEffect status in combatente.StatusAtivos.ToList())
                 status.AoIniciarTurno(combatente);
         }
 
-        /// <summary>
-        /// Dispara passivas que devem agir no início do combate (não em resposta a evento).
-        /// Cada passiva decide se aplica via DeveAtivar — aqui usamos um evento sintético.
-        /// </summary>
         private void AtivarPassivasIniciais(Combate combatente)
         {
-            // Procura passivas que se autoaplicam no setup do combate
             foreach (Habilidade hab in combatente.Personagem.Habilidades.OfType<HabilidadePassiva>())
             {
                 var passiva = (HabilidadePassiva)hab;
@@ -112,7 +100,6 @@ namespace v1_Apostle_s_War.Services
         {
             Console.Clear();
 
-            // Irritar — força A1 automático no aplicador
             var irritar = atacante.StatusAtivos.OfType<Irritar>().FirstOrDefault();
             if (irritar != null)
             {
@@ -122,8 +109,8 @@ namespace v1_Apostle_s_War.Services
                 var resultado = atacante.Atacar(irritar.Aplicador);
                 _menuService.ExibirResultadoAtaque(atacante, irritar.Aplicador, resultado);
                 Thread.Sleep(1500);
-                ProcessarPassivasAlvo(irritar.Aplicador, atacante, aliados, resultado.Critico);
-                ProcessarPassivasAtacante(atacante, irritar.Aplicador, aliados);
+                ProcessarPassivasAlvo(irritar.Aplicador, atacante, aliados, defensores, resultado.Critico);
+                ProcessarPassivasAtacante(atacante, irritar.Aplicador, aliados, defensores);
                 return;
             }
 
@@ -210,19 +197,13 @@ namespace v1_Apostle_s_War.Services
             _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
             Thread.Sleep(1500);
 
-            ProcessarPassivasAlvo(alvo, atacante, aliados, resultado.Critico);
-            ProcessarPassivasAtacante(atacante, alvo, aliados);
+            ProcessarPassivasAlvo(alvo, atacante, aliados, defensores, resultado.Critico);
+            ProcessarPassivasAtacante(atacante, alvo, aliados, defensores);
         }
 
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
         {
-            List<Combate> lista = hab.TipoLista switch
-            {
-                TipoLista.Aliados => aliados,
-                TipoLista.Inimigos => defensores,
-                TipoLista.Self => new List<Combate> { atacante },
-                _ => defensores
-            };
+            var ctx = new ContextoCombate(atacante, aliados, defensores);
 
             Combate alvoInicial;
             if (hab.TipoLista == TipoLista.Inimigos)
@@ -237,12 +218,11 @@ namespace v1_Apostle_s_War.Services
                 alvoInicial = atacante;
             }
 
-            var resultados = hab.Ativar(atacante, alvoInicial, lista);
+            var resultados = hab.Ativar(ctx, alvoInicial);
             foreach (var r in resultados)
             {
                 _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
-                // Processa passivas do alvo após cada hit (Invencível pode salvar)
-                ProcessarPassivasAlvo(r.Alvo, atacante, aliados, r.Critico);
+                ProcessarPassivasAlvo(r.Alvo, atacante, aliados, defensores, r.Critico);
             }
 
             atacante.Cooldowns[hab].Usar();
@@ -254,13 +234,6 @@ namespace v1_Apostle_s_War.Services
 
         #region Seleção de alvos
 
-        /// <summary>
-        /// Resolve a lista de alvos disponíveis conforme prioridade:
-        /// 1. Provocar — só quem tem
-        /// 2. Sem BloqueioTotal e sem Intocável
-        /// 3. Sem BloqueioTotal
-        /// 4. Sem filtro
-        /// </summary>
         private List<Combate> ResolverListaDeAlvosDisponiveis(List<Combate> candidatos, Combate atacante)
         {
             var vivos = candidatos.Where(c => c.EstaVivo()).ToList();
@@ -328,17 +301,30 @@ namespace v1_Apostle_s_War.Services
             }
         }
 
-        private void ProcessarPassivasAlvo(Combate alvo, Combate atacante, List<Combate> aliados, bool foiCritico)
+        /// <summary>
+        /// Processa passivas reativas do alvo (quem levou o golpe).
+        /// Do ponto de vista do alvo da passiva:
+        /// - ctx.Atacante = portador da passiva (alvo do golpe original)
+        /// - ctx.Aliados = time do portador
+        /// - ctx.Inimigos = time inimigo COMPLETO (não só quem golpeou)
+        /// "alvo" do parâmetro = quem golpeou (referência ao atacante original).
+        /// </summary>
+        private void ProcessarPassivasAlvo(Combate alvo, Combate atacante, List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante, bool foiCritico)
         {
-            var ctx = new ContextoPassiva(alvo.EstaVivo(), foiCritico, aliados, atacante);
+            // Do ponto de vista do alvo: aliados/inimigos são invertidos relativos ao atacante
+            var aliadosDoAlvo = inimigosDoAtacante;
+            var inimigosDoAlvo = aliadosDoAtacante;
+
+            var ctxPassiva = new ContextoPassiva(alvo.EstaVivo(), foiCritico, aliadosDoAlvo, atacante);
+            var ctxCombate = new ContextoCombate(alvo, aliadosDoAlvo, inimigosDoAlvo);
 
             foreach (Habilidade hab in alvo.Personagem.Habilidades)
             {
                 if (hab is not HabilidadePassiva passiva) continue;
-                if (!passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano, ctx)) continue;
+                if (!passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano, ctxPassiva)) continue;
                 if (!alvo.Cooldowns[hab].Disponivel) continue;
 
-                var resultados = passiva.Ativar(alvo, atacante, aliados);
+                var resultados = passiva.Ativar(ctxCombate, atacante);
                 foreach (var r in resultados)
                     _menuService.ExibirResultadoAtaque(alvo, r.Alvo, r);
 
@@ -356,17 +342,25 @@ namespace v1_Apostle_s_War.Services
             }
         }
 
-        private void ProcessarPassivasAtacante(Combate atacante, Combate alvo, List<Combate> inimigos)
+        /// <summary>
+        /// Processa passivas reativas do atacante (quem executou o golpe).
+        /// ctx.Atacante = atacante (portador da passiva)
+        /// ctx.Aliados = time do atacante
+        /// ctx.Inimigos = time inimigo COMPLETO
+        /// "alvo" do parâmetro = quem foi atacado.
+        /// </summary>
+        private void ProcessarPassivasAtacante(Combate atacante, Combate alvo, List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
         {
-            var ctx = new ContextoPassiva(alvo.EstaVivo(), false, inimigos, atacante);
+            var ctxPassiva = new ContextoPassiva(alvo.EstaVivo(), false, aliadosDoAtacante, atacante);
+            var ctxCombate = new ContextoCombate(atacante, aliadosDoAtacante, inimigosDoAtacante);
 
             foreach (Habilidade hab in atacante.Personagem.Habilidades)
             {
                 if (hab is not HabilidadePassiva passiva) continue;
-                if (!passiva.DeveAtivar(EventoCombate.DepoisDeAtacar, ctx)) continue;
+                if (!passiva.DeveAtivar(EventoCombate.DepoisDeAtacar, ctxPassiva)) continue;
                 if (!atacante.Cooldowns[hab].Disponivel) continue;
 
-                passiva.Ativar(atacante, alvo, inimigos);
+                passiva.Ativar(ctxCombate, alvo);
             }
         }
 
@@ -391,6 +385,11 @@ namespace v1_Apostle_s_War.Services
             foreach (Combate c in jogador)
                 _arsenalService.AplicarItens(c);
 
+            // NOVO: captura HPMaximoInicial DOS JOGADORES depois de mult + itens
+            // (jogadores não recebem multiplicador de fase, mas mantemos pra simetria/consistência)
+            foreach (Combate c in jogador)
+                c.IniciarCombate();
+
             if (!ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)) return false;
             return ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
         }
@@ -399,7 +398,11 @@ namespace v1_Apostle_s_War.Services
         {
             var inimigo = new List<Combate>();
             foreach (Slot slot in slotsInimigos)
-                inimigo.Add(new Inimigo(_personagemService.ObterPersonagem(capitulo, slot), mult));
+            {
+                var novoInimigo = new Inimigo(_personagemService.ObterPersonagem(capitulo, slot), mult);
+                novoInimigo.IniciarCombate();  // NOVO: snapshot do HP máximo do inimigo nesta rodada
+                inimigo.Add(novoInimigo);
+            }
 
             var combatentes = new List<Combate>();
             combatentes.AddRange(jogador);

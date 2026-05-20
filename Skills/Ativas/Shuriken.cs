@@ -11,17 +11,17 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Aleatorio;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
             var resultados = new List<ResultadoAtaque>();
-            var alvos = ResolverAlvos(alvo, lista);
+            var alvos = ResolverAlvos(alvo, ObterListaPrincipal(ctx));
 
-            var hit1 = AplicarDano(atacante, alvos[0], 1.5);
+            var hit1 = AplicarDano(ctx.Atacante, alvos[0], 1.5);
             resultados.Add(hit1);
 
             Combate alvo2 = alvos.Count > 1 ? alvos[1] : alvos[0];
             double ignorar = hit1.Critico ? 0.25 : 0.0;
-            resultados.Add(atacante.AtacarComMultiplicador(alvo2, 1.5, ignorarDefesaPct: ignorar));
+            resultados.Add(ctx.Atacante.AtacarComMultiplicador(alvo2, 1.5, ignorarDefesaPct: ignorar));
 
             return resultados;
         }

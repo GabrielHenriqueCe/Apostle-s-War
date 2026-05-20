@@ -12,10 +12,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Self;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            AplicarBuff(atacante, new Provocar(turnos: 2));
-            AplicarBuff(atacante, new BloqueioTotal(turnos: 1));
+            AplicarBuff(ctx.Atacante, new Provocar(turnos: 2));
+            AplicarBuff(ctx.Atacante, new BloqueioTotal(turnos: 1));
             return SemDano();
         }
     }

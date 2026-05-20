@@ -15,16 +15,26 @@ namespace ApostlesWar
         public abstract TipoAlvo TipoAlvo { get; }
 
         /// <summary>
-        /// Define em qual lista a habilidade age.
-        /// O CombateService usa isso para passar a lista correta sem conhecer a habilidade.
+        /// Define qual lista a habilidade considera como "principal" pra selecionar alvos.
+        /// O CombateService usa isso pra mostrar a lista certa de alvos pro jogador.
+        /// A habilidade ainda tem acesso às duas listas via ContextoCombate.
         /// </summary>
         public abstract TipoLista TipoLista { get; }
 
         /// <summary>
+        /// Retorna a lista correspondente ao TipoLista da habilidade.
+        /// Conveniência pra resolver alvos.
+        /// </summary>
+        protected List<Combate> ObterListaPrincipal(ContextoCombate ctx) => TipoLista switch
+        {
+            TipoLista.Aliados => ctx.Aliados,
+            TipoLista.Inimigos => ctx.Inimigos,
+            TipoLista.Self => new List<Combate> { ctx.Atacante },
+            _ => ctx.Inimigos
+        };
+
+        /// <summary>
         /// Monta a lista de alvos com base em TipoAlvo e NumeroDeAlvos.
-        /// O alvo selecionado é sempre o primeiro.
-        /// Explicito: percorre em ordem a partir do selecionado, sem repetição.
-        /// Aleatorio: sorteia os demais com repetição permitida.
         /// </summary>
         protected List<Combate> ResolverAlvos(Combate alvoSelecionado, List<Combate> lista)
         {

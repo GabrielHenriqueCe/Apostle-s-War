@@ -11,10 +11,10 @@ namespace v1_Apostle_s_War.Skills.Passivas
             evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo && ctx.FoiCritico;
         public override string MensagemSobreviveu(Personagem p) => string.Empty;
         public override string MensagemMorreu(Personagem p) => string.Empty;
-        // atacante = Sushiman; lista = aliados
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        // ctx.Atacante = Sushiman; ctx.Aliados = time do Sushiman
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            foreach (Combate aliado in lista.Where(a => a.EstaVivo()))
+            foreach (Combate aliado in ctx.Aliados.Where(a => a.EstaVivo()))
                 new RefletirDano(turnos: 2, percentual: 0.15).Aplicar(aliado);
             return SemDano();
         }

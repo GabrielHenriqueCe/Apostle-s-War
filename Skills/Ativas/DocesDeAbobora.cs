@@ -4,7 +4,7 @@ using v1_Apostle_s_War.Skills.Buffs;
 namespace v1_Apostle_s_War.Skills.Ativas
 {
     /// <summary>
-    /// Revive 1 aliado morto (primeiro elegível) com HP cheio.
+    /// Revive 1 aliado morto com HP cheio (primeiro elegível).
     /// Aplica RefletirDano em todos os aliados vivos.
     /// </summary>
     class DocesDeAbobora : HabilidadeAtiva
@@ -17,8 +17,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Aliados;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
+            var lista = ObterListaPrincipal(ctx);
+
             var morto = lista.FirstOrDefault(a => !a.EstaVivo() && !a.TemBloqueioRessurreicao());
             if (morto != null)
                 morto.Reviver(morto.HPMaximo);

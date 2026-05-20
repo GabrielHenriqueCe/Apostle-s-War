@@ -6,7 +6,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
     /// <summary>
     /// Revive todos os aliados mortos com 30% HP (respeita TemBloqueioRessurreicao).
     /// Aplica CuraContinua 1t em todos os aliados vivos (incluindo revividos).
-    /// Funciona mesmo sem ninguém pra reviver — a CuraContinua é aplicada de qualquer forma.
+    /// Funciona mesmo sem ninguém pra reviver.
     /// </summary>
     class Tecnology : HabilidadeAtiva
     {
@@ -18,8 +18,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Aliados;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
+            var lista = ObterListaPrincipal(ctx);
+
             foreach (Combate a in lista)
             {
                 if (!a.EstaVivo() && !a.TemBloqueioRessurreicao())

@@ -22,13 +22,13 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
             evento == EventoCombate.DepoisDeAtacar;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            var estado = ObterEstado<Estado>(atacante);
+            var estado = ObterEstado<Estado>(ctx.Atacante);
             if (estado.TotalAumentado >= Cap) return SemDano();
 
             double aumentar = Math.Min(AumentoPorHit, Cap - estado.TotalAumentado);
-            atacante.DefinirDanoCrit(atacante.DanoCrit + aumentar);
+            ctx.Atacante.DefinirDanoCrit(ctx.Atacante.DanoCrit + aumentar);
             estado.TotalAumentado += aumentar;
             return SemDano();
         }

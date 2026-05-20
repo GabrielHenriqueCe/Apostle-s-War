@@ -16,9 +16,9 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Aliados;
 
-        public override List<ResultadoAtaque> Ativar(Combate atacante, Combate alvo, List<Combate> lista)
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            foreach (Combate a in ResolverAlvos(alvo, lista))
+            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
                 AplicarCura(a, 0.15);
                 foreach (var buff in a.StatusAtivos.OfType<Buff>())

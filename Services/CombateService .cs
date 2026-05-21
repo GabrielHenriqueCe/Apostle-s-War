@@ -100,12 +100,18 @@ namespace v1_Apostle_s_War.Services
         {
             Console.Clear();
 
+            // Irritar: força A1 automático no aplicador (mas Medo pode interromper)
             var irritar = atacante.StatusAtivos.OfType<Irritar>().FirstOrDefault();
             if (irritar != null)
             {
                 _menuService.ExibirPartida(aliados, defensores);
-                _menuService.ExibirMensagemPassiva($"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
+                _menuService.ExibirMensagemPassiva(
+                    $"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
                 Thread.Sleep(1500);
+
+                // Medo pode cancelar a A1 forçada
+                if (VerificarMedoEAplicar(atacante)) return;
+
                 var resultado = atacante.Atacar(irritar.Aplicador);
                 _menuService.ExibirResultadoAtaque(atacante, irritar.Aplicador, resultado);
                 Thread.Sleep(1500);
@@ -119,6 +125,22 @@ namespace v1_Apostle_s_War.Services
                 : EscolherAcaoInimigo(atacante);
 
             ExecutarAcao(atacante, acao, defensores, aliados);
+        }
+
+        /// <summary>
+        /// Verifica se o portador tem Medo e se trigga.
+        /// Retorna true se a ação foi paralizada (chamador deve abortar).
+        /// </summary>
+        private bool VerificarMedoEAplicar(Combate atacante)
+        {
+            var medo = atacante.StatusAtivos.OfType<Medo>().FirstOrDefault();
+            if (medo == null) return false;
+            if (!medo.TentaParalizar()) return false;
+
+            _menuService.ExibirMensagemPassiva(
+                $"{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} estava com medo e não conseguiu agir!");
+            Thread.Sleep(1500);
+            return true;
         }
 
         #endregion
@@ -187,6 +209,9 @@ namespace v1_Apostle_s_War.Services
                 ? EscolherAlvoDaLista(atacante, alvosDisponiveis, aliados, defensores)
                 : EscolherAlvoAleatorio(alvosDisponiveis);
 
+            // Medo trigga DEPOIS da escolha de alvo (jogador escolhe e aí leva medo)
+            if (VerificarMedoEAplicar(atacante)) return;
+
             if (atacante is Inimigo)
             {
                 _menuService.ExibirPreparacaoAtaque(atacante, defensores);
@@ -216,6 +241,13 @@ namespace v1_Apostle_s_War.Services
             else
             {
                 alvoInicial = atacante;
+            }
+
+            // Medo trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
+            if (VerificarMedoEAplicar(atacante))
+            {
+                atacante.Cooldowns[hab].Usar();  // cooldown ativa mesmo cancelando
+                return;
             }
 
             var resultados = hab.Ativar(ctx, alvoInicial);

@@ -71,7 +71,7 @@ namespace ApostlesWar
 
         public bool TemBloqueioRessurreicao() => StatusAtivos.Any(s => s is MortePermanente);
 
-        public int ReceberDano(int ataque)
+        public int ReceberDano(int ataque, Combate? atacante = null)
         {
             double reducao = Math.Min((Defesa / 1000.0) * 0.75, 0.75);
             int danoFinal = (int)(ataque * (1 - reducao));
@@ -80,6 +80,15 @@ namespace ApostlesWar
                 danoFinal = status.ModificarDanoRecebido(this, danoFinal);
 
             HPAtual -= danoFinal;
+
+            // Hook: notifica status ativos sobre o dano recebido.
+            // Usado por ContraAtaque para revidar; ignora se atacante == null (dano de Veneno/Queima).
+            if (atacante != null)
+            {
+                foreach (var status in StatusAtivos.ToList())
+                    status.AoReceberDano(this, atacante);
+            }
+
             return danoFinal;
         }
 
@@ -93,7 +102,7 @@ namespace ApostlesWar
         {
             bool critico = random.NextDouble() < TaxaCrit;
             int dano = critico ? (int)(Ataque * (1 + DanoCrit)) : Ataque;
-            int danoReal = alvo.ReceberDano(dano);
+            int danoReal = alvo.ReceberDano(dano, this);  // <-- this como atacante
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
 
@@ -108,7 +117,7 @@ namespace ApostlesWar
             if (ignorarDefesaPct > 0)
                 alvo.Defesa = (int)(alvo.Defesa * (1.0 - ignorarDefesaPct));
 
-            int danoReal = alvo.ReceberDano(dano);
+            int danoReal = alvo.ReceberDano(dano, this);  // <-- this como atacante
             alvo.Defesa = defesaOriginal;
 
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));

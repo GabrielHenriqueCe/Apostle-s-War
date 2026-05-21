@@ -9,6 +9,8 @@
     /// - ModificarDanoRecebido: alterar o dano recebido pelo portador
     /// - Bloqueia: bloquear a entrada de outros status
     /// - AoIniciarTurno: efeitos no início do turno do portador (Veneno, CuraContinua)
+    /// - AoReceberDano: reação a dano recebido (ContraAtaque)
+    /// - AoPassarTurno: hook depois de PassarTurno (resetar CDs internos, etc)
     /// </summary>
     abstract class StatusEffect
     {
@@ -36,28 +38,35 @@
             if (AcabouDeAplicar)
             {
                 AcabouDeAplicar = false;
+                AoPassarTurno();
                 return;
             }
             TurnosRestantes--;
+            AoPassarTurno();
         }
 
         public bool Expirou => TurnosRestantes <= 0;
         public abstract void Remover(Combate alvo);
         public void EstenderTurno() => TurnosRestantes++;
 
-        /// <summary>
-        /// Aumenta a duração em N turnos. Usado por Raio-X do Robô.
-        /// </summary>
         public void AumentarDuracao(int turnos) => TurnosRestantes += turnos;
-
-        /// <summary>
-        /// Reduz a duração em N turnos. Mínimo 0 (vai expirar).
-        /// </summary>
         public void ReduzirDuracao(int turnos) => TurnosRestantes = Math.Max(0, TurnosRestantes - turnos);
 
         public virtual int ModificarDanoRecebido(Combate portador, int dano) => dano;
         public virtual bool Bloqueia(StatusEffect novo) => false;
         public virtual void AoIniciarTurno(Combate portador) { }
+
+        /// <summary>
+        /// Hook chamado depois que o portador recebe dano.
+        /// Usado por ContraAtaque (e outros futuros).
+        /// </summary>
+        public virtual void AoReceberDano(Combate portador, Combate atacante) { }
+
+        /// <summary>
+        /// Hook chamado depois que PassarTurno foi executado.
+        /// Usado por ContraAtaque pra resetar seu CD interno.
+        /// </summary>
+        protected virtual void AoPassarTurno() { }
 
         public virtual void Aplicar(Combate alvo)
         {

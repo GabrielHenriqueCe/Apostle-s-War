@@ -4,7 +4,7 @@ using v1_Apostle_s_War.Skills.Buffs;
 namespace v1_Apostle_s_War.Skills.Ativas
 {
     /// <summary>
-    /// 1. Aplica ContraAtaque 2t em todos os aliados (mecânica criada na Fase 2)
+    /// 1. Aplica ContraAtaque 2t em todos os aliados
     /// 2. Restaura HP máximo perdido em todos os aliados (cap próprio de 25% do HPMaximoInicial)
     /// 3. Cura 25% do HP máximo em todos os aliados
     /// </summary>
@@ -25,14 +25,11 @@ namespace v1_Apostle_s_War.Skills.Ativas
         {
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
-                // 1. ContraAtaque — TODO: aguarda implementação na Fase 2
-                // new ContraAtaque(turnos: 2).Aplicar(a);
+                new ContraAtaque(turnos: 2).Aplicar(a);
 
-                // 2. Restaura HP máx perdido (até 25% do HP inicial do combate)
                 int maxRestauravel = (int)(a.HPMaximoInicial * CapPropioRestauracao);
                 a.RestaurarHPMaximo(maxRestauravel);
 
-                // 3. Cura 25% do HP máximo atual
                 AplicarCura(a, CuraPercentual);
             }
             return SemDano();

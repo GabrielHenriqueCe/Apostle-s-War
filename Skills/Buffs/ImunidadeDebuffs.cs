@@ -4,12 +4,13 @@ namespace v1_Apostle_s_War.Skills.Buffs
 {
     /// <summary>
     /// Bloqueia a aplicação de qualquer Debuff no portador.
-    /// Aplicado pela passiva da Abóbora — é permanente (turnos altos suficiente).
+    /// Pode ser permanente (PassivaAbobora aplica com int.MaxValue) ou temporária
+    /// (habilidades como Coringa do Palhaço e Canto de Sereia aplicam com turnos limitados).
     /// </summary>
     class ImunidadeDebuffs : Buff
     {
-        public ImunidadeDebuffs() : base("Imunidade", "🎃", int.MaxValue, 0,
-            "Imune a maleficios.")
+        public ImunidadeDebuffs(int turnos = int.MaxValue)
+            : base("Imunidade", "🎃", turnos, 0, "Imune a maleficios.")
         { }
 
         public override bool Bloqueia(StatusEffect novo) => novo is Debuff;

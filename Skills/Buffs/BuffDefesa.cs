@@ -5,6 +5,8 @@ namespace v1_Apostle_s_War.Skills.Buffs
     /// <summary>
     /// Aumenta a DEF do portador em um percentual calculado no momento da aplicação.
     /// Ao expirar, restaura a DEF original.
+    /// 
+    /// Declara ContribuicaoDefesa pra permitir habilidades de ignorar buffs no ataque.
     /// </summary>
     class BuffDefesa : Buff
     {
@@ -29,6 +31,8 @@ namespace v1_Apostle_s_War.Skills.Buffs
             alvo.ModificarDefesa(_valorAdicionado);
             alvo.StatusAtivos.Add(this);
         }
+
+        public override int ContribuicaoDefesa(Combate portador) => _valorAdicionado;
 
         public override void Remover(Combate alvo)
         {

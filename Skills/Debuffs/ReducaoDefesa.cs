@@ -5,6 +5,8 @@ namespace v1_Apostle_s_War.Skills.Debuffs
     /// <summary>
     /// Reduz a DEF do alvo em 30% pelo número de turnos especificado.
     /// Ao expirar, restaura o valor reduzido.
+    /// 
+    /// Declara ContribuicaoDefesa negativa pra permitir ignorar via habilidade.
     /// </summary>
     class ReducaoDefesa : Debuff
     {
@@ -15,10 +17,14 @@ namespace v1_Apostle_s_War.Skills.Debuffs
 
         public override void Aplicar(Combate alvo)
         {
+            if (!alvo.PodeReceber(this)) return;
+
             _valorReduzido = (int)(alvo.Defesa * Valor);
             alvo.ModificarDefesa(-_valorReduzido);
             base.Aplicar(alvo);
         }
+
+        public override int ContribuicaoDefesa(Combate portador) => -_valorReduzido;
 
         public override void Remover(Combate alvo)
         {

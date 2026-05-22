@@ -81,12 +81,15 @@ namespace ApostlesWar
 
             HPAtual -= danoFinal;
 
-            // Hook: notifica status ativos sobre o dano recebido.
-            // Usado por ContraAtaque para revidar; ignora se atacante == null (dano de Veneno/Queima).
+            // Hook reativo: notifica status sobre o dano recebido.
+            // Ignora se atacante == null (dano de Veneno/Queima/auto-dano).
             if (atacante != null)
             {
                 foreach (var status in StatusAtivos.ToList())
+                {
                     status.AoReceberDano(this, atacante);
+                    status.AoSerAtacado(this, atacante, danoFinal);
+                }
             }
 
             return danoFinal;

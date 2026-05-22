@@ -10,9 +10,11 @@
     /// - ModificarDanoRecebido: alterar o dano recebido pelo portador
     /// - Bloqueia: bloquear a entrada de outros status
     /// - AoIniciarTurno: efeitos no início do turno do portador (Veneno, CuraContinua)
-    /// - AoReceberDano: reação ao receber dano (ContraAtaque do PORTADOR)
-    /// - AoSerAtacado: reação do PORTADOR atacar o ATACANTE (Sangramento cura o atacante)
-    /// - AoPassarTurno: hook depois de PassarTurno (resetar CDs internos, etc)
+    /// - AoReceberDano: reação do portador ao receber dano (ContraAtaque)
+    /// - AoSerAtacado: status do portador reage em favor do atacante (Sangramento)
+    /// - AoPassarTurno: hook depois de PassarTurno (resetar CDs internos)
+    /// - ContribuicaoDefesa: quanto este status soma na DEF do portador
+    ///   (usado quando habilidade decide ignorar buffs específicos do alvo)
     /// </summary>
     abstract class StatusEffect
     {
@@ -60,22 +62,26 @@
 
         /// <summary>
         /// Hook chamado depois que o portador recebe dano de um ataque.
-        /// Usado por ContraAtaque pra revidar.
         /// </summary>
         public virtual void AoReceberDano(Combate portador, Combate atacante) { }
 
         /// <summary>
-        /// Hook chamado quando o portador é atacado (qualquer ataque direto).
-        /// Diferente do AoReceberDano: este permite o status REAGIR EM FAVOR DO ATACANTE
-        /// (ex: Sangramento cura o atacante com base no dano causado).
+        /// Hook chamado quando o portador é atacado.
+        /// Status pode reagir em favor do ATACANTE (ex: Sangramento cura atacante).
         /// </summary>
         public virtual void AoSerAtacado(Combate portador, Combate atacante, int danoCausado) { }
 
         /// <summary>
         /// Hook chamado depois que PassarTurno foi executado.
-        /// Usado pra resetar CDs internos.
         /// </summary>
         protected virtual void AoPassarTurno() { }
+
+        /// <summary>
+        /// Quanto este status soma (positivo) ou subtrai (negativo) na DEF do portador.
+        /// Usado quando um ataque decide ignorar buffs específicos — a contribuição é
+        /// subtraída da DEF efetiva no cálculo do dano. Default: 0 (não afeta DEF).
+        /// </summary>
+        public virtual int ContribuicaoDefesa(Combate portador) => 0;
 
         public virtual void Aplicar(Combate alvo)
         {

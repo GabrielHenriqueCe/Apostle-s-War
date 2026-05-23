@@ -55,12 +55,17 @@ namespace ApostlesWar
 
         /// <summary>
         /// Captura o HP máximo "cheio" do combate, depois de multiplicadores e itens.
+        /// Também aplica buffs iniciais das passivas que implementam IPassivaInicial.
         /// Deve ser chamado APÓS toda configuração inicial estar pronta (mult + itens),
         /// e ANTES do primeiro turno.
         /// </summary>
         public void IniciarCombate()
         {
             HPMaximoInicial = HPMaximo;
+
+            // Aplica buffs iniciais permanentes de passivas (ex: PassivaDragao -> ImunidadeEspecifica)
+            foreach (var passiva in Personagem.Habilidades.OfType<IPassivaInicial>())
+                passiva.AplicarInicial(this);
         }
 
         public bool PodeReceber(StatusEffect novo)

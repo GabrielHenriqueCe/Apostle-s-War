@@ -38,7 +38,6 @@ namespace v1_Apostle_s_War.Services
 
         private bool ExecutarCombate(List<Combate> jogador, List<Combate> inimigo, List<Combate> combatentes)
         {
-            // Trigger inicial — passivas que aplicam efeito no setup do combate
             foreach (var c in combatentes)
                 AtivarPassivasIniciais(c);
 
@@ -49,29 +48,53 @@ namespace v1_Apostle_s_War.Services
                     if (!combatentes[c].EstaVivo()) continue;
                     if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
 
-                    List<Combate> aliadosDoTurno = combatentes[c] is Jogador ? jogador : inimigo;
-                    List<Combate> inimigosDoTurno = combatentes[c] is Jogador ? inimigo : jogador;
-                    ExecutarInicioDeTurno(combatentes[c], aliadosDoTurno, inimigosDoTurno);
-                    if (!combatentes[c].EstaVivo()) continue;
+                    ExecutarTurnoCompleto(combatentes[c], jogador, inimigo);
 
-                    if (combatentes[c].StatusAtivos.Any(s => s is Preso))
+                    // Turno extra: dispara enquanto a flag estiver setada.
+                    // Loop teórico infinito é permitido por design (RNG decide quando para).
+                    while (combatentes[c].TemTurnoExtra)
                     {
-                        AvancarStatus(combatentes[c]);
-                        AvancarCooldowns(combatentes[c]);
-                        continue;
+                        combatentes[c].ConsumirTurnoExtra();
+                        if (!combatentes[c].EstaVivo()) break;
+                        if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
+                        ExecutarTurnoCompleto(combatentes[c], jogador, inimigo);
                     }
-
-                    List<Combate> defensores = combatentes[c] is Jogador ? inimigo : jogador;
-                    List<Combate> aliados = combatentes[c] is Jogador ? jogador : inimigo;
-
-                    ExecutarTurno(combatentes[c], defensores, aliados);
-
-                    AvancarStatus(combatentes[c]);
-                    AvancarCooldowns(combatentes[c]);
                 }
             } while (jogador.Any(j => j.EstaVivo()) && inimigo.Any(i => i.EstaVivo()));
 
             return jogador.Any(j => j.EstaVivo());
+        }
+
+        /// <summary>
+        /// Executa um turno completo de um combatente:
+        /// - Trigga AoIniciarTurno dos status (Veneno, Queima tickam aqui)
+        /// - Dispara passivas com EventoCombate.InicioDoTurno (PassivaGenio reaplica RefletirDano)
+        /// - Se Preso: pula a ação mas avança status e cooldowns
+        /// - Senão: executa a ação (a1, habilidade) e processa passivas reativas
+        /// - Avança duração de status e cooldowns
+        /// 
+        /// Chamado uma vez por turno do round, e potencialmente N vezes a mais se o combatente
+        /// tiver ConcederTurnoExtra acionado durante o próprio turno.
+        /// </summary>
+        private void ExecutarTurnoCompleto(Combate atacante, List<Combate> jogador, List<Combate> inimigo)
+        {
+            List<Combate> aliados = atacante is Jogador ? jogador : inimigo;
+            List<Combate> defensores = atacante is Jogador ? inimigo : jogador;
+
+            ExecutarInicioDeTurno(atacante, aliados, defensores);
+            if (!atacante.EstaVivo()) return;
+
+            if (atacante.StatusAtivos.Any(s => s is Preso))
+            {
+                AvancarStatus(atacante);
+                AvancarCooldowns(atacante);
+                return;
+            }
+
+            ExecutarTurno(atacante, defensores, aliados);
+
+            AvancarStatus(atacante);
+            AvancarCooldowns(atacante);
         }
 
         #endregion

@@ -68,6 +68,26 @@ namespace ApostlesWar
                 passiva.AplicarInicial(this);
         }
 
+        /// <summary>
+        /// Flag que sinaliza que este combatente deve jogar um turno extra
+        /// imediatamente após o atual. Setada por habilidades/passivas (ex: RatoVoador).
+        /// Consumida pelo CombateService antes de executar o turno extra.
+        /// </summary>
+        public bool TemTurnoExtra { get; private set; }
+
+        /// <summary>
+        /// Concede um turno extra ao combatente. Acumular múltiplas concessões antes do
+        /// turno acontecer não tem efeito (flag é boolean). Mas o turno extra pode disparar
+        /// outro turno extra durante sua execução — RNG decide quando acaba.
+        /// </summary>
+        public void ConcederTurnoExtra() => TemTurnoExtra = true;
+
+        /// <summary>
+        /// Zera a flag de turno extra. Chamado pelo CombateService antes de iniciar o
+        /// turno extra (não depois) pra permitir que esse próprio turno conceda outro.
+        /// </summary>
+        public void ConsumirTurnoExtra() => TemTurnoExtra = false;
+
         public bool PodeReceber(StatusEffect novo)
         {
             foreach (var ativo in StatusAtivos)

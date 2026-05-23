@@ -171,6 +171,7 @@ namespace v1_Apostle_s_War.Services
             string[] numeros = { "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩" };
             if (numero >= 1 && numero <= 10)
                 return numeros[numero - 1];
+            if (numero >= 999) return "♾️";   // permanente — mostra infinito
             return $"({numero})";
         }
 

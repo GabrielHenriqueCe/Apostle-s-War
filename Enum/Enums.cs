@@ -30,7 +30,7 @@ namespace ApostlesWar
         [Description("Bota")] Fase7 = 7
     }
 
-    enum EventoCombate { AntesDeReceberDano, DepoisDeReceberDano, DepoisDeAtacar, DepoisDeMatar }
+    enum EventoCombate { AntesDeReceberDano, DepoisDeReceberDano, DepoisDeAtacar, DepoisDeMatar, InicioDoTurno }
 
     enum SimOuNao
     {

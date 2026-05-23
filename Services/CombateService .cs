@@ -49,7 +49,9 @@ namespace v1_Apostle_s_War.Services
                     if (!combatentes[c].EstaVivo()) continue;
                     if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
 
-                    ExecutarInicioDeTurno(combatentes[c]);
+                    List<Combate> aliadosDoTurno = combatentes[c] is Jogador ? jogador : inimigo;
+                    List<Combate> inimigosDoTurno = combatentes[c] is Jogador ? inimigo : jogador;
+                    ExecutarInicioDeTurno(combatentes[c], aliadosDoTurno, inimigosDoTurno);
                     if (!combatentes[c].EstaVivo()) continue;
 
                     if (combatentes[c].StatusAtivos.Any(s => s is Preso))
@@ -76,10 +78,19 @@ namespace v1_Apostle_s_War.Services
 
         #region Hooks de turno
 
-        private void ExecutarInicioDeTurno(Combate combatente)
+        private void ExecutarInicioDeTurno(Combate combatente, List<Combate> aliados, List<Combate> inimigos)
         {
+            // Status effects (Veneno, Queima, CuraContinua, etc)
             foreach (StatusEffect status in combatente.StatusAtivos.ToList())
                 status.AoIniciarTurno(combatente);
+
+            if (!combatente.EstaVivo()) return;
+
+            // Passivas reativas ao inicio do turno (ex: PassivaGenio aplica RefletirDano em si)
+            var ctxPassiva = new ContextoPassiva(combatente.EstaVivo(), false, aliados, combatente);
+            var ctxCombate = new ContextoCombate(combatente, aliados, inimigos);
+
+            DispararEvento(EventoCombate.InicioDoTurno, combatente, combatente, ctxPassiva, ctxCombate);
         }
 
         private void AtivarPassivasIniciais(Combate combatente)

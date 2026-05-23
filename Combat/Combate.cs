@@ -1,4 +1,5 @@
 ﻿using v1_Apostle_s_War.Skills.Debuffs;
+using v1_Apostle_s_War.Skills.Passivas;
 
 namespace ApostlesWar
 {
@@ -71,18 +72,29 @@ namespace ApostlesWar
 
         public bool TemBloqueioRessurreicao() => StatusAtivos.Any(s => s is MortePermanente);
 
-        public int ReceberDano(int ataque, Combate? atacante = null)
+        public int ReceberDano(int ataque, Combate? atacante = null, IEnumerable<Type>? ignorarStatus = null)
         {
-            double reducao = Math.Min((Defesa / 1000.0) * 0.75, 0.75);
+            var ignorados = ignorarStatus?.ToHashSet() ?? new HashSet<Type>();
+
+            int defesaEfetiva = Defesa;
+            foreach (var status in StatusAtivos)
+            {
+                if (ignorados.Contains(status.GetType()))
+                    defesaEfetiva -= status.ContribuicaoDefesa(this);
+            }
+            defesaEfetiva = Math.Max(0, defesaEfetiva);
+
+            double reducao = Math.Min((defesaEfetiva / 1000.0) * 0.75, 0.75);
             int danoFinal = (int)(ataque * (1 - reducao));
 
             foreach (var status in StatusAtivos.ToList())
+            {
+                if (ignorados.Contains(status.GetType())) continue;
                 danoFinal = status.ModificarDanoRecebido(this, danoFinal);
+            }
 
             HPAtual -= danoFinal;
 
-            // Hook reativo: notifica status sobre o dano recebido.
-            // Ignora se atacante == null (dano de Veneno/Queima/auto-dano).
             if (atacante != null)
             {
                 foreach (var status in StatusAtivos.ToList())
@@ -101,16 +113,20 @@ namespace ApostlesWar
             return dano;
         }
 
-        public ResultadoAtaque Atacar(Combate alvo)
+        public ResultadoAtaque Atacar(Combate alvo, IEnumerable<Type>? ignorarStatus = null)
         {
             bool critico = random.NextDouble() < TaxaCrit;
             int dano = critico ? (int)(Ataque * (1 + DanoCrit)) : Ataque;
-            int danoReal = alvo.ReceberDano(dano, this);  // <-- this como atacante
+
+            var ignorarFinal = ComporListaIgnorar(ignorarStatus);
+
+            int danoReal = alvo.ReceberDano(dano, this, ignorarFinal);
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
 
         public ResultadoAtaque AtacarComMultiplicador(Combate alvo, double multiplicador,
-            double ignorarDefesaPct = 0.0, bool forcaCritico = false)
+            double ignorarDefesaPct = 0.0, bool forcaCritico = false,
+            IEnumerable<Type>? ignorarStatus = null)
         {
             bool critico = forcaCritico || random.NextDouble() < TaxaCrit;
             int danoBase = (int)(Ataque * multiplicador);
@@ -120,7 +136,9 @@ namespace ApostlesWar
             if (ignorarDefesaPct > 0)
                 alvo.Defesa = (int)(alvo.Defesa * (1.0 - ignorarDefesaPct));
 
-            int danoReal = alvo.ReceberDano(dano, this);  // <-- this como atacante
+            var ignorarFinal = ComporListaIgnorar(ignorarStatus);
+
+            int danoReal = alvo.ReceberDano(dano, this, ignorarFinal);
             alvo.Defesa = defesaOriginal;
 
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
@@ -174,6 +192,20 @@ namespace ApostlesWar
                 case TipoStat.TaxaCritPct: TaxaCrit += item.Valor; break;
                 case TipoStat.DanoCritPct: DanoCrit += item.Valor; break;
             }
+        }
+
+        /// <summary>
+        /// Combina a lista passada na chamada com a lista permanente do atacante
+        /// (passivas como PassivaVampiro que ignoram tipos específicos sempre).
+        /// </summary>
+        private IEnumerable<Type>? ComporListaIgnorar(IEnumerable<Type>? extra)
+        {
+            var permanente = Personagem.Habilidades
+                .OfType<IIgnoraStatusNoAtaque>()
+                .SelectMany(p => p.TiposIgnorados);
+
+            if (extra == null) return permanente.Any() ? permanente : null;
+            return permanente.Concat(extra);
         }
 
         public void ModificarHPMaximo(int delta)

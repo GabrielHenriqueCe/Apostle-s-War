@@ -386,10 +386,19 @@ namespace v1_Apostle_s_War.Services
             var ctxPassiva = new ContextoPassiva(alvo.EstaVivo(), false, aliadosDoAtacante, atacante);
             var ctxCombate = new ContextoCombate(atacante, aliadosDoAtacante, inimigosDoAtacante);
 
+            DispararEvento(EventoCombate.DepoisDeAtacar, atacante, alvo, ctxPassiva, ctxCombate);
+
+            if (!alvo.EstaVivo())
+                DispararEvento(EventoCombate.DepoisDeMatar, atacante, alvo, ctxPassiva, ctxCombate);
+        }
+
+        private void DispararEvento(EventoCombate evento, Combate atacante, Combate alvo,
+    ContextoPassiva ctxPassiva, ContextoCombate ctxCombate)
+        {
             foreach (Habilidade hab in atacante.Personagem.Habilidades)
             {
                 if (hab is not HabilidadePassiva passiva) continue;
-                if (!passiva.DeveAtivar(EventoCombate.DepoisDeAtacar, ctxPassiva)) continue;
+                if (!passiva.DeveAtivar(evento, ctxPassiva)) continue;
                 if (!atacante.Cooldowns[hab].Disponivel) continue;
 
                 passiva.Ativar(ctxCombate, alvo);

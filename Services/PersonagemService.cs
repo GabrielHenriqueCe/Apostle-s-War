@@ -106,10 +106,25 @@ namespace v1_Apostle_s_War.Services
             new Personagem(4, Faccao.Folclore, "Troll", "🧌", 1200, 160, 200),
 
             // Místicos
-            new Personagem(1, Faccao.Misticos, "Gênio", "🧞", 1400, 120, 200),
-            new Personagem(2, Faccao.Misticos, "Sereia", "🧜",  600, 280, 200),
-            new Personagem(3, Faccao.Misticos, "Fada", "🧚", 1000, 280, 120),
-            new Personagem(4, Faccao.Misticos, "Dragão", "🐲", 1400, 200, 120),
+            new Personagem(1, Faccao.Misticos, "Gênio", "🧞", 1400, 120, 200,
+            new Desejo(),
+            new Profecia(),
+            new PassivaGenio()),
+
+            new Personagem(2, Faccao.Misticos, "Sereia", "🧜", 600, 280, 200,
+            new CantoDeSereia(),
+            new Atlantis(),
+            new PassivaSereia()),
+
+            new Personagem(3, Faccao.Misticos, "Fada", "🧚", 1000, 280, 120,
+            new Sininho(),
+            new PoMagico(),
+            new PassivaFada()),
+
+            new Personagem(4, Faccao.Misticos, "Dragão", "🐲", 1400, 200, 120,
+            new SoproDoDragao(),
+            new DragaoProtetor(),
+            new PassivaDragao()),
 
             // Especial
             new Personagem(1, Faccao.Especial, "Cocô", "💩", 1200, 160, 200),

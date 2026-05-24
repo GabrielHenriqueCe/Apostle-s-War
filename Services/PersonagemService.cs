@@ -132,11 +132,27 @@ namespace v1_Apostle_s_War.Services
             new Personagem(3, Faccao.Especial, "Vilão", "🦹", 1200, 200, 160),
             new Personagem(4, Faccao.Especial, "T-Rex", "🦖", 1000, 160, 240),
 
-            // Decaídos 
-            new Personagem(1, Faccao.Decaidos, "Morcego", "🦇",  800, 160, 280),
-            new Personagem(2, Faccao.Decaidos, "Vampiro", "🧛",  800, 280, 160),
-            new Personagem(3, Faccao.Decaidos, "Elfo", "🧝", 1400, 160, 160),
-            new Personagem(4, Faccao.Decaidos, "Diabo", "😈", 1400, 160, 160),
+            // Decaídos
+            new Personagem(1, Faccao.Decaidos, "Morcego", "🦇", 800, 160, 280,
+            new Mordida(),
+            new RatoVoador(),
+            new PassivaMorcego()),
+
+            new Personagem(2, Faccao.Decaidos, "Vampiro", "🧛", 800, 280, 160,
+            new BatMan(),
+            new CintoUtilidades(),
+            new PassivaVampiro()),
+
+            new Personagem(3, Faccao.Decaidos, "Elfo", "🧝", 1400, 160, 160,
+            new ArvoreDoMundo(),
+            new Natureza(),
+            new PassivaElfo()),
+
+            new Personagem(4, Faccao.Decaidos, "Diabo", "😈", 1400, 160, 160,
+            new Inferno(),
+            new AnjoCaido(),
+            new PassivaDiabo()),
+ 
 
             // Apóstolos
             new Personagem(1, Faccao.Apostolos, "Boneco de Neve", "☃️",  600, 240, 240),

@@ -15,9 +15,19 @@ namespace v1_Apostle_s_War.Skills.Buffs
 
         public override void Aplicar(Combate alvo)
         {
+            if (!alvo.PodeReceber(this)) return;
+
+            var existente = alvo.StatusAtivos.OfType<BuffAtaque>().FirstOrDefault();
+            if (existente != null)
+            {
+                if (this.TurnosRestantes <= existente.TurnosRestantes) return;
+                alvo.StatusAtivos.Remove(existente);
+                alvo.ModificarAtaque(-existente._valorAdicionado);
+            }
+
             _valorAdicionado = (int)(alvo.Ataque * Valor);
             alvo.ModificarAtaque(_valorAdicionado);
-            base.Aplicar(alvo);
+            alvo.StatusAtivos.Add(this);
         }
 
         public override void Remover(Combate alvo)

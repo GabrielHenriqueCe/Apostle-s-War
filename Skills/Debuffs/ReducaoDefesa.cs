@@ -19,9 +19,17 @@ namespace v1_Apostle_s_War.Skills.Debuffs
         {
             if (!alvo.PodeReceber(this)) return;
 
+            var existente = alvo.StatusAtivos.OfType<ReducaoDefesa>().FirstOrDefault();
+            if (existente != null)
+            {
+                if (this.TurnosRestantes <= existente.TurnosRestantes) return;
+                alvo.StatusAtivos.Remove(existente);
+                alvo.ModificarDefesa(existente._valorReduzido);
+            }
+
             _valorReduzido = (int)(alvo.Defesa * Valor);
             alvo.ModificarDefesa(-_valorReduzido);
-            base.Aplicar(alvo);
+            alvo.StatusAtivos.Add(this);
         }
 
         public override int ContribuicaoDefesa(Combate portador) => -_valorReduzido;

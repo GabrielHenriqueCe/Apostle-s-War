@@ -100,10 +100,26 @@ namespace v1_Apostle_s_War.Services
             new PassivaCientista()),
 
             // Folclore
-            new Personagem(1, Faccao.Folclore, "Ogro", "👹", 1400, 160, 160),
-            new Personagem(2, Faccao.Folclore, "Tengu", "👺",  800, 280, 160),
-            new Personagem(3, Faccao.Folclore, "Palhaço", "🤡",  800, 160, 280),
-            new Personagem(4, Faccao.Folclore, "Troll", "🧌", 1200, 160, 200),
+            new Personagem(1, Faccao.Folclore, "Ogro", "👹", 1400, 160, 160,
+            new Esmagar(),
+            new Quebrar(),
+            new PassivaOgro()),
+
+            new Personagem(2, Faccao.Folclore, "Tengu", "👺", 800, 280, 160,
+            new CorteDeVento(),
+            new Vendaval(),
+            new PassivaTengu()),
+
+            new Personagem(3, Faccao.Folclore, "Palhaço", "🤡", 800, 160, 280,
+            new Coringa(),
+            new Circo(),
+            new PassivaPalhaco()),
+
+            new Personagem(4, Faccao.Folclore, "Troll", "🧌", 1200, 160, 200,
+            new Pancada(),
+            new Porradeiro(),
+            new Ambicao()),
+ 
 
             // Místicos
             new Personagem(1, Faccao.Misticos, "Gênio", "🧞", 1400, 120, 200,

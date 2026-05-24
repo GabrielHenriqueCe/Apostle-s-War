@@ -97,6 +97,14 @@
             }
             alvo.StatusAtivos.Add(this);
         }
+
+        /// <summary>
+        /// Hook chamado quando o portador causa dano em alguém (ataque direto).
+        /// Usado por buffs como Sedento (PassivaMorcego cura ao atacar).
+        /// Diferente do AoSerAtacado: este é do ponto de vista do ATACANTE.
+        /// </summary>
+        public virtual void AoCausarDano(Combate portador, Combate alvo, int danoCausado) { }
+
     }
 
     #endregion

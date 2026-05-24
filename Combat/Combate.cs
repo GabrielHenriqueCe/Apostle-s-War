@@ -146,6 +146,11 @@ namespace ApostlesWar
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
 
             int danoReal = alvo.ReceberDano(dano, this, ignorarFinal);
+
+            // Hook: notifica status do atacante sobre dano causado (Sedento, etc)
+            foreach (var status in StatusAtivos.ToList())
+                status.AoCausarDano(this, alvo, danoReal);
+
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
 
@@ -165,6 +170,10 @@ namespace ApostlesWar
 
             int danoReal = alvo.ReceberDano(dano, this, ignorarFinal);
             alvo.Defesa = defesaOriginal;
+
+            // Hook: notifica status do atacante sobre dano causado
+            foreach (var status in StatusAtivos.ToList())
+                status.AoCausarDano(this, alvo, danoReal);
 
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }

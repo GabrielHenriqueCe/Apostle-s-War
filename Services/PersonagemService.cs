@@ -186,10 +186,25 @@ namespace v1_Apostle_s_War.Services
  
 
             // Apóstolos
-            new Personagem(1, Faccao.Apostolos, "Boneco de Neve", "☃️",  600, 240, 240),
-            new Personagem(2, Faccao.Apostolos, "Mímico", "🎭", 1200, 240, 120),
-            new Personagem(3, Faccao.Apostolos, "Anjo", "👼", 1200, 120, 240),
-            new Personagem(4, Faccao.Apostolos, "Papai Noel", "🎅", 1400, 160, 160),
+            new Personagem(1, Faccao.Apostolos, "Boneco de Neve", "⛄", 1000, 200, 200,
+            new BolaDeNeve(),
+            new Gelado(),
+            new PassivaBonecoDeNeve()),
+
+            new Personagem(2, Faccao.Apostolos, "Mímico", "🎭", 1000, 200, 200,
+            new Imitacao(),
+            new Copiando(),
+            new PassivaMimico()),
+
+            new Personagem(3, Faccao.Apostolos, "Anjo", "😇", 1200, 160, 200,
+            new Celestial(),
+            new Ceu(),
+            new PassivaAnjo()),
+
+            new Personagem(4, Faccao.Apostolos, "Papai Noel", "🎅", 1000, 200, 200,
+            new SacoDePresente(),
+            new FabricaDePresente(),
+            new PassivaPapaiNoel()),
         };
 
         public Personagem ObterPersonagem(Faccao faccao, Slot slot)

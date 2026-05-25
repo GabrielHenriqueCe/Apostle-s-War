@@ -143,10 +143,25 @@ namespace v1_Apostle_s_War.Services
             new PassivaDragao()),
 
             // Especial
-            new Personagem(1, Faccao.Especial, "Cocô", "💩", 1200, 160, 200),
-            new Personagem(2, Faccao.Especial, "Herói", "🦸",  800, 240, 200),
-            new Personagem(3, Faccao.Especial, "Vilão", "🦹", 1200, 200, 160),
-            new Personagem(4, Faccao.Especial, "T-Rex", "🦖", 1000, 160, 240),
+            new Personagem(1, Faccao.Especial, "Cocô", "💩", 1200, 160, 200,
+            new Descarga(),
+            new Desentupidor(),
+            new PassivaCoco()),
+
+            new Personagem(2, Faccao.Especial, "Herói", "🦸", 800, 240, 200,
+            new SalvandoDia(),
+            new Super(),
+            new PassivaHeroi()),
+
+            new Personagem(3, Faccao.Especial, "Vilão", "🦹", 1200, 200, 160,
+            new DestruindoDia(),
+            new Vilania(),
+            new PassivaVilao()),
+
+            new Personagem(4, Faccao.Especial, "T-Rex", "🦖", 1000, 160, 240,
+            new Rugido(),
+            new Pisada(),
+            new PassivaTRex()),
 
             // Decaídos
             new Personagem(1, Faccao.Decaidos, "Morcego", "🦇", 800, 160, 280,

@@ -1,0 +1,31 @@
+﻿using ApostlesWar;
+using v1_Apostle_s_War.Skills.Debuffs;
+
+namespace v1_Apostle_s_War.Skills.Ativas
+{
+    /// <summary>
+    /// Ataca 1 inimigo com +150% ATK e aplica 5 stacks de Veneno.
+    /// </summary>
+    class Descarga : HabilidadeAtiva
+    {
+        public Descarga() : base("Descarga", "🚽", 3,
+            "+150% ATK e aplica 5 stacks de Veneno.")
+        { }
+
+        public override int NumeroDeAlvos => 1;
+        public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
+        public override TipoLista TipoLista => TipoLista.Inimigos;
+
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        {
+            var resultados = new List<ResultadoAtaque>();
+            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
+            {
+                resultados.Add(AplicarDano(ctx.Atacante, a, 2.5));
+                if (a.EstaVivo())
+                    new Veneno(stacks: 5).Aplicar(a);
+            }
+            return resultados;
+        }
+    }
+}

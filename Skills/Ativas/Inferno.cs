@@ -16,7 +16,11 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override int NumeroDeAlvos => int.MaxValue;
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;
-        public override TipoAtaque TipoAtaque => TipoAtaque.AreaDeEfeito;
+        // NaoAtaque proposital: a habilidade nao usa Atacar(), so aplica Queima
+        // e explode via ReceberDanoDireto. Bypassa passivas defensivas dos
+        // inimigos (Vampiro, Sushiman ContraAtaque, etc) e tambem passivas
+        // ofensivas do atacante (Sedento nao cura, Detetive nao acumula crit).
+        public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
 
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {

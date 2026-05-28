@@ -1,5 +1,6 @@
 ﻿using ApostlesWar;
 using GHUtils;
+using v1_Apostle_s_War.Skills.Ativas;
 using v1_Apostle_s_War.Skills.Buffs;
 using v1_Apostle_s_War.Skills.Debuffs;
 using v1_Apostle_s_War.Skills.Passivas;
@@ -31,8 +32,7 @@ namespace v1_Apostle_s_War.Services
 
         #region Estrutura de ação
 
-        private record AcaoEscolhida(HabilidadeAtiva? Habilidade);
-
+        private record AcaoEscolhida(HabilidadeAtiva Habilidade);
         #endregion
 
         #region Loop principal
@@ -144,7 +144,6 @@ namespace v1_Apostle_s_War.Services
                     $"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
                 Thread.Sleep(1500);
 
-                // Medo pode cancelar a A1 forçada
                 if (VerificarMedoEAplicar(atacante)) return;
 
                 var resultado = atacante.Atacar(irritar.Aplicador);
@@ -152,6 +151,7 @@ namespace v1_Apostle_s_War.Services
                 Thread.Sleep(1500);
                 ProcessarPassivasAlvo(irritar.Aplicador, atacante, aliados, defensores, resultado.Critico);
                 ProcessarPassivasAtacante(atacante, irritar.Aplicador, aliados, defensores);
+                ProcessarPassivasAtacanteMorte(atacante, irritar.Aplicador, aliados, defensores);
                 return;
             }
 
@@ -185,7 +185,7 @@ namespace v1_Apostle_s_War.Services
         private AcaoEscolhida EscolherAcaoJogador(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
             var habilidadesAtivas = atacante.Personagem.Habilidades.OfType<HabilidadeAtiva>().ToList();
-            int totalOpcoes = habilidadesAtivas.Count + 1;
+            int totalOpcoes = habilidadesAtivas.Count;
             int acao = 1;
 
             while (true)
@@ -200,9 +200,11 @@ namespace v1_Apostle_s_War.Services
                 int novaAcao = ConsoleUtils.SelecionarComCursor(acao, 1, totalOpcoes, key.Key);
                 bool descendo = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
 
-                while (novaAcao >= 2 && novaAcao != acao)
+                // Pula habilidades em cooldown. A1 (AtaqueBasico) tem cooldown 0 sempre,
+                // então nunca é pulada — a A1 é sempre selecionável.
+                while (novaAcao != acao)
                 {
-                    var hab = habilidadesAtivas[novaAcao - 2];
+                    var hab = habilidadesAtivas[novaAcao - 1];
                     if (atacante.Cooldowns[hab].Disponivel) break;
 
                     int proximo = descendo ? novaAcao + 1 : novaAcao - 1;
@@ -217,12 +219,16 @@ namespace v1_Apostle_s_War.Services
                 acao = novaAcao;
             }
 
-            return acao == 1
-                ? new AcaoEscolhida(null)
-                : new AcaoEscolhida(habilidadesAtivas[acao - 2]);
+            return new AcaoEscolhida(habilidadesAtivas[acao - 1]);
         }
 
-        private AcaoEscolhida EscolherAcaoInimigo(Combate atacante) => new AcaoEscolhida(null);
+        private AcaoEscolhida EscolherAcaoInimigo(Combate atacante)
+        {
+            // Inimigo usa sempre AtaqueBasico (A1) por enquanto.
+            // Futuro: bot escolherá entre habilidades disponíveis (modo automático).
+            var ataqueBasico = atacante.Personagem.Habilidades.OfType<AtaqueBasico>().First();
+            return new AcaoEscolhida(ataqueBasico);
+        }
 
         #endregion
 
@@ -230,35 +236,7 @@ namespace v1_Apostle_s_War.Services
 
         private void ExecutarAcao(Combate atacante, AcaoEscolhida acao, List<Combate> defensores, List<Combate> aliados)
         {
-            if (acao.Habilidade == null)
-                ExecutarAtaqueBasico(atacante, defensores, aliados);
-            else
-                ExecutarHabilidade(atacante, acao.Habilidade, defensores, aliados);
-        }
-
-        private void ExecutarAtaqueBasico(Combate atacante, List<Combate> defensores, List<Combate> aliados)
-        {
-            var alvosDisponiveis = ResolverListaDeAlvosDisponiveis(defensores, atacante);
-
-            Combate alvo = atacante is Jogador
-                ? EscolherAlvoDaLista(atacante, alvosDisponiveis, aliados, defensores)
-                : EscolherAlvoAleatorio(alvosDisponiveis);
-
-            // Medo trigga DEPOIS da escolha de alvo (jogador escolhe e aí leva medo)
-            if (VerificarMedoEAplicar(atacante)) return;
-
-            if (atacante is Inimigo)
-            {
-                _menuService.ExibirPreparacaoAtaque(atacante, defensores);
-                Thread.Sleep(1500);
-            }
-
-            var resultado = atacante.Atacar(alvo);
-            _menuService.ExibirResultadoAtaque(atacante, alvo, resultado);
-            Thread.Sleep(1500);
-
-            ProcessarPassivasAlvo(alvo, atacante, aliados, defensores, resultado.Critico);
-            ProcessarPassivasAtacante(atacante, alvo, aliados, defensores);
+            ExecutarHabilidade(atacante, acao.Habilidade, defensores, aliados);
         }
 
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
@@ -278,23 +256,49 @@ namespace v1_Apostle_s_War.Services
                 alvoInicial = atacante;
             }
 
+            // Inimigo "prepara o ataque" antes (UX) — só pra ataque básico do bot.
+            if (atacante is Inimigo && hab is AtaqueBasico)
+            {
+                _menuService.ExibirPreparacaoAtaque(atacante, defensores);
+                Thread.Sleep(1500);
+            }
+
             // Medo trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
             if (VerificarMedoEAplicar(atacante))
             {
-                atacante.Cooldowns[hab].Usar();  // cooldown ativa mesmo cancelando
+                atacante.Cooldowns[hab].Usar();
                 return;
             }
 
             var resultados = hab.Ativar(ctx, alvoInicial);
+
             foreach (var r in resultados)
             {
                 _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
+                Thread.Sleep(1500);
                 ProcessarPassivasAlvo(r.Alvo, atacante, aliados, defensores, r.Critico);
+
+                // Sequencial: DepoisDeAtacar por hit (Detetive ganha crit em cada ataque)
+                if (hab.TipoAtaque == TipoAtaque.Sequencial)
+                    ProcessarPassivasAtacante(atacante, r.Alvo, aliados, defensores);
+
+                // DepoisDeMatar SEMPRE por alvo morto (independente do TipoAtaque)
+                // — Vilão precisa aplicar MortePermanente em cada morto, mesmo em AoE.
+                ProcessarPassivasAtacanteMorte(atacante, r.Alvo, aliados, defensores);
             }
 
+            // AoE: DepoisDeAtacar dispara 1x no fim (UMA explosão = UM evento)
+            if (hab.TipoAtaque == TipoAtaque.AreaDeEfeito && resultados.Count > 0)
+                ProcessarPassivasAtacante(atacante, resultados[0].Alvo, aliados, defensores);
+
             atacante.Cooldowns[hab].Usar();
-            _menuService.ExibirUsoHabilidade(atacante, hab);
-            Thread.Sleep(2500);
+
+            // Mensagem de uso só pra habilidades não-A1 (A1 já tem ExibirResultadoAtaque)
+            if (hab is not AtaqueBasico)
+            {
+                _menuService.ExibirUsoHabilidade(atacante, hab);
+                Thread.Sleep(2500);
+            }
         }
 
         #endregion
@@ -410,11 +414,8 @@ namespace v1_Apostle_s_War.Services
         }
 
         /// <summary>
-        /// Processa passivas reativas do atacante (quem executou o golpe).
-        /// ctx.Atacante = atacante (portador da passiva)
-        /// ctx.Aliados = time do atacante
-        /// ctx.Inimigos = time inimigo COMPLETO
-        /// "alvo" do parâmetro = quem foi atacado.
+        /// Dispara DepoisDeAtacar do atacante. Chamado conforme o TipoAtaque
+        /// (Sequencial: por hit; AoE: 1x no fim).
         /// </summary>
         private void ProcessarPassivasAtacante(Combate atacante, Combate alvo, List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
         {
@@ -422,9 +423,21 @@ namespace v1_Apostle_s_War.Services
             var ctxCombate = new ContextoCombate(atacante, aliadosDoAtacante, inimigosDoAtacante);
 
             DispararEvento(EventoCombate.DepoisDeAtacar, atacante, alvo, ctxPassiva, ctxCombate);
+        }
 
-            if (!alvo.EstaVivo())
-                DispararEvento(EventoCombate.DepoisDeMatar, atacante, alvo, ctxPassiva, ctxCombate);
+        /// <summary>
+        /// Dispara DepoisDeMatar do atacante. Chamado SEMPRE por alvo morto,
+        /// independente do TipoAtaque — Vilão precisa aplicar MortePermanente em
+        /// CADA inimigo morto, mesmo numa AoE.
+        /// </summary>
+        private void ProcessarPassivasAtacanteMorte(Combate atacante, Combate alvoMorto, List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
+        {
+            if (alvoMorto.EstaVivo()) return;
+
+            var ctxPassiva = new ContextoPassiva(false, false, aliadosDoAtacante, atacante);
+            var ctxCombate = new ContextoCombate(atacante, aliadosDoAtacante, inimigosDoAtacante);
+
+            DispararEvento(EventoCombate.DepoisDeMatar, atacante, alvoMorto, ctxPassiva, ctxCombate);
         }
 
         private void DispararEvento(EventoCombate evento, Combate atacante, Combate alvo,

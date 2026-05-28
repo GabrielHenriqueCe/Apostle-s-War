@@ -118,10 +118,8 @@ namespace v1_Apostle_s_War.Services
         public void ExibirAcoes(Combate atacante, int acaoSelecionada = 1)
         {
             Console.WriteLine("\nAções:");
-            string cursor1 = acaoSelecionada == 1 ? "▶" : " ";
-            Console.WriteLine($"{cursor1} 1 - ⚔️  Atacar");
 
-            int i = 2;
+            int i = 1;
             foreach (Habilidade hab in atacante.Personagem.Habilidades)
             {
                 if (hab is HabilidadeAtiva)

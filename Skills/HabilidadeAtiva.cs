@@ -84,6 +84,13 @@ namespace ApostlesWar
             => debuff.Aplicar(alvo);
 
         protected List<ResultadoAtaque> SemDano() => new List<ResultadoAtaque>();
+
+        /// <summary>
+        /// Semântica do evento de ataque. Default Sequencial (a maioria das habilidades de dano
+        /// single-target ou multi-hit). Habilidades AoE e não-atacantes sobrescrevem.
+        /// O CombateService usa isso pra decidir quantas vezes dispara passivas DepoisDeAtacar.
+        /// </summary>
+        public virtual TipoAtaque TipoAtaque => TipoAtaque.Sequencial;
     }
 
     #endregion

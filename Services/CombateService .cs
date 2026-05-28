@@ -2,6 +2,7 @@
 using GHUtils;
 using v1_Apostle_s_War.Skills.Buffs;
 using v1_Apostle_s_War.Skills.Debuffs;
+using v1_Apostle_s_War.Skills.Passivas;
 
 namespace v1_Apostle_s_War.Services
 {

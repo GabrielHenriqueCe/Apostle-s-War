@@ -207,6 +207,18 @@ namespace v1_Apostle_s_War.Services
             new PassivaPapaiNoel()),
         };
 
+        public PersonagemService()
+        {
+            // Injeta AtaqueBasico como A1 em quem não declara A1 própria.
+            // Hoje: todos recebem. Futuro: quem tiver A1 customizada (IAtaquePrimario), pula.
+            foreach (Personagem p in personagens)
+            {
+                bool jaTemA1 = p.Habilidades.OfType<IAtaquePrimario>().Any();
+                if (!jaTemA1)
+                    p.Habilidades.Insert(0, new AtaqueBasico());
+            }
+        }
+
         public Personagem ObterPersonagem(Faccao faccao, Slot slot)
         {
             return personagens.First(p => p.Faccao == faccao && p.Slot == (int)slot);

@@ -61,5 +61,21 @@ namespace ApostlesWar
     /// </summary>
     enum TipoLista { Inimigos, Aliados, Self }
 
+    /// <summary>
+    /// Define a semântica do evento de ataque, usada pelo CombateService
+    /// para decidir quantas vezes disparar as passivas reativas do atacante (DepoisDeAtacar).
+    /// 
+    /// AreaDeEfeito: conceitualmente UM evento que atinge vários. Passiva dispara 1x.
+    ///   Ex: Sopro do Dragão, Incêndio, Pó Mágico.
+    /// Sequencial: N ataques separados, cada um é um evento completo. Passiva dispara Nx.
+    ///   Ex: Ataque Básico, Tiroteio, Porradeiro, Shuriken.
+    /// NaoAtaque: habilidade que não causa dano. Passiva DepoisDeAtacar não dispara.
+    ///   Ex: Democracia (cura), Lealdade (escudo), Abduzir (só Preso).
+    /// 
+    /// Nota: DepoisDeMatar dispara por alvo morto independente deste tipo —
+    /// só DepoisDeAtacar é afetado por AreaDeEfeito vs Sequencial.
+    /// </summary>
+    enum TipoAtaque { AreaDeEfeito, Sequencial, NaoAtaque }
+
     #endregion
 }

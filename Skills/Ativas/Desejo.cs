@@ -19,6 +19,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         // TipoLista.Aliados porque o foco principal é o buff defensivo
         public override TipoLista TipoLista => TipoLista.Aliados;
+        public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
 
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {

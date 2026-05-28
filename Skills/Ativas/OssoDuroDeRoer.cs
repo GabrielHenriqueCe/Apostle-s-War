@@ -16,6 +16,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override int NumeroDeAlvos => int.MaxValue;
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Aliados;
+        public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
 
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {

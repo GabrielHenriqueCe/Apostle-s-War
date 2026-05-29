@@ -61,13 +61,25 @@
         public virtual void AoIniciarTurno(Combate portador) { }
 
         /// <summary>
-        /// Hook chamado depois que o portador recebe dano de um ataque.
+        /// Hook chamado quando o portador efetivamente recebeu dano em HP
+        /// (danoCausado > 0). NAO dispara se Escudo ou BloqueioTotal cobriram
+        /// todo o dano.
+        /// 
+        /// Use pra: logica que reage ao SOFRIMENTO fisico.
+        /// Ex: ContraAtaque (revida o golpe sentido), Sangramento (cura quem
+        /// te ferir).
         /// </summary>
-        public virtual void AoReceberDano(Combate portador, Combate atacante) { }
+        public virtual void AoReceberDano(Combate portador, Combate atacante, int danoCausado) { }
 
         /// <summary>
-        /// Hook chamado quando o portador é atacado.
-        /// Status pode reagir em favor do ATACANTE (ex: Sangramento cura atacante).
+        /// Hook chamado quando o portador é alvo de um ataque, INDEPENDENTE
+        /// de receber dano efetivo. Dispara mesmo se BloqueioTotal, Escudo
+        /// ou ReducaoDanoFixo absorveram tudo.
+        /// 
+        /// Use pra: reflexos e retaliações que reagem ao ATO de atacar.
+        /// Ex: RefletirDano (espinho fere quem encosta), EspinhosVenenosos.
+        /// 
+        /// O parametro danoCausado pode ser 0 — verifique se precisar.
         /// </summary>
         public virtual void AoSerAtacado(Combate portador, Combate atacante, int danoCausado) { }
 

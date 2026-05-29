@@ -39,9 +39,8 @@ namespace v1_Apostle_s_War.Skills.Debuffs
             alvo.StatusAtivos.Add(this);
         }
 
-        public override void AoSerAtacado(Combate portador, Combate atacante, int danoCausado)
+        public override void AoReceberDano(Combate portador, Combate atacante, int danoCausado)
         {
-            if (danoCausado <= 0) return;
             atacante.Curar((int)(danoCausado * PercentualCura));
         }
 

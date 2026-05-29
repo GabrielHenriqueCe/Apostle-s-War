@@ -124,8 +124,9 @@ namespace ApostlesWar
             {
                 foreach (var status in StatusAtivos.ToList())
                 {
-                    status.AoReceberDano(this, atacante);
                     status.AoSerAtacado(this, atacante, danoFinal);
+                    if (danoFinal > 0)
+                        status.AoReceberDano(this, atacante, danoFinal);
                 }
             }
 

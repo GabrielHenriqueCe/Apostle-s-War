@@ -21,7 +21,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
             : base("Contra-Ataque", "↩️", turnos, 0, "Contra-ataca com a1 ao receber dano (1x por turno).")
         { }
 
-        public override void AoReceberDano(Combate portador, Combate atacante)
+        public override void AoSerAtacado(Combate portador, Combate atacante, int danoCausado)
         {
             if (_emCooldown) return;
             if (!portador.EstaVivo()) return;

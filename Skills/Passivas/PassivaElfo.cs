@@ -1,30 +1,26 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Debuffs;
+using v1_Apostle_s_War.Skills.Buffs;
 
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Sempre que o Elfo recebe dano, aplica 1 stack de Veneno e 1 stack de Queima
-    /// no atacante. Sem cooldown — dispara em cada hit.
+    /// Passiva permanente do Elfo: aplica EspinhosVenenosos no início do combate.
+    /// Cada vez que o Elfo é atacado, atacante recebe Veneno + Queima (1 stack cada).
     /// </summary>
-    class PassivaElfo : HabilidadePassiva
+    class PassivaElfo : HabilidadePassiva, IPassivaInicial
     {
         public PassivaElfo() : base("Espinhos", "🌿", 0,
-            "Ao ser atacado, aplica Veneno e Queima no atacante.")
+            "Atacantes recebem Veneno e Queima.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
-
-        // ctx.Atacante = Elfo (portador); alvo = quem atacou o Elfo
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public void AplicarInicial(Combate portador)
         {
-            if (!alvo.EstaVivo()) return SemDano();
-
-            new Veneno(stacks: 1).Aplicar(alvo);
-            new Queima(stacks: 1).Aplicar(alvo);
-            return SemDano();
+            new EspinhosVenenosos().Aplicar(portador);
         }
+
+        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
+
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
 
         public override string MensagemSobreviveu(Personagem p) => string.Empty;
         public override string MensagemMorreu(Personagem p) => string.Empty;

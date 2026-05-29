@@ -20,11 +20,11 @@ namespace v1_Apostle_s_War.Skills.Passivas
         }
 
         public PassivaDiabo() : base("Cresce com Dor", "😈", 0,
-            "A cada hit recebido, +5% HP máximo (até 25%).")
+            "Ao ser atacado, +5% HP máximo (até 25%).")
         { }
 
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo;
+            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
 
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {

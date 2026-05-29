@@ -12,12 +12,12 @@ namespace v1_Apostle_s_War.Skills.Passivas
             public double TotalAumentado;
         }
 
-        public Ambicao() : base("Ambição", "???", 0,
-            "Ao receber golpe, aumenta o próprio ATK em 5% até 25%.")
+        public Ambicao() : base("Ambição", "🧌", 0,
+            "Ao ser atacado, aumenta o próprio ATK em 5% até 25%.")
         { }
 
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo;
+            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
 
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {

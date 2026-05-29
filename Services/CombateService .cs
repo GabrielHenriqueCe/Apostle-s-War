@@ -382,17 +382,26 @@ namespace v1_Apostle_s_War.Services
         /// </summary>
         private void ProcessarPassivasAlvo(Combate alvo, Combate atacante, List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante, bool foiCritico)
         {
-            // Do ponto de vista do alvo: aliados/inimigos são invertidos relativos ao atacante
             var aliadosDoAlvo = inimigosDoAtacante;
             var inimigosDoAlvo = aliadosDoAtacante;
 
             var ctxPassiva = new ContextoPassiva(alvo.EstaVivo(), foiCritico, aliadosDoAlvo, atacante);
             var ctxCombate = new ContextoCombate(alvo, aliadosDoAlvo, inimigosDoAlvo);
 
+            // DepoisDeSerAtacado: dispara sempre (mesmo se Escudo/Bloqueio absorveu).
+            // DepoisDeReceberDano: passivas decidem via DeveAtivar (Necromancia/Guarda
+            // checam !ctx.AlvoVivo; Alien/Sushiman precisariam de dano > 0, mas o
+            // filtro de dano efetivo fica na escolha do evento, nao em guard manual).
+            ExecutarPassivasReativas(alvo, atacante, ctxPassiva, ctxCombate, EventoCombate.DepoisDeSerAtacado);
+            ExecutarPassivasReativas(alvo, atacante, ctxPassiva, ctxCombate, EventoCombate.DepoisDeReceberDano);
+        }
+
+        private void ExecutarPassivasReativas(Combate alvo, Combate atacante, ContextoPassiva ctxPassiva, ContextoCombate ctxCombate, EventoCombate evento)
+        {
             foreach (Habilidade hab in alvo.Personagem.Habilidades)
             {
                 if (hab is not HabilidadePassiva passiva) continue;
-                if (!passiva.DeveAtivar(EventoCombate.DepoisDeReceberDano, ctxPassiva)) continue;
+                if (!passiva.DeveAtivar(evento, ctxPassiva)) continue;
                 if (!alvo.Cooldowns[hab].Disponivel) continue;
 
                 var resultados = passiva.Ativar(ctxCombate, atacante);

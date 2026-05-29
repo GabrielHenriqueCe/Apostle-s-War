@@ -8,7 +8,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
             "10% de chance de contra-atacar com Marretada ao receber dano.")
         { }
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo;
+            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
         public override string MensagemSobreviveu(Personagem p) =>
             $"{p.Simbolo} {p.Nome} contra-atacou com Marretada!";
         public override string MensagemMorreu(Personagem p) => string.Empty;

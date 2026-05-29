@@ -17,7 +17,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
         { }
 
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo;
+            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
 
         // ctx.Atacante = Mímico (portador); alvo = quem atacou
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)

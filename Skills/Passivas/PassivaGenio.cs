@@ -24,8 +24,5 @@ namespace v1_Apostle_s_War.Skills.Passivas
             new RefletirDano(turnos: 2).Aplicar(ctx.Atacante);
             return SemDano();
         }
-
-        public override string MensagemSobreviveu(Personagem p) => string.Empty;
-        public override string MensagemMorreu(Personagem p) => string.Empty;
     }
 }

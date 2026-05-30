@@ -24,6 +24,5 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public override string MensagemSobreviveu(Personagem p) =>
             $"{p.Simbolo} {p.Nome} sobreviveu pela passiva! Invencível por 1 turno!";
-        public override string MensagemMorreu(Personagem p) => string.Empty;
     }
 }

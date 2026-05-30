@@ -9,8 +9,6 @@ namespace v1_Apostle_s_War.Skills.Passivas
         { }
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
             evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo && ctx.FoiCritico;
-        public override string MensagemSobreviveu(Personagem p) => string.Empty;
-        public override string MensagemMorreu(Personagem p) => string.Empty;
         // ctx.Atacante = Sushiman; ctx.Aliados = time do Sushiman
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {

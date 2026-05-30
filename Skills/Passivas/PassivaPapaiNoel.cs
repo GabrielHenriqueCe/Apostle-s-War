@@ -28,8 +28,5 @@ namespace v1_Apostle_s_War.Skills.Passivas
             new Preso(turnos: 1).Aplicar(alvo);
             return SemDano();
         }
-
-        public override string MensagemSobreviveu(Personagem p) => string.Empty;
-        public override string MensagemMorreu(Personagem p) => string.Empty;
     }
 }

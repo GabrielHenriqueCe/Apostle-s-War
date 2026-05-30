@@ -39,9 +39,6 @@ namespace v1_Apostle_s_War.Services
 
         private bool ExecutarCombate(List<Combate> jogador, List<Combate> inimigo, List<Combate> combatentes)
         {
-            foreach (var c in combatentes)
-                AtivarPassivasIniciais(c);
-
             do
             {
                 for (int c = 0; c < combatentes.Count; c++)
@@ -115,16 +112,6 @@ namespace v1_Apostle_s_War.Services
             var ctxCombate = new ContextoCombate(combatente, aliados, inimigos);
 
             DispararEvento(EventoCombate.InicioDoTurno, combatente, combatente, ctxPassiva, ctxCombate);
-        }
-
-        private void AtivarPassivasIniciais(Combate combatente)
-        {
-            foreach (Habilidade hab in combatente.Personagem.Habilidades.OfType<HabilidadePassiva>())
-            {
-                var passiva = (HabilidadePassiva)hab;
-                if (passiva is IPassivaInicial inicial)
-                    inicial.AplicarInicial(combatente);
-            }
         }
 
         #endregion

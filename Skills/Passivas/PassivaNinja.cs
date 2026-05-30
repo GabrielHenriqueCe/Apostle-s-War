@@ -36,8 +36,5 @@ namespace v1_Apostle_s_War.Skills.Passivas
             estado.TotalReduzido[alvo] += reduzir;
             return SemDano();
         }
-
-        public override string MensagemSobreviveu(Personagem p) => string.Empty;
-        public override string MensagemMorreu(Personagem p) => string.Empty;
     }
 }

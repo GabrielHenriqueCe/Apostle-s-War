@@ -23,8 +23,5 @@ namespace v1_Apostle_s_War.Skills.Passivas
             bool alvComQueima = alvo.StatusAtivos.Any(s => s is Queima);
             return (temPassiva && alvComQueima) ? 1.25 : 1.0;
         }
-
-        public override string MensagemSobreviveu(Personagem p) => string.Empty;
-        public override string MensagemMorreu(Personagem p) => string.Empty;
     }
 }

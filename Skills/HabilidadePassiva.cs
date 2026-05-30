@@ -14,8 +14,19 @@
         /// </summary>
         public abstract bool DeveAtivar(EventoCombate evento, ContextoPassiva contexto);
 
-        public abstract string MensagemSobreviveu(Personagem personagem);
-        public abstract string MensagemMorreu(Personagem personagem);
+        /// <summary>
+        /// Mensagem exibida quando a passiva impede a morte ou faz algo notavel
+        /// no momento de ser atacada. Default vazio — sobrescreva apenas se a
+        /// passiva tem mensagem real (ex: Guarda, Operario, Necromancia).
+        /// </summary>
+        public virtual string MensagemSobreviveu(Personagem personagem) => string.Empty;
+
+        /// <summary>
+        /// Mensagem exibida quando a passiva nao consegue evitar a morte
+        /// (ex: Necromancia bloqueada por MortePermanente).
+        /// Default vazio — sobrescreva apenas se a passiva tem mensagem real.
+        /// </summary>
+        public virtual string MensagemMorreu(Personagem personagem) => string.Empty;
 
         protected List<ResultadoAtaque> SemDano() => new List<ResultadoAtaque>();
 

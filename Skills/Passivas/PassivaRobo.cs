@@ -27,8 +27,5 @@ namespace v1_Apostle_s_War.Skills.Passivas
             new CuraContinua(turnos: 1, percentual: 0.10).Aplicar(aliadoMenorHP);
             return SemDano();
         }
-
-        public override string MensagemSobreviveu(Personagem p) => string.Empty;
-        public override string MensagemMorreu(Personagem p) => string.Empty;
     }
 }

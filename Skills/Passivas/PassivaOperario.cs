@@ -11,7 +11,6 @@ namespace v1_Apostle_s_War.Skills.Passivas
             evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
         public override string MensagemSobreviveu(Personagem p) =>
             $"{p.Simbolo} {p.Nome} contra-atacou com Marretada!";
-        public override string MensagemMorreu(Personagem p) => string.Empty;
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
             if (_random.NextDouble() >= 0.10) return SemDano();

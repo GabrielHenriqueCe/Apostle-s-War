@@ -12,7 +12,6 @@
         public int Turnos { get; }
         public string Descricao { get; }
         public string Simbolo { get; }
-        public SkillCooldown Cooldown { get; }
 
         public Habilidade(string nome, string simbolo, int turnos, string descricao = "")
         {
@@ -20,7 +19,6 @@
             Simbolo = simbolo;
             Turnos = turnos;
             Descricao = descricao;
-            Cooldown = new SkillCooldown(turnos);
         }
 
         /// <summary>

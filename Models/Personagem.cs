@@ -7,6 +7,10 @@
     /// </summary>
     class Personagem
     {
+        // Valores base de crit aplicados a TODOS os personagens. Modificar aqui
+        // afeta o balanceamento global. Itens e habilidades modificam por cima.
+        public const double TaxaCritBase = 0.15;
+        public const double DanoCritBase = 0.60;
         public int Slot { get; private set; }
         public Faccao Faccao { get; private set; }
         public string Nome { get; private set; }
@@ -14,8 +18,8 @@
         public int HP { get; private set; }
         public int Ataque { get; private set; }
         public int Defesa { get; private set; }
-        public double TaxaCrit { get; private set; } = 0.15;
-        public double DanoCrit { get; private set; } = 0.60;
+        public double TaxaCrit { get; private set; } = TaxaCritBase;
+        public double DanoCrit { get; private set; } = DanoCritBase;
         public List<Habilidade> Habilidades { get; private set; }
 
         public Personagem(int slot, Faccao faccao, string nome, string simbolo, int hp, int ataque, int def, params Habilidade[] habilidades)

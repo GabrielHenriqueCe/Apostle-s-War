@@ -10,6 +10,10 @@ namespace ApostlesWar
     abstract class Combate
     {
         private static readonly Random random = new Random();
+        // Balanceamento de defesa: cada N pontos de DEF reduzem 1 ponto percentual
+        // de dano, com cap máximo. Modificar aqui afeta todos os combatentes.
+        private const double DefesaPorPontoReducao = 1000.0;
+        private const double ReducaoMaximaPorDefesa = 0.75;
         public abstract Personagem Personagem { get; }
         public Dictionary<Habilidade, SkillCooldown> Cooldowns { get; private set; }
         public Dictionary<Habilidade, object> EstadoHabilidades { get; private set; }
@@ -109,7 +113,9 @@ namespace ApostlesWar
             }
             defesaEfetiva = Math.Max(0, defesaEfetiva);
 
-            double reducao = Math.Min((defesaEfetiva / 1000.0) * 0.75, 0.75);
+            double reducao = Math.Min(
+                (defesaEfetiva / DefesaPorPontoReducao) * ReducaoMaximaPorDefesa,
+                ReducaoMaximaPorDefesa);
             int danoFinal = (int)(ataque * (1 - reducao));
 
             foreach (var status in StatusAtivos.ToList())

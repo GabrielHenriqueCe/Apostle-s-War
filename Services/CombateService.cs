@@ -16,7 +16,6 @@ namespace v1_Apostle_s_War.Services
         private readonly CampeoesService _campeoesService;
         private readonly PersonagemService _personagemService;
         private readonly MenuService _menuService;
-        private readonly Random _random = new Random();
 
         public CombateService(ArsenalService arsenalService, CampanhaService campanhaService,
             CampeoesService campeoesService, PersonagemService personagemService, MenuService menuService)
@@ -336,7 +335,7 @@ namespace v1_Apostle_s_War.Services
         private Combate EscolherAlvoAleatorio(List<Combate> candidatos)
         {
             var vivos = candidatos.Where(d => d.EstaVivo()).ToList();
-            return vivos[_random.Next(vivos.Count)];
+            return vivos[Random.Shared.Next(vivos.Count)];
         }
 
         #endregion

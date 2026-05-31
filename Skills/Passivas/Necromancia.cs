@@ -20,7 +20,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            if (ctx.Atacante.TemBloqueioRessurreicao()) return SemDano();
+            if (!ctx.Atacante.PodeReviver) return SemDano();
             if (ctx.Atacante.HPAtual <= 0)
                 ctx.Atacante.Reviver(ctx.Atacante.HPMaximo / 2);
             return SemDano();

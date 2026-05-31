@@ -1,5 +1,4 @@
-﻿using v1_Apostle_s_War.Skills.Debuffs;
-using v1_Apostle_s_War.Skills.Passivas;
+﻿using v1_Apostle_s_War.Skills.Passivas;
 
 namespace ApostlesWar
 {
@@ -99,7 +98,26 @@ namespace ApostlesWar
             return true;
         }
 
-        public bool TemBloqueioRessurreicao() => StatusAtivos.Any(s => s is MortePermanente);
+        /// <summary>
+        /// Flag explícita: o combatente pode ser ressuscitado por habilidades que respeitem
+        /// esse bloqueio? Default true. Setada como false por passivas como PassivaVilao
+        /// (Sentença), que impedem revive ao matar.
+        /// 
+        /// Habilidades de revive que RESPEITAM esse bloqueio: Necromancia, PassivaGuarda.
+        /// Habilidades que IGNORAM proposital: AnjoCaido (Diabo — "traz do inferno").
+        /// 
+        /// Promovida de StatusEffect (MortePermanente) pra propriedade direta porque
+        /// MortePermanente era uma flag fingindo ser Debuff: nao tinha duração real,
+        /// nao tinha efeito recorrente, nao tinha removedor. Tudo que fazia era virar
+        /// um booleano. Como Debuff, era acidentalmente bloqueada por ImunidadeDebuffs
+        /// (CantoDeSereia) — comportamento questionável que agora desaparece.
+        /// </summary>
+        public bool PodeReviver { get; private set; } = true;
+
+        /// <summary>
+        /// Bloqueia revive deste combatente. Operação irreversível dentro do combate.
+        /// </summary>
+        public void BloquearRevive() => PodeReviver = false;
 
         public int ReceberDano(int ataque, Combate? atacante = null, IEnumerable<Type>? ignorarStatus = null)
         {

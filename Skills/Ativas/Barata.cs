@@ -1,6 +1,5 @@
 ﻿using ApostlesWar;
 using v1_Apostle_s_War.Skills.Buffs;
-using v1_Apostle_s_War.Skills.Debuffs;
 
 namespace v1_Apostle_s_War.Skills.Ativas
 {
@@ -30,7 +29,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
                 resultados.Add(r);
 
                 if (vivoAntes && !a.EstaVivo())
-                    new MortePermanente().Aplicar(a);
+                    a.BloquearRevive();
             }
             return resultados;
         }

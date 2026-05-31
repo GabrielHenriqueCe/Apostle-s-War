@@ -135,9 +135,11 @@ namespace v1_Apostle_s_War.Services
                 var resultado = atacante.Atacar(irritar.Aplicador);
                 _menuService.ExibirResultadoAtaque(atacante, irritar.Aplicador, resultado);
                 Thread.Sleep(1500);
+
+                // Mesma ordem de ExecutarHabilidade: DepoisDeMatar antes de DepoisDeReceberDano.
+                ProcessarPassivasAtacanteMorte(atacante, irritar.Aplicador, aliados, defensores);
                 ProcessarPassivasAlvo(irritar.Aplicador, atacante, aliados, defensores, resultado.Critico);
                 ProcessarPassivasAtacante(atacante, irritar.Aplicador, aliados, defensores);
-                ProcessarPassivasAtacanteMorte(atacante, irritar.Aplicador, aliados, defensores);
                 return;
             }
 
@@ -262,15 +264,19 @@ namespace v1_Apostle_s_War.Services
             {
                 _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
                 Thread.Sleep(1500);
+
+                // ORDEM IMPORTANTE: DepoisDeMatar dispara ANTES de DepoisDeReceberDano.
+                // O Vilão (DepoisDeMatar) precisa bloquear o revive ANTES da Necromancia
+                // ou Guarda (DepoisDeReceberDano + !ctx.AlvoVivo) tentarem reviver.
+                // Conceitualmente: "ao matar" precede "ao morrer" — a consequência da
+                // morte só faz sentido depois que a morte foi totalmente processada.
+                ProcessarPassivasAtacanteMorte(atacante, r.Alvo, aliados, defensores);
+
                 ProcessarPassivasAlvo(r.Alvo, atacante, aliados, defensores, r.Critico);
 
                 // Sequencial: DepoisDeAtacar por hit (Detetive ganha crit em cada ataque)
                 if (hab.TipoAtaque == TipoAtaque.Sequencial)
                     ProcessarPassivasAtacante(atacante, r.Alvo, aliados, defensores);
-
-                // DepoisDeMatar SEMPRE por alvo morto (independente do TipoAtaque)
-                // — Vilão precisa aplicar MortePermanente em cada morto, mesmo em AoE.
-                ProcessarPassivasAtacanteMorte(atacante, r.Alvo, aliados, defensores);
             }
 
             // AoE: DepoisDeAtacar dispara 1x no fim (UMA explosão = UM evento)

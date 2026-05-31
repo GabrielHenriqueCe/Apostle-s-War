@@ -402,7 +402,12 @@ namespace v1_Apostle_s_War.Services
 
                 alvo.Cooldowns[hab].Usar();
 
-                string msg = passiva.Revive()
+                // passiva.Revive() retorna a CAPACIDADE de reviver, nao o resultado.
+                // Necromancia/Guarda podem ter capacidade mas terem sido bloqueadas
+                // (PodeReviver = false aplicado por Vilao/Barata antes). Combinamos
+                // capacidade + estado real do alvo pra decidir a mensagem.
+                bool reviveuDeFato = passiva.Revive() && alvo.EstaVivo();
+                string msg = reviveuDeFato
                     ? passiva.MensagemSobreviveu(alvo.Personagem)
                     : passiva.MensagemMorreu(alvo.Personagem);
 

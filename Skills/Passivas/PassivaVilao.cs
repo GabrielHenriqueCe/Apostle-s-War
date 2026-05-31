@@ -4,9 +4,9 @@ using v1_Apostle_s_War.Skills.Debuffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Quando o Vilão mata um inimigo, aplica MortePermanente no morto.
-    /// Habilidades que respeitam TemBloqueioRessurreicao não conseguem reviver.
-    /// (AnjoCaido do Diabo ignora propositalmente.)
+    /// Quando o Vilão mata um inimigo, bloqueia ressurreição desse inimigo via
+    /// Combate.BloquearRevive(). Habilidades que respeitam o bloqueio (Necromancia,
+    /// PassivaGuarda) nao conseguem reviver. AnjoCaido (Diabo) ignora proposital.
     /// </summary>
     class PassivaVilao : HabilidadePassiva
     {
@@ -20,7 +20,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
         // ctx.Atacante = Vilão (portador); alvo = inimigo que ele matou
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            new MortePermanente().Aplicar(alvo);
+            alvo.BloquearRevive();
             return SemDano();
         }
     }

@@ -1,4 +1,5 @@
 ﻿using v1_Apostle_s_War.Skills.Passivas;
+using v1_Apostle_s_War.Skills.Buffs;
 
 namespace ApostlesWar
 {
@@ -34,10 +35,51 @@ namespace ApostlesWar
         /// </summary>
         public int HPMaximoReduzidoTotal { get; private set; }
 
-        public int Ataque { get; protected set; }
+        // === Camadas de Ataque (stat calculado) ===
+        // AtaqueBase: valor cru do personagem, imutável na fase.
+        // MultiplicadorAtaque: multiplicador de fase (jogador=1.0, inimigo=mult da fase).
+        // ItensAtaqueFlat/Pct: contribuição de itens equipados.
+        // BonusAtaquePermanente: acúmulo de stack-builders (Ambicao), some no getter.
+        // BuffAtaque ativo: incide sobre (base+mult+itens+permanente).
+        public int AtaqueBase { get; private set; }
+        public double MultiplicadorAtaque { get; protected set; } = 1.0;
+        public int ItensAtaqueFlat { get; private set; }
+        public double ItensAtaquePct { get; private set; }
+        public int BonusAtaquePermanente { get; private set; }
+
+        /// <summary>
+        /// Ataque após base, multiplicador de fase e itens — SEM bônus permanente nem buffs.
+        /// É a referência sobre a qual os stack-builders (Ambicao) calculam seu incremento.
+        /// </summary>
+        public int AtaqueComItens
+        {
+            get
+            {
+                int comMult = (int)(AtaqueBase * MultiplicadorAtaque);
+                return comMult + ItensAtaqueFlat + (int)(comMult * ItensAtaquePct);
+            }
+        }
+
+        /// <summary>
+        /// Ataque final do combatente, calculado por camadas:
+        /// (base × mult + itens) + bônus permanente + buff sobre esse total.
+        /// </summary>
+        public int Ataque
+        {
+            get
+            {
+                int comPermanente = AtaqueComItens + BonusAtaquePermanente;
+                int total = comPermanente;
+                var buff = StatusAtivos.OfType<BuffAtaque>().FirstOrDefault();
+                if (buff != null) total += (int)(comPermanente * buff.Valor);
+                return Math.Max(0, total);
+            }
+        }
+
         public int Defesa { get; protected set; }
         public double TaxaCrit { get; protected set; }
         public double DanoCrit { get; protected set; }
+
         public List<StatusEffect> StatusAtivos { get; }
 
         public Combate(Personagem personagem)
@@ -45,7 +87,7 @@ namespace ApostlesWar
             HPBase = personagem.HP;
             HPMaximo = personagem.HP;
             HPAtual = personagem.HP;
-            Ataque = personagem.Ataque;
+            AtaqueBase = personagem.Ataque;
             Defesa = personagem.Defesa;
             TaxaCrit = personagem.TaxaCrit;
             DanoCrit = personagem.DanoCrit;
@@ -207,7 +249,12 @@ namespace ApostlesWar
         public void Reviver(int hp) => HPAtual = hp;
         public void DefinirDanoCrit(double valor) => DanoCrit = valor;
         public void ModificarDefesa(int delta) => Defesa = Math.Max(0, Defesa + delta);
-        public void ModificarAtaque(int delta) => Ataque = Math.Max(0, Ataque + delta);
+        /// <summary>
+        /// Adiciona bônus permanente de Ataque (stack-builders como Ambicao).
+        /// Soma no getter de Ataque, não muta a base.
+        /// </summary>
+        public void AdicionarBonusAtaquePermanente(int delta) =>
+            BonusAtaquePermanente = Math.Max(0, BonusAtaquePermanente + delta);
         public void ModificarTaxaCrit(double delta) => TaxaCrit = Math.Clamp(TaxaCrit + delta, 0, 1);
         public void Curar(int valor) => HPAtual = Math.Min(HPMaximo, HPAtual + valor);
 
@@ -237,7 +284,7 @@ namespace ApostlesWar
         {
             switch (item.TipoStat)
             {
-                case TipoStat.ATKFlat: Ataque += (int)item.Valor; break;
+                case TipoStat.ATKFlat: ItensAtaqueFlat += (int)item.Valor; break;
                 case TipoStat.HPFlat:
                     HPMaximo += (int)item.Valor;
                     HPAtual += (int)item.Valor;

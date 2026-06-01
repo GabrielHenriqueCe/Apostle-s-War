@@ -3,13 +3,15 @@
 namespace v1_Apostle_s_War.Skills.Buffs
 {
     /// <summary>
-    /// Aumenta o ATK do portador em um percentual calculado no momento da aplicação.
-    /// Ao expirar, restaura o ATK original.
+    /// Buff temporário de ATK. Não muta o stat — apenas existe em StatusAtivos.
+    /// O Combate.Ataque calcula o bônus sob demanda: percentual sobre
+    /// (base + multiplicador + itens + bônus permanente).
+    /// 
+    /// Não acumula: se já houver BuffAtaque, mantém o de maior Valor;
+    /// em empate de Valor, mantém o de maior duração.
     /// </summary>
     class BuffAtaque : Buff
     {
-        private int _valorAdicionado;
-
         public BuffAtaque(int turnos = 2, double percentual = 0.25)
             : base("ATK+", "⚔️", turnos, percentual, $"+{percentual * 100:F0}% ATK.") { }
 
@@ -20,19 +22,17 @@ namespace v1_Apostle_s_War.Skills.Buffs
             var existente = alvo.StatusAtivos.OfType<BuffAtaque>().FirstOrDefault();
             if (existente != null)
             {
-                if (this.TurnosRestantes <= existente.TurnosRestantes) return;
+                // Mais forte prevalece: maior Valor; empate decide pela duração.
+                if (Valor < existente.Valor) return;
+                if (Valor == existente.Valor && TurnosRestantes <= existente.TurnosRestantes) return;
                 alvo.StatusAtivos.Remove(existente);
-                alvo.ModificarAtaque(-existente._valorAdicionado);
             }
 
-            _valorAdicionado = (int)(alvo.Ataque * Valor);
-            alvo.ModificarAtaque(_valorAdicionado);
             alvo.StatusAtivos.Add(this);
         }
 
         public override void Remover(Combate alvo)
         {
-            alvo.ModificarAtaque(-_valorAdicionado);
             alvo.StatusAtivos.Remove(this);
         }
     }

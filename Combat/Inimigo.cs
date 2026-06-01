@@ -19,7 +19,7 @@
             Personagem = personagem;
             HPMaximo = (int)(HPBase * mult.HP);
             HPAtual = (int)(HPBase * mult.HP);
-            Ataque = (int)(Ataque * mult.Ataque);
+            MultiplicadorAtaque = mult.Ataque;
             Defesa = (int)(Defesa * mult.Defesa);
         }
     }

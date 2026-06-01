@@ -9,7 +9,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
     class Natureza : HabilidadeAtiva
     {
         public Natureza() : base("Natureza", "🌿", 3,
-            "+50% ATK e Preso 1t no alvo.")
+            "Ataca 1 inimigo com +50% ATK e aplica Preso por 1 turno.")
         { }
 
         public override int NumeroDeAlvos => 1;

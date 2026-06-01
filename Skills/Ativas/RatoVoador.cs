@@ -11,7 +11,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
     class RatoVoador : HabilidadeAtiva
     {
         public RatoVoador() : base("Rato Voador", "🐀", 4,
-            "Medo nos inimigos, +ATK, +Crit em si e ganha turno extra.")
+            "Medo 1t em todos os inimigos, +25% ATK e +25% Crit em si (2t) e ganha turno extra.")
         { }
 
         public override int NumeroDeAlvos => int.MaxValue;

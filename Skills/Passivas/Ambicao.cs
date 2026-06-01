@@ -25,10 +25,10 @@ namespace v1_Apostle_s_War.Skills.Passivas
             if (estado.TotalAumentado >= Cap) return SemDano();
 
             double aumentar = Math.Min(AumentoPorHit, Cap - estado.TotalAumentado);
-            int delta = (int)(ctx.Atacante.Ataque * aumentar);
+            int delta = (int)(ctx.Atacante.AtaqueComItens * aumentar);
             if (delta <= 0) return SemDano();
 
-            ctx.Atacante.ModificarAtaque(delta);
+            ctx.Atacante.AdicionarBonusAtaquePermanente(delta);
             estado.TotalAumentado += aumentar;
             return SemDano();
         }

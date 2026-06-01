@@ -1,0 +1,225 @@
+# Apostle's War — GDD da Expansão (Pós-Web)
+
+> **Status:** Ideias registradas, NÃO implementar no console v1/v2.
+> Destino: expansão pós-lançamento da versão web (2027+).
+> Última atualização: maio/2026.
+
+---
+
+## Propósito deste documento
+
+Registrar as ideias de meta-progressão e sistemas de RPG de coleção pensadas
+para uma futura expansão de Apostle's War. Nada aqui deve ser construído no
+console atual — o console v1 é o MVP jogável (montar time → jogar fase), sem
+progressão persistente.
+
+A ordem de desenvolvimento planejada é:
+
+1. **v1 console** — completar habilidades de todas as facções (MVP jogável)
+2. **v2 console** — modo auto-battle
+3. **Web port (2027)** — mesmo jogo, React + .NET API (peça principal de portfólio)
+4. **Expansão (pós-web)** — tudo que está neste documento
+
+A razão de tudo isto ser "pós-web" e não "console": cada sistema aqui exige
+persistência séria (banco de dados, inventário, tracking de XP, instâncias
+únicas de item) e uma interface visual rica (grids coloridos de raridade,
+telas de evolução, comparação de sub-stats). O console não comporta isso sem
+virar um segundo jogo.
+
+---
+
+## 1. Sistema de Itens (coleção)
+
+### Instâncias de item
+
+Itens deixam de ser stats fixos aplicados ao personagem e passam a ser
+**objetos equipáveis com identidade própria**. Várias cópias do mesmo item
+podem existir (ex: duas "Coroas"), cada uma equipável em um personagem
+diferente. Equipar uma cópia em um personagem ocupa aquela cópia.
+
+### Raridades
+
+Cada item nasce com uma raridade que determina quantas sub-estatísticas ele
+pode ter:
+
+| Raridade  | Cor            | Sub-stats |
+|-----------|----------------|-----------|
+| Comum     | Cinza          | 0         |
+| Incomum   | Verde          | 1         |
+| Raro      | Azul           | 2         |
+| Épico     | Roxo           | 3         |
+| Lendário  | Dourado/Laranja| 4         |
+
+### Estrelas e Níveis
+
+- Item começa com 1 estrela, sobe até 5 estrelas.
+- Cada estrela amplia o teto de nível: 1 estrela = nv 10, ..., 5 estrelas = nv 50.
+  (Curva exata a definir — provisório: teto = estrelas x 10.)
+- Cada nível e cada estrela aumentam o **atributo base** do item.
+- Estrelas, além de aumentar o base, aumentam o **poder máximo das sub-stats**.
+
+### Progressão de sub-stats (upgrade do item)
+
+- A cada +5 níveis no item, ele:
+  - Desbloqueia uma nova sub-stat (se ainda tiver menos do que o teto da raridade), OU
+  - Melhora uma sub-stat existente (se já estiver no teto de quantidade).
+- Item evolui assim até +20 (4 marcos de +5), totalizando até 4 sub-stats.
+
+### Poder das sub-stats por estrela (exemplo)
+
+O range aleatório de uma sub-stat depende das estrelas do item. Exemplo com
+sub-stat de HP:
+
+| Estrelas | Range de HP (random) |
+|----------|----------------------|
+| 1        | 8–12                 |
+| 2        | 10–16                |
+| 3+       | (escala a definir)   |
+
+> Nota de design: ranges aleatórios criam variação entre cópias do mesmo item,
+> incentivando "farmar" a cópia ideal — núcleo do loop de coleção.
+
+---
+
+## 2. Progressão de Personagem
+
+### Níveis e XP
+
+- Personagens ganham XP **apenas se participarem da batalha** (estiverem no time).
+- Personagens ganham níveis com XP acumulado.
+
+### Estrelas de Personagem (ascensão)
+
+- Personagem evolui em estrelas (mecânica de ascensão tipo gacha).
+- Exemplo: ao chegar em 1 estrela nível 10, precisa de um **item de evolução**
+  para ascender.
+- Quanto mais estrelas o personagem já tem, mais itens de evolução são
+  necessários para a próxima ascensão.
+
+### Drop de itens de evolução
+
+- A fase final de cada capítulo dropa item(ns) de evolução.
+- Capítulos mais avançados dropam mais itens de evolução.
+
+### Maestrias por herói (ideia futura)
+
+- Cada herói poderia ter uma árvore de maestrias desbloqueáveis.
+- Algumas maestrias mexem em mecânicas permanentes (ex: "reduz DEF do inimigo
+  até um cap próprio").
+- **Importante:** o refator de Stats em Camadas (ver seção 4) já modela
+  modificadores permanentes guardados no alvo (ReducaoDefesaPermanente),
+  o que permite múltiplas fontes (Sorrateiro + maestrias) compartilharem o
+  mesmo cap sem "buff invisível".
+
+---
+
+## 3. Campanha e Dificuldade
+
+- A campanha começa no **Fácil**, com inimigos escalando de forma tranquila.
+- Completar uma dificuldade libera a próxima: Fácil -> Normal -> Difícil -> Muito Difícil.
+- Cada dificuldade aumenta a escala dos inimigos.
+
+### Decisão em aberto: stats de inimigo por fase
+
+Hoje (console) os inimigos têm stats calculados por multiplicador:
+HP = (0.5 x capítulo) + (0.1 x fase).
+
+Pergunta para a expansão: trocar por **tabela fixa de stats por fase/turno**
+(controle de balanceamento fino) ou manter cálculo (escala automática)?
+
+> Recomendação atual: manter cálculo até haver telemetria de jogadores reais
+> indicando fases mal balanceadas. Tabela fixa é otimização que só compensa
+> com dados de uso. YAGNI até lá.
+
+---
+
+## 4. Arquitetura de Stats em Camadas (em implementação no console)
+
+> Esta seção descreve um refator que está sendo feito JÁ no console (não é
+> futuro). Está aqui porque é a fundação técnica que torna toda a expansão
+> viável.
+
+Stats (Ataque, Defesa, etc.) deixam de ser campos mutáveis e viram
+propriedades **calculadas por composição de camadas**. Princípio central:
+**nada de "buff invisível"** — todo modificador é uma camada explícita e
+rastreável.
+
+### Camadas (ordem de aplicação), exemplo com Ataque
+
+```
+AtaqueComItens = AtaqueBase x MultiplicadorFase + ItensFlat + (base x ItensPct)
+comStacks      = AtaqueComItens + BonusPermanente          (stack-builders, ex: Ambicao)
+Ataque (final) = comStacks + (buff sobre comStacks)        (BuffAtaque temporário)
+```
+
+### Regras confirmadas (por simulação)
+
+ATAQUE:
+- base 100 + buff 25% = 125
+- base 100 + stack máx 25% = 125
+- base 100 + stack máx + buff 25% = 156
+- base 100 + 1 stack (5%) + buff 25% = 131
+
+DEFESA (buff e debuff incidem sobre comStacks, independentes — um anula o outro):
+- base 100 + buff +30% + debuff -30% = 100
+- base 100 + stack Rei +25% (comStacks 125) + buff +30% + debuff -30% = 125
+
+### Stack-builders (modificadores permanentes da fase)
+
+- **Ambicao** (Troll): +5% ATK por hit recebido, cap +25%. Calcula sobre
+  AtaqueComItens. Mora em BonusAtaquePermanente do próprio combatente.
+- **PassivaRei**: +5% DEF por hit recebido, cap +25%. Mora em BonusDefesaPermanente.
+- **PassivaDiabo**: +5% HP máximo por hit recebido, cap +25%.
+- **PassivaDetetive**: +5% TaxaCrit por ataque, cap +25%.
+- **PassivaSorrateiro**: -5% DEF do INIMIGO por ataque, cap -25% TOTAL no alvo.
+  Mora em ReducaoDefesaPermanente do alvo. Múltiplos Sorrateiros (e futuras
+  maestrias) compartilham o mesmo cap porque o dado mora no alvo, não na passiva.
+
+> Padronização: todos os stack-builders usam 5% por tick e cap de 25%.
+> (Sorrateiro era 3%, ajustado para 5% para manter o padrão.)
+
+### Critério de substituição de buffs
+
+Buffs do mesmo tipo NÃO se somam — o mais forte prevalece:
+- Maior Valor ganha (BuffAtaque 50% vence BuffAtaque 25%)
+- Em empate de Valor, maior duração ganha
+- Escudo: maior PontosRestantes prevalece
+
+> Hoje todos os buffs do roster usam o mesmo valor (ex: BuffAtaque sempre 25%),
+> então o critério de Valor só será exercitado quando houver buffs de valores
+> diferentes (bosses, habilidades novas). O código já está preparado.
+
+### Stack-builder como buff que "reseta no pico" (ideia futura para BOSS)
+
+Cogitou-se um stack-builder que sobe até o máximo e então "reseta" para fraco
+(janela de oportunidade). Decidido: os stack-builders atuais (Diabo/Rei/Ambicao)
+ficam **permanentes e não-buffs**. A mecânica de "reset no pico" fica reservada
+para um BOSS futuro.
+
+---
+
+## 5. Ganchos técnicos que o console JÁ deve respeitar
+
+- **Stats calculados por composição**, não mutação direta. (Em implementação.)
+- **Itens como lista de instâncias equipadas no combatente**, não valores
+  somados direto no stat.
+- **Modificadores permanentes moram no alvo afetado**, não na passiva que os
+  aplica (evita "buff invisível" e permite cap compartilhado).
+- **Não construir cedo demais:** não adicionar campos como Nivel ou Estrelas
+  enquanto não forem usados. Objetivo é *não impedir* o futuro, não *construir*
+  o futuro agora.
+
+---
+
+## 6. Escopo — o que NÃO fazer agora
+
+- NAO implementar itens com estrela/nível/raridade no console
+- NAO implementar XP/níveis de personagem no console
+- NAO implementar inventário persistente ou múltiplas cópias de item
+- NAO implementar dificuldades destraváveis
+- NAO implementar maestrias
+- SIM terminar as habilidades faltantes do v1
+- SIM fechar o v1 jogável
+- SIM fazer o refator de Stats em Camadas (serve ao presente E prepara o futuro)
+
+Quando bater a empolgação com a expansão: **escrever neste documento**, não codar.

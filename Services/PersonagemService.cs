@@ -22,7 +22,7 @@ namespace v1_Apostle_s_War.Services
             new Personagem(2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160,
             new Espionagem(),
             new Furtividade(),
-            new PassivaDetetive()),
+            new OlhoClinico()),
 
             new Personagem(3, Faccao.Humanos, "Policial", "👮",  1000, 120, 280,
             new Tiroteio(),
@@ -82,7 +82,7 @@ namespace v1_Apostle_s_War.Services
             new Personagem(1, Faccao.Tecnologicos, "Invasor", "👾",  600, 240, 240,
             new Glitch(),
             new Barata(),
-            new PassivaInvasor()),
+            new Virus()),
 
             new Personagem(2, Faccao.Tecnologicos, "Alien", "👽", 1200, 240, 120,
             new Abduzir(),

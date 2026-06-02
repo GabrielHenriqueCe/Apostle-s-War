@@ -196,6 +196,40 @@ Cogitou-se um stack-builder que sobe até o máximo e então "reseta" para fraco
 ficam **permanentes e não-buffs**. A mecânica de "reset no pico" fica reservada
 para um BOSS futuro.
 
+### Por que o HP NÃO virou stat calculado por camadas
+
+ATK, DEF, TaxaCrit e DanoCrit viraram propriedades calculadas (getters que
+somam camadas). O HP ficou de fora, por decisão consciente — não por
+esquecimento.
+
+**Motivo real:** o HP tem o HPAtual, um valor de "vida gasta" com memória
+própria (resultado de danos e curas ao longo do combate), que NÃO é
+recalculável a partir de camadas. Além disso, o HPAtual está acoplado ao
+HPMaximo (nunca pode passar dele). Quando o HPMaximo diminui (Maldição,
+Queima), o HPAtual precisa ser cortado NAQUELE momento — uma ação, não um
+cálculo. Um getter puro não faz ações; forçar o HPMaximo a ser getter
+calculado exigiria um gatilho separado pra ajustar o HPAtual, reintroduzindo
+a complexidade que o modelo mutável já resolve corretamente.
+
+O modelo atual (HPMaximo mutável via ModificarHPMaximo / ReduzirHPMaximo /
+RestaurarHPMaximo, com HPMaximoReduzidoTotal como acumulador) já trata tudo
+certo e não tem o bug de timing do _valorAdicionado.
+
+**Inconsistência consciente — o Diabo:** PassivaDiabo (+5% HP máx por hit,
+cap 25%) é, conceitualmente, um stack-builder igual à Ambicao (ATK) e ao
+Rei (DEF). Mas, enquanto Ambicao/Rei usam camadas de bônus permanente
+(BonusAtaquePermanente etc), o Diabo modifica o HPMaximo diretamente via
+ModificarHPMaximo. Essa assimetria é aceita de propósito: padronizar o Diabo
+com os outros stack-builders exigiria transformar o HPMaximo em camada,
+reabrindo o acoplamento HPAtual↔HPMaximo (e ainda mexendo no save/load).
+Risco alto num sistema crítico (dano, cura, revive, status, save), ganho
+apenas estético, e zero bug corrigido. Aceita-se a inconsistência por ser
+superficial (mora num lugar diferente) mas comportamentalmente correta.
+
+**Quando reavaliar:** se algum dia existir um buff TEMPORÁRIO de HP máximo
+(que aumenta o teto por X turnos e depois volta), o modelo mutável traria de
+volta o bug de timing, e aí valeria fazer o HP em camadas. Até lá, YAGNI.
+
 ---
 
 ## 5. Ganchos técnicos que o console JÁ deve respeitar

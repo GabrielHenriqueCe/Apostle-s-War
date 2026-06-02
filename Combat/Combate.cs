@@ -134,8 +134,43 @@ namespace ApostlesWar
             }
         }
 
-        public double TaxaCrit { get; protected set; }
-        public double DanoCrit { get; protected set; }
+        // === Camadas de TaxaCrit e DanoCrit (stats calculados) ===
+        // Crit é soma de pontos absolutos (não % de %): base + itens + permanente + buff.
+        public double TaxaCritBase { get; private set; }
+        public double ItensTaxaCrit { get; private set; }
+        public double BonusTaxaCritPermanente { get; private set; }   // PassivaDetetive
+
+        public double DanoCritBase { get; private set; }
+        public double ItensDanoCrit { get; private set; }
+        public double BonusDanoCritPermanente { get; private set; }    // PassivaInvasor
+
+        /// <summary>
+        /// Chance de crítico final: base + itens + bônus permanente (Detetive) +
+        /// BuffTaxaCrit ativo. Clamp 0..1 (0% a 100%).
+        /// </summary>
+        public double TaxaCrit
+        {
+            get
+            {
+                double total = TaxaCritBase + ItensTaxaCrit + BonusTaxaCritPermanente;
+                var buff = StatusAtivos.OfType<v1_Apostle_s_War.Skills.Buffs.BuffTaxaCrit>().FirstOrDefault();
+                if (buff != null) total += buff.Valor;
+                return Math.Clamp(total, 0, 1);
+            }
+        }
+
+        /// <summary>
+        /// Multiplicador de dano crítico final: base + itens + bônus permanente (Invasor).
+        /// Sem teto superior (pode passar de +100%); piso em 0.
+        /// </summary>
+        public double DanoCrit
+        {
+            get
+            {
+                double total = DanoCritBase + ItensDanoCrit + BonusDanoCritPermanente;
+                return Math.Max(0, total);
+            }
+        }
 
         public List<StatusEffect> StatusAtivos { get; }
 
@@ -146,8 +181,8 @@ namespace ApostlesWar
             HPAtual = personagem.HP;
             AtaqueBase = personagem.Ataque;
             DefesaBase = personagem.Defesa;
-            TaxaCrit = personagem.TaxaCrit;
-            DanoCrit = personagem.DanoCrit;
+            TaxaCritBase = personagem.TaxaCrit;
+            DanoCritBase = personagem.DanoCrit;
             StatusAtivos = new List<StatusEffect>();
             Cooldowns = new Dictionary<Habilidade, SkillCooldown>();
             EstadoHabilidades = new Dictionary<Habilidade, object>();
@@ -304,7 +339,14 @@ namespace ApostlesWar
 
         public bool EstaVivo() => HPAtual > 0;
         public void Reviver(int hp) => HPAtual = hp;
-        public void DefinirDanoCrit(double valor) => DanoCrit = valor;
+
+        /// <summary>
+        /// Adiciona bônus permanente de DanoCrit (stack-builder PassivaInvasor).
+        /// Soma no getter de DanoCrit.
+        /// </summary>
+        public void AdicionarBonusDanoCritPermanente(double delta) =>
+            BonusDanoCritPermanente += delta;
+
 
         /// <summary>
         /// Adiciona bônus permanente de Defesa (stack-builder PassivaRei).
@@ -327,7 +369,13 @@ namespace ApostlesWar
         /// </summary>
         public void AdicionarBonusAtaquePermanente(int delta) =>
             BonusAtaquePermanente = Math.Max(0, BonusAtaquePermanente + delta);
-        public void ModificarTaxaCrit(double delta) => TaxaCrit = Math.Clamp(TaxaCrit + delta, 0, 1);
+
+        /// <summary>
+        /// Adiciona bônus permanente de TaxaCrit (stack-builder PassivaDetetive).
+        /// Soma no getter; o clamp 0..1 acontece no getter de TaxaCrit.
+        /// </summary>
+        public void AdicionarBonusTaxaCritPermanente(double delta) =>
+            BonusTaxaCritPermanente += delta;
         public void Curar(int valor) => HPAtual = Math.Min(HPMaximo, HPAtual + valor);
 
         /// <summary>
@@ -367,8 +415,8 @@ namespace ApostlesWar
                     HPAtual += (int)(HPBase * item.Valor);
                     break;
                 case TipoStat.DEFPct: ItensDefesaPct += item.Valor; break;
-                case TipoStat.TaxaCritPct: TaxaCrit += item.Valor; break;
-                case TipoStat.DanoCritPct: DanoCrit += item.Valor; break;
+                case TipoStat.TaxaCritPct: ItensTaxaCrit += item.Valor; break;
+                case TipoStat.DanoCritPct: ItensDanoCrit += item.Valor; break;
             }
         }
 

@@ -3,9 +3,9 @@
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// A cada ataque, ganha +5% de TaxaCrit acumulável, até 25%.
+    /// Cada ataque +5% DanoCrit, até 25%. Estado per-combate via ObterEstado.
     /// </summary>
-    class PassivaDetetive : HabilidadePassiva
+    class Virus : HabilidadePassiva
     {
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;
@@ -15,8 +15,8 @@ namespace v1_Apostle_s_War.Skills.Passivas
             public double TotalAumentado;
         }
 
-        public PassivaDetetive() : base("Olho Clínico", "🚬", 0,
-            "A cada ataque, ganha +5% de TaxaCrit, até 25%.")
+        public Virus() : base("Vírus", "👾", 0,
+            "A cada ataque, +5% de Dano Crítico, até 25%.")
         { }
 
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
@@ -28,7 +28,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
             if (estado.TotalAumentado >= Cap) return SemDano();
 
             double aumentar = Math.Min(AumentoPorHit, Cap - estado.TotalAumentado);
-            ctx.Atacante.ModificarTaxaCrit(aumentar);
+            ctx.Atacante.AdicionarBonusDanoCritPermanente(aumentar);
             estado.TotalAumentado += aumentar;
             return SemDano();
         }

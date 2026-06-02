@@ -44,7 +44,7 @@ namespace v1_Apostle_s_War.Services
             new Personagem(2, Faccao.Reino, "Ninja", "🥷", 600, 280, 200,
             new Shuriken(),
             new Kunai(),
-            new PassivaSorrateiro()),
+            new Sorrateiro()),
 
             new Personagem(3, Faccao.Reino, "Mago", "🧙", 1000, 280, 120,
             new BolaDeFogo(),
@@ -54,7 +54,7 @@ namespace v1_Apostle_s_War.Services
             new Personagem(4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200,
             new Democracia(),
             new Lealdade(),
-            new PassivaRei()),
+            new CoroaDoSoberano()),
 
 
             // Lado Sombrio

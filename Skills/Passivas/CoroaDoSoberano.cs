@@ -2,7 +2,7 @@
 
 namespace v1_Apostle_s_War.Skills.Passivas
 {
-    class PassivaRei : HabilidadePassiva
+    class CoroaDoSoberano : HabilidadePassiva
     {
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;
@@ -12,7 +12,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
             public double TotalAumentado;
         }
 
-        public PassivaRei() : base("Coroa do Soberano", "👑", 0,
+        public CoroaDoSoberano() : base("Coroa do Soberano", "👑", 0,
             "Ao ser atacado, aumenta a própria DEF em 5% até 25%.")
         { }
 
@@ -25,10 +25,10 @@ namespace v1_Apostle_s_War.Skills.Passivas
             if (estado.TotalAumentado >= Cap) return SemDano();
 
             double aumentar = Math.Min(AumentoPorHit, Cap - estado.TotalAumentado);
-            int delta = (int)(ctx.Atacante.Defesa * aumentar);
+            int delta = (int)(ctx.Atacante.DefesaComItens * aumentar);
             if (delta <= 0) return SemDano();
 
-            ctx.Atacante.ModificarDefesa(delta);
+            ctx.Atacante.AdicionarBonusDefesaPermanente(delta);
             estado.TotalAumentado += aumentar;
             return SemDano();
         }

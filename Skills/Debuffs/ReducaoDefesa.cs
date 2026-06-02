@@ -3,15 +3,16 @@
 namespace v1_Apostle_s_War.Skills.Debuffs
 {
     /// <summary>
-    /// Reduz a DEF do alvo em 30% pelo número de turnos especificado.
-    /// Ao expirar, restaura o valor reduzido.
+    /// Debuff temporário de DEF (-30%). Não muta o stat — apenas existe em
+    /// StatusAtivos. Combate.Defesa subtrai o percentual sob demanda, sobre
+    /// (base + multiplicador + itens + bônus permanente − redução permanente).
     /// 
-    /// Declara ContribuicaoDefesa negativa pra permitir ignorar via habilidade.
+    /// Não acumula: mantém o de maior Valor; em empate, o de maior duração.
+    /// ContribuicaoDefesa expõe (negativo) quanto este debuff tira agora, pra
+    /// habilidades que ignoram status de defesa no ataque.
     /// </summary>
     class ReducaoDefesa : Debuff
     {
-        private int _valorReduzido;
-
         public ReducaoDefesa(int turnos = 2)
             : base("Redução DEF", "🔎", turnos, 0.30, "-30% DEF.") { }
 
@@ -22,21 +23,23 @@ namespace v1_Apostle_s_War.Skills.Debuffs
             var existente = alvo.StatusAtivos.OfType<ReducaoDefesa>().FirstOrDefault();
             if (existente != null)
             {
-                if (this.TurnosRestantes <= existente.TurnosRestantes) return;
+                if (Valor < existente.Valor) return;
+                if (Valor == existente.Valor && TurnosRestantes <= existente.TurnosRestantes) return;
                 alvo.StatusAtivos.Remove(existente);
-                alvo.ModificarDefesa(existente._valorReduzido);
             }
 
-            _valorReduzido = (int)(alvo.Defesa * Valor);
-            alvo.ModificarDefesa(-_valorReduzido);
             alvo.StatusAtivos.Add(this);
         }
 
-        public override int ContribuicaoDefesa(Combate portador) => -_valorReduzido;
+        /// <summary>
+        /// Quanto este debuff tira da defesa AGORA (valor negativo): percentual
+        /// sobre a base com itens e stacks permanentes.
+        /// </summary>
+        public override int ContribuicaoDefesa(Combate portador) =>
+            -(int)(portador.DefesaComStacks * Valor);
 
         public override void Remover(Combate alvo)
         {
-            alvo.ModificarDefesa(_valorReduzido);
             alvo.StatusAtivos.Remove(this);
         }
     }

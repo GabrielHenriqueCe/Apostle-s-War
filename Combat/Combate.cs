@@ -1,5 +1,6 @@
 ﻿using v1_Apostle_s_War.Skills.Passivas;
 using v1_Apostle_s_War.Skills.Buffs;
+using v1_Apostle_s_War.Skills.Debuffs;
 
 namespace ApostlesWar
 {
@@ -76,7 +77,63 @@ namespace ApostlesWar
             }
         }
 
-        public int Defesa { get; protected set; }
+        // === Camadas de Defesa (stat calculado) ===
+        // DefesaBase: valor cru do personagem, imutável na fase.
+        // MultiplicadorDefesa: multiplicador de fase (jogador=1.0, inimigo=mult da fase).
+        // ItensDefesaFlat/Pct: contribuição de itens equipados.
+        // BonusDefesaPermanente: stack-builder de aumento (PassivaRei), soma no getter.
+        // ReducaoDefesaPermanente: stack-builder de redução no alvo (PassivaSorrateiro),
+        //   subtrai no getter. Mora no alvo pra que múltiplas fontes compartilhem o cap.
+        // BuffDefesa/ReducaoDefesa: temporários, incidem sobre comStacks (independentes).
+        public int DefesaBase { get; private set; }
+        public double MultiplicadorDefesa { get; protected set; } = 1.0;
+        public int ItensDefesaFlat { get; private set; }
+        public double ItensDefesaPct { get; private set; }
+        public int BonusDefesaPermanente { get; private set; }
+        public int ReducaoDefesaPermanente { get; private set; }
+
+        /// <summary>
+        /// Defesa após base, multiplicador de fase e itens — SEM stacks permanentes
+        /// nem buffs/debuffs. Referência sobre a qual os stack-builders (Rei aumenta,
+        /// Sorrateiro reduz) calculam seu incremento.
+        /// </summary>
+        public int DefesaComItens
+        {
+            get
+            {
+                int comMult = (int)(DefesaBase * MultiplicadorDefesa);
+                return comMult + ItensDefesaFlat + (int)(comMult * ItensDefesaPct);
+            }
+        }
+
+        /// <summary>
+        /// Defesa com itens e stacks permanentes (Rei aumenta, Sorrateiro reduz),
+        /// mas SEM buffs/debuffs temporários. É a base sobre a qual BuffDefesa e
+        /// ReducaoDefesa calculam seu percentual.
+        /// </summary>
+        public int DefesaComStacks => DefesaComItens + BonusDefesaPermanente - ReducaoDefesaPermanente;
+
+        /// <summary>
+        /// Defesa final do combatente, calculada por camadas:
+        /// (base × mult + itens) + bônus permanente − redução permanente,
+        /// e então buff/debuff temporários incidindo sobre esse total (independentes).
+        /// </summary>
+        public int Defesa
+        {
+            get
+            {
+                int total = DefesaComStacks;
+
+                var buff = StatusAtivos.OfType<BuffDefesa>().FirstOrDefault();
+                if (buff != null) total += (int)(DefesaComStacks * buff.Valor);
+
+                var debuff = StatusAtivos.OfType<ReducaoDefesa>().FirstOrDefault();
+                if (debuff != null) total -= (int)(DefesaComStacks * debuff.Valor);
+
+                return Math.Max(0, total);
+            }
+        }
+
         public double TaxaCrit { get; protected set; }
         public double DanoCrit { get; protected set; }
 
@@ -88,7 +145,7 @@ namespace ApostlesWar
             HPMaximo = personagem.HP;
             HPAtual = personagem.HP;
             AtaqueBase = personagem.Ataque;
-            Defesa = personagem.Defesa;
+            DefesaBase = personagem.Defesa;
             TaxaCrit = personagem.TaxaCrit;
             DanoCrit = personagem.DanoCrit;
             StatusAtivos = new List<StatusEffect>();
@@ -161,16 +218,21 @@ namespace ApostlesWar
         /// </summary>
         public void BloquearRevive() => PodeReviver = false;
 
-        public int ReceberDano(int ataque, Combate? atacante = null, IEnumerable<Type>? ignorarStatus = null)
+        public int ReceberDano(int ataque, Combate? atacante = null,
+            IEnumerable<Type>? ignorarStatus = null, double ignorarDefesaPct = 0.0)
         {
             var ignorados = ignorarStatus?.ToHashSet() ?? new HashSet<Type>();
 
+            // Ordem: parte da Defesa completa, remove a contribuição dos status
+            // ignorados (anula buffs/proteções do suporte), e só então corta o
+            // percentual de ignorarDefesaPct sobre o que sobrou.
             int defesaEfetiva = Defesa;
             foreach (var status in StatusAtivos)
             {
                 if (ignorados.Contains(status.GetType()))
                     defesaEfetiva -= status.ContribuicaoDefesa(this);
             }
+            defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
             defesaEfetiva = Math.Max(0, defesaEfetiva);
 
             double reducao = Math.Min(
@@ -229,14 +291,9 @@ namespace ApostlesWar
             int danoBase = (int)(Ataque * multiplicador);
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
 
-            int defesaOriginal = alvo.Defesa;
-            if (ignorarDefesaPct > 0)
-                alvo.Defesa = (int)(alvo.Defesa * (1.0 - ignorarDefesaPct));
-
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
 
-            int danoReal = alvo.ReceberDano(dano, this, ignorarFinal);
-            alvo.Defesa = defesaOriginal;
+            int danoReal = alvo.ReceberDano(dano, this, ignorarFinal, ignorarDefesaPct);
 
             // Hook: notifica status do atacante sobre dano causado
             foreach (var status in StatusAtivos.ToList())
@@ -248,7 +305,22 @@ namespace ApostlesWar
         public bool EstaVivo() => HPAtual > 0;
         public void Reviver(int hp) => HPAtual = hp;
         public void DefinirDanoCrit(double valor) => DanoCrit = valor;
-        public void ModificarDefesa(int delta) => Defesa = Math.Max(0, Defesa + delta);
+
+        /// <summary>
+        /// Adiciona bônus permanente de Defesa (stack-builder PassivaRei).
+        /// Soma no getter de Defesa, não muta a base.
+        /// </summary>
+        public void AdicionarBonusDefesaPermanente(int delta) =>
+            BonusDefesaPermanente = Math.Max(0, BonusDefesaPermanente + delta);
+
+        /// <summary>
+        /// Adiciona redução permanente de Defesa (stack-builder PassivaSorrateiro).
+        /// Mora no alvo — múltiplas fontes compartilham o mesmo acúmulo e cap.
+        /// Subtrai no getter de Defesa.
+        /// </summary>
+        public void AdicionarReducaoDefesaPermanente(int delta) =>
+            ReducaoDefesaPermanente = Math.Max(0, ReducaoDefesaPermanente + delta);
+
         /// <summary>
         /// Adiciona bônus permanente de Ataque (stack-builders como Ambicao).
         /// Soma no getter de Ataque, não muta a base.
@@ -289,12 +361,12 @@ namespace ApostlesWar
                     HPMaximo += (int)item.Valor;
                     HPAtual += (int)item.Valor;
                     break;
-                case TipoStat.DEFFlat: Defesa += (int)item.Valor; break;
+                case TipoStat.DEFFlat: ItensDefesaFlat += (int)item.Valor; break;
                 case TipoStat.HPPct:
                     HPMaximo += (int)(HPBase * item.Valor);
                     HPAtual += (int)(HPBase * item.Valor);
                     break;
-                case TipoStat.DEFPct: Defesa += (int)(Defesa * item.Valor); break;
+                case TipoStat.DEFPct: ItensDefesaPct += item.Valor; break;
                 case TipoStat.TaxaCritPct: TaxaCrit += item.Valor; break;
                 case TipoStat.DanoCritPct: DanoCrit += item.Valor; break;
             }

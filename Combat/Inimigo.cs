@@ -17,10 +17,10 @@
         public Inimigo(Personagem personagem, MultiplicadorFase mult) : base(personagem)
         {
             Personagem = personagem;
-            HPMaximo = (int)(HPBase * mult.HP);
+            HPMaximo = (int)(HPBase * mult.HP);   // HP ainda mutável (refatora no PR de HP)
             HPAtual = (int)(HPBase * mult.HP);
-            MultiplicadorAtaque = mult.Ataque;
-            Defesa = (int)(Defesa * mult.Defesa);
+            MultiplicadorAtaque = mult.Ataque;     // camada (PR 14a)
+            MultiplicadorDefesa = mult.Defesa;     // camada (PR 14b)
         }
     }
 

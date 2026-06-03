@@ -33,7 +33,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
                 if (veneno == null) continue;
 
                 int danoVeneno = veneno.DanoTotalImediato(a);
-                a.ReceberDanoDireto(danoVeneno);
+                a.ReceberDano(danoVeneno, NaturezasDano.Veneno);
                 somaPercentual += veneno.PercentualDanoImediato;
                 comVeneno++;
 

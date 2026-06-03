@@ -1,7 +1,7 @@
 # ADR — PR-C: Reações Unificadas e Orquestradas
 
 > **Tipo:** Architecture Decision Record
-> **Status:** Proposta (aguardando aprovação do desenho)
+> **Status:** Aceito (Forma 2 / interfaces; fatiamento Strangler Fig)
 > **Contexto:** Apostle's War. Implementa a Separação 2 do ADR de Sistema de
 >   Efeitos. Sucede PR-A (unificar Atacar), PR-B (NaturezaDano), fix (órfãos)
 >   e PR-consequencia (TipoReacao + DanoIndireto).
@@ -73,27 +73,65 @@ ReceberDano. Em vez disso, o CombateService os invoca no momento orquestrado
 O AoCausarDano (Sedento) sai do Atacar e passa a ser processado no lado do
 atacante (ProcessarPassivasAtacante / equivalente).
 
-### 3.3 Como o status declara que reage — interface comum
+### 3.3 Como o status declara que reage — INTERFACES (Forma 2, decidido)
 
-Proposta: uma interface que os status reativos implementam.
+DECISÃO: interfaces específicas por momento de reação, implementadas tanto
+por buffs (StatusEffect) quanto por passivas (HabilidadePassiva). Substitui o
+DeveAtivar(evento)+enum das passivas. Escolhida por:
+- Interface Segregation (SOLID): só quem reage a um momento implementa a
+  interface daquele momento. Escudo/BuffAtaque não carregam método inútil.
+- Type-safe: o compilador garante o método; não existe "evento errado".
+- Escala sem mexer em enum central: momento novo = interface nova.
+- Alinhado ao crescimento de longo prazo do projeto (hobby, sem prazo,
+  modelo reaproveitável em outros jogos).
+
+Três interfaces, uma por momento (espelham AoSerAtacado/AoReceberDano/
+AoCausarDano):
 
 ```
-interface IReageAoCombate
-{
-    // Chamado pelo CombateService no momento certo. Retorna os danos/curas
-    // produzidos (pra orquestrador exibir). Pode ser vazio.
-    List<ResultadoAtaque> Reagir(EventoCombate evento, ContextoReacao ctx);
-}
+interface IReageAoSerAtacado   { List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx); }
+interface IReageAoReceberDano  { List<ResultadoReacao> AoReceberDano(ContextoReacao ctx); }
+interface IReageAoCausarDano   { List<ResultadoReacao> AoCausarDano(ContextoReacao ctx); }
 ```
 
-(Nome e assinatura a refinar na implementação. O ContextoReacao carrega
-portador, atacante, dano causado e a NaturezaDano que originou — essencial
-pro RefletirDano/ContraAtaque consultarem TipoReacao.)
+Mapa de quem implementa o quê:
+- IReageAoSerAtacado:  ContraAtaque, EspinhosVenenosos (reagem ao ATO, dano 0 ok)
+- IReageAoReceberDano: RefletirDano, Sangramento (só com dano > 0)
+- IReageAoCausarDano:  Sedento (lado do atacante)
 
-Status que NÃO reagem (Escudo, Bloqueio, BuffAtaque, etc) não implementam a
-interface — o CombateService os ignora no dispatch de reação. Eles seguem
-agindo via ModificarDanoRecebido (dentro do ReceberDano) ou stat calculado,
-intocados.
+### 3.3.1 ContextoReacao (entrada da reação)
+
+Carrega tudo que a reação precisa, incluindo a NaturezaDano do golpe (pra
+ContraAtaque/Reflexo consultarem TipoReacao):
+
+```
+record ContextoReacao(
+    Combate Portador,        // quem tem o efeito reativo
+    Combate Outro,           // o atacante (lado alvo) ou o alvo (lado atacante)
+    int DanoCausado,         // dano efetivo do golpe que disparou (0 se absorvido)
+    NaturezaDano Natureza    // natureza do golpe — pra consumir TipoReacao
+);
+```
+
+### 3.3.2 ResultadoReacao (saída da reação)
+
+O CombateService precisa exibir o que a reação fez. Como reações produzem
+dano, cura OU só aplicação de status, o resultado é unificado:
+
+```
+record ResultadoReacao(
+    string Mensagem,         // texto a exibir (ex: "Heroi contra-atacou!")
+    ResultadoAtaque? Dano = null,  // se a reacao causou dano (revide/reflexo)
+    int Cura = 0             // se a reacao curou (Sedento)
+);
+```
+
+(Assinatura a refinar na implementação. O ponto é: a reação DECLARA o que
+fez via ResultadoReacao; o CombateService EXIBE. A reação não chama
+MenuService diretamente — resolve o problema do Operario furar a camada.)
+
+ALTERNATIVA considerada: reusar ResultadoAtaque pra tudo (cura = dano
+negativo). Rejeitada — cura não é dano negativo, seria gambiarra semântica.
 
 ### 3.4 Consumo do TipoReacao (loop quebrado)
 
@@ -138,46 +176,70 @@ revides. Remove-se o _emCooldown.
 
 ## 5. Riscos
 
-- É o coração do combate. Mexe em ReceberDano, Atacar, CombateService e 5
-  status. Alto risco de regressão.
-- A ordem das reações importa (ex: contra-ataque antes ou depois de espinhos?).
-  Precisa ser definida e documentada.
-- AoSerAtacado vs AoReceberDano (dano 0 vs dano > 0) precisa virar uma
-  distinção explícita no novo modelo (ex: dois eventos, ou um campo no
-  contexto indicando se houve dano).
+- É o coração do combate. Mexe em ReceberDano, Atacar, CombateService, os 5
+  status reativos E todas as passivas (migração pro modelo de interface).
+  Alto risco de regressão — mitigado pelo fatiamento Strangler Fig (§6).
+- A ordem das reações do alvo importa: definida em §7.3 (Reflexo -> Espinhos
+  -> ContraAtaque).
+- Migrar as passivas de DeveAtivar/enum pra interfaces é a maior superfície.
+  O sistema velho coexiste com o novo até a última migração (C5).
+- Confirmar que os efeitos do Grupo A (ModificarDanoRecebido: Escudo,
+  Bloqueio, Invencivel, ProtecaoAliado, ReducaoDanoFixo) NÃO são tocados —
+  eles ficam dentro do ReceberDano, são cálculo de dano, não reação.
 
 ---
 
-## 6. Plano de sub-fatiamento (cada sub-PR compila)
+## 6. Plano de sub-fatiamento (Strangler Fig — Forma 2)
 
-O PR-C é grande demais pra um commit. Sub-fatias propostas:
+A Forma 2 (interfaces) exige migrar TAMBÉM as passivas (hoje em DeveAtivar+
+enum), senão ficam dois modelos. Pra não fazer big bang, usa-se o padrão
+Strangler Fig: constrói o sistema novo AO LADO do velho, migra aos poucos,
+remove o velho no fim. Cada sub-PR compila e o jogo roda.
 
-- **C1 — Sedento** (lado atacante, isolado, 1 efeito). Move AoCausarDano pro
-  orquestrador. Menor superfície, bom primeiro passo.
-- **C2 — RefletirDano + Sangramento** (lado alvo, AoReceberDano, dano > 0).
-  Os dois são gêmeos (reagem a dano recebido, agem no atacante).
-- **C3 — EspinhosVenenosos** (lado alvo, AoSerAtacado, mesmo com dano 0).
-- **C4 — ContraAtaque** (o mais complexo: revida todos, consome TipoReacao,
-  remove _emCooldown, Revide). Por último, com a fundação pronta.
-- **C5 — Operario** (para de furar a camada). Pequeno, fecha.
+- **C1 — Fundação (sem migrar ninguém).** Cria as 3 interfaces
+  (IReageAoSerAtacado/ReceberDano/CausarDano), os records ContextoReacao e
+  ResultadoReacao, e o dispatch no CombateService que varre StatusAtivos +
+  Habilidades por essas interfaces. O dispatch novo roda EM PARALELO ao
+  sistema antigo (hooks no ReceberDano + DeveAtivar das passivas). Ninguém
+  implementa as interfaces ainda -> nada muda de comportamento, tudo compila.
 
-Cada sub-PR: build verde + teste antes do push.
+- **C2 — Prova de conceito: migra Sedento + 1 passiva simples.** Move o
+  Sedento (AoCausarDano) e uma passiva (ex: Detetive) pro modelo novo.
+  Remove os hooks/DeveAtivar SÓ desses dois. Valida a fundação com 1 de cada
+  tipo. Se a fundação está boa, o resto é repetição.
 
-ALTERNATIVA: se a interface comum exigir mexer no ReceberDano de uma vez (os
-hooks saem todos juntos), pode não dar pra fatiar tão limpo. Avaliar no C1: se
-mover um efeito exigir mover todos, replanejar.
+- **C3 — Migra RefletirDano + Sangramento** (AoReceberDano, dano > 0).
+
+- **C4 — Migra EspinhosVenenosos** (AoSerAtacado, dano 0 ok).
+
+- **C5 — Migra as passivas reativas restantes** (Operario, Necromancia,
+  Guarda, etc) pro modelo de interface. Remove DeveAtivar/enum quando a
+  última passiva migrar.
+
+- **C6 — ContraAtaque** (o mais complexo): migra, revida todos, consome
+  TipoReacao (só reage a Completa), revide com NaturezasDano.Revide, remove
+  _emCooldown. Por último, com tudo maduro.
+
+- **C7 — Limpeza:** remove os hooks mortos do StatusEffect (AoSerAtacado/
+  AoReceberDano/AoCausarDano) e o DeveAtivar/EventoCombate se não sobrar uso.
+
+Ordem das reações do alvo (decisão §7.3) aplicada no dispatch: Reflexo ->
+Espinhos -> ContraAtaque.
+
+NOTA: é mais fatias que o plano antigo, de propósito. Cada uma é segura
+porque o sistema velho coexiste com o novo até a migração terminar.
 
 ---
 
 ## 7. Decisões pendentes (resolver antes/durante a implementação)
 
-1. Nome e assinatura exata da interface de reação.
-2. **RESOLVIDO** — "Houve dano?" NÃO vira um campo. Usa os DOIS eventos que
-   já existem (iguais aos das passivas): DepoisDeSerAtacado (dispara sempre,
-   mesmo dano 0 — ContraAtaque, EspinhosVenenosos) e DepoisDeReceberDano (só
-   com dano > 0 — RefletirDano, Sangramento). Cada buff reativo declara a qual
-   evento reage, igual as passivas via DeveAtivar. O evento JÁ É a distinção;
-   o modelo de buff reaproveita exatamente o das passivas.
+1. **RESOLVIDO** — Forma 2: três interfaces (IReageAoSerAtacado/ReceberDano/
+   CausarDano) + records ContextoReacao e ResultadoReacao. Ver §3.3.
+2. **RESOLVIDO** — "Houve dano?" NÃO vira um campo. A distinção vira DUAS
+   interfaces distintas: IReageAoSerAtacado (disparada sempre, mesmo dano 0 —
+   ContraAtaque, EspinhosVenenosos) e IReageAoReceberDano (disparada só com
+   dano > 0 — RefletirDano, Sangramento). A interface implementada JÁ É a
+   distinção; estado inválido (refletir sem dano) fica irrepresentável.
 3. **RESOLVIDO** — Ordem das reações do lado do alvo:
    (1) RefletirDano, (2) EspinhosVenenosos, (3) ContraAtaque (SEMPRE por último).
    Efeitos passivos/defensivos antes; o revide ativo por último.

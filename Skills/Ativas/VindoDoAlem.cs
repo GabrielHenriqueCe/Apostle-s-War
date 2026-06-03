@@ -24,7 +24,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
                 var r = ctx.Atacante.Atacar(a, 1.5,
                     ignorarDefesaPct: 1.0, forcaCritico: true);
                 resultados.Add(r);
-                ctx.Atacante.ReceberDano((int)(r.Dano * 0.20), NaturezasDano.Direto);
+                ctx.Atacante.ReceberDano((int)(r.Dano * 0.20), NaturezasDano.DanoIndireto);
             }
             return resultados;
         }

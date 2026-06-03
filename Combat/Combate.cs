@@ -286,7 +286,10 @@ namespace ApostlesWar
 
             HPAtual -= danoFinal;
 
-            if (atacante != null)
+            // Reações só disparam se a natureza permite (Completa ou SemContraAtaque) e
+            // há um atacante conhecido. DanoIndireto/Veneno/Queima/Direto têm Reacao.Nenhuma
+            // e não provocam contra-ataque, reflexo, espinhos, etc.
+            if (atacante != null && natureza.Reacao != TipoReacao.Nenhuma)
             {
                 foreach (var status in StatusAtivos.ToList())
                 {

@@ -1,6 +1,15 @@
 ﻿namespace ApostlesWar
 {
     /// <summary>
+    /// Quanto de reação um dano provoca em quem o recebe.
+    /// Completa: dispara tudo (contra-ataque, reflexo, espinhos, passivas). Ataque normal.
+    /// SemContraAtaque: dispara reações, MAS não gera outro contra-ataque (Revide — quebra loop).
+    /// Nenhuma: não dispara reação alguma. Dano que é consequência de uma ação já
+    ///   resolvida (auto-dano, redirecionamento, reflexo) — só Escudo/BloqueioTotal agem.
+    /// </summary>
+    enum TipoReacao { Completa, SemContraAtaque, Nenhuma }
+
+    /// <summary>
     /// Descreve como uma instância de dano se comporta: o que ela ignora
     /// (defesa, escudo, bloqueio) e se provoca retaliação de contra-ataque.
     /// 
@@ -13,7 +22,7 @@
         bool IgnoraDefesa = false,
         bool IgnoraEscudo = false,
         bool IgnoraBloqueio = false,
-        bool EhRevide = false
+        TipoReacao Reacao = TipoReacao.Completa
     );
 
     /// <summary>
@@ -22,24 +31,27 @@
     /// </summary>
     static class NaturezasDano
     {
-        /// Ataque normal: defesa reduz, escudo absorve, bloqueio bloqueia, provoca reações.
+        /// Ataque normal: passa por defesa/escudo/bloqueio, dispara todas as reações.
         public static readonly NaturezaDano Ataque = new();
 
-        /// Revide (contra-ataque): ataque gerado por retaliação. Comporta-se como
-        /// ataque normal (é refletido pelo alvo, dispara reações), EXCETO que não
-        /// provoca OUTRO contra-ataque de volta — é o que quebra o loop A↔B.
-        /// O RefletirDano ignora EhRevide e reflete o revide normalmente.
-        public static readonly NaturezaDano Revide = new(EhRevide: true);
+        /// Revide (contra-ataque): como ataque, é refletido e dispara reações,
+        /// MAS não gera outro contra-ataque — quebra o loop A↔B.
+        public static readonly NaturezaDano Revide = new(Reacao: TipoReacao.SemContraAtaque);
 
-        /// Veneno (tick e explosão): ignora defesa. Escudo absorve, bloqueio bloqueia.
-        public static readonly NaturezaDano Veneno = new(IgnoraDefesa: true);
+        /// Veneno (tick e explosão): ignora defesa; escudo absorve, bloqueio bloqueia.
+        /// Não dispara reação (é dano de status, não um ataque).
+        public static readonly NaturezaDano Veneno = new(IgnoraDefesa: true, Reacao: TipoReacao.Nenhuma);
 
-        /// Queima (dano à vida, tick e explosão): ignora defesa e escudo.
-        /// Bloqueio AINDA bloqueia. (A redução de HP máximo é tratada à parte
-        /// via ReduzirHPMaximo e ignora tudo.)
-        public static readonly NaturezaDano QueimaDano = new(IgnoraDefesa: true, IgnoraEscudo: true);
+        /// Queima (dano à vida): ignora defesa e escudo; bloqueio ainda bloqueia.
+        /// Não dispara reação.
+        public static readonly NaturezaDano QueimaDano = new(IgnoraDefesa: true, IgnoraEscudo: true, Reacao: TipoReacao.Nenhuma);
 
-        /// Direto puro: ignora defesa, escudo e bloqueio. Nada segura.
-        public static readonly NaturezaDano Direto = new(IgnoraDefesa: true, IgnoraEscudo: true, IgnoraBloqueio: true);
+        /// Dano indireto: consequência de uma ação já resolvida (auto-dano do
+        /// Fantasma, redirecionamento da Proteção, reflexo). Passa por defesa,
+        /// escudo e bloqueio normalmente, mas NÃO dispara reação alguma.
+        public static readonly NaturezaDano DanoIndireto = new(Reacao: TipoReacao.Nenhuma);
+
+        /// Direto puro: ignora defesa, escudo e bloqueio. Nada segura. Sem reação.
+        public static readonly NaturezaDano Direto = new(IgnoraDefesa: true, IgnoraEscudo: true, IgnoraBloqueio: true, Reacao: TipoReacao.Nenhuma);
     }
 }

@@ -23,7 +23,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
             if (!Aplicador.EstaVivo()) return dano;
 
             int redirecionado = (int)(dano * Valor);
-            Aplicador.ReceberDano(redirecionado, NaturezasDano.Direto);
+            Aplicador.ReceberDano(redirecionado, NaturezasDano.DanoIndireto);
             return dano - redirecionado;
         }
 

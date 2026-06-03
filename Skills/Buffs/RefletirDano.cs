@@ -26,7 +26,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
 
             int danoRefletido = (int)(danoCausado * Valor);
             if (danoRefletido > 0)
-                atacante.ReceberDano(danoRefletido, NaturezasDano.Direto);
+                atacante.ReceberDano(danoRefletido, NaturezasDano.DanoIndireto);
         }
 
         public override void Remover(Combate alvo)

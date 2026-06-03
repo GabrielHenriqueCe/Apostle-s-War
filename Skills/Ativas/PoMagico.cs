@@ -29,7 +29,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
                     .Distinct()
                     .ToArray();
 
-                var r = ctx.Atacante.AtacarComMultiplicador(
+                var r = ctx.Atacante.Atacar(
                     a,
                     multiplicador: 1.5,
                     ignorarStatus: tiposBuff);

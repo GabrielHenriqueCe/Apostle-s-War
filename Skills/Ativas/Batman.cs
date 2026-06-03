@@ -20,7 +20,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
             var resultados = new List<ResultadoAtaque>();
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
-                var r = ctx.Atacante.AtacarComMultiplicador(
+                var r = ctx.Atacante.Atacar(
                     a,
                     multiplicador: 3.0,
                     ignorarDefesaPct: 0.50);

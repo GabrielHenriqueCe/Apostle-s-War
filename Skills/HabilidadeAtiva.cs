@@ -72,7 +72,7 @@ namespace ApostlesWar
         }
 
         protected ResultadoAtaque AplicarDano(Combate atacante, Combate alvo, double multiplicador = 1.0)
-            => atacante.AtacarComMultiplicador(alvo, multiplicador);
+            => atacante.Atacar(alvo, multiplicador);
 
         protected void AplicarCura(Combate alvo, double percentual)
             => alvo.Curar((int)(alvo.HPMaximo * percentual));

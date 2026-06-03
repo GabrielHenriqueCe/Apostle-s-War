@@ -302,23 +302,11 @@ namespace ApostlesWar
             return dano;
         }
 
-        public ResultadoAtaque Atacar(Combate alvo, IEnumerable<Type>? ignorarStatus = null)
-        {
-            bool critico = random.NextDouble() < TaxaCrit;
-            int dano = critico ? (int)(Ataque * (1 + DanoCrit)) : Ataque;
-
-            var ignorarFinal = ComporListaIgnorar(ignorarStatus);
-
-            int danoReal = alvo.ReceberDano(dano, this, ignorarFinal);
-
-            // Hook: notifica status do atacante sobre dano causado (Sedento, etc)
-            foreach (var status in StatusAtivos.ToList())
-                status.AoCausarDano(this, alvo, danoReal);
-
-            return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
-        }
-
-        public ResultadoAtaque AtacarComMultiplicador(Combate alvo, double multiplicador,
+        /// <summary>
+        /// Ataque com multiplicador de dano, opção de ignorar % de defesa, forçar
+        /// crítico e ignorar status específicos do alvo.
+        /// </summary>
+        public ResultadoAtaque Atacar(Combate alvo, double multiplicador,
             double ignorarDefesaPct = 0.0, bool forcaCritico = false,
             IEnumerable<Type>? ignorarStatus = null)
         {
@@ -327,15 +315,19 @@ namespace ApostlesWar
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
 
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
-
             int danoReal = alvo.ReceberDano(dano, this, ignorarFinal, ignorarDefesaPct);
 
-            // Hook: notifica status do atacante sobre dano causado
             foreach (var status in StatusAtivos.ToList())
                 status.AoCausarDano(this, alvo, danoReal);
 
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
         }
+
+        /// <summary>
+        /// Ataque básico (multiplicador 1.0). Sobrecarga de conveniência.
+        /// </summary>
+        public ResultadoAtaque Atacar(Combate alvo, IEnumerable<Type>? ignorarStatus = null)
+            => Atacar(alvo, 1.0, ignorarStatus: ignorarStatus);
 
         public bool EstaVivo() => HPAtual > 0;
         public void Reviver(int hp) => HPAtual = hp;

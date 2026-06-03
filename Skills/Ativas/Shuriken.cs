@@ -21,7 +21,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
 
             Combate alvo2 = alvos.Count > 1 ? alvos[1] : alvos[0];
             double ignorar = hit1.Critico ? 0.25 : 0.0;
-            resultados.Add(ctx.Atacante.AtacarComMultiplicador(alvo2, 1.5, ignorarDefesaPct: ignorar));
+            resultados.Add(ctx.Atacante.Atacar(alvo2, 1.5, ignorarDefesaPct: ignorar));
 
             return resultados;
         }

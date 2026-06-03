@@ -14,7 +14,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
         {
             if (_random.NextDouble() >= 0.10) return SemDano();
-            var resultado = ctx.Atacante.AtacarComMultiplicador(alvo, 1.25);
+            var resultado = ctx.Atacante.Atacar(alvo, 1.25);
             Console.WriteLine(MensagemSobreviveu(ctx.Atacante.Personagem));
             Thread.Sleep(1500);
             return new List<ResultadoAtaque> { resultado };

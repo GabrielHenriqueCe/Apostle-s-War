@@ -37,7 +37,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
                     : 0;
                 double multiplicador = MultiplicadorBase + (BonusMaximo * proporcao);
 
-                var r = ctx.Atacante.AtacarComMultiplicador(
+                var r = ctx.Atacante.Atacar(
                     a,
                     multiplicador,
                     ignorarStatus: _ignorar);

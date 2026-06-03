@@ -30,7 +30,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
                 if (vivos.Count == 0) break;
 
                 var sorteado = vivos[_random.Next(vivos.Count)];
-                resultados.Add(ctx.Atacante.AtacarComMultiplicador(sorteado, MultiplicadorAtaque));
+                resultados.Add(ctx.Atacante.Atacar(sorteado, MultiplicadorAtaque));
             }
 
             return resultados;

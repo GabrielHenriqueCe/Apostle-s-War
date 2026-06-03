@@ -21,7 +21,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
             var resultados = new List<ResultadoAtaque>();
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
-                var r = ctx.Atacante.AtacarComMultiplicador(a, 1.5,
+                var r = ctx.Atacante.Atacar(a, 1.5,
                     ignorarDefesaPct: 1.0, forcaCritico: true);
                 resultados.Add(r);
                 ctx.Atacante.ReceberDanoDireto((int)(r.Dano * 0.20));

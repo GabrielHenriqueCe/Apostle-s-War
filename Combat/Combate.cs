@@ -253,31 +253,34 @@ namespace ApostlesWar
         /// </summary>
         public void BloquearRevive() => PodeReviver = false;
 
-        public int ReceberDano(int ataque, Combate? atacante = null,
+        public int ReceberDano(int ataque, NaturezaDano natureza, Combate? atacante = null,
             IEnumerable<Type>? ignorarStatus = null, double ignorarDefesaPct = 0.0)
         {
             var ignorados = ignorarStatus?.ToHashSet() ?? new HashSet<Type>();
+            int danoFinal = ataque;
 
-            // Ordem: parte da Defesa completa, remove a contribuição dos status
-            // ignorados (anula buffs/proteções do suporte), e só então corta o
-            // percentual de ignorarDefesaPct sobre o que sobrou.
-            int defesaEfetiva = Defesa;
-            foreach (var status in StatusAtivos)
+            if (!natureza.IgnoraDefesa)
             {
-                if (ignorados.Contains(status.GetType()))
-                    defesaEfetiva -= status.ContribuicaoDefesa(this);
-            }
-            defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
-            defesaEfetiva = Math.Max(0, defesaEfetiva);
+                int defesaEfetiva = Defesa;
+                foreach (var status in StatusAtivos)
+                {
+                    if (ignorados.Contains(status.GetType()))
+                        defesaEfetiva -= status.ContribuicaoDefesa(this);
+                }
+                defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
+                defesaEfetiva = Math.Max(0, defesaEfetiva);
 
-            double reducao = Math.Min(
-                (defesaEfetiva / DefesaPorPontoReducao) * ReducaoMaximaPorDefesa,
-                ReducaoMaximaPorDefesa);
-            int danoFinal = (int)(ataque * (1 - reducao));
+                double reducao = Math.Min(
+                    (defesaEfetiva / DefesaPorPontoReducao) * ReducaoMaximaPorDefesa,
+                    ReducaoMaximaPorDefesa);
+                danoFinal = (int)(danoFinal * (1 - reducao));
+            }
 
             foreach (var status in StatusAtivos.ToList())
             {
                 if (ignorados.Contains(status.GetType())) continue;
+                if (natureza.IgnoraEscudo && status is Escudo) continue;
+                if (natureza.IgnoraBloqueio && status is BloqueioTotal) continue;
                 danoFinal = status.ModificarDanoRecebido(this, danoFinal);
             }
 
@@ -296,12 +299,6 @@ namespace ApostlesWar
             return danoFinal;
         }
 
-        public int ReceberDanoDireto(int dano)
-        {
-            HPAtual -= dano;
-            return dano;
-        }
-
         /// <summary>
         /// Ataque com multiplicador de dano, opção de ignorar % de defesa, forçar
         /// crítico e ignorar status específicos do alvo.
@@ -315,7 +312,7 @@ namespace ApostlesWar
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
 
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
-            int danoReal = alvo.ReceberDano(dano, this, ignorarFinal, ignorarDefesaPct);
+            int danoReal = alvo.ReceberDano(dano, NaturezasDano.Ataque, this, ignorarFinal, ignorarDefesaPct);
 
             foreach (var status in StatusAtivos.ToList())
                 status.AoCausarDano(this, alvo, danoReal);

@@ -50,9 +50,9 @@ namespace v1_Apostle_s_War.Skills.Debuffs
         public override void AoIniciarTurno(Combate portador)
         {
             int valor = (int)(portador.HPMaximoInicial * DanoPorTurno);
-
-            // Dano sempre acontece
-            portador.ReceberDanoDireto(valor);
+            // Dano à vida: ignora defesa e escudo, mas BloquearDano ainda bloqueia.
+            portador.ReceberDano(valor, NaturezasDano.QueimaDano);
+            // (a ReduzirHPMaximo abaixo continua igual — ignora tudo)
 
             // Redução só se cap próprio não foi atingido
             int capAbsoluto = (int)(portador.HPMaximoInicial * CapPropio);
@@ -79,8 +79,8 @@ namespace v1_Apostle_s_War.Skills.Debuffs
         public void Explodir(Combate portador)
         {
             int valor = (int)(portador.HPMaximoInicial * DanoPorTurno * Stacks);
-
-            portador.ReceberDanoDireto(valor);
+            // Dano à vida bloqueável; a redução de HP máximo (abaixo) ignora tudo.
+            portador.ReceberDano(valor, NaturezasDano.QueimaDano);
 
             int capAbsoluto = (int)(portador.HPMaximoInicial * CapPropio);
             int aindaPodeReduzir = capAbsoluto - portador.HPMaximoReduzidoTotal;

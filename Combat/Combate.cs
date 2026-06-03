@@ -6,7 +6,7 @@ namespace ApostlesWar
 {
     #region Combate
 
-    record ResultadoAtaque(int Dano, bool Critico, Combate Alvo, int HPRestante);
+    record ResultadoAtaque(int Dano, bool Critico, Combate Alvo, int HPRestante, NaturezaDano Natureza);
 
     abstract class Combate
     {
@@ -320,7 +320,7 @@ namespace ApostlesWar
             foreach (var status in StatusAtivos.ToList())
                 status.AoCausarDano(this, alvo, danoReal);
 
-            return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual));
+            return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual), NaturezasDano.Ataque);
         }
 
         /// <summary>

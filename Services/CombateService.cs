@@ -274,6 +274,10 @@ namespace v1_Apostle_s_War.Services
 
                 ProcessarPassivasAlvo(r.Alvo, atacante, aliados, defensores, r.Critico);
 
+                // Reações dos buffs/status (sistema novo — roda vazio até a migração dos efeitos)
+                ProcessarReacoesAlvo(r.Alvo, atacante, r);
+                ProcessarReacoesAtacante(atacante, r.Alvo, r);
+
                 // Sequencial: DepoisDeAtacar por hit (Detetive ganha crit em cada ataque)
                 if (hab.TipoAtaque == TipoAtaque.Sequencial)
                     ProcessarPassivasAtacante(atacante, r.Alvo, aliados, defensores);
@@ -456,6 +460,71 @@ namespace v1_Apostle_s_War.Services
                 if (!atacante.Cooldowns[hab].Disponivel) continue;
 
                 passiva.Ativar(ctxCombate, alvo);
+            }
+        }
+
+        #endregion
+
+        #region Reacao
+
+        /// <summary>
+        /// Dispara as reações do ALVO a um golpe recebido (lado do alvo).
+        /// C1: roda vazio — nenhum status implementa as interfaces ainda. A migração
+        /// dos efeitos (Reflexo, Espinhos, ContraAtaque) acontece nos sub-PRs seguintes.
+        /// Ordem definida no ADR: Reflexo -> Espinhos -> ContraAtaque.
+        /// </summary>
+        private void ProcessarReacoesAlvo(Combate alvo, Combate atacante, ResultadoAtaque r)
+        {
+            var ctx = new ContextoReacao(alvo, atacante, r.Dano, r.Natureza);
+
+            var resultados = new List<ResultadoReacao>();
+
+            // AoReceberDano: só com dano efetivo (> 0). [Reflexo, Sangramento]
+            if (r.Dano > 0)
+                foreach (var s in alvo.StatusAtivos.OfType<IReageAoReceberDano>().ToList())
+                    resultados.AddRange(s.AoReceberDano(ctx));
+
+            // AoSerAtacado: sempre (mesmo dano 0). [Espinhos, ContraAtaque]
+            foreach (var s in alvo.StatusAtivos.OfType<IReageAoSerAtacado>().ToList())
+                resultados.AddRange(s.AoSerAtacado(ctx));
+
+            ExibirResultadosReacao(alvo, resultados);
+        }
+
+        /// <summary>
+        /// Dispara as reações do ATACANTE a um dano causado (lado do atacante).
+        /// C1: roda vazio. Futuro implementador: Sedento.
+        /// </summary>
+        private void ProcessarReacoesAtacante(Combate atacante, Combate alvo, ResultadoAtaque r)
+        {
+            var ctx = new ContextoReacao(atacante, alvo, r.Dano, r.Natureza);
+
+            var resultados = new List<ResultadoReacao>();
+            foreach (var s in atacante.StatusAtivos.OfType<IReageAoCausarDano>().ToList())
+                resultados.AddRange(s.AoCausarDano(ctx));
+
+            ExibirResultadosReacao(atacante, resultados);
+        }
+
+        /// <summary>
+        /// Exibe o que as reações produziram (dano, cura, mensagem). Centraliza a
+        /// exibição — as reações declaram, aqui exibe.
+        /// </summary>
+        private void ExibirResultadosReacao(Combate origem, List<ResultadoReacao> resultados)
+        {
+            foreach (var res in resultados)
+            {
+                if (!string.IsNullOrEmpty(res.Mensagem))
+                    _menuService.ExibirMensagemPassiva(res.Mensagem);
+
+                if (res.Dano != null)
+                    _menuService.ExibirResultadoAtaque(origem, res.Dano.Alvo, res.Dano);
+
+                // Cura: exibição a definir num sub-PR (depende de método no MenuService).
+                // C1 não tem implementador de cura ainda, então fica como TODO.
+
+                if (res.Mensagem != "" || res.Dano != null)
+                    Thread.Sleep(1500);
             }
         }
 

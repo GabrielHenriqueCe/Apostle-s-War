@@ -3,15 +3,12 @@
 namespace v1_Apostle_s_War.Skills.Debuffs
 {
     /// <summary>
-    /// Debuff stack-based.
-    /// Quando qualquer atacante causa dano direto no portador, o atacante é curado em
-    /// 15% do dano causado (cap = HP máximo do atacante).
-    /// 
-    /// - Duração = nº de stacks (perde 1 stack por turno do portador, igual Veneno)
-    /// - Stacks NÃO afetam o % de cura (sempre 15%) — só duração
-    /// - Não cura em dano de Veneno/Queima (atacante == null no ReceberDano)
+    /// Debuff stack-based. Quando o portador recebe dano, o ATACANTE é curado em
+    /// 15% do dano causado. Reage via IReageAoReceberDano (só com dano > 0).
+    /// - Duração = nº de stacks (perde 1 por turno, igual Veneno)
+    /// - Stacks não afetam o % (sempre 15%) — só duração
     /// </summary>
-    class Sangramento : Debuff
+    class Sangramento : Debuff, IReageAoReceberDano
     {
         public const double PercentualCura = 0.15;
 
@@ -39,9 +36,22 @@ namespace v1_Apostle_s_War.Skills.Debuffs
             alvo.StatusAtivos.Add(this);
         }
 
-        public override void AoReceberDano(Combate portador, Combate atacante, int danoCausado)
+        public List<ResultadoReacao> AoReceberDano(ContextoReacao ctx)
         {
-            atacante.Curar((int)(danoCausado * PercentualCura));
+            // ctx.Portador tem o Sangramento; ctx.Outro (o atacante) é quem se cura.
+            int cura = (int)(ctx.DanoCausado * PercentualCura);
+            if (cura <= 0)
+                return new List<ResultadoReacao>();
+
+            ctx.Outro.Curar(cura);
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"{ctx.Outro.Personagem.Nome} se cura em {cura} com o Sangramento do inimigo! 🩸",
+                    Cura: cura
+                )
+            };
         }
 
         public override void Remover(Combate alvo)

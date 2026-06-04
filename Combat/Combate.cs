@@ -286,19 +286,6 @@ namespace ApostlesWar
 
             HPAtual -= danoFinal;
 
-            // Reações só disparam se a natureza permite (Completa ou SemContraAtaque) e
-            // há um atacante conhecido. DanoIndireto/Veneno/Queima/Direto têm Reacao.Nenhuma
-            // e não provocam contra-ataque, reflexo, espinhos, etc.
-            if (atacante != null && natureza.Reacao != TipoReacao.Nenhuma)
-            {
-                foreach (var status in StatusAtivos.ToList())
-                {
-                    status.AoSerAtacado(this, atacante, danoFinal);
-                    // AoReceberDano já migrado (C3). AoSerAtacado ainda usado pelo
-                    // ContraAtaque (migra em C6). Espinhos já migrado (C4) — não usa mais.
-                }
-            }
-
             return danoFinal;
         }
 
@@ -308,16 +295,19 @@ namespace ApostlesWar
         /// </summary>
         public ResultadoAtaque Atacar(Combate alvo, double multiplicador,
             double ignorarDefesaPct = 0.0, bool forcaCritico = false,
-            IEnumerable<Type>? ignorarStatus = null)
+            IEnumerable<Type>? ignorarStatus = null,
+            NaturezaDano? natureza = null)
         {
+            var nat = natureza ?? NaturezasDano.Ataque;
+
             bool critico = forcaCritico || random.NextDouble() < TaxaCrit;
             int danoBase = (int)(Ataque * multiplicador);
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
 
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
-            int danoReal = alvo.ReceberDano(dano, NaturezasDano.Ataque, this, ignorarFinal, ignorarDefesaPct);
+            int danoReal = alvo.ReceberDano(dano, nat, this, ignorarFinal, ignorarDefesaPct);
 
-            return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual), NaturezasDano.Ataque);
+            return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual), nat);
         }
 
         /// <summary>

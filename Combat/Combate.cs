@@ -294,9 +294,8 @@ namespace ApostlesWar
                 foreach (var status in StatusAtivos.ToList())
                 {
                     status.AoSerAtacado(this, atacante, danoFinal);
-                    // AoReceberDano removido — RefletirDano/Sangramento agora reagem via
-                    // IReageAoReceberDano (dispatch no CombateService). Espinhos/ContraAtaque
-                    // ainda usam AoSerAtacado até C4/C6.
+                    // AoReceberDano já migrado (C3). AoSerAtacado ainda usado pelo
+                    // ContraAtaque (migra em C6). Espinhos já migrado (C4) — não usa mais.
                 }
             }
 

@@ -3,39 +3,50 @@
 namespace v1_Apostle_s_War.Skills.Buffs
 {
     /// <summary>
-    /// Quando o portador recebe dano direto de um ataque (a1, habilidade, etc),
-    /// contra-ataca com a1 imediatamente.
+    /// Quando o portador é atacado (golpe de natureza Completa), contra-ataca o
+    /// agressor com a1 — uma vez por agressor, por turno. Reage via
+    /// IReageAoSerAtacado (dispara mesmo com dano 0 — reage ao ato).
     /// 
-    /// Tem cooldown intrínseco de 1 turno do portador — uma vez por turno só.
-    /// Isso evita loops infinitos (A contra-ataca B → B contra-ataca A → ...) e
-    /// limita contra-ataques múltiplos em AoE (só o primeiro hit dispara).
-    /// 
-    /// NÃO dispara em dano de Veneno/Queima (status passa atacante == null no ReceberDano).
-    /// Só dispara se portador estiver vivo após receber o dano.
+    /// Só reage a golpes Completa: um Revide (SemContraAtaque) NÃO provoca
+    /// contra-ataque -> loop A<->B quebrado pela natureza. O revide é declarado
+    /// (RevidarAlvo), não executado aqui — o CombateService o executa com
+    /// natureza Revide e propaga as reações do alvo revidado.
     /// </summary>
-    class ContraAtaque : Buff
+    class ContraAtaque : Buff, IReageAoSerAtacado
     {
-        private bool _emCooldown = false;
+        private readonly HashSet<Combate> _jaRevidados = new();
 
         public ContraAtaque(int turnos = 2)
-            : base("Contra-Ataque", "↩️", turnos, 0, "Contra-ataca com a1 ao receber dano (1x por turno).")
+            : base("Contra-Ataque", "↩️", turnos, 0,
+                "Contra-ataca ao ser atacado (1x por agressor, por turno).")
         { }
 
-        public override void AoSerAtacado(Combate portador, Combate atacante, int danoCausado)
+        public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (_emCooldown) return;
-            if (!portador.EstaVivo()) return;
+            // Só reage a golpe Completa: Revide (SemContraAtaque) não gera
+            // contra-ataque. (Nenhuma já nem chega aqui — dispatch filtra.)
+            if (ctx.Natureza.Reacao != TipoReacao.Completa)
+                return new List<ResultadoReacao>();
 
-            _emCooldown = true;
-            portador.Atacar(atacante);
+            if (!ctx.Portador.EstaVivo()) return new List<ResultadoReacao>();
+            if (!ctx.Outro.EstaVivo()) return new List<ResultadoReacao>();
+
+            // 1 revide por agressor, por turno.
+            if (_jaRevidados.Contains(ctx.Outro)) return new List<ResultadoReacao>();
+            _jaRevidados.Add(ctx.Outro);
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"{ctx.Portador.Personagem.Nome} contra-ataca! ↩️",
+                    RevidarAlvo: ctx.Outro
+                )
+            };
         }
 
-        /// <summary>
-        /// Reset do CD intrínseco ao passar o turno.
-        /// </summary>
         protected override void AoPassarTurno()
         {
-            _emCooldown = false;
+            _jaRevidados.Clear();
         }
 
         public override void Remover(Combate alvo)

@@ -468,27 +468,48 @@ namespace v1_Apostle_s_War.Services
         #region Reacao
 
         /// <summary>
-        /// Dispara as reações do ALVO a um golpe recebido (lado do alvo).
-        /// C1: roda vazio — nenhum status implementa as interfaces ainda. A migração
-        /// dos efeitos (Reflexo, Espinhos, ContraAtaque) acontece nos sub-PRs seguintes.
-        /// Ordem definida no ADR: Reflexo -> Espinhos -> ContraAtaque.
+        /// Dispara as reações do ALVO a um golpe recebido. Ordem: Reflexo/Sangramento
+        /// (dano > 0) -> Espinhos/ContraAtaque (sempre). O ContraAtaque declara um
+        /// revide (RevidarAlvo); este método o executa com natureza Revide e propaga
+        /// recursivamente as reações do alvo revidado. A natureza Revide
+        /// (SemContraAtaque) impede novo contra-ataque -> profundidade máxima 1.
         /// </summary>
         private void ProcessarReacoesAlvo(Combate alvo, Combate atacante, ResultadoAtaque r)
         {
-            var ctx = new ContextoReacao(alvo, atacante, r.Dano, r.Natureza);
+            // Reações só fazem sentido se o golpe permite (Completa ou SemContraAtaque).
+            // Nenhuma (veneno/queima/dano indireto) não dispara reação.
+            if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
+            var ctx = new ContextoReacao(alvo, atacante, r.Dano, r.Natureza);
             var resultados = new List<ResultadoReacao>();
 
-            // AoReceberDano: só com dano efetivo (> 0). [Reflexo, Sangramento]
+            // AoReceberDano: só com dano > 0. [Reflexo, Sangramento]
             if (r.Dano > 0)
                 foreach (var s in alvo.StatusAtivos.OfType<IReageAoReceberDano>().ToList())
                     resultados.AddRange(s.AoReceberDano(ctx));
 
-            // AoSerAtacado: sempre (mesmo dano 0). [Espinhos, ContraAtaque]
+            // AoSerAtacado: sempre. [Espinhos, ContraAtaque]
             foreach (var s in alvo.StatusAtivos.OfType<IReageAoSerAtacado>().ToList())
                 resultados.AddRange(s.AoSerAtacado(ctx));
 
             ExibirResultadosReacao(alvo, resultados);
+
+            // Executa revides declarados (ContraAtaque). O revide usa natureza Revide e
+            // propaga as reações do alvo revidado (reflexo/espinhos dele agem; o
+            // contra-ataque dele NÃO, por ser SemContraAtaque -> não recursão infinita).
+            foreach (var res in resultados)
+            {
+                if (res.RevidarAlvo == null) continue;
+                if (!alvo.EstaVivo()) break;            // morto não revida (mas já declarou — ver nota)
+                if (!res.RevidarAlvo.EstaVivo()) continue;
+
+                var revide = alvo.Atacar(res.RevidarAlvo, 1.0, natureza: NaturezasDano.Revide);
+                _menuService.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
+                Thread.Sleep(1500);
+
+                // Propaga: o alvo revidado reage ao revide (profundidade 1, Revide barra contra-ataque)
+                ProcessarReacoesAlvo(res.RevidarAlvo, alvo, revide);
+            }
         }
 
         /// <summary>

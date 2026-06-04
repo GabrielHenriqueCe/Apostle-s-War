@@ -317,9 +317,6 @@ namespace ApostlesWar
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
             int danoReal = alvo.ReceberDano(dano, NaturezasDano.Ataque, this, ignorarFinal, ignorarDefesaPct);
 
-            foreach (var status in StatusAtivos.ToList())
-                status.AoCausarDano(this, alvo, danoReal);
-
             return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual), NaturezasDano.Ataque);
         }
 

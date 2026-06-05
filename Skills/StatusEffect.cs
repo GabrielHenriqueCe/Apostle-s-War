@@ -61,29 +61,6 @@
         public virtual void AoIniciarTurno(Combate portador) { }
 
         /// <summary>
-        /// Hook chamado quando o portador efetivamente recebeu dano em HP
-        /// (danoCausado > 0). NAO dispara se Escudo ou BloqueioTotal cobriram
-        /// todo o dano.
-        /// 
-        /// Use pra: logica que reage ao SOFRIMENTO fisico.
-        /// Ex: ContraAtaque (revida o golpe sentido), Sangramento (cura quem
-        /// te ferir).
-        /// </summary>
-        public virtual void AoReceberDano(Combate portador, Combate atacante, int danoCausado) { }
-
-        /// <summary>
-        /// Hook chamado quando o portador é alvo de um ataque, INDEPENDENTE
-        /// de receber dano efetivo. Dispara mesmo se BloqueioTotal, Escudo
-        /// ou ReducaoDanoFixo absorveram tudo.
-        /// 
-        /// Use pra: reflexos e retaliações que reagem ao ATO de atacar.
-        /// Ex: RefletirDano (espinho fere quem encosta), EspinhosVenenosos.
-        /// 
-        /// O parametro danoCausado pode ser 0 — verifique se precisar.
-        /// </summary>
-        public virtual void AoSerAtacado(Combate portador, Combate atacante, int danoCausado) { }
-
-        /// <summary>
         /// Hook chamado depois que PassarTurno foi executado.
         /// </summary>
         protected virtual void AoPassarTurno() { }
@@ -109,13 +86,6 @@
             }
             alvo.StatusAtivos.Add(this);
         }
-
-        /// <summary>
-        /// Hook chamado quando o portador causa dano em alguém (ataque direto).
-        /// Usado por buffs como Sedento (PassivaMorcego cura ao atacar).
-        /// Diferente do AoSerAtacado: este é do ponto de vista do ATACANTE.
-        /// </summary>
-        public virtual void AoCausarDano(Combate portador, Combate alvo, int danoCausado) { }
 
     }
 

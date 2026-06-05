@@ -43,7 +43,7 @@ namespace v1_Apostle_s_War.Skills.Debuffs
         /// </summary>
         public override void AoIniciarTurno(Combate portador)
         {
-            int dano = (int)(portador.HPMaximo * DanoPorStack * Stacks);
+            int dano = (int)(portador.HPMaximo * DanoPorStack);
             portador.ReceberDano(dano, NaturezasDano.Veneno);
         }
 

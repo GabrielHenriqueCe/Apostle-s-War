@@ -16,15 +16,17 @@ namespace v1_Apostle_s_War.Services
         private readonly CampeoesService _campeoesService;
         private readonly PersonagemService _personagemService;
         private readonly MenuService _menuService;
+        private readonly SelecaoDeAlvoService _selecaoDeAlvoService;
 
         public CombateService(ArsenalService arsenalService, CampanhaService campanhaService,
-            CampeoesService campeoesService, PersonagemService personagemService, MenuService menuService)
+            CampeoesService campeoesService, PersonagemService personagemService, MenuService menuService, SelecaoDeAlvoService selecaoDeAlvoService    )
         {
             _arsenalService = arsenalService;
             _campanhaService = campanhaService;
             _campeoesService = campeoesService;
             _personagemService = personagemService;
             _menuService = menuService;
+            _selecaoDeAlvoService = selecaoDeAlvoService;
         }
 
         #endregion
@@ -237,10 +239,10 @@ namespace v1_Apostle_s_War.Services
             Combate alvoInicial;
             if (hab.TipoLista == TipoLista.Inimigos)
             {
-                var alvosDisponiveis = ResolverListaDeAlvosDisponiveis(defensores, atacante);
+                var alvosDisponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(defensores);
                 alvoInicial = atacante is Jogador
-                    ? EscolherAlvoDaLista(atacante, alvosDisponiveis, aliados, defensores)
-                    : EscolherAlvoAleatorio(alvosDisponiveis);
+                    ? _menuService.EscolherAlvoNaTela(alvosDisponiveis, aliados, defensores)
+                    : _selecaoDeAlvoService.EscolherAlvoBot(alvosDisponiveis);
             }
             else
             {
@@ -298,57 +300,6 @@ namespace v1_Apostle_s_War.Services
                 _menuService.ExibirUsoHabilidade(atacante, hab);
                 Thread.Sleep(2500);
             }
-        }
-
-        #endregion
-
-        #region Seleção de alvos
-
-        private List<Combate> ResolverListaDeAlvosDisponiveis(List<Combate> candidatos, Combate atacante)
-        {
-            var vivos = candidatos.Where(c => c.EstaVivo()).ToList();
-
-            var comProvocar = vivos.Where(c => c.StatusAtivos.Any(s => s is Provocar)).ToList();
-            if (comProvocar.Count > 0) return comProvocar;
-
-            var semTudo = vivos.Where(c =>
-                !c.StatusAtivos.Any(s => s is BloqueioTotal) &&
-                !c.StatusAtivos.Any(s => s is Intocavel)).ToList();
-            if (semTudo.Count > 0) return semTudo;
-
-            var semBloqueio = vivos.Where(c => !c.StatusAtivos.Any(s => s is BloqueioTotal)).ToList();
-            if (semBloqueio.Count > 0) return semBloqueio;
-
-            return vivos;
-        }
-
-        private Combate EscolherAlvoDaLista(Combate atacante, List<Combate> lista, List<Combate> aliados, List<Combate> defensores)
-        {
-            var alvosVivos = lista.Where(d => d.EstaVivo()).ToList();
-            int idx = 1;
-
-            while (true)
-            {
-                Console.Clear();
-                _menuService.ExibirPartida(aliados, defensores);
-                Console.WriteLine("\nAlvos:");
-                for (int i = 0; i < alvosVivos.Count; i++)
-                {
-                    string cursor = idx == i + 1 ? "▶" : " ";
-                    Console.WriteLine($"{cursor} {i + 1} - {alvosVivos[i].Personagem.Simbolo} {alvosVivos[i].Personagem.Nome} | HP:{alvosVivos[i].HPAtual} ATK:{alvosVivos[i].Ataque} DEF:{alvosVivos[i].Defesa}");
-                }
-
-                ConsoleKeyInfo key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Enter) return alvosVivos[idx - 1];
-
-                idx = ConsoleUtils.SelecionarComCursor(idx, 1, alvosVivos.Count, key.Key);
-            }
-        }
-
-        private Combate EscolherAlvoAleatorio(List<Combate> candidatos)
-        {
-            var vivos = candidatos.Where(d => d.EstaVivo()).ToList();
-            return vivos[Random.Shared.Next(vivos.Count)];
         }
 
         #endregion

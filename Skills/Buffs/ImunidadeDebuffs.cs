@@ -7,13 +7,13 @@ namespace v1_Apostle_s_War.Skills.Buffs
     /// Pode ser permanente (PassivaAbobora aplica com int.MaxValue) ou temporária
     /// (habilidades como Coringa do Palhaço e Canto de Sereia aplicam com turnos limitados).
     /// </summary>
-    class ImunidadeDebuffs : Buff
+    class ImunidadeDebuffs : Buff, IBloqueiaStatus
     {
         public ImunidadeDebuffs(int turnos = int.MaxValue)
             : base("Imunidade", "🎃", turnos, 0, "Imune a maleficios.")
         { }
 
-        public override bool Bloqueia(StatusEffect novo) => novo is Debuff;
+        public bool Bloqueia(StatusEffect novo) => novo is Debuff;
 
         public override void Remover(Combate alvo)
         {

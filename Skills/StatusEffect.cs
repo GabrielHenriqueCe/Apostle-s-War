@@ -7,11 +7,7 @@
     /// Hooks disponíveis pra sobrescrever:
     /// - Aplicar: efeitos colaterais ao aplicar
     /// - Remover: limpeza ao expirar
-    /// - ModificarDanoRecebido: alterar o dano recebido pelo portador
-    /// - Bloqueia: bloquear a entrada de outros status
     /// - AoIniciarTurno: efeitos no início do turno do portador (Veneno, CuraContinua)
-    /// - AoReceberDano: reação do portador ao receber dano (ContraAtaque)
-    /// - AoSerAtacado: status do portador reage em favor do atacante (Sangramento)
     /// - AoPassarTurno: hook depois de PassarTurno (resetar CDs internos)
     /// - ContribuicaoDefesa: quanto este status soma na DEF do portador
     ///   (usado quando habilidade decide ignorar buffs específicos do alvo)
@@ -55,9 +51,6 @@
 
         public void AumentarDuracao(int turnos) => TurnosRestantes += turnos;
         public void ReduzirDuracao(int turnos) => TurnosRestantes = Math.Max(0, TurnosRestantes - turnos);
-
-        public virtual int ModificarDanoRecebido(Combate portador, int dano) => dano;
-        public virtual bool Bloqueia(StatusEffect novo) => false;
         public virtual void AoIniciarTurno(Combate portador) { }
 
         /// <summary>

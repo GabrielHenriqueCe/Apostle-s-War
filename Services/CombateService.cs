@@ -78,35 +78,38 @@ namespace v1_Apostle_s_War.Services
             List<Combate> aliados = atacante is Jogador ? jogador : inimigo;
             List<Combate> defensores = atacante is Jogador ? inimigo : jogador;
 
-            ExecutarInicioDeTurno(atacante, aliados, defensores);
+            var turno = new TurnoDoPersonagem(atacante);
+
+            turno.Iniciar();
+            DispararEventoInicioDeTurno(atacante, aliados, defensores);
             if (!atacante.EstaVivo()) return;
 
             if (atacante.StatusAtivos.Any(s => s is Preso))
             {
-                AvancarStatus(atacante);
-                AvancarCooldowns(atacante);
+                turno.Finalizar();
                 return;
             }
 
             ExecutarTurno(atacante, defensores, aliados);
 
-            AvancarStatus(atacante);
-            AvancarCooldowns(atacante);
+            turno.Finalizar();
         }
 
         #endregion
 
         #region Hooks de turno
 
-        private void ExecutarInicioDeTurno(Combate combatente, List<Combate> aliados, List<Combate> inimigos)
+        /// <summary>
+        /// Dispara o evento InicioDoTurno das passivas (ex: PassivaGenio reaplica
+        /// RefletirDano). Fica no service porque depende do sistema de passivas
+        /// (DeveAtivar/enum), que será migrado para interfaces no C5 — quando isso
+        /// acontecer, reavaliar se o disparo vai para o Turno.
+        /// O tick dos status já foi disparado por TurnoDoPersonagem.Iniciar().
+        /// </summary>
+        private void DispararEventoInicioDeTurno(Combate combatente, List<Combate> aliados, List<Combate> inimigos)
         {
-            // Status effects (Veneno, Queima, CuraContinua, etc)
-            foreach (StatusEffect status in combatente.StatusAtivos.ToList())
-                status.AoIniciarTurno(combatente);
-
             if (!combatente.EstaVivo()) return;
 
-            // Passivas reativas ao inicio do turno (ex: PassivaGenio aplica RefletirDano em si)
             var ctxPassiva = new ContextoPassiva(combatente.EstaVivo(), false, aliados, combatente);
             var ctxCombate = new ContextoCombate(combatente, aliados, inimigos);
 
@@ -351,22 +354,6 @@ namespace v1_Apostle_s_War.Services
         #endregion
 
         #region Passivas e status
-
-        private void AvancarCooldowns(Combate combatente)
-        {
-            foreach (var cd in combatente.Cooldowns.Values)
-                cd.PassarTurno();
-        }
-
-        private void AvancarStatus(Combate combatente)
-        {
-            foreach (StatusEffect status in combatente.StatusAtivos.ToList())
-            {
-                status.PassarTurno();
-                if (status.Expirou)
-                    status.Remover(combatente);
-            }
-        }
 
         /// <summary>
         /// Processa passivas reativas do alvo (quem levou o golpe).

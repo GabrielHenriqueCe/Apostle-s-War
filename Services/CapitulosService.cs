@@ -85,7 +85,9 @@ namespace v1_Apostle_s_War.Services
         /// </summary>
         public void CarregarProgresso()
         {
-            if (File.Exists("save.txt"))
+            if (!File.Exists("save.txt")) return;
+
+            try
             {
                 var json = File.ReadAllText("save.txt");
                 var lista = JsonSerializer.Deserialize<List<Capitulos>>(json);
@@ -95,6 +97,13 @@ namespace v1_Apostle_s_War.Services
                     capitulos.Clear();
                     capitulos.AddRange(lista);
                 }
+            }
+            catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
+            {
+                // Save corrompido ou ilegível: mantém o progresso inicial (default em memória)
+                // em vez de crashar. O jogador recomeça do zero, mas o jogo abre.
+                Console.WriteLine("⚠️ Não foi possível carregar o progresso salvo (save inválido). Iniciando do começo.");
+                Thread.Sleep(2000);
             }
         }
         public bool CapituloConcluido(Faccao faccao)

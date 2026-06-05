@@ -227,8 +227,8 @@ namespace ApostlesWar
 
         public bool PodeReceber(StatusEffect novo)
         {
-            foreach (var ativo in StatusAtivos)
-                if (ativo.Bloqueia(novo)) return false;
+            foreach (var bloqueador in StatusAtivos.OfType<IBloqueiaStatus>())
+                if (bloqueador.Bloqueia(novo)) return false;
             return true;
         }
 
@@ -276,12 +276,13 @@ namespace ApostlesWar
                 danoFinal = (int)(danoFinal * (1 - reducao));
             }
 
-            foreach (var status in StatusAtivos.ToList())
+            foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
             {
+                var status = (StatusEffect)modificador;
                 if (ignorados.Contains(status.GetType())) continue;
                 if (natureza.IgnoraEscudo && status is Escudo) continue;
                 if (natureza.IgnoraBloqueio && status is BloqueioTotal) continue;
-                danoFinal = status.ModificarDanoRecebido(this, danoFinal);
+                danoFinal = modificador.ModificarDanoRecebido(this, danoFinal);
             }
 
             HPAtual -= danoFinal;

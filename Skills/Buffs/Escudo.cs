@@ -6,7 +6,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
     /// Absorve dano antes de afetar o HP. Quando os pontos zeram, o buff se remove.
     /// Não acumula — se aplicado em cima de outro Escudo, mantém o de maior valor.
     /// </summary>
-    class Escudo : Buff
+    class Escudo : Buff, IModificaDanoRecebido
     {
         public int PontosRestantes { get; private set; }
 
@@ -28,7 +28,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
             alvo.StatusAtivos.Add(this);
         }
 
-        public override int ModificarDanoRecebido(Combate portador, int dano)
+        public int ModificarDanoRecebido(Combate portador, int dano)
         {
             if (PontosRestantes >= dano)
             {

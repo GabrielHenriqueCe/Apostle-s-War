@@ -9,14 +9,14 @@ namespace v1_Apostle_s_War.Skills.Buffs
     /// Como é aplicado no IniciarCombate (antes de qualquer outro buff), processa
     /// PRIMEIRO no foreach do ReceberDano — reduz o dano antes de Escudo/BloqueioTotal/etc.
     /// </summary>
-    class ReducaoDanoFixo : Buff
+    class ReducaoDanoFixo : Buff, IModificaDanoRecebido
     {
         public ReducaoDanoFixo(double percentual = 0.15)
             : base("Couraça", "🐚", int.MaxValue, percentual,
                 $"-{percentual * 100:F0}% dano recebido.")
         { }
 
-        public override int ModificarDanoRecebido(Combate portador, int dano)
+        public int ModificarDanoRecebido(Combate portador, int dano)
         {
             return (int)(dano * (1 - Valor));
         }

@@ -28,79 +28,49 @@
 
 ## FAZER AGORA / PRÓXIMO
 
-### 1. Conceito de Turno (TurnoDoPersonagem) — PRÓXIMO GRANDE TEMA
-**Status:** conceitos fechados, falta ADR + implementação.
-**Dor:** o turno está diluído em 5 métodos do CombateService (ExecutarTurnoCompleto,
-ExecutarInicioDeTurno, AvancarStatus, AvancarCooldowns, check de Preso), sem dono.
-O estado (duração de status, cooldown, "1x por agressor") vive espalhado.
+### 1. Conceito de Turno (TurnoDoPersonagem) — PARCIALMENTE FEITO
+**Status:** RELÓGIO FEITO. TurnoDoPersonagem extraído do CombateService (ADR em
+docs/ADR-conceito-de-turno.md): expõe Iniciar() (tick dos status) e Finalizar()
+(avança duração de status + remove expirados + avança cooldowns). O CombateService
+chama os dois em volta da Ação.
+**FALTA (cruza o C5 — "o inevitável adiado"):**
+- O reset "1x por agressor por turno" — mora no Turno, mas serve as reações do C5.
+- O disparo do evento InicioDoTurno das passivas — hoje ficou no CombateService
+  (DispararEventoInicioDeTurno) porque depende do sistema de passivas DeveAtivar/
+  enum, que o C5 vai migrar.
+Ambos serão feitos na branch que mexe em Turno + C5 JUNTOS (o ponto onde os dois
+temas se cruzam, que decidimos não forçar a separar).
 
-**Conceito fechado:**
-- Turno = 3 fases: **Início → Ação → Fim**.
-- Início/Fim são "relógio" (mecânico, automático, sem decisão; igual pra jogador e bot).
-- Ação é "vontade" (decisão + UI + bot; diferente pra cada um).
-- **Escopo (Opção 1.5):** o TurnoDoPersonagem é dono do RELÓGIO — expõe `Iniciar()`
-  (tick de status, eventos de início, futuro reset do "1x por agressor") e
-  `Finalizar()` (avança duração de status, avança cooldowns). O CombateService chama
-  esses EM VOLTA da Ação. A Ação fica no service porque arrasta dependências
-  (menu/bot/UI/seleção de alvo) que o Turno NÃO deve conhecer — senão o Turno vira
-  outro CombateService (God Object renomeado).
+**Conceito fechado (referência):**
+- Turno = 3 fases: Início → Ação → Fim. Início/Fim = "relógio" (mecânico); Ação =
+  "vontade" (decisão/UI/bot, fica no service).
+- O que NÃO migrou (continua no StatusEffect): Turnos, TurnosRestantes (duração é
+  dado do status), AoPassarTurno (hook interno de reação ao avanço).
 
-**Fronteira de responsabilidade (por dependências):**
-- Início/Fim dependem só de status + cooldown do combatente → vão pro Turno.
-- Ação depende de UI/input/bot → fica no CombateService.
-
-**O que migra pro Turno (do StatusEffect/CombateService):**
-- A INVOCAÇÃO de `AoIniciarTurno` e `PassarTurno` dos status (hoje no CombateService).
-- O `AvancarCooldowns` (hoje percorre Cooldowns no service; SkillCooldown continua
-  sendo a classe que encapsula o cooldown — só a orquestração migra).
-- O `AvancarStatus` (avança duração + remove expirados).
-- (Futuro C5b) o reset do "1x por agressor por turno".
-
-**O que NÃO migra (continua no StatusEffect — é estado/mecanismo do próprio status):**
-- `Turnos`, `TurnosRestantes` (duração é dado do status; buffs decidem "maior
-  duração prevalece", debuffs stack sincronizam com Stacks).
-- `AoPassarTurno` (hook interno do status pra reagir ao avanço — ex: ContraAtaque
-  reseta HashSet).
-
-**Próximo passo:** escrever `docs/ADR-conceito-de-turno.md`.
-
-### 2. Seleção de Alvo — separar regra de UI
-**Status:** auditado, falta ADR + implementação. Tema próprio (depois do Turno).
-**Dor:** no CombateService, mistura regra de domínio com UI e bot:
-- `ResolverListaDeAlvosDisponiveis` → REGRA de targeting (Provocar > sem Intocável/
-  Bloqueio > sem Bloqueio > todos). Domínio puro. SOBREVIVE à web.
-- `EscolherAlvoDaLista` → UI (desenha lista, ReadKey). MORRE na web.
-- `EscolherAlvoAleatorio` → lógica de bot.
-
-**Direção:** extrair a REGRA de targeting (domínio) pra perto do Combate ou um
-serviço próprio; a UI fica no MenuService; o bot vira estratégia. Benefício extra:
-isola o que persiste (regra) do que será descartado (UI).
-**Próximo passo:** escrever `docs/ADR-selecao-de-alvo.md`.
-
-### 3. Save defensivo (fix barato, AGORA)
-**Status:** fix pequeno e isolado.
-**Dor:** `CapitulosService.CarregarProgresso` e `ArsenalService.CarregarItensEquipados/
-CarregarItens` desserializam JSON do disco SEM tratamento. Save corrompido (jogador
-editou, versão antiga, disco falhou) → JsonSerializer lança → jogo CRASHA na
-inicialização.
-**Fix:** try-catch no carregamento com fallback ("save inválido → começa do zero").
-Exception aqui é correta: é um LIMITE (I/O + parsing externo), não o núcleo. O
-conceito de "carregar defensivamente com fallback" SOBREVIVE pro mundo SQL.
-**Branch:** fix/carregamento-save-defensivo.
+### 2. RelógioDoCombate — enrage / limite de turnos
+**Status:** FUTURO, YAGNI. Lugar reservado, não implementar agora.
+**O que é:** conceito VIZINHO do TurnoDoPersonagem, num nível ACIMA (combate/rodada).
+Conta os turnos GLOBAIS do combate e dispara eventos em marcos (turno X → boss mata
+todos / enrage; limite de turnos da fase → anti-stall). É o relógio do COMBATE, não o
+turno de um personagem — relógios diferentes, níveis diferentes (SRP).
+**Por que reservar:** players otimizam até quebrar o jogo (combos infinitos); o jogo
+VAI querer rédea (enrage timer é padrão clássico). Mora no nível do ExecutarCombate,
+não dentro do TurnoDoPersonagem. Implementa quando uma fase concreta pedir.
 
 ---
 
 ## PAUSADO (depende de pré-requisitos)
 
-### 4. C5 — padrão de reações das passivas
+### 3. C5 — padrão de reações das passivas
 **Status:** PAUSADO. Buffs reativos já migrados (PR-C, C2-C6). Passivas continuam no
 DeveAtivar/enum (que FUNCIONA). Estado estável.
 **Por que pausou:** os casos complexos do C5 dependem de Turno e EventoDano:
 - O reset "1x por agressor por turno" (decidido: igual ContraAtaque) precisa do
-  conceito de Turno pra morar no lugar certo.
+  conceito de Turno pra morar no lugar certo. (Turno-relógio já existe; falta o reset.)
 - Sushiman (precisa FoiCritico + Aliados), stat-builders → precisam do ContextoReacao
   rico (EventoDano).
-**Ordem de dependência:** Turno → EventoDano → C5.
+**Ordem de dependência:** Turno → EventoDano → C5. (Turno-relógio feito; falta o
+reset + EventoDano antes do grosso do C5.)
 **O que falta no C5 (quando voltar):**
 - Fundação: base HabilidadePassiva (DeveAtivar/Ativar viram virtual); dispatch varre
   StatusAtivos + Personagem.Habilidades por interface (com check de cooldown pro lado
@@ -117,12 +87,14 @@ DeveAtivar/enum (que FUNCIONA). Estado estável.
   + cooldown); Guarda (HACK de revive — intenção real = "impedir morte" via Invencivel,
   Categoria B; consertar se fácil, senão ajustar passiva); Fada/Vilao (IReageAoMatar);
   BonecoDeNeve/Genio (início de turno).
+- Disparo do evento InicioDoTurno das passivas (hoje em DispararEventoInicioDeTurno no
+  CombateService) — reavaliar se vai pro Turno quando as passivas migrarem.
 - Aposentar DeveAtivar/enum EventoCombate só quando TODAS migrarem.
 - Espinhos/ContraAtaque (já migrados) largam HashSet próprio e usam a política central.
 **Decisão firmada:** Espinhos/Zumbi/Coco = "1x por agressor por turno" igual ContraAtaque
 (não por-hit). O controle dessa frequência é reusável (não copiado em cada efeito).
 
-### 5. EventoDano — contexto rico das reações
+### 4. EventoDano — contexto rico das reações
 **Status:** FUTURO (depois do Turno, antes/junto do C5).
 **O que é:** o ContextoReacao atual (Portador, Outro, DanoCausado, Natureza) é magro.
 EventoDano = registro rico (dano bruto/efetivo/absorvido, FoiCritico, atacante, alvo,
@@ -132,34 +104,23 @@ natureza, aliados). Evolução natural do ContextoReacao. Alimenta também a ver
 Forma 1 (recursão profundidade 1, segura pela natureza Revide) e migra pra fila quando
 o EventoDano vier.
 
-### 6. RelógioDoCombate — enrage / limite de turnos
-**Status:** FUTURO, YAGNI. Lugar reservado, não implementar agora.
-**O que é:** conceito VIZINHO do TurnoDoPersonagem, num nível ACIMA (combate/rodada).
-Conta os turnos GLOBAIS do combate e dispara eventos em marcos (turno X → boss mata
-todos / enrage; limite de turnos da fase → anti-stall). É o relógio do COMBATE, não o
-turno de um personagem — relógios diferentes, níveis diferentes (SRP).
-**Por que reservar agora:** players otimizam até quebrar o jogo (combos infinitos);
-o jogo VAI querer rédea (enrage timer é padrão clássico). O ADR do Turno só precisa
-NÃO IMPEDIR isso — deixar claro que o RelógioDoCombate mora no nível do ExecutarCombate,
-não dentro do TurnoDoPersonagem. Implementa quando uma fase concreta pedir.
-
 ---
 
 ## BOY SCOUT (quando tocar) / FUTURO ARQUITETURAL
 
-### 7. Capacidades — intervenção-dano / stat / bloqueio viram interface
-**Status:** ADR já existe (docs/ADR-modelo-de-capacidades.md). Migração incremental.
-Reações (Categoria A) em curso. As outras categorias migram por boy scout ou PR dedicado:
-- B) Intervenção no dano → IModificaDanoRecebido (Escudo, BloqueioTotal, Invencivel,
-  ProtecaoAliado, ReducaoDanoFixo). Hoje é método virtual ModificarDanoRecebido.
+### 5. Capacidades — intervenção-dano / stat / bloqueio viram interface
+**Status:** ADR em docs/ADR-modelo-de-capacidades.md. Migração incremental.
+- A) Reação após evento → interfaces IReageAo* — buffs FEITOS (PR-C); passivas no C5.
+- B) Intervenção no dano → IModificaDanoRecebido ✅ FEITO (Escudo, BloqueioTotal,
+  Invencivel, ProtecaoAliado, ReducaoDanoFixo). Método virtual morto removido da base.
+- E) Bloqueio de aplicação → IBloqueiaStatus ✅ FEITO (ImunidadeDebuffs,
+  ImunidadeEspecifica, ImpedirBeneficios). Método virtual morto removido da base.
 - C) Stat sob demanda → IContribuiDefesa / IContribuiAtaque / IContribuiCrit
-  (BuffDefesa/ReducaoDefesa já espelhados via ContribuicaoDefesa).
-- E) Bloqueio de aplicação → IBloqueiaStatus (ImunidadeDebuffs, ImunidadeEspecifica,
-  ImpedirBeneficios). Hoje é método virtual Bloqueia.
-- D) Comportamento de turno (Medo/Preso/Irritar) → baixa prioridade, avaliar se vale
-  interface ou se a consulta atual basta.
+  (BuffDefesa/ReducaoDefesa já espelhados via ContribuicaoDefesa). PENDENTE (boy scout).
+- D) Comportamento de turno (Medo/Preso/Irritar) → PENDENTE, baixa prioridade,
+  avaliar se vale interface ou se a consulta atual basta.
 
-### 8. Persistência — arquivo → SQL (futuro web)
+### 6. Persistência — arquivo → SQL (futuro web)
 **Status:** FUTURO (versão web 2027). Registrar direção, não fazer agora.
 **Problema atual:** os Services acessam arquivo DIRETO (File.ReadAllText + JsonSerializer
 dentro de CapitulosService/ArsenalService). Acoplamento à persistência espalhado. Quando
@@ -168,8 +129,13 @@ virar SQL, mexe em vários services.
 IRepositorioProgresso / IRepositorioItens) que hoje lê arquivo, amanhã lê SQL. A troca
 arquivo→SQL passa a mexer num lugar só. YAGNI até a web chegar — mas a direção fica
 registrada pra não acoplar mais ainda nesse meio tempo.
-**Nota:** o save em arquivo é da versão console (morre na web). Só o fix barato do
-"save defensivo" (item 3) vale agora; refatorar pra repositório é trabalho da web.
+**Nota:** o save em arquivo é da versão console (morre na web). O fix do "save
+defensivo" (já feito) cobre o risco imediato; refatorar pra repositório é trabalho da web.
+
+### 7. Services-lookup (cosmético, baixa prioridade)
+**Status:** observado na auditoria, sem dor. FaccaoService e CampanhaService são
+basicamente tabelas (dicionário/lista + getters, sem comportamento real). Candidatos a
+virar dados em vez de service. Cosmético — fazer só se incomodar. YAGNI.
 
 ---
 
@@ -182,6 +148,17 @@ registrada pra não acoplar mais ainda nesse meio tempo.
   AoSerAtacado/AoCausarDano) + EventoCombate.AntesDeReceberDano.
 - **fix Veneno tick:** dano do tick é 5% fixo (não × Stacks); acúmulo só recompensa na
   Explosão (Putrefação). Queima já estava correta.
+- **fix Save defensivo:** CarregarProgresso/CarregarItensEquipados tratam JSON corrompido/
+  ilegível (JsonException/IOException) com fallback (começa do zero + aviso), em vez de
+  crashar. Tratamento no limite de I/O, não no núcleo.
+- **TurnoDoPersonagem (relógio)** extraído do CombateService (Iniciar/Finalizar). ADR em
+  docs/ADR-conceito-de-turno.md. Falta o reset 1x-por-agressor + evento de início (cruzam C5).
+- **Seleção de Alvo:** regra de targeting → SelecaoDeAlvoService (injetável, domínio puro);
+  UI → MenuService.EscolherAlvoNaTela; bot → SelecaoDeAlvoService.EscolherAlvoBot (ponto de
+  evolução p/ IA do AW v2). CombateService só orquestra. ADR em docs/ADR-selecao-de-alvo.md.
+- **Capacidades B + E:** IModificaDanoRecebido (Escudo/BloqueioTotal/Invencivel/
+  ProtecaoAliado/ReducaoDanoFixo) e IBloqueiaStatus (ImunidadeDebuffs/ImunidadeEspecifica/
+  ImpedirBeneficios). Métodos virtuais mortos removidos da base StatusEffect.
 - **ADR modelo de capacidades** salvo em docs/.
 - **Stats em Camadas** (Ataque/Defesa/Crit calculados sob demanda, buffs/debuffs/
   permanentes como camadas).

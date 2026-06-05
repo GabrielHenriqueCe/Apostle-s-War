@@ -1,10 +1,7 @@
 ﻿using ApostlesWar;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using GHUtils;
-using static GHUtils.ConsoleUtils;
-using static GHUtils.Helper;
+
 
 namespace v1_Apostle_s_War.Services
 {

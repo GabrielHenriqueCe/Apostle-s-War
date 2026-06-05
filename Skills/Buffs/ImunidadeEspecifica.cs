@@ -9,7 +9,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
     /// 
     /// Usado pela PassivaDragao (Veneno + Queima) e por futuras passivas iniciais.
     /// </summary>
-    class ImunidadeEspecifica : Buff
+    class ImunidadeEspecifica : Buff, IBloqueiaStatus
     {
         private readonly HashSet<Type> _tipos;
 
@@ -20,7 +20,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
             _tipos = tipos.ToHashSet();
         }
 
-        public override bool Bloqueia(StatusEffect novo) => _tipos.Contains(novo.GetType());
+        public bool Bloqueia(StatusEffect novo) => _tipos.Contains(novo.GetType());
 
         public override void Remover(Combate alvo)
         {

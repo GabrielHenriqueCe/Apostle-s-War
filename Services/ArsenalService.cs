@@ -23,16 +23,16 @@ namespace v1_Apostle_s_War.Services
         #region Arsenal
 
         Dictionary<Faccao, string[]> simbolosPorFaccao = new Dictionary<Faccao, string[]>
-{
-    { Faccao.Reino,        new[] { "🗡️", "👑", "🛡️", "📿", "👔", "👖", "👞" } },
-    { Faccao.LadoSombrio,  new[] { "🏹", "🕶️", "💼", "🦯", "🥋", "🦽", "👟" } },
-    { Faccao.Tecnologicos, new[] { "🔫", "🥽", "🧰", "🦾", "🥼", "🦿", "🛼" } },
-    { Faccao.Folclore,     new[] { "🪃", "🧢", "🧳", "🥊", "🎽", "🩳", "🩴" } },
-    { Faccao.Misticos,     new[] { "🪭", "👒", "👛", "💅", "🥻", "👙", "👠" } },
-    { Faccao.Especial,     new[] { "🔪", "⛑️", "🍳", "🚬", "🦺", "🛢️", "👢" } },
-    { Faccao.Decaidos,     new[] { "🪄", "🎩", "🎒", "🩼", "🧥", "🦼", "🥾" } },
-    { Faccao.Apostolos,    new[] { "🎄", "🧣", "🔔", "🧤", "👘", "🩲", "🪽" } },
-};
+        {
+            { Faccao.Reino,        new[] { "🗡️", "👑", "🛡️", "📿", "👔", "👖", "👞" } },
+            { Faccao.LadoSombrio,  new[] { "🏹", "🕶️", "💼", "🦯", "🥋", "🦽", "👟" } },
+            { Faccao.Tecnologicos, new[] { "🔫", "🥽", "🧰", "🦾", "🥼", "🦿", "🛼" } },
+            { Faccao.Folclore,     new[] { "🪃", "🧢", "🧳", "🥊", "🎽", "🩳", "🩴" } },
+            { Faccao.Misticos,     new[] { "🪭", "👒", "👛", "💅", "🥻", "👙", "👠" } },
+            { Faccao.Especial,     new[] { "🔪", "⛑️", "🍳", "🚬", "🦺", "🛢️", "👢" } },
+            { Faccao.Decaidos,     new[] { "🪄", "🎩", "🎒", "🩼", "🧥", "🦼", "🥾" } },
+            { Faccao.Apostolos,    new[] { "🎄", "🧣", "🔔", "🧤", "👘", "🩲", "🪽" } },
+        };
 
         /// <summary>
         /// Adiciona um item à lista de obtidos ao concluir uma fase
@@ -70,13 +70,21 @@ namespace v1_Apostle_s_War.Services
         /// </summary>
         public void CarregarItensEquipados()
         {
-            if (File.Exists("itens.txt"))
+            if (!File.Exists("itens.txt")) return;
+
+            try
             {
                 var json = File.ReadAllText("itens.txt");
                 var lista = JsonSerializer.Deserialize<Item?[]>(json);
                 if (lista != null)
-                    for (int i = 0; i < lista.Length; i++)
+                    for (int i = 0; i < lista.Length && i < equipados.Length; i++)
                         equipados[i] = lista[i];
+            }
+            catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
+            {
+                // Itens corrompidos ou ilegíveis: mantém os slots vazios (default) em vez de crashar.
+                Console.WriteLine("⚠️ Não foi possível carregar os itens equipados (arquivo inválido).");
+                Thread.Sleep(2000);
             }
         }
 

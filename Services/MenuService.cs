@@ -437,6 +437,27 @@ namespace v1_Apostle_s_War.Services
             Console.WriteLine("\nWASD - Navegar | Enter - Selecionar/Remover/Iniciar | Esc - Voltar");
         }
 
+        public Combate EscolherAlvoNaTela(List<Combate> alvosDisponiveis, List<Combate> aliados, List<Combate> defensores)
+        {
+            int idx = 1;
+            while (true)
+            {
+                Console.Clear();
+                ExibirPartida(aliados, defensores);
+                Console.WriteLine("\nAlvos:");
+                for (int i = 0; i < alvosDisponiveis.Count; i++)
+                {
+                    string cursor = idx == i + 1 ? "▶" : " ";
+                    Console.WriteLine($"{cursor} {i + 1} - {alvosDisponiveis[i].Personagem.Simbolo} {alvosDisponiveis[i].Personagem.Nome} | HP:{alvosDisponiveis[i].HPAtual} ATK:{alvosDisponiveis[i].Ataque} DEF:{alvosDisponiveis[i].Defesa}");
+                }
+
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter) return alvosDisponiveis[idx - 1];
+
+                idx = ConsoleUtils.SelecionarComCursor(idx, 1, alvosDisponiveis.Count, key.Key);
+            }
+        }
+
         /// <summary>
         /// Loop de navegação da seleção de time.
         /// Retorna time preenchido ou lista vazia se cancelou.

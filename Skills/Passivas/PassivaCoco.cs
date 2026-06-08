@@ -4,24 +4,29 @@ using v1_Apostle_s_War.Skills.Debuffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Ao ser atacado, aplica 2 stacks de Veneno no atacante.
-    /// Mais agressivo que PassivaZumbi (1 stack).
+    /// Ao ser atacado, aplica 2 stacks de Veneno no atacante. Migrada para o
+    /// modelo de reação (IReageAoSerAtacado). Mais agressiva que a Zumbi (1 stack).
+    /// (Por-hit por enquanto; "1x por agressor por turno" vem com o Turno.)
     /// </summary>
-    class PassivaCoco : HabilidadePassiva
+    class PassivaCoco : HabilidadePassiva, IReageAoSerAtacado
     {
         public PassivaCoco() : base("Fedorento", "💩", 0,
             "Ao ser atacado, aplica 2 stacks de Veneno no atacante.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
-
-        // ctx.Atacante = Coco (portador); alvo = quem atacou
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!alvo.EstaVivo()) return SemDano();
-            new Veneno(stacks: 2).Aplicar(alvo);
-            return SemDano();
+            if (!ctx.Outro.EstaVivo())
+                return new List<ResultadoReacao>();
+
+            new Veneno(stacks: 2).Aplicar(ctx.Outro);
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"{ctx.Outro.Personagem.Nome} foi envenenado pelo Fedorento! 💩"
+                )
+            };
         }
     }
 }

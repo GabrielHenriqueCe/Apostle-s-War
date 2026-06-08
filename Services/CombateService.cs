@@ -414,40 +414,62 @@ namespace v1_Apostle_s_War.Services
         /// </summary>
         private void ProcessarReacoesAlvo(Combate alvo, Combate atacante, ResultadoAtaque r)
         {
-            // Reações só fazem sentido se o golpe permite (Completa ou SemContraAtaque).
-            // Nenhuma (veneno/queima/dano indireto) não dispara reação.
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
             var ctx = new ContextoReacao(alvo, atacante, r.Dano, r.Natureza);
             var resultados = new List<ResultadoReacao>();
 
-            // AoReceberDano: só com dano > 0. [Reflexo, Sangramento]
+            // AoReceberDano: só com dano > 0. [buffs: Reflexo, Sangramento | passivas: futuras]
             if (r.Dano > 0)
+            {
                 foreach (var s in alvo.StatusAtivos.OfType<IReageAoReceberDano>().ToList())
                     resultados.AddRange(s.AoReceberDano(ctx));
 
-            // AoSerAtacado: sempre. [Espinhos, ContraAtaque]
+                foreach (var p in ColetarPassivasReativas<IReageAoReceberDano>(alvo))
+                    resultados.AddRange(p.AoReceberDano(ctx));
+            }
+
+            // AoSerAtacado: sempre. [buffs: Espinhos, ContraAtaque | passivas: Zumbi, Coco...]
             foreach (var s in alvo.StatusAtivos.OfType<IReageAoSerAtacado>().ToList())
                 resultados.AddRange(s.AoSerAtacado(ctx));
 
+            foreach (var p in ColetarPassivasReativas<IReageAoSerAtacado>(alvo))
+                resultados.AddRange(p.AoSerAtacado(ctx));
+
             ExibirResultadosReacao(alvo, resultados);
 
-            // Executa revides declarados (ContraAtaque). O revide usa natureza Revide e
-            // propaga as reações do alvo revidado (reflexo/espinhos dele agem; o
-            // contra-ataque dele NÃO, por ser SemContraAtaque -> não recursão infinita).
+            // Revide (ContraAtaque) — inalterado
             foreach (var res in resultados)
             {
                 if (res.RevidarAlvo == null) continue;
-                if (!alvo.EstaVivo()) break;            // morto não revida (mas já declarou — ver nota)
+                if (!alvo.EstaVivo()) break;
                 if (!res.RevidarAlvo.EstaVivo()) continue;
 
                 var revide = alvo.Atacar(res.RevidarAlvo, 1.0, natureza: NaturezasDano.Revide);
                 _menuService.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
                 Thread.Sleep(1500);
-
-                // Propaga: o alvo revidado reage ao revide (profundidade 1, Revide barra contra-ataque)
                 ProcessarReacoesAlvo(res.RevidarAlvo, alvo, revide);
             }
+        }
+
+        /// <summary>
+        /// Coleta as passivas do combatente que implementam a interface de reação T,
+        /// respeitando o cooldown (passivas têm Cooldowns; buffs/status não). Consome o
+        /// cooldown ao coletar — a passiva "usou" sua reação neste disparo. Passivas com
+        /// cooldown 0 (a maioria das reativas) estão sempre disponíveis.
+        /// </summary>
+        private IEnumerable<T> ColetarPassivasReativas<T>(Combate combatente) where T : class
+        {
+            var coletadas = new List<T>();
+            foreach (var hab in combatente.Personagem.Habilidades)
+            {
+                if (hab is not T reativa) continue;
+                if (!combatente.Cooldowns[hab].Disponivel) continue;
+
+                coletadas.Add(reativa);
+                combatente.Cooldowns[hab].Usar();
+            }
+            return coletadas;
         }
 
         /// <summary>

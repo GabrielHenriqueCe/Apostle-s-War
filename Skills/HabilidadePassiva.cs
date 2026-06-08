@@ -10,9 +10,12 @@
         public virtual bool Revive() => false;
 
         /// <summary>
-        /// Cada passiva decide sozinha se deve disparar com base no evento e contexto.
+        /// Passivas do sistema VELHO (enum/evento) sobrescrevem isto pra decidir se
+        /// disparam. Passivas MIGRADAS para o modelo de reação (IReageAo*) NÃO
+        /// sobrescrevem — herdam o default false e são processadas pelo dispatch de
+        /// reações (ProcessarReacoesAlvo), não por aqui.
         /// </summary>
-        public abstract bool DeveAtivar(EventoCombate evento, ContextoPassiva contexto);
+        public virtual bool DeveAtivar(EventoCombate evento, ContextoPassiva contexto) => false;
 
         /// <summary>
         /// Mensagem exibida quando a passiva impede a morte ou faz algo notavel
@@ -30,7 +33,7 @@
 
         protected List<ResultadoAtaque> SemDano() => new List<ResultadoAtaque>();
 
-        public override abstract List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo);
+        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
 
         /// <summary>
         /// Obtém (ou cria) o estado de runtime desta passiva para o combatente.

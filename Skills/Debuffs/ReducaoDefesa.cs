@@ -11,7 +11,7 @@ namespace v1_Apostle_s_War.Skills.Debuffs
     /// ContribuicaoDefesa expõe (negativo) quanto este debuff tira agora, pra
     /// habilidades que ignoram status de defesa no ataque.
     /// </summary>
-    class ReducaoDefesa : Debuff
+    class ReducaoDefesa : Debuff, IContribuiDefesa
     {
         public ReducaoDefesa(int turnos = 2)
             : base("Redução DEF", "🔎", turnos, 0.30, "-30% DEF.") { }
@@ -35,7 +35,7 @@ namespace v1_Apostle_s_War.Skills.Debuffs
         /// Quanto este debuff tira da defesa AGORA (valor negativo): percentual
         /// sobre a base com itens e stacks permanentes.
         /// </summary>
-        public override int ContribuicaoDefesa(Combate portador) =>
+        public int ContribuicaoDefesa(Combate portador) =>
             -(int)(portador.DefesaComStacks * Valor);
 
         public override void Remover(Combate alvo)

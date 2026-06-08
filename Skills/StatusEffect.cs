@@ -9,7 +9,6 @@
     /// - Remover: limpeza ao expirar
     /// - AoIniciarTurno: efeitos no início do turno do portador (Veneno, CuraContinua)
     /// - AoPassarTurno: hook depois de PassarTurno (resetar CDs internos)
-    /// - ContribuicaoDefesa: quanto este status soma na DEF do portador
     ///   (usado quando habilidade decide ignorar buffs específicos do alvo)
     /// </summary>
     abstract class StatusEffect
@@ -58,12 +57,6 @@
         /// </summary>
         protected virtual void AoPassarTurno() { }
 
-        /// <summary>
-        /// Quanto este status soma (positivo) ou subtrai (negativo) na DEF do portador.
-        /// Usado quando um ataque decide ignorar buffs específicos — a contribuição é
-        /// subtraída da DEF efetiva no cálculo do dano. Default: 0 (não afeta DEF).
-        /// </summary>
-        public virtual int ContribuicaoDefesa(Combate portador) => 0;
 
         public virtual void Aplicar(Combate alvo)
         {

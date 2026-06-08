@@ -262,10 +262,11 @@ namespace ApostlesWar
             if (!natureza.IgnoraDefesa)
             {
                 int defesaEfetiva = Defesa;
-                foreach (var status in StatusAtivos)
+                foreach (var contribuidor in StatusAtivos.OfType<IContribuiDefesa>())
                 {
+                    var status = (StatusEffect)contribuidor;
                     if (ignorados.Contains(status.GetType()))
-                        defesaEfetiva -= status.ContribuicaoDefesa(this);
+                        defesaEfetiva -= contribuidor.ContribuicaoDefesa(this);
                 }
                 defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
                 defesaEfetiva = Math.Max(0, defesaEfetiva);

@@ -3,34 +3,33 @@
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Cada ataque +5% DanoCrit, até 25%. Estado per-combate via ObterEstado.
+    /// Ao atacar, ganha +5% de Dano Crítico (cap 25% acumulado). Migrada para IReageAoAtacar
+    /// (segue TipoAtaque). Ganho no PRÓPRIO atacante.
     /// </summary>
-    class Virus : HabilidadePassiva
+    class Virus : HabilidadePassiva, IReageAoAtacar
     {
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;
 
-        private class Estado
-        {
-            public double TotalAumentado;
-        }
+        private class Estado { public double TotalAumentado; }
 
         public Virus() : base("Vírus", "👾", 0,
             "A cada ataque, +5% de Dano Crítico, até 25%.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeAtacar;
-
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoAtacar(ContextoReacao ctx)
         {
-            var estado = ObterEstado<Estado>(ctx.Atacante);
-            if (estado.TotalAumentado >= Cap) return SemDano();
+            var estado = ObterEstado<Estado>(ctx.Portador);
+            if (estado.TotalAumentado >= Cap) return new List<ResultadoReacao>();
 
             double aumentar = Math.Min(AumentoPorHit, Cap - estado.TotalAumentado);
-            ctx.Atacante.AdicionarBonusDanoCritPermanente(aumentar);
+            ctx.Portador.AdicionarBonusDanoCritPermanente(aumentar);
             estado.TotalAumentado += aumentar;
-            return SemDano();
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(Mensagem: $"👾 O Vírus intensificou o dano crítico de {ctx.Portador.Personagem.Nome}!")
+            };
         }
     }
 }

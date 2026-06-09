@@ -270,27 +270,24 @@ namespace v1_Apostle_s_War.Services
                 _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
                 Thread.Sleep(1500);
 
-                // ORDEM IMPORTANTE: DepoisDeMatar dispara ANTES de DepoisDeReceberDano.
-                // O Vilão (DepoisDeMatar) precisa bloquear o revive ANTES da Necromancia
-                // ou Guarda (DepoisDeReceberDano + !ctx.AlvoVivo) tentarem reviver.
-                // Conceitualmente: "ao matar" precede "ao morrer" — a consequência da
-                // morte só faz sentido depois que a morte foi totalmente processada.
                 ProcessarPassivasAtacanteMorte(atacante, r.Alvo, aliados, defensores);
-
                 ProcessarPassivasAlvo(r.Alvo, atacante, aliados, defensores, r.Critico);
 
-                // Reações dos buffs/status (sistema novo — roda vazio até a migração dos efeitos)
                 ProcessarReacoesAlvo(r.Alvo, atacante, r);
-                ProcessarReacoesAtacante(atacante, r.Alvo, r);
+                ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r);
 
-                // Sequencial: DepoisDeAtacar por hit (Detetive ganha crit em cada ataque)
                 if (hab.TipoAtaque == TipoAtaque.Sequencial)
+                {
                     ProcessarPassivasAtacante(atacante, r.Alvo, aliados, defensores);
+                    ProcessarReacoesAtacantePorAtaque(atacante, r.Alvo, r);
+                }
             }
 
-            // AoE: DepoisDeAtacar dispara 1x no fim (UMA explosão = UM evento)
             if (hab.TipoAtaque == TipoAtaque.AreaDeEfeito && resultados.Count > 0)
+            {
                 ProcessarPassivasAtacante(atacante, resultados[0].Alvo, aliados, defensores);
+                ProcessarReacoesAtacantePorAtaque(atacante, resultados[0].Alvo, resultados[0]);
+            }
 
             atacante.Cooldowns[hab].Usar();
 
@@ -473,16 +470,48 @@ namespace v1_Apostle_s_War.Services
         }
 
         /// <summary>
-        /// Dispara as reações do ATACANTE a um dano causado (lado do atacante).
-        /// C1: roda vazio. Futuro implementador: Sedento.
+        /// Reações do atacante POR ALVO atingido (Nx). Chamado dentro do foreach.
+        /// IReagePorAtaque (Sorrateiro, Policial) + IReageAoCausarDano (Sedento, dano > 0).
         /// </summary>
-        private void ProcessarReacoesAtacante(Combate atacante, Combate alvo, ResultadoAtaque r)
+        private void ProcessarReacoesAtacantePorAlvo(Combate atacante, Combate alvo, ResultadoAtaque r)
         {
-            var ctx = new ContextoReacao(atacante, alvo, r.Dano, r.Natureza);
+            if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
+            var ctx = new ContextoReacao(atacante, alvo, r.Dano, r.Natureza);
             var resultados = new List<ResultadoReacao>();
-            foreach (var s in atacante.StatusAtivos.OfType<IReageAoCausarDano>().ToList())
-                resultados.AddRange(s.AoCausarDano(ctx));
+
+            foreach (var s in atacante.StatusAtivos.OfType<IReagePorAtaque>().ToList())
+                resultados.AddRange(s.PorAtaque(ctx));
+            foreach (var p in ColetarPassivasReativas<IReagePorAtaque>(atacante))
+                resultados.AddRange(p.PorAtaque(ctx));
+
+            if (r.Dano > 0)
+            {
+                foreach (var s in atacante.StatusAtivos.OfType<IReageAoCausarDano>().ToList())
+                    resultados.AddRange(s.AoCausarDano(ctx));
+                foreach (var p in ColetarPassivasReativas<IReageAoCausarDano>(atacante))
+                    resultados.AddRange(p.AoCausarDano(ctx));
+            }
+
+            ExibirResultadosReacao(atacante, resultados);
+        }
+
+        /// <summary>
+        /// Reações do atacante ao EVENTO de atacar (IReageAoAtacar), seguindo o TipoAtaque:
+        /// chamado por hit (Sequencial) ou 1x no fim (AoE), lado a lado com ProcessarPassivasAtacante.
+        /// Para efeitos no próprio atacante (OlhoClinico, Virus).
+        /// </summary>
+        private void ProcessarReacoesAtacantePorAtaque(Combate atacante, Combate alvoRef, ResultadoAtaque r)
+        {
+            if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
+
+            var ctx = new ContextoReacao(atacante, alvoRef, r.Dano, r.Natureza);
+            var resultados = new List<ResultadoReacao>();
+
+            foreach (var s in atacante.StatusAtivos.OfType<IReageAoAtacar>().ToList())
+                resultados.AddRange(s.AoAtacar(ctx));
+            foreach (var p in ColetarPassivasReativas<IReageAoAtacar>(atacante))
+                resultados.AddRange(p.AoAtacar(ctx));
 
             ExibirResultadosReacao(atacante, resultados);
         }

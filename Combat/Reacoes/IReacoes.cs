@@ -53,4 +53,22 @@
     {
         List<ResultadoReacao> AoCausarDano(ContextoReacao ctx);
     }
+
+    /// <summary>
+    /// Reage ao evento de atacar, seguindo o TipoAtaque (AoE = 1x; Sequencial = por hit).
+    /// Para efeitos que beneficiam o PRÓPRIO atacante. Implementadores: OlhoClinico, Virus.
+    /// </summary>
+    interface IReageAoAtacar
+    {
+        List<ResultadoReacao> AoAtacar(ContextoReacao ctx);
+    }
+
+    /// <summary>
+    /// Reage POR ALVO atingido (Nx, sempre). Para efeitos aplicados em CADA alvo do golpe.
+    /// Implementadores: Sorrateiro, Policial.
+    /// </summary>
+    interface IReagePorAtaque
+    {
+        List<ResultadoReacao> PorAtaque(ContextoReacao ctx);
+    }
 }

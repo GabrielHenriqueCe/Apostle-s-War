@@ -3,15 +3,10 @@
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Cada ataque reduz a DEF do inimigo em 5% (sobre a DEF com itens),
-    /// até um cap de -25% TOTAL no alvo.
-    /// 
-    /// A redução mora no próprio alvo (Combate.ReducaoDefesaPermanente), não
-    /// na passiva. Assim, múltiplos Sorrateiros (e futuras maestrias) que
-    /// atacam o mesmo alvo COMPARTILHAM o cap — a DEF do inimigo não cai além
-    /// de -25% no total, independente de quantos reduzem.
+    /// Cada ataque reduz a DEF do alvo em 5% (sobre DefesaComItens), até -25% no alvo.
+    /// A redução mora no alvo (cap compartilhado). Migrada para IReagePorAtaque (por alvo atingido).
     /// </summary>
-    class Sorrateiro : HabilidadePassiva
+    class Sorrateiro : HabilidadePassiva, IReagePorAtaque
     {
         private const double ReducaoPorHit = 0.05;
         private const double Cap = 0.25;
@@ -20,20 +15,21 @@ namespace v1_Apostle_s_War.Skills.Passivas
             "Cada ataque reduz a DEF do inimigo em 5%, até 25%.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeAtacar;
-
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> PorAtaque(ContextoReacao ctx)
         {
-            int reducaoMaxima = (int)(alvo.DefesaComItens * Cap);
-            if (alvo.ReducaoDefesaPermanente >= reducaoMaxima) return SemDano();
+            int reducaoMaxima = (int)(ctx.Outro.DefesaComItens * Cap);
+            if (ctx.Outro.ReducaoDefesaPermanente >= reducaoMaxima) return new List<ResultadoReacao>();
 
-            int incremento = (int)(alvo.DefesaComItens * ReducaoPorHit);
-            int aplicar = Math.Min(incremento, reducaoMaxima - alvo.ReducaoDefesaPermanente);
-            if (aplicar <= 0) return SemDano();
+            int incremento = (int)(ctx.Outro.DefesaComItens * ReducaoPorHit);
+            int aplicar = Math.Min(incremento, reducaoMaxima - ctx.Outro.ReducaoDefesaPermanente);
+            if (aplicar <= 0) return new List<ResultadoReacao>();
 
-            alvo.AdicionarReducaoDefesaPermanente(aplicar);
-            return SemDano();
+            ctx.Outro.AdicionarReducaoDefesaPermanente(aplicar);
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(Mensagem: $"👁️ O Sorrateiro corroeu a defesa de {ctx.Outro.Personagem.Nome}!")
+            };
         }
     }
 }

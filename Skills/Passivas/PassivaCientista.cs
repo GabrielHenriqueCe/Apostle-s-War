@@ -3,27 +3,38 @@
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Sempre que recebe dano, reduz a duração de TODOS os buffs do atacante em 1 turno.
+    /// Ao ser atacado, reduz em 1 turno a duração de TODOS os buffs do atacante
+    /// (removendo os que expiram). Migrada para o modelo de reação
+    /// (IReageAoSerAtacado). Só declara mensagem se havia buff para reduzir.
     /// </summary>
-    class PassivaCientista : HabilidadePassiva
+    class PassivaCientista : HabilidadePassiva, IReageAoSerAtacado
     {
         public PassivaCientista() : base("Análise Crítica", "🔬", 0,
             "Ao ser atacado, reduz em 1t a duração dos benefícios do atacante.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
-
-        // ctx.Atacante = Cientista (portador); alvo = quem atacou o Cientista
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            foreach (var buff in alvo.StatusAtivos.OfType<Buff>().ToList())
+            if (!ctx.Outro.EstaVivo())
+                return new List<ResultadoReacao>();
+
+            var buffs = ctx.Outro.StatusAtivos.OfType<Buff>().ToList();
+            if (buffs.Count == 0)
+                return new List<ResultadoReacao>();
+
+            foreach (var buff in buffs)
             {
                 buff.ReduzirDuracao(1);
                 if (buff.Expirou)
-                    buff.Remover(alvo);
+                    buff.Remover(ctx.Outro);
             }
-            return SemDano();
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"🔬 Análise Crítica encurtou os benefícios de {ctx.Outro.Personagem.Nome}!"
+                )
+            };
         }
     }
 }

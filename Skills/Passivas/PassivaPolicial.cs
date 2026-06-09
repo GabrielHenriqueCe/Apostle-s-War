@@ -1,19 +1,29 @@
 ﻿using ApostlesWar;
 using v1_Apostle_s_War.Skills.Debuffs;
+
 namespace v1_Apostle_s_War.Skills.Passivas
 {
-    class PassivaPolicial : HabilidadePassiva
+    /// <summary>
+    /// Atacar um inimigo Preso adiciona +1 turno ao debuff. Migrada para IReagePorAtaque
+    /// (por alvo atingido). Só declara mensagem se o alvo tinha Preso.
+    /// </summary>
+    class PassivaPolicial : HabilidadePassiva, IReagePorAtaque
     {
         public PassivaPolicial() : base("Algemas Reforçadas", "🔗", 0,
             "Atacar um inimigo Preso adiciona +1 turno ao debuff.")
         { }
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeAtacar;
-        // ctx.Atacante = Policial; alvo = inimigo atacado
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+
+        public List<ResultadoReacao> PorAtaque(ContextoReacao ctx)
         {
-            alvo.StatusAtivos.OfType<Preso>().FirstOrDefault()?.EstenderTurno();
-            return SemDano();
+            var preso = ctx.Outro.StatusAtivos.OfType<Preso>().FirstOrDefault();
+            if (preso == null) return new List<ResultadoReacao>();
+
+            preso.EstenderTurno();
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(Mensagem: $"🔗 Algemas Reforçadas prolongaram o aprisionamento de {ctx.Outro.Personagem.Nome}!")
+            };
         }
     }
 }

@@ -3,13 +3,12 @@
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// A cada hit recebido (ataque direto), o Diabo ganha +5% de HP máximo permanente,
-    /// até o cap de 25% acumulado (5 hits). HPAtual NÃO é alterado — só o máximo aumenta.
-    /// 
-    /// Calculado sobre HPMaximoInicial (HP cheio da fase), consistente com Queima/Maldição.
-    /// Só dispara em dano de ataque direto (não Veneno/Queima).
+    /// A cada hit recebido, o Diabo ganha +5% de HP máximo permanente, até 25%
+    /// acumulado (5 hits). HPAtual NÃO é alterado — só o máximo aumenta. Calculado
+    /// sobre HPMaximoInicial (consistente com Queima/Maldição). Migrada para o
+    /// modelo de reação (IReageAoSerAtacado). O ganho vai no PORTADOR (si mesmo).
     /// </summary>
-    class PassivaDiabo : HabilidadePassiva
+    class PassivaDiabo : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double GanhoPorHit = 0.05;
         private const double Cap = 0.25;
@@ -23,21 +22,23 @@ namespace v1_Apostle_s_War.Skills.Passivas
             "Ao ser atacado, +5% HP máximo (até 25%).")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
-
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            var estado = ObterEstado<Estado>(ctx.Atacante);
-            if (estado.TotalAumentado >= Cap) return SemDano();
+            var estado = ObterEstado<Estado>(ctx.Portador);
+            if (estado.TotalAumentado >= Cap) return new List<ResultadoReacao>();
 
             double aumentar = Math.Min(GanhoPorHit, Cap - estado.TotalAumentado);
-            int delta = (int)(ctx.Atacante.HPMaximoInicial * aumentar);
+            int delta = (int)(ctx.Portador.HPMaximoInicial * aumentar);
 
-            ctx.Atacante.ModificarHPMaximo(delta);
+            ctx.Portador.ModificarHPMaximo(delta);
             estado.TotalAumentado += aumentar;
 
-            return SemDano();
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"😈 Cresce com Dor aumentou o HP máximo de {ctx.Portador.Personagem.Nome}!"
+                )
+            };
         }
     }
 }

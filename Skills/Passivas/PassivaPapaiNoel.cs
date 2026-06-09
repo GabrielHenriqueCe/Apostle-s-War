@@ -4,29 +4,32 @@ using v1_Apostle_s_War.Skills.Debuffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Ao ser atacado, tem 10% de chance de aplicar Preso 1t no atacante.
-    /// Tematicamente: "presente surpresa que te prende".
+    /// Ao ser atacado, 10% de chance de aplicar Preso 1t no atacante. Migrada para
+    /// o modelo de reação (IReageAoSerAtacado). "Presente surpresa que te prende."
+    /// Só declara mensagem quando dispara.
     /// </summary>
-    class PassivaPapaiNoel : HabilidadePassiva
+    class PassivaPapaiNoel : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChancePreso = 0.10;
-
         private static readonly Random _random = new Random();
 
         public PassivaPapaiNoel() : base("Surpresa", "🎁", 0,
             "10% de chance de Prender o atacante ao ser atacado.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
-
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!alvo.EstaVivo()) return SemDano();
-            if (_random.NextDouble() >= ChancePreso) return SemDano();
+            if (!ctx.Outro.EstaVivo()) return new List<ResultadoReacao>();
+            if (_random.NextDouble() >= ChancePreso) return new List<ResultadoReacao>();
 
-            new Preso(turnos: 1).Aplicar(alvo);
-            return SemDano();
+            new Preso(turnos: 1).Aplicar(ctx.Outro);
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"🎁 A Surpresa prendeu {ctx.Outro.Personagem.Nome}!"
+                )
+            };
         }
     }
 }

@@ -4,29 +4,32 @@ using v1_Apostle_s_War.Skills.Debuffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Ao ser atacado, tem 25% de chance de aplicar ReducaoDefesa 2t no atacante.
+    /// Ao ser atacado, 25% de chance de aplicar ReducaoDefesa 2t no atacante.
+    /// Migrada para o modelo de reação (IReageAoSerAtacado). Só declara mensagem
+    /// quando dispara.
     /// </summary>
-    class PassivaTRex : HabilidadePassiva
+    class PassivaTRex : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChanceReducao = 0.25;
-
         private static readonly Random _random = new Random();
 
         public PassivaTRex() : base("Pele Grossa", "🦖", 0,
             "25% de chance de reduzir DEF do atacante ao ser atacado.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
-
-        // ctx.Atacante = T-Rex (portador); alvo = quem atacou
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!alvo.EstaVivo()) return SemDano();
-            if (_random.NextDouble() >= ChanceReducao) return SemDano();
+            if (!ctx.Outro.EstaVivo()) return new List<ResultadoReacao>();
+            if (_random.NextDouble() >= ChanceReducao) return new List<ResultadoReacao>();
 
-            new ReducaoDefesa(turnos: 2).Aplicar(alvo);
-            return SemDano();
+            new ReducaoDefesa(turnos: 2).Aplicar(ctx.Outro);
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"🦖 Pele Grossa enfraqueceu a defesa de {ctx.Outro.Personagem.Nome}!"
+                )
+            };
         }
     }
 }

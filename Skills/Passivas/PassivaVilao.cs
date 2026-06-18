@@ -1,27 +1,26 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Debuffs;
 
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Quando o Vilão mata um inimigo, bloqueia ressurreição desse inimigo via
-    /// Combate.BloquearRevive(). Habilidades que respeitam o bloqueio (Necromancia,
-    /// PassivaGuarda) nao conseguem reviver. AnjoCaido (Diabo) ignora proposital.
+    /// Ao matar um inimigo, bloqueia a ressurreição dele (BloquearRevive). Migrada
+    /// para IReageAoMatar. Roda antes do "ao morrer" — bloqueia antes da tentativa
+    /// de reviver (Necromancia/Guarda). AnjoCaido (Diabo) ignora proposital.
     /// </summary>
-    class PassivaVilao : HabilidadePassiva
+    class PassivaVilao : HabilidadePassiva, IReageAoMatar
     {
         public PassivaVilao() : base("Sentença", "🦹", 0,
             "Inimigos mortos por ele não podem ser ressuscitados.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeMatar;
-
-        // ctx.Atacante = Vilão (portador); alvo = inimigo que ele matou
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoMatar(ContextoReacao ctx)
         {
-            alvo.BloquearRevive();
-            return SemDano();
+            ctx.Outro.BloquearRevive();
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(Mensagem: $"🦹 Sentença: {ctx.Outro.Personagem.Nome} não poderá ressuscitar!")
+            };
         }
     }
 }

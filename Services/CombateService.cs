@@ -143,6 +143,7 @@ namespace v1_Apostle_s_War.Services
 
                 // Mesma ordem de ExecutarHabilidade: DepoisDeMatar antes de DepoisDeReceberDano.
                 ProcessarPassivasAtacanteMorte(atacante, irritar.Aplicador, aliados, defensores);
+                ProcessarReacoesAtacanteMorte(atacante, irritar.Aplicador, resultado);
                 ProcessarPassivasAlvo(irritar.Aplicador, atacante, aliados, defensores, resultado.Critico);
                 ProcessarPassivasAtacante(atacante, irritar.Aplicador, aliados, defensores);
                 return;
@@ -271,6 +272,7 @@ namespace v1_Apostle_s_War.Services
                 Thread.Sleep(1500);
 
                 ProcessarPassivasAtacanteMorte(atacante, r.Alvo, aliados, defensores);
+                ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r);
                 ProcessarPassivasAlvo(r.Alvo, atacante, aliados, defensores, r.Critico);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r);
@@ -536,6 +538,29 @@ namespace v1_Apostle_s_War.Services
                 if (res.Mensagem != "" || res.Dano != null)
                     Thread.Sleep(1500);
             }
+        }
+
+        /// <summary>
+        /// Dispara as reações "ao matar" (IReageAoMatar) do atacante, por alvo morto.
+        /// Chamado no MESMO ponto que ProcessarPassivasAtacanteMorte (antes das reações
+        /// de "ao morrer"), preservando a ordem: bloquear revive (Vilao) precede tentar
+        /// reviver (Necromancia/Guarda). Guarda: só dispara se o alvo realmente morreu.
+        /// </summary>
+        private void ProcessarReacoesAtacanteMorte(Combate atacante, Combate alvoMorto, ResultadoAtaque r)
+        {
+            if (alvoMorto.EstaVivo()) return;
+            if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
+
+            var ctx = new ContextoReacao(atacante, alvoMorto, r.Dano, r.Natureza);
+            var resultados = new List<ResultadoReacao>();
+
+            foreach (var s in atacante.StatusAtivos.OfType<IReageAoMatar>().ToList())
+                resultados.AddRange(s.AoMatar(ctx));
+
+            foreach (var p in ColetarPassivasReativas<IReageAoMatar>(atacante))
+                resultados.AddRange(p.AoMatar(ctx));
+
+            ExibirResultadosReacao(atacante, resultados);
         }
 
         #endregion

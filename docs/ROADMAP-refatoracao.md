@@ -137,6 +137,21 @@ defensivo" (já feito) cobre o risco imediato; refatorar pra repositório é tra
 basicamente tabelas (dicionário/lista + getters, sem comportamento real). Candidatos a
 virar dados em vez de service. Cosmético — fazer só se incomodar. YAGNI.
 
+### 8. Bloquear-revive temporário / "status do estado morto" (FUTURO, não desenhar agora)
+**Status:** ideia registrada, YAGNI. Não construir até os efeitos pedirem.
+**Hoje:** "impedir revive" é a flag `PodeReviver` + `BloquearRevive()` (permanente,
+irreversível). O Vilao bloqueia; o AnjoCaido (Diabo) ignora via exceção pontual na
+própria habilidade. Dois casos — a flag basta.
+**A ideia (Gabriel):** se o jogo quiser bloqueio de revive TEMPORÁRIO/removível
+(estilo Raid: duração, cleanse, resistência), a flag não basta. Modelar como um
+"status do ESTADO MORTO" — uma categoria de status separada da lista do vivo, pra
+NÃO ser pega pela ImunidadeDebuffs (que protege o vivo; foi o bug original que tirou
+MortePermanente de Debuff). Essa categoria também acomodaria cenários complexos
+(contra-revive, ignorar-bloqueio seletivo).
+**Por que não agora:** só 2 efeitos hoje (Vilao bloqueia, AnjoCaido ignora). Construir
+um sub-sistema de "status da morte" pra 2 casos é desenhar no escuro. A interface/
+categoria nasce quando os efeitos que a justificam existirem.
+
 ---
 
 ## CONCLUÍDO (referência)

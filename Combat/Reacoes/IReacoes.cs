@@ -71,4 +71,17 @@
     {
         List<ResultadoReacao> PorAtaque(ContextoReacao ctx);
     }
+
+    /// <summary>
+    /// Reage quando o portador MATA um alvo (o golpe reduziu o alvo a 0 HP).
+    /// Dispara por alvo morto (numa AoE que mata vários, dispara por cada morto).
+    /// Portador = quem matou; Outro = o morto.
+    /// IMPORTANTE: roda ANTES das reações de "ao morrer" (Necromancia/Guarda) —
+    /// o Vilao precisa bloquear o revive antes da tentativa de reviver.
+    /// Implementadores: Fada, Vilao.
+    /// </summary>
+    interface IReageAoMatar
+    {
+        List<ResultadoReacao> AoMatar(ContextoReacao ctx);
+    }
 }

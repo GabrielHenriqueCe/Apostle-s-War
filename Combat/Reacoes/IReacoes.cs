@@ -20,9 +20,9 @@
     /// </summary>
     record ResultadoReacao(
         string Mensagem = "",
-        ResultadoAtaque? Dano = null,
+        EventoDano? Dano = null, 
         int Cura = 0,
-        Combate? RevidarAlvo = null   // se preenchido, o CombateService executa um revide neste alvo
+        Combate? RevidarAlvo = null
     );
 
     /// <summary>

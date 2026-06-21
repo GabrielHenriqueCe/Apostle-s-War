@@ -13,7 +13,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Self;
         public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             AplicarBuff(ctx.Atacante, new Provocar(turnos: 2));
             AplicarBuff(ctx.Atacante, new BloqueioTotal(turnos: 1));

@@ -18,7 +18,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public override string MensagemMorreu(Personagem p) =>
             $"{p.Simbolo} {p.Nome} caiu em batalha e não pode ser ressuscitado.";
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             if (!ctx.Atacante.PodeReviver) return SemDano();
             if (ctx.Atacante.HPAtual <= 0)

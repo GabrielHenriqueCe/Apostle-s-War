@@ -21,13 +21,13 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override TipoAtaque TipoAtaque => TipoAtaque.AreaDeEfeito;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             int buffsAtivos = ctx.Atacante.StatusAtivos.OfType<Buff>().Count();
             int buffsContados = Math.Min(buffsAtivos, CapBuffs);
             double multiplicador = MultiplicadorBase + (BonusPorBuff * buffsContados);
 
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             foreach (Combate i in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
                 resultados.Add(AplicarDano(ctx.Atacante, i, multiplicador));
 

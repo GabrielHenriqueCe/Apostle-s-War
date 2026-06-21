@@ -27,17 +27,26 @@ namespace v1_Apostle_s_War.Skills.Buffs
             if (danoRefletido <= 0)
                 return new List<ResultadoReacao>();
 
-            int real = ctx.Outro.ReceberDano(danoRefletido, NaturezasDano.DanoIndireto);
-            var resultado = new ResultadoAtaque(real, false, ctx.Outro,
-                Math.Max(0, ctx.Outro.HPAtual), NaturezasDano.DanoIndireto);
+            var (real, absorvido) = ctx.Outro.ReceberDano(danoRefletido, NaturezasDano.DanoIndireto);
+
+            var resultado = new EventoDano(
+                Atacante: ctx.Portador,
+                Alvo: ctx.Outro,
+                DanoBruto: danoRefletido,
+                DanoEfetivo: real,
+                AbsorvidoPeloEscudo: absorvido,
+                Critico: false,
+                HPRestante: Math.Max(0, ctx.Outro.HPAtual),
+                Natureza: NaturezasDano.DanoIndireto
+            );
 
             return new List<ResultadoReacao>
-            {
-                new ResultadoReacao(
-                    Mensagem: $"{ctx.Portador.Personagem.Nome} refletiu {real} de dano! 🥢",
-                    Dano: resultado
-                )
-            };
+    {
+        new ResultadoReacao(
+            Mensagem: $"{ctx.Portador.Personagem.Nome} refletiu {real} de dano! 🥢",
+            Dano: resultado
+        )
+    };
         }
 
         public override void Remover(Combate alvo)

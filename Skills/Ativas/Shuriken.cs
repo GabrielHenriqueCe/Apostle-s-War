@@ -11,9 +11,9 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Aleatorio;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             var alvos = ResolverAlvos(alvo, ObterListaPrincipal(ctx));
 
             var hit1 = AplicarDano(ctx.Atacante, alvos[0], 1.5);

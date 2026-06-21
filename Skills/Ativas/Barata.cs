@@ -17,11 +17,11 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             new Intocavel(turnos: 2).Aplicar(ctx.Atacante);
 
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
                 bool vivoAntes = a.EstaVivo();

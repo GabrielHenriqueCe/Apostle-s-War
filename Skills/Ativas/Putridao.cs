@@ -19,9 +19,9 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override TipoAtaque TipoAtaque => TipoAtaque.AreaDeEfeito;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             double somaPercentual = 0;
             int comVeneno = 0;
 

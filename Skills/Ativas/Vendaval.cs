@@ -23,9 +23,9 @@ namespace v1_Apostle_s_War.Skills.Ativas
             typeof(BuffDefesa)
         };
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
                 var r = ctx.Atacante.Atacar(

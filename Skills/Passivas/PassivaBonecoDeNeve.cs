@@ -21,7 +21,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
             evento == EventoCombate.InicioDoTurno && ctx.AlvoVivo
             && ctx.Atacante.StatusAtivos.OfType<Queima>().Any();
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             var queimas = ctx.Atacante.StatusAtivos.OfType<Queima>().ToList();
             foreach (var q in queimas)

@@ -11,13 +11,13 @@ namespace v1_Apostle_s_War.Skills.Passivas
             evento == EventoCombate.DepoisDeSerAtacado && ctx.AlvoVivo;
         public override string MensagemSobreviveu(Personagem p) =>
             $"{p.Simbolo} {p.Nome} contra-atacou com Marretada!";
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             if (_random.NextDouble() >= 0.10) return SemDano();
             var resultado = ctx.Atacante.Atacar(alvo, 1.25);
             Console.WriteLine(MensagemSobreviveu(ctx.Atacante.Personagem));
             Thread.Sleep(1500);
-            return new List<ResultadoAtaque> { resultado };
+            return new List<EventoDano> { resultado };
         }
     }
 }

@@ -12,11 +12,11 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             AplicarBuff(ctx.Atacante, new Intocavel(turnos: 2));
 
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
                 resultados.Add(ctx.Atacante.Atacar(a, 1.5,
                     ignorarDefesaPct: 0.75, forcaCritico: true));

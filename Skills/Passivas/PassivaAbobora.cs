@@ -19,7 +19,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
             => SemDano();
     }
 }

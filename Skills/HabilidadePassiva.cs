@@ -31,9 +31,9 @@
         /// </summary>
         public virtual string MensagemMorreu(Personagem personagem) => string.Empty;
 
-        protected List<ResultadoAtaque> SemDano() => new List<ResultadoAtaque>();
+        protected List<EventoDano> SemDano() => new List<EventoDano>();
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
 
         /// <summary>
         /// Obtém (ou cria) o estado de runtime desta passiva para o combatente.

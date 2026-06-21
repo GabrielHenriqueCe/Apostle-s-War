@@ -16,14 +16,14 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             // Invencível em todos os aliados
             foreach (Combate a in ctx.Aliados.Where(c => c.EstaVivo()))
                 new Invencivel(turnos: 2).Aplicar(a);
 
             // Ataque crítico forçado no inimigo
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
                 var r = ctx.Atacante.Atacar(

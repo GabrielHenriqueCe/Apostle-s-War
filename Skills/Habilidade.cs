@@ -26,7 +26,7 @@
         /// ctx contém o atacante, aliados e inimigos.
         /// alvo é o alvo primário selecionado (jogador escolhe, ou aleatório pra inimigo).
         /// </summary>
-        public abstract List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo);
+        public abstract List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo);
     }
 
     #endregion

@@ -22,16 +22,16 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override TipoAtaque TipoAtaque => TipoAtaque.AreaDeEfeito;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             int danoTotal = 0;
 
             foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
                 var r = AplicarDano(ctx.Atacante, a, MultiplicadorAtaque);
                 resultados.Add(r);
-                danoTotal += r.Dano;
+                danoTotal += r.DanoEfetivo;
 
                 if (a.EstaVivo())
                     new Irritar(ctx.Atacante, turnos: 1).Aplicar(a);

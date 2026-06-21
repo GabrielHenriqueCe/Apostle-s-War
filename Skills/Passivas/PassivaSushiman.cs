@@ -10,7 +10,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
             evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo && ctx.FoiCritico;
         // ctx.Atacante = Sushiman; ctx.Aliados = time do Sushiman
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             foreach (Combate aliado in ctx.Aliados.Where(a => a.EstaVivo()))
                 new RefletirDano(turnos: 2, percentual: 0.15).Aplicar(aliado);

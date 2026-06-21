@@ -20,7 +20,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Aliados;
         public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             // Revive todos os mortos, IGNORANDO MortePermanente (proposital).
             foreach (Combate a in ObterListaPrincipal(ctx))

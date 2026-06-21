@@ -411,15 +411,15 @@ namespace v1_Apostle_s_War.Services
         /// recursivamente as reações do alvo revidado. A natureza Revide
         /// (SemContraAtaque) impede novo contra-ataque -> profundidade máxima 1.
         /// </summary>
-        private void ProcessarReacoesAlvo(Combate alvo, Combate atacante, ResultadoAtaque r)
+        private void ProcessarReacoesAlvo(Combate alvo, Combate atacante, EventoDano r)
         {
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
-            var ctx = new ContextoReacao(alvo, atacante, r.Dano, r.Natureza);
+            var ctx = new ContextoReacao(alvo, atacante, r.DanoEfetivo, r.Natureza);
             var resultados = new List<ResultadoReacao>();
 
             // AoReceberDano: só com dano > 0. [buffs: Reflexo, Sangramento | passivas: futuras]
-            if (r.Dano > 0)
+            if (r.DanoEfetivo > 0)
             {
                 foreach (var s in alvo.StatusAtivos.OfType<IReageAoReceberDano>().ToList())
                     resultados.AddRange(s.AoReceberDano(ctx));
@@ -475,11 +475,11 @@ namespace v1_Apostle_s_War.Services
         /// Reações do atacante POR ALVO atingido (Nx). Chamado dentro do foreach.
         /// IReagePorAtaque (Sorrateiro, Policial) + IReageAoCausarDano (Sedento, dano > 0).
         /// </summary>
-        private void ProcessarReacoesAtacantePorAlvo(Combate atacante, Combate alvo, ResultadoAtaque r)
+        private void ProcessarReacoesAtacantePorAlvo(Combate atacante, Combate alvo, EventoDano r)
         {
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
-            var ctx = new ContextoReacao(atacante, alvo, r.Dano, r.Natureza);
+            var ctx = new ContextoReacao(atacante, alvo, r.DanoEfetivo, r.Natureza);
             var resultados = new List<ResultadoReacao>();
 
             foreach (var s in atacante.StatusAtivos.OfType<IReagePorAtaque>().ToList())
@@ -487,7 +487,7 @@ namespace v1_Apostle_s_War.Services
             foreach (var p in ColetarPassivasReativas<IReagePorAtaque>(atacante))
                 resultados.AddRange(p.PorAtaque(ctx));
 
-            if (r.Dano > 0)
+            if (r.DanoEfetivo > 0)
             {
                 foreach (var s in atacante.StatusAtivos.OfType<IReageAoCausarDano>().ToList())
                     resultados.AddRange(s.AoCausarDano(ctx));
@@ -503,11 +503,11 @@ namespace v1_Apostle_s_War.Services
         /// chamado por hit (Sequencial) ou 1x no fim (AoE), lado a lado com ProcessarPassivasAtacante.
         /// Para efeitos no próprio atacante (OlhoClinico, Virus).
         /// </summary>
-        private void ProcessarReacoesAtacantePorAtaque(Combate atacante, Combate alvoRef, ResultadoAtaque r)
+        private void ProcessarReacoesAtacantePorAtaque(Combate atacante, Combate alvoRef, EventoDano r)
         {
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
-            var ctx = new ContextoReacao(atacante, alvoRef, r.Dano, r.Natureza);
+            var ctx = new ContextoReacao(atacante, alvoRef, r.DanoEfetivo, r.Natureza);
             var resultados = new List<ResultadoReacao>();
 
             foreach (var s in atacante.StatusAtivos.OfType<IReageAoAtacar>().ToList())
@@ -546,12 +546,12 @@ namespace v1_Apostle_s_War.Services
         /// de "ao morrer"), preservando a ordem: bloquear revive (Vilao) precede tentar
         /// reviver (Necromancia/Guarda). Guarda: só dispara se o alvo realmente morreu.
         /// </summary>
-        private void ProcessarReacoesAtacanteMorte(Combate atacante, Combate alvoMorto, ResultadoAtaque r)
+        private void ProcessarReacoesAtacanteMorte(Combate atacante, Combate alvoMorto, EventoDano r)
         {
             if (alvoMorto.EstaVivo()) return;
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
-            var ctx = new ContextoReacao(atacante, alvoMorto, r.Dano, r.Natureza);
+            var ctx = new ContextoReacao(atacante, alvoMorto, r.DanoEfetivo, r.Natureza);
             var resultados = new List<ResultadoReacao>();
 
             foreach (var s in atacante.StatusAtivos.OfType<IReageAoMatar>().ToList())

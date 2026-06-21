@@ -14,7 +14,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
             evento == EventoCombate.DepoisDeReceberDano && !ctx.AlvoVivo;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             if (!ctx.Atacante.PodeReviver) return SemDano();
             ctx.Atacante.Reviver(1);

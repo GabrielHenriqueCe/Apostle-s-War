@@ -6,7 +6,22 @@ namespace ApostlesWar
 {
     #region Combate
 
-    record ResultadoAtaque(int Dano, bool Critico, Combate Alvo, int HPRestante, NaturezaDano Natureza);
+    /// <summary>
+    /// Descrição completa de um golpe (o "fato" do que aconteceu). Produzido pelo
+    /// Atacar/ReceberDano, consumido pelas reações (contexto) e pela exibição (console
+    /// hoje, web amanhã). É o Model do golpe — descreve o que houve, sem decidir como
+    /// mostrar.
+    /// </summary>
+    record EventoDano(
+        Combate Atacante,
+        Combate Alvo,
+        int DanoBruto,            // valor do golpe ao chegar, antes da mitigação do alvo
+        int DanoEfetivo,          // o que de fato entrou no HP (era o antigo "Dano")
+        int AbsorvidoPeloEscudo,  // quanto o Escudo aparou (0 se não havia escudo)
+        bool Critico,
+        int HPRestante,
+        NaturezaDano Natureza
+    );
 
     abstract class Combate
     {
@@ -253,7 +268,8 @@ namespace ApostlesWar
         /// </summary>
         public void BloquearRevive() => PodeReviver = false;
 
-        public int ReceberDano(int ataque, NaturezaDano natureza, Combate? atacante = null,
+        public (int Efetivo, int AbsorvidoPeloEscudo) ReceberDano(
+            int ataque, NaturezaDano natureza, Combate? atacante = null,
             IEnumerable<Type>? ignorarStatus = null, double ignorarDefesaPct = 0.0)
         {
             var ignorados = ignorarStatus?.ToHashSet() ?? new HashSet<Type>();
@@ -277,25 +293,31 @@ namespace ApostlesWar
                 danoFinal = (int)(danoFinal * (1 - reducao));
             }
 
+            int absorvidoPeloEscudo = 0;
             foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
             {
                 var status = (StatusEffect)modificador;
                 if (ignorados.Contains(status.GetType())) continue;
                 if (natureza.IgnoraEscudo && status is Escudo) continue;
                 if (natureza.IgnoraBloqueio && status is BloqueioTotal) continue;
+
+                int antes = danoFinal;
                 danoFinal = modificador.ModificarDanoRecebido(this, danoFinal);
+
+                if (status is Escudo)
+                    absorvidoPeloEscudo += antes - danoFinal;
             }
 
             HPAtual -= danoFinal;
 
-            return danoFinal;
+            return (danoFinal, absorvidoPeloEscudo);
         }
 
         /// <summary>
         /// Ataque com multiplicador de dano, opção de ignorar % de defesa, forçar
         /// crítico e ignorar status específicos do alvo.
         /// </summary>
-        public ResultadoAtaque Atacar(Combate alvo, double multiplicador,
+        public EventoDano Atacar(Combate alvo, double multiplicador,
             double ignorarDefesaPct = 0.0, bool forcaCritico = false,
             IEnumerable<Type>? ignorarStatus = null,
             NaturezaDano? natureza = null)
@@ -307,15 +329,24 @@ namespace ApostlesWar
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
 
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
-            int danoReal = alvo.ReceberDano(dano, nat, this, ignorarFinal, ignorarDefesaPct);
+            var (efetivo, absorvidoEscudo) = alvo.ReceberDano(dano, nat, this, ignorarFinal, ignorarDefesaPct);
 
-            return new ResultadoAtaque(danoReal, critico, alvo, Math.Max(0, alvo.HPAtual), nat);
+            return new EventoDano(
+                Atacante: this,
+                Alvo: alvo,
+                DanoBruto: dano,
+                DanoEfetivo: efetivo,
+                AbsorvidoPeloEscudo: absorvidoEscudo,
+                Critico: critico,
+                HPRestante: Math.Max(0, alvo.HPAtual),
+                Natureza: nat
+            );
         }
 
         /// <summary>
         /// Ataque básico (multiplicador 1.0). Sobrecarga de conveniência.
         /// </summary>
-        public ResultadoAtaque Atacar(Combate alvo, IEnumerable<Type>? ignorarStatus = null)
+        public EventoDano Atacar(Combate alvo, IEnumerable<Type>? ignorarStatus = null)
             => Atacar(alvo, 1.0, ignorarStatus: ignorarStatus);
 
         public bool EstaVivo() => HPAtual > 0;

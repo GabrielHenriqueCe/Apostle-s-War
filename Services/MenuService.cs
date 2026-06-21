@@ -174,10 +174,10 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Exibe o dano causado, HP restante no momento do hit e indicação de crítico.
         /// </summary>
-        public void ExibirResultadoAtaque(Combate atacante, Combate alvo, ResultadoAtaque resultado)
+        public void ExibirResultadoAtaque(Combate atacante, Combate alvo, EventoDano resultado)
         {
             string critico = resultado.Critico ? " 💥 ATAQUE CRÍTICO!" : "";
-            Console.WriteLine($"{atacante.Personagem.Simbolo} causou {resultado.Dano} de dano em {alvo.Personagem.Simbolo} {alvo.Personagem.Nome}{critico}");
+            Console.WriteLine($"{atacante.Personagem.Simbolo} causou {resultado.DanoEfetivo} de dano em {alvo.Personagem.Simbolo} {alvo.Personagem.Nome}{critico}");
             Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {resultado.HPRestante}/{alvo.HPMaximo}");
         }
 

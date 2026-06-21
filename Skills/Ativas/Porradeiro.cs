@@ -22,9 +22,9 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Aleatorio;
         public override TipoLista TipoLista => TipoLista.Inimigos;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
 
             for (int i = 0; i < NumeroDeHits; i++)
             {
@@ -35,8 +35,8 @@ namespace v1_Apostle_s_War.Skills.Ativas
                 var r = ctx.Atacante.Atacar(sorteado, MultiplicadorAtaque);
                 resultados.Add(r);
 
-                if (r.Dano > 0)
-                    ctx.Atacante.Curar((int)(r.Dano * CuraPorHit));
+                if (r.DanoEfetivo > 0)
+                    ctx.Atacante.Curar((int)(r.DanoEfetivo * CuraPorHit));
             }
 
             return resultados;

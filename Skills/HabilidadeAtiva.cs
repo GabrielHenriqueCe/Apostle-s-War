@@ -71,7 +71,7 @@ namespace ApostlesWar
             return resultado;
         }
 
-        protected ResultadoAtaque AplicarDano(Combate atacante, Combate alvo, double multiplicador = 1.0)
+        protected EventoDano AplicarDano(Combate atacante, Combate alvo, double multiplicador = 1.0)
             => atacante.Atacar(alvo, multiplicador);
 
         protected void AplicarCura(Combate alvo, double percentual)
@@ -83,7 +83,7 @@ namespace ApostlesWar
         protected void AplicarDebuff(Combate alvo, Debuff debuff)
             => debuff.Aplicar(alvo);
 
-        protected List<ResultadoAtaque> SemDano() => new List<ResultadoAtaque>();
+        protected List<EventoDano> SemDano() => new List<EventoDano>();
 
         /// <summary>
         /// Semântica do evento de ataque. Default Sequencial (a maioria das habilidades de dano

@@ -21,7 +21,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override TipoAtaque TipoAtaque => TipoAtaque.AreaDeEfeito;
 
-        public override List<ResultadoAtaque> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             // Escudo nos aliados vivos
             foreach (Combate a in ctx.Aliados.Where(c => c.EstaVivo()))
@@ -31,7 +31,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
             }
 
             // Ataca todos inimigos
-            var resultados = new List<ResultadoAtaque>();
+            var resultados = new List<EventoDano>();
             foreach (Combate i in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
                 resultados.Add(AplicarDano(ctx.Atacante, i, MultiplicadorAtaque));
 

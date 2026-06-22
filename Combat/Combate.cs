@@ -297,13 +297,11 @@ namespace ApostlesWar
             foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
             {
                 var status = (StatusEffect)modificador;
-                if (ignorados.Contains(status.GetType())) continue;
-                if (natureza.IgnoraEscudo && status is Escudo) continue;
-                if (natureza.IgnoraBloqueio && status is BloqueioTotal) continue;
+                if (ignorados.Contains(status.GetType())) continue;   // mecanismo lista (PoMagico/Vampiro) — fica
+                if (!modificador.DeveAgir(natureza)) continue;         // mecanismo natureza — agora dentro do status
 
                 int antes = danoFinal;
                 danoFinal = modificador.ModificarDanoRecebido(this, danoFinal);
-
                 if (status is Escudo)
                     absorvidoPeloEscudo += antes - danoFinal;
             }

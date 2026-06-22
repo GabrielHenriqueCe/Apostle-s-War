@@ -28,6 +28,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
             alvo.StatusAtivos.Add(this);
         }
 
+        public bool DeveAgir(NaturezaDano natureza) => !natureza.IgnoraEscudo;
         public int ModificarDanoRecebido(Combate portador, int dano)
         {
             if (PontosRestantes >= dano)

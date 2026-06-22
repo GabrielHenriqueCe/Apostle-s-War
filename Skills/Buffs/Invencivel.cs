@@ -11,6 +11,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
             "Não pode morrer. HP mínimo de 1.")
         { }
 
+        public bool DeveAgir(NaturezaDano natureza) => true;
         public int ModificarDanoRecebido(Combate portador, int dano)
         {
             // Limita dano para que HP não vá abaixo de 1

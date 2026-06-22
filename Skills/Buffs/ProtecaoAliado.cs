@@ -17,9 +17,13 @@ namespace v1_Apostle_s_War.Skills.Buffs
             Aplicador = aplicador;
         }
 
+        // Só redireciona golpes que provocam reação (ataques/revides). Não age em dano
+        // sem reação (Veneno/Queima/DanoIndireto) — e como o redirecionamento usa
+        // DanoIndireto, isso corta o loop de proteção mútua (A→B→A).
+        public bool DeveAgir(NaturezaDano natureza) => natureza.Reacao != TipoReacao.Nenhuma;
+
         public int ModificarDanoRecebido(Combate portador, int dano)
         {
-            // Se aplicador morreu, status não tem mais efeito (mas só some na próxima passagem de turno)
             if (!Aplicador.EstaVivo()) return dano;
 
             int redirecionado = (int)(dano * Valor);

@@ -1,15 +1,19 @@
 ﻿namespace ApostlesWar
 {
     /// <summary>
-    /// Capacidade B do modelo de capacidades: INTERVENÇÃO NO DANO.
-    /// O status altera o dano recebido pelo portador ENQUANTO ele acontece
-    /// (antes do HP cair) — diferente de uma reação, que dispara DEPOIS.
-    /// Chamada dentro de Combate.ReceberDano, na ordem de StatusAtivos.
-    /// Implementadores: Escudo, BloqueioTotal, Invencivel, ProtecaoAliado,
-    /// ReducaoDanoFixo.
+    /// Status que modifica o dano recebido durante o cálculo (Escudo, Bloqueio,
+    /// Invencível, Proteção, Redução). DeveAgir decide se o modificador atua neste
+    /// golpe; ModificarDanoRecebido aplica a modificação.
     /// </summary>
     interface IModificaDanoRecebido
     {
+        /// <summary>
+        /// O modificador deve agir neste golpe? Hoje decide pela natureza do dano.
+        /// Futuro (unificação dos mecanismos de ignorar): considerará também a lista
+        /// de ignorados e passivas como IIgnoraStatusNoAtaque.
+        /// </summary>
+        bool DeveAgir(NaturezaDano natureza);
+
         int ModificarDanoRecebido(Combate portador, int dano);
     }
 

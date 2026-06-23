@@ -4,28 +4,32 @@ using v1_Apostle_s_War.Skills.Buffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Ao atacar, aplica CuraContinua 1t no aliado vivo com menor HP atual (inclui o Robô).
+    /// Ao atacar, aplica CuraContinua 1t no aliado vivo com menor HP atual (inclui o
+    /// Robô). Reage 1x por ataque (IReageAoAtacar segue o TipoAtaque). Aliados = time
+    /// do portador (vem do ContextoReacao).
     /// </summary>
-    class PassivaRobo : HabilidadePassiva
+    class PassivaRobo : HabilidadePassiva, IReageAoAtacar
     {
         public PassivaRobo() : base("Reparo Automático", "🔧", 0,
             "Ao atacar, aplica Cura Contínua no aliado com menor HP.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeAtacar;
-
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoAtacar(ContextoReacao ctx)
         {
             var aliadoMenorHP = ctx.Aliados
                 .Where(a => a.EstaVivo())
                 .OrderBy(a => a.HPAtual)
                 .FirstOrDefault();
 
-            if (aliadoMenorHP == null) return SemDano();
+            if (aliadoMenorHP == null) return new List<ResultadoReacao>();
 
             new CuraContinua(turnos: 1, percentual: 0.10).Aplicar(aliadoMenorHP);
-            return SemDano();
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"{ctx.Portador.Personagem.Simbolo} reparou {aliadoMenorHP.Personagem.Simbolo}! 🔧")
+            };
         }
     }
 }

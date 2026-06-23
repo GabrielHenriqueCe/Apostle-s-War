@@ -3,14 +3,18 @@
     /// <summary>
     /// Contexto passado para uma reação. Portador = quem reage; Outro = a outra
     /// parte (atacante, no lado do alvo; alvo, no lado do atacante); DanoCausado
-    /// = dano efetivo que disparou; Natureza = natureza do golpe (pra reações
-    /// consultarem TipoReacao, ex: ContraAtaque só reage a golpe Completa).
+    /// = dano efetivo que disparou; Natureza = natureza do golpe; FoiCritico = se
+    /// o golpe foi crítico (já vem correto da fonte — golpe que não causou dano não
+    /// é crítico); Aliados/Inimigos = times do PORTADOR.
     /// </summary>
     record ContextoReacao(
         Combate Portador,
         Combate Outro,
         int DanoCausado,
-        NaturezaDano Natureza
+        NaturezaDano Natureza,
+        bool FoiCritico,
+        List<Combate> Aliados,
+        List<Combate> Inimigos
     );
 
     /// <summary>

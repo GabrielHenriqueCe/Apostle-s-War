@@ -335,7 +335,7 @@ namespace ApostlesWar
                 DanoBruto: dano,
                 DanoEfetivo: efetivo,
                 AbsorvidoPeloEscudo: absorvidoEscudo,
-                Critico: critico,
+                Critico: critico && (efetivo + absorvidoEscudo) > 0, 
                 HPRestante: Math.Max(0, alvo.HPAtual),
                 Natureza: nat
             );

@@ -189,6 +189,13 @@ namespace ApostlesWar
 
         public List<StatusEffect> StatusAtivos { get; }
 
+        /// <summary>
+        /// Estado de vida (Vivo/Morto). Começa Vivo. Trocado pela transição no
+        /// ReceberDano (HP <= 0 → Morto) e pelo revive (Morto → Vivo). Invariante:
+        /// HP <= 0 ⟺ Morto.
+        /// </summary>
+        private EstadoVida _estado = new Vivo();
+
         public Combate(Personagem personagem)
         {
             HPBase = personagem.HP;
@@ -308,6 +315,13 @@ namespace ApostlesWar
 
             HPAtual -= danoFinal;
 
+            // Invariante: HP <= 0 ⟺ Morto. A transição mora aqui (ponto único de dano —
+            // ataque, Veneno, Queima, explosão, todos passam por ReceberDano), colada à
+            // mudança de HP, pra nunca dessincronizar. As REAÇÕES de morte (Vilão,
+            // Necromancia, Guarda) ficam no fluxo (AtoMorte), não aqui.
+            if (HPAtual <= 0 && _estado.EstaVivo())
+                _estado = new Morto();
+
             return (danoFinal, absorvidoPeloEscudo);
         }
 
@@ -347,8 +361,8 @@ namespace ApostlesWar
         public EventoDano Atacar(Combate alvo, IEnumerable<Type>? ignorarStatus = null)
             => Atacar(alvo, 1.0, ignorarStatus: ignorarStatus);
 
-        public bool EstaVivo() => HPAtual > 0;
-        public void Reviver(int hp) => HPAtual = hp;
+        public bool EstaVivo() => _estado.EstaVivo();
+        public void Reviver(int hp) => _estado.Reviver(this, hp);
 
         /// <summary>
         /// Adiciona bônus permanente de DanoCrit (stack-builder PassivaInvasor).
@@ -386,7 +400,23 @@ namespace ApostlesWar
         /// </summary>
         public void AdicionarBonusTaxaCritPermanente(double delta) =>
             BonusTaxaCritPermanente += delta;
-        public void Curar(int valor) => HPAtual = Math.Min(HPMaximo, HPAtual + valor);
+        public void Curar(int valor) => _estado.Curar(this, valor);
+
+        /// <summary>
+        /// Aplica a cura no HP. Chamado pelo estado Vivo. Não checar estado aqui —
+        /// quem decide se cura é o EstadoVida.
+        /// </summary>
+        public void AplicarCura(int valor) => HPAtual = Math.Min(HPMaximo, HPAtual + valor);
+
+        /// <summary>
+        /// Aplica o revive: define o HP e transiciona Morto → Vivo. Chamado pelo estado
+        /// Morto. A transição de volta vive aqui (invariante: HP > 0 após revive ⟺ Vivo).
+        /// </summary>
+        public void AplicarRevive(int hp)
+        {
+            HPAtual = hp;
+            _estado = new Vivo();
+        }
 
         /// <summary>
         /// Reduz o HP máximo do portador. HPAtual é cortado se ficar acima do novo máximo.

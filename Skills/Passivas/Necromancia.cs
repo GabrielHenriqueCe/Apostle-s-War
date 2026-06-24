@@ -2,28 +2,35 @@
 
 namespace v1_Apostle_s_War.Skills.Passivas
 {
-    class Necromancia : HabilidadePassiva
+    /// <summary>
+    /// Ao morrer, revive o portador com 50% do HP máximo — se não estiver bloqueado
+    /// (PodeReviver, ex: Vilao). Reage pós-morte (IReageAoMorrer), depois do "ao matar".
+    /// Cooldown 6 (consumido ao reagir, revivendo ou não — bloqueio e cooldown são
+    /// independentes).
+    /// </summary>
+    class Necromancia : HabilidadePassiva, IReageAoMorrer
     {
         public Necromancia() : base("Necromancia", "🪦", 6,
             "Revive o personagem com 50% do HP máximo ao morrer.")
         { }
 
-        public override bool Revive() => true;
-
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeReceberDano && !ctx.AlvoVivo;
-
-        public override string MensagemSobreviveu(Personagem p) =>
-            $"{p.Simbolo} {p.Nome} foi ressuscitado pela Necromancia!";
-        public override string MensagemMorreu(Personagem p) =>
-            $"{p.Simbolo} {p.Nome} caiu em batalha e não pode ser ressuscitado.";
-
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoMorrer(ContextoReacao ctx)
         {
-            if (!ctx.Atacante.PodeReviver) return SemDano();
-            if (ctx.Atacante.HPAtual <= 0)
-                ctx.Atacante.Reviver(ctx.Atacante.HPMaximo / 2);
-            return SemDano();
+            var portador = ctx.Portador;
+
+            if (!portador.PodeReviver)
+                return new List<ResultadoReacao>
+                {
+                    new ResultadoReacao(
+                        Mensagem: $"{portador.Personagem.Simbolo} {portador.Personagem.Nome} caiu em batalha e não pode ser ressuscitado.")
+                };
+
+            portador.Reviver(portador.HPMaximo / 2);
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"{portador.Personagem.Simbolo} {portador.Personagem.Nome} foi ressuscitado pela Necromancia!")
+            };
         }
     }
 }

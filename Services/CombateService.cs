@@ -144,6 +144,7 @@ namespace v1_Apostle_s_War.Services
                 // Mesma ordem de ExecutarHabilidade: DepoisDeMatar antes de DepoisDeReceberDano.
                 ProcessarPassivasAtacanteMorte(atacante, irritar.Aplicador, aliados, defensores);
                 ProcessarReacoesAtacanteMorte(atacante, irritar.Aplicador, resultado, aliados, defensores);
+                ProcessarReacoesAoMorrer(irritar.Aplicador, atacante, resultado, aliados, defensores);   // ← NOVO
                 ProcessarPassivasAlvo(irritar.Aplicador, atacante, aliados, defensores, resultado.Critico);
                 ProcessarPassivasAtacante(atacante, irritar.Aplicador, aliados, defensores);
                 return;
@@ -272,6 +273,7 @@ namespace v1_Apostle_s_War.Services
                 Thread.Sleep(1500);
 
                 ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r, aliados, defensores);
+                ProcessarReacoesAoMorrer(r.Alvo, atacante, r, aliados, defensores);   // ← NOVO, aqui
                 ProcessarPassivasAlvo(r.Alvo, atacante, aliados, defensores, r.Critico);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
@@ -568,6 +570,35 @@ namespace v1_Apostle_s_War.Services
                 resultados.AddRange(p.AoMatar(ctx));
 
             ExibirResultadosReacao(atacante, resultados);
+        }
+
+        /// <summary>
+        /// Dispara as reações "ao morrer" (IReageAoMorrer) do que MORREU. Chamado
+        /// DEPOIS do ProcessarReacoesAtacanteMorte (ao matar), preservando a ordem:
+        /// o Vilao bloqueia o revive (ao matar) antes da Necromancia tentar reviver
+        /// (ao morrer). Portador = quem morreu; times invertidos (aliados do morto =
+        /// time do alvo), como no ProcessarReacoesAlvo.
+        /// </summary>
+        private void ProcessarReacoesAoMorrer(Combate morto, Combate atacante, EventoDano r,
+            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
+        {
+            if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
+            if (morto.EstaVivo()) return;  // só dispara se realmente morreu
+
+            var aliadosDoMorto = inimigosDoAtacante;
+            var inimigosDoMorto = aliadosDoAtacante;
+
+            var ctx = new ContextoReacao(morto, atacante, r.DanoEfetivo, r.Natureza,
+                r.Critico, aliadosDoMorto, inimigosDoMorto);
+            var resultados = new List<ResultadoReacao>();
+
+            foreach (var s in morto.StatusAtivos.OfType<IReageAoMorrer>().ToList())
+                resultados.AddRange(s.AoMorrer(ctx));
+
+            foreach (var p in ColetarPassivasReativas<IReageAoMorrer>(morto))
+                resultados.AddRange(p.AoMorrer(ctx));
+
+            ExibirResultadosReacao(morto, resultados);
         }
 
         #endregion

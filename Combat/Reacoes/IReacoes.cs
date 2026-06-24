@@ -88,4 +88,16 @@
     {
         List<ResultadoReacao> AoMatar(ContextoReacao ctx);
     }
+
+    /// <summary>
+    /// Reage quando o portador MORRE (HP chegou a 0 por um golpe). Pós-morte.
+    /// Dispara DEPOIS do IReageAoMatar — o Vilao já bloqueou o revive, se for o caso.
+    /// O portador pode tentar reviver (Necromancia), respeitando PodeReviver.
+    /// Portador = quem morreu; Outro = quem matou.
+    /// Implementador: Necromancia.
+    /// </summary>
+    interface IReageAoMorrer
+    {
+        List<ResultadoReacao> AoMorrer(ContextoReacao ctx);
+    }
 }

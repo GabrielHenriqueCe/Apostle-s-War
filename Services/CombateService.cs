@@ -112,15 +112,9 @@ namespace v1_Apostle_s_War.Services
         {
             if (!combatente.EstaVivo()) return;
 
-            var ctxPassiva = new ContextoPassiva(combatente.EstaVivo(), false, aliados, combatente);
             var ctxCombate = new ContextoCombate(combatente, aliados, inimigos);
-
-            // Sistema velho (enum) — qualquer passiva que ainda use InicioDoTurno.
-            DispararEvento(EventoCombate.InicioDoTurno, combatente, combatente, ctxPassiva, ctxCombate);
-
-            // Modelo de reação (IReageAoInicioTurno) — Genio, BonecoDeNeve, Tengu, Elfo.
             ProcessarReacoesInicioTurno(combatente, ctxCombate);
-        }
+        }   
 
         /// <summary>
         /// Dispara as reações de início de turno (IReageAoInicioTurno) do combatente.
@@ -161,11 +155,8 @@ namespace v1_Apostle_s_War.Services
                 Thread.Sleep(1500);
 
                 // Mesma ordem de ExecutarHabilidade: DepoisDeMatar antes de DepoisDeReceberDano.
-                ProcessarPassivasAtacanteMorte(atacante, irritar.Aplicador, aliados, defensores);
                 ProcessarReacoesAtacanteMorte(atacante, irritar.Aplicador, resultado, aliados, defensores);
-                ProcessarReacoesAoMorrer(irritar.Aplicador, atacante, resultado, aliados, defensores);   // ← NOVO
-                ProcessarPassivasAlvo(irritar.Aplicador, atacante, aliados, defensores, resultado.Critico);
-                ProcessarPassivasAtacante(atacante, irritar.Aplicador, aliados, defensores);
+                ProcessarReacoesAoMorrer(irritar.Aplicador, atacante, resultado, aliados, defensores);
                 return;
             }
 
@@ -292,22 +283,19 @@ namespace v1_Apostle_s_War.Services
                 Thread.Sleep(1500);
 
                 ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r, aliados, defensores);
-                ProcessarReacoesAoMorrer(r.Alvo, atacante, r, aliados, defensores);   // ← NOVO, aqui
-                ProcessarPassivasAlvo(r.Alvo, atacante, aliados, defensores, r.Critico);
+                ProcessarReacoesAoMorrer(r.Alvo, atacante, r, aliados, defensores);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
                 ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r, aliados, defensores);
 
                 if (hab.TipoAtaque == TipoAtaque.Sequencial)
                 {
-                    ProcessarPassivasAtacante(atacante, r.Alvo, aliados, defensores);
                     ProcessarReacoesAtacantePorAtaque(atacante, r.Alvo, r, aliados, defensores);
                 }
             }
 
             if (hab.TipoAtaque == TipoAtaque.AreaDeEfeito && resultados.Count > 0)
             {
-                ProcessarPassivasAtacante(atacante, resultados[0].Alvo, aliados, defensores);
                 ProcessarReacoesAtacantePorAtaque(atacante, resultados[0].Alvo, resultados[0], aliados, defensores);
             }
 
@@ -318,105 +306,6 @@ namespace v1_Apostle_s_War.Services
             {
                 _menuService.ExibirUsoHabilidade(atacante, hab);
                 Thread.Sleep(2500);
-            }
-        }
-
-        #endregion
-
-        #region Passivas e status
-
-        /// <summary>
-        /// Processa passivas reativas do alvo (quem levou o golpe).
-        /// Do ponto de vista do alvo da passiva:
-        /// - ctx.Atacante = portador da passiva (alvo do golpe original)
-        /// - ctx.Aliados = time do portador
-        /// - ctx.Inimigos = time inimigo COMPLETO (não só quem golpeou)
-        /// "alvo" do parâmetro = quem golpeou (referência ao atacante original).
-        /// </summary>
-        private void ProcessarPassivasAlvo(Combate alvo, Combate atacante, List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante, bool foiCritico)
-        {
-            var aliadosDoAlvo = inimigosDoAtacante;
-            var inimigosDoAlvo = aliadosDoAtacante;
-
-            var ctxPassiva = new ContextoPassiva(alvo.EstaVivo(), foiCritico, aliadosDoAlvo, atacante);
-            var ctxCombate = new ContextoCombate(alvo, aliadosDoAlvo, inimigosDoAlvo);
-
-            // DepoisDeSerAtacado: dispara sempre (mesmo se Escudo/Bloqueio absorveu).
-            // DepoisDeReceberDano: passivas decidem via DeveAtivar (Necromancia/Guarda
-            // checam !ctx.AlvoVivo; Alien/Sushiman precisariam de dano > 0, mas o
-            // filtro de dano efetivo fica na escolha do evento, nao em guard manual).
-            ExecutarPassivasReativas(alvo, atacante, ctxPassiva, ctxCombate, EventoCombate.DepoisDeSerAtacado);
-            ExecutarPassivasReativas(alvo, atacante, ctxPassiva, ctxCombate, EventoCombate.DepoisDeReceberDano);
-        }
-
-        private void ExecutarPassivasReativas(Combate alvo, Combate atacante, ContextoPassiva ctxPassiva, ContextoCombate ctxCombate, EventoCombate evento)
-        {
-            foreach (Habilidade hab in alvo.Personagem.Habilidades)
-            {
-                if (hab is not HabilidadePassiva passiva) continue;
-                if (!passiva.DeveAtivar(evento, ctxPassiva)) continue;
-                if (!alvo.Cooldowns[hab].Disponivel) continue;
-
-                var resultados = passiva.Ativar(ctxCombate, atacante);
-                foreach (var r in resultados)
-                    _menuService.ExibirResultadoAtaque(alvo, r.Alvo, r);
-
-                alvo.Cooldowns[hab].Usar();
-
-                // passiva.Revive() retorna a CAPACIDADE de reviver, nao o resultado.
-                // Necromancia/Guarda podem ter capacidade mas terem sido bloqueadas
-                // (PodeReviver = false aplicado por Vilao/Barata antes). Combinamos
-                // capacidade + estado real do alvo pra decidir a mensagem.
-                bool reviveuDeFato = passiva.Revive() && alvo.EstaVivo();
-                string msg = reviveuDeFato
-                    ? passiva.MensagemSobreviveu(alvo.Personagem)
-                    : passiva.MensagemMorreu(alvo.Personagem);
-
-                if (!string.IsNullOrEmpty(msg))
-                {
-                    _menuService.ExibirMensagemPassiva(msg);
-                    Thread.Sleep(1500);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Dispara DepoisDeAtacar do atacante. Chamado conforme o TipoAtaque
-        /// (Sequencial: por hit; AoE: 1x no fim).
-        /// </summary>
-        private void ProcessarPassivasAtacante(Combate atacante, Combate alvo, List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
-        {
-            var ctxPassiva = new ContextoPassiva(alvo.EstaVivo(), false, aliadosDoAtacante, atacante);
-            var ctxCombate = new ContextoCombate(atacante, aliadosDoAtacante, inimigosDoAtacante);
-
-            DispararEvento(EventoCombate.DepoisDeAtacar, atacante, alvo, ctxPassiva, ctxCombate);
-        }
-
-        /// <summary>
-        /// Dispara DepoisDeMatar do atacante. Chamado SEMPRE por alvo morto,
-        /// independente do TipoAtaque — Vilão precisa aplicar MortePermanente em
-        /// CADA inimigo morto, mesmo numa AoE.
-        /// </summary>
-        private void ProcessarPassivasAtacanteMorte(Combate atacante, Combate alvoMorto, List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
-        {
-            if (alvoMorto.EstaVivo()) return;
-
-            var ctxPassiva = new ContextoPassiva(false, false, aliadosDoAtacante, atacante);
-            var ctxCombate = new ContextoCombate(atacante, aliadosDoAtacante, inimigosDoAtacante);
-
-            DispararEvento(EventoCombate.DepoisDeMatar, atacante, alvoMorto, ctxPassiva, ctxCombate);
-        }
-
-        private void DispararEvento(EventoCombate evento, Combate atacante, Combate alvo,
-    ContextoPassiva ctxPassiva, ContextoCombate ctxCombate)
-        {
-            foreach (Habilidade hab in atacante.Personagem.Habilidades)
-            {
-                if (hab is not HabilidadePassiva passiva) continue;
-                if (!passiva.DeveAtivar(evento, ctxPassiva)) continue;
-                if (!atacante.Cooldowns[hab].Disponivel) continue;
-
-                passiva.Ativar(ctxCombate, alvo);
             }
         }
 

@@ -22,9 +22,6 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public IEnumerable<Type> TiposIgnorados => _tipos;
 
-        // Passiva sem evento ativo — funciona via interface, não via DeveAtivar.
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
-
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

@@ -115,7 +115,26 @@ namespace v1_Apostle_s_War.Services
             var ctxPassiva = new ContextoPassiva(combatente.EstaVivo(), false, aliados, combatente);
             var ctxCombate = new ContextoCombate(combatente, aliados, inimigos);
 
+            // Sistema velho (enum) — qualquer passiva que ainda use InicioDoTurno.
             DispararEvento(EventoCombate.InicioDoTurno, combatente, combatente, ctxPassiva, ctxCombate);
+
+            // Modelo de reação (IReageAoInicioTurno) — Genio, BonecoDeNeve, Tengu, Elfo.
+            ProcessarReacoesInicioTurno(combatente, ctxCombate);
+        }
+
+        /// <summary>
+        /// Dispara as reações de início de turno (IReageAoInicioTurno) do combatente.
+        /// Sem golpe — usa o ContextoCombate (portador = combatente). Renova buffs/
+        /// efeitos que o portador aplica a cada turno.
+        /// </summary>
+        private void ProcessarReacoesInicioTurno(Combate combatente, ContextoCombate ctxCombate)
+        {
+            var resultados = new List<ResultadoReacao>();
+
+            foreach (var p in ColetarPassivasReativas<IReageAoInicioTurno>(combatente))
+                resultados.AddRange(p.AoInicioTurno(ctxCombate));
+
+            ExibirResultadosReacao(combatente, resultados);
         }
 
         #endregion

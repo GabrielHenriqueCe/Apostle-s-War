@@ -5,10 +5,10 @@ using v1_Apostle_s_War.Skills.Debuffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// No início do turno, se o Boneco de Neve tiver Queima, remove e aplica CuraContinua 2t.
-    /// Tematicamente: "o calor da queima vira o gelo derretendo e curando".
+    /// Início do turno: se tem Queima, remove (cleanse) e aplica CuraContinua 2t.
+    /// Só age se havia Queima — "o calor da queima vira gelo derretendo e curando".
     /// </summary>
-    class PassivaBonecoDeNeve : HabilidadePassiva
+    class PassivaBonecoDeNeve : HabilidadePassiva, IReageAoInicioTurno
     {
         private const double CuraPercentual = 0.10;
         private const int TurnosCura = 2;
@@ -17,19 +17,21 @@ namespace v1_Apostle_s_War.Skills.Passivas
             "Início do turno: se tem Queima, remove e aplica Cura Contínua (2t).")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.InicioDoTurno && ctx.AlvoVivo
-            && ctx.Atacante.StatusAtivos.OfType<Queima>().Any();
-
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx)
         {
             var queimas = ctx.Atacante.StatusAtivos.OfType<Queima>().ToList();
+            if (queimas.Count == 0) return new List<ResultadoReacao>();
+
             foreach (var q in queimas)
                 q.Remover(ctx.Atacante);
 
             new CuraContinua(turnos: TurnosCura, percentual: CuraPercentual).Aplicar(ctx.Atacante);
 
-            return SemDano();
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"{ctx.Atacante.Personagem.Simbolo} derreteu a queima e começou a se curar! ❄️")
+            };
         }
     }
 }

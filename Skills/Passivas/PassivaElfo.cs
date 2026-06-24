@@ -4,22 +4,19 @@ using v1_Apostle_s_War.Skills.Buffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Passiva permanente do Elfo: aplica EspinhosVenenosos no início do combate.
-    /// Cada vez que o Elfo é atacado, atacante recebe Veneno + Queima (1 stack cada).
+    /// Todo início de turno, aplica EspinhosVenenosos 2t (renova sempre). Quem ataca
+    /// o Elfo recebe Veneno + Queima enquanto ativo.
     /// </summary>
-    class PassivaElfo : HabilidadePassiva, IPassivaInicial
+    class PassivaElfo : HabilidadePassiva, IReageAoInicioTurno
     {
         public PassivaElfo() : base("Espinhos", "🌿", 0,
-            "Atacantes recebem Veneno e Queima.")
+            "Todo turno: atacantes recebem Veneno e Queima (2t).")
         { }
 
-        public void AplicarInicial(Combate portador)
+        public List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx)
         {
-            new EspinhosVenenosos().Aplicar(portador);
+            new EspinhosVenenosos(turnos: 2).Aplicar(ctx.Atacante);
+            return new List<ResultadoReacao>();
         }
-
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
-
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

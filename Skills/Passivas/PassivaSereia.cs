@@ -18,11 +18,6 @@ namespace v1_Apostle_s_War.Skills.Passivas
             new ReducaoDanoFixo(percentual: 0.15).Aplicar(portador);
         }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
-
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
-
-        public override string MensagemSobreviveu(Personagem p) => string.Empty;
-        public override string MensagemMorreu(Personagem p) => string.Empty;
     }
 }

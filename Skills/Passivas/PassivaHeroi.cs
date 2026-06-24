@@ -18,8 +18,6 @@ namespace v1_Apostle_s_War.Skills.Passivas
             new ContraAtaque(turnos: int.MaxValue).Aplicar(portador);
         }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
-
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

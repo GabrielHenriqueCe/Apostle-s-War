@@ -9,8 +9,6 @@ namespace v1_Apostle_s_War.Skills.Passivas
             "Causa 25% mais dano contra alvos com Queima.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
-
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
             => SemDano();
 

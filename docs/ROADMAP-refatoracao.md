@@ -76,26 +76,44 @@ DeveAtivar e some do sistema velho. Sem dupla execução (confirmado).
 - Interface própria não-reativa (consulta direta, sem evento): Piromancer (MultExtra
   no cálculo de dano), Vampiro (IIgnoraStatusNoAtaque no Atacar).
 
-**FALTAM migrar (9):**
+**FALTAM migrar (2):**
 - **Operario** — IReageAoSerAtacado (interface existe). Contra-ataque 10% com
   Marretada 1.25x. Tem o furo de camada (Console.WriteLine + Thread.Sleep dentro da
   passiva) pra limpar. Ver "Fio do revide" — a migração esbarra na decisão de como o
   revide carrega a habilidade. Decisão pro AGORA: Opção C provisória.
-- **Necromancia + Guarda** — IReageAoMorrer (A CRIAR). Revive (capacidade vs efetivo),
-  cooldown real (6 e 4), interação com o bloqueio do Vilao (já migrado), mensagens
-  sobreviveu/morreu. Guarda é um HACK de revive — intenção real é "impedir morte" via
-  Invencivel (Categoria B). NÃO depende do EventoDano — pode ser feito "solta".
-- **BonecoDeNeve + Genio** — IReageAoInicioTurno (A CRIAR). Cruza com o
-  DispararEventoInicioDeTurno (evento de início que ficou no CombateService) — fio do Turno.
-- **Robo + Sushiman** — BLOQUEADOS, esperam a Fatia 2 do EventoDano. Robo precisa de
-  Aliados (curar o de menor HP). Sushiman precisa de Aliados (reflexo a todos) + FoiCritico.
-  O Combate NÃO conhece o próprio time — vem via contexto montado pelo CombateService.
+- **Guarda** — SEPARADA da Necromancia (categorias diferentes). NÃO é revive (pós-morte) —
+  é PREVENÇÃO de morte (pré-morte). Propósito: quando o portador ia morrer, APLICA Invencível
+  nele → o Invencível (buff que segura HP em 1) prende em 1 E persiste, criando uma JANELA
+  TÁTICA (próximos golpes no mesmo turno não matam; na rodada dele pode curar/ser protegido;
+  só morre quando o Invencível expira). O Invencível persistente é o ponto, não detalhe.
+  EXIGE um gancho NOVO de "morte iminente": no ReceberDano, quando danoFinal >= HPAtual
+  (golpe seria letal), ANTES de subtrair o HP, disparar uma interface (nome provável
+  **IReageAntesDeMorrer**, segue o padrão IReageAo*) que dá às passivas/efeitos a chance de
+  agir; a Guarda aplica Invencível e o dano é re-resolvido com ele ativo (segura em 1).
+  REUSÁVEL por design — um conjunto de itens futuro deve poder usar o mesmo gancho (foi o
+  motivo de Gabriel de não hardcodar na Guarda). Cruza com o Invencível (que JÁ é, na essência,
+  um "previne morte" — avaliar se vira implementador do mesmo gancho). FIO PRÓPRIO, capacidade
+  nova. Guarda ainda usa a infra VELHA de revive (Revive()/MensagemSobreviveu na base +
+  ExecutarPassivasReativas) — essa infra morre quando a Guarda migrar pro gancho.
+
+**MIGRADAS recentemente (saíram de "faltam"):**
+- **Robo** (IReageAoAtacar, lê ctx.Aliados — cura o de menor HP) e **Sushiman**
+  (IReageAoSerAtacado, lê ctx.Aliados + ctx.FoiCritico — reflexo a todos se crítico).
+  Fatia 2 do EventoDano.
+- **Necromancia** (IReageAoMorrer, revive 50% pós-morte, respeita PodeReviver). Dispatch
+  ProcessarReacoesAoMorrer no CombateService, depois do "ao matar".
+- **Genio + BonecoDeNeve + Tengu + Elfo** (IReageAoInicioTurno). Genio renova RefletirDano 2t;
+  BonecoDeNeve cleanse Queima + cura se havia; Tengu e Elfo passaram de IPassivaInicial (1x /
+  infinito) pra reaplicar buff 2t TODO turno. Dispatch ProcessarReacoesInicioTurno no
+  CombateService (ao lado do velho; move pro Turno fica pro fio do Turno).
 
 ### Interfaces de reação — estado
 - IReageAoSerAtacado, IReageAoReceberDano, IReageAoCausarDano — existem (PR-C).
 - IReageAoAtacar (1x por ataque, segue TipoAtaque), IReagePorAtaque (Nx por alvo),
   IReageAoMatar — CRIADAS.
-- IReageAoMorrer, IReageAoInicioTurno — A CRIAR.
+- IReageAoMorrer (pós-morte, Necromancia), IReageAoInicioTurno (início de turno, recebe
+  ContextoCombate — Genio/BonecoDeNeve/Tengu/Elfo) — CRIADAS.
+- IReageAntesDeMorrer (pré-morte, gancho de morte-iminente) — A CRIAR (fio da Guarda).
 
 ### Dois sabores do lado atacante (decisão firmada)
 - **IReageAoAtacar** = efeito no PRÓPRIO atacante. Segue TipoAtaque: AoE = 1x, Sequencial
@@ -112,6 +130,46 @@ ordem.
 
 ### Aposentar o sistema velho
 DeveAtivar/Ativar virtual e o enum EventoCombate só saem quando a ÚLTIMA passiva migrar.
+
+---
+
+## Buff-permanente vs passiva-pura vs buff-não-removível (FIO NOVO — descoberto ao migrar início-de-turno)
+
+**Status:** REGISTRADO, dor REAL (não pureza), branch própria depois do C5. Gabriel
+identificou: vários personagens aplicam um BUFF PERMANENTE (int.MaxValue) via IPassivaInicial
+"pra contornar" — quando o certo seria a passiva SER a capacidade diretamente. Foi a gambiarra
+que originou a refatoração. Três categorias distintas (não "buff vs passiva"):
+
+1. **Buff permanente NÃO-REMOVÍVEL** — só o **Fantasma** (Intocável permanente que NÃO deve
+   ser dispelável). Hoje é buff comum (removível). Falta o conceito "buff não-removível" —
+   provavelmente uma flag `Removivel = false` no StatusEffect (pequena, geral), em vez de
+   converter pra passiva pura. O Fantasma continua com buff, só protegido de remoção.
+2. **Passiva PURA** (a passiva É a capacidade, sem buff intermediário) — **Abóbora**
+   (IBloqueiaStatus, hoje ImunidadeDebuffs), **Dragão** (bloqueio Veneno/Queima, hoje
+   ImunidadeEspecifica — pode deletar o buff depois), **Herói** (IReageAoSerAtacado /
+   contra-ataque, hoje ContraAtaque), **Morcego** (IReageAoCausarDano / cura 15%, hoje
+   Sedento), **Anjo** (IReageAoInicioTurno / cura 5%, hoje CuraContinua), **Sereia**
+   (IModificaDanoRecebido / -15%, hoje ReducaoDanoFixo). Cada um passa a implementar a
+   interface da sua capacidade direto — é o modelo de capacidades do ADR. É DOR (o buff é
+   contorno), não pureza. Os buffs cuja MECÂNICA Gabriel gostou (ReducaoDanoFixo "Couraça",
+   Sedento) ficam pra reuso em habilidades ativas (ver Rebalanceamento), só somem de serem o
+   meio da passiva.
+3. **Reaplica buff no início do turno** — Tengu, Elfo (FEITO — viraram IReageAoInicioTurno
+   2t/turno), Genio (já era). Categoria resolvida.
+
+Agrupar B (passivas puras) numa branch; o Fantasma (C) pode ir junto ou virar detalhe.
+
+---
+
+## Rebalanceamento de personagens (FASE PRÓPRIA, pós-estrutura)
+
+**Status:** BACKLOG DE DESIGN (não refactor). Só DEPOIS do C5/estrutura estabilizar — mudar
+comportamento e estrutura juntos esconde bugs. Ideias de Gabriel registradas pra não perder:
+- **Sereia A3** — mudar pra reviver aliados + aplicar Intocável (já faz) + acrescentar a
+  Couraça (ReducaoDanoFixo) nos aliados, dando utilidade ao buff.
+- **Morcego** — o buff Sedento sai dele (vira passiva pura) e vai pra **A2 do Vampiro**.
+- **Durações/quando inicia** — revisar buffs (quais 2t, quais permanentes, quando aplicam).
+- Trocas de habilidade entre personagens em geral. É DESIGN DE JOGO, não arquitetura.
 
 ---
 
@@ -380,9 +438,16 @@ tudo estabilizar.
 - **PR-C — reações via interface** (C1-C6): Sedento, Reflexo, Sangramento, Espinhos, ContraAtaque
   migrados pra IReageAo*. Revide orquestrado (Forma 1, profundidade 1).
 - **C7 — limpeza:** removidos os 3 hooks mortos do StatusEffect + EventoCombate.AntesDeReceberDano.
-- **C5 (em curso) — 17 passivas migradas:** lado "ao ser atacado" completo; lado atacante
-  (OlhoClinico, Virus; Sorrateiro, Policial); ao matar (Fada, Vilao). Interfaces
-  IReageAoAtacar/IReagePorAtaque/IReageAoMatar criadas.
+- **C5 (quase no fim) — 24 passivas migradas:** lado "ao ser atacado" completo; lado atacante
+  (OlhoClinico, Virus; Sorrateiro, Policial); ao matar (Fada, Vilao); Robo + Sushiman (Fatia 2);
+  Necromancia (IReageAoMorrer); Genio, BonecoDeNeve, Tengu, Elfo (IReageAoInicioTurno). Interfaces
+  IReageAoAtacar/IReagePorAtaque/IReageAoMatar/IReageAoMorrer/IReageAoInicioTurno criadas. Restam 2:
+  Operario (revide) e Guarda (gancho de morte-iminente).
+- **Crítico exige dano:** golpe cujo dano efetivo total (HP + escudo) deu 0 não é crítico no
+  EventoDano — foi negado (bloqueio total). Escudo consumido conta (é vida). Beneficia todos os
+  consumidores de FoiCritico na fonte.
+- **EventoDano (Fatia 2):** ContextoReacao enriquecido (FoiCritico, Aliados, Inimigos do portador).
+  Os 4 métodos de reação recebem os times; ProcessarReacoesAlvo inverte a perspectiva.
 - **EventoDano (Fatia 1):** ResultadoAtaque convergiu em EventoDano (record rico do golpe).
   ReceberDano retorna (Efetivo, AbsorvidoPeloEscudo). Atacar monta o evento. Base da exibição
   rica/web (Propósito B).

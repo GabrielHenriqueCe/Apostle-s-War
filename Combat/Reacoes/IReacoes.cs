@@ -100,4 +100,16 @@
     {
         List<ResultadoReacao> AoMorrer(ContextoReacao ctx);
     }
+
+    /// <summary>
+    /// Reage no INÍCIO do turno do portador. Não há golpe (sem dano, sem Outro) —
+    /// recebe o ContextoCombate (Atacante = portador, Aliados, Inimigos). Para efeitos
+    /// que o portador renova/aplica a cada turno (RefletirDano do Genio, BuffAtaque do
+    /// Tengu, cleanse do BonecoDeNeve).
+    /// Implementadores: Genio, BonecoDeNeve, Tengu, Elfo.
+    /// </summary>
+    interface IReageAoInicioTurno
+    {
+        List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx);
+    }
 }

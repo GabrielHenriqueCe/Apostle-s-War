@@ -4,22 +4,18 @@ using v1_Apostle_s_War.Skills.Buffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// O Tengu começa o combate com BuffAtaque 25% por 2 turnos.
-    /// Aplicado via IPassivaInicial no IniciarCombate.
+    /// Todo início de turno, aplica BuffAtaque 25% por 2 turnos (renova sempre).
     /// </summary>
-    class PassivaTengu : HabilidadePassiva, IPassivaInicial
+    class PassivaTengu : HabilidadePassiva, IReageAoInicioTurno
     {
         public PassivaTengu() : base("Ventania", "👺", 0,
-            "Começa o combate com +25% ATK por 2 turnos.")
+            "Todo turno: +25% ATK por 2 turnos.")
         { }
 
-        public void AplicarInicial(Combate portador)
+        public List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx)
         {
-            new BuffAtaque(turnos: 2, percentual: 0.25).Aplicar(portador);
+            new BuffAtaque(turnos: 2, percentual: 0.25).Aplicar(ctx.Atacante);
+            return new List<ResultadoReacao>();
         }
-
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) => false;
-
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

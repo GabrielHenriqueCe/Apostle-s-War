@@ -54,12 +54,18 @@ Dois eixos quase independentes: o do **contexto** (1 → 2) e o do **revide** (3
 
 ---
 
-## C5 — padrão de reações das passivas (EM CURSO, quase no fim)
+## C5 — padrão de reações das passivas (✅ COMPLETO)
 
-**Status:** AVANÇADO. As passivas reativas estão migrando do DeveAtivar/enum para o
-modelo de interfaces (IReageAo*), ao lado dos buffs reativos (PR-C). Strangler Fig:
-sistema velho coexiste com o novo; cada passiva migrada deixa de sobrescrever
-DeveAtivar e some do sistema velho. Sem dupla execução (confirmado).
+**Status:** ✅ COMPLETO. Todas as 36 passivas migradas do DeveAtivar/enum para o modelo
+de interfaces (IReageAo*), ao lado dos buffs reativos (PR-C). Strangler Fig concluído:
+nenhuma passiva usa mais o sistema velho. A Guarda foi a última (migrada pro IReageAoMorrer
+com hack provisório — ver "Estado morto" / [sistema-morte-como-estado]).
+
+**PRÓXIMO (consequência direta):** aposentar o sistema velho — agora ÓRFÃO. Remover
+ExecutarPassivasReativas, HabilidadePassiva.Revive()/MensagemSobreviveu/MensagemMorreu/
+DeveAtivar, o enum EventoCombate, DispararEvento/DispararEventoInicioDeTurno (a parte velha).
+Confirmar que tudo está sem uso antes de remover. Branch de limpeza (junto da exclusão de
+documentação/ADRs mortos).
 
 ### As 36 passivas — mapa de status
 
@@ -76,36 +82,11 @@ DeveAtivar e some do sistema velho. Sem dupla execução (confirmado).
 - Interface própria não-reativa (consulta direta, sem evento): Piromancer (MultExtra
   no cálculo de dano), Vampiro (IIgnoraStatusNoAtaque no Atacar).
 
-**FALTAM migrar (2):**
-- **Operario** — IReageAoSerAtacado (interface existe). Contra-ataque 10% com
-  Marretada 1.25x. Tem o furo de camada (Console.WriteLine + Thread.Sleep dentro da
-  passiva) pra limpar. Ver "Fio do revide" — a migração esbarra na decisão de como o
-  revide carrega a habilidade. Decisão pro AGORA: Opção C provisória.
-- **Guarda** — SEPARADA da Necromancia (categorias diferentes). NÃO é revive (pós-morte) —
-  é PREVENÇÃO de morte (pré-morte). Propósito: quando o portador ia morrer, APLICA Invencível
-  nele → o Invencível (buff que segura HP em 1) prende em 1 E persiste, criando uma JANELA
-  TÁTICA (próximos golpes no mesmo turno não matam; na rodada dele pode curar/ser protegido;
-  só morre quando o Invencível expira). O Invencível persistente é o ponto, não detalhe.
-  EXIGE um gancho NOVO de "morte iminente": no ReceberDano, quando danoFinal >= HPAtual
-  (golpe seria letal), ANTES de subtrair o HP, disparar uma interface (nome provável
-  **IReageAntesDeMorrer**, segue o padrão IReageAo*) que dá às passivas/efeitos a chance de
-  agir; a Guarda aplica Invencível e o dano é re-resolvido com ele ativo (segura em 1).
-  REUSÁVEL por design — um conjunto de itens futuro deve poder usar o mesmo gancho (foi o
-  motivo de Gabriel de não hardcodar na Guarda). Cruza com o Invencível (que JÁ é, na essência,
-  um "previne morte" — avaliar se vira implementador do mesmo gancho). FIO PRÓPRIO, capacidade
-  nova. Guarda ainda usa a infra VELHA de revive (Revive()/MensagemSobreviveu na base +
-  ExecutarPassivasReativas) — essa infra morre quando a Guarda migrar pro gancho.
-
-**MIGRADAS recentemente (saíram de "faltam"):**
-- **Robo** (IReageAoAtacar, lê ctx.Aliados — cura o de menor HP) e **Sushiman**
-  (IReageAoSerAtacado, lê ctx.Aliados + ctx.FoiCritico — reflexo a todos se crítico).
-  Fatia 2 do EventoDano.
-- **Necromancia** (IReageAoMorrer, revive 50% pós-morte, respeita PodeReviver). Dispatch
-  ProcessarReacoesAoMorrer no CombateService, depois do "ao matar".
-- **Genio + BonecoDeNeve + Tengu + Elfo** (IReageAoInicioTurno). Genio renova RefletirDano 2t;
-  BonecoDeNeve cleanse Queima + cura se havia; Tengu e Elfo passaram de IPassivaInicial (1x /
-  infinito) pra reaplicar buff 2t TODO turno. Dispatch ProcessarReacoesInicioTurno no
-  CombateService (ao lado do velho; move pro Turno fica pro fio do Turno).
+**FALTAM migrar: NENHUMA (C5 completo).** A Guarda foi migrada pro IReageAoMorrer com
+HACK provisório (deixa morrer → Reviver(1) → Invencível). O CONCEITO certo dela (prevenção
+de morte pré-morte, via gancho de morte-iminente) fica pendente no sistema de morte-como-estado
+— ver "Estado morto". O Operario também foi migrado com provisório [revide-com-habilidade].
+Os dois débitos são CONCEITUAIS (a migração aconteceu), não de migração.
 
 ### Interfaces de reação — estado
 - IReageAoSerAtacado, IReageAoReceberDano, IReageAoCausarDano — existem (PR-C).
@@ -257,7 +238,13 @@ não criado agora.
 - **IIgnoraStatusNoAtaque (mecanismo 3) entra no DeveAgir** — provavelmente o
   IIgnoraStatusNoAtaque some ou se transforma; o Vampiro contribui pro DeveAgir de outra forma.
 - Cruza com IContribuiDefesa (o ignorarStatus também afeta a defesa — Vendaval ignora
-  BuffDefesa). A unificação precisa cobrir as duas categorias.
+  BuffDefesa). A unificação precisa cobrir as duas categorias. NOTA: ignorar IContribuiDefesa
+  NÃO é igual a pular (continue) como Escudo/ProtecaoAliado — a defesa do buff já foi SOMADA
+  ao stat (Defesa), então pra ignorá-la o ReceberDano SUBTRAI a ContribuicaoDefesa (lógica
+  invertida vs o continue dos modificadores). Funciona, mas é confuso ("soma tudo, depois
+  desconta o ignorado"). Limpeza prevista: o cálculo de quanto descontar deveria morar na
+  própria reação/natureza, não no loop do ReceberDano — montar a defesa SEM os ignorados desde
+  o início, em vez de incluir e descontar.
 
 ---
 

@@ -33,24 +33,26 @@
 
 ---
 
-## OS 5 FIOS QUE FALTAM (visão de alto nível)
+## OS FIOS QUE FALTAM (visão de alto nível)
 
-Resumo do que resta no combate, na ordem encadeada que destrava o máximo:
+Resumo do que resta no combate. **C5 COMPLETO** (todas as passivas migradas, sistema
+velho aposentado). O que resta:
 
-1. **EventoDano / contexto rico** — o nó central. NASCEU (record do golpe pronto,
-   Fatia 1). Falta a Fatia 2 (enriquecer o ContextoReacao) pra destravar Robo,
-   Sushiman e a passiva-conta-mortos.
-2. **Turno (resto)** — reset 1x-por-agressor + evento de início. Cruza o C5. Junto
-   do TimeAtualDoTurno (centralizar a regra de aliados/inimigos).
-3. **Refactor das ativas → revide-com-habilidade** — destrava Operario certo +
-   contra-ataque de múltiplas fontes (buff/passiva/item).
-4. **Estado morto (1a)** — dívida de modelagem ATUAL (não YAGNI): bloquear-revive já
-   tem clientes reais. Refatorar no rebalanceamento.
-5. **Terminar o C5 → aposentar o sistema velho** — consequência de 1, 2, 3.
+1. **EventoDano / contexto rico** — Fatia 1 e Fatia 2 FEITAS. Falta só a passiva-conta-mortos
+   (1b) como cliente futuro do contexto rico.
+2. **Estado de Vida (Vivo/Morto) + Atos do turno** — DESENHADO (ADR-estado-de-vida-e-atos.md).
+   UNIFICA o que antes eram "estado morto" + "separação de fases". É o próximo grande refactor.
+   Destrava a Guarda limpa, o bloquear-revive com dono, e a seleção de alvo por estado.
+3. **Turno (resto)** — reset 1x-por-agressor + TimeAtualDoTurno (centralizar aliados/inimigos).
+   Independente do estado de vida (o relógio não cruza; só os Atos cruzam).
+4. **Refactor das ativas → revide-com-habilidade** — destrava Operario certo (hoje provisório)
+   + contra-ataque de múltiplas fontes.
+5. **Buff-permanente vs passiva-pura** — 6 passivas que usam buff de contorno (deviam ser
+   capacidade direta) + Fantasma (buff não-removível). Dor real, seção própria.
+6. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria
+   pós-estrutura.
 
-Dois eixos quase independentes: o do **contexto** (1 → 2) e o do **revide** (3). A
-**unificação dos mecanismos de ignorar** (abaixo) é um fio transversal que já começou
-(DeveAgir = passo 1).
+A **unificação dos mecanismos de ignorar** é um fio transversal já começado (DeveAgir = passo 1).
 
 ---
 
@@ -338,28 +340,42 @@ Aplicador, (2) passiva filtra por origem, (3) regra "maior prevalece" (já exist
 
 ---
 
-## Estado morto — DÍVIDA DE MODELAGEM ATUAL (não YAGNI puro)
+## Estado de Vida (Vivo/Morto) + Atos do turno — ADR FEITO, implementação pendente
 
-**Status:** RECLASSIFICADO. Tem clientes reais HOJE — refatorar no rebalanceamento.
+**Status:** DESENHADO. Ver **ADR-estado-de-vida-e-atos.md** (conceitos fechados). Este é
+o fio que UNIFICA o que antes eram dois: "estado morto" e "separação de fases do turno".
+Descoberto que são o MESMO fio — o Ato de Morte é a transição de estado.
 
-**Distinção 1a vs 1b:**
-- **1a) Estado morto** = status que agem sobre o morto / regras de revive. Dívida atual.
-- **1b) Passiva-conta-mortos** = passiva do VIVO que conta mortos pra ganhar força. NÃO é
-  estado morto — consulta o tabuleiro. Depende do contexto rico (Fatia 2). Ver seção própria.
+**Resumo da decisão (detalhe no ADR):**
+- **Estado de vida como objeto (State Pattern):** Combate tem um `EstadoVida` interno
+  (Vivo/Morto), delega interações que dependem de estado (Reviver/Curar/etc) — sem
+  `if (estaVivo)` espalhado. O Combate mantém a identidade; troca o objeto de estado na
+  transição.
+- **Status de morto vivem no objeto Morto** (lista separada da do vivo). Isola dos
+  cleanses/bloqueios do vivo. O bloquear-revive volta a ser DEBUFF (símbolo, removível
+  pelo Diabo) — agora possível porque (1) ganha removedor e (2) vive no Morto, fora do
+  alcance da ImunidadeDebuffs. Resolve o histórico do MortePermanente.
+- **Atos do turno:** ExecutarHabilidade vira 5 Atos nomeados (AtoExecucao,
+  AtoReacaoDoAlvo, AtoMorte, AtoReacaoDoAtacante, AtoEncerramento). "Ato" e não "Fase"
+  (Fase = campanha). O AtoMorte é onde o modelo de estado encaixa.
+- **Cálculo vs fluxo entre classes JÁ está certo** (Combate=domínio calcula,
+  CombateService=orquestra). NÃO se move cálculo nem se cria classe de cálculo. O
+  refactor é dar Atos ao fluxo + o modelo de estado fornecendo o AtoMorte.
 
-**Por que 1a não é YAGNI (correção):** "impedir revive" JÁ tem clientes — Vilao bloqueia (flag
-PodeReviver), Diabo/AnjoCaido ignora (exceção pontual). Anjo talvez ignore no futuro (céu/
-inferno). Todo revive checa PodeReviver; só o Diabo ignora. A forma atual (flag + exceção)
-funciona pros 2 casos, mas a regra "quem revive / bloqueia / ignora o bloqueio" está espalhada,
-sem dono.
+**Destrava:** a Guarda limpa (sai do hack [sistema-morte-como-estado], vira prevenção no
+AtoMorte), o bloquear-revive com dono (era flag PodeReviver espalhada), seleção de alvo
+por estado (reviver→morto, curar→vivo).
 
-**Gatilho concreto:** quando adicionar o Anjo-que-ignora OU mexer no rebalanceamento de revives,
-modelar o "estado morto" como categoria própria (dono claro), no MESMO trabalho. Boy scout com
-gatilho, não YAGNI.
+**Sequência de implementação (no ADR §10):** modelo de estado → status no morto →
+Atos → Guarda limpa → seleção por estado. Cada passo buildável, Strangler-friendly.
 
-**A parte genuinamente YAGNI (separada):** bloquear-revive TEMPORÁRIO/removível estilo Raid
-(duração, cleanse, resistência) — categoria de status separada da lista do vivo, pra NÃO ser
-pega pela ImunidadeDebuffs. ESSA só quando os efeitos pedirem.
+**Gameplay futuro que o modelo HABILITA (NÃO no refactor):** decomposição (debuff de
+morto que após X turnos aplica impedir-ressurreição), gás tóxico acumulativo (corpo
+explode, dano nos vivos). Ideias de design/lore — o refactor só entrega o
+impedir-ressurreição (tem cliente: Vilão/Diabo). Validam que o desenho não fecha portas.
+
+**1b) Passiva-conta-mortos** (passiva do VIVO que conta mortos pra ganhar força) — NÃO é
+estado morto, consulta o tabuleiro. Depende do contexto rico (Fatia 2). Seção própria.
 
 ---
 

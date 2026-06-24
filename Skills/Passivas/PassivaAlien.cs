@@ -4,22 +4,23 @@ using v1_Apostle_s_War.Skills.Buffs;
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Ao receber dano, aplica Escudo de 5% do HP máximo por 1 turno em si mesmo.
+    /// Ao receber dano (HP perdido), aplica Escudo de 5% do HP máximo por 1 turno em si.
+    /// Reage via IReageAoReceberDano (só dispara com dano > 0).
     /// </summary>
-    class PassivaAlien : HabilidadePassiva
+    class PassivaAlien : HabilidadePassiva, IReageAoReceberDano
     {
         public PassivaAlien() : base("Carapaça Alienígena", "👽", 0,
             "Ao receber dano, ganha Escudo de 5% HP por 1 turno.")
         { }
 
-        public override bool DeveAtivar(EventoCombate evento, ContextoPassiva ctx) =>
-            evento == EventoCombate.DepoisDeReceberDano && ctx.AlvoVivo;
-
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        public List<ResultadoReacao> AoReceberDano(ContextoReacao ctx)
         {
-            int pontos = (int)(ctx.Atacante.HPMaximo * 0.05);
-            new Escudo(pontos, turnos: 1).Aplicar(ctx.Atacante);
-            return SemDano();
+            if (!ctx.Portador.EstaVivo()) return new List<ResultadoReacao>();
+
+            int pontos = (int)(ctx.Portador.HPMaximo * 0.05);
+            new Escudo(pontos, turnos: 1).Aplicar(ctx.Portador);
+
+            return new List<ResultadoReacao>();
         }
     }
 }

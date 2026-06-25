@@ -369,10 +369,90 @@ por estado (reviver→morto, curar→vivo).
 **Sequência de implementação (no ADR §10):** modelo de estado → status no morto →
 Atos → Guarda limpa → seleção por estado. Cada passo buildável, Strangler-friendly.
 
-**Gameplay futuro que o modelo HABILITA (NÃO no refactor):** decomposição (debuff de
-morto que após X turnos aplica impedir-ressurreição), gás tóxico acumulativo (corpo
-explode, dano nos vivos). Ideias de design/lore — o refactor só entrega o
-impedir-ressurreição (tem cliente: Vilão/Diabo). Validam que o desenho não fecha portas.
+**REFATORAÇÃO DAS ATIVAS — seleção de alvo por estado (dor REAL detectada, fio próprio):**
+Hoje cada ativa checa EstaVivo() de forma INCONSISTENTE — umas filtram `.Where(EstaVivo())`,
+o AnjoCaido filtra `!EstaVivo()`, as de dano não checam. Não há padrão; cada Ativar decide na
+mão se mira vivo ou morto. Agora que Morto é estado de primeira classe, a bagunça fica
+explícita. SOLUÇÃO (ideia de Gabriel, análoga ao que fizemos com NaturezaDano): uma INTERFACE
+declarativa onde a habilidade DECLARA quem mira (VIVOS / MORTOS / AMBOS), e a seleção de alvo
+respeita automaticamente — em vez do filtro manual em cada Ativar. "Make illegal states
+unrepresentable" (uma cura não consegue nem mirar um morto). Conecta com o Passo 5 do ADR
+("seleção de alvo por estado") — agora com FORMA (interface declarativa). É refactor das
+ativas, dói de verdade (não pureza), GRANDE — fio próprio, não cabe no Passo 2.
+
+EXEMPLOS pra desenhar a interface (mapeados): a maioria mira UM estado (cura→vivos,
+revive→mortos, ataque→vivos). Casos ricos que miram OS DOIS: **AnjoCaido (Diabo)** revive
+mortos E cura vivos — duas seleções de listas diferentes na mesma habilidade. **Barata
+(Glitch)** é ativa que mira VIVO (ataque) e, como CONSEQUÊNCIA do golpe (matou→virou morto),
+aplica bloqueio no morto resultante — uma seleção (vivo) + consequência no morto, não duas
+seleções. A interface precisa distinguir "mira os dois" (Diabo) de "mira um, consequência no
+outro" (Glitch). NOTA: bloqueadores de revive são de DOIS tipos — PassivaVilao é REAÇÃO
+(IReageAoMatar), Barata/Glitch é ATIVA (seleção). Os dois migram no Passo 2 (aplicam o debuff),
+mas só o Glitch é cliente da interface de seleção.
+
+**SEMENTE FUTURA — mecânica de "Vida de Alma" (lore + mecânica grande, NÃO desenvolver agora):**
+ideias cruas de Gabriel pra maturar: o morto teria uma "Vida de Alma" (a vida REAL pós-morte);
+atacar a alma e zerá-la = morte PERMANENTE de verdade (nem o Diabo revive — matou a alma).
+Possível atacar o morto direto na Vida de Alma. Almas atacando almas (um morto inimigo ataca
+as almas vivas, afetando o vivo?) — Gabriel inclinou que talvez não generalize, mas uma facção/
+personagem TEMÁTICO poderia ter "sobrevida" e atacar como alma (vantagem temporária vs a
+desvantagem de decompor). Questão em aberto: a decomposição TIRA a Vida de Alma (uma coisa só)
+ou são dois sistemas (provavelmente uma só). Status no morto poderiam mirar a alma (reduzir
+"defesa da alma" pra matá-la mais rápido?).
+
+**SACADA ARQUITETURAL (Gabriel) — Alma como TERCEIRO ESTADO:** se a Alma precisar de
+comportamento próprio (atacar, ser atacada na vida-de-alma, interagir), ela vira uma TERCEIRA
+filha de EstadoVida (Vivo / Morto / Alma) — o State Pattern já suporta, é só criar a classe sem
+mexer nas outras. Transição possível Vivo→Morto→Alma (decompôs vira alma) ou Vivo→Alma (facções
+que morrem direto pra alma). Isso resolveria as dúvidas (morto passivo não ataca; Alma é estado
+ATIVO que ataca/é atacada). O modelo NÃO fecha portas — a Alma entra como estado quando a
+mecânica amadurecer. TUDO futuro — Gabriel vai maturar e trazer depois.
+
+**DECISÃO (Passo 2):** ImpedirRessurreicao fica como **Debuff** por ora (não tipo próprio). É
+seguro — vive na lista do Morto, e os cleanses genéricos filtram EstaVivo() (só vivos), então
+nunca alcançam ele. O isolamento vem da SEPARAÇÃO DE LISTAS (Forma 2), não do tipo. Só vira
+decisão se/quando a Alma mudar como cleanses rodam em mortos — aí Gabriel reavalia.
+
+**Gameplay futuro que o modelo HABILITA (NÃO no refactor — design de balanceamento, matura
+JOGANDO):** o estado Morto vira um SISTEMA tático rico. Visão de Gabriel (registrada pra não
+perder; números NÃO cravados — afinar em playtest, são alavancas interdependentes):
+
+- **Decomposição (penalidade por não reviver):** a cada turno morto, acumula um tick de
+  decomposição que tira % PERMANENTE (na partida) dos stats TOTAIS — vida, def, atk (ex:
+  ~5%/tick). Incide sobre o total: passivas que alteram o total vão junto; buffs de atk somam
+  SOBRE o novo total já penalizado. Debuff NÃO-removível e VISÍVEL (o jogador vê quantos ticks
+  de penalidade acumulou).
+- **Explosão (clímax da decomposição):** ao atingir N ticks (ex: ~10), o corpo EXPLODE —
+  causa dano no PRÓPRIO time (penalidade por abandonar o morto) e CONTAMINA os vivos (aplica
+  ~2 ticks de um debuff de contaminação NELES — o mesmo debuff transicionando vivo↔morto).
+  Após explodir, é MORTE PERMANENTE DE VERDADE: nem o Diabo revive. ESTA é a "morte
+  permanente" real — reservar o nome pra ela.
+- **Renomeação (decisão de AGORA, afeta o Passo 2):** a "morte permanente" do Vilão NÃO é a
+  permanente de verdade — é só um BLOQUEIO removível. Vira **ImpedirRessurreicao** (debuff do
+  Vilão, removível pelo Diabo). "Morte permanente" fica reservado pra explosão-da-decomposição.
+- **Diabo com penalidade (ponderar):** pra reviver alguém com ImpedirRessurreicao, o Diabo
+  paga um preço — duas opções a ponderar: (a) ADICIONA ~2 ticks de decomposição ao reviver
+  (mais agressivo — pode empurrar pra explosão), ou (b) ROUBA metade dos ticks pra si (menos
+  agressivo, mas ainda custoso). Decidir jogando.
+- **Limpeza de ticks (ponderar):** formas de reduzir decomposição — a cada cura recebida, a
+  cada ~2 turnos vivo, ou ao matar um inimigo. Decidir jogando.
+- **fraqueza-por-revive:** caso mais simples do mesmo princípio — cada morte+revive deixa uma
+  marca acumulativa. Pode ser a própria decomposição ou um efeito à parte.
+
+Tudo são status de MORTO (e contaminação que transiciona vivo↔morto) que rodam sobre o
+modelo via a view StatusAtivos — REÚSO dos mesmos mecanismos de tick/processamento, sem
+duplicação. O refactor (Passo 2) entrega só o ImpedirRessurreicao (Vilão aplica, Diabo
+remove). A mecânica completa valida que o desenho não fecha portas, mas só vira código na
+fase de balanceamento.
+
+**Identidade / lore (semente):** esta mecânica de morte-como-sistema é um DIFERENCIAL — Gabriel
+não conhece jogo com algo assim (Void Hunters tem penalidades, mas natureza diferente). Dá
+identidade própria ao Apostle's War. Possível resgate da lore criada no Campo Minado (a Deusa
+e os apóstolos) pra justificar a mecânica na ficção — por que mortos decompõem/explodem/
+contaminam. Fio de NARRATIVA, futuro.
+
+**Comportamento-BASE (já decidido):** status de vivo SOMEM ao morrer (Opção X); as
+consequências de morte/revive entram depois como status de morto, sem retrabalho estrutural.
 
 **1b) Passiva-conta-mortos** (passiva do VIVO que conta mortos pra ganhar força) — NÃO é
 estado morto, consulta o tabuleiro. Depende do contexto rico (Fatia 2). Seção própria.

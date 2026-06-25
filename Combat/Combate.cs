@@ -187,7 +187,13 @@ namespace ApostlesWar
             }
         }
 
-        public List<StatusEffect> StatusAtivos { get; }
+        /// <summary>
+        /// Os status do ESTADO ATUAL (vivo ou morto). É uma view — aponta pra lista
+        /// do estado em que o combatente está agora. Aplicar/remover status opera
+        /// sobre a lista do estado atual. Ao transicionar (morrer/reviver), a lista
+        /// muda junto (o novo estado tem a sua).
+        /// </summary>
+        public List<StatusEffect> StatusAtivos => _estado.Status;
 
         /// <summary>
         /// Estado de vida (Vivo/Morto). Começa Vivo. Trocado pela transição no
@@ -205,7 +211,6 @@ namespace ApostlesWar
             DefesaBase = personagem.Defesa;
             TaxaCritBase = personagem.TaxaCrit;
             DanoCritBase = personagem.DanoCrit;
-            StatusAtivos = new List<StatusEffect>();
             Cooldowns = new Dictionary<Habilidade, SkillCooldown>();
             EstadoHabilidades = new Dictionary<Habilidade, object>();
             foreach (Habilidade hab in personagem.Habilidades)

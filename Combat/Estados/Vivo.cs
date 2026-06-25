@@ -1,10 +1,15 @@
 ﻿namespace ApostlesWar
 {
     /// <summary>
-    /// Estado vivo: cura normalmente; ignora revive (já está vivo).
+    /// Estado vivo: carrega os status do vivo (buffs, debuffs, escudos...).
+    /// Cura normalmente; ignora revive (já está vivo).
     /// </summary>
     class Vivo : EstadoVida
     {
+        public List<StatusEffect> StatusNoVivo { get; } = new List<StatusEffect>();
+
+        public override List<StatusEffect> Status => StatusNoVivo;
+
         public override bool EstaVivo() => true;
 
         public override void Curar(Combate dono, int valor) =>

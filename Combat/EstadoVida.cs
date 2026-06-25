@@ -3,21 +3,19 @@
     /// <summary>
     /// Estado de vida de um combatente (Vivo ou Morto). State Pattern: o Combate
     /// tem um EstadoVida interno e delega a ele o COMPORTAMENTO que muda conforme
-    /// vivo/morto (curar, reviver, e — no Passo 2 — os status de morto). A leitura
-    /// "está vivo?" é respondida pelo estado, mantida em sincronia com o HP pela
-    /// transição no ReceberDano (invariante: HP <= 0 ⟺ Morto).
+    /// vivo/morto (curar, reviver, e a lista de status daquele estado).
     ///
-    /// Passo 1: só Vivo/Morto magros (EstaVivo, Curar, Reviver). O Morto ainda não
-    /// carrega status de morto — isso entra no Passo 2 (bloquear-revive como debuff).
+    /// Cada estado carrega SUA PRÓPRIA lista de status (StatusNoVivo / StatusNoMorto).
+    /// O Combate expõe a do estado atual via a view StatusAtivos. Ao morrer, os status
+    /// do vivo somem (a lista do Vivo é descartada com ele); o Morto começa limpo.
     /// </summary>
     abstract class EstadoVida
     {
+        /// <summary>A lista de status DESTE estado. O Combate expõe a do estado atual.</summary>
+        public abstract List<StatusEffect> Status { get; }
+
         public abstract bool EstaVivo();
-
-        /// <summary>Cura o portador. Só o Vivo cura; o Morto ignora.</summary>
         public abstract void Curar(Combate dono, int valor);
-
-        /// <summary>Revive o portador. Só o Morto revive (vira Vivo); o Vivo ignora.</summary>
         public abstract void Reviver(Combate dono, int hp);
     }
 }

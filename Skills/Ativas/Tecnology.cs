@@ -29,7 +29,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
 
             foreach (Combate a in lista)
             {
-                if (!a.EstaVivo() && a.PodeReviver)
+                if (!a.EstaVivo())
                     a.Reviver((int)(a.HPMaximo * HPRevivido));
             }
 

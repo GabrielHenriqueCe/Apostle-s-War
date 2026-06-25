@@ -25,7 +25,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         {
             var lista = ObterListaPrincipal(ctx);
 
-            var morto = lista.FirstOrDefault(a => !a.EstaVivo() && a.PodeReviver);
+            var morto = lista.FirstOrDefault(a => !a.EstaVivo());
             if (morto != null)
                 morto.Reviver(morto.HPMaximo);
 

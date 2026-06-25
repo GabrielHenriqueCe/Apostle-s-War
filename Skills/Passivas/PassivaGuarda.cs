@@ -25,10 +25,11 @@ namespace v1_Apostle_s_War.Skills.Passivas
         {
             var portador = ctx.Portador;
 
-            if (!portador.PodeReviver)
-                return new List<ResultadoReacao>();
-
             portador.Reviver(1);
+
+            if (!portador.EstaVivo())
+                return new List<ResultadoReacao>();   // bloqueado pela Sentença — não sobreviveu
+
             new Invencivel(turnos: 1).Aplicar(portador);
 
             return new List<ResultadoReacao>

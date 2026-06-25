@@ -1,11 +1,13 @@
 ﻿using ApostlesWar;
+using v1_Apostle_s_War.Skills.Debuffs;
 
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Ao matar um inimigo, bloqueia a ressurreição dele (BloquearRevive). Migrada
-    /// para IReageAoMatar. Roda antes do "ao morrer" — bloqueia antes da tentativa
-    /// de reviver (Necromancia/Guarda). AnjoCaido (Diabo) ignora proposital.
+    /// Ao matar um inimigo, aplica a Sentença (ImpedirRessurreicao) no morto — ele não
+    /// pode ser ressuscitado. Reação (IReageAoMatar), roda antes do "ao morrer", então
+    /// o debuff já está no morto quando a Necromancia/Guarda tentam reviver. O Diabo
+    /// (AnjoCaido) remove a Sentença proposital.
     /// </summary>
     class PassivaVilao : HabilidadePassiva, IReageAoMatar
     {
@@ -14,8 +16,8 @@ namespace v1_Apostle_s_War.Skills.Passivas
         { }
 
         public List<ResultadoReacao> AoMatar(ContextoReacao ctx)
-        {
-            ctx.Outro.BloquearRevive();
+        {   
+            new ImpedirRessurreicao().Aplicar(ctx.Outro);
 
             return new List<ResultadoReacao>
             {

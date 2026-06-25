@@ -1,11 +1,12 @@
 ﻿using ApostlesWar;
 using v1_Apostle_s_War.Skills.Buffs;
+using v1_Apostle_s_War.Skills.Debuffs;
 
 namespace v1_Apostle_s_War.Skills.Ativas
 {
     /// <summary>
     /// Intocavel 2t em si, ataca 1 inimigo com +100% ATK (2.0x).
-    /// Se este golpe matou o inimigo, aplica MortePermanente.
+    /// Se este golpe matou o inimigo, aplica a Sentença (ImpedirRessurreicao).
     /// </summary>
     class Barata : HabilidadeAtiva
     {
@@ -29,7 +30,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
                 resultados.Add(r);
 
                 if (vivoAntes && !a.EstaVivo())
-                    a.BloquearRevive();
+                    new ImpedirRessurreicao().Aplicar(a);
             }
             return resultados;
         }

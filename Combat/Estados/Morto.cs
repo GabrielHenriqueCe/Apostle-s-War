@@ -1,4 +1,6 @@
-﻿namespace ApostlesWar
+﻿using System.Linq;
+
+namespace ApostlesWar
 {
     /// <summary>
     /// Estado morto: carrega os status do morto (na Fatia 2, o ImpedirRessurreicao
@@ -20,6 +22,13 @@
 
         public override void Reviver(Combate dono, int hp)
         {
+            // Checagem CENTRALIZADA do bloqueio: se o morto tem a Sentença
+            // (ImpedirRessurreicao), não revive. Toda tentativa de revive passa por
+            // aqui, então nenhuma habilidade precisa checar — é à prova de esquecimento.
+            // O Diabo (AnjoCaido) remove o debuff ANTES de chamar Reviver, daí passa.
+            if (StatusNoMorto.OfType<v1_Apostle_s_War.Skills.Debuffs.ImpedirRessurreicao>().Any())
+                return;
+
             dono.AplicarRevive(hp);
         }
     }

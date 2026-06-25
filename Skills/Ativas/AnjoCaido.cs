@@ -1,10 +1,12 @@
 ﻿using ApostlesWar;
+using v1_Apostle_s_War.Skills.Debuffs;
 
 namespace v1_Apostle_s_War.Skills.Ativas
 {
     /// <summary>
     /// Revive todos os aliados mortos com 50% HP e cura todos os aliados em 30% HP.
-    /// IGNORA bloqueio de ressurreição (MortePermanente) — traz direto do inferno.
+    /// QUEBRA a Sentença (remove ImpedirRessurreicao do morto) antes de reviver —
+    /// "traz direto do inferno". Remove só esse debuff, não outros.
     /// </summary>
     class AnjoCaido : HabilidadeAtiva
     {
@@ -12,7 +14,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         private const double CuraPercentual = 0.30;
 
         public AnjoCaido() : base("Anjo Caído", "😇", 3,
-            "Revive aliados (50% HP, ignora bloqueio) e cura todos (30% HP).")
+            "Revive aliados (50% HP, quebra a Sentença) e cura todos (30% HP).")
         { }
 
         public override int NumeroDeAlvos => int.MaxValue;
@@ -22,11 +24,13 @@ namespace v1_Apostle_s_War.Skills.Ativas
 
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            // Revive todos os mortos, IGNORANDO MortePermanente (proposital).
-            foreach (Combate a in ObterListaPrincipal(ctx))
+            foreach (Combate a in ObterListaPrincipal(ctx).Where(a => !a.EstaVivo()))
             {
-                if (!a.EstaVivo())
-                    a.Reviver((int)(a.HPMaximo * HPRevivido));
+                // Quebra a Sentença (só ela, não outros debuffs do morto), depois revive.
+                foreach (var sentenca in a.StatusAtivos.OfType<ImpedirRessurreicao>().ToList())
+                    sentenca.Remover(a);
+
+                a.Reviver((int)(a.HPMaximo * HPRevivido));
             }
 
             // Cura todos os aliados vivos (incluindo revividos)

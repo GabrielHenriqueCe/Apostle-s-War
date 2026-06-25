@@ -27,7 +27,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         {
             var lista = ObterListaPrincipal(ctx);
 
-            foreach (Combate aliado in lista.Where(a => !a.EstaVivo() && a.PodeReviver))
+            foreach (Combate aliado in lista.Where(a => !a.EstaVivo()))
                 aliado.Reviver((int)(aliado.HPMaximo * HPRevivido));
 
             foreach (Combate a in ResolverAlvos(alvo, lista))

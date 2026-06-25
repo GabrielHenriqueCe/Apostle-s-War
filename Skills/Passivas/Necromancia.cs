@@ -18,18 +18,17 @@ namespace v1_Apostle_s_War.Skills.Passivas
         {
             var portador = ctx.Portador;
 
-            if (!portador.PodeReviver)
-                return new List<ResultadoReacao>
-                {
-                    new ResultadoReacao(
-                        Mensagem: $"{portador.Personagem.Simbolo} {portador.Personagem.Nome} caiu em batalha e não pode ser ressuscitado.")
-                };
-
             portador.Reviver(portador.HPMaximo / 2);
+
+            // Se o revive foi bloqueado pela Sentença, o Reviver não fez nada (portador
+            // segue morto). A mensagem diferenciada (reviveu vs bloqueado) fica pra
+            // refatoração de exibição/front — ver roadmap. Por ora, declara a tentativa.
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"{portador.Personagem.Simbolo} {portador.Personagem.Nome} foi ressuscitado pela Necromancia!")
+                    Mensagem: portador.EstaVivo()
+                        ? $"{portador.Personagem.Simbolo} {portador.Personagem.Nome} foi ressuscitado pela Necromancia!"
+                        : $"{portador.Personagem.Simbolo} {portador.Personagem.Nome} caiu em batalha e não pode ser ressuscitado.")
             };
         }
     }

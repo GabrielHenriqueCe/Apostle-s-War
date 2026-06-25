@@ -26,7 +26,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
             // Revive aliados mortos (respeita MortePermanente)
             foreach (Combate a in ObterListaPrincipal(ctx))
             {
-                if (!a.EstaVivo() && a.PodeReviver)
+                if (!a.EstaVivo())
                     a.Reviver((int)(a.HPMaximo * HPRevivido));
             }
 

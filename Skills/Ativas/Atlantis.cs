@@ -26,7 +26,6 @@ namespace v1_Apostle_s_War.Skills.Ativas
             foreach (Combate a in ObterListaPrincipal(ctx))
             {
                 if (a.EstaVivo()) continue;
-                if (!a.PodeReviver) continue;
 
                 a.Reviver((int)(a.HPMaximo * HPRevivido));
                 new Intocavel(turnos: TurnosIntocavel).Aplicar(a);

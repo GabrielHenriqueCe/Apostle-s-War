@@ -245,7 +245,52 @@ volta o bug de timing, e aí valeria fazer o HP em camadas. Até lá, YAGNI.
 
 ---
 
-## 6. Escopo — o que NÃO fazer agora
+## 6. Modo Arena (Pós-Web)
+
+> **Status:** Direção fechada; regras concretas a-definir em playtest.
+> Não implementar no console — exige persistência de run, UI de draft e
+> balanceamento por molde. Registrado aqui para não perder o conceito.
+
+### Moldes de Time
+
+Um **molde de time** é um arquétipo de composição — um esqueleto de "que tipo
+de time montar", não um time fixo. Em vez de sortear personagens no RNG cru
+(que gera times injogáveis ou triviais), cada molde tem regras de elegibilidade:
+quais personagens podem entrar, em que proporção, com qual papel.
+
+As 9 facções já são temas de sinergia prontos e servem como base natural para
+os moldes. Exemplos de arquétipos possíveis:
+
+- **Rush agressivo** — time de alta pressão, personagens de dano puro.
+- **Controle/debuff** — time que aplica status e enrola o adversário.
+- **Stall com Necromancia** — time que sustenta com revive + ImpedirRessurreicao.
+
+> As regras concretas de cada molde (quais personagens entram, quantos, quais
+> facções) são **a-definir em playtest**. Não cravar antes de ter dados reais.
+
+### Motor Procedural
+
+A cada run de Arena, o motor **escolhe um molde e sorteia personagens dentro
+das regras dele** — gerando um time coerente e diferente a cada vez. A
+variedade vem de recombinar o elenco existente (combinatória), não de criar
+conteúdo novo nem de números subindo. É o "infinito horizontal" da Arena:
+mesmo elenco, composições sempre novas.
+
+### Decomposição como Enrage Timer
+
+A mecânica de decomposição (ver Roadmap — Estado de Vida, gameplay futuro)
+serve naturalmente como **enrage timer da Arena**: quando dois times entram em
+loop e ninguém morre, os corpos acumulando ticks de decomposição forçam uma
+resolução — o time que não conseguir reviver seus mortos perde terreno de
+forma acumulativa até a explosão encerrar o combate. Anti-stall orgânico, sem
+precisar de um timer externo artificial.
+
+Esta é a conexão entre a mecânica de morte (fio técnico) e o design da Arena
+(fio de jogo): o mesmo sistema resolve dois problemas ao mesmo tempo.
+
+---
+
+## 7. Escopo — o que NÃO fazer agora
 
 - NAO implementar itens com estrela/nível/raridade no console
 - NAO implementar XP/níveis de personagem no console

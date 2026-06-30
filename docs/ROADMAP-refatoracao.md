@@ -451,6 +451,11 @@ identidade própria ao Apostle's War. Possível resgate da lore criada no Campo 
 e os apóstolos) pra justificar a mecânica na ficção — por que mortos decompõem/explodem/
 contaminam. Fio de NARRATIVA, futuro.
 
+**Conexão com Arena (design, ver GDD §6):** a decomposição serve como **enrage timer natural**
+do Modo Arena — quando dois times entram em loop e ninguém morre, os ticks de decomposição
+forçam resolução sem timer externo artificial. O mesmo sistema que pune negligenciar mortos na
+campanha resolve o anti-stall da Arena. Um fio técnico, dois problemas de design.
+
 **Comportamento-BASE (já decidido):** status de vivo SOMEM ao morrer (Opção X); as
 consequências de morte/revive entram depois como status de morto, sem retrabalho estrutural.
 

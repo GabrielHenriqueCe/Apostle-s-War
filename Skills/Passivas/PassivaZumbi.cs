@@ -18,15 +18,15 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!ctx.Outro.EstaVivo())
+            if (!ctx.Contraparte.EstaVivo())
                 return new List<ResultadoReacao>();
 
-            new Veneno(stacks: 1).Aplicar(ctx.Outro);
+            new Veneno(stacks: 1).Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"{ctx.Outro.Personagem.Nome} foi envenenado pela Putrefação Contagiosa! 🧟"
+                    Mensagem: $"{ctx.Contraparte.Personagem.Nome} foi envenenado pela Putrefação Contagiosa! 🧟"
                 )
             };
         }

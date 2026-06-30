@@ -38,17 +38,17 @@ namespace v1_Apostle_s_War.Skills.Debuffs
 
         public List<ResultadoReacao> AoReceberDano(ContextoReacao ctx)
         {
-            // ctx.Portador tem o Sangramento; ctx.Outro (o atacante) é quem se cura.
+            // ctx.Portador tem o Sangramento; ctx.Contraparte (o atacante) é quem se cura.
             int cura = (int)(ctx.DanoCausado * PercentualCura);
             if (cura <= 0)
                 return new List<ResultadoReacao>();
 
-            ctx.Outro.Curar(cura);
+            ctx.Contraparte.Curar(cura);
 
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"{ctx.Outro.Personagem.Nome} se cura em {cura} com o Sangramento do inimigo! 🩸",
+                    Mensagem: $"{ctx.Contraparte.Personagem.Nome} se cura em {cura} com o Sangramento do inimigo! 🩸",
                     Cura: cura
                 )
             };

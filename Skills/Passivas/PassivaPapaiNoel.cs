@@ -19,15 +19,15 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!ctx.Outro.EstaVivo()) return new List<ResultadoReacao>();
+            if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
             if (_random.NextDouble() >= ChancePreso) return new List<ResultadoReacao>();
 
-            new Preso(turnos: 1).Aplicar(ctx.Outro);
+            new Preso(turnos: 1).Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"🎁 A Surpresa prendeu {ctx.Outro.Personagem.Nome}!"
+                    Mensagem: $"🎁 A Surpresa prendeu {ctx.Contraparte.Personagem.Nome}!"
                 )
             };
         }

@@ -17,18 +17,18 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> PorAtaque(ContextoReacao ctx)
         {
-            int reducaoMaxima = (int)(ctx.Outro.DefesaComItens * Cap);
-            if (ctx.Outro.ReducaoDefesaPermanente >= reducaoMaxima) return new List<ResultadoReacao>();
+            int reducaoMaxima = (int)(ctx.Contraparte.DefesaComItens * Cap);
+            if (ctx.Contraparte.ReducaoDefesaPermanente >= reducaoMaxima) return new List<ResultadoReacao>();
 
-            int incremento = (int)(ctx.Outro.DefesaComItens * ReducaoPorHit);
-            int aplicar = Math.Min(incremento, reducaoMaxima - ctx.Outro.ReducaoDefesaPermanente);
+            int incremento = (int)(ctx.Contraparte.DefesaComItens * ReducaoPorHit);
+            int aplicar = Math.Min(incremento, reducaoMaxima - ctx.Contraparte.ReducaoDefesaPermanente);
             if (aplicar <= 0) return new List<ResultadoReacao>();
 
-            ctx.Outro.AdicionarReducaoDefesaPermanente(aplicar);
+            ctx.Contraparte.AdicionarReducaoDefesaPermanente(aplicar);
 
             return new List<ResultadoReacao>
             {
-                new ResultadoReacao(Mensagem: $"👁️ O Sorrateiro corroeu a defesa de {ctx.Outro.Personagem.Nome}!")
+                new ResultadoReacao(Mensagem: $"👁️ O Sorrateiro corroeu a defesa de {ctx.Contraparte.Personagem.Nome}!")
             };
         }
     }

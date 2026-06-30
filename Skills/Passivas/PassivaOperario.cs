@@ -19,14 +19,14 @@ namespace v1_Apostle_s_War.Skills.Passivas
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
             if (_random.NextDouble() >= 0.10) return new List<ResultadoReacao>();
-            if (!ctx.Outro.EstaVivo()) return new List<ResultadoReacao>();
+            if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
 
             // PROVISÓRIO [revide-com-habilidade]: o contra-ataque usa multiplicador
             // hardcoded (1.25, força da Marretada) + natureza Revide. Quando o refactor
             // das ativas expuser a força das habilidades, isto vira "revidar carregando
             // a HabilidadeAtiva Marretada" (nome/animação/efeito próprios), unificando
             // com o ContraAtaque. Ver "Fio do revide" no roadmap.
-            var revide = ctx.Portador.Atacar(ctx.Outro, 1.25, natureza: NaturezasDano.Revide);
+            var revide = ctx.Portador.Atacar(ctx.Contraparte, 1.25, natureza: NaturezasDano.Revide);
 
             return new List<ResultadoReacao>
             {

@@ -16,15 +16,15 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!ctx.Outro.EstaVivo())
+            if (!ctx.Contraparte.EstaVivo())
                 return new List<ResultadoReacao>();
 
-            new Veneno(stacks: 2).Aplicar(ctx.Outro);
+            new Veneno(stacks: 2).Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"{ctx.Outro.Personagem.Nome} foi envenenado pelo Fedorento! 💩"
+                    Mensagem: $"{ctx.Contraparte.Personagem.Nome} foi envenenado pelo Fedorento! 💩"
                 )
             };
         }

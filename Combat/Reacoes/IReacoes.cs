@@ -1,7 +1,7 @@
 ﻿namespace ApostlesWar
 {
     /// <summary>
-    /// Contexto passado para uma reação. Portador = quem reage; Outro = a outra
+    /// Contexto passado para uma reação. Portador = quem reage; Contraparte = a outra
     /// parte (atacante, no lado do alvo; alvo, no lado do atacante); DanoCausado
     /// = dano efetivo que disparou; Natureza = natureza do golpe; FoiCritico = se
     /// o golpe foi crítico (já vem correto da fonte — golpe que não causou dano não
@@ -9,7 +9,7 @@
     /// </summary>
     record ContextoReacao(
         Combate Portador,
-        Combate Outro,
+        Combate Contraparte,
         int DanoCausado,
         NaturezaDano Natureza,
         bool FoiCritico,
@@ -79,9 +79,10 @@
     /// <summary>
     /// Reage quando o portador MATA um alvo (o golpe reduziu o alvo a 0 HP).
     /// Dispara por alvo morto (numa AoE que mata vários, dispara por cada morto).
-    /// Portador = quem matou; Outro = o morto.
-    /// IMPORTANTE: roda ANTES das reações de "ao morrer" (Necromancia/Guarda) —
-    /// o Vilao precisa bloquear o revive antes da tentativa de reviver.
+    /// Portador = quem matou; Contraparte = o morto.
+    /// IMPORTANTE: roda DEPOIS de IReageAntesDeMorrer (Guarda) e ANTES de
+    /// IReageAoMorrer (Necromancia). Se a Guarda reverteu a morte, este disparo
+    /// não ocorre (alvo voltou a EstaVivo).
     /// Implementadores: Fada, Vilao.
     /// </summary>
     interface IReageAoMatar
@@ -90,10 +91,23 @@
     }
 
     /// <summary>
+    /// Intervém ANTES das consequências da morte (antes de IReageAoMatar e IReageAoMorrer).
+    /// O portador chegou a 0 HP e está em estado Morto; esta interface pode REVERTER
+    /// a transição chamando AplicarRevive — mantendo o personagem como Vivo, impedindo
+    /// que o Vilão perceba a morte e que a Necromância tente reviver.
+    /// Portador = quem quase morreu; Contraparte = quem matou.
+    /// Implementador: PassivaGuarda.
+    /// </summary>
+    interface IReageAntesDeMorrer
+    {
+        List<ResultadoReacao> AntesDeMorrer(ContextoReacao ctx);
+    }
+
+    /// <summary>
     /// Reage quando o portador MORRE (HP chegou a 0 por um golpe). Pós-morte.
     /// Dispara DEPOIS do IReageAoMatar — o Vilao já bloqueou o revive, se for o caso.
     /// O portador pode tentar reviver (Necromancia), respeitando PodeReviver.
-    /// Portador = quem morreu; Outro = quem matou.
+    /// Portador = quem morreu; Contraparte = quem matou.
     /// Implementador: Necromancia.
     /// </summary>
     interface IReageAoMorrer
@@ -102,7 +116,7 @@
     }
 
     /// <summary>
-    /// Reage no INÍCIO do turno do portador. Não há golpe (sem dano, sem Outro) —
+    /// Reage no INÍCIO do turno do portador. Não há golpe (sem dano, sem Contraparte) —
     /// recebe o ContextoCombate (Atacante = portador, Aliados, Inimigos). Para efeitos
     /// que o portador renova/aplica a cada turno (RefletirDano do Genio, BuffAtaque do
     /// Tengu, cleanse do BonecoDeNeve).

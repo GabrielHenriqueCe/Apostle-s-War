@@ -84,11 +84,9 @@ documentação/ADRs mortos).
 - Interface própria não-reativa (consulta direta, sem evento): Piromancer (MultExtra
   no cálculo de dano), Vampiro (IIgnoraStatusNoAtaque no Atacar).
 
-**FALTAM migrar: NENHUMA (C5 completo).** A Guarda foi migrada pro IReageAoMorrer com
-HACK provisório (deixa morrer → Reviver(1) → Invencível). O CONCEITO certo dela (prevenção
-de morte pré-morte, via gancho de morte-iminente) fica pendente no sistema de morte-como-estado
-— ver "Estado morto". O Operario também foi migrado com provisório [revide-com-habilidade].
-Os dois débitos são CONCEITUAIS (a migração aconteceu), não de migração.
+**FALTAM migrar: NENHUMA (C5 completo).** A Guarda foi migrada pra IReageAntesDeMorrer
+(hack provisório removido — ver Passo 4 no CONCLUÍDO). O Operario está com provisório
+[revide-com-habilidade]. Débito CONCEITUAL (migração aconteceu), não de migração.
 
 ### Interfaces de reação — estado
 - IReageAoSerAtacado, IReageAoReceberDano, IReageAoCausarDano — existem (PR-C).
@@ -96,7 +94,7 @@ Os dois débitos são CONCEITUAIS (a migração aconteceu), não de migração.
   IReageAoMatar — CRIADAS.
 - IReageAoMorrer (pós-morte, Necromancia), IReageAoInicioTurno (início de turno, recebe
   ContextoCombate — Genio/BonecoDeNeve/Tengu/Elfo) — CRIADAS.
-- IReageAntesDeMorrer (pré-morte, gancho de morte-iminente) — A CRIAR (fio da Guarda).
+- IReageAntesDeMorrer (pré-morte, gancho de morte-iminente) — CRIADA (Passo 4).
 
 ### Dois sabores do lado atacante (decisão firmada)
 - **IReageAoAtacar** = efeito no PRÓPRIO atacante. Segue TipoAtaque: AoE = 1x, Sequencial
@@ -107,9 +105,9 @@ ProcessarReacoesAtacante dividido em PorAlvo (dentro do foreach) e PorAtaque (se
 TipoAtaque). Ver "Dívidas" — a repetição do loop vira helper ColetarReacoes<T>.
 
 ### Ordem crítica preservada (morte/revive)
-"Ao matar" (IReageAoMatar) roda ANTES de "ao morrer" (Necromancia/Guarda). O Vilao bloqueia
-o revive antes da tentativa. Dispatch novo chamado no mesmo ponto que o velho, preservando a
-ordem.
+IReageAntesDeMorrer (Guarda) → IReageAoMatar (Vilao) → IReageAoMorrer (Necromancia).
+A Guarda reverte a morte antes do Vilão enxergá-la; se reverteu, os outros dois não disparam.
+Se não reverteu, o Vilão bloqueia o revive antes da Necromância tentar.
 
 ### Aposentar o sistema velho
 DeveAtivar/Ativar virtual e o enum EventoCombate só saem quando a ÚLTIMA passiva migrar.
@@ -526,11 +524,16 @@ tudo estabilizar.
 - **PR-C — reações via interface** (C1-C6): Sedento, Reflexo, Sangramento, Espinhos, ContraAtaque
   migrados pra IReageAo*. Revide orquestrado (Forma 1, profundidade 1).
 - **C7 — limpeza:** removidos os 3 hooks mortos do StatusEffect + EventoCombate.AntesDeReceberDano.
-- **C5 (quase no fim) — 24 passivas migradas:** lado "ao ser atacado" completo; lado atacante
-  (OlhoClinico, Virus; Sorrateiro, Policial); ao matar (Fada, Vilao); Robo + Sushiman (Fatia 2);
-  Necromancia (IReageAoMorrer); Genio, BonecoDeNeve, Tengu, Elfo (IReageAoInicioTurno). Interfaces
-  IReageAoAtacar/IReagePorAtaque/IReageAoMatar/IReageAoMorrer/IReageAoInicioTurno criadas. Restam 2:
-  Operario (revide) e Guarda (gancho de morte-iminente).
+- **C5 completo — todas as passivas migradas:** lado "ao ser atacado"; lado atacante (OlhoClinico,
+  Virus, Sorrateiro, Policial); ao matar (Fada, Vilao); Robo + Sushiman; Necromancia (IReageAoMorrer);
+  Genio, BonecoDeNeve, Tengu, Elfo (IReageAoInicioTurno); Guarda (IReageAntesDeMorrer — Passo 4).
+  Operario migrado com provisório [revide-com-habilidade]. Sistema velho aposentado.
+- **Atos do Turno [Passo 3]:** ExecutarAtos centraliza o fluxo pós-Ativar. Ordem: AtoReacaoDoAlvo
+  → IReageAntesDeMorrer → AtoMorte (IReageAoMatar + IReageAoMorrer) → AtoReacaoDoAtacante →
+  AtoEncerramento. Irritar unificado (passava só AtoMorte, agora passa todos os Atos).
+- **Guarda limpa [Passo 4]:** IReageAntesDeMorrer criada; Guarda migrada do hack IReageAoMorrer;
+  ProcessarReacoesAntesDeMorrer inserido em ExecutarAtos antes do Vilão. Bug Vilao+Guarda corrigido.
+  ContextoReacao.Outro renomeado para Contraparte (19 arquivos).
 - **Crítico exige dano:** golpe cujo dano efetivo total (HP + escudo) deu 0 não é crítico no
   EventoDano — foi negado (bloqueio total). Escudo consumido conta (é vida). Beneficia todos os
   consumidores de FoiCritico na fonte.

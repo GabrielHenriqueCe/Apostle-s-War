@@ -151,12 +151,7 @@ namespace v1_Apostle_s_War.Services
                 if (VerificarMedoEAplicar(atacante)) return;
 
                 var resultado = atacante.Atacar(irritar.Aplicador);
-                _menuService.ExibirResultadoAtaque(atacante, irritar.Aplicador, resultado);
-                Thread.Sleep(1500);
-
-                // Mesma ordem de ExecutarHabilidade: DepoisDeMatar antes de DepoisDeReceberDano.
-                ProcessarReacoesAtacanteMorte(atacante, irritar.Aplicador, resultado, aliados, defensores);
-                ProcessarReacoesAoMorrer(irritar.Aplicador, atacante, resultado, aliados, defensores);
+                ExecutarAtos(new List<EventoDano> { resultado }, atacante, aliados, defensores, TipoAtaque.Sequencial);
                 return;
             }
 
@@ -244,64 +239,65 @@ namespace v1_Apostle_s_War.Services
             ExecutarHabilidade(atacante, acao.Habilidade, defensores, aliados);
         }
 
+        /// <summary>
+        /// Roda os Atos de reação sobre cada resultado produzido pelo AtoExecucao.
+        /// Ordem do ADR: AtoReacaoDoAlvo → AtoMorte → AtoReacaoDoAtacante.
+        /// Compartilhado pelo caminho normal (ExecutarHabilidade) e pelo Irritar.
+        /// </summary>
+        private void ExecutarAtos(List<EventoDano> resultados, Combate atacante,
+            List<Combate> aliados, List<Combate> defensores, TipoAtaque tipoAtaque)
+        {
+            foreach (var r in resultados)
+            {
+                _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
+                Thread.Sleep(1500);
+
+                ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
+                ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r, aliados, defensores);
+                ProcessarReacoesAoMorrer(r.Alvo, atacante, r, aliados, defensores);
+                ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r, aliados, defensores);
+
+                if (tipoAtaque == TipoAtaque.Sequencial)
+                    ProcessarReacoesAtacantePorAtaque(atacante, r.Alvo, r, aliados, defensores);
+            }
+
+            if (tipoAtaque == TipoAtaque.AreaDeEfeito && resultados.Count > 0)
+                ProcessarReacoesAtacantePorAtaque(atacante, resultados[0].Alvo, resultados[0], aliados, defensores);
+        }
+
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
         {
             var ctx = new ContextoCombate(atacante, aliados, defensores);
 
+            // Setup: seleção de alvo
             Combate alvoInicial;
             if (hab.TipoLista == TipoLista.Inimigos)
             {
-                var alvosDisponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(defensores);
+                var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(defensores);
                 alvoInicial = atacante is Jogador
-                    ? _menuService.EscolherAlvoNaTela(alvosDisponiveis, aliados, defensores)
-                    : _selecaoDeAlvoService.EscolherAlvoBot(alvosDisponiveis);
+                    ? _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores)
+                    : _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
             }
-            else
-            {
-                alvoInicial = atacante;
-            }
+            else alvoInicial = atacante;
 
-            // Inimigo "prepara o ataque" antes (UX) — só pra ataque básico do bot.
+            // Setup: UX de preparação (inimigo com A1)
             if (atacante is Inimigo && hab is AtaqueBasico)
             {
                 _menuService.ExibirPreparacaoAtaque(atacante, defensores);
                 Thread.Sleep(1500);
             }
 
-            // Medo trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
+            // Setup: Medo trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
             if (VerificarMedoEAplicar(atacante))
             {
                 atacante.Cooldowns[hab].Usar();
                 return;
             }
 
-            var resultados = hab.Ativar(ctx, alvoInicial);
-
-            foreach (var r in resultados)
-            {
-                _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
-                Thread.Sleep(1500);
-
-                ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r, aliados, defensores);
-                ProcessarReacoesAoMorrer(r.Alvo, atacante, r, aliados, defensores);
-
-                ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
-                ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r, aliados, defensores);
-
-                if (hab.TipoAtaque == TipoAtaque.Sequencial)
-                {
-                    ProcessarReacoesAtacantePorAtaque(atacante, r.Alvo, r, aliados, defensores);
-                }
-            }
-
-            if (hab.TipoAtaque == TipoAtaque.AreaDeEfeito && resultados.Count > 0)
-            {
-                ProcessarReacoesAtacantePorAtaque(atacante, resultados[0].Alvo, resultados[0], aliados, defensores);
-            }
-
-            atacante.Cooldowns[hab].Usar();
-
-            // Mensagem de uso só pra habilidades não-A1 (A1 já tem ExibirResultadoAtaque)
+            // Os Atos
+            var resultados = hab.Ativar(ctx, alvoInicial);                             // AtoExecucao
+            ExecutarAtos(resultados, atacante, aliados, defensores, hab.TipoAtaque);   // Reação + Morte + Atacante
+            atacante.Cooldowns[hab].Usar();                                            // AtoEncerramento
             if (hab is not AtaqueBasico)
             {
                 _menuService.ExibirUsoHabilidade(atacante, hab);

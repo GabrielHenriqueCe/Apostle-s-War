@@ -19,15 +19,15 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!ctx.Outro.EstaVivo()) return new List<ResultadoReacao>();
+            if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
             if (_random.NextDouble() >= ChanceReducao) return new List<ResultadoReacao>();
 
-            new ReducaoDefesa(turnos: 2).Aplicar(ctx.Outro);
+            new ReducaoDefesa(turnos: 2).Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"🦖 Pele Grossa enfraqueceu a defesa de {ctx.Outro.Personagem.Nome}!"
+                    Mensagem: $"🦖 Pele Grossa enfraqueceu a defesa de {ctx.Contraparte.Personagem.Nome}!"
                 )
             };
         }

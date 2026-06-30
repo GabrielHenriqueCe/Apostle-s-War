@@ -18,15 +18,15 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!ctx.Outro.EstaVivo()) return new List<ResultadoReacao>();
+            if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
             if (_random.NextDouble() >= ChanceMedo) return new List<ResultadoReacao>();
 
-            new Medo(turnos: 1).Aplicar(ctx.Outro);
+            new Medo(turnos: 1).Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"👹 O Intimidador encheu {ctx.Outro.Personagem.Nome} de Medo!"
+                    Mensagem: $"👹 O Intimidador encheu {ctx.Contraparte.Personagem.Nome} de Medo!"
                 )
             };
         }

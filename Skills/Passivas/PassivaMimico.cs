@@ -18,10 +18,10 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!ctx.Outro.EstaVivo())
+            if (!ctx.Contraparte.EstaVivo())
                 return new List<ResultadoReacao>();
 
-            var debuffs = ctx.Outro.StatusAtivos.OfType<Debuff>().ToList();
+            var debuffs = ctx.Contraparte.StatusAtivos.OfType<Debuff>().ToList();
             if (debuffs.Count == 0)
                 return new List<ResultadoReacao>();
 
@@ -31,7 +31,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"🎭 Repetindo prolongou o {escolhido.Nome} de {ctx.Outro.Personagem.Nome}!"
+                    Mensagem: $"🎭 Repetindo prolongou o {escolhido.Nome} de {ctx.Contraparte.Personagem.Nome}!"
                 )
             };
         }

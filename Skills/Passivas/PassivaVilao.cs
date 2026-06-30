@@ -17,11 +17,11 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoMatar(ContextoReacao ctx)
         {   
-            new ImpedirRessurreicao().Aplicar(ctx.Outro);
+            new ImpedirRessurreicao().Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {
-                new ResultadoReacao(Mensagem: $"🦹 Sentença: {ctx.Outro.Personagem.Nome} não poderá ressuscitar!")
+                new ResultadoReacao(Mensagem: $"🦹 Sentença: {ctx.Contraparte.Personagem.Nome} não poderá ressuscitar!")
             };
         }
     }

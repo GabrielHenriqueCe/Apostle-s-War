@@ -15,14 +15,14 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> PorAtaque(ContextoReacao ctx)
         {
-            var preso = ctx.Outro.StatusAtivos.OfType<Preso>().FirstOrDefault();
+            var preso = ctx.Contraparte.StatusAtivos.OfType<Preso>().FirstOrDefault();
             if (preso == null) return new List<ResultadoReacao>();
 
             preso.EstenderTurno();
 
             return new List<ResultadoReacao>
             {
-                new ResultadoReacao(Mensagem: $"🔗 Algemas Reforçadas prolongaram o aprisionamento de {ctx.Outro.Personagem.Nome}!")
+                new ResultadoReacao(Mensagem: $"🔗 Algemas Reforçadas prolongaram o aprisionamento de {ctx.Contraparte.Personagem.Nome}!")
             };
         }
     }

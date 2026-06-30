@@ -29,17 +29,17 @@ namespace v1_Apostle_s_War.Skills.Buffs
                 return new List<ResultadoReacao>();
 
             if (!ctx.Portador.EstaVivo()) return new List<ResultadoReacao>();
-            if (!ctx.Outro.EstaVivo()) return new List<ResultadoReacao>();
+            if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
 
             // 1 revide por agressor, por turno.
-            if (_jaRevidados.Contains(ctx.Outro)) return new List<ResultadoReacao>();
-            _jaRevidados.Add(ctx.Outro);
+            if (_jaRevidados.Contains(ctx.Contraparte)) return new List<ResultadoReacao>();
+            _jaRevidados.Add(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
                     Mensagem: $"{ctx.Portador.Personagem.Nome} contra-ataca! ↩️",
-                    RevidarAlvo: ctx.Outro
+                    RevidarAlvo: ctx.Contraparte
                 )
             };
         }

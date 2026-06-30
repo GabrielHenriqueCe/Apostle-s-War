@@ -253,6 +253,7 @@ namespace v1_Apostle_s_War.Services
                 Thread.Sleep(1500);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
+                ProcessarReacoesAntesDeMorrer(r.Alvo, atacante, r, aliados, defensores);
                 ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r, aliados, defensores);
                 ProcessarReacoesAoMorrer(r.Alvo, atacante, r, aliados, defensores);
                 ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r, aliados, defensores);
@@ -453,10 +454,37 @@ namespace v1_Apostle_s_War.Services
         }
 
         /// <summary>
+        /// Intervém ANTES das consequências da morte (IReageAntesDeMorrer). Dispara se
+        /// o alvo morreu; a passiva pode chamar AplicarRevive para reverter a transição —
+        /// se isso acontecer, ProcessarReacoesAtacanteMorte e AoMorrer não disparam
+        /// (ambos checam EstaVivo() antes de agir).
+        /// Portador = quem quase morreu; Contraparte = quem matou.
+        /// </summary>
+        private void ProcessarReacoesAntesDeMorrer(Combate alvo, Combate atacante, EventoDano r,
+            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
+        {
+            if (alvo.EstaVivo()) return;
+            if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
+
+            var aliadosDoAlvo = inimigosDoAtacante;
+            var inimigosDoAlvo = aliadosDoAtacante;
+
+            var ctx = new ContextoReacao(alvo, atacante, r.DanoEfetivo, r.Natureza,
+                r.Critico, aliadosDoAlvo, inimigosDoAlvo);
+            var resultados = new List<ResultadoReacao>();
+
+            foreach (var s in alvo.StatusAtivos.OfType<IReageAntesDeMorrer>().ToList())
+                resultados.AddRange(s.AntesDeMorrer(ctx));
+            foreach (var p in ColetarPassivasReativas<IReageAntesDeMorrer>(alvo))
+                resultados.AddRange(p.AntesDeMorrer(ctx));
+
+            ExibirResultadosReacao(alvo, resultados);
+        }
+
+        /// <summary>
         /// Dispara as reações "ao matar" (IReageAoMatar) do atacante, por alvo morto.
-        /// Chamado no MESMO ponto que ProcessarPassivasAtacanteMorte (antes das reações
-        /// de "ao morrer"), preservando a ordem: bloquear revive (Vilao) precede tentar
-        /// reviver (Necromancia/Guarda). Guarda: só dispara se o alvo realmente morreu.
+        /// Chamado DEPOIS de IReageAntesDeMorrer — se a Guarda reverteu a morte, o alvo
+        /// voltou a EstaVivo() e este método retorna sem disparar.
         /// </summary>
         private void ProcessarReacoesAtacanteMorte(Combate atacante, Combate alvoMorto, EventoDano r,
             List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)

@@ -15,10 +15,10 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (!ctx.Outro.EstaVivo())
+            if (!ctx.Contraparte.EstaVivo())
                 return new List<ResultadoReacao>();
 
-            var buffs = ctx.Outro.StatusAtivos.OfType<Buff>().ToList();
+            var buffs = ctx.Contraparte.StatusAtivos.OfType<Buff>().ToList();
             if (buffs.Count == 0)
                 return new List<ResultadoReacao>();
 
@@ -26,13 +26,13 @@ namespace v1_Apostle_s_War.Skills.Passivas
             {
                 buff.ReduzirDuracao(1);
                 if (buff.Expirou)
-                    buff.Remover(ctx.Outro);
+                    buff.Remover(ctx.Contraparte);
             }
 
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
-                    Mensagem: $"🔬 Análise Crítica encurtou os benefícios de {ctx.Outro.Personagem.Nome}!"
+                    Mensagem: $"🔬 Análise Crítica encurtou os benefícios de {ctx.Contraparte.Personagem.Nome}!"
                 )
             };
         }

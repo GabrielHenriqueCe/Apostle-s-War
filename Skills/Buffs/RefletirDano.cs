@@ -20,23 +20,23 @@ namespace v1_Apostle_s_War.Skills.Buffs
 
         public List<ResultadoReacao> AoReceberDano(ContextoReacao ctx)
         {
-            if (!ctx.Outro.EstaVivo())
+            if (!ctx.Contraparte.EstaVivo())
                 return new List<ResultadoReacao>();
 
             int danoRefletido = (int)(ctx.DanoCausado * Valor);
             if (danoRefletido <= 0)
                 return new List<ResultadoReacao>();
 
-            var (real, absorvido) = ctx.Outro.ReceberDano(danoRefletido, NaturezasDano.DanoIndireto);
+            var (real, absorvido) = ctx.Contraparte.ReceberDano(danoRefletido, NaturezasDano.DanoIndireto);
 
             var resultado = new EventoDano(
                 Atacante: ctx.Portador,
-                Alvo: ctx.Outro,
+                Alvo: ctx.Contraparte,
                 DanoBruto: danoRefletido,
                 DanoEfetivo: real,
                 AbsorvidoPeloEscudo: absorvido,
                 Critico: false,
-                HPRestante: Math.Max(0, ctx.Outro.HPAtual),
+                HPRestante: Math.Max(0, ctx.Contraparte.HPAtual),
                 Natureza: NaturezasDano.DanoIndireto
             );
 

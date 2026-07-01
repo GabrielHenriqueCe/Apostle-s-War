@@ -21,6 +21,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override int NumeroDeAlvos => 1;  // alvo inicial é só pra a UI
         public override TipoAlvo TipoAlvo => TipoAlvo.Aleatorio;
         public override TipoLista TipoLista => TipoLista.Inimigos;
+        public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
 
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {

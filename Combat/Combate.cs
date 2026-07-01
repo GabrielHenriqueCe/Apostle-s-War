@@ -256,6 +256,12 @@ namespace ApostlesWar
         {
             foreach (var bloqueador in StatusAtivos.OfType<IBloqueiaStatus>())
                 if (bloqueador.Bloqueia(novo)) return false;
+
+            // Passiva-pura (Abóbora, Dragão) também bloqueia — não vive em
+            // StatusAtivos, vive em Personagem.Habilidades.
+            foreach (var bloqueador in Personagem.Habilidades.OfType<IBloqueiaStatus>())
+                if (bloqueador.Bloqueia(novo)) return false;
+
             return true;
         }
 
@@ -285,6 +291,18 @@ namespace ApostlesWar
             }
 
             int absorvidoPeloEscudo = 0;
+
+            // Passiva-pura (Sereia) processa ANTES do Escudo/BloqueioTotal — mesma ordem
+            // que o buff de contorno (ReducaoDanoFixo) tinha, aplicado no IniciarCombate
+            // antes de qualquer outro status. Não participa do mecanismo de ignorados
+            // (lista é de tipos de StatusEffect; passiva não é status) nem do
+            // absorvidoPeloEscudo (não é Escudo).
+            foreach (var modificador in Personagem.Habilidades.OfType<IModificaDanoRecebido>())
+            {
+                if (!modificador.DeveAgir(natureza)) continue;
+                danoFinal = modificador.ModificarDanoRecebido(this, danoFinal);
+            }
+
             foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
             {
                 var status = (StatusEffect)modificador;

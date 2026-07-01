@@ -40,12 +40,24 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Escolha do bot: alvo aleatório entre os disponíveis. Ponto de evolução
         /// para IA mais inteligente no futuro (AW v2) — focar mais fraco, mais
-        /// perigoso, etc. Por ora, aleatório uniforme.
+        /// perigoso, etc. Por ora, aleatório uniforme. Confia que `disponiveis` já
+        /// veio filtrado (por ResolverAlvosDisponiveis) — não refiltra por EstaVivo,
+        /// senão quebra quando o estado alvo é Mortos (ex: bot revivendo aliado).
         /// </summary>
-        public Combate EscolherAlvoBot(List<Combate> disponiveis)
-        {
-            var vivos = disponiveis.Where(d => d.EstaVivo()).ToList();
-            return vivos[Random.Shared.Next(vivos.Count)];
-        }
+        public Combate EscolherAlvoBot(List<Combate> disponiveis) =>
+            disponiveis[Random.Shared.Next(disponiveis.Count)];
+
+        /// <summary>
+        /// Overload pra alvo ALIADO: filtra só pelo EstadoAlvo declarado pela
+        /// habilidade (Vivos/Mortos), SEM as regras de Provocar/BloqueioTotal/
+        /// Intocável — essas são mecânica de combate contra o time adversário,
+        /// não fazem sentido escolhendo quem curar/reviver no próprio time.
+        /// </summary>
+        public List<Combate> ResolverAlvosDisponiveis(List<Combate> candidatos, EstadoAlvo estado) =>
+            estado switch
+            {
+                EstadoAlvo.Mortos => candidatos.Where(c => !c.EstaVivo()).ToList(),
+                _ => candidatos.Where(c => c.EstaVivo()).ToList(),
+            };
     }
 }

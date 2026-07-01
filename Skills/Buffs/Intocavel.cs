@@ -8,8 +8,8 @@ namespace v1_Apostle_s_War.Skills.Buffs
     /// </summary>
     class Intocavel : Buff
     {
-        public Intocavel(int turnos = 2) : base("Intocável", "🕳️", turnos, 0,
-            "Não pode ser selecionado como alvo.")
+        public Intocavel(int turnos = 2, bool removivel = true) : base("Intocável", "🕳️", turnos, 0,
+            "Não pode ser selecionado como alvo.", removivel)
         { }
 
         // Não sobrescreve ModificarDanoRecebido — Intocável não afeta dano

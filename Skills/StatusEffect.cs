@@ -21,7 +21,15 @@
         public int TurnosRestantes { get; protected set; }
         public bool AcabouDeAplicar { get; private set; }
 
-        public StatusEffect(string nome, string simbolo, int turnosRestantes, double valor, string descricao = "")
+        /// <summary>
+        /// Se false, o status não pode ser removido/roubado por efeitos de terceiros
+        /// (Copiando, PassivaCientista, cleanses de buff). Continua expirando por
+        /// duração normalmente — não é sobre imunidade a tempo, é sobre imunidade a
+        /// remoção externa. Usado pelo Fantasma (Intocável permanente).
+        /// </summary>
+        public bool Removivel { get; }
+
+        public StatusEffect(string nome, string simbolo, int turnosRestantes, double valor, string descricao = "", bool removivel = true)
         {
             Nome = nome;
             Simbolo = simbolo;
@@ -30,6 +38,7 @@
             Descricao = descricao;
             TurnosRestantes = turnosRestantes;
             AcabouDeAplicar = true;
+            Removivel = removivel;
         }
 
         public void PassarTurno()

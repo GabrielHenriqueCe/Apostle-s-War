@@ -3,11 +3,15 @@
 namespace v1_Apostle_s_War.Skills.Buffs
 {
     /// <summary>
-    /// Buff permanente que reduz o dano recebido em um percentual fixo.
-    /// Aplicado por passivas como PassivaSereia (15%).
-    /// 
-    /// Como é aplicado no IniciarCombate (antes de qualquer outro buff), processa
-    /// PRIMEIRO no foreach do ReceberDano — reduz o dano antes de Escudo/BloqueioTotal/etc.
+    /// Buff que reduz o dano recebido em um percentual fixo ("Couraça"). A Sereia
+    /// migrou pra passiva-pura (PassivaSereia implementa IModificaDanoRecebido
+    /// direto); este buff fica disponível pra reuso em habilidades ativas futuras
+    /// (Rebalanceamento).
+    ///
+    /// Se aplicado como buff comum (via StatusAtivos), processa junto dos demais
+    /// IModificaDanoRecebido no ReceberDano — sem a garantia de ordem "primeiro"
+    /// que tinha quando era o buff de contorno da Sereia (essa ordem agora é da
+    /// passiva-pura, ver Combate.ReceberDano).
     /// </summary>
     class ReducaoDanoFixo : Buff, IModificaDanoRecebido
     {

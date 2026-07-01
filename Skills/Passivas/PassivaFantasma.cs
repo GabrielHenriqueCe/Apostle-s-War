@@ -14,7 +14,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public void AplicarInicial(Combate portador)
         {
-            new Intocavel(turnos: int.MaxValue).Aplicar(portador);
+            new Intocavel(turnos: int.MaxValue, removivel: false).Aplicar(portador);
         }
 
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)

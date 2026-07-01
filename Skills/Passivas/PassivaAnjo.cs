@@ -1,21 +1,31 @@
-﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar;
 
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Passiva permanente do Anjo: começa o combate com CuraContinua infinita 5%/turno.
-    /// Aplicado via IPassivaInicial no IniciarCombate.
+    /// Recupera 5% HP no início do turno, permanentemente. Capacidade direta
+    /// (IReageAoInicioTurno) — não usa mais buff de contorno (CuraContinua).
     /// </summary>
-    class PassivaAnjo : HabilidadePassiva, IPassivaInicial
+    class PassivaAnjo : HabilidadePassiva, IReageAoInicioTurno
     {
+        private const double PercentualCura = 0.05;
+
         public PassivaAnjo() : base("Bênção", "😇", 0,
             "Recupera 5% HP por turno permanentemente.")
         { }
 
-        public void AplicarInicial(Combate portador)
+        public List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx)
         {
-            new CuraContinua(turnos: int.MaxValue, percentual: 0.05).Aplicar(portador);
+            int cura = (int)(ctx.Atacante.HPMaximo * PercentualCura);
+            ctx.Atacante.Curar(cura);
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"{ctx.Atacante.Personagem.Nome} recupera {cura} HP com Bênção! 😇",
+                    Cura: cura
+                )
+            };
         }
 
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();

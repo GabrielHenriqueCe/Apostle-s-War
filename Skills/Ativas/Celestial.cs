@@ -16,11 +16,12 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override int NumeroDeAlvos => int.MaxValue;
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Aliados;
+        public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
         public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
 
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            foreach (Combate a in ObterListaPrincipal(ctx).Where(c => c.EstaVivo()))
+            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
             {
                 var debuffs = a.StatusAtivos.OfType<Debuff>().ToList();
                 foreach (var d in debuffs)

@@ -60,6 +60,15 @@ namespace ApostlesWar
     enum TipoLista { Inimigos, Aliados, Self }
 
     /// <summary>
+    /// Define qual estado de vida a habilidade mira dentro da TipoLista escolhida.
+    /// Vivos: maioria (ataques, curas, buffs). Mortos: revive de N fixo (seleção
+    /// única sobre os mortos). Ambos: a habilidade faz duas seleções independentes
+    /// na mesma chamada (ex: revive mortos E cura vivos) — opta por fora do pick
+    /// automático de alvo explícito, resolve as duas listas sozinha no Ativar.
+    /// </summary>
+    enum EstadoAlvo { Vivos, Mortos, Ambos }
+
+    /// <summary>
     /// Define a semântica do evento de ataque, usada pelo CombateService
     /// para decidir quantas vezes disparar as passivas reativas do atacante (DepoisDeAtacar).
     /// 

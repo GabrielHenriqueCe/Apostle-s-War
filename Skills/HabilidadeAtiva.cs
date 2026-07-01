@@ -22,6 +22,12 @@ namespace ApostlesWar
         public abstract TipoLista TipoLista { get; }
 
         /// <summary>
+        /// Define qual estado de vida a habilidade mira dentro da TipoLista. Sem default —
+        /// toda habilidade declara conscientemente (ver ADR-selecao-por-estado.md).
+        /// </summary>
+        public abstract EstadoAlvo EstadoAlvo { get; }
+
+        /// <summary>
         /// Retorna a lista correspondente ao TipoLista da habilidade.
         /// Conveniência pra resolver alvos.
         /// </summary>
@@ -34,30 +40,41 @@ namespace ApostlesWar
         };
 
         /// <summary>
-        /// Monta a lista de alvos com base em TipoAlvo e NumeroDeAlvos.
+        /// Filtra a lista pelo EstadoAlvo declarado pela habilidade. Ambos não usa este
+        /// caminho (a habilidade resolve as duas seleções sozinha no Ativar) — cai no
+        /// default (Vivos) só por segurança de compilação, nunca deveria ser chamado.
+        /// </summary>
+        private List<Combate> FiltrarPorEstado(List<Combate> lista) => EstadoAlvo switch
+        {
+            EstadoAlvo.Mortos => lista.Where(c => !c.EstaVivo()).ToList(),
+            _ => lista.Where(c => c.EstaVivo()).ToList(),
+        };
+
+        /// <summary>
+        /// Monta a lista de alvos com base em TipoAlvo, NumeroDeAlvos e EstadoAlvo.
         /// </summary>
         protected List<Combate> ResolverAlvos(Combate alvoSelecionado, List<Combate> lista)
         {
-            var vivos = lista.Where(c => c.EstaVivo()).ToList();
+            var candidatos = FiltrarPorEstado(lista);
             var resultado = new List<Combate>();
 
-            if (vivos.Count == 0) return resultado;
+            if (candidatos.Count == 0) return resultado;
 
             resultado.Add(alvoSelecionado);
 
             int extras = NumeroDeAlvos == int.MaxValue
-                ? vivos.Count - 1
+                ? candidatos.Count - 1
                 : NumeroDeAlvos - 1;
 
             if (extras <= 0) return resultado;
 
             if (TipoAlvo == TipoAlvo.Explicito)
             {
-                int inicio = vivos.IndexOf(alvoSelecionado);
+                int inicio = candidatos.IndexOf(alvoSelecionado);
                 for (int i = 1; i <= extras; i++)
                 {
-                    int idx = (inicio + i) % vivos.Count;
-                    Combate proximo = vivos[idx];
+                    int idx = (inicio + i) % candidatos.Count;
+                    Combate proximo = candidatos[idx];
                     if (!resultado.Contains(proximo))
                         resultado.Add(proximo);
                 }
@@ -65,7 +82,7 @@ namespace ApostlesWar
             else
             {
                 for (int i = 0; i < extras; i++)
-                    resultado.Add(vivos[_random.Next(vivos.Count)]);
+                    resultado.Add(candidatos[_random.Next(candidatos.Count)]);
             }
 
             return resultado;

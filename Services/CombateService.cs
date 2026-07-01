@@ -279,7 +279,16 @@ namespace v1_Apostle_s_War.Services
                     ? _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores)
                     : _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
             }
-            else alvoInicial = atacante;
+            else if (hab.TipoLista == TipoLista.Aliados && hab.NumeroDeAlvos != int.MaxValue && hab.EstadoAlvo != EstadoAlvo.Ambos)
+            {
+                // Pick real de alvo aliado (por estado) — antes disso nunca existia,
+                // porque toda habilidade de aliado mirava o time inteiro.
+                var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(aliados, hab.EstadoAlvo);
+                alvoInicial = atacante is Jogador
+                    ? _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores)
+                    : _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
+            }
+            else alvoInicial = atacante; // hit-all (NumeroDeAlvos=MaxValue) ou Ambos: a própria habilidade resolve
 
             // Setup: UX de preparação (inimigo com A1)
             if (atacante is Inimigo && hab is AtaqueBasico)

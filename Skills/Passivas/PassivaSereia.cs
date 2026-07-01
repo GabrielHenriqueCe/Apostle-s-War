@@ -1,22 +1,24 @@
-﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar;
 
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Passiva permanente da Sereia: recebe -15% de dano durante todo o combate.
-    /// Aplica ReducaoDanoFixo via IPassivaInicial no IniciarCombate.
+    /// Recebe 15% menos dano durante todo o combate. Capacidade direta
+    /// (IModificaDanoRecebido) — não usa mais buff de contorno (ReducaoDanoFixo).
+    /// Processa antes do Escudo/BloqueioTotal (ver Combate.ReceberDano).
     /// </summary>
-    class PassivaSereia : HabilidadePassiva, IPassivaInicial
+    class PassivaSereia : HabilidadePassiva, IModificaDanoRecebido
     {
+        private const double PercentualReducao = 0.15;
+
         public PassivaSereia() : base("Aquagirl", "🧜‍♀️", 0,
             "Recebe 15% menos dano.")
         { }
 
-        public void AplicarInicial(Combate portador)
-        {
-            new ReducaoDanoFixo(percentual: 0.15).Aplicar(portador);
-        }
+        public bool DeveAgir(NaturezaDano natureza) => true;
+
+        public int ModificarDanoRecebido(Combate portador, int dano) =>
+            (int)(dano * (1 - PercentualReducao));
 
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }

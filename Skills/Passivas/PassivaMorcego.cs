@@ -1,21 +1,34 @@
-﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar;
 
 namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
-    /// Passiva permanente do Morcego: cura 15% do dano causado em qualquer ataque.
-    /// Aplica Sedento via IPassivaInicial no IniciarCombate.
+    /// Cura 15% do dano causado ao atacar. Capacidade direta (IReageAoCausarDano)
+    /// — não usa mais buff de contorno (Sedento).
     /// </summary>
-    class PassivaMorcego : HabilidadePassiva, IPassivaInicial
+    class PassivaMorcego : HabilidadePassiva, IReageAoCausarDano
     {
+        private const double PercentualCura = 0.15;
+
         public PassivaMorcego() : base("Sedento de Sangue", "🦇", 0,
             "Cura 15% do dano causado ao atacar.")
         { }
 
-        public void AplicarInicial(Combate portador)
+        public List<ResultadoReacao> AoCausarDano(ContextoReacao ctx)
         {
-            new Sedento(percentual: 0.15).Aplicar(portador);
+            if (ctx.DanoCausado <= 0)
+                return new List<ResultadoReacao>();
+
+            int cura = (int)(ctx.DanoCausado * PercentualCura);
+            ctx.Portador.Curar(cura);
+
+            return new List<ResultadoReacao>
+            {
+                new ResultadoReacao(
+                    Mensagem: $"{ctx.Portador.Personagem.Nome} se cura em {cura} com Sedento de Sangue! 🦇",
+                    Cura: cura
+                )
+            };
         }
 
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();

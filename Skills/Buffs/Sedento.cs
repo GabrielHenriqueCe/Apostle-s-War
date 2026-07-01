@@ -4,9 +4,10 @@ namespace v1_Apostle_s_War.Skills.Buffs
 {
     /// <summary>
     /// Buff: cada vez que o portador causa dano, recupera um percentual desse
-    /// dano como HP. Usado pela PassivaMorcego (aplicado permanente via
-    /// IPassivaInicial). Reage via IReageAoCausarDano — orquestrado pelo
-    /// CombateService (declara a cura; o serviço exibe).
+    /// dano como HP. Reage via IReageAoCausarDano — orquestrado pelo
+    /// CombateService (declara a cura; o serviço exibe). O Morcego migrou pra
+    /// passiva-pura (PassivaMorcego implementa IReageAoCausarDano direto); este
+    /// buff fica disponível pra reuso em habilidades ativas futuras (Rebalanceamento).
     /// </summary>
     class Sedento : Buff, IReageAoCausarDano
     {

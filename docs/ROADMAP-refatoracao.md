@@ -40,9 +40,9 @@ velho aposentado). O que resta:
 
 1. **EventoDano / contexto rico** — Fatia 1 e Fatia 2 FEITAS. Falta só a passiva-conta-mortos
    (1b) como cliente futuro do contexto rico.
-2. **Estado de Vida (Vivo/Morto) + Atos do turno** — DESENHADO (ADR-estado-de-vida-e-atos.md).
-   UNIFICA o que antes eram "estado morto" + "separação de fases". É o próximo grande refactor.
-   Destrava a Guarda limpa, o bloquear-revive com dono, e a seleção de alvo por estado.
+2. **Estado de Vida (Vivo/Morto) + Atos do turno** — Passos 1-4 FEITOS (State Pattern, status
+   no Morto, Atos, Guarda limpa). Falta só o Passo 5: **seleção de alvo por estado** (interface
+   declarativa VIVOS/MORTOS/AMBOS pras ativas) — é o próximo grande refactor.
 3. **Turno (resto)** — reset 1x-por-agressor (multi-fonte, ver "Fio do revide") +
    TimeAtualDoTurno (centralizar aliados/inimigos). Independente do estado de vida
    (o relógio não cruza; só os Atos cruzam).
@@ -153,10 +153,11 @@ comportamento e estrutura juntos esconde bugs. Ideias de Gabriel registradas pra
 
 ---
 
-## EventoDano — o registro rico do golpe (NASCEU — Fatia 1 FEITA)
+## EventoDano — o registro rico do golpe (✅ FATIA 1 + FATIA 2 FEITAS)
 
-**Status:** FATIA 1 CONCLUÍDA. O EventoDano existe e é produzido pelo combate. Falta a
-Fatia 2 (enriquecer o ContextoReacao das reações).
+**Status:** ✅ COMPLETO. O EventoDano existe e é produzido pelo combate; o ContextoReacao já
+foi enriquecido (FoiCritico, Aliados, Inimigos). Só falta a passiva-conta-mortos (1b) como
+cliente futuro do contexto rico (seção própria).
 
 **O que é:** o tipo canônico que descreve um golpe — o "Model do golpe" (conceito MVC) que
 a apresentação consome (console hoje, React/web amanhã via JSON). Convergiu o antigo
@@ -179,22 +180,22 @@ refatorar depois.
 - Descartado conscientemente: "aparado pela defesa" (nunca tem cliente). DanoBruto e
   AbsorvidoPeloEscudo entram pela exibição/web (Propósito B), sem efeito que REAJA a eles hoje.
 
-### Fatia 2 — PRÓXIMA (enriquecer o ContextoReacao)
-O ContextoReacao hoje é magro (Portador, Outro, DanoCausado, Natureza). A Fatia 2 leva pras
-reações a visão de times que o ContextoCombate já dá pras habilidades:
-- ContextoReacao ganha: **FoiCritico** (de r.Critico), **Aliados**, **Inimigos** (do Portador).
-- Os 4 métodos de reação (ProcessarReacoesAlvo, PorAlvo, PorAtaque, Morte) recebem os times
-  (que o CombateService já calcula nos call sites) e montam o contexto rico. Aliados/Inimigos =
-  do PORTADOR (inverte no lado do alvo, como ProcessarPassivasAlvo já faz; não inverte no lado
-  atacante).
-- **Migra Robo** (lê ctx.Aliados, cura o de menor HP) e **Sushiman** (lê ctx.Aliados +
-  ctx.FoiCritico, reflexo a todos). Destrava também a **passiva-conta-mortos** (ver seção).
-ContextoReacao alvo: (Portador, Outro, DanoCausado, Natureza, FoiCritico, Aliados, Inimigos).
+### Fatia 2 — FEITA (enriquecer o ContextoReacao)
+O ContextoReacao era magro (Portador, Contraparte, DanoCausado, Natureza). A Fatia 2 levou pras
+reações a visão de times que o ContextoCombate já dava pras habilidades:
+- ContextoReacao ganhou: **FoiCritico** (de r.Critico), **Aliados**, **Inimigos** (do Portador).
+- Os métodos de reação (ProcessarReacoesAlvo e afins) recebem os times (que o CombateService já
+  calcula nos call sites) e montam o contexto rico. Aliados/Inimigos = do PORTADOR (inverte no
+  lado do alvo, como ProcessarPassivasAlvo já faz; não inverte no lado atacante).
+- **Robo** (lê ctx.Aliados, cura o de menor HP) e **Sushiman** (lê ctx.Aliados + ctx.FoiCritico,
+  reflexo a todos) migrados. Destravou também a **passiva-conta-mortos** (ver seção, ainda não
+  implementada).
+ContextoReacao atual: (Portador, Contraparte, DanoCausado, Natureza, FoiCritico, Aliados, Inimigos).
 
 ### Os 3 contextos — não confundir (esclarecido)
-- **ContextoCombate** (Atacante, Aliados, Inimigos) — das HABILIDADES. JÁ EXISTE.
-- **ContextoReacao** — das REAÇÕES. Magro hoje; a Fatia 2 enriquece.
-- **EventoDano** — descreve o GOLPE (não é contexto de quem reage). Feito.
+- **ContextoCombate** (Atacante, Aliados, Inimigos) — das HABILIDADES.
+- **ContextoReacao** (Portador, Contraparte, ...) — das REAÇÕES. Enriquecido na Fatia 2.
+- **EventoDano** — descreve o GOLPE (não é contexto de quem reage).
 
 ---
 
@@ -247,37 +248,27 @@ não criado agora.
 
 ---
 
-## TimeAtualDoTurno — fonte única de aliados/inimigos (FIO NOVO)
-
-**Status:** REGISTRADO, fazer junto do "resto do Turno". NÃO é pré-requisito da Fatia 2.
-
-**A ideia (Gabriel):** centralizar a regra "quais são os aliados e os inimigos de uma
-perspectiva" numa fonte única, que ContextoCombate E ContextoReacao consultam, em vez de cada
-ponto do CombateService recalcular `atacante is Jogador ? jogador : inimigo` e inverter na mão.
-
-**Por que não é pré-requisito:** o CombateService JÁ calcula os times a cada turno; a Fatia 2
-só encaminha o que ele já tem. O TimeAtualDoTurno é refinamento — quando vier, o ContextoReacao
-LÊ da fonte em vez de receber por parâmetro (mudança pequena, não retrabalho). Fazê-lo agora
-abriria terceira frente no meio da Fatia 2.
-
-**Por que junto do Turno:** "de quem é a vez" e "quais os times dessa vez" são parentes.
-Agrupar com o resto do Turno (reset 1x-por-agressor + evento de início). Nome a definir
-(TimeAtualDoTurno / RelaçãoDeTimes / PerspectivaDeCombate).
-
----
-
 ## Conceito de Turno (TurnoDoPersonagem) — PARCIALMENTE FEITO
 
 **Status:** RELÓGIO FEITO. TurnoDoPersonagem extraído (ADR em docs/ADR-conceito-de-turno.md):
 Iniciar() (tick dos status) e Finalizar() (avança duração + remove expirados + avança cooldowns).
-**FALTA (cruza o C5):**
-- O reset "1x por agressor por turno" — mora no Turno, serve as reações do C5 (Espinhos/Zumbi/
-  Coco passam de "por hit" pra "1x por agressor", igual ContraAtaque: HashSet de já-revidados,
-  limpo no AoPassarTurno). Controle de frequência reusável, não copiado.
+**FALTA:**
+- **Reset "1x por agressor por turno" (multi-fonte)** — mora no Turno, serve as reações do C5
+  (Espinhos/Zumbi/Coco passam de "por hit" pra "1x por agressor", igual ContraAtaque) E resolve
+  o gap aceito no "Fio do revide": hoje ContraAtaque e PassivaOperario têm cada um seu próprio
+  HashSet de já-revidados — se o mesmo personagem tiver os dois ao mesmo tempo, pode
+  contra-atacar 2x no mesmo golpe. O tracker precisa virar compartilhado (viver no Combate,
+  resetado no TurnoDoPersonagem), não duplicado por buff/passiva.
+- **TimeAtualDoTurno** — centralizar a regra "quais são os aliados e os inimigos de uma
+  perspectiva" numa fonte única que ContextoCombate E ContextoReacao consultam, em vez de cada
+  ponto do CombateService recalcular `atacante is Jogador ? jogador : inimigo` e inverter na
+  mão. Não era pré-requisito da Fatia 2 do EventoDano (o CombateService já calculava os times e
+  só encaminhava); agora que a Fatia 2 terminou, é refinamento puro — junta com o reset
+  1x-por-agressor porque "de quem é a vez" e "quais os times dessa vez" são parentes. Nome a
+  definir (TimeAtualDoTurno / RelaçãoDeTimes / PerspectivaDeCombate).
 - O disparo do evento InicioDoTurno das passivas — hoje em DispararEventoInicioDeTurno no
-  CombateService. Reavaliar quando BonecoDeNeve/Genio (IReageAoInicioTurno) forem migrados.
-- **TimeAtualDoTurno** (ver acima) — centralizar a regra de times. Vai junto.
-Tudo na branch que mexe em Turno + C5 JUNTOS.
+  CombateService. Reavaliar se migra pro Turno junto dessa branch.
+Tudo numa única branch (Turno resto).
 
 ---
 
@@ -339,9 +330,9 @@ existir.
 
 **Status:** PENDENTE, avaliar uma vez. NÃO refatorar preventivamente.
 As ativas usam um modelo data-driven decente (ContextoCombate + metadados + Ativar).
-Aparentemente SEM a dor do C5. O fio com o revide: se expusessem força + aceitassem natureza,
-o revide-com-habilidade ficaria possível. Avaliar UMA vez se há dívida; se não houver dor,
-encerrar como "sem ação".
+Aparentemente SEM a dor do C5. (O fio do revide-com-habilidade, que dependia parcialmente
+disso, já foi resolvido SEM precisar tocar a base de HabilidadeAtiva — IAtivavelComNatureza
+é ISP à parte.) Avaliar UMA vez se há dívida; se não houver dor, encerrar como "sem ação".
 
 ---
 
@@ -363,11 +354,13 @@ Aplicador, (2) passiva filtra por origem, (3) regra "maior prevalece" (já exist
 
 ---
 
-## Estado de Vida (Vivo/Morto) + Atos do turno — ADR FEITO, implementação pendente
+## Estado de Vida (Vivo/Morto) + Atos do turno — Passos 1-4 FEITOS, falta seleção por estado
 
-**Status:** DESENHADO. Ver **ADR-estado-de-vida-e-atos.md** (conceitos fechados). Este é
-o fio que UNIFICA o que antes eram dois: "estado morto" e "separação de fases do turno".
-Descoberto que são o MESMO fio — o Ato de Morte é a transição de estado.
+**Status:** Passos 1-4 IMPLEMENTADOS (ver CONCLUÍDO: State Pattern Vivo/Morto, status
+separados no Morto, Atos do Turno, Guarda limpa). Ver **ADR-estado-de-vida-e-atos.md**
+(conceitos fechados). Este foi o fio que UNIFICOU o que antes eram dois: "estado morto" e
+"separação de fases do turno" — o Ato de Morte é a transição de estado. **Falta só o Passo
+5 (seleção de alvo por estado)**, detalhado abaixo.
 
 **Resumo da decisão (detalhe no ADR):**
 - **Estado de vida como objeto (State Pattern):** Combate tem um `EstadoVida` interno
@@ -385,12 +378,13 @@ Descoberto que são o MESMO fio — o Ato de Morte é a transição de estado.
   CombateService=orquestra). NÃO se move cálculo nem se cria classe de cálculo. O
   refactor é dar Atos ao fluxo + o modelo de estado fornecendo o AtoMorte.
 
-**Destrava:** a Guarda limpa (sai do hack [sistema-morte-como-estado], vira prevenção no
-AtoMorte), o bloquear-revive com dono (era flag PodeReviver espalhada), seleção de alvo
-por estado (reviver→morto, curar→vivo).
+**Já destravado (Passos 1-4 feitos):** a Guarda limpa (saiu do hack, vira prevenção no
+AtoMorte) e o bloquear-revive com dono (ImpedirRessurreicao, debuff no Morto). **Ainda
+falta consumir a última destrava:** seleção de alvo por estado (reviver→morto, curar→vivo).
 
-**Sequência de implementação (no ADR §10):** modelo de estado → status no morto →
-Atos → Guarda limpa → seleção por estado. Cada passo buildável, Strangler-friendly.
+**Sequência de implementação (no ADR §10):** ✅ modelo de estado → ✅ status no morto →
+✅ Atos → ✅ Guarda limpa → **seleção por estado (falta, é o Passo 5)**. Cada passo
+buildável, Strangler-friendly — a sequência entregou exatamente nessa ordem.
 
 **REFATORAÇÃO DAS ATIVAS — seleção de alvo por estado (dor REAL detectada, fio próprio):**
 Hoje cada ativa checa EstaVivo() de forma INCONSISTENTE — umas filtram `.Where(EstaVivo())`,
@@ -599,6 +593,3 @@ tudo estabilizar.
 - **Centralizar descrições das habilidades.** A descrição mora na habilidade (coesão correta).
 - **try-catch no núcleo de combate.** Domínio controlado; exceção lá seria bug mascarado.
 - **Refatorar as ativas preventivamente.** Só se a auditoria achar dor real.
-- **Importar a complexidade de revive do Raid** sem ter os efeitos. (Mas o estado-morto ATUAL —
-  Vilao/Diabo — é dívida real, ver seção própria.)
-- **Criar TimeAtualDoTurno agora, no meio da Fatia 2.** É refinamento, vai junto do Turno.

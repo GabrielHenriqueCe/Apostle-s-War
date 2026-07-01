@@ -20,14 +20,35 @@
     /// <summary>
     /// O que uma reação produziu, pro CombateService exibir. A reação DECLARA
     /// o que fez; o orquestrador EXIBE. A reação nunca chama MenuService direto.
-    /// Dano: se a reação causou dano (revide, reflexo). Cura: se curou (Sedento).
+    /// Dano: se a reação causou dano (reflexo). Cura: se curou (Sedento).
+    /// Revide: se a reação declarou um contra-ataque (ContraAtaque, Operário) —
+    /// carrega QUAL habilidade usar, não executa nada aqui.
     /// </summary>
     record ResultadoReacao(
         string Mensagem = "",
-        EventoDano? Dano = null, 
+        EventoDano? Dano = null,
         int Cura = 0,
-        Combate? RevidarAlvo = null
+        Revide? Revide = null
     );
+
+    /// <summary>
+    /// Declaração de um contra-ataque: qual habilidade usar e contra quem.
+    /// A reação que declara (ContraAtaque, PassivaOperario) escolhe a Habilidade
+    /// (A1 por padrão, Marretada no caso do Operário); o CombateService a
+    /// executa polimorficamente via IAtivavelComNatureza, sem saber qual skill é.
+    /// </summary>
+    record Revide(IAtivavelComNatureza Habilidade, Combate Alvo);
+
+    /// <summary>
+    /// ISP: habilidades que podem ser usadas como um contra-ataque — precisam
+    /// atacar UM alvo explícito com uma NaturezaDano escolhida por quem chama
+    /// (em vez da Natureza default da Ativar normal). Só faz sentido pra
+    /// habilidades de alvo único (A1, Marretada); uma AoE não implementa.
+    /// </summary>
+    interface IAtivavelComNatureza
+    {
+        EventoDano AtivarComNatureza(Combate atacante, Combate alvo, NaturezaDano natureza);
+    }
 
     /// <summary>
     /// Reage quando o portador é alvo de um ataque — dispara MESMO com dano 0

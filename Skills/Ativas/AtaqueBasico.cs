@@ -11,7 +11,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
     /// ou ganhar efeitos secundários no futuro — basta sobrescrever as propriedades
     /// e ajustar o Ativar, igual qualquer outra habilidade.
     /// </summary>
-    class AtaqueBasico : HabilidadeAtiva, IAtaquePrimario
+    class AtaqueBasico : HabilidadeAtiva, IAtaquePrimario, IAtivavelComNatureza
     {
         public AtaqueBasico() : base("Atacar", "⚔️", turnos: 0, "Ataque básico (100% ATK).") { }
 
@@ -26,5 +26,13 @@ namespace v1_Apostle_s_War.Skills.Ativas
                 resultados.Add(ctx.Atacante.Atacar(a));
             return resultados;
         }
+
+        /// <summary>
+        /// Entrada usada como contra-ataque (ContraAtaque busca a A1 do portador
+        /// via IAtaquePrimario). Alvo já é fixo (o agressor) — não passa por
+        /// ResolverAlvos.
+        /// </summary>
+        public EventoDano AtivarComNatureza(Combate atacante, Combate alvo, NaturezaDano natureza)
+            => atacante.Atacar(alvo, 1.0, natureza: natureza);
     }
 }

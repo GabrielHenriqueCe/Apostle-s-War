@@ -3,14 +3,14 @@
 namespace v1_Apostle_s_War.Skills.Buffs
 {
     /// <summary>
-    /// Quando o portador é atacado (golpe de natureza Completa), contra-ataca o
-    /// agressor com a1 — uma vez por agressor, por turno. Reage via
-    /// IReageAoSerAtacado (dispara mesmo com dano 0 — reage ao ato).
-    /// 
-    /// Só reage a golpes Completa: um Revide (SemContraAtaque) NÃO provoca
-    /// contra-ataque -> loop A<->B quebrado pela natureza. O revide é declarado
-    /// (RevidarAlvo), não executado aqui — o CombateService o executa com
-    /// natureza Revide e propaga as reações do alvo revidado.
+    /// Quando o portador é atacado, contra-ataca o agressor com a A1 — uma vez
+    /// por agressor, por turno. Reage via IReageAoSerAtacado (dispara mesmo com
+    /// dano 0 — reage ao ato).
+    ///
+    /// Declara o revide (Revide: Habilidade + Alvo), não executa aqui — o
+    /// CombateService executa via IAtivavelComNatureza e propaga as reações do
+    /// alvo revidado. O loop A↔B é quebrado por profundidade (o executor não
+    /// processa Revide de um revide), não pela Natureza do golpe.
     /// </summary>
     class ContraAtaque : Buff, IReageAoSerAtacado
     {
@@ -23,11 +23,6 @@ namespace v1_Apostle_s_War.Skills.Buffs
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            // Só reage a golpe Completa: Revide (SemContraAtaque) não gera
-            // contra-ataque. (Nenhuma já nem chega aqui — dispatch filtra.)
-            if (ctx.Natureza.Reacao != TipoReacao.Completa)
-                return new List<ResultadoReacao>();
-
             if (!ctx.Portador.EstaVivo()) return new List<ResultadoReacao>();
             if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
 
@@ -35,11 +30,16 @@ namespace v1_Apostle_s_War.Skills.Buffs
             if (_jaRevidados.Contains(ctx.Contraparte)) return new List<ResultadoReacao>();
             _jaRevidados.Add(ctx.Contraparte);
 
+            var a1 = ctx.Portador.Personagem.Habilidades
+                .OfType<IAtaquePrimario>()
+                .OfType<IAtivavelComNatureza>()
+                .First();
+
             return new List<ResultadoReacao>
             {
                 new ResultadoReacao(
                     Mensagem: $"{ctx.Portador.Personagem.Nome} contra-ataca! ↩️",
-                    RevidarAlvo: ctx.Contraparte
+                    Revide: new Revide(a1, ctx.Contraparte)
                 )
             };
         }

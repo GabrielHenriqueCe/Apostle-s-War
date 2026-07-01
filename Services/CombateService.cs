@@ -102,10 +102,10 @@ namespace v1_Apostle_s_War.Services
         #region Hooks de turno
 
         /// <summary>
-        /// Dispara o evento InicioDoTurno das passivas (ex: PassivaGenio reaplica
-        /// RefletirDano). Fica no service porque depende do sistema de passivas
-        /// (DeveAtivar/enum), que será migrado para interfaces no C5 — quando isso
-        /// acontecer, reavaliar se o disparo vai para o Turno.
+        /// Dispara o evento InicioDoTurno das passivas via IReageAoInicioTurno (ex:
+        /// PassivaGenio reaplica RefletirDano). Fica no service por ora; reavaliar se
+        /// o disparo vai para o Turno quando o resto do Turno (reset 1x-por-agressor +
+        /// TimeAtualDoTurno) for feito.
         /// O tick dos status já foi disparado por TurnoDoPersonagem.Iniciar().
         /// </summary>
         private void DispararEventoInicioDeTurno(Combate combatente, List<Combate> aliados, List<Combate> inimigos)

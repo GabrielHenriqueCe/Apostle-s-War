@@ -3,11 +3,10 @@
     /// <summary>
     /// Quanto de reação um dano provoca em quem o recebe.
     /// Completa: dispara tudo (contra-ataque, reflexo, espinhos, passivas). Ataque normal.
-    /// SemContraAtaque: dispara reações, MAS não gera outro contra-ataque (Revide — quebra loop).
     /// Nenhuma: não dispara reação alguma. Dano que é consequência de uma ação já
     ///   resolvida (auto-dano, redirecionamento, reflexo) — só Escudo/BloqueioTotal agem.
     /// </summary>
-    enum TipoReacao { Completa, SemContraAtaque, Nenhuma }
+    enum TipoReacao { Completa, Nenhuma }
 
     /// <summary>
     /// Descreve como uma instância de dano se comporta: o que ela ignora
@@ -32,11 +31,10 @@
     static class NaturezasDano
     {
         /// Ataque normal: passa por defesa/escudo/bloqueio, dispara todas as reações.
+        /// Usado também pro revide (contra-ataque) — mecanicamente é um ataque igual
+        /// qualquer outro; o loop A↔B é quebrado por profundidade no executor, não
+        /// por uma Natureza especial (ver ProcessarReacoesAlvo).
         public static readonly NaturezaDano Ataque = new();
-
-        /// Revide (contra-ataque): como ataque, é refletido e dispara reações,
-        /// MAS não gera outro contra-ataque — quebra o loop A↔B.
-        public static readonly NaturezaDano Revide = new(Reacao: TipoReacao.SemContraAtaque);
 
         /// Veneno (tick e explosão): ignora defesa; escudo absorve, bloqueio bloqueia.
         /// Não dispara reação (é dano de status, não um ataque).

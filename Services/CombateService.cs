@@ -312,13 +312,16 @@ namespace v1_Apostle_s_War.Services
 
         /// <summary>
         /// Dispara as reações do ALVO a um golpe recebido. Ordem: Reflexo/Sangramento
-        /// (dano > 0) -> Espinhos/ContraAtaque (sempre). O ContraAtaque declara um
-        /// revide (RevidarAlvo); este método o executa com natureza Revide e propaga
-        /// recursivamente as reações do alvo revidado. A natureza Revide
-        /// (SemContraAtaque) impede novo contra-ataque -> profundidade máxima 1.
+        /// (dano > 0) -> Espinhos/ContraAtaque/Operário (sempre). ContraAtaque e
+        /// PassivaOperario declaram um revide (ResultadoReacao.Revide: Habilidade +
+        /// Alvo); este método o executa via IAtivavelComNatureza e propaga
+        /// recursivamente as reações do alvo revidado. O parâmetro profundidade
+        /// garante profundidade máxima 1 — só processa Revide na chamada de topo
+        /// (profundidade 0); a recursão em si (profundidade 1) nunca declara outro
+        /// revide, quebrando o loop A↔B. Não depende da Natureza do golpe.
         /// </summary>
         private void ProcessarReacoesAlvo(Combate alvo, Combate atacante, EventoDano r,
-            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
+            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante, int profundidade = 0)
         {
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
@@ -347,16 +350,17 @@ namespace v1_Apostle_s_War.Services
 
             foreach (var res in resultados)
             {
-                if (res.RevidarAlvo == null) continue;
+                if (res.Revide == null) continue;
+                if (profundidade > 0) continue;
                 if (!alvo.EstaVivo()) break;
-                if (!res.RevidarAlvo.EstaVivo()) continue;
+                if (!res.Revide.Alvo.EstaVivo()) continue;
 
-                var revide = alvo.Atacar(res.RevidarAlvo, 1.0, natureza: NaturezasDano.Revide);
+                var revide = res.Revide.Habilidade.AtivarComNatureza(alvo, res.Revide.Alvo, NaturezasDano.Ataque);
                 _menuService.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
                 Thread.Sleep(1500);
                 // No revide, o portador do próximo nível é o revidado; passa os times do
                 // ponto de vista atual (alvo é quem revida agora → seus aliados/inimigos).
-                ProcessarReacoesAlvo(res.RevidarAlvo, alvo, revide, inimigosDoAtacante, aliadosDoAtacante);
+                ProcessarReacoesAlvo(res.Revide.Alvo, alvo, revide, inimigosDoAtacante, aliadosDoAtacante, profundidade + 1);
             }
         }
 

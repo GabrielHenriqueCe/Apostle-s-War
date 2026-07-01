@@ -43,13 +43,12 @@ velho aposentado). O que resta:
 2. **Estado de Vida (Vivo/Morto) + Atos do turno** — DESENHADO (ADR-estado-de-vida-e-atos.md).
    UNIFICA o que antes eram "estado morto" + "separação de fases". É o próximo grande refactor.
    Destrava a Guarda limpa, o bloquear-revive com dono, e a seleção de alvo por estado.
-3. **Turno (resto)** — reset 1x-por-agressor + TimeAtualDoTurno (centralizar aliados/inimigos).
-   Independente do estado de vida (o relógio não cruza; só os Atos cruzam).
-4. **Refactor das ativas → revide-com-habilidade** — destrava Operario certo (hoje provisório)
-   + contra-ataque de múltiplas fontes.
-5. **Buff-permanente vs passiva-pura** — 6 passivas que usam buff de contorno (deviam ser
+3. **Turno (resto)** — reset 1x-por-agressor (multi-fonte, ver "Fio do revide") +
+   TimeAtualDoTurno (centralizar aliados/inimigos). Independente do estado de vida
+   (o relógio não cruza; só os Atos cruzam).
+4. **Buff-permanente vs passiva-pura** — 6 passivas que usam buff de contorno (deviam ser
    capacidade direta) + Fantasma (buff não-removível). Dor real, seção própria.
-6. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria
+5. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria
    pós-estrutura.
 
 A **unificação dos mecanismos de ignorar** é um fio transversal já começado (DeveAgir = passo 1).
@@ -85,8 +84,8 @@ documentação/ADRs mortos).
   no cálculo de dano), Vampiro (IIgnoraStatusNoAtaque no Atacar).
 
 **FALTAM migrar: NENHUMA (C5 completo).** A Guarda foi migrada pra IReageAntesDeMorrer
-(hack provisório removido — ver Passo 4 no CONCLUÍDO). O Operario está com provisório
-[revide-com-habilidade]. Débito CONCEITUAL (migração aconteceu), não de migração.
+(hack provisório removido — ver Passo 4 no CONCLUÍDO). O Operario perdeu o provisório
+do revide (ver "Fio do revide" no CONCLUÍDO) — hoje declara Revide igual ao ContraAtaque.
 
 ### Interfaces de reação — estado
 - IReageAoSerAtacado, IReageAoReceberDano, IReageAoCausarDano — existem (PR-C).
@@ -282,40 +281,54 @@ Tudo na branch que mexe em Turno + C5 JUNTOS.
 
 ---
 
-## Fio do revide — revide carrega a HABILIDADE (decisão de design pendente)
+## Fio do revide — revide carrega a HABILIDADE (✅ FEITO)
 
-**Status:** DECISÃO FECHADA — próximo PR independente (antes do Passo 5).
-
-**O problema real:** `ResultadoReacao.RevidarAlvo: Combate?` é uma "request" disfarçada de
-"declaration" — o executor decide sozinho o HOW (1.0x hardcoded, qual natureza). A
-responsabilidade de COMO revidar pertence a quem declara o revide, não ao executor. Adicionar
-campo novo ao lado do antigo geraria dois campos fazendo a mesma coisa de formas diferentes.
-
-**Decisão:** substituir `RevidarAlvo: Combate?` por `Revide? Revide` onde:
+**Status:** ✅ COMPLETO. `ResultadoReacao.RevidarAlvo: Combate?` era uma "request" disfarçada
+de "declaration" — o executor decidia sozinho o HOW (1.0x hardcoded, qual natureza). Virou
+`Revide? Revide` onde:
 
 ```csharp
 record Revide(IAtivavelComNatureza Habilidade, Combate Alvo);
+interface IAtivavelComNatureza { EventoDano AtivarComNatureza(Combate atacante, Combate alvo, NaturezaDano natureza); }
 ```
 
-`IAtivavelComNatureza` é interface ISP — só A1 e Marretada implementam. Não polui a assinatura
-base de HabilidadeAtiva. O executor chama `Revide.Habilidade.AtivarComNatureza(ctx, alvo, Revide)`
-polimorficamente, sem saber qual skill é.
+`IAtivavelComNatureza` é ISP — só A1 (AtaqueBasico) e Marretada implementam. O executor chama
+`Revide.Habilidade.AtivarComNatureza(alvo, Revide.Alvo, natureza)` polimorficamente, sem saber
+qual skill é. **Sem ContextoCombate na assinatura** (desvio da ideia original) — o revide não
+precisa de Aliados/Inimigos, só do atacante fixo; carregar `ctx` seria parâmetro sem uso.
 
-Cada reação que declara revide busca a skill do portador:
-- ContraAtaque / EspinhosVenenosos: `portador.Personagem.Habilidades.OfType<AtaqueBasico>().First()`
+Cada reação que declara revide busca a skill do portador via `IAtaquePrimario`/tipo concreto
+(não hardcoda `AtaqueBasico` cru — pensando em A1 customizada futura, que pode ser AoE ou
+aleatória):
+- ContraAtaque: `portador.Personagem.Habilidades.OfType<IAtaquePrimario>().OfType<IAtivavelComNatureza>().First()`
 - Operário: `portador.Personagem.Habilidades.OfType<Marretada>().First()`
 
-**Opção C provisória DESCARTADA.** Hardcodar 1.25 era dead-end — o sistema certo já é
-viável sem refactor das ativas (natureza entra pela interface, não pelo Ativar base).
+**EspinhosVenenosos NÃO é cliente** (correção: o ROADMAP antigo listava errado — Espinhos só
+aplica Veneno+Queima no atacante, nunca revidou com dano).
 
-**Garantia de profundidade 1 — INVARIANTE CRÍTICA (não remover):**
-O resultado de `AtivarComNatureza(..., NaturezasDano.Revide)` produz `EventoDano` com
-`TipoReacao.Nenhuma`. Em `ProcessarReacoesAlvo`, o guard `if (r.Natureza.Reacao == Nenhuma) return`
-bloqueia qualquer reação do alvo revidado — sem isso, A revida B, B revida A, loop infinito.
-Se mudar o comportamento do Revide, recalcular essa garantia.
+**Quebra do loop A↔B: profundidade, não Natureza (mudou do desenho original).** A ideia inicial
+usava `NaturezasDano.Revide` com `TipoReacao.SemContraAtaque` só pra sinalizar "não gera outro
+contra-ataque" — auditoria mostrou que `SemContraAtaque` só era lido em UM lugar (dentro do
+próprio ContraAtaque), um enum value inteiro existindo só pra carregar controle de fluxo
+disfarçado de tipo de dano. Trocado por **profundidade explícita** em `ProcessarReacoesAlvo`
+(`int profundidade = 0`, incrementado na recursão): só processa `res.Revide` quando
+`profundidade == 0`. `TipoReacao.SemContraAtaque` e `NaturezasDano.Revide` foram REMOVIDOS —
+`TipoReacao` agora é só `{ Completa, Nenhuma }`; o revide usa `NaturezasDano.Ataque` (mecanicamente
+é um ataque igual qualquer outro). Se um dia o revide precisar de comportamento distinto de um
+ataque normal, o lugar certo é metadado no `EventoDano` (ver "Proveniência de status"), não uma
+Natureza nova.
 
-**Scope do PR:** ~6 arquivos (ResultadoReacao, IAtivavelComNatureza nova, A1, Marretada,
-ContraAtaque, EspinhosVenenosos, Operário, ProcessarReacoesAlvo no CombateService).
+**Operário:** aceita o gap de multi-fonte conscientemente. Se o mesmo personagem tiver, ao mesmo
+tempo, o buff genérico ContraAtaque (ex: aplicado por DragaoProtetor) E a passiva própria (10%
+Marretada), as duas podem contra-atacar no mesmo golpe — cada uma com seu próprio limite "1x por
+agressor" independente, sem tracker compartilhado. Resolver isso de vez é o "reset 1x-por-agressor
+reutilizável" já registrado em Turno (resto); não vale puxar pra cá sem um caso real doendo.
+
+**Ideia futura registrada:** um personagem cuja habilidade é ativa-e-passiva ("eu sempre
+contra-ataco com ESTA habilidade", sem RNG) já é suportado de graça pelo desenho atual — só
+precisa declarar `Revide(suaHabilidade, contraparte)` como o Operário faz. A interação desse
+personagem com o ContraAtaque genérico do Dragão (qual prevalece?) fica em aberto pro dia que
+existir.
 
 **Depois:** quando um personagem novo quiser revidar com outra skill, basta implementar
 `IAtivavelComNatureza` nela. Zero mudança no executor.
@@ -531,6 +544,12 @@ tudo estabilizar.
 
 ## CONCLUÍDO (referência)
 
+- **Revide-com-habilidade:** `ResultadoReacao.Revide` (Habilidade + Alvo) substitui
+  `RevidarAlvo: Combate?`. `IAtivavelComNatureza` (A1, Marretada) executa o revide
+  polimorficamente. Loop A↔B quebrado por profundidade explícita no executor (não mais por
+  `NaturezasDano.Revide`/`TipoReacao.SemContraAtaque`, removidos — enum virou só
+  `{ Completa, Nenhuma }`). Operário unificado com ContraAtaque (mesmo fluxo, troca A1 por
+  Marretada); gap de multi-fonte (buff + passiva simultâneos) aceito conscientemente.
 - **Sistema de Natureza do Dano** (NaturezaDano + TipoReacao + perfis). Base de tudo.
 - **ContextoCombate** (Atacante/Aliados/Inimigos) — habilidades recebem o contexto rico.
 - **PR-C — reações via interface** (C1-C6): Sedento, Reflexo, Sangramento, Espinhos, ContraAtaque
@@ -539,7 +558,8 @@ tudo estabilizar.
 - **C5 completo — todas as passivas migradas:** lado "ao ser atacado"; lado atacante (OlhoClinico,
   Virus, Sorrateiro, Policial); ao matar (Fada, Vilao); Robo + Sushiman; Necromancia (IReageAoMorrer);
   Genio, BonecoDeNeve, Tengu, Elfo (IReageAoInicioTurno); Guarda (IReageAntesDeMorrer — Passo 4).
-  Operario migrado com provisório [revide-com-habilidade]. Sistema velho aposentado.
+  Operario migrado (revide unificado com ContraAtaque, ver "Revide-com-habilidade"). Sistema
+  velho aposentado.
 - **Atos do Turno [Passo 3]:** ExecutarAtos centraliza o fluxo pós-Ativar. Ordem: AtoReacaoDoAlvo
   → IReageAntesDeMorrer → AtoMorte (IReageAoMatar + IReageAoMorrer) → AtoReacaoDoAtacante →
   AtoEncerramento. Irritar unificado (passava só AtoMorte, agora passa todos os Atos).

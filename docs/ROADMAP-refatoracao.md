@@ -284,29 +284,41 @@ Tudo na branch que mexe em Turno + C5 JUNTOS.
 
 ## Fio do revide — revide carrega a HABILIDADE (decisão de design pendente)
 
-**Status:** decisão tomada na direção, EXECUÇÃO depende do refactor das ativas.
+**Status:** DECISÃO FECHADA — próximo PR independente (antes do Passo 5).
 
-**O problema:** o revide hoje (RevidarAlvo no ResultadoReacao) carrega só "quem revidar" e o
-executor faz Atacar(alvo, 1.0) — multiplicador 1.0 hardcoded. O ContraAtaque usa isso. Mas o
-Operario quer revidar com Marretada (1.25x).
+**O problema real:** `ResultadoReacao.RevidarAlvo: Combate?` é uma "request" disfarçada de
+"declaration" — o executor decide sozinho o HOW (1.0x hardcoded, qual natureza). A
+responsabilidade de COMO revidar pertence a quem declara o revide, não ao executor. Adicionar
+campo novo ao lado do antigo geraria dois campos fazendo a mesma coisa de formas diferentes.
 
-**A decisão (Gabriel):** o revide deve carregar a HABILIDADE, não um multiplicador. Cada
-habilidade tem identidade (animação, nome, símbolo). O AtaqueBasico já é habilidade — "revidar
-com a1" e "revidar com Marretada" são o MESMO conceito.
+**Decisão:** substituir `RevidarAlvo: Combate?` por `Revide? Revide` onde:
 
-**Cenário rico (Gabriel):** o contra-ataque pode vir de MÚLTIPLAS fontes — passiva fixa
-("sempre contra-ataca com Marretada"), buff temporário, item com chance — cada uma revidando
-com habilidade diferente, podendo coexistir. Confirma que o revide tem que carregar a habilidade.
+```csharp
+record Revide(IAtivavelComNatureza Habilidade, Combate Alvo);
+```
 
-**O obstáculo:** a força da habilidade está ENTERRADA no Ativar de cada ativa (Marretada faz
-AplicarDano(..., 1.25) lá dentro). "Revide carrega a habilidade" DEPENDE do refactor das ativas:
-expor a força + aceitar natureza.
+`IAtivavelComNatureza` é interface ISP — só A1 e Marretada implementam. Não polui a assinatura
+base de HabilidadeAtiva. O executor chama `Revide.Habilidade.AtivarComNatureza(ctx, alvo, Revide)`
+polimorficamente, sem saber qual skill é.
 
-**Decisão pro Operario AGORA:** Opção C provisória — executa Atacar(ctx.Outro, 1.25, natureza:
-Revide) e DECLARA via ResultadoReacao (Mensagem + Dano), em vez de Console.WriteLine. Corrige o
-furo de camada sem mexer no RevidarAlvo. Depois unifica com o revide-com-habilidade.
+Cada reação que declara revide busca a skill do portador:
+- ContraAtaque / EspinhosVenenosos: `portador.Personagem.Habilidades.OfType<AtaqueBasico>().First()`
+- Operário: `portador.Personagem.Habilidades.OfType<Marretada>().First()`
 
-**Entrelaçamento:** cruza com "Auditoria das ativas".
+**Opção C provisória DESCARTADA.** Hardcodar 1.25 era dead-end — o sistema certo já é
+viável sem refactor das ativas (natureza entra pela interface, não pelo Ativar base).
+
+**Garantia de profundidade 1 — INVARIANTE CRÍTICA (não remover):**
+O resultado de `AtivarComNatureza(..., NaturezasDano.Revide)` produz `EventoDano` com
+`TipoReacao.Nenhuma`. Em `ProcessarReacoesAlvo`, o guard `if (r.Natureza.Reacao == Nenhuma) return`
+bloqueia qualquer reação do alvo revidado — sem isso, A revida B, B revida A, loop infinito.
+Se mudar o comportamento do Revide, recalcular essa garantia.
+
+**Scope do PR:** ~6 arquivos (ResultadoReacao, IAtivavelComNatureza nova, A1, Marretada,
+ContraAtaque, EspinhosVenenosos, Operário, ProcessarReacoesAlvo no CombateService).
+
+**Depois:** quando um personagem novo quiser revidar com outra skill, basta implementar
+`IAtivavelComNatureza` nela. Zero mudança no executor.
 
 ---
 

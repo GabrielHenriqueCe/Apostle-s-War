@@ -8,8 +8,6 @@
     /// - Aplicar: efeitos colaterais ao aplicar
     /// - Remover: limpeza ao expirar
     /// - AoIniciarTurno: efeitos no início do turno do portador (Veneno, CuraContinua)
-    /// - AoPassarTurno: hook depois de PassarTurno (resetar CDs internos)
-    ///   (usado quando habilidade decide ignorar buffs específicos do alvo)
     /// </summary>
     abstract class StatusEffect
     {
@@ -46,11 +44,9 @@
             if (AcabouDeAplicar)
             {
                 AcabouDeAplicar = false;
-                AoPassarTurno();
                 return;
             }
             TurnosRestantes--;
-            AoPassarTurno();
         }
 
         public bool Expirou => TurnosRestantes <= 0;
@@ -60,11 +56,6 @@
         public void AumentarDuracao(int turnos) => TurnosRestantes += turnos;
         public void ReduzirDuracao(int turnos) => TurnosRestantes = Math.Max(0, TurnosRestantes - turnos);
         public virtual void AoIniciarTurno(Combate portador) { }
-
-        /// <summary>
-        /// Hook chamado depois que PassarTurno foi executado.
-        /// </summary>
-        protected virtual void AoPassarTurno() { }
 
 
         public virtual void Aplicar(Combate alvo)

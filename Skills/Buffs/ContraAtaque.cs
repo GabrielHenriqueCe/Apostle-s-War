@@ -14,8 +14,6 @@ namespace v1_Apostle_s_War.Skills.Buffs
     /// </summary>
     class ContraAtaque : Buff, IReageAoSerAtacado
     {
-        private readonly HashSet<Combate> _jaRevidados = new();
-
         public ContraAtaque(int turnos = 2)
             : base("Contra-Ataque", "↩️", turnos, 0,
                 "Contra-ataca ao ser atacado (1x por agressor, por turno).")
@@ -26,9 +24,9 @@ namespace v1_Apostle_s_War.Skills.Buffs
             if (!ctx.Portador.EstaVivo()) return new List<ResultadoReacao>();
             if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
 
-            // 1 revide por agressor, por turno.
-            if (_jaRevidados.Contains(ctx.Contraparte)) return new List<ResultadoReacao>();
-            _jaRevidados.Add(ctx.Contraparte);
+            // Regra "1x por agressor, por turno" mora no Combate (fonte única —
+            // compartilhada com as passivas Herói/Operário). chance 1.0 = sempre.
+            if (!ctx.Portador.TentarContraAtacar(ctx.Contraparte, 1.0)) return new List<ResultadoReacao>();
 
             var a1 = ctx.Portador.Personagem.Habilidades
                 .OfType<IAtaquePrimario>()
@@ -42,11 +40,6 @@ namespace v1_Apostle_s_War.Skills.Buffs
                     Revide: new Revide(a1, ctx.Contraparte)
                 )
             };
-        }
-
-        protected override void AoPassarTurno()
-        {
-            _jaRevidados.Clear();
         }
 
         public override void Remover(Combate alvo)

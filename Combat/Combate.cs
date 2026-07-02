@@ -252,6 +252,30 @@ namespace ApostlesWar
         /// </summary>
         public void ConsumirTurnoExtra() => TemTurnoExtra = false;
 
+        // Agressores que este combatente já contra-atacou na janela do turno atual.
+        // Limpo por TurnoDoPersonagem.Finalizar (fim do turno). Vive no Combate porque
+        // é estado do combatente que o turno reseta — não é um StatusEffect.
+        private readonly HashSet<Combate> _jaContraAtacou = new();
+
+        /// <summary>
+        /// Regra ÚNICA de contra-ataque: "1x por agressor por turno" + chance. Decide se
+        /// este combatente pode contra-atacar o agressor agora; registra em caso de sucesso
+        /// (trava aquele agressor até o reset no fim do turno). chance 1.0 = sempre contra-ataca
+        /// (se ainda não contra-atacou o agressor neste turno). Fonte única — o buff ContraAtaque
+        /// E as passivas (Herói, Operário) passam TODAS por aqui, então múltiplas fontes no mesmo
+        /// combatente compartilham o mesmo limite (não somam contra-ataques).
+        /// </summary>
+        public bool TentarContraAtacar(Combate agressor, double chance)
+        {
+            if (_jaContraAtacou.Contains(agressor)) return false;
+            if (random.NextDouble() >= chance) return false;
+            _jaContraAtacou.Add(agressor);
+            return true;
+        }
+
+        /// <summary>Limpa o registro de contra-ataques do turno. Chamado por TurnoDoPersonagem.Finalizar.</summary>
+        public void LimparContraAtaques() => _jaContraAtacou.Clear();
+
         public bool PodeReceber(StatusEffect novo)
         {
             foreach (var bloqueador in StatusAtivos.OfType<IBloqueiaStatus>())

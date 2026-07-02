@@ -251,24 +251,42 @@ não criado agora.
 ## Conceito de Turno (TurnoDoPersonagem) — PARCIALMENTE FEITO
 
 **Status:** RELÓGIO FEITO. TurnoDoPersonagem extraído (ADR em docs/ADR-conceito-de-turno.md):
-Iniciar() (tick dos status) e Finalizar() (avança duração + remove expirados + avança cooldowns).
-**FALTA:**
-- **Reset "1x por agressor por turno" (multi-fonte)** — mora no Turno, serve as reações do C5
-  (Espinhos/Zumbi/Coco passam de "por hit" pra "1x por agressor", igual ContraAtaque) E resolve
-  o gap aceito no "Fio do revide": hoje ContraAtaque e PassivaOperario têm cada um seu próprio
-  HashSet de já-revidados — se o mesmo personagem tiver os dois ao mesmo tempo, pode
-  contra-atacar 2x no mesmo golpe. O tracker precisa virar compartilhado (viver no Combate,
-  resetado no TurnoDoPersonagem), não duplicado por buff/passiva.
+Iniciar() (tick dos status) e Finalizar() (avança duração + remove expirados + avança cooldowns
++ limpa contra-ataques do turno).
+
+**Reset "1x por agressor por turno" do CONTRA-ATAQUE — ✅ FEITO.** O registro de quem já foi
+contra-atacado saiu dos HashSets privados (ContraAtaque tinha o seu, Operário nem tinha) e virou
+`Combate._jaContraAtacou` + `Combate.TentarContraAtacar(agressor, chance)` (regra única: chance +
+"1x por agressor", registra no sucesso) + `Combate.LimparContraAtaques()` (chamado no
+Finalizar). Fonte única — buff ContraAtaque, PassivaHeroi e PassivaOperario passam TODOS por ela,
+então o gap multi-fonte (Herói com buff do Dragão + passiva) morreu: o primeiro registra, o
+segundo vê que já contra-atacou. O hook `StatusEffect.AoPassarTurno` (virtual usado só pelo
+ContraAtaque, o único "capaz virtual sem irmã interface") foi REMOVIDO. Herói virou passiva-pura
+(IReageAoSerAtacado, sem buff via IPassivaInicial); Operário ganhou o limite 1x/agressor.
+
+**FALTA (Turno resto):**
+- **Reset 1x-por-agressor das OUTRAS reações** — Espinhos/Zumbi/Coco ainda são "por hit"; podem
+  passar a "1x por agressor" reusando o mesmo padrão do contra-ataque (registro no Combate,
+  limpo no Finalizar). Generalizar `TentarContraAtacar` pra um mecanismo de frequência por-reação
+  quando doer (hoje só o contra-ataque pediu).
 - **TimeAtualDoTurno** — centralizar a regra "quais são os aliados e os inimigos de uma
   perspectiva" numa fonte única que ContextoCombate E ContextoReacao consultam, em vez de cada
   ponto do CombateService recalcular `atacante is Jogador ? jogador : inimigo` e inverter na
-  mão. Não era pré-requisito da Fatia 2 do EventoDano (o CombateService já calculava os times e
-  só encaminhava); agora que a Fatia 2 terminou, é refinamento puro — junta com o reset
-  1x-por-agressor porque "de quem é a vez" e "quais os times dessa vez" são parentes. Nome a
-  definir (TimeAtualDoTurno / RelaçãoDeTimes / PerspectivaDeCombate).
+  mão. Refinamento puro (o CombateService já calcula os times). Nome a definir.
 - O disparo do evento InicioDoTurno das passivas — hoje em DispararEventoInicioDeTurno no
-  CombateService. Reavaliar se migra pro Turno junto dessa branch.
-Tudo numa única branch (Turno resto).
+  CombateService. Reavaliar se migra pro Turno.
+
+**EVOLUÇÃO ARQUITETURAL — TurnoDoPersonagem PERSISTENTE (Caminho B, decisão fechada, futuro):**
+Hoje o TurnoDoPersonagem é TRANSIENTE (`new` a cada turno, só orquestra; o estado mora no
+Combate). O `_jaContraAtacou` foi posto no Combate por pragmatismo (Caminho A) — mas é
+conceitualmente estado DE TURNO (nasce e morre no turno), diferente de duração/cooldown que são
+do COMBATENTE (persistem, o turno só avança). Quando o "Turno resto" vier, o TurnoDoPersonagem
+vira PERSISTENTE (um por combatente, vive o combate todo) e passa a POSSUIR o estado turn-scoped
+(contra-ataques hoje; TimeAtualDoTurno depois) — deixa de ser procedimento e vira o MODELO de
+turno. Migração barata: o estado só muda de casa (Combate → Turno), a leitura/escrita das
+passivas via `TentarContraAtacar` não muda. Habilita ideias de Gabriel: medidor de turno /
+velocidade nos stats. NÃO confundir com o RelógioDoCombate (contador GLOBAL de rodadas, nível
+acima — "boss mata todos após X turnos") — são dois relógios em níveis diferentes.
 
 ---
 

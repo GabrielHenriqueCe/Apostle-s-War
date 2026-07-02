@@ -5,7 +5,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
 {
     /// <summary>
     /// Imune a Veneno e Queima durante todo o combate. Capacidade direta
-    /// (IBloqueiaStatus) — não usa mais buff de contorno (ImunidadeEspecifica).
+    /// (IBloqueiaStatus) — a passiva É o bloqueio, sem buff de contorno.
     /// </summary>
     class PassivaDragao : HabilidadePassiva, IBloqueiaStatus
     {

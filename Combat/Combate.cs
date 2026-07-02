@@ -227,7 +227,7 @@ namespace ApostlesWar
         {
             HPMaximoInicial = HPMaximo;
 
-            // Aplica buffs iniciais permanentes de passivas (ex: PassivaDragao -> ImunidadeEspecifica)
+            // Aplica buffs iniciais permanentes de passivas (ex: PassivaFantasma -> Intocavel)
             foreach (var passiva in Personagem.Habilidades.OfType<IPassivaInicial>())
                 passiva.AplicarInicial(this);
         }

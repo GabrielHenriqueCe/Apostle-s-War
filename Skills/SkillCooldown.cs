@@ -29,10 +29,6 @@
             if (turnosRestantes > 0)
                 turnosRestantes--;
         }
-        public void Resetar()
-        {
-            this.turnosRestantes = 0;
-        }
     }
 
     #endregion

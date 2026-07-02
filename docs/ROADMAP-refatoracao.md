@@ -245,6 +245,13 @@ não criado agora.
   desconta o ignorado"). Limpeza prevista: o cálculo de quanto descontar deveria morar na
   própria reação/natureza, não no loop do ReceberDano — montar a defesa SEM os ignorados desde
   o início, em vez de incluir e descontar.
+- **ATENÇÃO (avaliado jul/2026):** IContribuiDefesa NÃO é a mesma "mina dual-source" que
+  IBloqueiaStatus/IModificaDanoRecebido eram (aquelas ganharam a varredura de
+  Personagem.Habilidades). Aqui é diferente: o getter `Defesa` usa os tipos CONCRETOS
+  BuffDefesa/ReducaoDefesa, não a interface; a interface só serve ao loop de subtração-do-ignorado
+  no ReceberDano, e passivas nem entram na lista `ignorados`. Adicionar varredura de passivas
+  aqui seria inútil/errado (subtrairia o que nunca foi somado). Resolver só JUNTO desta unificação,
+  não como "consistência de dispatch".
 
 ---
 

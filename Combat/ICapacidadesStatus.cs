@@ -21,7 +21,8 @@
     /// Capacidade E do modelo de capacidades: BLOQUEIO DE APLICAÇÃO.
     /// O status impede que outro StatusEffect seja aplicado no portador.
     /// Chamada em Combate.PodeReceber, antes de adicionar um novo status.
-    /// Implementadores: ImunidadeDebuffs, ImunidadeEspecifica, ImpedirBeneficios.
+    /// Implementadores: ImunidadeDebuffs, ImpedirBeneficios (status); PassivaAbobora,
+    /// PassivaDragao (passivas-pura).
     /// </summary>
     interface IBloqueiaStatus
     {

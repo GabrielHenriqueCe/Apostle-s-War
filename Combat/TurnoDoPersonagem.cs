@@ -36,8 +36,12 @@
         }
 
         /// <summary>
-        /// Fim do turno: avança a duração dos status (removendo os expirados) e
-        /// avança os cooldowns das habilidades.
+        /// Fim do turno: avança a duração dos status (removendo os expirados),
+        /// avança os cooldowns das habilidades e limpa o registro de contra-ataques
+        /// do turno. Três estados temporais diferentes, um único dono das transições
+        /// (o Turno): duração e cooldown PERSISTEM entre turnos (o turno só avança);
+        /// o registro de contra-ataques é do TURNO (nasce e morre no turno) — por isso
+        /// é limpo, não avançado.
         /// </summary>
         public void Finalizar()
         {
@@ -50,6 +54,8 @@
 
             foreach (var cd in _combatente.Cooldowns.Values)
                 cd.PassarTurno();
+
+            _combatente.LimparContraAtaques();
         }
     }
 }

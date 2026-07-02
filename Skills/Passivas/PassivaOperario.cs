@@ -12,7 +12,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// </summary>
     class PassivaOperario : HabilidadePassiva, IReageAoSerAtacado
     {
-        private static readonly Random _random = new Random();
+        private const double Chance = 0.10;
 
         public PassivaOperario() : base("Instinto do Operário", "🛠️", 0,
             "10% de chance de contra-atacar com Marretada ao ser atacado.")
@@ -20,8 +20,13 @@ namespace v1_Apostle_s_War.Skills.Passivas
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
-            if (_random.NextDouble() >= 0.10) return new List<ResultadoReacao>();
+            if (!ctx.Portador.EstaVivo()) return new List<ResultadoReacao>();
             if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
+
+            // Mesma regra do ContraAtaque/Herói, só muda a chance (10%) e a habilidade
+            // (Marretada). Agora ganha o limite "1x por agressor por turno" que não tinha —
+            // a rolagem de 10% e o registro vivem no Combate (fonte única).
+            if (!ctx.Portador.TentarContraAtacar(ctx.Contraparte, Chance)) return new List<ResultadoReacao>();
 
             var marretada = ctx.Portador.Personagem.Habilidades.OfType<Marretada>().First();
 

@@ -1,8 +1,10 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using v1_Apostle_s_War.Skills.Passivas;
 
 namespace v1_Apostle_s_War.Skills.Ativas
 {
+    // Piloto da composição de Ações (ver ADR-composicao-de-acoes.md): AoE de dano puro,
+    // agora declara Acoes em vez de sobrescrever Ativar.
     class Incendio : HabilidadeAtiva
     {
         public Incendio() : base("Incêndio", "🌋", 4,
@@ -14,15 +16,9 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
         public override TipoAtaque TipoAtaque => TipoAtaque.AreaDeEfeito;
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        protected override List<Acao> Acoes => new()
         {
-            var resultados = new List<EventoDano>();
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-            {
-                double mult = 1.5 * PassivaPiromancer.MultExtra(ctx.Atacante, a);
-                resultados.Add(AplicarDano(ctx.Atacante, a, mult));
-            }
-            return resultados;
-        }
+            new Dano((atk, alvo) => 1.5 * PassivaPiromancer.MultExtra(atk, alvo)),
+        };
     }
 }

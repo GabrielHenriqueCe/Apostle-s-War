@@ -1,9 +1,11 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using v1_Apostle_s_War.Skills.Debuffs;
 using v1_Apostle_s_War.Skills.Passivas;
 
 namespace v1_Apostle_s_War.Skills.Ativas
 {
+    // Piloto da composição de Ações (ver ADR-composicao-de-acoes.md): era Balde 1 puro
+    // (loop + Dano + Queima), agora declara Acoes em vez de sobrescrever Ativar.
     class BolaDeFogo : HabilidadeAtiva
     {
         public BolaDeFogo() : base("Bola de Fogo", "🔥", 4,
@@ -14,16 +16,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        protected override List<Acao> Acoes => new()
         {
-            var resultados = new List<EventoDano>();
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-            {
-                double mult = 2.0 * PassivaPiromancer.MultExtra(ctx.Atacante, a);
-                resultados.Add(AplicarDano(ctx.Atacante, a, mult));
-                AplicarDebuff(a, new Queima(2));
-            }
-            return resultados;
-        }
+            new Dano((atk, alvo) => 2.0 * PassivaPiromancer.MultExtra(atk, alvo)),
+            new AplicarDebuff(() => new Queima(2)),
+        };
     }
 }

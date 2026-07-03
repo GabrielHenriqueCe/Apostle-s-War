@@ -28,6 +28,29 @@ namespace ApostlesWar
         public abstract EstadoAlvo EstadoAlvo { get; }
 
         /// <summary>
+        /// Ações que a habilidade executa sobre cada alvo resolvido (Balde 1: só aplica uma
+        /// lista fixa de efeitos). Vazio por default — habilidades com comportamento próprio
+        /// sobrescrevem Ativar em vez de declarar Acoes. Ver ADR-composicao-de-acoes.md.
+        /// </summary>
+        protected virtual List<Acao> Acoes => new();
+
+        /// <summary>
+        /// Interpretador default: roda cada Acao sobre os alvos resolvidos, na ordem declarada,
+        /// agregando os EventoDano das ações de dano (contrato preservado — reações-do-atacante
+        /// e exibição consomem a lista). Habilidades bespoke sobrescrevem este Ativar; as duas
+        /// formas convivem durante a migração (Strangler).
+        /// </summary>
+        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        {
+            var eventos = new List<EventoDano>();
+            var acoes = Acoes;
+            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
+                foreach (var acao in acoes)
+                    acao.Executar(ctx.Atacante, a, eventos);
+            return eventos;
+        }
+
+        /// <summary>
         /// Retorna a lista correspondente ao TipoLista da habilidade.
         /// Conveniência pra resolver alvos.
         /// </summary>

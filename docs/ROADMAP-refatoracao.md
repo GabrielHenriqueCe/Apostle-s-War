@@ -5,7 +5,11 @@
 >   refatoração, priorizado. Aponta para os ADRs de cada tema.
 > **Como usar:** risque o que concluir, adicione o que descobrir. Cada tema
 >   grande ganha seu ADR próprio em docs/ quando for executado.
-> **Atualizado:** junho/2026
+> **Atualizado:** julho/2026
+>
+> **Sobre timing:** dívida/melhoria aqui é descrita pela NECESSIDADE, sem data nem
+>   "versão"/"2027"/"web". O jogo não tem versões; cada coisa é feita quando for o
+>   momento ideal (pode ser já). Não rotular nada por era futura.
 
 ---
 
@@ -40,18 +44,52 @@ velho aposentado). O que resta:
 
 1. **EventoDano / contexto rico** — Fatia 1 e Fatia 2 FEITAS. Falta só a passiva-conta-mortos
    (1b) como cliente futuro do contexto rico.
-2. **Estado de Vida (Vivo/Morto) + Atos do turno** — Passos 1-4 FEITOS (State Pattern, status
-   no Morto, Atos, Guarda limpa). Falta só o Passo 5: **seleção de alvo por estado** (interface
-   declarativa VIVOS/MORTOS/AMBOS pras ativas) — é o próximo grande refactor.
-3. **Turno (resto)** — reset 1x-por-agressor (multi-fonte, ver "Fio do revide") +
-   TimeAtualDoTurno (centralizar aliados/inimigos). Independente do estado de vida
-   (o relógio não cruza; só os Atos cruzam).
-4. **Buff-permanente vs passiva-pura** — 6 passivas que usam buff de contorno (deviam ser
-   capacidade direta) + Fantasma (buff não-removível). Dor real, seção própria.
-5. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria
-   pós-estrutura.
+2. **Estado de Vida (Vivo/Morto) + Atos do turno** — ✅ **Passos 1-5 FEITOS** (State Pattern,
+   status no Morto, Atos, Guarda limpa, seleção de alvo por estado — PR #111). Falta só a
+   passiva-conta-mortos (1b), que é do EventoDano.
+3. **Turno (resto)** — reset 1x-por-agressor do CONTRA-ATAQUE ✅ FEITO (#112). Falta o reset das
+   OUTRAS reações (Espinhos/Zumbi/Coco) + TimeAtualDoTurno (centralizar aliados/inimigos).
+4. **Buff-permanente vs passiva-pura** — ✅ **FEITO** (#111/#112): 6 passivas puras + Fantasma
+   (Removivel=false). Ver seção própria (marcada concluída).
+5. **Composição de Ações** — habilidade vira DADO (config de Ações) em vez de classe-por-habilidade.
+   É o **próximo grande fio**. Ver **ADR-composicao-de-acoes.md**. Predecessor do Rebalanceamento.
+6. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria,
+   pós-composição.
 
 A **unificação dos mecanismos de ignorar** é um fio transversal já começado (DeveAgir = passo 1).
+
+---
+
+## Composição de Ações — habilidade como dado (FIO NOVO — PRÓXIMO)
+
+**Status:** DECIDIDO. Ver **ADR-composicao-de-acoes.md** (desenho fechado). É a
+"Auditoria das ativas" acordando com dor real: ~70% das ativas são só dado (loop +
+lista fixa de efeitos), reinventando boilerplate. Predecessor do Rebalanceamento
+(mexer em número/efeito vira editar dado, não 74 classes).
+
+**Núcleo:** habilidade vira DADO (config de **Ações**) quando o `Ativar` é só "aplica
+lista fixa de efeitos"; continua classe/Ação custom quando há comportamento real. A
+unidade de reúso é a **AÇÃO** (Skills/Acoes/), não a habilidade. Ação = **Operação**
+(Dano/Cura/AplicarBuff/RemoverDebuffs/RemoverBuffs/MoverBuffs/...) × **Escopo** (quais
+combatentes) × **Seletor** (quais/quantos status por combatente — eixo separado do
+NumeroDeAlvos).
+
+**Pontos-chave (detalhe no ADR):**
+- Ações são ORDENADAS; cada uma vê o estado da anterior (Barata: buff→ataca).
+- `EstadoAlvo` DESCE pra ação → o `Ambos` MORRE (cada ação carrega vivos/mortos). A
+  ideia antiga de `throw` no `Ambos` foi descartada (morre com o refactor).
+- Categoria "ação condicional / de consequência" (ao matar → X) nomeada, não resolvida
+  agora — Balde 2 fica bespoke até um lote pedir.
+- Disciplina: promove local→compartilhado no 2º cliente REAL; verificar-antes-de-fundir
+  (o grep mente — AnjoCaido/Putridao pareciam cleanse e não eram).
+- Cravado: `RemoverDebuffs`(aliados, 3 clientes), `RemoverBuffs`(inimigos), `MoverBuffs`
+  já nascem compartilhados. `Transformar`(buff→debuff) é futuro.
+- Invariantes: `TipoAtaque` continua alimentando dispatch de passivas-atacante; o
+  interpretador agrega os `EventoDano` das ações de Dano.
+
+**Sequência:** PR-1 = modelo + interpretador + ações + piloto **Mago** (Balde 1 puro),
+Strangler (resto segue no `Ativar` velho, build verde). Depois champ-a-champ. **Tema
+separado, depois:** champ-como-dado + reorganização pasta-por-champ (Champs/Faccao/Champ/).
 
 ---
 
@@ -115,7 +153,9 @@ DeveAtivar/Ativar virtual e o enum EventoCombate só saem quando a ÚLTIMA passi
 
 ## Buff-permanente vs passiva-pura vs buff-não-removível (FIO NOVO — descoberto ao migrar início-de-turno)
 
-**Status:** REGISTRADO, dor REAL (não pureza), branch própria depois do C5. Gabriel
+**Status:** ✅ **FEITO** (PRs #111/#112). Os 6 viraram passiva-pura (capacidade direta) e o
+Fantasma ganhou `Removivel = false` (segue buff, só protegido). Herói veio junto no #112. O
+texto abaixo fica como registro da decisão. Gabriel
 identificou: vários personagens aplicam um BUFF PERMANENTE (int.MaxValue) via IPassivaInicial
 "pra contornar" — quando o certo seria a passiva SER a capacidade diretamente. Foi a gambiarra
 que originou a refatoração. Três categorias distintas (não "buff vs passiva"):
@@ -381,8 +421,10 @@ Aplicador, (2) passiva filtra por origem, (3) regra "maior prevalece" (já exist
 
 ## Estado de Vida (Vivo/Morto) + Atos do turno — Passos 1-4 FEITOS, falta seleção por estado
 
-**Status:** Passos 1-4 IMPLEMENTADOS (ver CONCLUÍDO: State Pattern Vivo/Morto, status
-separados no Morto, Atos do Turno, Guarda limpa). Ver **ADR-estado-de-vida-e-atos.md**
+**Status:** ✅ Passos 1-**5** IMPLEMENTADOS (State Pattern Vivo/Morto, status separados no
+Morto, Atos do Turno, Guarda limpa, **seleção de alvo por estado — PR #111**; ver
+ADR-selecao-por-estado.md). Só a passiva-conta-mortos (1b) segue pendente, e é do EventoDano.
+Ver **ADR-estado-de-vida-e-atos.md**
 (conceitos fechados). Este foi o fio que UNIFICOU o que antes eram dois: "estado morto" e
 "separação de fases do turno" — o Ato de Morte é a transição de estado. **Falta só o Passo
 5 (seleção de alvo por estado)**, detalhado abaixo.
@@ -545,8 +587,12 @@ métodos está correta; só o loop interno é repetido.
 aparecem na tela — não-testáveis hoje. Conecta com o test bed (modo Versus).
 
 ### Testes automatizados (xUnit na lógica de domínio)
-**Status:** futuro, quando a estrutura estabilizar. Diferencial de portfólio. Timing: DEPOIS de o
-C5/EventoDano estabilizarem.
+**Status:** ADIADO CONSCIENTE (Gabriel, jul/2026 — nunca usou xUnit, prefere não parar o embalo
+agora). Não esquecido: é o maior diferencial de portfólio e a rede de segurança dos refactors
+(os bugs sérios — StackOverflow de proteção mútua, crítico-exige-dano, dispatch dual-source —
+foram achados por raciocínio, não por teste). **On-ramp pra quando quiser:** o 1º teste verde
+leva ~15 min guiado, começando pela ordem crítica de morte (Guarda→Vilão→Necromancia) e pelo
+ReceberDano — os pontos onde bug já apareceu.
 
 ### Persistência — arquivo → SQL (futuro web)
 **Status:** FUTURO (web 2027). Isolar persistência atrás de repositório. YAGNI até a web.
@@ -554,6 +600,22 @@ C5/EventoDano estabilizarem.
 ### Services-lookup (cosmético, baixa prioridade)
 **Status:** observado, sem dor. FaccaoService/CampanhaService são tabelas. Candidatos a virar
 dados. Fazer só se incomodar.
+
+### Faxina de nomes (rename do repo/namespace)
+**Status:** boy-scout. Tirar o `v1` — namespace `v1_Apostle_s_War` → `ApostlesWar` — e o repo
+vira só "Apostle's War". Corrigir a pasta `Campaingn` (typo de Campaign) e a mistura PT/EN.
+Portfólio: recrutador lê o repo.
+
+### EventoDano por ID (desacoplar dos objetos vivos)
+**Status:** registrado, sem data. O `EventoDano` carrega hoje `Combate Atacante`/`Combate Alvo`
+(objetos vivos). Pra ser um registro limpo do golpe (log/stream desacoplado), referenciaria por
+id/nome. Mudança real; fazemos quando for natural. (Não é "web/2027" — é quando der.)
+
+### IModificaDanoCausado (modificador de dano do atacante)
+**Status:** follow-on da Composição de Ações. A ação `Dano` passa a consultar modificadores do
+atacante automaticamente (a `PassivaPiromancer` para de ser fiada à mão em cada habilidade de
+fogo). Espelho do `IModificaDanoRecebido`. Cruza com `FontesDeCapacidade` (dispatch das duas
+fontes: StatusAtivos + Personagem.Habilidades).
 
 ### Faxina de comentários
 **Status:** ÚLTIMO da fila. Bisturi: remove ruído, mantém os porquês. Branch própria, depois de

@@ -51,8 +51,10 @@ velho aposentado). O que resta:
    OUTRAS reações (Espinhos/Zumbi/Coco) + TimeAtualDoTurno (centralizar aliados/inimigos).
 4. **Buff-permanente vs passiva-pura** — ✅ **FEITO** (#111/#112): 6 passivas puras + Fantasma
    (Removivel=false). Ver seção própria (marcada concluída).
-5. **Composição de Ações** — habilidade vira DADO (config de Ações) em vez de classe-por-habilidade.
-   É o **próximo grande fio**. Ver **ADR-composicao-de-acoes.md**. Predecessor do Rebalanceamento.
+5. **Composição de Ações + Motor de Habilidades** — habilidade vira DADO (lista de Ações) rodada
+   por um interpretador único; **zero `Ativar` override**. Piloto per-alvo FEITO (#115); o MOTOR
+   (loop-flip + escopo/estado por ação + `AcaoSobreConjunto`) está desenhado, falta implementar.
+   Ver **ADR-composicao-de-acoes.md** (revisado). Predecessor do Rebalanceamento.
 6. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria,
    pós-composição.
 
@@ -60,36 +62,41 @@ A **unificação dos mecanismos de ignorar** é um fio transversal já começado
 
 ---
 
-## Composição de Ações — habilidade como dado (FIO NOVO — PRÓXIMO)
+## Composição de Ações + Motor de Habilidades (MOTOR DESENHADO — PRÓXIMO)
 
-**Status:** DECIDIDO. Ver **ADR-composicao-de-acoes.md** (desenho fechado). É a
-"Auditoria das ativas" acordando com dor real: ~70% das ativas são só dado (loop +
-lista fixa de efeitos), reinventando boilerplate. Predecessor do Rebalanceamento
-(mexer em número/efeito vira editar dado, não 74 classes).
+**Status:** MOTOR DESENHADO. Ver **ADR-composicao-de-acoes.md** (revisado jul/2026, com o
+motor mapeado lendo o roster real). É a "Auditoria das ativas" com dor real: ~70% das ativas
+são só dado (loop + lista fixa de efeitos), reinventando boilerplate. Predecessor do
+Rebalanceamento (mexer em número/efeito vira editar dado, não 74 classes).
 
-**Núcleo:** habilidade vira DADO (config de **Ações**) quando o `Ativar` é só "aplica
-lista fixa de efeitos"; continua classe/Ação custom quando há comportamento real. A
-unidade de reúso é a **AÇÃO** (Skills/Acoes/), não a habilidade. Ação = **Operação**
-(Dano/Cura/AplicarBuff/RemoverDebuffs/RemoverBuffs/MoverBuffs/...) × **Escopo** (quais
-combatentes) × **Seletor** (quais/quantos status por combatente — eixo separado do
-NumeroDeAlvos).
+**Núcleo:** um interpretador ÚNICO (`HabilidadeAtiva.Ativar`) roda uma lista de **Ações**;
+**nenhuma habilidade sobrescreve `Ativar`**. Três níveis, todos pelo motor: (1) vocabulário
+puro, (2) vocabulário + 1 ação custom, (3) ação custom inteira — "único" vira uma `Acao`
+especial, não uma habilidade especial. A unidade de reúso é o **FRAGMENTO** (correção: NÃO a
+Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só no verbo).
 
-**Pontos-chave (detalhe no ADR):**
-- Ações são ORDENADAS; cada uma vê o estado da anterior (Barata: buff→ataca).
-- `EstadoAlvo` DESCE pra ação → o `Ambos` MORRE (cada ação carrega vivos/mortos). A
-  ideia antiga de `throw` no `Ambos` foi descartada (morre com o refactor).
-- Categoria "ação condicional / de consequência" (ao matar → X) nomeada, não resolvida
-  agora — Balde 2 fica bespoke até um lote pedir.
-- Disciplina: promove local→compartilhado no 2º cliente REAL; verificar-antes-de-fundir
-  (o grep mente — AnjoCaido/Putridao pareciam cleanse e não eram).
-- Cravado: `RemoverDebuffs`(aliados, 3 clientes), `RemoverBuffs`(inimigos), `MoverBuffs`
-  já nascem compartilhados. `Transformar`(buff→debuff) é futuro.
-- Invariantes: `TipoAtaque` continua alimentando dispatch de passivas-atacante; o
-  interpretador agrega os `EventoDano` das ações de Dano.
+**O motor (detalhe no ADR):**
+- **Loop-flip:** ação-por-fora; cada ação resolve seu **Escopo** + **EstadoAlvo** no momento
+  em que roda. Isso dissolve "escopo próprio" e "condição de estado" — não eram paredes.
+- **`AcaoSobreConjunto`:** 2º formato de ação (recebe o conjunto inteiro) pra **agregação
+  cross-alvo** (a média da Putridão). É a única parede real, e é pequena.
+- Ações ORDENADAS; cada uma vê o estado da anterior (AnjoCaído: revive→cura os revividos).
+- `EstadoAlvo` DESCE pra ação, avaliado NA EXECUÇÃO → o `Ambos` MORRE; a categoria "ao-matar"
+  se dissolve no fluxo normal (Sentença = `AplicarDebuff(Mortos)`).
+- Eixos da ação: **Operação × Escopo × EstadoAlvo × Valor(fragmento) × Seletor**.
+- Vocabulário mapeado: Dano, Cura, Escudo, AplicarBuff, AplicarDebuff, Reviver,
+  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra, **Explodir** (+ `IStatusComTick`, `Seletor`).
+- Disciplina: promove no 2º cliente REAL; verificar-antes-de-fundir (o grep mente — **Copiando
+  era Balde 3 e é vocabulário puro**; **Atlantis** revelou o boundary de "pipeline / conjunto
+  afetado", 1 cliente, registrado sem construir).
+- Invariantes: `TipoAtaque` alimenta dispatch de passivas-atacante; o interpretador agrega os
+  `EventoDano` das ações de dano.
 
-**Sequência:** PR-1 = modelo + interpretador + ações + piloto **Mago** (Balde 1 puro),
-Strangler (resto segue no `Ativar` velho, build verde). Depois champ-a-champ. **Tema
-separado, depois:** champ-como-dado + reorganização pasta-por-champ (Champs/Faccao/Champ/).
+**Sequência:** #115 = piloto **per-alvo** do Mago (BolaDeFogo, Incendio) — FEITO, mas foi o
+formato per-alvo, NÃO o motor. Próximo = o motor (loop-flip + escopo/estado), depois
+vocabulário incremental, depois `AcaoSobreConjunto` (Putridão), depois o pick do menu (lado
+UI). **Tema separado:** champ-como-dado + pasta-por-champ (Champs/Faccao/Champ/) — o arquivo
+do champ vira a VIEW (lê habilidades/descrições sem rodar o jogo).
 
 ---
 

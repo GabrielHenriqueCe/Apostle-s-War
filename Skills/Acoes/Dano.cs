@@ -13,8 +13,11 @@ namespace ApostlesWar
     {
         private readonly Func<Combate, Combate, double> _multiplicador;
 
-        public Dano(double multiplicador) : this((_, _) => multiplicador) { }
-        public Dano(Func<Combate, Combate, double> multiplicador) => _multiplicador = multiplicador;
+        public Dano(double multiplicador, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
+            : this((_, _) => multiplicador, escopo, estadoAlvo) { }
+
+        public Dano(Func<Combate, Combate, double> multiplicador, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
+            : base(escopo, estadoAlvo) => _multiplicador = multiplicador;
 
         public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
             => eventos.Add(atacante.Atacar(alvo, _multiplicador(atacante, alvo)));

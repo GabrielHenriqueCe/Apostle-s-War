@@ -69,6 +69,17 @@ namespace ApostlesWar
     enum EstadoAlvo { Vivos, Mortos, Ambos }
 
     /// <summary>
+    /// Em quais combatentes uma AÇÃO age (eixo da composição — ver ADR-composicao-de-acoes §5.2).
+    /// Separado do TipoLista da habilidade (que manda no menu de alvo). O interpretador resolve
+    /// o conjunto por ação e filtra pelo EstadoAlvo da própria ação, na hora de executar.
+    /// - AlvosResolvidos: herda os alvos que a habilidade selecionou.
+    /// - TodosAliados: o time do atacante (INCLUI o próprio atacante).
+    /// - TodosInimigos: o time oposto.
+    /// - ProprioAtacante: só o conjurador.
+    /// </summary>
+    enum Escopo { AlvosResolvidos, TodosAliados, TodosInimigos, ProprioAtacante }
+
+    /// <summary>
     /// Define a semântica do evento de ataque, usada pelo CombateService
     /// para decidir quantas vezes disparar as passivas reativas do atacante (DepoisDeAtacar).
     /// 

@@ -35,19 +35,46 @@ namespace ApostlesWar
         protected virtual List<Acao> Acoes => new();
 
         /// <summary>
-        /// Interpretador default: roda cada Acao sobre os alvos resolvidos, na ordem declarada,
-        /// agregando os EventoDano das ações de dano (contrato preservado — reações-do-atacante
-        /// e exibição consomem a lista). Habilidades bespoke sobrescrevem este Ativar; as duas
-        /// formas convivem durante a migração (Strangler).
+        /// Interpretador default (o MOTOR — ver ADR-composicao-de-acoes §3): roda cada Acao na
+        /// ordem declarada, resolvendo o Escopo de cada uma e filtrando pelo EstadoAlvo NO
+        /// MOMENTO em que ela executa. É "ação-por-fora": uma ação termina toda a sua passada
+        /// antes da próxima começar — é isso que faz o dano agregar (o eventos já está completo
+        /// quando uma ação seguinte o lê) e que faz uma ação pegar o estado que a anterior
+        /// deixou (revive → cura os revividos). Habilidades bespoke sobrescrevem este Ativar; as
+        /// duas formas convivem durante a migração (Strangler).
+        ///
+        /// A resolução dos AlvosResolvidos (o pick + extras) ainda usa o EstadoAlvo da HABILIDADE
+        /// — é o que alimenta o menu de alvo. Cada ação re-filtra o seu conjunto pelo EstadoAlvo
+        /// DELA na execução. A derivação do pick a partir das ações (§8.2) fica pra depois.
         /// </summary>
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             var eventos = new List<EventoDano>();
-            var acoes = Acoes;
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-                foreach (var acao in acoes)
-                    acao.Executar(ctx.Atacante, a, eventos);
+            var alvosResolvidos = ResolverAlvos(alvo, ObterListaPrincipal(ctx));
+            foreach (var acao in Acoes)
+                foreach (Combate combatente in ResolverEscopo(acao, alvosResolvidos, ctx))
+                    acao.Executar(ctx.Atacante, combatente, eventos);
             return eventos;
+        }
+
+        /// <summary>
+        /// Monta o conjunto de combatentes que uma ação atinge: pega a lista do Escopo dela e
+        /// filtra pelo EstadoAlvo dela, avaliado AGORA (não na resolução). Snapshot (ToList) pra
+        /// não iterar uma coleção que a própria ação pode alterar (ex: reviver muda quem é vivo).
+        /// </summary>
+        private List<Combate> ResolverEscopo(Acao acao, List<Combate> resolvidos, ContextoCombate ctx)
+        {
+            IEnumerable<Combate> conjunto = acao.Escopo switch
+            {
+                Escopo.AlvosResolvidos => resolvidos,
+                Escopo.TodosAliados => ctx.Aliados,
+                Escopo.TodosInimigos => ctx.Inimigos,
+                Escopo.ProprioAtacante => new List<Combate> { ctx.Atacante },
+                _ => resolvidos,
+            };
+            return conjunto
+                .Where(c => acao.EstadoAlvo == EstadoAlvo.Mortos ? !c.EstaVivo() : c.EstaVivo())
+                .ToList();
         }
 
         /// <summary>

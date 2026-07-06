@@ -1,20 +1,31 @@
 namespace ApostlesWar
 {
     /// <summary>
-    /// Bloco de composição de uma habilidade — a operação que ela executa sobre um alvo.
-    /// Uma HabilidadeAtiva de "Balde 1" (que só aplica uma lista fixa de efeitos) declara
-    /// suas Acoes em vez de sobrescrever Ativar; o interpretador default
-    /// (HabilidadeAtiva.Ativar) roda cada ação sobre os alvos resolvidos, na ordem declarada.
+    /// Bloco de composição de uma habilidade — uma operação (Dano/Cura/AplicarBuff/...) sobre
+    /// um conjunto de combatentes. A habilidade declara uma LISTA de Ações; o interpretador
+    /// (HabilidadeAtiva.Ativar) roda cada uma na ordem, resolvendo o Escopo e filtrando pelo
+    /// EstadoAlvo NO MOMENTO em que a ação executa (ver ADR-composicao-de-acoes §3).
     ///
-    /// Escopo por ação (aliados/inimigos/próprio) e ações que agregam entre alvos entram
-    /// quando uma habilidade migrada precisar — ver ADR-composicao-de-acoes.md §3.2/§6.
-    /// Por ora a ação recebe UM alvo já resolvido; habilidades bespoke seguem no Ativar.
+    /// Cada ação carrega dois eixos:
+    /// - Escopo: em quais combatentes ela cai (alvos resolvidos / aliados / inimigos / próprio).
+    /// - EstadoAlvo: vivos ou mortos, avaliado na execução — é isso que faz uma ação pegar os
+    ///   recém-revividos (Vivos) ou os recém-mortos (Mortos) da ação anterior, sem condicional.
     /// </summary>
     abstract class Acao
     {
+        public Escopo Escopo { get; }
+        public EstadoAlvo EstadoAlvo { get; }
+
+        protected Acao(Escopo escopo, EstadoAlvo estadoAlvo)
+        {
+            Escopo = escopo;
+            EstadoAlvo = estadoAlvo;
+        }
+
         /// <summary>
-        /// Executa a ação sobre um alvo resolvido. Ações que causam dano acrescentam o
-        /// EventoDano produzido à lista (consumida pelas reações-do-atacante e pela exibição).
+        /// Executa a ação sobre UM combatente já resolvido (escopo + estado filtrados pelo
+        /// interpretador). Ações que causam dano acrescentam o EventoDano à lista — consumida
+        /// pelas reações-do-atacante e pela exibição.
         /// </summary>
         public abstract void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos);
     }

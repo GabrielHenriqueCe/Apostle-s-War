@@ -1,7 +1,9 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using v1_Apostle_s_War.Skills.Debuffs;
 namespace v1_Apostle_s_War.Skills.Ativas
 {
+    // Piloto do motor (ADR-composicao-de-acoes): valida AplicarDebuff fora do Mago —
+    // aplica Preso (2t) no inimigo selecionado.
     class Prender : HabilidadeAtiva
     {
         public Prender() : base("Prender", "⛓️", 4, "Inimigo pula os próximos 2 turnos.") { }
@@ -10,11 +12,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
         public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+
+        protected override List<Acao> Acoes => new()
         {
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-                AplicarDebuff(a, new Preso(turnos: 2));
-            return SemDano();
-        }
+            new AplicarDebuff(() => new Preso(turnos: 2)),
+        };
     }
 }

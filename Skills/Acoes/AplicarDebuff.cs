@@ -11,7 +11,8 @@ namespace ApostlesWar
     {
         private readonly Func<Debuff> _fabrica;
 
-        public AplicarDebuff(Func<Debuff> fabrica) => _fabrica = fabrica;
+        public AplicarDebuff(Func<Debuff> fabrica, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
+            : base(escopo, estadoAlvo) => _fabrica = fabrica;
 
         public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
             => _fabrica().Aplicar(alvo);

@@ -1,7 +1,9 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using v1_Apostle_s_War.Skills.Buffs;
 namespace v1_Apostle_s_War.Skills.Ativas
 {
+    // Piloto do motor (ADR-composicao-de-acoes): valida ESCOPO PRÓPRIO — aplica Intocável em si
+    // (ProprioAtacante) e depois ataca todos os inimigos. A ordem da lista preserva "buff → ataca".
     class Furtividade : HabilidadeAtiva
     {
         public Furtividade() : base("Furtividade", "🕳️", 4,
@@ -13,14 +15,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
         public override TipoAtaque TipoAtaque => TipoAtaque.AreaDeEfeito;
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        protected override List<Acao> Acoes => new()
         {
-            AplicarBuff(ctx.Atacante, new Intocavel(turnos: 2));
-
-            var resultados = new List<EventoDano>();
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-                resultados.Add(AplicarDano(ctx.Atacante, a, 1.0));
-            return resultados;
-        }
+            new AplicarBuff(() => new Intocavel(turnos: 2), Escopo.ProprioAtacante),
+            new Dano(1.0),
+        };
     }
 }

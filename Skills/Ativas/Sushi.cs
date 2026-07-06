@@ -1,6 +1,8 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 namespace v1_Apostle_s_War.Skills.Ativas
 {
+    // Piloto do motor (ADR-composicao-de-acoes): valida o fragmento de VALOR — cura 30% do HP
+    // máximo de cada aliado (Valor.PorHP) sobre o escopo TodosAliados (inclui o próprio).
     class Sushi : HabilidadeAtiva
     {
         public Sushi() : base("Sushi", "🍣", 4, "Cura todos os aliados em 30% do HP máximo.") { }
@@ -9,11 +11,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Aliados;
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
         public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+
+        protected override List<Acao> Acoes => new()
         {
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-                AplicarCura(a, 0.30);
-            return SemDano();
-        }
+            new Cura(Valor.PorHP(0.30), Escopo.TodosAliados),
+        };
     }
 }

@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
 using v1_Apostle_s_War.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace v1_Apostle_s_War.Champs.Reino
 {
     class PassivaPiromancer : HabilidadePassiva
     {

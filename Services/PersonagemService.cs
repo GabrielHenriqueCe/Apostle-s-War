@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using v1_Apostle_s_War.Champs.Reino;
 using v1_Apostle_s_War.Skills.Ativas;
 using v1_Apostle_s_War.Skills.Passivas;
 
@@ -46,10 +47,8 @@ namespace v1_Apostle_s_War.Services
             new Kunai(),
             new Sorrateiro()),
 
-            new Personagem(3, Faccao.Reino, "Mago", "🧙", 1000, 280, 120,
-            new BolaDeFogo(),
-            new Incendio(),
-            new PassivaPiromancer()),
+            // Champ migrado pra forma final (Champs/Reino/Mago/) — o arquivo do champ é a view.
+            Mago.Definir(),
 
             new Personagem(4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200,
             new Democracia(),

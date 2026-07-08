@@ -33,7 +33,7 @@
 
     /// <summary>
     /// Declaração de um contra-ataque: qual habilidade usar e contra quem.
-    /// A reação que declara (ContraAtaque, PassivaOperario) escolhe a Habilidade
+    /// A reação que declara (ContraAtaque, InstintoDoOperario) escolhe a Habilidade
     /// (A1 por padrão, Marretada no caso do Operário); o CombateService a
     /// executa polimorficamente via IAtivavelComNatureza, sem saber qual skill é.
     /// </summary>

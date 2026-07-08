@@ -10,9 +10,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// da base, então o sistema velho (ExecutarPassivasReativas) a ignora.
     /// (Por-hit por enquanto; "1x por agressor por turno" vem com o conceito de Turno.)
     /// </summary>
-    class PassivaZumbi : HabilidadePassiva, IReageAoSerAtacado
+    class PutrefacaoContagiosa : HabilidadePassiva, IReageAoSerAtacado
     {
-        public PassivaZumbi() : base("Putrefação Contagiosa", "🧟", 0,
+        public PutrefacaoContagiosa() : base("Putrefação Contagiosa", "🧟", 0,
             "Ao ser atacado, aplica Veneno no atacante.")
         { }
 

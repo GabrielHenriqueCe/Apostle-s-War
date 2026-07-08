@@ -8,12 +8,12 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Início do turno: se tem Queima, remove (cleanse) e aplica CuraContinua 2t.
     /// Só age se havia Queima — "o calor da queima vira gelo derretendo e curando".
     /// </summary>
-    class PassivaBonecoDeNeve : HabilidadePassiva, IReageAoInicioTurno
+    class Derretendo : HabilidadePassiva, IReageAoInicioTurno
     {
         private const double CuraPercentual = 0.10;
         private const int TurnosCura = 2;
 
-        public PassivaBonecoDeNeve() : base("Derretendo", "❄️", 0,
+        public Derretendo() : base("Derretendo", "❄️", 0,
             "Início do turno: se tem Queima, remove e aplica Cura Contínua (2t).")
         { }
 

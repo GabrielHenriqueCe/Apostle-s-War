@@ -19,7 +19,7 @@ namespace v1_Apostle_s_War.Skills.Ativas
         }
 
         /// <summary>
-        /// Entrada usada como contra-ataque (PassivaOperario busca a Marretada
+        /// Entrada usada como contra-ataque (InstintoDoOperario busca a Marretada
         /// do portador). Alvo já é fixo (o agressor) — não passa por ResolverAlvos.
         /// </summary>
         public EventoDano AtivarComNatureza(Combate atacante, Combate alvo, NaturezaDano natureza)

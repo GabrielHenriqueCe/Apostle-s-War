@@ -7,9 +7,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Imune a Veneno e Queima durante todo o combate. Capacidade direta
     /// (IBloqueiaStatus) — a passiva É o bloqueio, sem buff de contorno.
     /// </summary>
-    class PassivaDragao : HabilidadePassiva, IBloqueiaStatus
+    class PeleDeDragao : HabilidadePassiva, IBloqueiaStatus
     {
-        public PassivaDragao() : base("Pele de Dragão", "🐉", 0,
+        public PeleDeDragao() : base("Pele de Dragão", "🐉", 0,
             "Imune a Veneno e Queima.")
         { }
 

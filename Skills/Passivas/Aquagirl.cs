@@ -7,11 +7,11 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// (IModificaDanoRecebido) — não usa mais buff de contorno (ReducaoDanoFixo).
     /// Processa antes do Escudo/BloqueioTotal (ver Combate.ReceberDano).
     /// </summary>
-    class PassivaSereia : HabilidadePassiva, IModificaDanoRecebido
+    class Aquagirl : HabilidadePassiva, IModificaDanoRecebido
     {
         private const double PercentualReducao = 0.15;
 
-        public PassivaSereia() : base("Aquagirl", "🧜‍♀️", 0,
+        public Aquagirl() : base("Aquagirl", "🧜‍♀️", 0,
             "Recebe 15% menos dano.")
         { }
 

@@ -8,12 +8,12 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Migrada para o modelo de reação (IReageAoSerAtacado). Só declara mensagem
     /// quando dispara.
     /// </summary>
-    class PassivaTRex : HabilidadePassiva, IReageAoSerAtacado
+    class PeleGrossa : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChanceReducao = 0.25;
         private static readonly Random _random = new Random();
 
-        public PassivaTRex() : base("Pele Grossa", "🦖", 0,
+        public PeleGrossa() : base("Pele Grossa", "🦖", 0,
             "25% de chance de reduzir DEF do atacante ao ser atacado.")
         { }
 

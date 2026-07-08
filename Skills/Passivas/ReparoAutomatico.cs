@@ -8,9 +8,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Robô). Reage 1x por ataque (IReageAoAtacar segue o TipoAtaque). Aliados = time
     /// do portador (vem do ContextoReacao).
     /// </summary>
-    class PassivaRobo : HabilidadePassiva, IReageAoAtacar
+    class ReparoAutomatico : HabilidadePassiva, IReageAoAtacar
     {
-        public PassivaRobo() : base("Reparo Automático", "🔧", 0,
+        public ReparoAutomatico() : base("Reparo Automático", "🔧", 0,
             "Ao atacar, aplica Cura Contínua no aliado com menor HP.")
         { }
 

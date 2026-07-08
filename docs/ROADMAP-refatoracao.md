@@ -52,8 +52,10 @@ velho aposentado). O que resta:
 4. **Buff-permanente vs passiva-pura** — ✅ **FEITO** (#111/#112): 6 passivas puras + Fantasma
    (Removivel=false). Ver seção própria (marcada concluída).
 5. **Composição de Ações + Motor de Habilidades** — habilidade vira DADO (lista de Ações) rodada
-   por um interpretador único; **zero `Ativar` override**. Piloto per-alvo FEITO (#115); o MOTOR
-   (loop-flip + escopo/estado por ação + `AcaoSobreConjunto`) está desenhado, falta implementar.
+   por um interpretador único; **zero `Ativar` override**. Piloto per-alvo FEITO (#115); **MOTOR
+   FEITO (#116)** — loop-flip + Escopo/EstadoAlvo por ação + fragmentos de Valor, verificado em
+   jogo. Forma-construtor + champ-como-arquivo (Mago piloto) FEITOS. Agora: **sweep por facção**
+   (Nível A fundido — cada facção migra direto pra forma final, uma passada só).
    Ver **ADR-composicao-de-acoes.md** (revisado). Predecessor do Rebalanceamento.
 6. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria,
    pós-composição.
@@ -62,12 +64,32 @@ A **unificação dos mecanismos de ignorar** é um fio transversal já começado
 
 ---
 
-## Composição de Ações + Motor de Habilidades (MOTOR DESENHADO — PRÓXIMO)
+## Composição de Ações + Motor de Habilidades (MOTOR FEITO — SWEEP POR FACÇÃO)
 
-**Status:** MOTOR DESENHADO. Ver **ADR-composicao-de-acoes.md** (revisado jul/2026, com o
-motor mapeado lendo o roster real). É a "Auditoria das ativas" com dor real: ~70% das ativas
+**Status:** MOTOR IMPLEMENTADO (#116, verificado em jogo: Furtividade/Sushi/Prender + regressão
+do Mago) e **forma-construtor + champ-como-arquivo FEITOS** (Mago piloto em `Champs/Reino/Mago/`).
+Ver **ADR-composicao-de-acoes.md**. É a "Auditoria das ativas" com dor real: ~70% das ativas
 são só dado (loop + lista fixa de efeitos), reinventando boilerplate. Predecessor do
 Rebalanceamento (mexer em número/efeito vira editar dado, não 74 classes).
+
+**Decisões novas (jul/2026, pós-motor):**
+- **Fusão do Nível A no sweep:** cada PR de facção migra os champs direto pra FORMA FINAL
+  (pasta `Champs/<Faccao>/<Champ>/`, habilidades como métodos `static HabilidadeAtiva X() =>
+  new(...)`, passiva movida junto, classes velhas deletadas, linha do `PersonagemService` vira
+  `Champ.Definir()`). Uma passada por champ em vez de duas — e a VIEW do champ chega facção a
+  facção. O `PersonagemService` encolhe até virar o `Roster`.
+- **Família do revive mapeada (7 clientes de `Reviver`):** Nigiri, Céu, Tecnology, AnjoCaído,
+  DocesDeAbobora (revive SÓ 1), Circo (Intocável exceto self) e Atlantis (Intocável só nos
+  revividos — pipeline, segue 1 cliente, bespoke). `Reviver` precisa de percentualHP + quantos.
+  Todos os 7 são os únicos usuários de `EstadoAlvo.Ambos` (+ 1 check no CombateService) — o
+  `Ambos` morre quando o 7º migrar.
+- **`Escopo.OutrosAliados` tem 2 clientes** (OssoDuroDeRoer + Circo) — entra no vocabulário
+  quando o 1º migrar.
+- **Testes do motor ANTES do sweep** (meio-termo do "xUnit depois"): ~10 testes só do
+  interpretador (escopo, estado-na-execução, ordem, agregação, Aleatorio com duplicata) —
+  o motor é infra load-bearing de 74 habilidades; verificação manual por facção não escala.
+- **Regra de processo:** todo PR de código que fecha um marco carrega o bump do ROADMAP/ADR
+  NO MESMO DIFF. Chega de PR de docs correndo atrás (drift aconteceu em #115 e #116).
 
 **Núcleo:** um interpretador ÚNICO (`HabilidadeAtiva.Ativar`) roda uma lista de **Ações**;
 **nenhuma habilidade sobrescreve `Ativar`**. Três níveis, todos pelo motor: (1) vocabulário
@@ -92,11 +114,13 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
 - Invariantes: `TipoAtaque` alimenta dispatch de passivas-atacante; o interpretador agrega os
   `EventoDano` das ações de dano.
 
-**Sequência:** #115 = piloto **per-alvo** do Mago (BolaDeFogo, Incendio) — FEITO, mas foi o
-formato per-alvo, NÃO o motor. Próximo = o motor (loop-flip + escopo/estado), depois
-vocabulário incremental, depois `AcaoSobreConjunto` (Putridão), depois o pick do menu (lado
-UI). **Tema separado:** champ-como-dado + pasta-por-champ (Champs/Faccao/Champ/) — o arquivo
-do champ vira a VIEW (lê habilidades/descrições sem rodar o jogo).
+**Sequência:** #115 piloto per-alvo ✅ → #116 motor (loop-flip) ✅ → forma-construtor + Mago
+como champ-arquivo ✅ → **testes do motor** → **sweep por facção na forma final** (Humanos →
+Reino → LadoSombrio [estreia `AcaoSobreConjunto`/Putridão + `Explodir`] → Tecnológicos [Barata,
+estado/ao-matar] → Folclore [Quebrar, `OutrosAliados`] → Místicos [Atlantis bespoke] → Especial
+→ Decaídos [AnjoCaído, `Explodir`/Inferno] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do
+menu (lado UI, §8.2) quando o `Ambos` morrer. Quando uma facção ESTREIA um mecanismo, o champ é
+momento de design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---
 

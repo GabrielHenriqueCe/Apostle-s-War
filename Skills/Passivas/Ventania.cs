@@ -6,9 +6,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// <summary>
     /// Todo início de turno, aplica BuffAtaque 25% por 2 turnos (renova sempre).
     /// </summary>
-    class PassivaTengu : HabilidadePassiva, IReageAoInicioTurno
+    class Ventania : HabilidadePassiva, IReageAoInicioTurno
     {
-        public PassivaTengu() : base("Ventania", "👺", 0,
+        public Ventania() : base("Ventania", "👺", 0,
             "Todo turno: +25% ATK por 2 turnos.")
         { }
 

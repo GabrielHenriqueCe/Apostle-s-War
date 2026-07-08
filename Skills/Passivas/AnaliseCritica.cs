@@ -7,9 +7,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// (removendo os que expiram). Migrada para o modelo de reação
     /// (IReageAoSerAtacado). Só declara mensagem se havia buff para reduzir.
     /// </summary>
-    class PassivaCientista : HabilidadePassiva, IReageAoSerAtacado
+    class AnaliseCritica : HabilidadePassiva, IReageAoSerAtacado
     {
-        public PassivaCientista() : base("Análise Crítica", "🔬", 0,
+        public AnaliseCritica() : base("Análise Crítica", "🔬", 0,
             "Ao ser atacado, reduz em 1t a duração dos benefícios do atacante.")
         { }
 

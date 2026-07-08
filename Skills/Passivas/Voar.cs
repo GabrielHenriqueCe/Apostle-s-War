@@ -7,9 +7,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Ao matar um inimigo, aplica BloqueioTotal 3t em si mesma. Migrada para
     /// IReageAoMatar. O buff vai no PORTADOR (a Fada).
     /// </summary>
-    class PassivaFada : HabilidadePassiva, IReageAoMatar
+    class Voar : HabilidadePassiva, IReageAoMatar
     {
-        public PassivaFada() : base("Voar", "🧚", 0,
+        public Voar() : base("Voar", "🧚", 0,
             "Após matar, fica imune a dano por 3 turnos.")
         { }
 

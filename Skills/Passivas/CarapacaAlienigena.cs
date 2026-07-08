@@ -7,9 +7,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Ao receber dano (HP perdido), aplica Escudo de 5% do HP máximo por 1 turno em si.
     /// Reage via IReageAoReceberDano (só dispara com dano > 0).
     /// </summary>
-    class PassivaAlien : HabilidadePassiva, IReageAoReceberDano
+    class CarapacaAlienigena : HabilidadePassiva, IReageAoReceberDano
     {
-        public PassivaAlien() : base("Carapaça Alienígena", "👽", 0,
+        public CarapacaAlienigena() : base("Carapaça Alienígena", "👽", 0,
             "Ao receber dano, ganha Escudo de 5% HP por 1 turno.")
         { }
 

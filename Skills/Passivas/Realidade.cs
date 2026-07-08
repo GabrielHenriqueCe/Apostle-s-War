@@ -7,9 +7,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Todo início de turno, aplica RefletirDano 2t em si mesmo (renova sempre).
     /// Se ImpedirBeneficios estiver ativo, falha silenciosamente.
     /// </summary>
-    class PassivaGenio : HabilidadePassiva, IReageAoInicioTurno
+    class Realidade : HabilidadePassiva, IReageAoInicioTurno
     {
-        public PassivaGenio() : base("Realidade", "🔮", 0,
+        public Realidade() : base("Realidade", "🔮", 0,
             "Todo turno aplica Refletir Dano em si mesmo.")
         { }
 

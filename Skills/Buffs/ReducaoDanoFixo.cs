@@ -4,7 +4,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
 {
     /// <summary>
     /// Buff que reduz o dano recebido em um percentual fixo ("Couraça"). A Sereia
-    /// migrou pra passiva-pura (PassivaSereia implementa IModificaDanoRecebido
+    /// migrou pra passiva-pura (Aquagirl implementa IModificaDanoRecebido
     /// direto); este buff fica disponível pra reuso em habilidades ativas futuras
     /// (Rebalanceamento).
     ///

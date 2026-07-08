@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
 using v1_Apostle_s_War.Skills.Buffs;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace v1_Apostle_s_War.Champs.Humanos
 {
     /// <summary>
     /// Ao receber um golpe CRÍTICO, todos os aliados ganham 15% de reflexo de dano

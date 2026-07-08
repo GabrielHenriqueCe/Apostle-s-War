@@ -117,8 +117,9 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
   `EventoDano` das ações de dano.
 
 **Sequência:** #115 piloto per-alvo ✅ → #116 motor (loop-flip) ✅ → #117 forma-construtor +
-Mago champ-arquivo + rename passivas ✅ → testes do motor ✅ → **sweep por facção na forma
-final** (Humanos →
+Mago champ-arquivo + rename passivas ✅ → #118 testes do motor ✅ → **Humanos ✅** (4 champs na
+forma final em `Champs/Humanos/`; `Reviver` nasceu no Nigiri — 1º da família dos 7; Marretada
+é a 1ª híbrida `.Ativa.cs`; o Nigiri deixou de usar `Ambos`) → **sweep segue** (Reino →
 Reino → LadoSombrio [estreia `AcaoSobreConjunto`/Putridão + `Explodir`] → Tecnológicos [Barata,
 estado/ao-matar] → Folclore [Quebrar, `OutrosAliados`] → Místicos [Atlantis bespoke] → Especial
 → Decaídos [AnjoCaído, `Explodir`/Inferno] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do

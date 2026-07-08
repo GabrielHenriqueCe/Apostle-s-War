@@ -85,9 +85,11 @@ Rebalanceamento (mexer em número/efeito vira editar dado, não 74 classes).
   `Ambos` morre quando o 7º migrar.
 - **`Escopo.OutrosAliados` tem 2 clientes** (OssoDuroDeRoer + Circo) — entra no vocabulário
   quando o 1º migrar.
-- **Testes do motor ANTES do sweep** (meio-termo do "xUnit depois"): ~10 testes só do
-  interpretador (escopo, estado-na-execução, ordem, agregação, Aleatorio com duplicata) —
-  o motor é infra load-bearing de 74 habilidades; verificação manual por facção não escala.
+- **Testes do motor ANTES do sweep — ✅ FEITO** (projeto `Tests/`, xUnit, 10 testes verdes):
+  escopo (próprio/todos-inimigos/todos-aliados), EstadoAlvo na execução (recém-morto pulado /
+  Mortos pega recém-morto / Ambos sem filtro), agregação+ordem (PorDanoCausado lê o eventos
+  completo), fragmento PorHP com cap, Aleatorio com duplicata, Strangler (Democracia override).
+  Rede de regressão de cada PR de facção: `dotnet test`. O "xUnit do JOGO" continua pra depois.
 - **Regra de processo:** todo PR de código que fecha um marco carrega o bump do ROADMAP/ADR
   NO MESMO DIFF. Chega de PR de docs correndo atrás (drift aconteceu em #115 e #116).
 
@@ -114,8 +116,9 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
 - Invariantes: `TipoAtaque` alimenta dispatch de passivas-atacante; o interpretador agrega os
   `EventoDano` das ações de dano.
 
-**Sequência:** #115 piloto per-alvo ✅ → #116 motor (loop-flip) ✅ → forma-construtor + Mago
-como champ-arquivo ✅ → **testes do motor** → **sweep por facção na forma final** (Humanos →
+**Sequência:** #115 piloto per-alvo ✅ → #116 motor (loop-flip) ✅ → #117 forma-construtor +
+Mago champ-arquivo + rename passivas ✅ → testes do motor ✅ → **sweep por facção na forma
+final** (Humanos →
 Reino → LadoSombrio [estreia `AcaoSobreConjunto`/Putridão + `Explodir`] → Tecnológicos [Barata,
 estado/ao-matar] → Folclore [Quebrar, `OutrosAliados`] → Místicos [Atlantis bespoke] → Especial
 → Decaídos [AnjoCaído, `Explodir`/Inferno] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do

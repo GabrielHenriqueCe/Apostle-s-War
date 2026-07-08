@@ -10,10 +10,17 @@
 
   <ItemGroup>
     <Compile Remove="v1-Apostle-s-War.cs" />
+    <!-- O csproj mora na raiz e inclui **/*.cs por default — os testes são do projeto Tests. -->
+    <Compile Remove="Tests\**" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GHUtils\GHUtils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- As classes do jogo são internal; os testes do motor (Tests/) precisam enxergá-las. -->
+    <InternalsVisibleTo Include="Tests" />
   </ItemGroup>
 
 </Project>

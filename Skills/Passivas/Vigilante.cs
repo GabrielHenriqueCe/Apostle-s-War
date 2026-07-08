@@ -10,9 +10,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// então se o Herói também tiver o buff (ex: do Dragão), os dois não somam — o
     /// primeiro registra o agressor, o segundo vê que já contra-atacou.
     /// </summary>
-    class PassivaHeroi : HabilidadePassiva, IReageAoSerAtacado
+    class Vigilante : HabilidadePassiva, IReageAoSerAtacado
     {
-        public PassivaHeroi() : base("Vigilante", "🦸", 0,
+        public Vigilante() : base("Vigilante", "🦸", 0,
             "Contra-ataca sempre que é atacado.")
         { }
 

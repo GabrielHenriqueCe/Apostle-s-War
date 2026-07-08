@@ -6,11 +6,11 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Recupera 5% HP no início do turno, permanentemente. Capacidade direta
     /// (IReageAoInicioTurno) — não usa mais buff de contorno (CuraContinua).
     /// </summary>
-    class PassivaAnjo : HabilidadePassiva, IReageAoInicioTurno
+    class Bencao : HabilidadePassiva, IReageAoInicioTurno
     {
         private const double PercentualCura = 0.05;
 
-        public PassivaAnjo() : base("Bênção", "😇", 0,
+        public Bencao() : base("Bênção", "😇", 0,
             "Recupera 5% HP por turno permanentemente.")
         { }
 

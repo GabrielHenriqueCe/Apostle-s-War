@@ -9,9 +9,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// importa é o crítico, que já vem correto do EventoDano: golpe sem dano não é
     /// crítico). Aliados = time do portador (vem do ContextoReacao).
     /// </summary>
-    class PassivaSushiman : HabilidadePassiva, IReageAoSerAtacado
+    class CodigoDoSushi : HabilidadePassiva, IReageAoSerAtacado
     {
-        public PassivaSushiman() : base("Código do Sushi", "🥢", 0,
+        public CodigoDoSushi() : base("Código do Sushi", "🥢", 0,
             "Ao receber crítico, todos os aliados ganham 15% de reflexo de dano por 2 turnos.")
         { }
 

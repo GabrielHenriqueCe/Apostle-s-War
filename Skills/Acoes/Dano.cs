@@ -2,7 +2,7 @@ namespace ApostlesWar
 {
     /// <summary>
     /// Causa dano ao alvo com um multiplicador de ATK. O multiplicador pode depender do
-    /// atacante e do alvo (ex: bônus da PassivaPiromancer contra alvo com Queima) — por isso
+    /// atacante e do alvo (ex: bônus da Piromancer contra alvo com Queima) — por isso
     /// aceita uma função. Habilidades de multiplicador fixo usam a sobrecarga com double.
     ///
     /// NOTA (ADR-composicao-de-acoes §12): o modificador do atacante (Piromancer) é passado à

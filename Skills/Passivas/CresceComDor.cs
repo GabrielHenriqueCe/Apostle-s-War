@@ -8,7 +8,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// sobre HPMaximoInicial (consistente com Queima/Maldição). Migrada para o
     /// modelo de reação (IReageAoSerAtacado). O ganho vai no PORTADOR (si mesmo).
     /// </summary>
-    class PassivaDiabo : HabilidadePassiva, IReageAoSerAtacado
+    class CresceComDor : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double GanhoPorHit = 0.05;
         private const double Cap = 0.25;
@@ -18,7 +18,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
             public double TotalAumentado;
         }
 
-        public PassivaDiabo() : base("Cresce com Dor", "😈", 0,
+        public CresceComDor() : base("Cresce com Dor", "😈", 0,
             "Ao ser atacado, +5% HP máximo (até 25%).")
         { }
 

@@ -3,9 +3,9 @@ using v1_Apostle_s_War.Skills.Debuffs;
 
 namespace v1_Apostle_s_War.Champs.Reino
 {
-    class PassivaPiromancer : HabilidadePassiva
+    class Piromancer : HabilidadePassiva
     {
-        public PassivaPiromancer() : base("Piromancer", "🪄", 0,
+        public Piromancer() : base("Piromancer", "🪄", 0,
             "Causa 25% mais dano contra alvos com Queima.")
         { }
 
@@ -17,7 +17,7 @@ namespace v1_Apostle_s_War.Champs.Reino
         /// </summary>
         public static double MultExtra(Combate atacante, Combate alvo)
         {
-            bool temPassiva = atacante.Personagem.Habilidades.OfType<PassivaPiromancer>().Any();
+            bool temPassiva = atacante.Personagem.Habilidades.OfType<Piromancer>().Any();
             bool alvComQueima = alvo.StatusAtivos.Any(s => s is Queima);
             return (temPassiva && alvComQueima) ? 1.25 : 1.0;
         }

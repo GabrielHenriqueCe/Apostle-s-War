@@ -7,9 +7,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Atacar um inimigo Preso adiciona +1 turno ao debuff. Migrada para IReagePorAtaque
     /// (por alvo atingido). Só declara mensagem se o alvo tinha Preso.
     /// </summary>
-    class PassivaPolicial : HabilidadePassiva, IReagePorAtaque
+    class AlgemasReforcadas : HabilidadePassiva, IReagePorAtaque
     {
-        public PassivaPolicial() : base("Algemas Reforçadas", "🔗", 0,
+        public AlgemasReforcadas() : base("Algemas Reforçadas", "🔗", 0,
             "Atacar um inimigo Preso adiciona +1 turno ao debuff.")
         { }
 

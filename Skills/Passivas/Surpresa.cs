@@ -8,12 +8,12 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// o modelo de reação (IReageAoSerAtacado). "Presente surpresa que te prende."
     /// Só declara mensagem quando dispara.
     /// </summary>
-    class PassivaPapaiNoel : HabilidadePassiva, IReageAoSerAtacado
+    class Surpresa : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChancePreso = 0.10;
         private static readonly Random _random = new Random();
 
-        public PassivaPapaiNoel() : base("Surpresa", "🎁", 0,
+        public Surpresa() : base("Surpresa", "🎁", 0,
             "10% de chance de Prender o atacante ao ser atacado.")
         { }
 

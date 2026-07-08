@@ -8,7 +8,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
     /// e Queima (1 stack). Sem CD — dispara em cada hit. Reage via
     /// IReageAoSerAtacado (dispara mesmo com dano 0 — reage ao ATO de ser atacado,
     /// não ao dano: o espinho fere quem encosta mesmo se o golpe foi bloqueado).
-    /// Usado pela PassivaElfo (aplicado permanente via IPassivaInicial).
+    /// Usado pela Espinhos (aplicado permanente via IPassivaInicial).
     /// </summary>
     class EspinhosVenenosos : Buff, IReageAoSerAtacado
     {

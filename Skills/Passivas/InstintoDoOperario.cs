@@ -10,11 +10,11 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Contraparte); o CombateService executa via IAtivavelComNatureza e exibe —
     /// mesmo fluxo do ContraAtaque, só troca A1 por Marretada.
     /// </summary>
-    class PassivaOperario : HabilidadePassiva, IReageAoSerAtacado
+    class InstintoDoOperario : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double Chance = 0.10;
 
-        public PassivaOperario() : base("Instinto do Operário", "🛠️", 0,
+        public InstintoDoOperario() : base("Instinto do Operário", "🛠️", 0,
             "10% de chance de contra-atacar com Marretada ao ser atacado.")
         { }
 

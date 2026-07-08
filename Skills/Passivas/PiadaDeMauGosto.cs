@@ -8,9 +8,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// modelo de reação (IReageAoSerAtacado).
     /// (Por-hit por enquanto; "1x por agressor por turno" vem com o Turno.)
     /// </summary>
-    class PassivaPalhaco : HabilidadePassiva, IReageAoSerAtacado
+    class PiadaDeMauGosto : HabilidadePassiva, IReageAoSerAtacado
     {
-        public PassivaPalhaco() : base("Piada de Mau Gosto", "🤡", 0,
+        public PiadaDeMauGosto() : base("Piada de Mau Gosto", "🤡", 0,
             "Ao ser atacado, amaldiçoa o atacante.")
         { }
 

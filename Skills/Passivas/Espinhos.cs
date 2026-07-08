@@ -7,9 +7,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Todo início de turno, aplica EspinhosVenenosos 2t (renova sempre). Quem ataca
     /// o Elfo recebe Veneno + Queima enquanto ativo.
     /// </summary>
-    class PassivaElfo : HabilidadePassiva, IReageAoInicioTurno
+    class Espinhos : HabilidadePassiva, IReageAoInicioTurno
     {
-        public PassivaElfo() : base("Espinhos", "🌿", 0,
+        public Espinhos() : base("Espinhos", "🌿", 0,
             "Todo turno: atacantes recebem Veneno e Queima (2t).")
         { }
 

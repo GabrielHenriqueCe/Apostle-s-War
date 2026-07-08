@@ -6,9 +6,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Bloqueia a aplicação de qualquer Debuff no portador. Capacidade direta
     /// (IBloqueiaStatus) — não usa mais buff de contorno (ImunidadeDebuffs).
     /// </summary>
-    class PassivaAbobora : HabilidadePassiva, IBloqueiaStatus
+    class CascaDura : HabilidadePassiva, IBloqueiaStatus
     {
-        public PassivaAbobora() : base("Casca Dura", "🎃", 0,
+        public CascaDura() : base("Casca Dura", "🎃", 0,
             "Imune a maleficios.")
         { }
 

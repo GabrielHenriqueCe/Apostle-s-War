@@ -67,7 +67,7 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Executa um turno completo de um combatente:
         /// - Trigga AoIniciarTurno dos status (Veneno, Queima tickam aqui)
-        /// - Dispara passivas com EventoCombate.InicioDoTurno (PassivaGenio reaplica RefletirDano)
+        /// - Dispara passivas com EventoCombate.InicioDoTurno (Realidade reaplica RefletirDano)
         /// - Se Preso: pula a ação mas avança status e cooldowns
         /// - Senão: executa a ação (a1, habilidade) e processa passivas reativas
         /// - Avança duração de status e cooldowns
@@ -103,7 +103,7 @@ namespace v1_Apostle_s_War.Services
 
         /// <summary>
         /// Dispara o evento InicioDoTurno das passivas via IReageAoInicioTurno (ex:
-        /// PassivaGenio reaplica RefletirDano). Fica no service por ora; reavaliar se
+        /// Realidade reaplica RefletirDano). Fica no service por ora; reavaliar se
         /// o disparo vai para o Turno quando o resto do Turno (reset 1x-por-agressor +
         /// TimeAtualDoTurno) for feito.
         /// O tick dos status já foi disparado por TurnoDoPersonagem.Iniciar().
@@ -322,7 +322,7 @@ namespace v1_Apostle_s_War.Services
         /// <summary>
         /// Dispara as reações do ALVO a um golpe recebido. Ordem: Reflexo/Sangramento
         /// (dano > 0) -> Espinhos/ContraAtaque/Operário (sempre). ContraAtaque e
-        /// PassivaOperario declaram um revide (ResultadoReacao.Revide: Habilidade +
+        /// InstintoDoOperario declaram um revide (ResultadoReacao.Revide: Habilidade +
         /// Alvo); este método o executa via IAtivavelComNatureza e propaga
         /// recursivamente as reações do alvo revidado. O parâmetro profundidade
         /// garante profundidade máxima 1 — só processa Revide na chamada de topo

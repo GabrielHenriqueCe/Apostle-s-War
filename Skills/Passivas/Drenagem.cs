@@ -8,7 +8,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// do alvo. Não tem evento — funciona via interface IIgnoraStatusNoAtaque consultada
     /// pelo Combate.Atacar.
     /// </summary>
-    class PassivaVampiro : HabilidadePassiva, IIgnoraStatusNoAtaque
+    class Drenagem : HabilidadePassiva, IIgnoraStatusNoAtaque
     {
         private static readonly Type[] _tipos = new[]
         {
@@ -16,7 +16,7 @@ namespace v1_Apostle_s_War.Skills.Passivas
             typeof(BloqueioTotal)
         };
 
-        public PassivaVampiro() : base("Drenagem", "🧛", 0,
+        public Drenagem() : base("Drenagem", "🧛", 0,
             "Ataques ignoram Invencível e Bloqueio Total.")
         { }
 

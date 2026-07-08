@@ -6,9 +6,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// <summary>
     /// Aplica Intocavel permanente no portador no início do combate.
     /// </summary>
-    class PassivaFantasma : HabilidadePassiva, IPassivaInicial
+    class Espectral : HabilidadePassiva, IPassivaInicial
     {
-        public PassivaFantasma() : base("Espectral", "👻", 0,
+        public Espectral() : base("Espectral", "👻", 0,
             "Intocável durante todo o combate.")
         { }
 

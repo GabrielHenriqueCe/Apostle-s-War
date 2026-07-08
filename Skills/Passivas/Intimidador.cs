@@ -7,12 +7,12 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Ao ser atacado, 25% de chance de aplicar Medo 1t no atacante. Migrada para
     /// o modelo de reação (IReageAoSerAtacado). Só declara mensagem quando dispara.
     /// </summary>
-    class PassivaOgro : HabilidadePassiva, IReageAoSerAtacado
+    class Intimidador : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChanceMedo = 0.25;
         private static readonly Random _random = new Random();
 
-        public PassivaOgro() : base("Intimidador", "👹", 0,
+        public Intimidador() : base("Intimidador", "👹", 0,
             "25% de chance de aplicar Medo no atacante ao ser atacado.")
         { }
 

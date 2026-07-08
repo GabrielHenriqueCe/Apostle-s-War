@@ -6,11 +6,11 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// Cura 15% do dano causado ao atacar. Capacidade direta (IReageAoCausarDano)
     /// — não usa mais buff de contorno (Sedento).
     /// </summary>
-    class PassivaMorcego : HabilidadePassiva, IReageAoCausarDano
+    class SedentoDeSangue : HabilidadePassiva, IReageAoCausarDano
     {
         private const double PercentualCura = 0.15;
 
-        public PassivaMorcego() : base("Sedento de Sangue", "🦇", 0,
+        public SedentoDeSangue() : base("Sedento de Sangue", "🦇", 0,
             "Cura 15% do dano causado ao atacar.")
         { }
 

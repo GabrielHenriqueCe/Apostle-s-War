@@ -9,9 +9,9 @@ namespace v1_Apostle_s_War.Skills.Passivas
     /// o debuff já está no morto quando a Necromancia/Guarda tentam reviver. O Diabo
     /// (AnjoCaido) remove a Sentença proposital.
     /// </summary>
-    class PassivaVilao : HabilidadePassiva, IReageAoMatar
+    class Sentenca : HabilidadePassiva, IReageAoMatar
     {
-        public PassivaVilao() : base("Sentença", "🦹", 0,
+        public Sentenca() : base("Sentença", "🦹", 0,
             "Inimigos mortos por ele não podem ser ressuscitados.")
         { }
 

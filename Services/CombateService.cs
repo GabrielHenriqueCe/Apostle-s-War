@@ -283,10 +283,15 @@ namespace ApostlesWar.Services
             {
                 // Pick real de alvo aliado (por estado) — antes disso nunca existia,
                 // porque toda habilidade de aliado mirava o time inteiro.
+                // Sem candidato no estado pedido (ex: revive sem mortos): pula o pick —
+                // ResolverAlvos devolve vazio pra ação que herda o alvo, e as demais ações
+                // da habilidade (escopos próprios) rodam normalmente (DocesDeAbobora sem
+                // mortos ainda vale pelo Reflexo).
                 var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(aliados, hab.EstadoAlvo);
-                alvoInicial = atacante is Jogador
-                    ? _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores)
-                    : _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
+                alvoInicial = disponiveis.Count == 0 ? atacante
+                    : atacante is Jogador
+                        ? _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores)
+                        : _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
             }
             else alvoInicial = atacante; // hit-all (NumeroDeAlvos=MaxValue) ou Ambos: a própria habilidade resolve
 

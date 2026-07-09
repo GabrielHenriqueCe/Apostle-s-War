@@ -1,7 +1,8 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Passivas;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.LadoSombrio
 {
     /// <summary>
     /// Aplica Intocavel permanente no portador no início do combate.

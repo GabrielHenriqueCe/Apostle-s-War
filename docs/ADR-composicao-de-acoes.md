@@ -142,12 +142,20 @@ deixaram. É **semanticamente significativo**:
 Reordenar quebra a semântica. Combinado com a avaliação-na-execução (§3.2), é isso que
 absorve a antiga "categoria condicional / ao-matar" para dentro do fluxo normal.
 
-### 3.4 `AcaoSobreConjunto` — a única parede real (agregação cross-alvo)
+### 3.4 `AcaoSobreConjunto` — agregação cross-alvo (CONSTRUÍDA E REMOVIDA — desenho registrado)
 
-Algumas habilidades calculam um valor que **atravessa todos os alvos** (a média da Putridão,
-`soma ÷ contador`). Uma `Acao` per-alvo não enxerga o conjunto todo, e guardar acumulador na
-instância é frágil (ela é reusada entre combates). Então existe um **segundo formato de
-ação**, que recebe o conjunto inteiro de uma vez:
+> **Status (jul/2026):** implementada no sweep do LadoSombrio pra média da Putrefação e
+> REMOVIDA no mesmo sweep — o rebalance de Gabriel trocou a média por "cura 20% de todo o
+> dano causado", que é o fragmento `PorDanoCausado` lendo o `eventos` (a agregação que o
+> loop-flip §3.2 já dá de graça, sem formato novo). Zero clientes → YAGNI. O desenho fica
+> registrado abaixo pra reconstrução barata se uma agregação cross-alvo REAL aparecer
+> (candidata: Atlantis §8.1).
+
+Algumas habilidades calculariam um valor que **atravessa todos os alvos** de um jeito que o
+`eventos` não expressa (a antiga média da Putridão, `soma ÷ contador` de PERCENTUAIS — não de
+dano). Uma `Acao` per-alvo não enxerga o conjunto todo, e guardar acumulador na instância é
+frágil (ela é reusada entre combates). O formato seria um **segundo formato de ação**, que
+recebe o conjunto inteiro de uma vez:
 
 ```csharp
 abstract class AcaoSobreConjunto : Acao {
@@ -155,9 +163,9 @@ abstract class AcaoSobreConjunto : Acao {
 }
 ```
 
-O interpretador despacha por tipo (ver §3.2). A lógica que agrega mora numa
-`AcaoSobreConjunto` (com variável local, à vontade). É a "Frente 3" — e acabou sendo
-modesta: uma interface a mais + um `if` no despacho.
+O interpretador despacharia por tipo (ver §3.2). É modesto: uma classe a mais + um `if` no
+despacho. **Antes de reconstruir, confira se o valor agregado não é derivável do `eventos`** —
+foi exatamente assim que o único cliente morreu.
 
 ---
 
@@ -169,7 +177,7 @@ os três são `new HabilidadeAtiva(..., acoes: [...])`:
 | Nível | O que é | Exemplos |
 |---|---|---|
 | 1. **Vocabulário puro** | lista de ações compartilhadas | BolaDeFogo, Inferno, AnjoCaído, Copiando |
-| 2. **Vocabulário + 1 ação custom** | quase tudo compartilhado, uma `Acao` bespoke pro pedaço único | Putridão (média), Atlantis (revive-e-Intocável) |
+| 2. **Vocabulário + 1 ação custom** | quase tudo compartilhado, uma `Acao` bespoke pro pedaço único | Atlantis (revive-e-Intocável); GolpeSeguidor (Shuriken) — a Putrefação era o exemplo e SUBIU pro Nível 1 (a média virou cura-por-dano) |
 | 3. **Ação custom inteira** | a habilidade é uma `Acao` bespoke que faz tudo | as genuinamente únicas |
 
 A diferença entre os níveis é só **se as ações da lista são do vocabulário ou custom-locais
@@ -191,9 +199,9 @@ O vocabulário compartilhado do jogo. **Cresce por descoberta** — quando um pe
 
 ### 5.2 Escopo (em quais COMBATENTES)
 `AlvosResolvidos` (default, herda o pick da habilidade), `TodosAliados` (o time do atacante —
-que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`. 5º confirmado com **2
-clientes reais**: `OutrosAliados` (aliados menos o conjurador — OssoDuroDeRoer e Circo) —
-entra no vocabulário quando o primeiro deles migrar.
+que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`, `OutrosAliados` ✅
+**IMPLEMENTADO** (aliados menos o conjurador — 2 clientes reais: OssoDuroDeRoer ✅, LadoSombrio;
+Circo, Folclore).
 
 ### 5.3 EstadoAlvo por ação (Vivos/Mortos) — avaliado na execução
 `EstadoAlvo` **desce da habilidade pra ação** e é avaliado no momento em que a ação roda
@@ -264,10 +272,13 @@ acoes: {
     new Escudo(Valor.PorDanoCausado(0.30),  ProprioAtacante, Vivos),      // lê o dano somado
 }
 
-// PUTRIDÃO — a única com AcaoSobreConjunto (média cross-alvo, Nível 2)
+// PUTREFAÇÃO (como MIGROU — rebalance de Gabriel: cura 20% do dano total, não mais a média;
+// a explosão registra EventoDano, então o PorDanoCausado agrega ataque + explosões, e a cura
+// é um EXTRA da hab — a explosão é reutilizável a seco por clientes futuros)
 acoes: {
-    new Dano(1.0,                         AlvosResolvidos, Vivos),
-    new ExplodirVenenoECurarMedia(sobre: Inimigos, Vivos),  // custom, reusa Detonar
+    new Dano(1.0),
+    new Explodir(Seletor.Tipo<Veneno>()),
+    new Cura(Valor.PorDanoCausado(0.20), ProprioAtacante),
 }
 ```
 
@@ -278,7 +289,7 @@ acoes: {
 | Copiando | MoverBuffs, ConcederTurnoExtra | per-alvo + Seletor | 1 |
 | Barata | AplicarBuff, Dano, AplicarDebuff | escopo próprio + estado (Mortos) | 1 |
 | Quebrar | Dano, AplicarDebuff, Escudo | escopo próprio + PorDanoCausado | 1 |
-| Putridão | Dano, Detonar (custom) | **AcaoSobreConjunto** | 2 |
+| Putrefação ✅ | Dano, Explodir, Cura | per-alvo + PorDanoCausado (a média morreu) | 1 |
 
 ---
 
@@ -336,17 +347,59 @@ especulativo (YAGNI / "não desenhar no escuro"). Duas travas:
    - `Atlantis` parecia igual ao `AnjoCaido` e escondia um boundary (§8.1).
 
 **Cravado (nascem compartilhados, clientes reais mapeados):** `RemoverDebuffs` (Celestial,
-Coringa, DestruindoDia, AnjoCaido), `RemoverBuffs` (DocesOuTravessuras), `MoverBuffs`
-(Copiando), `Explodir` (Inferno, Putridão). `Transformar` (buff→debuff) é futuro (depende dos
-debuffs-contraparte + um mapa).
+Coringa, DestruindoDia, AnjoCaido — ainda sem cliente migrado), `RemoverBuffs` ✅ **IMPLEMENTADA**
+(DocesOuTravessuras, LadoSombrio), `MoverBuffs` (Copiando — ainda sem cliente migrado),
+`Explodir` ✅ **IMPLEMENTADA** genérica com `Seletor` + `IStatusComTick` (1º cliente: Putrefação
+com `Seletor.Tipo<Veneno>()`; Inferno mapeado pra Decaídos; Gabriel planeja mais clientes de
+explosão-de-veneno — a ação já serve a seco, sem a cura). `IStatusComTick` ✅ **IMPLEMENTADA**
+(`Detonar(portador, detonador) → EventoDano`; Veneno e Queima). `Transformar` (buff→debuff) é
+futuro (depende dos debuffs-contraparte + um mapa).
+
+**`AcaoSobreConjunto` — REMOVIDA (jul/2026, decisão de Gabriel).** Foi construída no sweep do
+LadoSombrio pra média cross-alvo da Putrefação — e a média MORREU no rebalance ("cura 20% de
+todo o dano causado" é o fragmento `PorDanoCausado` lendo o `eventos`, agregação que o
+loop-flip já dá de graça). O `Reviver` também chegou a nascer nela (`quantos` + `Take`) e foi
+revertido pra per-alvo (regra do revive abaixo). Com ZERO clientes, saiu — YAGNI. O desenho
+(§3.4) fica registrado: se uma agregação cross-alvo REAL aparecer (candidata: Atlantis §8.1,
+pipeline), reconstrói-se — é 1 classe + 1 `if` de dispatch no interpretador.
+
+**`Explodir` ✅ IMPLEMENTADA** (`Skills/Acoes/Explodir.cs`) — o molde ÚNICO das explosões
+(regra de Gabriel): a ação orquestra via `Seletor` e cada status detona FAZENDO O QUE ELE FAZ
+(`IStatusComTick.Detonar(portador, detonador)` devolve o `EventoDano` — Veneno só dano; Queima
+dano + redução de HP máx). A detonação entra no `eventos`: aparece na exibição, conta no
+`PorDanoCausado` e morte-por-explosão passa pelos Atos de morte (antes era um furo silencioso —
+kill de explosão não disparava Guarda/Vilão/Necromancia). Natureza de status (`Reacao.Nenhuma`)
+garante que não proca reações de ataque. Efeitos EXTRAS da habilidade (a cura da Putrefação)
+NÃO moram na explosão — são ações separadas na lista, por isso ela é reutilizável a seco.
+1º cliente: Putrefação (`Seletor.Tipo<Veneno>()`); Inferno usa `Seletor.Tipo<Queima>()` quando
+migrar (Decaídos — até lá o shim `Queima.Explodir` chama o Detonar e descarta o evento).
+
+**`Escopo.OutrosAliados` ✅ IMPLEMENTADO.** 1º dos 2 clientes: OssoDuroDeRoer (Caveira,
+LadoSombrio). Falta Circo (Folclore).
 
 **A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
-`Reviver` tem **7 clientes** — Nigiri (Humanos), Tecnology (Tecnológicos), Céu (Apóstolos),
-AnjoCaído (Decaídos), DocesDeAbobora (LadoSombrio, revive **SÓ 1** — primeiro elegível, HP
-cheio), Circo (Folclore, + Intocável em `OutrosAliados`) e Atlantis (Místicos, pipeline §8.1).
-Nasce compartilhada com `percentualHP` + `quantos` (todos vs. 1). A Sentença é checada central
-no `Morto.Reviver` — a ação não escreve nada disso. Esses 7 são exatamente os usuários do
-`Ambos`; migrados eles, o enum-value e o check do `CombateService:282` morrem juntos.
+`Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology (Tecnológicos), Céu (Apóstolos),
+AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1**), Circo (Folclore, +
+Intocável em `OutrosAliados`) e Atlantis (Místicos, pipeline §8.1).
+
+**REGRA DO REVIVE (decisão de Gabriel, jul/2026):** a ação `Reviver` é per-alvo simples, só
+`percentualHP` — a SELEÇÃO de quantos/quais revive NÃO mora na ação, mora no mecanismo único
+de seleção do jogo (`ResolverAlvos`):
+- **Revive-de-todos** (Nigiri, AnjoCaído...): `Reviver(pct)` com escopo default
+  (`TodosAliados`/`Mortos`), sem pick.
+- **Revive-de-N** (DocesDeAbobora, N=1): a HABILIDADE declara `numeroDeAlvos: N` +
+  `TipoAlvo.Aleatorio` + `EstadoAlvo.Mortos`, e a ação usa `Escopo.AlvosResolvidos`. O jogador
+  ESCOLHE o morto (pick real por estado — ADR-selecao-por-estado §2.4) e os extras são
+  sorteados: **selecionado + random**, a semântica que o `Aleatorio` já tem. Duplicata do
+  sorteio é inofensiva (`Vivo.Reviver` é no-op). Uma 1ª versão usava `quantos` + `Take` dentro
+  da ação — REVERTIDA: duas formas de selecionar N alvos no mesmo motor é anti-padrão.
+  O DocesDeAbobora ganhou de quebra o pick real ("primeiro da lista" era a dor apontada no
+  ADR-selecao-por-estado); o `CombateService` ganhou o guard pra pick sem candidato (revive
+  sem mortos: pula o pick, as demais ações rodam — o Reflexo ainda vale).
+
+A Sentença é checada central no `Morto.Reviver` — a ação não escreve nada disso. Esses 7 são
+exatamente os usuários do `Ambos`; migrados eles, o enum-value e o check do
+`CombateService:282` morrem juntos. **2 de 7 feitos.**
 
 ---
 
@@ -393,13 +446,20 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
 - **Testes do motor ✅:** 11 testes xUnit do interpretador (escopo, estado-na-execução,
   ordem, agregação, Aleatorio com duplicata) — feitos ANTES do sweep, o motor é infra
   load-bearing. Rede de regressão de cada PR de facção: `dotnet test`.
-- **Sweep por facção, forma final (§10.2): Humanos ✅, Reino ✅** (Guarda/Ninja/Rei, ao lado do
-  Mago piloto — `AplicarEscudo` promovido de vocabulário-mapeado (§5.1, "Escudo") a Ação real
-  (Lealdade; nome `AplicarEscudo` pra não colidir com `Skills.Buffs.Escudo`), `Dano` ganhou
-  `ignorarDefesaPct`/`forcaCritico` opcionais (Kunai), Shuriken estreou a Ação bespoke Nível 3
-  `GolpeSeguidor`). Segue: LadoSombrio (estreia `AcaoSobreConjunto`/Putridão + `Explodir`) →
-  Tecnológicos (Barata) → Folclore (Quebrar, `OutrosAliados`) → Místicos (Atlantis bespoke) →
-  Especial → Decaídos (AnjoCaído/Inferno) → Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce
+- **Sweep por facção, forma final (§10.2): Humanos ✅, Reino ✅, LadoSombrio ✅** (Guarda/
+  Ninja/Rei; Caveira/Fantasma/Abóbora/Zumbi — `AplicarEscudo` promovido de vocabulário-mapeado
+  a Ação real (Lealdade), `Dano` ganhou `ignorarDefesaPct`/`forcaCritico` opcionais (Kunai),
+  Shuriken estreou Nível 3 (`GolpeSeguidor`). LadoSombrio foi o momento de design, com duas
+  rodadas de revisão de Gabriel por cima do sweep: a regra do revive (per-alvo + pick do motor,
+  ver §9) e o rebalance da Putrefação (cura 20% do dano total, não média) — que matou o único
+  cliente da `AcaoSobreConjunto` (construída e REMOVIDA no mesmo sweep, §3.4) e fez nascer o
+  **`Explodir` genérico** (`Seletor` + `IStatusComTick.Detonar(portador, detonador) →
+  EventoDano`; Putrefação 1º cliente; Inferno segue no shim `Queima.Explodir` até Decaídos);
+  `Escopo.OutrosAliados` real (OssoDuroDeRoer, 1º dos 2 clientes — falta Circo);
+  `RemoverBuffs`/`Seletor` reais (DocesOuTravessuras).
+  Segue: Tecnológicos (Barata, estado/ao-matar) → Folclore (Quebrar, 2º cliente de
+  `OutrosAliados` — Circo) → Místicos (Atlantis bespoke) → Especial → Decaídos (AnjoCaído,
+  `Explodir`/Inferno migra de vez) → Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce
   quando a facção do 1º cliente chega.
   Facção que estreia mecanismo = momento de design, não sweep mecânico.
 - **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).

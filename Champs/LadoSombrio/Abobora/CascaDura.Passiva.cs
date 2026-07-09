@@ -1,6 +1,7 @@
 using ApostlesWar;
+using ApostlesWar.Skills;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.LadoSombrio
 {
     /// <summary>
     /// Bloqueia a aplicação de qualquer Debuff no portador. Capacidade direta

@@ -7,7 +7,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// Duração = nº de stacks. A cada passagem de turno, perde 1 stack.
     /// Reaplicar adiciona stacks (até o cap, se houver).
     /// </summary>
-    class Veneno : Debuff
+    class Veneno : Debuff, IStatusComTick
     {
         public const double DanoPorStack = 0.05;
 
@@ -63,5 +63,21 @@ namespace ApostlesWar.Skills.Debuffs
         /// % do HP máximo que o dano total representa. Usado pra calcular cura da Putrefação.
         /// </summary>
         public double PercentualDanoImediato => DanoPorStack * Stacks;
+
+        /// <summary>
+        /// IStatusComTick: aplica o dano total imediato, remove o Veneno e devolve o EventoDano
+        /// da detonação (o detonador é o Atacante do evento).
+        /// </summary>
+        public EventoDano Detonar(Combate portador, Combate detonador)
+        {
+            int bruto = DanoTotalImediato(portador);
+            var (efetivo, absorvido) = portador.ReceberDano(bruto, NaturezasDano.Veneno);
+            Remover(portador);
+            return new EventoDano(
+                Atacante: detonador, Alvo: portador,
+                DanoBruto: bruto, DanoEfetivo: efetivo, AbsorvidoPeloEscudo: absorvido,
+                Critico: false, HPRestante: Math.Max(0, portador.HPAtual),
+                Natureza: NaturezasDano.Veneno);
+        }
     }
 }

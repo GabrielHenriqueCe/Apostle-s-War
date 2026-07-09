@@ -111,6 +111,7 @@ namespace ApostlesWar
                 Escopo.TodosAliados => ctx.Aliados,
                 Escopo.TodosInimigos => ctx.Inimigos,
                 Escopo.ProprioAtacante => new List<Combate> { ctx.Atacante },
+                Escopo.OutrosAliados => ctx.Aliados.Where(c => c != ctx.Atacante),
                 _ => resolvidos,
             };
             return conjunto

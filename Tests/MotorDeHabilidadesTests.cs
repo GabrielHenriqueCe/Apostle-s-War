@@ -23,8 +23,9 @@ namespace Tests
             => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, 0));
 
         private static HabilidadeAtiva Hab(List<Acao> acoes, int alvos,
-            TipoLista lista = TipoLista.Inimigos, TipoAlvo modo = TipoAlvo.Explicito)
-            => new("Teste", "🧪", 3, "hab de teste", alvos, modo, lista, EstadoAlvo.Vivos, acoes);
+            TipoLista lista = TipoLista.Inimigos, TipoAlvo modo = TipoAlvo.Explicito,
+            EstadoAlvo estado = EstadoAlvo.Vivos)
+            => new("Teste", "🧪", 3, "hab de teste", alvos, modo, lista, estado, acoes);
 
         private static void Ferir(Combate c, int dano)
             => c.ReceberDano(dano, NaturezasDano.DanoIndireto);
@@ -100,6 +101,28 @@ namespace Tests
 
             Assert.Equal(1000, atacante.HPAtual);        // capado no máximo
             Assert.Equal(400 + 240, aliado.HPAtual);     // 30% de 800, não de 1000
+        }
+
+        [Fact]
+        public void EscopoOutrosAliados_AtingeAliadosMenosOProprioAtacante()
+        {
+            var atacante = Novo();
+            var aliado1 = Novo(); var aliado2 = Novo();
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, aliado1, aliado2 },
+                new List<Combate> { Novo() });
+
+            // OssoDuroDeRoer-like: buff em todos os aliados EXCETO quem conjurou.
+            var hab = Hab(new()
+            {
+                new AplicarBuff(() => new Intocavel(turnos: 2), Escopo.OutrosAliados),
+            }, alvos: int.MaxValue, lista: TipoLista.Aliados);
+
+            hab.Ativar(ctx, atacante);
+
+            Assert.False(atacante.StatusAtivos.OfType<Intocavel>().Any());
+            Assert.True(aliado1.StatusAtivos.OfType<Intocavel>().Any());
+            Assert.True(aliado2.StatusAtivos.OfType<Intocavel>().Any());
         }
 
         // ---------- EstadoAlvo avaliado na EXECUÇÃO ----------
@@ -261,6 +284,62 @@ namespace Tests
             Assert.Equal(400, aliadoMorto.HPAtual);                              // 50% de 800
             Assert.True(aliadoMorto.StatusAtivos.OfType<BuffAtaque>().Any());    // revivido pegou o buff
             Assert.True(atacante.StatusAtivos.OfType<BuffAtaque>().Any());       // vivo também
+        }
+
+        [Fact]
+        public void Reviver_DeN_UsaOPickDaHabilidade_ReviveSoOSelecionado()
+        {
+            var atacante = Novo();
+            var morto1 = Novo(hp: 1000); Matar(morto1);
+            var morto2 = Novo(hp: 1000); Matar(morto2);
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, morto1, morto2 },
+                new List<Combate> { Novo() });
+
+            // DocesDeAbobora-like (regra do revive): a HABILIDADE declara o pick (1 alvo,
+            // estado Mortos) e a ação herda os AlvosResolvidos — a MESMA seleção de qualquer
+            // habilidade (selecionado + extras sorteados), sem contador dentro da ação.
+            var hab = Hab(new()
+            {
+                new Reviver(1.0, Escopo.AlvosResolvidos),
+            }, alvos: 1, lista: TipoLista.Aliados, modo: TipoAlvo.Aleatorio, estado: EstadoAlvo.Mortos);
+
+            hab.Ativar(ctx, morto2);   // o jogador escolheu o morto2
+
+            Assert.True(morto2.EstaVivo());     // o SELECIONADO revive
+            Assert.False(morto1.EstaVivo());    // o outro não
+            Assert.Equal(1000, morto2.HPAtual); // HP cheio
+        }
+
+        // ---------- Explodir (molde único das explosões — ADR §5.1) ----------
+
+        [Fact]
+        public void Explodir_DetonaOVeneno_RegistraOEvento_EACuraPorDanoIncluiAExplosao()
+        {
+            var atacante = Novo(hp: 1000); Ferir(atacante, 900);   // 100/1000 — espaço pra cura
+            var inimigo1 = Novo(hp: 2000, atk: 0);
+            new Veneno(stacks: 2).Aplicar(inimigo1);               // detona 10% de 2000 = 200
+            var inimigo2 = Novo(hp: 2000, atk: 0);                 // sem veneno — explosão pula
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante },
+                new List<Combate> { inimigo1, inimigo2 });
+
+            // Putrefação-like: a cura é um EXTRA da habilidade (ação separada), 20% de TODO o
+            // dano causado — a explosão entra na conta porque registra seus EventoDano.
+            var hab = Hab(new()
+            {
+                new Explodir(Seletor.Tipo<Veneno>()),
+                new Cura(Valor.PorDanoCausado(0.20), Escopo.ProprioAtacante),
+            }, alvos: int.MaxValue);
+
+            var eventos = hab.Ativar(ctx, inimigo1);
+
+            Assert.False(inimigo1.StatusAtivos.OfType<Veneno>().Any());   // detonado e removido
+            Assert.Single(eventos);                                        // só quem tinha veneno gera evento
+            Assert.Equal(200, eventos[0].DanoEfetivo);                     // 2 stacks × 5% de 2000
+            Assert.Equal(2000 - 200, inimigo1.HPAtual);
+            Assert.Equal(2000, inimigo2.HPAtual);                          // sem veneno, intocado
+            Assert.Equal(100 + 40, atacante.HPAtual);                      // cura = 20% de 200
         }
 
         // ---------- Convivência Strangler ----------

@@ -76,8 +76,10 @@ namespace ApostlesWar
     /// - TodosAliados: o time do atacante (INCLUI o próprio atacante).
     /// - TodosInimigos: o time oposto.
     /// - ProprioAtacante: só o conjurador.
+    /// - OutrosAliados: o time do atacante EXCETO o próprio atacante (ex: OssoDuroDeRoer,
+    ///   Circo — ADR-composicao-de-acoes §5.2).
     /// </summary>
-    enum Escopo { AlvosResolvidos, TodosAliados, TodosInimigos, ProprioAtacante }
+    enum Escopo { AlvosResolvidos, TodosAliados, TodosInimigos, ProprioAtacante, OutrosAliados }
 
     /// <summary>
     /// Define a semântica do evento de ataque, usada pelo CombateService

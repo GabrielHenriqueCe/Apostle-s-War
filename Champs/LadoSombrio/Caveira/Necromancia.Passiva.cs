@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.LadoSombrio
 {
     /// <summary>
     /// Ao morrer, revive o portador com 50% do HP máximo — se não estiver bloqueado

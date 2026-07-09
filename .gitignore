@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Save do jogador (gerado em runtime na raiz do projeto por CapitulosService/ArsenalService)
+save.txt
+itens.txt

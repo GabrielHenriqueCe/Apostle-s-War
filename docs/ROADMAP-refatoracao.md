@@ -102,14 +102,20 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
 **O motor (detalhe no ADR):**
 - **Loop-flip:** ação-por-fora; cada ação resolve seu **Escopo** + **EstadoAlvo** no momento
   em que roda. Isso dissolve "escopo próprio" e "condição de estado" — não eram paredes.
-- **`AcaoSobreConjunto`:** 2º formato de ação (recebe o conjunto inteiro) pra **agregação
-  cross-alvo** (a média da Putridão). É a única parede real, e é pequena.
+- **`AcaoSobreConjunto`:** 2º formato de ação (recebe o conjunto inteiro) pra agregação
+  cross-alvo. CONSTRUÍDA E REMOVIDA no sweep LadoSombrio (ADR §3.4) — o único cliente (média
+  da Putrefação) morreu no rebalance (cura por dano total = `PorDanoCausado` lê o `eventos`).
+  Desenho registrado; reconstrói se agregação real aparecer (candidata: Atlantis §8.1).
 - Ações ORDENADAS; cada uma vê o estado da anterior (AnjoCaído: revive→cura os revividos).
 - `EstadoAlvo` DESCE pra ação, avaliado NA EXECUÇÃO → o `Ambos` MORRE; a categoria "ao-matar"
   se dissolve no fluxo normal (Sentença = `AplicarDebuff(Mortos)`).
 - Eixos da ação: **Operação × Escopo × EstadoAlvo × Valor(fragmento) × Seletor**.
-- Vocabulário mapeado: Dano, Cura, Escudo, AplicarBuff, AplicarDebuff, Reviver,
-  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra, **Explodir** (+ `IStatusComTick`, `Seletor`).
+- Vocabulário mapeado: Dano, Cura, AplicarEscudo, AplicarBuff, AplicarDebuff, Reviver,
+  RemoverBuffs, RemoverDebuffs, MoverBuffs, ConcederTurnoExtra, **Explodir** (+ `IStatusComTick`,
+  `Seletor`). Implementados: Dano/Cura/AplicarEscudo/AplicarBuff/AplicarDebuff/Reviver/
+  RemoverBuffs/**Explodir** (genérico, `Seletor` + `IStatusComTick.Detonar → EventoDano`;
+  1º cliente Putrefação; Inferno no shim até Decaídos)/IStatusComTick/Seletor. Faltam:
+  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra.
 - Disciplina: promove no 2º cliente REAL; verificar-antes-de-fundir (o grep mente — **Copiando
   era Balde 3 e é vocabulário puro**; **Atlantis** revelou o boundary de "pipeline / conjunto
   afetado", 1 cliente, registrado sem construir).
@@ -125,11 +131,32 @@ vocabulário — Lealdade, já estava mapeada em §5.1 (como "Escudo") mas sem c
 (nome `AplicarEscudo`, não `Escudo`, pra não colidir com `Skills.Buffs.Escudo` — o namespace
 raiz `ApostlesWar` é envolvente de quase todo o código); `Dano` ganhou
 `ignorarDefesaPct`/`forcaCritico` opcionais — Kunai; Shuriken estreou a 1ª Ação bespoke Nível 3,
-`GolpeSeguidor`, acoplamento hit-a-hit lido via `eventos`) → **sweep segue** (LadoSombrio
-[estreia `AcaoSobreConjunto`/Putridão + `Explodir`] → Tecnológicos [Barata, estado/ao-matar] →
-Folclore [Quebrar, `OutrosAliados`] → Místicos [Atlantis bespoke] → Especial → Decaídos
-[AnjoCaído, `Explodir`/Inferno] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado
-UI, §8.2) quando o `Ambos` morrer. Quando uma facção ESTREIA um mecanismo, o champ é momento de
+`GolpeSeguidor`, acoplamento hit-a-hit lido via `eventos`) → **LadoSombrio ✅** (Caveira/
+Fantasma/Abóbora/Zumbi migrados em `Champs/LadoSombrio/` — momento de design, estreou 4
+mecanismos novos do motor, com duas rodadas de revisão de Gabriel por cima do sweep:
+**regra do revive firmada** (ADR §9): `Reviver` per-alvo só com `percentualHP` — revive-de-N
+usa o pick do motor (habilidade declara `numeroDeAlvos: N` + `TipoAlvo.Aleatorio` +
+`EstadoAlvo.Mortos`, ação herda `AlvosResolvidos`; selecionado + extras sorteados).
+**DocesDeAbobora** (2º da família dos 7) é o 1º revive-de-N com pick REAL de morto (a dor do
+"primeiro da lista" do ADR-selecao-por-estado morreu); `CombateService` ganhou guard pra pick
+sem candidato (revive sem mortos ainda vale pelo Reflexo). **Rebalance da Putrefação** (cura
+20% do dano TOTAL, não média — a cura é EXTRA da hab, ação separada): matou o único cliente da
+`AcaoSobreConjunto` (construída e removida no mesmo sweep) e fez nascer o **`Explodir`
+genérico** (molde único das explosões: `Seletor.Tipo<Veneno>()` hoje, `Seletor.Tipo<Queima>()`
+quando o Inferno migrar em Decaídos; `IStatusComTick.Detonar(portador, detonador)` devolve o
+`EventoDano` — a explosão aparece na exibição, conta no `PorDanoCausado` e morte-por-explosão
+passa pelos Atos de morte, furo antigo fechado; Inferno segue no shim `Queima.Explodir`);
+**`Escopo.OutrosAliados`** real, 1º cliente OssoDuroDeRoer (Circo é o 2º, Folclore);
+**`RemoverBuffs`/`Seletor`** reais, 1º cliente DocesOuTravessuras. De quebra, `AplicarBuff`
+ganhou a sobrecarga `Func&lt;Combate,Buff&gt;` pra buffs com proveniência
+(ProtecaoAliado.Aplicador). 14 testes xUnit (3 novos: OutrosAliados, revive-de-N via pick,
+Explodir + cura-por-dano)) → **sweep segue** (Tecnológicos [Barata,
+estado/ao-matar] → Folclore [Quebrar, 2º cliente de `OutrosAliados` — Circo] → Místicos
+[Atlantis bespoke] → Especial → Decaídos [AnjoCaído; Inferno migra pro `Explodir` genérico
+(`Seletor.Tipo<Queima>()`) e o shim `Queima.Explodir` morre — 3º da família do revive] →
+Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
+quando o `Ambos` morrer (2 dos 7 feitos: Nigiri, DocesDeAbobora — faltam Tecnology, Céu,
+AnjoCaído, Circo, Atlantis). Quando uma facção ESTREIA um mecanismo, o champ é momento de
 design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---

@@ -236,6 +236,33 @@ namespace Tests
             Assert.All(eventos, e => Assert.Same(inimigo, e.Alvo));
         }
 
+        // ---------- Reviver (família do revive — ADR §9) ----------
+
+        [Fact]
+        public void Reviver_DoisEstadosEmOrdem_OsRevividosPegamOBuffDosVivos()
+        {
+            var atacante = Novo();
+            var aliadoMorto = Novo(hp: 800); Matar(aliadoMorto);
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, aliadoMorto },
+                new List<Combate> { Novo() });
+
+            // Nigiri-like (era EstadoAlvo.Ambos + Ativar bespoke): Reviver(Mortos) e depois
+            // buff nos Vivos — o EstadoAlvo na EXECUÇÃO faz o recém-revivido pegar o buff.
+            var hab = Hab(new()
+            {
+                new Reviver(0.50),
+                new AplicarBuff(() => new BuffAtaque(), Escopo.TodosAliados, EstadoAlvo.Vivos),
+            }, alvos: int.MaxValue, lista: TipoLista.Aliados);
+
+            hab.Ativar(ctx, atacante);
+
+            Assert.True(aliadoMorto.EstaVivo());
+            Assert.Equal(400, aliadoMorto.HPAtual);                              // 50% de 800
+            Assert.True(aliadoMorto.StatusAtivos.OfType<BuffAtaque>().Any());    // revivido pegou o buff
+            Assert.True(atacante.StatusAtivos.OfType<BuffAtaque>().Any());       // vivo também
+        }
+
         // ---------- Convivência Strangler ----------
 
         [Fact]

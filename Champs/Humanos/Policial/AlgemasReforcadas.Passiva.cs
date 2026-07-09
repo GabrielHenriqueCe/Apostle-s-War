@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
 using v1_Apostle_s_War.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace v1_Apostle_s_War.Champs.Humanos
 {
     /// <summary>
     /// Atacar um inimigo Preso adiciona +1 turno ao debuff. Migrada para IReagePorAtaque

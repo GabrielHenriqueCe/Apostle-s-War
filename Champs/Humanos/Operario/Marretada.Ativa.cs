@@ -1,6 +1,11 @@
 ﻿using ApostlesWar;
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace v1_Apostle_s_War.Champs.Humanos
 {
+    /// <summary>
+    /// Habilidade-CLASSE híbrida (ADR §4, Nível 1 + método custom): o Ativar é declarativo
+    /// (Acoes), mas ela continua classe porque o InstintoDoOperario a encontra por tipo
+    /// (OfType) e o contra-ataque entra pelo AtivarComNatureza.
+    /// </summary>
     class Marretada : HabilidadeAtiva, IAtivavelComNatureza
     {
         private const double Multiplicador = 1.25;
@@ -10,13 +15,11 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+
+        protected override List<Acao> Acoes => new()
         {
-            var resultados = new List<EventoDano>();
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-                resultados.Add(AplicarDano(ctx.Atacante, a, Multiplicador));
-            return resultados;
-        }
+            new Dano(Multiplicador),
+        };
 
         /// <summary>
         /// Entrada usada como contra-ataque (InstintoDoOperario busca a Marretada

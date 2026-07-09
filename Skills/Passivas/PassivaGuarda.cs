@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar.Skills.Buffs;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace ApostlesWar.Skills.Passivas
 {
     /// <summary>
     /// Reverte a transição Vivo→Morto antes das consequências (IReageAntesDeMorrer).

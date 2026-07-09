@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Buffs
+namespace ApostlesWar.Skills.Buffs
 {
     /// <summary>
     /// Buff temporário de ATK. Não muta o stat — apenas existe em StatusAtivos.

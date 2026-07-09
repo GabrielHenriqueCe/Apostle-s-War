@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using v1_Apostle_s_War.Champs.Humanos;
-using v1_Apostle_s_War.Champs.Reino;
-using v1_Apostle_s_War.Skills.Ativas;
-using v1_Apostle_s_War.Skills.Passivas;
+using ApostlesWar.Champs.Humanos;
+using ApostlesWar.Champs.Reino;
+using ApostlesWar.Skills.Ativas;
+using ApostlesWar.Skills.Passivas;
 
-namespace v1_Apostle_s_War.Services
+namespace ApostlesWar.Services
 {
     internal class PersonagemService
     {

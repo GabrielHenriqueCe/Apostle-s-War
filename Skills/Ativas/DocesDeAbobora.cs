@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar.Skills.Buffs;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// Revive 1 aliado morto com HP cheio (primeiro elegível, respeita PodeReviver).

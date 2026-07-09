@@ -1,6 +1,6 @@
 using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace ApostlesWar.Skills.Passivas
 {
     /// <summary>
     /// Recebe 15% menos dano durante todo o combate. Capacidade direta

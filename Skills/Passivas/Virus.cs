@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace ApostlesWar.Skills.Passivas
 {
     /// <summary>
     /// Ao atacar, ganha +5% de Dano Crítico (cap 25% acumulado). Migrada para IReageAoAtacar

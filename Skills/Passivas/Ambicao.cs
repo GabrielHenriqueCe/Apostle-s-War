@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace ApostlesWar.Skills.Passivas
 {
     /// <summary>
     /// Ao ser atacado, aumenta o próprio ATK em 5% (sobre AtaqueComItens) até um

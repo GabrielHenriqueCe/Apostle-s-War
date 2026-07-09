@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// Ataque básico (A1) como habilidade. Sempre disponível — cooldown 0.

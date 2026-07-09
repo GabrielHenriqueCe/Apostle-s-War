@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar.Skills.Buffs;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// Aplica Provocar + RefletirDano + ContraAtaque em si mesmo, todos 2t.

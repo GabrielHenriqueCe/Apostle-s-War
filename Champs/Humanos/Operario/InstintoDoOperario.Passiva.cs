@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Champs.Humanos
+namespace ApostlesWar.Champs.Humanos
 {
     /// <summary>
     /// 10% de chance de contra-atacar com Marretada ao ser atacado. Reage via

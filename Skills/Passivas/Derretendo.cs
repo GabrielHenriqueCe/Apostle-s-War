@@ -1,8 +1,8 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
-using v1_Apostle_s_War.Skills.Debuffs;
+using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace ApostlesWar.Skills.Passivas
 {
     /// <summary>
     /// Início do turno: se tem Queima, remove (cleanse) e aplica CuraContinua 2t.

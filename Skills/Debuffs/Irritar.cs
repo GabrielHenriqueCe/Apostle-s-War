@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Debuffs
+namespace ApostlesWar.Skills.Debuffs
 {
     /// <summary>
     /// Força o portador a atacar com A1 quem aplicou. Verificado no ExecutarTurno.

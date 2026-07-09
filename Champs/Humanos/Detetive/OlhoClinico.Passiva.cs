@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Champs.Humanos
+namespace ApostlesWar.Champs.Humanos
 {
     /// <summary>
     /// Ao atacar, ganha +5% de TaxaCrit (cap 25% acumulado). Migrada para IReageAoAtacar

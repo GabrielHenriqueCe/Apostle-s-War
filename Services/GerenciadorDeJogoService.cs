@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
 using GHUtils;
 
-namespace v1_Apostle_s_War.Services
+namespace ApostlesWar.Services
 {
     internal class GerenciadorDeJogoService
     {

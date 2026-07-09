@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Buffs
+namespace ApostlesWar.Skills.Buffs
 {
     /// <summary>
     /// O portador não pode ser selecionado como alvo (verificado em ResolverListaDeAlvosDisponiveis).

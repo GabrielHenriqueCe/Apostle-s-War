@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// Ataca todos os inimigos com 100% ATK. Cura o Fantasma em 20% do dano causado em cada hit.

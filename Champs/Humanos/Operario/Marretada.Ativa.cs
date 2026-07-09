@@ -1,5 +1,5 @@
 ﻿using ApostlesWar;
-namespace v1_Apostle_s_War.Champs.Humanos
+namespace ApostlesWar.Champs.Humanos
 {
     /// <summary>
     /// Habilidade-CLASSE híbrida (ADR §4, Nível 1 + método custom): o Ativar é declarativo

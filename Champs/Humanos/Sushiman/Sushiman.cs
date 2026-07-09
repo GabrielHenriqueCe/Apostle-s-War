@@ -1,7 +1,7 @@
 using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar.Skills.Buffs;
 
-namespace v1_Apostle_s_War.Champs.Humanos
+namespace ApostlesWar.Champs.Humanos
 {
     /// <summary>
     /// Sushiman — champ como DADO. Comportamento real: CodigoDoSushi.Passiva.cs.

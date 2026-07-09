@@ -1,6 +1,6 @@
-﻿using v1_Apostle_s_War.Skills.Passivas;
-using v1_Apostle_s_War.Skills.Buffs;
-using v1_Apostle_s_War.Skills.Debuffs;
+﻿using ApostlesWar.Skills.Passivas;
+using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Debuffs;
 
 namespace ApostlesWar
 {
@@ -168,7 +168,7 @@ namespace ApostlesWar
             get
             {
                 double total = TaxaCritBase + ItensTaxaCrit + BonusTaxaCritPermanente;
-                var buff = StatusAtivos.OfType<v1_Apostle_s_War.Skills.Buffs.BuffTaxaCrit>().FirstOrDefault();
+                var buff = StatusAtivos.OfType<ApostlesWar.Skills.Buffs.BuffTaxaCrit>().FirstOrDefault();
                 if (buff != null) total += buff.Valor;
                 return Math.Clamp(total, 0, 1);
             }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
-namespace v1_Apostle_s_War.Services
+namespace ApostlesWar.Services
 {
     internal class CapitulosService
     {

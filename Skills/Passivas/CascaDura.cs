@@ -1,6 +1,6 @@
 using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace ApostlesWar.Skills.Passivas
 {
     /// <summary>
     /// Bloqueia a aplicação de qualquer Debuff no portador. Capacidade direta

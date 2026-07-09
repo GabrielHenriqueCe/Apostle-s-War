@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Debuffs;
+using ApostlesWar.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// Aplica ReducaoDefesa 2t em todos os inimigos e em seguida ataca todos com +75% ATK.

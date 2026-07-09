@@ -1,7 +1,7 @@
 # Apostle's War — GDD da Expansão (Pós-Web)
 
-> **Status:** Ideias registradas, NÃO implementar no console v1/v2.
-> Destino: expansão pós-lançamento da versão web (2027+).
+> **Status:** Ideias registradas, NÃO implementar no console.
+> Destino: expansão pós-lançamento da versão web.
 > Última atualização: maio/2026.
 
 ---
@@ -10,14 +10,14 @@
 
 Registrar as ideias de meta-progressão e sistemas de RPG de coleção pensadas
 para uma futura expansão de Apostle's War. Nada aqui deve ser construído no
-console atual — o console v1 é o MVP jogável (montar time → jogar fase), sem
+console atual — o console é o MVP jogável (montar time → jogar fase), sem
 progressão persistente.
 
 A ordem de desenvolvimento planejada é:
 
-1. **v1 console** — completar habilidades de todas as facções (MVP jogável)
-2. **v2 console** — modo auto-battle
-3. **Web port (2027)** — mesmo jogo, React + .NET API (peça principal de portfólio)
+1. **Console jogável** — completar habilidades de todas as facções (MVP jogável)
+2. **Modo auto-battle** — automação de combate no console
+3. **Web port** — mesmo jogo, React + .NET API (peça principal de portfólio)
 4. **Expansão (pós-web)** — tudo que está neste documento
 
 A razão de tudo isto ser "pós-web" e não "console": cada sistema aqui exige
@@ -297,8 +297,7 @@ Esta é a conexão entre a mecânica de morte (fio técnico) e o design da Arena
 - NAO implementar inventário persistente ou múltiplas cópias de item
 - NAO implementar dificuldades destraváveis
 - NAO implementar maestrias
-- SIM terminar as habilidades faltantes do v1
-- SIM fechar o v1 jogável
+- SIM continuar o sweep de Composição de Ações (motor de habilidades) por facção
 - SIM fazer o refator de Stats em Camadas (serve ao presente E prepara o futuro)
 
 Quando bater a empolgação com a expansão: **escrever neste documento**, não codar.

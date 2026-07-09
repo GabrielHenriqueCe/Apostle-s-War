@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Buffs
+namespace ApostlesWar.Skills.Buffs
 {
     /// <summary>
     /// Buff que reduz o dano recebido em um percentual fixo ("Couraça"). A Sereia

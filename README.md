@@ -78,6 +78,10 @@ Arsenal          → gerencia itens obtidos e equipados
 Campanha         → define composição de inimigos por fase
 Capitulos        → progresso de desbloqueio por capítulo
 GerenciadorDeJogo → loop principal, menus e execução da campanha
+
+Champs/<Faccao>/<Champ>/ → cada campeão como dado (stats + habilidades), a view do champ
+Skills/Acoes/            → motor de habilidades — Ações compartilhadas (Dano, Cura, Reviver...)
+                            interpretadas por HabilidadeAtiva.Ativar
 ```
 
 ---
@@ -88,9 +92,8 @@ GerenciadorDeJogo → loop principal, menus e execução da campanha
 
 ---
 
-## 🔭 Próximos Passos (v2)
+## 🔭 Próximos Passos
 
-- Habilidades únicas por personagem
 - Modo automático de combate — tecla 0 alterna entre manual e automático
 - Combate visual em grid 4x6 com navegação por cursor
 - Seleção de personagens com navegação A/D

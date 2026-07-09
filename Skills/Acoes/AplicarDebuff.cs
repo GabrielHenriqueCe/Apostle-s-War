@@ -1,4 +1,4 @@
-using v1_Apostle_s_War.Skills;
+using ApostlesWar.Skills;
 
 namespace ApostlesWar
 {

@@ -1,11 +1,11 @@
 ﻿using ApostlesWar;
 using GHUtils;
-using v1_Apostle_s_War.Skills.Ativas;
-using v1_Apostle_s_War.Skills.Buffs;
-using v1_Apostle_s_War.Skills.Debuffs;
-using v1_Apostle_s_War.Skills.Passivas;
+using ApostlesWar.Skills.Ativas;
+using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Skills.Passivas;
 
-namespace v1_Apostle_s_War.Services
+namespace ApostlesWar.Services
 {
     internal class CombateService
     {

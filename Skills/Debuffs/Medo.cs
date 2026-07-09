@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Debuffs
+namespace ApostlesWar.Skills.Debuffs
 {
     /// <summary>
     /// Debuff de Medo. Quando o portador vai usar uma ação (a1 ou habilidade),

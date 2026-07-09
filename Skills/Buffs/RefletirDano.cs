@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Buffs
+namespace ApostlesWar.Skills.Buffs
 {
     /// <summary>
     /// Buff: reflete uma % do dano efetivamente recebido de volta ao atacante.

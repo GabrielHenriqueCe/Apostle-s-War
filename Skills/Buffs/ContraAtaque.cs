@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Buffs
+namespace ApostlesWar.Skills.Buffs
 {
     /// <summary>
     /// Quando o portador é atacado, contra-ataca o agressor com a A1 — uma vez

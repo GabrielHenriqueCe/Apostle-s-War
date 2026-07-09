@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// Ataca todos os inimigos. Multiplicador escala de 1.0 (HP cheio) até 2.0 (1 HP).

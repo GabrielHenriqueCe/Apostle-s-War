@@ -390,9 +390,10 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
 - **Forma-construtor + champ-arquivo ✅:** `HabilidadeAtiva` concreta com dois construtores
   (dado + subclasse Strangler); Mago como piloto da forma final (`Champs/Reino/Mago/`);
   AtaqueBasico híbrido (Acoes + `AtivarComNatureza`); `Ambos` numa ação = sem filtro.
-- **Testes do motor (próximo):** ~10 testes do interpretador (escopo, estado-na-execução,
-  ordem, agregação, Aleatorio com duplicata) ANTES do sweep — o motor é infra load-bearing.
-- **Sweep por facção, forma final (§10.2):** Humanos → Reino → LadoSombrio (estreia
+- **Testes do motor ✅:** 11 testes xUnit do interpretador (escopo, estado-na-execução,
+  ordem, agregação, Aleatorio com duplicata) — feitos ANTES do sweep, o motor é infra
+  load-bearing. Rede de regressão de cada PR de facção: `dotnet test`.
+- **Sweep por facção, forma final (§10.2): Humanos ✅.** Segue: Reino → LadoSombrio (estreia
   `AcaoSobreConjunto`/Putridão + `Explodir`) → Tecnológicos (Barata) → Folclore (Quebrar,
   `OutrosAliados`) → Místicos (Atlantis bespoke) → Especial → Decaídos (AnjoCaído/Inferno) →
   Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce quando a facção do 1º cliente chega.
@@ -412,7 +413,7 @@ Um PR, um tema. Build verde o tempo todo (Strangler). **Docs bumpam NO MESMO PR 
 - **Champ-como-dado + pastas** (§10) — tema separado, depois do motor provar-se.
 - **`EventoDano` por ID** — hoje carrega objetos vivos (`Combate`); referenciar por id/nome
   desacopla o log/stream dos objetos.
-- **Rename do repo/namespace** — tirar o `v1` (`v1_Apostle_s_War` → `ApostlesWar`).
+- **Rename do repo/namespace ✅** — tirado o `v1` (`v1_Apostle_s_War` → `ApostlesWar`, sln/csproj junto).
 
 ---
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using ApostlesWar.Champs.Humanos;
 using ApostlesWar.Champs.Reino;
+using ApostlesWar.Champs.LadoSombrio;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Passivas;
 
@@ -29,26 +30,11 @@ namespace ApostlesWar.Services
             Rei.Definir(),
 
 
-            // Lado Sombrio
-            new Personagem(1, Faccao.LadoSombrio, "Caveira", "💀",  600, 280, 200,
-            new Ossinho(),
-            new OssoDuroDeRoer(),
-            new Necromancia()),
-
-            new Personagem(2, Faccao.LadoSombrio, "Fantasma", "👻", 1400, 120, 200,
-            new Assombracao(),
-            new VindoDoAlem(),
-            new Espectral()),
-
-            new Personagem(3, Faccao.LadoSombrio, "Abóbora", "🎃",  600, 200, 280,
-            new DocesOuTravessuras(),
-            new DocesDeAbobora(),
-            new CascaDura()),
-
-            new Personagem(4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120,
-            new Fedorento(),
-            new Putridao(),
-            new PutrefacaoContagiosa()),
+            // Lado Sombrio — facção migrada pra forma final (Champs/LadoSombrio/), cada arquivo é a view.
+            Caveira.Definir(),
+            Fantasma.Definir(),
+            Abobora.Definir(),
+            Zumbi.Definir(),
 
             // Tecnológicos
             new Personagem(1, Faccao.Tecnologicos, "Invasor", "👾",  600, 240, 240,

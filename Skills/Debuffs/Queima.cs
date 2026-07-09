@@ -11,7 +11,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// - Cap de stacks: 5 (configurável)
     /// - Reaplicar: adiciona N stacks (até o cap)
     /// </summary>
-    class Queima : Debuff
+    class Queima : Debuff, IStatusComTick
     {
         public const double DanoPorTurno = 0.05;    // 5% HP inicial
         public const double CapPropio = 0.25;       // 25% redução acumulada
@@ -71,12 +71,19 @@ namespace ApostlesWar.Skills.Debuffs
         }
 
         /// <summary>
-        /// Aplica imediatamente todo o efeito remanescente desta Queima e a remove.
-        /// Usado pela A2 do Diabo (Inferno).
-        /// Dano = stacks × 5% HPMaximoInicial.
-        /// Redução = mesmo valor, respeitando cap próprio.
+        /// Aplica imediatamente todo o efeito remanescente desta Queima e a remove. Shim de
+        /// compatibilidade — o Inferno (ainda não migrado, Skills/Ativas/Inferno.cs) chama este
+        /// método direto; quando migrar, vira a Ação Explodir (ADR-composicao-de-acoes §5.1),
+        /// que usará Detonar (abaixo) por baixo, igual todo IStatusComTick.
         /// </summary>
-        public void Explodir(Combate portador)
+        public void Explodir(Combate portador) => Detonar(portador);
+
+        /// <summary>
+        /// IStatusComTick: aplica imediatamente todo o efeito remanescente (dano + redução de
+        /// HP máximo, respeitando o cap próprio), remove a Queima e retorna o dano causado.
+        /// Dano = stacks × 5% HPMaximoInicial.
+        /// </summary>
+        public int Detonar(Combate portador)
         {
             int valor = (int)(portador.HPMaximoInicial * DanoPorTurno * Stacks);
             // Dano à vida bloqueável; a redução de HP máximo (abaixo) ignora tudo.
@@ -91,6 +98,7 @@ namespace ApostlesWar.Skills.Debuffs
             }
 
             Remover(portador);
+            return valor;
         }
     }
 }

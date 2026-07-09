@@ -108,8 +108,11 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
 - `EstadoAlvo` DESCE pra ação, avaliado NA EXECUÇÃO → o `Ambos` MORRE; a categoria "ao-matar"
   se dissolve no fluxo normal (Sentença = `AplicarDebuff(Mortos)`).
 - Eixos da ação: **Operação × Escopo × EstadoAlvo × Valor(fragmento) × Seletor**.
-- Vocabulário mapeado: Dano, Cura, Escudo, AplicarBuff, AplicarDebuff, Reviver,
-  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra, **Explodir** (+ `IStatusComTick`, `Seletor`).
+- Vocabulário mapeado: Dano, Cura, AplicarEscudo, AplicarBuff, AplicarDebuff, Reviver,
+  RemoverBuffs, RemoverDebuffs, MoverBuffs, ConcederTurnoExtra, **Explodir** (+ `IStatusComTick`,
+  `Seletor`). Implementados: Dano/Cura/AplicarEscudo/AplicarBuff/AplicarDebuff/Reviver/
+  RemoverBuffs/IStatusComTick/Seletor. Faltam: RemoverDebuffs, MoverBuffs, ConcederTurnoExtra,
+  Explodir per-alvo genérico (só a variante bespoke pro Zumbi existe hoje).
 - Disciplina: promove no 2º cliente REAL; verificar-antes-de-fundir (o grep mente — **Copiando
   era Balde 3 e é vocabulário puro**; **Atlantis** revelou o boundary de "pipeline / conjunto
   afetado", 1 cliente, registrado sem construir).
@@ -125,11 +128,25 @@ vocabulário — Lealdade, já estava mapeada em §5.1 (como "Escudo") mas sem c
 (nome `AplicarEscudo`, não `Escudo`, pra não colidir com `Skills.Buffs.Escudo` — o namespace
 raiz `ApostlesWar` é envolvente de quase todo o código); `Dano` ganhou
 `ignorarDefesaPct`/`forcaCritico` opcionais — Kunai; Shuriken estreou a 1ª Ação bespoke Nível 3,
-`GolpeSeguidor`, acoplamento hit-a-hit lido via `eventos`) → **sweep segue** (LadoSombrio
-[estreia `AcaoSobreConjunto`/Putridão + `Explodir`] → Tecnológicos [Barata, estado/ao-matar] →
-Folclore [Quebrar, `OutrosAliados`] → Místicos [Atlantis bespoke] → Especial → Decaídos
-[AnjoCaído, `Explodir`/Inferno] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado
-UI, §8.2) quando o `Ambos` morrer. Quando uma facção ESTREIA um mecanismo, o champ é momento de
+`GolpeSeguidor`, acoplamento hit-a-hit lido via `eventos`) → **LadoSombrio ✅** (Caveira/
+Fantasma/Abóbora/Zumbi migrados em `Champs/LadoSombrio/` — momento de design, estreou 4
+mecanismos novos do motor: **`AcaoSobreConjunto`** real (2º formato de Ação, dispatch por tipo
+em `HabilidadeAtiva.Ativar`) com 2 clientes — `Reviver` ganhou `quantos` (Nigiri todos, agora
+**DocesDeAbobora** revive só 1, 2º da família dos 7) e a bespoke local
+`ExplodirVenenoECurarMedia` (Putrefação, média cross-alvo); **`IStatusComTick`** (`Combat/
+ICapacidadesStatus.cs`) com `Veneno.Detonar` real e `Queima.Detonar` adicionado por tabela
+(Inferno segue no `Skills/Ativas/` velho chamando `Queima.Explodir`, agora um shim fino sobre
+Detonar — **`Explodir` per-alvo genérico (Seletor.Tipo&lt;Queima&gt;()) ainda NÃO existe**, só
+migra quando Inferno migrar, em Decaídos); **`Escopo.OutrosAliados`** real, 1º cliente
+OssoDuroDeRoer (Circo é o 2º, Folclore); **`RemoverBuffs`/`Seletor`** reais, 1º cliente
+DocesOuTravessuras. De quebra, `AplicarBuff` ganhou a sobrecarga `Func&lt;Combate,Buff&gt;`
+pra buffs com proveniência (ProtecaoAliado.Aplicador). 13 testes xUnit (2 novos: OutrosAliados,
+AcaoSobreConjunto via `Reviver quantos:1`)) → **sweep segue** (Tecnológicos [Barata,
+estado/ao-matar] → Folclore [Quebrar, 2º cliente de `OutrosAliados` — Circo] → Místicos
+[Atlantis bespoke] → Especial → Decaídos [AnjoCaído, `Explodir`/Inferno migra de vez — 3º da
+família do revive] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
+quando o `Ambos` morrer (2 dos 7 feitos: Nigiri, DocesDeAbobora — faltam Tecnology, Céu,
+AnjoCaído, Circo, Atlantis). Quando uma facção ESTREIA um mecanismo, o champ é momento de
 design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---

@@ -102,6 +102,28 @@ namespace Tests
             Assert.Equal(400 + 240, aliado.HPAtual);     // 30% de 800, não de 1000
         }
 
+        [Fact]
+        public void EscopoOutrosAliados_AtingeAliadosMenosOProprioAtacante()
+        {
+            var atacante = Novo();
+            var aliado1 = Novo(); var aliado2 = Novo();
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, aliado1, aliado2 },
+                new List<Combate> { Novo() });
+
+            // OssoDuroDeRoer-like: buff em todos os aliados EXCETO quem conjurou.
+            var hab = Hab(new()
+            {
+                new AplicarBuff(() => new Intocavel(turnos: 2), Escopo.OutrosAliados),
+            }, alvos: int.MaxValue, lista: TipoLista.Aliados);
+
+            hab.Ativar(ctx, atacante);
+
+            Assert.False(atacante.StatusAtivos.OfType<Intocavel>().Any());
+            Assert.True(aliado1.StatusAtivos.OfType<Intocavel>().Any());
+            Assert.True(aliado2.StatusAtivos.OfType<Intocavel>().Any());
+        }
+
         // ---------- EstadoAlvo avaliado na EXECUÇÃO ----------
 
         [Fact]
@@ -261,6 +283,31 @@ namespace Tests
             Assert.Equal(400, aliadoMorto.HPAtual);                              // 50% de 800
             Assert.True(aliadoMorto.StatusAtivos.OfType<BuffAtaque>().Any());    // revivido pegou o buff
             Assert.True(atacante.StatusAtivos.OfType<BuffAtaque>().Any());       // vivo também
+        }
+
+        // ---------- AcaoSobreConjunto (agregação cross-alvo — ADR §3.4) ----------
+
+        [Fact]
+        public void Reviver_Quantos1_RecebeOConjuntoInteiroEReviveSoOPrimeiroElegivel()
+        {
+            var atacante = Novo();
+            var morto1 = Novo(hp: 1000); Matar(morto1);
+            var morto2 = Novo(hp: 1000); Matar(morto2);
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, morto1, morto2 },
+                new List<Combate> { Novo() });
+
+            // DocesDeAbobora-like: revive só o 1º elegível do conjunto — só a
+            // AcaoSobreConjunto (recebe o conjunto INTEIRO de uma vez) sabe "já revivi 1".
+            var hab = Hab(new()
+            {
+                new Reviver(1.0, quantos: 1),
+            }, alvos: int.MaxValue, lista: TipoLista.Aliados);
+
+            hab.Ativar(ctx, atacante);
+
+            Assert.True(morto1.EstaVivo());
+            Assert.False(morto2.EstaVivo());
         }
 
         // ---------- Convivência Strangler ----------

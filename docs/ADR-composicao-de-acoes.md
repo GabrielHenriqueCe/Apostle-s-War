@@ -191,9 +191,9 @@ O vocabulário compartilhado do jogo. **Cresce por descoberta** — quando um pe
 
 ### 5.2 Escopo (em quais COMBATENTES)
 `AlvosResolvidos` (default, herda o pick da habilidade), `TodosAliados` (o time do atacante —
-que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`. 5º confirmado com **2
-clientes reais**: `OutrosAliados` (aliados menos o conjurador — OssoDuroDeRoer e Circo) —
-entra no vocabulário quando o primeiro deles migrar.
+que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`, `OutrosAliados` ✅
+**IMPLEMENTADO** (aliados menos o conjurador — 2 clientes reais: OssoDuroDeRoer ✅, LadoSombrio;
+Circo, Folclore).
 
 ### 5.3 EstadoAlvo por ação (Vivos/Mortos) — avaliado na execução
 `EstadoAlvo` **desce da habilidade pra ação** e é avaliado no momento em que a ação roda
@@ -336,17 +336,31 @@ especulativo (YAGNI / "não desenhar no escuro"). Duas travas:
    - `Atlantis` parecia igual ao `AnjoCaido` e escondia um boundary (§8.1).
 
 **Cravado (nascem compartilhados, clientes reais mapeados):** `RemoverDebuffs` (Celestial,
-Coringa, DestruindoDia, AnjoCaido), `RemoverBuffs` (DocesOuTravessuras), `MoverBuffs`
-(Copiando), `Explodir` (Inferno, Putridão). `Transformar` (buff→debuff) é futuro (depende dos
-debuffs-contraparte + um mapa).
+Coringa, DestruindoDia, AnjoCaido — ainda sem cliente migrado), `RemoverBuffs` ✅ **IMPLEMENTADA**
+(DocesOuTravessuras, LadoSombrio), `MoverBuffs` (Copiando — ainda sem cliente migrado),
+`Explodir` (Inferno, Putridão — só a variante bespoke pro Putridão existe hoje,
+`ExplodirVenenoECurarMedia`; a Ação genérica per-alvo com `Seletor.Tipo<Queima>()` nasce quando
+o Inferno migrar, Decaídos). `IStatusComTick` ✅ **IMPLEMENTADA** (`Veneno.Detonar`,
+`Queima.Detonar`). `Transformar` (buff→debuff) é futuro (depende dos debuffs-contraparte + um
+mapa).
+
+**`AcaoSobreConjunto` ✅ IMPLEMENTADA** (`Skills/Acoes/AcaoSobreConjunto.cs`, dispatch por tipo em
+`HabilidadeAtiva.Ativar`). 2 clientes reais: `Reviver` com `quantos` (abaixo) e
+`ExplodirVenenoECurarMedia` (Putrefação, média cross-alvo, bespoke local em
+`Champs/LadoSombrio/Zumbi/`).
+
+**`Escopo.OutrosAliados` ✅ IMPLEMENTADO.** 1º dos 2 clientes: OssoDuroDeRoer (Caveira,
+LadoSombrio). Falta Circo (Folclore).
 
 **A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
-`Reviver` tem **7 clientes** — Nigiri (Humanos), Tecnology (Tecnológicos), Céu (Apóstolos),
-AnjoCaído (Decaídos), DocesDeAbobora (LadoSombrio, revive **SÓ 1** — primeiro elegível, HP
+`Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology (Tecnológicos), Céu (Apóstolos),
+AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1** — primeiro elegível, HP
 cheio), Circo (Folclore, + Intocável em `OutrosAliados`) e Atlantis (Místicos, pipeline §8.1).
-Nasce compartilhada com `percentualHP` + `quantos` (todos vs. 1). A Sentença é checada central
-no `Morto.Reviver` — a ação não escreve nada disso. Esses 7 são exatamente os usuários do
-`Ambos`; migrados eles, o enum-value e o check do `CombateService:282` morrem juntos.
+Nasceu compartilhada com `percentualHP` + `quantos` (todos vs. 1) — `Reviver` é
+`AcaoSobreConjunto` desde o DocesDeAbobora (quantos:1 exige ver o conjunto inteiro de uma vez,
+pra saber "já revivi 1"). A Sentença é checada central no `Morto.Reviver` — a ação não escreve
+nada disso. Esses 7 são exatamente os usuários do `Ambos`; migrados eles, o enum-value e o
+check do `CombateService:282` morrem juntos. **2 de 7 feitos.**
 
 ---
 
@@ -393,13 +407,19 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
 - **Testes do motor ✅:** 11 testes xUnit do interpretador (escopo, estado-na-execução,
   ordem, agregação, Aleatorio com duplicata) — feitos ANTES do sweep, o motor é infra
   load-bearing. Rede de regressão de cada PR de facção: `dotnet test`.
-- **Sweep por facção, forma final (§10.2): Humanos ✅, Reino ✅** (Guarda/Ninja/Rei, ao lado do
-  Mago piloto — `AplicarEscudo` promovido de vocabulário-mapeado (§5.1, "Escudo") a Ação real
-  (Lealdade; nome `AplicarEscudo` pra não colidir com `Skills.Buffs.Escudo`), `Dano` ganhou
-  `ignorarDefesaPct`/`forcaCritico` opcionais (Kunai), Shuriken estreou a Ação bespoke Nível 3
-  `GolpeSeguidor`). Segue: LadoSombrio (estreia `AcaoSobreConjunto`/Putridão + `Explodir`) →
-  Tecnológicos (Barata) → Folclore (Quebrar, `OutrosAliados`) → Místicos (Atlantis bespoke) →
-  Especial → Decaídos (AnjoCaído/Inferno) → Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce
+- **Sweep por facção, forma final (§10.2): Humanos ✅, Reino ✅, LadoSombrio ✅** (Guarda/
+  Ninja/Rei; Caveira/Fantasma/Abóbora/Zumbi — `AplicarEscudo` promovido de vocabulário-mapeado
+  a Ação real (Lealdade), `Dano` ganhou `ignorarDefesaPct`/`forcaCritico` opcionais (Kunai),
+  Shuriken estreou Nível 3 (`GolpeSeguidor`). LadoSombrio foi o momento de design: estreou
+  `AcaoSobreConjunto` de verdade — `Reviver` ganhou `quantos` (DocesDeAbobora revive só 1) e a
+  bespoke `ExplodirVenenoECurarMedia` (Putrefação, média cross-alvo); `IStatusComTick` real
+  (`Veneno.Detonar`; `Queima.Detonar` também, mas o `Explodir` per-alvo genérico com `Seletor`
+  só nasce quando o Inferno migrar, em Decaídos — hoje ele segue chamando `Queima.Explodir`,
+  agora um shim sobre `Detonar`); `Escopo.OutrosAliados` real (OssoDuroDeRoer, 1º dos 2
+  clientes — falta Circo); `RemoverBuffs`/`Seletor` reais (DocesOuTravessuras).
+  Segue: Tecnológicos (Barata, estado/ao-matar) → Folclore (Quebrar, 2º cliente de
+  `OutrosAliados` — Circo) → Místicos (Atlantis bespoke) → Especial → Decaídos (AnjoCaído,
+  `Explodir`/Inferno migra de vez) → Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce
   quando a facção do 1º cliente chega.
   Facção que estreia mecanismo = momento de design, não sweep mecânico.
 - **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).

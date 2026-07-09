@@ -8,8 +8,9 @@ namespace v1_Apostle_s_War.Skills.Ativas
     /// TipoAtaque Sequencial (default): 1 alvo, passiva DepoisDeAtacar dispara normalmente.
     /// 
     /// É uma HabilidadeAtiva de primeira classe: pode virar AoE, aleatória, multi-hit
-    /// ou ganhar efeitos secundários no futuro — basta sobrescrever as propriedades
-    /// e ajustar o Ativar, igual qualquer outra habilidade.
+    /// ou ganhar efeitos secundários no futuro — basta ajustar as propriedades e as
+    /// Acoes, igual qualquer outra habilidade. Híbrido do motor (ADR §4, Nível 1 +
+    /// método custom): o Ativar é declarativo, o contra-ataque continua bespoke abaixo.
     /// </summary>
     class AtaqueBasico : HabilidadeAtiva, IAtaquePrimario, IAtivavelComNatureza
     {
@@ -20,13 +21,10 @@ namespace v1_Apostle_s_War.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        protected override List<Acao> Acoes => new()
         {
-            var resultados = new List<EventoDano>();
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-                resultados.Add(ctx.Atacante.Atacar(a));
-            return resultados;
-        }
+            new Dano(1.0),
+        };
 
         /// <summary>
         /// Entrada usada como contra-ataque (ContraAtaque busca a A1 do portador

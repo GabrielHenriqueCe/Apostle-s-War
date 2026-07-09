@@ -4,50 +4,123 @@ namespace ApostlesWar
 {
     #region HabilidadeAtiva
 
-    abstract class HabilidadeAtiva : Habilidade
+    /// <summary>
+    /// Concreta e construível por DADO (forma-construtor — ver ADR-composicao-de-acoes §3.1):
+    /// a forma final de uma habilidade é `new HabilidadeAtiva(..., acoes: [...])`, montada no
+    /// arquivo do champ. Durante a migração (Strangler), as habilidades antigas continuam como
+    /// subclasses usando o construtor curto + override das propriedades virtuais.
+    /// </summary>
+    class HabilidadeAtiva : Habilidade
     {
         private static readonly Random _random = new Random();
 
-        public HabilidadeAtiva(string nome, string simbolo, int turnos, string descricao = "")
-            : base(nome, simbolo, turnos, descricao) { }
+        private readonly int _numeroDeAlvos;
+        private readonly TipoAlvo _tipoAlvo;
+        private readonly TipoLista _tipoLista;
+        private readonly EstadoAlvo _estadoAlvo;
+        private readonly TipoAtaque _tipoAtaque;
+        private readonly List<Acao> _acoes;
 
-        public abstract int NumeroDeAlvos { get; }
-        public abstract TipoAlvo TipoAlvo { get; }
+        /// <summary>
+        /// Construtor de SUBCLASSE (Strangler): a subclasse sobrescreve as propriedades
+        /// virtuais — os backings ficam em default e nunca são lidos. Some quando a última
+        /// subclasse migrar pra forma-construtor.
+        /// </summary>
+        public HabilidadeAtiva(string nome, string simbolo, int turnos, string descricao = "")
+            : base(nome, simbolo, turnos, descricao)
+        {
+            _tipoAtaque = TipoAtaque.Sequencial;
+            _acoes = new List<Acao>();
+        }
+
+        /// <summary>
+        /// Construtor de DADO (forma final): a habilidade inteira é config. A lista de Acoes é
+        /// criada UMA vez e reusada a cada ativação — por isso Acao só pode carregar config
+        /// (multiplicador, fábrica), nunca estado por-ativação (invariante do ADR §3.1).
+        /// </summary>
+        public HabilidadeAtiva(string nome, string simbolo, int turnos, string descricao,
+            int numeroDeAlvos, TipoAlvo tipoAlvo, TipoLista tipoLista, EstadoAlvo estadoAlvo,
+            List<Acao> acoes, TipoAtaque tipoAtaque = TipoAtaque.Sequencial)
+            : base(nome, simbolo, turnos, descricao)
+        {
+            _numeroDeAlvos = numeroDeAlvos;
+            _tipoAlvo = tipoAlvo;
+            _tipoLista = tipoLista;
+            _estadoAlvo = estadoAlvo;
+            _tipoAtaque = tipoAtaque;
+            _acoes = acoes;
+        }
+
+        public virtual int NumeroDeAlvos => _numeroDeAlvos;
+        public virtual TipoAlvo TipoAlvo => _tipoAlvo;
 
         /// <summary>
         /// Define qual lista a habilidade considera como "principal" pra selecionar alvos.
         /// O CombateService usa isso pra mostrar a lista certa de alvos pro jogador.
         /// A habilidade ainda tem acesso às duas listas via ContextoCombate.
         /// </summary>
-        public abstract TipoLista TipoLista { get; }
+        public virtual TipoLista TipoLista => _tipoLista;
 
         /// <summary>
-        /// Define qual estado de vida a habilidade mira dentro da TipoLista. Sem default —
-        /// toda habilidade declara conscientemente (ver ADR-selecao-por-estado.md).
+        /// Define qual estado de vida a habilidade mira dentro da TipoLista, alimentando a
+        /// resolução de alvos e o menu (ver ADR-selecao-por-estado.md). Cada AÇÃO re-filtra
+        /// pelo EstadoAlvo dela na execução (ver ADR-composicao-de-acoes §5.3).
         /// </summary>
-        public abstract EstadoAlvo EstadoAlvo { get; }
+        public virtual EstadoAlvo EstadoAlvo => _estadoAlvo;
 
         /// <summary>
-        /// Ações que a habilidade executa sobre cada alvo resolvido (Balde 1: só aplica uma
-        /// lista fixa de efeitos). Vazio por default — habilidades com comportamento próprio
-        /// sobrescrevem Ativar em vez de declarar Acoes. Ver ADR-composicao-de-acoes.md.
+        /// Ações que a habilidade executa (Balde 1: só aplica uma lista fixa de efeitos).
+        /// Na forma-construtor vêm do ctor; subclasses Strangler sobrescrevem (ou sobrescrevem
+        /// Ativar direto, se ainda bespoke). Ver ADR-composicao-de-acoes.md.
         /// </summary>
-        protected virtual List<Acao> Acoes => new();
+        protected virtual List<Acao> Acoes => _acoes;
 
         /// <summary>
-        /// Interpretador default: roda cada Acao sobre os alvos resolvidos, na ordem declarada,
-        /// agregando os EventoDano das ações de dano (contrato preservado — reações-do-atacante
-        /// e exibição consomem a lista). Habilidades bespoke sobrescrevem este Ativar; as duas
-        /// formas convivem durante a migração (Strangler).
+        /// Interpretador default (o MOTOR — ver ADR-composicao-de-acoes §3): roda cada Acao na
+        /// ordem declarada, resolvendo o Escopo de cada uma e filtrando pelo EstadoAlvo NO
+        /// MOMENTO em que ela executa. É "ação-por-fora": uma ação termina toda a sua passada
+        /// antes da próxima começar — é isso que faz o dano agregar (o eventos já está completo
+        /// quando uma ação seguinte o lê) e que faz uma ação pegar o estado que a anterior
+        /// deixou (revive → cura os revividos). Habilidades bespoke sobrescrevem este Ativar; as
+        /// duas formas convivem durante a migração (Strangler).
+        ///
+        /// A resolução dos AlvosResolvidos (o pick + extras) ainda usa o EstadoAlvo da HABILIDADE
+        /// — é o que alimenta o menu de alvo. Cada ação re-filtra o seu conjunto pelo EstadoAlvo
+        /// DELA na execução. A derivação do pick a partir das ações (§8.2) fica pra depois.
         /// </summary>
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             var eventos = new List<EventoDano>();
-            var acoes = Acoes;
-            foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
-                foreach (var acao in acoes)
-                    acao.Executar(ctx.Atacante, a, eventos);
+            var alvosResolvidos = ResolverAlvos(alvo, ObterListaPrincipal(ctx));
+            foreach (var acao in Acoes)
+                foreach (Combate combatente in ResolverEscopo(acao, alvosResolvidos, ctx))
+                    acao.Executar(ctx.Atacante, combatente, eventos);
             return eventos;
+        }
+
+        /// <summary>
+        /// Monta o conjunto de combatentes que uma ação atinge: pega a lista do Escopo dela e
+        /// filtra pelo EstadoAlvo dela, avaliado AGORA (não na resolução). Snapshot (ToList) pra
+        /// não iterar uma coleção que a própria ação pode alterar (ex: reviver muda quem é vivo).
+        /// </summary>
+        private List<Combate> ResolverEscopo(Acao acao, List<Combate> resolvidos, ContextoCombate ctx)
+        {
+            IEnumerable<Combate> conjunto = acao.Escopo switch
+            {
+                Escopo.AlvosResolvidos => resolvidos,
+                Escopo.TodosAliados => ctx.Aliados,
+                Escopo.TodosInimigos => ctx.Inimigos,
+                Escopo.ProprioAtacante => new List<Combate> { ctx.Atacante },
+                _ => resolvidos,
+            };
+            return conjunto
+                .Where(c => acao.EstadoAlvo switch
+                {
+                    EstadoAlvo.Mortos => !c.EstaVivo(),
+                    EstadoAlvo.Vivos => c.EstaVivo(),
+                    _ => true, // Ambos: sem filtro (vivos E mortos) — honesto enquanto o enum-value existir
+                })
+                .ToList();
         }
 
         /// <summary>
@@ -127,10 +200,11 @@ namespace ApostlesWar
 
         /// <summary>
         /// Semântica do evento de ataque. Default Sequencial (a maioria das habilidades de dano
-        /// single-target ou multi-hit). Habilidades AoE e não-atacantes sobrescrevem.
+        /// single-target ou multi-hit). Na forma-construtor vem do ctor; subclasses AoE e
+        /// não-atacantes sobrescrevem.
         /// O CombateService usa isso pra decidir quantas vezes dispara passivas DepoisDeAtacar.
         /// </summary>
-        public virtual TipoAtaque TipoAtaque => TipoAtaque.Sequencial;
+        public virtual TipoAtaque TipoAtaque => _tipoAtaque;
     }
 
     #endregion

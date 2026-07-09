@@ -21,7 +21,7 @@
 
         /// <summary>
         /// Se false, o status não pode ser removido/roubado por efeitos de terceiros
-        /// (Copiando, PassivaCientista, cleanses de buff). Continua expirando por
+        /// (Copiando, AnaliseCritica, cleanses de buff). Continua expirando por
         /// duração normalmente — não é sobre imunidade a tempo, é sobre imunidade a
         /// remoção externa. Usado pelo Fantasma (Intocável permanente).
         /// </summary>

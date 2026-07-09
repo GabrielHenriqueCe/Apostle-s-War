@@ -4,7 +4,7 @@ namespace v1_Apostle_s_War.Skills.Buffs
 {
     /// <summary>
     /// Bloqueia a aplicação de qualquer Debuff no portador.
-    /// Pode ser permanente (PassivaAbobora aplica com int.MaxValue) ou temporária
+    /// Pode ser permanente (CascaDura aplica com int.MaxValue) ou temporária
     /// (habilidades como Coringa do Palhaço e Canto de Sereia aplicam com turnos limitados).
     /// </summary>
     class ImunidadeDebuffs : Buff, IBloqueiaStatus

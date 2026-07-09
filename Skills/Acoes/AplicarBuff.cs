@@ -1,0 +1,23 @@
+using v1_Apostle_s_War.Skills;
+
+namespace ApostlesWar
+{
+    /// <summary>
+    /// Aplica um buff no alvo. Espelho do AplicarDebuff — recebe uma FÁBRICA (não instância)
+    /// porque cada combatente precisa da sua própria instância de status.
+    ///
+    /// Só serve pra buffs de valor FIXO (Provocar, Intocável, BloqueioTotal...). Buffs com valor
+    /// DERIVADO (Escudo = % do HP do alvo) são operações próprias que leem um fragmento de Valor
+    /// — ver ADR-composicao-de-acoes §5.5.
+    /// </summary>
+    class AplicarBuff : Acao
+    {
+        private readonly Func<Buff> _fabrica;
+
+        public AplicarBuff(Func<Buff> fabrica, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
+            : base(escopo, estadoAlvo) => _fabrica = fabrica;
+
+        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+            => _fabrica().Aplicar(alvo);
+    }
+}

@@ -96,8 +96,8 @@ namespace ApostlesWar
         // DefesaBase: valor cru do personagem, imutável na fase.
         // MultiplicadorDefesa: multiplicador de fase (jogador=1.0, inimigo=mult da fase).
         // ItensDefesaFlat/Pct: contribuição de itens equipados.
-        // BonusDefesaPermanente: stack-builder de aumento (PassivaRei), soma no getter.
-        // ReducaoDefesaPermanente: stack-builder de redução no alvo (PassivaSorrateiro),
+        // BonusDefesaPermanente: stack-builder de aumento (CoroaDoSoberano), soma no getter.
+        // ReducaoDefesaPermanente: stack-builder de redução no alvo (Sorrateiro),
         //   subtrai no getter. Mora no alvo pra que múltiplas fontes compartilhem o cap.
         // BuffDefesa/ReducaoDefesa: temporários, incidem sobre comStacks (independentes).
         public int DefesaBase { get; private set; }
@@ -153,11 +153,11 @@ namespace ApostlesWar
         // Crit é soma de pontos absolutos (não % de %): base + itens + permanente + buff.
         public double TaxaCritBase { get; private set; }
         public double ItensTaxaCrit { get; private set; }
-        public double BonusTaxaCritPermanente { get; private set; }   // PassivaDetetive
+        public double BonusTaxaCritPermanente { get; private set; }   // OlhoClinico
 
         public double DanoCritBase { get; private set; }
         public double ItensDanoCrit { get; private set; }
-        public double BonusDanoCritPermanente { get; private set; }    // PassivaInvasor
+        public double BonusDanoCritPermanente { get; private set; }    // Virus
 
         /// <summary>
         /// Chance de crítico final: base + itens + bônus permanente (Detetive) +
@@ -227,7 +227,7 @@ namespace ApostlesWar
         {
             HPMaximoInicial = HPMaximo;
 
-            // Aplica buffs iniciais permanentes de passivas (ex: PassivaFantasma -> Intocavel)
+            // Aplica buffs iniciais permanentes de passivas (ex: Espectral -> Intocavel)
             foreach (var passiva in Personagem.Habilidades.OfType<IPassivaInicial>())
                 passiva.AplicarInicial(this);
         }
@@ -391,7 +391,7 @@ namespace ApostlesWar
         public void Reviver(int hp) => _estado.Reviver(this, hp);
 
         /// <summary>
-        /// Adiciona bônus permanente de DanoCrit (stack-builder PassivaInvasor).
+        /// Adiciona bônus permanente de DanoCrit (stack-builder Virus).
         /// Soma no getter de DanoCrit.
         /// </summary>
         public void AdicionarBonusDanoCritPermanente(double delta) =>
@@ -399,14 +399,14 @@ namespace ApostlesWar
 
 
         /// <summary>
-        /// Adiciona bônus permanente de Defesa (stack-builder PassivaRei).
+        /// Adiciona bônus permanente de Defesa (stack-builder CoroaDoSoberano).
         /// Soma no getter de Defesa, não muta a base.
         /// </summary>
         public void AdicionarBonusDefesaPermanente(int delta) =>
             BonusDefesaPermanente = Math.Max(0, BonusDefesaPermanente + delta);
 
         /// <summary>
-        /// Adiciona redução permanente de Defesa (stack-builder PassivaSorrateiro).
+        /// Adiciona redução permanente de Defesa (stack-builder Sorrateiro).
         /// Mora no alvo — múltiplas fontes compartilham o mesmo acúmulo e cap.
         /// Subtrai no getter de Defesa.
         /// </summary>
@@ -421,7 +421,7 @@ namespace ApostlesWar
             BonusAtaquePermanente = Math.Max(0, BonusAtaquePermanente + delta);
 
         /// <summary>
-        /// Adiciona bônus permanente de TaxaCrit (stack-builder PassivaDetetive).
+        /// Adiciona bônus permanente de TaxaCrit (stack-builder OlhoClinico).
         /// Soma no getter; o clamp 0..1 acontece no getter de TaxaCrit.
         /// </summary>
         public void AdicionarBonusTaxaCritPermanente(double delta) =>
@@ -488,7 +488,7 @@ namespace ApostlesWar
 
         /// <summary>
         /// Combina a lista passada na chamada com a lista permanente do atacante
-        /// (passivas como PassivaVampiro que ignoram tipos específicos sempre).
+        /// (passivas como Drenagem que ignoram tipos específicos sempre).
         /// </summary>
         private IEnumerable<Type>? ComporListaIgnorar(IEnumerable<Type>? extra)
         {

@@ -8,7 +8,7 @@ namespace v1_Apostle_s_War.Skills.Debuffs
     /// cleanses genéricos de vivo nunca o alcançam (filtram EstaVivo()). O revive checa
     /// este debuff (Morto.Reviver) e recusa se ele estiver presente.
     ///
-    /// Aplicado por: PassivaVilao (ao matar) e Barata/Glitch (ao matar com a ativa).
+    /// Aplicado por: Sentenca (ao matar) e Barata/Glitch (ao matar com a ativa).
     /// Removido por: AnjoCaido (Diabo) — cleanse específico que reabilita o revive.
     ///
     /// NOTA: por ora é Debuff. Se a mecânica de Alma fizer cleanses rodarem em mortos,

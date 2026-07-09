@@ -191,15 +191,19 @@ O vocabulário compartilhado do jogo. **Cresce por descoberta** — quando um pe
 
 ### 5.2 Escopo (em quais COMBATENTES)
 `AlvosResolvidos` (default, herda o pick da habilidade), `TodosAliados` (o time do atacante —
-que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`. Provável 5º:
-`OutrosAliados` (aliados menos o conjurador — o OssoDuroDeRoer pede).
+que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`. 5º confirmado com **2
+clientes reais**: `OutrosAliados` (aliados menos o conjurador — OssoDuroDeRoer e Circo) —
+entra no vocabulário quando o primeiro deles migrar.
 
 ### 5.3 EstadoAlvo por ação (Vivos/Mortos) — avaliado na execução
 `EstadoAlvo` **desce da habilidade pra ação** e é avaliado no momento em que a ação roda
 (não uma vez, na resolução). É isso que faz `Cura(Vivos)` pegar os recém-revividos e
 `Sentença(Mortos)` pegar os recém-mortos. **O `Ambos` MORRE** — uma habilidade que mira dois
 estados é só uma habilidade com duas ações de estados diferentes; o `throw` no `Ambos` fica
-sem sentido e está descartado.
+sem sentido e está descartado. Enquanto o enum-value existir (Strangler), `Ambos` passado a
+uma AÇÃO significa **sem filtro** (vivos E mortos) — semanticamente honesto, nunca silêncio
+errado. Usuários mapeados: os 7 da família do revive (§9) + 1 check no `CombateService:282`;
+o value morre quando o 7º migrar.
 
 ### 5.4 Seletor (quais/quantos STATUS por combatente)
 Só para operações de manipulação de status (`RemoverDebuffs`/`MoverBuffs`/`Explodir`/
@@ -293,7 +297,7 @@ Quebrariam **em silêncio** — manter explícitos:
 
 ## 8. Boundaries e questões abertas (registradas, não resolvidas agora)
 
-### 8.1 Pipeline / conjunto-afetado (a Atlantis)
+### 8.1 Pipeline / conjunto-afetado (a Atlantis) — CONFIRMADO 1 cliente após ler os 7
 A `Atlantis` revive os mortos e aplica Intocável **só nos que reviveu** — não em todos os
 vivos. `AplicarBuff(Intocavel, TodosAliados, Vivos)` estaria errado (pegaria os que já
 estavam vivos). O `EstadoAlvo` sozinho não distingue "todos os vivos agora" (AnjoCaído) de
@@ -301,6 +305,8 @@ estavam vivos). O `EstadoAlvo` sozinho não distingue "todos os vivos agora" (An
 (`AfetadosPelaAcaoAnterior`): a `Reviver` produz um conjunto, a `AplicarBuff` consome. **1
 cliente real hoje** (Barata parece irmão mas é resolvido por `AlvosResolvidos+Mortos`). Pela
 disciplina do §9: **não construir ainda** — Atlantis fica Nível 2 (bespoke) até um 2º cliente.
+*Confirmado (jul/2026): lidas TODAS as 7 habilidades da família do revive (§9) — só a Atlantis
+mira "os revividos"; as outras miram "todos os vivos" (estado-na-execução resolve). Segue 1.*
 
 ### 8.2 Derivação do pick do menu
 Com `EstadoAlvo` fora da habilidade, o **menu de seleção de alvo** precisa derivar da ação
@@ -334,6 +340,14 @@ Coringa, DestruindoDia, AnjoCaido), `RemoverBuffs` (DocesOuTravessuras), `MoverB
 (Copiando), `Explodir` (Inferno, Putridão). `Transformar` (buff→debuff) é futuro (depende dos
 debuffs-contraparte + um mapa).
 
+**A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
+`Reviver` tem **7 clientes** — Nigiri (Humanos), Tecnology (Tecnológicos), Céu (Apóstolos),
+AnjoCaído (Decaídos), DocesDeAbobora (LadoSombrio, revive **SÓ 1** — primeiro elegível, HP
+cheio), Circo (Folclore, + Intocável em `OutrosAliados`) e Atlantis (Místicos, pipeline §8.1).
+Nasce compartilhada com `percentualHP` + `quantos` (todos vs. 1). A Sentença é checada central
+no `Morto.Reviver` — a ação não escreve nada disso. Esses 7 são exatamente os usuários do
+`Ambos`; migrados eles, o enum-value e o check do `CombateService:282` morrem juntos.
+
 ---
 
 ## 10. Organização de pastas e a view do champ
@@ -354,28 +368,39 @@ Criar champ novo = uma pasta nova, sem tocar arquivos de outro. E o arquivo do c
 habilidades **sem rodar o jogo**. Uniformidade também torna trivial uma view *imprimível*
 genérica (um método lê `Nome`/`Simbolo`/`Descricao` de qualquer `HabilidadeAtiva`).
 
-### 10.2 Ordem dos temas
-Nível A (champ-como-classe/arquivo) e a reorganização pasta-por-champ são um **tema separado**
-do motor. Não se misturam — uma frente grande de cada vez.
+### 10.2 Ordem dos temas — REVISADO (jul/2026): Nível A FUNDIDO no sweep
+A 1ª versão separava o Nível A (champ-como-arquivo) do motor. **Revisado com o motor pronto:**
+manter separado custaria tocar ~70 habilidades DUAS vezes (uma pra "subclasse com Acoes", outra
+pra forma-construtor no arquivo do champ). Decidido: um PR de infra deixou `HabilidadeAtiva`
+construível por construtor (props `virtual` com backing — as subclasses Strangler seguem
+válidas), e **cada PR de facção migra os champs direto pra forma FINAL** (pasta + habilidades
+como métodos + passiva movida + classes velhas deletadas). Uma passada por champ; a view chega
+facção a facção; o `PersonagemService` encolhe até virar o `Roster`. O custo aceito: PRs de
+facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
 
 ---
 
 ## 11. Sequência de implementação
 
-- **PR #115 (feito):** modelo de `Acao` + interpretador per-alvo + `Dano`/`AplicarDebuff` +
-  piloto Mago (BolaDeFogo, Incendio). **Foi o formato per-alvo, não o motor.** Strangler: o
-  resto segue no `Ativar` velho, build verde.
-- **Motor (próximo):** o loop-flip (§3.2) + `Escopo` + `EstadoAlvo` por ação, avaliado na
-  execução. Migrar 2-3 clientes de cada eixo (escopo próprio: Barata/Quebrar/ArvoreDoMundo;
-  estado: AnjoCaído/Barata). O `Ambos` morre aqui.
-- **Vocabulário incremental:** `Cura`, `AplicarBuff`, `Escudo` (+ fragmentos de Valor);
-  depois `Reviver`, `RemoverDebuffs`, `MoverBuffs`, `ConcederTurnoExtra`, `Explodir`
-  (+ `IStatusComTick`, `Seletor`) — cada um com clientes reais na mão.
-- **`AcaoSobreConjunto`:** quando a Putridão for migrada (agregação).
-- **Pick do menu (§8.2):** o lado UI, quando o `EstadoAlvo` sair da habilidade.
-- **Tema separado, depois:** champ-como-dado + pastas (§10) + rename do repo (§12).
+- **PR #115 ✅:** modelo de `Acao` + interpretador per-alvo + `Dano`/`AplicarDebuff` +
+  piloto Mago (BolaDeFogo, Incendio). Foi o formato per-alvo, não o motor.
+- **PR #116 ✅ (o motor):** loop-flip (§3.2) + `Escopo` + `EstadoAlvo` por ação avaliado na
+  execução + fragmentos de `Valor` + `AplicarBuff`/`Cura`. Pilotos: Furtividade (escopo
+  próprio), Sushi (Cura+PorHP), Prender. Verificado em jogo.
+- **Forma-construtor + champ-arquivo ✅:** `HabilidadeAtiva` concreta com dois construtores
+  (dado + subclasse Strangler); Mago como piloto da forma final (`Champs/Reino/Mago/`);
+  AtaqueBasico híbrido (Acoes + `AtivarComNatureza`); `Ambos` numa ação = sem filtro.
+- **Testes do motor (próximo):** ~10 testes do interpretador (escopo, estado-na-execução,
+  ordem, agregação, Aleatorio com duplicata) ANTES do sweep — o motor é infra load-bearing.
+- **Sweep por facção, forma final (§10.2):** Humanos → Reino → LadoSombrio (estreia
+  `AcaoSobreConjunto`/Putridão + `Explodir`) → Tecnológicos (Barata) → Folclore (Quebrar,
+  `OutrosAliados`) → Místicos (Atlantis bespoke) → Especial → Decaídos (AnjoCaído/Inferno) →
+  Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce quando a facção do 1º cliente chega.
+  Facção que estreia mecanismo = momento de design, não sweep mecânico.
+- **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).
+- **Depois:** rename do repo/namespace (§12).
 
-Um PR, um tema. Build verde o tempo todo (Strangler).
+Um PR, um tema. Build verde o tempo todo (Strangler). **Docs bumpam NO MESMO PR do código.**
 
 ---
 

@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Debuffs;
+using ApostlesWar.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// Aplica 2 stacks de Queima em todos os inimigos e imediatamente explode a Queima.

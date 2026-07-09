@@ -1,8 +1,8 @@
 using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
-using v1_Apostle_s_War.Skills.Debuffs;
+using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Champs.Humanos
+namespace ApostlesWar.Champs.Humanos
 {
     /// <summary>Detetive — champ como DADO. Comportamento real: OlhoClinico.Passiva.cs.</summary>
     static class Detetive

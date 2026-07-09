@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Debuffs;
+using ApostlesWar.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Skills.Buffs
+namespace ApostlesWar.Skills.Buffs
 {
     /// <summary>
     /// Buff: cada vez que o portador é atacado, o atacante recebe Veneno (1 stack)

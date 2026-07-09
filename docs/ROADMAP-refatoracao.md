@@ -637,8 +637,9 @@ ReceberDano — os pontos onde bug já apareceu.
 dados. Fazer só se incomodar.
 
 ### Faxina de nomes (rename do repo/namespace)
-**Status:** boy-scout. Tirar o `v1` — namespace `v1_Apostle_s_War` → `ApostlesWar` — e o repo
-vira só "Apostle's War". Corrigir a pasta `Campaingn` (typo de Campaign) e a mistura PT/EN.
+**Status:** ✅ **FEITO** o rename do `v1` — namespace `v1_Apostle_s_War` → `ApostlesWar`,
+sln/csproj (`v1-Apostle's-War.*` → `ApostlesWar.*`) junto. **Falta:** corrigir a pasta
+`Campaingn` (typo de Campaign) e a mistura PT/EN — boy-scout, sem dor conhecida ainda.
 Portfólio: recrutador lê o repo.
 
 ### EventoDano por ID (desacoplar dos objetos vivos)

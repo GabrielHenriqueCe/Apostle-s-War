@@ -51,9 +51,9 @@ Dono da REGRA de targeting (domínio puro, sem UI nem input):
 
 ```csharp
 using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar.Skills.Buffs;
 
-namespace v1_Apostle_s_War.Services
+namespace ApostlesWar.Services
 {
     /// <summary>
     /// Regra de domínio de targeting: dada uma lista de candidatos, decide quais

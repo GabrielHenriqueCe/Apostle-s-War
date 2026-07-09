@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Debuffs
+namespace ApostlesWar.Skills.Debuffs
 {
     /// <summary>
     /// Stack-based. Cada stack causa 5% do HP máximo no início do turno do portador (ignora defesa).

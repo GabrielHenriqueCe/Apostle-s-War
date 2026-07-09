@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\v1-Apostle's-War.csproj" />
+    <ProjectReference Include="..\ApostlesWar.csproj" />
   </ItemGroup>
 
 </Project>

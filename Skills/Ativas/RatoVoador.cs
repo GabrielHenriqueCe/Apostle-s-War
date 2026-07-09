@@ -1,8 +1,8 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
-using v1_Apostle_s_War.Skills.Debuffs;
+using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// Aplica Medo 1t em todos os inimigos, BuffAtaque 2t e BuffTaxaCrit 25% 2t em si mesmo,

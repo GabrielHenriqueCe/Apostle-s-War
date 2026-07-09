@@ -1,7 +1,7 @@
 using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
+using ApostlesWar.Skills.Buffs;
 
-namespace v1_Apostle_s_War.Champs.Humanos
+namespace ApostlesWar.Champs.Humanos
 {
     /// <summary>
     /// Operário — champ como DADO. A Marretada mora ao lado (Marretada.Ativa.cs) porque é

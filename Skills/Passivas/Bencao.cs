@@ -1,6 +1,6 @@
 using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Passivas
+namespace ApostlesWar.Skills.Passivas
 {
     /// <summary>
     /// Recupera 5% HP no início do turno, permanentemente. Capacidade direta

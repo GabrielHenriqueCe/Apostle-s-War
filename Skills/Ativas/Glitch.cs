@@ -1,8 +1,8 @@
 ﻿using ApostlesWar;
-using v1_Apostle_s_War.Skills.Buffs;
-using v1_Apostle_s_War.Skills.Debuffs;
+using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Debuffs;
 
-namespace v1_Apostle_s_War.Skills.Ativas
+namespace ApostlesWar.Skills.Ativas
 {
     /// <summary>
     /// +25% ATK em si (2t), -30% DEF no alvo (2t), ataca com +50% ATK.

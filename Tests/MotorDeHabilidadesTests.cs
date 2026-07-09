@@ -1,7 +1,7 @@
 using ApostlesWar;
-using v1_Apostle_s_War.Skills.Ativas;
-using v1_Apostle_s_War.Skills.Buffs;
-using v1_Apostle_s_War.Skills.Debuffs;
+using ApostlesWar.Skills.Ativas;
+using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Debuffs;
 
 namespace Tests
 {

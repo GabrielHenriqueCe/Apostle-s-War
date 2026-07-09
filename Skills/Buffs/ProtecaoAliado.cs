@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace v1_Apostle_s_War.Skills.Buffs
+namespace ApostlesWar.Skills.Buffs
 {
     /// <summary>
     /// Aliado com este buff sofre 30% a menos de dano; esse 30% vai pro Aplicador (sem defesa).

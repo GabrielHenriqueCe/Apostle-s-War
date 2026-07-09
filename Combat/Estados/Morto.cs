@@ -26,7 +26,7 @@ namespace ApostlesWar
             // (ImpedirRessurreicao), não revive. Toda tentativa de revive passa por
             // aqui, então nenhuma habilidade precisa checar — é à prova de esquecimento.
             // O Diabo (AnjoCaido) remove o debuff ANTES de chamar Reviver, daí passa.
-            if (StatusNoMorto.OfType<v1_Apostle_s_War.Skills.Debuffs.ImpedirRessurreicao>().Any())
+            if (StatusNoMorto.OfType<ApostlesWar.Skills.Debuffs.ImpedirRessurreicao>().Any())
                 return;
 
             dono.AplicarRevive(hp);

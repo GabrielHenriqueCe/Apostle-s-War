@@ -1,0 +1,29 @@
+namespace ApostlesWar
+{
+    /// <summary>
+    /// Aplica Escudo por um fragmento de Valor (ex: Valor.PorHP(0.30) = 30% do HP máximo do
+    /// alvo). Compartilha o fragmento de Valor com Cura — difere só no verbo final (ADR-
+    /// composicao-de-acoes §5.5). Já estava mapeada no vocabulário (§5.1); Lealdade (Rei) é o
+    /// 1º cliente migrado. Nomeada AplicarEscudo (não "Escudo", espelhando AplicarBuff/
+    /// AplicarDebuff) porque o nome cru colidiria com Skills.Buffs.Escudo: o namespace raiz
+    /// ApostlesWar é ENVOLVENTE de praticamente todo o resto do código, então um tipo Escudo
+    /// aqui venceria silenciosamente qualquer `using ApostlesWar.Skills.Buffs;` existente
+    /// (sem erro de ambiguidade — resolução por namespace envolvente tem prioridade sobre
+    /// using), quebrando todo `new Escudo(pontos, turnos)` que hoje se refere ao buff.
+    /// </summary>
+    class AplicarEscudo : Acao
+    {
+        private readonly ValorFn _valor;
+        private readonly int _turnos;
+
+        public AplicarEscudo(ValorFn valor, int turnos, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
+            : base(escopo, estadoAlvo)
+        {
+            _valor = valor;
+            _turnos = turnos;
+        }
+
+        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+            => new ApostlesWar.Skills.Buffs.Escudo(_valor(atacante, alvo, eventos), _turnos).Aplicar(alvo);
+    }
+}

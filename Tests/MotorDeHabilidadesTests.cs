@@ -274,12 +274,12 @@ namespace Tests
                 new List<Combate> { atacante, aliado },
                 new List<Combate> { Novo() });
 
-            var democracia = new Democracia();                  // Ativar velho, override
+            var raioX = new RaioX();                            // Ativar velho, override
 
-            democracia.Ativar(ctx, atacante);
+            raioX.Ativar(ctx, atacante);
 
             Assert.Equal(1000, atacante.HPAtual);               // capado
-            Assert.Equal(600 + 300, aliado.HPAtual);            // 30% de 1000
+            Assert.Equal(600 + 150, aliado.HPAtual);            // 15% de 1000
         }
     }
 }

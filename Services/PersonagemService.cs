@@ -21,25 +21,12 @@ namespace ApostlesWar.Services
             Policial.Definir(),
             Sushiman.Definir(),
 
-            
-            // O Reino
-            new Personagem(1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200,
-            new Protetor(),
-            new Esgrima(),
-            new PassivaGuarda()),
 
-            new Personagem(2, Faccao.Reino, "Ninja", "🥷", 600, 280, 200,
-            new Shuriken(),
-            new Kunai(),
-            new Sorrateiro()),
-
-            // Champ migrado pra forma final (Champs/Reino/Mago/) — o arquivo do champ é a view.
+            // O Reino — facção migrada pra forma final (Champs/Reino/), cada arquivo é a view.
+            Guarda.Definir(),
+            Ninja.Definir(),
             Mago.Definir(),
-
-            new Personagem(4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200,
-            new Democracia(),
-            new Lealdade(),
-            new CoroaDoSoberano()),
+            Rei.Definir(),
 
 
             // Lado Sombrio

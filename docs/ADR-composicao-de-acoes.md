@@ -393,10 +393,14 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
 - **Testes do motor ✅:** 11 testes xUnit do interpretador (escopo, estado-na-execução,
   ordem, agregação, Aleatorio com duplicata) — feitos ANTES do sweep, o motor é infra
   load-bearing. Rede de regressão de cada PR de facção: `dotnet test`.
-- **Sweep por facção, forma final (§10.2): Humanos ✅.** Segue: Reino → LadoSombrio (estreia
-  `AcaoSobreConjunto`/Putridão + `Explodir`) → Tecnológicos (Barata) → Folclore (Quebrar,
-  `OutrosAliados`) → Místicos (Atlantis bespoke) → Especial → Decaídos (AnjoCaído/Inferno) →
-  Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce quando a facção do 1º cliente chega.
+- **Sweep por facção, forma final (§10.2): Humanos ✅, Reino ✅** (Guarda/Ninja/Rei, ao lado do
+  Mago piloto — `AplicarEscudo` promovido de vocabulário-mapeado (§5.1, "Escudo") a Ação real
+  (Lealdade; nome `AplicarEscudo` pra não colidir com `Skills.Buffs.Escudo`), `Dano` ganhou
+  `ignorarDefesaPct`/`forcaCritico` opcionais (Kunai), Shuriken estreou a Ação bespoke Nível 3
+  `GolpeSeguidor`). Segue: LadoSombrio (estreia `AcaoSobreConjunto`/Putridão + `Explodir`) →
+  Tecnológicos (Barata) → Folclore (Quebrar, `OutrosAliados`) → Místicos (Atlantis bespoke) →
+  Especial → Decaídos (AnjoCaído/Inferno) → Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce
+  quando a facção do 1º cliente chega.
   Facção que estreia mecanismo = momento de design, não sweep mecânico.
 - **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).
 - **Depois:** rename do repo/namespace (§12).

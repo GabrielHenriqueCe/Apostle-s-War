@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Reino
 {
     /// <summary>
     /// Cada ataque reduz a DEF do alvo em 5% (sobre DefesaComItens), até -25% no alvo.

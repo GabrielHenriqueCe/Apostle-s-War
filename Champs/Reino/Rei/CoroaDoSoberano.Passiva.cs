@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Reino
 {
     /// <summary>
     /// Ao ser atacado, aumenta a própria DEF em 5% (sobre DefesaComItens) até um

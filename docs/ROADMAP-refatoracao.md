@@ -119,12 +119,18 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
 **Sequência:** #115 piloto per-alvo ✅ → #116 motor (loop-flip) ✅ → #117 forma-construtor +
 Mago champ-arquivo + rename passivas ✅ → #118 testes do motor ✅ → **Humanos ✅** (4 champs na
 forma final em `Champs/Humanos/`; `Reviver` nasceu no Nigiri — 1º da família dos 7; Marretada
-é a 1ª híbrida `.Ativa.cs`; o Nigiri deixou de usar `Ambos`) → **sweep segue** (Reino →
-Reino → LadoSombrio [estreia `AcaoSobreConjunto`/Putridão + `Explodir`] → Tecnológicos [Barata,
-estado/ao-matar] → Folclore [Quebrar, `OutrosAliados`] → Místicos [Atlantis bespoke] → Especial
-→ Decaídos [AnjoCaído, `Explodir`/Inferno] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do
-menu (lado UI, §8.2) quando o `Ambos` morrer. Quando uma facção ESTREIA um mecanismo, o champ é
-momento de design (verificar em jogo com cuidado extra), não sweep mecânico.
+é a 1ª híbrida `.Ativa.cs`; o Nigiri deixou de usar `Ambos`) → **Reino ✅** (Guarda/Ninja/Rei
+migrados em `Champs/Reino/`, ao lado do Mago piloto; `AplicarEscudo` nasceu Ação de
+vocabulário — Lealdade, já estava mapeada em §5.1 (como "Escudo") mas sem cliente até agora
+(nome `AplicarEscudo`, não `Escudo`, pra não colidir com `Skills.Buffs.Escudo` — o namespace
+raiz `ApostlesWar` é envolvente de quase todo o código); `Dano` ganhou
+`ignorarDefesaPct`/`forcaCritico` opcionais — Kunai; Shuriken estreou a 1ª Ação bespoke Nível 3,
+`GolpeSeguidor`, acoplamento hit-a-hit lido via `eventos`) → **sweep segue** (LadoSombrio
+[estreia `AcaoSobreConjunto`/Putridão + `Explodir`] → Tecnológicos [Barata, estado/ao-matar] →
+Folclore [Quebrar, `OutrosAliados`] → Místicos [Atlantis bespoke] → Especial → Decaídos
+[AnjoCaído, `Explodir`/Inferno] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado
+UI, §8.2) quando o `Ambos` morrer. Quando uma facção ESTREIA um mecanismo, o champ é momento de
+design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---
 

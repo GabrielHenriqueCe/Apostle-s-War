@@ -131,17 +131,21 @@ raiz `ApostlesWar` é envolvente de quase todo o código); `Dano` ganhou
 `GolpeSeguidor`, acoplamento hit-a-hit lido via `eventos`) → **LadoSombrio ✅** (Caveira/
 Fantasma/Abóbora/Zumbi migrados em `Champs/LadoSombrio/` — momento de design, estreou 4
 mecanismos novos do motor: **`AcaoSobreConjunto`** real (2º formato de Ação, dispatch por tipo
-em `HabilidadeAtiva.Ativar`) com 2 clientes — `Reviver` ganhou `quantos` (Nigiri todos, agora
-**DocesDeAbobora** revive só 1, 2º da família dos 7) e a bespoke local
-`ExplodirVenenoECurarMedia` (Putrefação, média cross-alvo); **`IStatusComTick`** (`Combat/
+em `HabilidadeAtiva.Ativar`), cliente: a bespoke local `ExplodirVenenoECurarMedia` (Putrefação,
+média cross-alvo); **regra do revive firmada** (ADR §9): `Reviver` per-alvo só com
+`percentualHP` — revive-de-N usa o pick do motor (habilidade declara `numeroDeAlvos: N` +
+`TipoAlvo.Aleatorio` + `EstadoAlvo.Mortos`, ação herda `AlvosResolvidos`; selecionado + extras
+sorteados). **DocesDeAbobora** (2º da família dos 7) é o 1º revive-de-N com pick REAL de morto
+(a dor do "primeiro da lista" do ADR-selecao-por-estado morreu); `CombateService` ganhou guard
+pra pick sem candidato (revive sem mortos ainda vale pelo Reflexo); **`IStatusComTick`** (`Combat/
 ICapacidadesStatus.cs`) com `Veneno.Detonar` real e `Queima.Detonar` adicionado por tabela
 (Inferno segue no `Skills/Ativas/` velho chamando `Queima.Explodir`, agora um shim fino sobre
 Detonar — **`Explodir` per-alvo genérico (Seletor.Tipo&lt;Queima&gt;()) ainda NÃO existe**, só
 migra quando Inferno migrar, em Decaídos); **`Escopo.OutrosAliados`** real, 1º cliente
 OssoDuroDeRoer (Circo é o 2º, Folclore); **`RemoverBuffs`/`Seletor`** reais, 1º cliente
 DocesOuTravessuras. De quebra, `AplicarBuff` ganhou a sobrecarga `Func&lt;Combate,Buff&gt;`
-pra buffs com proveniência (ProtecaoAliado.Aplicador). 13 testes xUnit (2 novos: OutrosAliados,
-AcaoSobreConjunto via `Reviver quantos:1`)) → **sweep segue** (Tecnológicos [Barata,
+pra buffs com proveniência (ProtecaoAliado.Aplicador). 14 testes xUnit (3 novos: OutrosAliados,
+revive-de-N via pick, dispatch de AcaoSobreConjunto)) → **sweep segue** (Tecnológicos [Barata,
 estado/ao-matar] → Folclore [Quebrar, 2º cliente de `OutrosAliados` — Circo] → Místicos
 [Atlantis bespoke] → Especial → Decaídos [AnjoCaído, `Explodir`/Inferno migra de vez — 3º da
 família do revive] → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)

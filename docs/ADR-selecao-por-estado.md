@@ -62,8 +62,10 @@ illegal states unrepresentable" (uma cura não consegue nem mirar um morto
 porque nem compila sem declarar).
 
 - **Vivos**: maioria (ataques, curas, buffs). `ResolverAlvos` filtra Vivos.
-- **Mortos**: revive puro de N-fixo (não existe hoje, mas a Abóbora
-  rebalanceada pode virar isso). `ResolverAlvos` filtra Mortos.
+- **Mortos**: revive de N-fixo. `ResolverAlvos` filtra Mortos. **1º cliente real:
+  DocesDeAbobora** (sweep LadoSombrio — o pick real de morto previsto aqui virou
+  realidade; o "primeiro da lista" morreu). O `CombateService` ganhou guard pra
+  pick sem candidato (sem mortos: pula o pick, as demais ações da habilidade rodam).
 - **Ambos**: a habilidade faz mais de uma coisa (família revive) — **opta por
   fora do pick automático** (ver 2.3). Não é "pureza quebrada", é uma categoria
   legítima (confirmado por Gabriel: "não tem problema as habilidades fazerem

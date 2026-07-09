@@ -23,8 +23,9 @@ namespace Tests
             => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, 0));
 
         private static HabilidadeAtiva Hab(List<Acao> acoes, int alvos,
-            TipoLista lista = TipoLista.Inimigos, TipoAlvo modo = TipoAlvo.Explicito)
-            => new("Teste", "🧪", 3, "hab de teste", alvos, modo, lista, EstadoAlvo.Vivos, acoes);
+            TipoLista lista = TipoLista.Inimigos, TipoAlvo modo = TipoAlvo.Explicito,
+            EstadoAlvo estado = EstadoAlvo.Vivos)
+            => new("Teste", "🧪", 3, "hab de teste", alvos, modo, lista, estado, acoes);
 
         private static void Ferir(Combate c, int dano)
             => c.ReceberDano(dano, NaturezasDano.DanoIndireto);
@@ -285,10 +286,8 @@ namespace Tests
             Assert.True(atacante.StatusAtivos.OfType<BuffAtaque>().Any());       // vivo também
         }
 
-        // ---------- AcaoSobreConjunto (agregação cross-alvo — ADR §3.4) ----------
-
         [Fact]
-        public void Reviver_Quantos1_RecebeOConjuntoInteiroEReviveSoOPrimeiroElegivel()
+        public void Reviver_DeN_UsaOPickDaHabilidade_ReviveSoOSelecionado()
         {
             var atacante = Novo();
             var morto1 = Novo(hp: 1000); Matar(morto1);
@@ -297,17 +296,55 @@ namespace Tests
                 new List<Combate> { atacante, morto1, morto2 },
                 new List<Combate> { Novo() });
 
-            // DocesDeAbobora-like: revive só o 1º elegível do conjunto — só a
-            // AcaoSobreConjunto (recebe o conjunto INTEIRO de uma vez) sabe "já revivi 1".
+            // DocesDeAbobora-like (regra do revive): a HABILIDADE declara o pick (1 alvo,
+            // estado Mortos) e a ação herda os AlvosResolvidos — a MESMA seleção de qualquer
+            // habilidade (selecionado + extras sorteados), sem contador dentro da ação.
             var hab = Hab(new()
             {
-                new Reviver(1.0, quantos: 1),
-            }, alvos: int.MaxValue, lista: TipoLista.Aliados);
+                new Reviver(1.0, Escopo.AlvosResolvidos),
+            }, alvos: 1, lista: TipoLista.Aliados, modo: TipoAlvo.Aleatorio, estado: EstadoAlvo.Mortos);
 
-            hab.Ativar(ctx, atacante);
+            hab.Ativar(ctx, morto2);   // o jogador escolheu o morto2
 
-            Assert.True(morto1.EstaVivo());
-            Assert.False(morto2.EstaVivo());
+            Assert.True(morto2.EstaVivo());     // o SELECIONADO revive
+            Assert.False(morto1.EstaVivo());    // o outro não
+            Assert.Equal(1000, morto2.HPAtual); // HP cheio
+        }
+
+        // ---------- AcaoSobreConjunto (agregação cross-alvo — ADR §3.4) ----------
+
+        /// <summary>Dummy de teste do CONTRATO de dispatch: registra como o motor a chamou.</summary>
+        private class AcaoDeConjuntoEspiã : AcaoSobreConjunto
+        {
+            public int Chamadas;
+            public int TamanhoDoConjunto;
+
+            public AcaoDeConjuntoEspiã(Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
+                : base(escopo, estadoAlvo) { }
+
+            public override void Executar(Combate atacante, IReadOnlyList<Combate> conjunto, List<EventoDano> eventos)
+            {
+                Chamadas++;
+                TamanhoDoConjunto = conjunto.Count;
+            }
+        }
+
+        [Fact]
+        public void AcaoSobreConjunto_RecebeOConjuntoInteiroDeUmaVez_NaoPerAlvo()
+        {
+            var atacante = Novo();
+            var inimigo1 = Novo(); var inimigo2 = Novo(); var inimigo3 = Novo();
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante },
+                new List<Combate> { inimigo1, inimigo2, inimigo3 });
+
+            var espiã = new AcaoDeConjuntoEspiã();
+            var hab = Hab(new() { espiã }, alvos: int.MaxValue);
+
+            hab.Ativar(ctx, inimigo1);
+
+            Assert.Equal(1, espiã.Chamadas);          // UMA chamada com o conjunto...
+            Assert.Equal(3, espiã.TamanhoDoConjunto); // ...inteiro — não 3 chamadas per-alvo
         }
 
         // ---------- Convivência Strangler ----------

@@ -12,8 +12,10 @@ namespace ApostlesWar.Champs.LadoSombrio
             2, Faccao.LadoSombrio, "Fantasma", "👻", 1400, 120, 200,
             Assombracao(), VindoDoAlem(), new Espectral());
 
+        // Cura AGREGADA (decisão de Gabriel): 20% da SOMA do dano causado no ataque inteiro,
+        // uma vez ao fim — não 20% por hit. É o fragmento PorDanoCausado lendo o eventos completo.
         static HabilidadeAtiva Assombracao() => new(
-            "Assombração", "👻", turnos: 3, "Ataca todos. Cura 20% do dano causado em cada inimigo.",
+            "Assombração", "👻", turnos: 3, "Ataca todos. Cura 20% de todo o dano causado.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()

@@ -345,22 +345,38 @@ o Inferno migrar, Decaídos). `IStatusComTick` ✅ **IMPLEMENTADA** (`Veneno.Det
 mapa).
 
 **`AcaoSobreConjunto` ✅ IMPLEMENTADA** (`Skills/Acoes/AcaoSobreConjunto.cs`, dispatch por tipo em
-`HabilidadeAtiva.Ativar`). 2 clientes reais: `Reviver` com `quantos` (abaixo) e
-`ExplodirVenenoECurarMedia` (Putrefação, média cross-alvo, bespoke local em
-`Champs/LadoSombrio/Zumbi/`).
+`HabilidadeAtiva.Ativar`). 1 cliente real: `ExplodirVenenoECurarMedia` (Putrefação, média
+cross-alvo, bespoke local em `Champs/LadoSombrio/Zumbi/`). O `Reviver` chegou a nascer como
+`AcaoSobreConjunto` (com `quantos` + `Take` interno) e foi REVERTIDO pra per-alvo — ver a regra
+do revive abaixo: contar/selecionar dentro da ação duplicava o mecanismo de seleção que o
+`ResolverAlvos` já é.
 
 **`Escopo.OutrosAliados` ✅ IMPLEMENTADO.** 1º dos 2 clientes: OssoDuroDeRoer (Caveira,
 LadoSombrio). Falta Circo (Folclore).
 
 **A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
 `Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology (Tecnológicos), Céu (Apóstolos),
-AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1** — primeiro elegível, HP
-cheio), Circo (Folclore, + Intocável em `OutrosAliados`) e Atlantis (Místicos, pipeline §8.1).
-Nasceu compartilhada com `percentualHP` + `quantos` (todos vs. 1) — `Reviver` é
-`AcaoSobreConjunto` desde o DocesDeAbobora (quantos:1 exige ver o conjunto inteiro de uma vez,
-pra saber "já revivi 1"). A Sentença é checada central no `Morto.Reviver` — a ação não escreve
-nada disso. Esses 7 são exatamente os usuários do `Ambos`; migrados eles, o enum-value e o
-check do `CombateService:282` morrem juntos. **2 de 7 feitos.**
+AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1**), Circo (Folclore, +
+Intocável em `OutrosAliados`) e Atlantis (Místicos, pipeline §8.1).
+
+**REGRA DO REVIVE (decisão de Gabriel, jul/2026):** a ação `Reviver` é per-alvo simples, só
+`percentualHP` — a SELEÇÃO de quantos/quais revive NÃO mora na ação, mora no mecanismo único
+de seleção do jogo (`ResolverAlvos`):
+- **Revive-de-todos** (Nigiri, AnjoCaído...): `Reviver(pct)` com escopo default
+  (`TodosAliados`/`Mortos`), sem pick.
+- **Revive-de-N** (DocesDeAbobora, N=1): a HABILIDADE declara `numeroDeAlvos: N` +
+  `TipoAlvo.Aleatorio` + `EstadoAlvo.Mortos`, e a ação usa `Escopo.AlvosResolvidos`. O jogador
+  ESCOLHE o morto (pick real por estado — ADR-selecao-por-estado §2.4) e os extras são
+  sorteados: **selecionado + random**, a semântica que o `Aleatorio` já tem. Duplicata do
+  sorteio é inofensiva (`Vivo.Reviver` é no-op). Uma 1ª versão usava `quantos` + `Take` dentro
+  da ação — REVERTIDA: duas formas de selecionar N alvos no mesmo motor é anti-padrão.
+  O DocesDeAbobora ganhou de quebra o pick real ("primeiro da lista" era a dor apontada no
+  ADR-selecao-por-estado); o `CombateService` ganhou o guard pra pick sem candidato (revive
+  sem mortos: pula o pick, as demais ações rodam — o Reflexo ainda vale).
+
+A Sentença é checada central no `Morto.Reviver` — a ação não escreve nada disso. Esses 7 são
+exatamente os usuários do `Ambos`; migrados eles, o enum-value e o check do
+`CombateService:282` morrem juntos. **2 de 7 feitos.**
 
 ---
 

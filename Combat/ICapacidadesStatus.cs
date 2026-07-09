@@ -31,15 +31,21 @@
 
     /// <summary>
     /// Status com efeito de tick (dano periódico) que pode ser DETONADO — aplica de uma vez o
-    /// efeito remanescente e se remove, em vez de esperar o próprio turno do portador. Fragmento
-    /// de Valor do lado do status (ADR-composicao-de-acoes §5.5), consumido pela Ação Explodir
-    /// (per-alvo, Inferno) e por agregações bespoke que precisam do valor pra além de só aplicar
-    /// o dano (ExplodirVenenoECurarMedia, Putrefação — precisa do % pra tirar a média).
-    /// Implementadores: Veneno, Queima.
+    /// efeito remanescente e se remove, em vez de esperar o próprio turno do portador. É o
+    /// molde único das explosões (regra de Gabriel): a Ação Explodir orquestra igual pra todos,
+    /// e cada status detona FAZENDO O QUE ELE FAZ (Veneno só dano; Queima dano + redução de HP
+    /// máximo). Implementadores: Veneno (cliente: Putrefação), Queima (cliente: Inferno, migra
+    /// nos Decaídos).
     /// </summary>
     interface IStatusComTick
     {
-        /// <summary>Aplica o efeito remanescente de uma vez, remove o status e retorna o dano causado.</summary>
-        int Detonar(Combate portador);
+        /// <summary>
+        /// Aplica o efeito remanescente de uma vez, remove o status e devolve o EventoDano da
+        /// detonação (bruto/efetivo/absorvido/natureza) — o interpretador agrega esses eventos
+        /// junto dos de Dano (invariante do ADR-composicao-de-acoes §7), então a explosão
+        /// aparece na exibição, conta no PorDanoCausado e a morte-por-explosão passa pelos
+        /// Atos de morte. O detonador entra como Atacante do evento.
+        /// </summary>
+        EventoDano Detonar(Combate portador, Combate detonador);
     }
 }

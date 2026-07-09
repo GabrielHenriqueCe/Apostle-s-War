@@ -4,8 +4,11 @@ using ApostlesWar.Skills.Debuffs;
 namespace ApostlesWar.Champs.LadoSombrio
 {
     /// <summary>
-    /// Zumbi — champ como DADO (ver ADR-composicao-de-acoes §10). Putridao usa a Ação bespoke
-    /// local ExplodirVenenoECurarMedia.cs — 1ª AcaoSobreConjunto real do motor. Passiva:
+    /// Zumbi — champ como DADO (ver ADR-composicao-de-acoes §10), vocabulário puro (Nível 1).
+    /// Putrefação é o 1º cliente da Ação Explodir (molde único das explosões — detona o que o
+    /// status faz); a cura é um EXTRA da habilidade (ação separada, 20% de todo o dano causado
+    /// via PorDanoCausado — a explosão entra na conta porque registra seus EventoDano), por
+    /// isso a explosão é reutilizável a seco por outros champs. Passiva:
     /// PutrefacaoContagiosa.Passiva.cs.
     /// </summary>
     static class Zumbi
@@ -25,13 +28,14 @@ namespace ApostlesWar.Champs.LadoSombrio
             });
 
         static HabilidadeAtiva Putridao() => new(
-            "Putrefação", "💀", turnos: 4, "Ataca todos. Explode Venenos causando dano imediato. Cura média.",
+            "Putrefação", "💀", turnos: 4, "Ataca todos. Explode os Venenos causando o dano imediato. Cura 20% do dano causado.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
                 new Dano(1.0),
-                new ExplodirVenenoECurarMedia(),
+                new Explodir(Seletor.Tipo<Veneno>()),
+                new Cura(Valor.PorDanoCausado(0.20), Escopo.ProprioAtacante),
             });
     }
 }

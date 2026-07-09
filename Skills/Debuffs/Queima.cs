@@ -71,34 +71,38 @@ namespace ApostlesWar.Skills.Debuffs
         }
 
         /// <summary>
-        /// Aplica imediatamente todo o efeito remanescente desta Queima e a remove. Shim de
-        /// compatibilidade — o Inferno (ainda não migrado, Skills/Ativas/Inferno.cs) chama este
-        /// método direto; quando migrar, vira a Ação Explodir (ADR-composicao-de-acoes §5.1),
-        /// que usará Detonar (abaixo) por baixo, igual todo IStatusComTick.
+        /// Shim de compatibilidade — o Inferno (ainda não migrado, Skills/Ativas/Inferno.cs)
+        /// chama este método direto e descarta o evento; quando migrar (Decaídos), vira a Ação
+        /// Explodir com Seletor.Tipo&lt;Queima&gt;() e este shim morre. O detonador do evento
+        /// descartado é irrelevante — passa o próprio portador.
         /// </summary>
-        public void Explodir(Combate portador) => Detonar(portador);
+        public void Explodir(Combate portador) => Detonar(portador, portador);
 
         /// <summary>
-        /// IStatusComTick: aplica imediatamente todo o efeito remanescente (dano + redução de
-        /// HP máximo, respeitando o cap próprio), remove a Queima e retorna o dano causado.
-        /// Dano = stacks × 5% HPMaximoInicial.
+        /// IStatusComTick: aplica imediatamente todo o efeito remanescente FAZENDO O QUE A
+        /// QUEIMA FAZ (dano + redução de HP máximo, respeitando o cap próprio), remove a Queima
+        /// e devolve o EventoDano da detonação. Dano = stacks × 5% HPMaximoInicial.
         /// </summary>
-        public int Detonar(Combate portador)
+        public EventoDano Detonar(Combate portador, Combate detonador)
         {
-            int valor = (int)(portador.HPMaximoInicial * DanoPorTurno * Stacks);
+            int bruto = (int)(portador.HPMaximoInicial * DanoPorTurno * Stacks);
             // Dano à vida bloqueável; a redução de HP máximo (abaixo) ignora tudo.
-            portador.ReceberDano(valor, NaturezasDano.QueimaDano);
+            var (efetivo, absorvido) = portador.ReceberDano(bruto, NaturezasDano.QueimaDano);
 
             int capAbsoluto = (int)(portador.HPMaximoInicial * CapPropio);
             int aindaPodeReduzir = capAbsoluto - portador.HPMaximoReduzidoTotal;
             if (aindaPodeReduzir > 0)
             {
-                int reducao = Math.Min(valor, aindaPodeReduzir);
+                int reducao = Math.Min(bruto, aindaPodeReduzir);
                 portador.ReduzirHPMaximo(reducao);
             }
 
             Remover(portador);
-            return valor;
+            return new EventoDano(
+                Atacante: detonador, Alvo: portador,
+                DanoBruto: bruto, DanoEfetivo: efetivo, AbsorvidoPeloEscudo: absorvido,
+                Critico: false, HPRestante: Math.Max(0, portador.HPAtual),
+                Natureza: NaturezasDano.QueimaDano);
         }
     }
 }

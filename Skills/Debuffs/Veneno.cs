@@ -64,13 +64,20 @@ namespace ApostlesWar.Skills.Debuffs
         /// </summary>
         public double PercentualDanoImediato => DanoPorStack * Stacks;
 
-        /// <summary>IStatusComTick: aplica o dano total imediato, remove o Veneno, retorna o dano.</summary>
-        public int Detonar(Combate portador)
+        /// <summary>
+        /// IStatusComTick: aplica o dano total imediato, remove o Veneno e devolve o EventoDano
+        /// da detonação (o detonador é o Atacante do evento).
+        /// </summary>
+        public EventoDano Detonar(Combate portador, Combate detonador)
         {
-            int dano = DanoTotalImediato(portador);
-            portador.ReceberDano(dano, NaturezasDano.Veneno);
+            int bruto = DanoTotalImediato(portador);
+            var (efetivo, absorvido) = portador.ReceberDano(bruto, NaturezasDano.Veneno);
             Remover(portador);
-            return dano;
+            return new EventoDano(
+                Atacante: detonador, Alvo: portador,
+                DanoBruto: bruto, DanoEfetivo: efetivo, AbsorvidoPeloEscudo: absorvido,
+                Critico: false, HPRestante: Math.Max(0, portador.HPAtual),
+                Natureza: NaturezasDano.Veneno);
         }
     }
 }

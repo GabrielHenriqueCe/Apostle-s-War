@@ -13,8 +13,8 @@ namespace ApostlesWar
     ///
     /// INVARIANTE (ADR §3.1): na forma-construtor a lista de Acoes é criada UMA vez e reusada a
     /// cada ativação — uma Acao só pode carregar CONFIG (multiplicador, fábrica, fragmento de
-    /// Valor), nunca estado por-ativação. Estado que atravessa alvos vive em variável local do
-    /// Executar de uma AcaoSobreConjunto, não em campo.
+    /// Valor), nunca estado por-ativação. Valor que atravessa alvos passa pelo `eventos` (é
+    /// assim que PorDanoCausado agrega), nunca por campo da instância.
     /// </summary>
     abstract class Acao
     {

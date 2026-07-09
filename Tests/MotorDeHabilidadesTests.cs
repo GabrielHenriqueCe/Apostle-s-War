@@ -311,40 +311,35 @@ namespace Tests
             Assert.Equal(1000, morto2.HPAtual); // HP cheio
         }
 
-        // ---------- AcaoSobreConjunto (agregação cross-alvo — ADR §3.4) ----------
-
-        /// <summary>Dummy de teste do CONTRATO de dispatch: registra como o motor a chamou.</summary>
-        private class AcaoDeConjuntoEspiã : AcaoSobreConjunto
-        {
-            public int Chamadas;
-            public int TamanhoDoConjunto;
-
-            public AcaoDeConjuntoEspiã(Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
-                : base(escopo, estadoAlvo) { }
-
-            public override void Executar(Combate atacante, IReadOnlyList<Combate> conjunto, List<EventoDano> eventos)
-            {
-                Chamadas++;
-                TamanhoDoConjunto = conjunto.Count;
-            }
-        }
+        // ---------- Explodir (molde único das explosões — ADR §5.1) ----------
 
         [Fact]
-        public void AcaoSobreConjunto_RecebeOConjuntoInteiroDeUmaVez_NaoPerAlvo()
+        public void Explodir_DetonaOVeneno_RegistraOEvento_EACuraPorDanoIncluiAExplosao()
         {
-            var atacante = Novo();
-            var inimigo1 = Novo(); var inimigo2 = Novo(); var inimigo3 = Novo();
+            var atacante = Novo(hp: 1000); Ferir(atacante, 900);   // 100/1000 — espaço pra cura
+            var inimigo1 = Novo(hp: 2000, atk: 0);
+            new Veneno(stacks: 2).Aplicar(inimigo1);               // detona 10% de 2000 = 200
+            var inimigo2 = Novo(hp: 2000, atk: 0);                 // sem veneno — explosão pula
             var ctx = new ContextoCombate(atacante,
                 new List<Combate> { atacante },
-                new List<Combate> { inimigo1, inimigo2, inimigo3 });
+                new List<Combate> { inimigo1, inimigo2 });
 
-            var espiã = new AcaoDeConjuntoEspiã();
-            var hab = Hab(new() { espiã }, alvos: int.MaxValue);
+            // Putrefação-like: a cura é um EXTRA da habilidade (ação separada), 20% de TODO o
+            // dano causado — a explosão entra na conta porque registra seus EventoDano.
+            var hab = Hab(new()
+            {
+                new Explodir(Seletor.Tipo<Veneno>()),
+                new Cura(Valor.PorDanoCausado(0.20), Escopo.ProprioAtacante),
+            }, alvos: int.MaxValue);
 
-            hab.Ativar(ctx, inimigo1);
+            var eventos = hab.Ativar(ctx, inimigo1);
 
-            Assert.Equal(1, espiã.Chamadas);          // UMA chamada com o conjunto...
-            Assert.Equal(3, espiã.TamanhoDoConjunto); // ...inteiro — não 3 chamadas per-alvo
+            Assert.False(inimigo1.StatusAtivos.OfType<Veneno>().Any());   // detonado e removido
+            Assert.Single(eventos);                                        // só quem tinha veneno gera evento
+            Assert.Equal(200, eventos[0].DanoEfetivo);                     // 2 stacks × 5% de 2000
+            Assert.Equal(2000 - 200, inimigo1.HPAtual);
+            Assert.Equal(2000, inimigo2.HPAtual);                          // sem veneno, intocado
+            Assert.Equal(100 + 40, atacante.HPAtual);                      // cura = 20% de 200
         }
 
         // ---------- Convivência Strangler ----------

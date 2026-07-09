@@ -87,24 +87,14 @@ namespace ApostlesWar
         /// A resolução dos AlvosResolvidos (o pick + extras) ainda usa o EstadoAlvo da HABILIDADE
         /// — é o que alimenta o menu de alvo. Cada ação re-filtra o seu conjunto pelo EstadoAlvo
         /// DELA na execução. A derivação do pick a partir das ações (§8.2) fica pra depois.
-        ///
-        /// Despacha por tipo (§3.4): uma AcaoSobreConjunto recebe o conjunto INTEIRO de uma vez
-        /// (agregação cross-alvo, ex: a média da Putrefação); as demais Acoes rodam per-alvo,
-        /// uma chamada por combatente do conjunto.
         /// </summary>
         public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
         {
             var eventos = new List<EventoDano>();
             var alvosResolvidos = ResolverAlvos(alvo, ObterListaPrincipal(ctx));
             foreach (var acao in Acoes)
-            {
-                var conjunto = ResolverEscopo(acao, alvosResolvidos, ctx);
-                if (acao is AcaoSobreConjunto agregada)
-                    agregada.Executar(ctx.Atacante, conjunto, eventos);
-                else
-                    foreach (Combate combatente in conjunto)
-                        acao.Executar(ctx.Atacante, combatente, eventos);
-            }
+                foreach (Combate combatente in ResolverEscopo(acao, alvosResolvidos, ctx))
+                    acao.Executar(ctx.Atacante, combatente, eventos);
             return eventos;
         }
 

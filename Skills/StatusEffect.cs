@@ -51,7 +51,6 @@
 
         public bool Expirou => TurnosRestantes <= 0;
         public abstract void Remover(Combate alvo);
-        public void EstenderTurno() => TurnosRestantes++;
 
         public void AumentarDuracao(int turnos) => TurnosRestantes += turnos;
         public void ReduzirDuracao(int turnos) => TurnosRestantes = Math.Max(0, TurnosRestantes - turnos);

@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Buffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Tecnologicos
 {
     /// <summary>
     /// Ao atacar, aplica CuraContinua 1t no aliado vivo com menor HP atual (inclui o

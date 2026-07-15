@@ -18,7 +18,7 @@ namespace ApostlesWar.Champs.Humanos
             var preso = ctx.Contraparte.StatusAtivos.OfType<Preso>().FirstOrDefault();
             if (preso == null) return new List<ResultadoReacao>();
 
-            preso.EstenderTurno();
+            preso.AumentarDuracao(1);
 
             return new List<ResultadoReacao>
             {

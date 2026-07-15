@@ -18,6 +18,10 @@ namespace ApostlesWar.Services
         // Itens obtidos ao longo da campanha
         private List<Item> obtidos = new List<Item>();
 
+        // Itens equipados salvos na pasta Save/ ao lado do executável (ver CapitulosService.CaminhoSave).
+        private static readonly string CaminhoItens =
+            Path.Combine(AppContext.BaseDirectory, "Save", "itens.txt");
+
         #endregion
 
         #region Arsenal
@@ -70,11 +74,11 @@ namespace ApostlesWar.Services
         /// </summary>
         public void CarregarItensEquipados()
         {
-            if (!File.Exists("itens.txt")) return;
+            if (!File.Exists(CaminhoItens)) return;
 
             try
             {
-                var json = File.ReadAllText("itens.txt");
+                var json = File.ReadAllText(CaminhoItens);
                 var lista = JsonSerializer.Deserialize<Item?[]>(json);
                 if (lista != null)
                     for (int i = 0; i < lista.Length && i < equipados.Length; i++)
@@ -141,7 +145,8 @@ namespace ApostlesWar.Services
         public void SalvarItens()
         {
             var json = JsonSerializer.Serialize(equipados);
-            File.WriteAllText("itens.txt", json);
+            Directory.CreateDirectory(Path.GetDirectoryName(CaminhoItens)!);
+            File.WriteAllText(CaminhoItens, json);
         }
 
         #endregion

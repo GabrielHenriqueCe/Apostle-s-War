@@ -30,6 +30,12 @@ namespace ApostlesWar.Services
             new List<bool> { false, false, false, false, false, false, false }, false),
         };
 
+        // Save "vivo": gravado na pasta Save/ ao lado do executável (AppContext.BaseDirectory),
+        // não em caminho relativo — assim independe da working directory (VS x dotnet run) e
+        // sempre bate com a semente Save/ que o csproj copia pra saída no build.
+        private static readonly string CaminhoSave =
+            Path.Combine(AppContext.BaseDirectory, "Save", "save.txt");
+
         Capitulos ObterCapitulo(Faccao faccao)
         {
             return capitulos.First(c => c.Faccao == faccao);
@@ -69,7 +75,8 @@ namespace ApostlesWar.Services
         public void SalvarProgresso()
         {
             var json = JsonSerializer.Serialize(capitulos);
-            File.WriteAllText("save.txt", json);
+            Directory.CreateDirectory(Path.GetDirectoryName(CaminhoSave)!);
+            File.WriteAllText(CaminhoSave, json);
         }
 
         public List<Capitulos> ObterTodos() => capitulos;
@@ -85,11 +92,11 @@ namespace ApostlesWar.Services
         /// </summary>
         public void CarregarProgresso()
         {
-            if (!File.Exists("save.txt")) return;
+            if (!File.Exists(CaminhoSave)) return;
 
             try
             {
-                var json = File.ReadAllText("save.txt");
+                var json = File.ReadAllText(CaminhoSave);
                 var lista = JsonSerializer.Deserialize<List<Capitulos>>(json);
 
                 if (lista != null)

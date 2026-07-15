@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Buffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Tecnologicos
 {
     /// <summary>
     /// Ao receber dano (HP perdido), aplica Escudo de 5% do HP máximo por 1 turno em si.

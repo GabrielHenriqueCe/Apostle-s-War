@@ -1,6 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
+using ApostlesWar.Skills;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Tecnologicos
 {
     /// <summary>
     /// Ao ser atacado, reduz em 1 turno a duração de TODOS os buffs do atacante

@@ -142,6 +142,13 @@ deixaram. É **semanticamente significativo**:
 Reordenar quebra a semântica. Combinado com a avaliação-na-execução (§3.2), é isso que
 absorve a antiga "categoria condicional / ao-matar" para dentro do fluxo normal.
 
+**Princípio (decorrência) — DECOMPOR, não juntar:** quando uma habilidade faz N coisas,
+declare N ações do vocabulário na ordem, em vez de espremer tudo numa ação bespoke que "faz
+duas coisas". A ordem + a avaliação-na-execução já entregam a semântica (a cura do RaioX é ação
+separada da extensão de buffs; a cura da Putrefação é ação separada da explosão — §9). Bespoke
+fica reservado a um VERBO novo e ATÔMICO (Explodir, GolpeSeguidor, EstenderBuffs), NUNCA a uma
+COMBINAÇÃO de verbos que já existem. (Decisão de Gabriel, firmada no rebalance da Putrefação.)
+
 ### 3.4 `AcaoSobreConjunto` — agregação cross-alvo (CONSTRUÍDA E REMOVIDA — desenho registrado)
 
 > **Status (jul/2026):** implementada no sweep do LadoSombrio pra média da Putrefação e
@@ -200,8 +207,8 @@ O vocabulário compartilhado do jogo. **Cresce por descoberta** — quando um pe
 ### 5.2 Escopo (em quais COMBATENTES)
 `AlvosResolvidos` (default, herda o pick da habilidade), `TodosAliados` (o time do atacante —
 que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`, `OutrosAliados` ✅
-**IMPLEMENTADO** (aliados menos o conjurador — 2 clientes reais: OssoDuroDeRoer ✅, LadoSombrio;
-Circo, Folclore).
+**IMPLEMENTADO** (aliados menos o conjurador — clientes reais: OssoDuroDeRoer ✅ (LadoSombrio),
+Galáxia ✅ (Alien, Tecnológicos); Circo (Folclore) ainda por vir).
 
 ### 5.3 EstadoAlvo por ação (Vivos/Mortos) — avaliado na execução
 `EstadoAlvo` **desce da habilidade pra ação** e é avaliado no momento em que a ação roda
@@ -374,8 +381,28 @@ NÃO moram na explosão — são ações separadas na lista, por isso ela é reu
 1º cliente: Putrefação (`Seletor.Tipo<Veneno>()`); Inferno usa `Seletor.Tipo<Queima>()` quando
 migrar (Decaídos — até lá o shim `Queima.Explodir` chama o Detonar e descarta o evento).
 
-**`Escopo.OutrosAliados` ✅ IMPLEMENTADO.** 1º dos 2 clientes: OssoDuroDeRoer (Caveira,
-LadoSombrio). Falta Circo (Folclore).
+**`Escopo.OutrosAliados` ✅ IMPLEMENTADO.** Clientes: OssoDuroDeRoer (Caveira, LadoSombrio) ✅,
+Galáxia (Alien, Tecnológicos) ✅. Falta Circo (Folclore).
+
+**`EstenderBuffs` — bespoke-LOCAL do Robô (Tecnológicos).** Espelho EXATO do `RemoverBuffs`
+(mesmo `Seletor`, troca só o verbo: `AumentarDuracao` no lugar de `Remover`) — segue o padrão
+valência-split (`AplicarBuff`/`AplicarDebuff`, `RemoverBuffs`/`RemoverDebuffs`). RaioX é o
+ÚNICO cliente ATIVO; promove pra `Skills/Acoes/` no 2º cliente ativo real (aí nasce o gêmeo
+`EstenderDebuffs`). NÃO confundir com as passivas de duração (fio abaixo).
+
+**FIO FUTURO — unir a seleção de status entre passivas e ações (decisão de Gabriel; registrar o
+QUANDO e a REGRA).** Três passivas mexem em duração de status escolhendo o alvo À MÃO:
+Policial/AlgemasReforçadas (estende o Preso), Repetindo (estende 1 debuff aleatório do atacante),
+AnáliseCrítica (reduz TODOS os buffs do atacante). Elas compartilham com as Ações de status
+(`RemoverBuffs`/`EstenderBuffs`) o PRIMITIVO (`StatusEffect.AumentarDuracao`/`ReduzirDuracao`, já
+unificado na base — o `EstenderTurno` redundante foi colapsado em `AumentarDuracao(1)`) e o
+CONCEITO de `Seletor` — mas **NÃO o dispatch** (passiva = `IReageAo*`, ação = `Acao`; os dois
+sistemas ficam separados de propósito, não se fundem). Possível consolidação: as passivas
+passarem a escolher status via o mesmo `Seletor` (unir o "pegar status", não o invólucro).
+**QUANDO:** ao TOCAR cada passiva de duração no sweep da facção dela — AnáliseCrítica caiu nos
+Tecnológicos (deixada como estava, DE PROPÓSITO), Repetindo cai em Apóstolos, Policial já está
+em Humanos. **REGRA (Gabriel):** ao chegar nessas passivas, **PARAR e reavaliar este ponto** —
+decidir juntos se vale unir a seleção; não construir especulativo antes da hora.
 
 **A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
 `Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology (Tecnológicos), Céu (Apóstolos),
@@ -457,10 +484,15 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
   EventoDano`; Putrefação 1º cliente; Inferno segue no shim `Queima.Explodir` até Decaídos);
   `Escopo.OutrosAliados` real (OssoDuroDeRoer, 1º dos 2 clientes — falta Circo);
   `RemoverBuffs`/`Seletor` reais (DocesOuTravessuras).
-  Segue: Tecnológicos (Barata, estado/ao-matar) → Folclore (Quebrar, 2º cliente de
-  `OutrosAliados` — Circo) → Místicos (Atlantis bespoke) → Especial → Decaídos (AnjoCaído,
-  `Explodir`/Inferno migra de vez) → Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce
-  quando a facção do 1º cliente chega.
+  **Tecnológicos ✅** (Invasor/Alien/Robô/Cientista): Barata estreou o estado/ao-matar
+  dissolvido em `Dano` + `AplicarDebuff(Mortos)` (sem condicional "se matou"); Tecnology é o 3º
+  do Reviver (revive-de-todos); `EstenderBuffs` nasceu bespoke-local no Robô (RaioX), espelho do
+  `RemoverBuffs` — ver §9; Galáxia entrou como cliente de `OutrosAliados`; consolidado
+  `StatusEffect.EstenderTurno` → `AumentarDuracao(1)` (eram idênticos). Cura/extensão do RaioX e
+  as ações da Barata seguem o princípio DECOMPOR (§3.3).
+  Segue: Folclore (Quebrar, 2º cliente de `OutrosAliados` — Circo) → Místicos (Atlantis bespoke)
+  → Especial → Decaídos (AnjoCaído, `Explodir`/Inferno migra de vez) → Apóstolos
+  (Copiando/`MoverBuffs`). Vocabulário nasce quando a facção do 1º cliente chega.
   Facção que estreia mecanismo = momento de design, não sweep mecânico.
 - **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).
 - **Depois:** rename do repo/namespace (§12).

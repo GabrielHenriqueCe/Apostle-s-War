@@ -344,6 +344,30 @@ namespace Tests
 
         // ---------- Convivência Strangler ----------
 
+        /// <summary>
+        /// Subclasse Strangler FAKE, local ao teste — prova que uma habilidade que ainda
+        /// sobrescreve Ativar (o caminho velho) continua rodando junto do motor. Local DE
+        /// PROPÓSITO: não depende de um champ real, que ao migrar pra forma-construtor sumiria e
+        /// quebraria o teste (foi o que aconteceu com o RaioX ao virar dado nos Tecnológicos).
+        /// Cura 15% do HP máx dos aliados vivos, igual ao antigo RaioX.
+        /// </summary>
+        private class CuraOverrideStrangler : HabilidadeAtiva
+        {
+            public CuraOverrideStrangler() : base("StranglerFake", "🧪", 3, "cura 15% dos aliados vivos") { }
+            public override int NumeroDeAlvos => int.MaxValue;
+            public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
+            public override TipoLista TipoLista => TipoLista.Aliados;
+            public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
+            public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
+
+            public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+            {
+                foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
+                    AplicarCura(a, 0.15);
+                return SemDano();
+            }
+        }
+
         [Fact]
         public void Strangler_SubclasseComAtivarOverride_ContinuaFuncionando()
         {
@@ -353,7 +377,7 @@ namespace Tests
                 new List<Combate> { atacante, aliado },
                 new List<Combate> { Novo() });
 
-            var raioX = new RaioX();                            // Ativar velho, override
+            var raioX = new CuraOverrideStrangler();            // Ativar velho, override
 
             raioX.Ativar(ctx, atacante);
 

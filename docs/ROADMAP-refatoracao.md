@@ -150,12 +150,15 @@ passa pelos Atos de morte, furo antigo fechado; Inferno segue no shim `Queima.Ex
 **`RemoverBuffs`/`Seletor`** reais, 1º cliente DocesOuTravessuras. De quebra, `AplicarBuff`
 ganhou a sobrecarga `Func&lt;Combate,Buff&gt;` pra buffs com proveniência
 (ProtecaoAliado.Aplicador). 14 testes xUnit (3 novos: OutrosAliados, revive-de-N via pick,
-Explodir + cura-por-dano)) → **sweep segue** (Tecnológicos [Barata,
-estado/ao-matar] → Folclore [Quebrar, 2º cliente de `OutrosAliados` — Circo] → Místicos
+Explodir + cura-por-dano)) → **Tecnológicos ✅** (Invasor/Alien/Robô/Cientista — Barata estreou
+estado/ao-matar via `Dano`+`AplicarDebuff(Mortos)`, sem condicional; Tecnology 3º do Reviver;
+`EstenderBuffs` bespoke-local no Robô/RaioX, espelho do `RemoverBuffs` (§9); Galáxia = novo
+cliente de `OutrosAliados`; `EstenderTurno`→`AumentarDuracao` consolidado; princípio DECOMPOR
+firmado — ADR §3.3) → **sweep segue** (Folclore [Quebrar, 2º cliente de `OutrosAliados` — Circo] → Místicos
 [Atlantis bespoke] → Especial → Decaídos [AnjoCaído; Inferno migra pro `Explodir` genérico
 (`Seletor.Tipo<Queima>()`) e o shim `Queima.Explodir` morre — 3º da família do revive] →
 Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
-quando o `Ambos` morrer (2 dos 7 feitos: Nigiri, DocesDeAbobora — faltam Tecnology, Céu,
+quando o `Ambos` morrer (3 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology — faltam Céu,
 AnjoCaído, Circo, Atlantis). Quando uma facção ESTREIA um mecanismo, o champ é momento de
 design (verificar em jogo com cuidado extra), não sweep mecânico.
 

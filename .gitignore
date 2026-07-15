@@ -362,6 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Save do jogador (gerado em runtime na raiz do projeto por CapitulosService/ArsenalService)
-save.txt
-itens.txt
+# A pasta Save/ na raiz é a SEMENTE versionada (vem com tudo liberado) — o csproj a copia
+# pra saída no build, onde o save "vivo" é lido/gravado (bin/.../Save/, já ignorado por [Bb]in/).
+# Só ignoramos resíduos antigos de save em caminho relativo na raiz.
+/save.txt
+/itens.txt

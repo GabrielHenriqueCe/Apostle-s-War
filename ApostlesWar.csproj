@@ -14,6 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Semente de save versionada (vem com tudo liberado). Copiada pra saída no build, onde
+         o jogo lê/grava (AppContext.BaseDirectory/Save). PreserveNewest: não sobrescreve o
+         progresso local já jogado, mas semeia num clone novo. -->
+    <None Update="Save\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GHUtils\GHUtils.csproj" />
   </ItemGroup>
 

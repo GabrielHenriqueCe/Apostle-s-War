@@ -5,6 +5,7 @@ using System.Text;
 using ApostlesWar.Champs.Humanos;
 using ApostlesWar.Champs.Reino;
 using ApostlesWar.Champs.LadoSombrio;
+using ApostlesWar.Champs.Tecnologicos;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Passivas;
 
@@ -36,26 +37,11 @@ namespace ApostlesWar.Services
             Abobora.Definir(),
             Zumbi.Definir(),
 
-            // Tecnológicos
-            new Personagem(1, Faccao.Tecnologicos, "Invasor", "👾",  600, 240, 240,
-            new Glitch(),
-            new Barata(),
-            new Virus()),
-
-            new Personagem(2, Faccao.Tecnologicos, "Alien", "👽", 1200, 240, 120,
-            new Abduzir(),
-            new Galaxia(),
-            new CarapacaAlienigena()),
-
-            new Personagem(3, Faccao.Tecnologicos, "Robô", "🤖", 1200, 120, 240,
-            new RaioX(),
-            new Tecnology(),
-            new ReparoAutomatico()),
-
-            new Personagem(4, Faccao.Tecnologicos, "Cientista", "🧑‍🔬", 1000, 200, 200,
-            new Quimica(),
-            new Fisica(),
-            new AnaliseCritica()),
+            // Tecnológicos — facção migrada pra forma final (Champs/Tecnologicos/), cada arquivo é a view.
+            Invasor.Definir(),
+            Alien.Definir(),
+            Robo.Definir(),
+            Cientista.Definir(),
 
             // Folclore
             new Personagem(1, Faccao.Folclore, "Ogro", "👹", 1400, 160, 160,

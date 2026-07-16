@@ -1,12 +1,14 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Debuffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Especial
 {
     /// <summary>
     /// Ao ser atacado, aplica 2 stacks de Veneno no atacante. Migrada para o
     /// modelo de reação (IReageAoSerAtacado). Mais agressiva que a Zumbi (1 stack).
     /// (Por-hit por enquanto; "1x por agressor por turno" vem com o Turno.)
+    /// Classe PassivaCoco, nome de jogo "Fedorento" — o nome cru colidiria com a ativa
+    /// Fedorento do Zumbi; a renomeação é decisão pendente (ROADMAP/memória).
     /// </summary>
     class PassivaCoco : HabilidadePassiva, IReageAoSerAtacado
     {

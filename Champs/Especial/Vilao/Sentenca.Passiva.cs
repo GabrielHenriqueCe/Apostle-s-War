@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Debuffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Especial
 {
     /// <summary>
     /// Ao matar um inimigo, aplica a Sentença (ImpedirRessurreicao) no morto — ele não
@@ -16,7 +16,7 @@ namespace ApostlesWar.Skills.Passivas
         { }
 
         public List<ResultadoReacao> AoMatar(ContextoReacao ctx)
-        {   
+        {
             new ImpedirRessurreicao().Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>

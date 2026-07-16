@@ -8,6 +8,7 @@ using ApostlesWar.Champs.LadoSombrio;
 using ApostlesWar.Champs.Tecnologicos;
 using ApostlesWar.Champs.Folclore;
 using ApostlesWar.Champs.Misticos;
+using ApostlesWar.Champs.Especial;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Passivas;
 
@@ -58,26 +59,11 @@ namespace ApostlesWar.Services
             Fada.Definir(),
             Dragao.Definir(),
 
-            // Especial
-            new Personagem(1, Faccao.Especial, "Cocô", "💩", 1200, 160, 200,
-            new Descarga(),
-            new Desentupidor(),
-            new PassivaCoco()),
-
-            new Personagem(2, Faccao.Especial, "Herói", "🦸", 800, 240, 200,
-            new SalvandoDia(),
-            new Super(),
-            new Vigilante()),
-
-            new Personagem(3, Faccao.Especial, "Vilão", "🦹", 1200, 200, 160,
-            new DestruindoDia(),
-            new Vilania(),
-            new Sentenca()),
-
-            new Personagem(4, Faccao.Especial, "T-Rex", "🦖", 1000, 160, 240,
-            new Rugido(),
-            new Pisada(),
-            new PeleGrossa()),
+            // Especial — facção migrada pra forma final (Champs/Especial/), cada arquivo é a view.
+            Coco.Definir(),
+            Heroi.Definir(),
+            Vilao.Definir(),
+            TRex.Definir(),
 
             // Decaídos
             new Personagem(1, Faccao.Decaidos, "Morcego", "🦇", 800, 160, 280,

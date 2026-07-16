@@ -15,10 +15,10 @@ namespace ApostlesWar.Champs.LadoSombrio
     {
         public static Personagem Definir() => new(
             4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120,
-            Fedorento(), Putridao(), new PutrefacaoContagiosa());
+            VomitoToxico(), Putridao(), new PutrefacaoContagiosa());
 
-        static HabilidadeAtiva Fedorento() => new(
-            "Fedorento", "🤢", turnos: 4, "Ataca todos e aplica Veneno (5% HP/turno por stack).",
+        static HabilidadeAtiva VomitoToxico() => new(
+            "Vômito Tóxico", "🤢", turnos: 4, "Ataca todos e aplica Veneno (5% HP/turno por stack).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()

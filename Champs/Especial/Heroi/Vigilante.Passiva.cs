@@ -1,6 +1,6 @@
 using ApostlesWar;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Especial
 {
     /// <summary>
     /// Contra-ataca com a A1 sempre que é atacado (1x por agressor por turno).

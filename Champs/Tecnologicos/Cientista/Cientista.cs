@@ -5,7 +5,7 @@ namespace ApostlesWar.Champs.Tecnologicos
 {
     /// <summary>
     /// Cientista — champ como DADO. Química e Física são vocabulário puro (Dano + AplicarDebuff),
-    /// irmãs do Fedorento/Zumbi. Passiva: AnaliseCritica.Passiva.cs (a 3ª da família de passivas
+    /// irmãs do Vômito Tóxico (Zumbi). Passiva: AnaliseCritica.Passiva.cs (a 3ª da família de passivas
     /// que mexem em duração de status — reduz buffs do atacante; ver a nota no ADR §9).
     /// </summary>
     static class Cientista

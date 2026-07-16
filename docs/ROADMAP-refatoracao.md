@@ -165,7 +165,9 @@ gêmeo do RemoverBuffs]; `Dano`+`ignorarStatus` [CorteDeVento/Vendaval]; `Aplica
 nos revividos], fez o Atlantis (5º do revive) e CONSERTOU o Circo (bug: pegava todos os outros vivos);
 PoMágico = vocabulário puro [`ignorarStatus` casa por tipo-BASE, `typeof(Buff)`=todos os buffs];
 `RestaurarHPMaximo` bespoke no Dragão; unificar-ignorar fica pra tema próprio no Vampiro/Decaídos) →
-**sweep segue** (Especial → Decaídos [AnjoCaído; Inferno migra pro `Explodir` genérico
+**Especial ✅** (Cocô/Herói/Vilão/T-Rex — 100% vocabulário puro, ZERO bespoke, 1ª facção totalmente
+mecânica; DestruindoDia = 2º cliente do `RemoverDebuffs`, SalvandoDia = mais um de `OutrosAliados`) →
+**sweep segue** (Decaídos [AnjoCaído; Inferno migra pro `Explodir` genérico
 (`Seletor.Tipo<Queima>()`) e o shim `Queima.Explodir` morre — 3º da família do revive] →
 Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
 quando o `Ambos` morrer (5 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology, Circo, Atlantis — faltam

@@ -16,12 +16,12 @@
 
 | Ação | O que faz | Eixos | Arquivo |
 |---|---|---|---|
-| `Dano` | dano ao alvo (mult ATK; `ignorarDefesaPct`/`forcaCritico`/`ignorarStatus` opcionais; mult pode ser `Func(atk,alvo)`) | — | `Skills/Acoes/Dano.cs` |
+| `Dano` | dano ao alvo (mult ATK; `ignorarDefesaPct`/`forcaCritico`/`ignorarStatus` opcionais; `ignorarStatus` casa por tipo-BASE — `typeof(Buff)` ignora todos os buffs; mult pode ser `Func(atk,alvo)`) | — | `Skills/Acoes/Dano.cs` |
 | `Cura` | cura o alvo por um fragmento de Valor | Valor | `Skills/Acoes/Cura.cs` |
 | `AplicarEscudo` | Escudo no alvo por um fragmento de Valor (+ turnos) | Valor | `Skills/Acoes/AplicarEscudo.cs` |
 | `AplicarBuff` | aplica um buff (recebe FÁBRICA; sobrecarga `Func<Combate,Buff>` p/ proveniência) | — | `Skills/Acoes/AplicarBuff.cs` |
 | `AplicarDebuff` | aplica um debuff (FÁBRICA; sobrecarga `Func<Combate,Debuff>` p/ proveniência; `chance` opcional) | — | `Skills/Acoes/AplicarDebuff.cs` |
-| `Reviver` | revive um morto por % do HP máximo | — | `Skills/Acoes/Reviver.cs` |
+| `Reviver` | revive um morto por % do HP máx (buff opcional `buffNoRevivido` — só nos revividos) | — | `Skills/Acoes/Reviver.cs` |
 | `RemoverBuffs` | remove buffs do alvo conforme um Seletor | Seletor | `Skills/Acoes/RemoverBuffs.cs` |
 | `RemoverDebuffs` | remove debuffs do alvo conforme um Seletor (gêmeo do RemoverBuffs) | Seletor | `Skills/Acoes/RemoverDebuffs.cs` |
 | `Explodir` | detona status de tick (`IStatusComTick`) conforme Seletor → devolve `EventoDano` | Seletor | `Skills/Acoes/Explodir.cs` |
@@ -48,6 +48,7 @@ mesmo verbo, **pare e promova** pra `Skills/Acoes/` (ADR §9) em vez de duplicar
 | `GolpeSeguidor` | ataque cujo ignore-DEF depende do hit anterior ter sido crítico | 3 | Shuriken (Ninja) | 2º com acoplamento hit-a-hit | `Champs/Reino/Ninja/GolpeSeguidor.cs` |
 | `AutoDano` | dano ao PRÓPRIO atacante por um fragmento de Valor | 2 | VindoDoAlém (Fantasma) | 2º cliente real | `Champs/LadoSombrio/Fantasma/AutoDano.cs` |
 | `EstenderBuffs` | estende a duração de buffs conforme um Seletor | 2 | RaioX (Robô) | 2º cliente ATIVO (→ nasce `EstenderDebuffs`) | `Champs/Tecnologicos/Robo/EstenderBuffs.cs` |
+| `RestaurarHPMaximo` | restaura HP máximo perdido do alvo, até um cap % do HP máx inicial | 2 | DragãoProtetor (Dragão) | 2º cliente real | `Champs/Misticos/Dragao/RestaurarHPMaximo.cs` |
 
 ---
 

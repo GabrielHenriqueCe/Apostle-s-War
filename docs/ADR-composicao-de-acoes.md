@@ -211,7 +211,7 @@ O vocabulário compartilhado do jogo. **Cresce por descoberta** — quando um pe
 `AlvosResolvidos` (default, herda o pick da habilidade), `TodosAliados` (o time do atacante —
 que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`, `OutrosAliados` ✅
 **IMPLEMENTADO** (aliados menos o conjurador — clientes reais: OssoDuroDeRoer ✅ (LadoSombrio),
-Galáxia ✅ (Alien, Tecnológicos), Circo ✅ e Esmagar ✅ (Palhaço/Ogro, Folclore)).
+Galáxia ✅ (Alien, Tecnológicos), Esmagar ✅ (Ogro, Folclore)).
 
 ### 5.3 EstadoAlvo por ação (Vivos/Mortos) — avaliado na execução
 `EstadoAlvo` **desce da habilidade pra ação** e é avaliado no momento em que a ação roda
@@ -318,16 +318,18 @@ Quebrariam **em silêncio** — manter explícitos:
 
 ## 8. Boundaries e questões abertas (registradas, não resolvidas agora)
 
-### 8.1 Pipeline / conjunto-afetado (a Atlantis) — CONFIRMADO 1 cliente após ler os 7
-A `Atlantis` revive os mortos e aplica Intocável **só nos que reviveu** — não em todos os
-vivos. `AplicarBuff(Intocavel, TodosAliados, Vivos)` estaria errado (pegaria os que já
-estavam vivos). O `EstadoAlvo` sozinho não distingue "todos os vivos agora" (AnjoCaído) de
-"os que a ação anterior afetou" (Atlantis). A forma geral seria um escopo de **pipeline**
-(`AfetadosPelaAcaoAnterior`): a `Reviver` produz um conjunto, a `AplicarBuff` consome. **1
-cliente real hoje** (Barata parece irmão mas é resolvido por `AlvosResolvidos+Mortos`). Pela
-disciplina do §9: **não construir ainda** — Atlantis fica Nível 2 (bespoke) até um 2º cliente.
-*Confirmado (jul/2026): lidas TODAS as 7 habilidades da família do revive (§9) — só a Atlantis
-mira "os revividos"; as outras miram "todos os vivos" (estado-na-execução resolve). Segue 1.*
+### 8.1 Pipeline / conjunto-afetado (a Atlantis) — DISSOLVIDO (jul/2026)
+> **Status: DISSOLVIDO — NÃO construído.** A `Atlantis` e o Circo reviviam e aplicavam Intocável
+> **só nos revividos**. A forma geral proposta era um escopo `AfetadosPelaAcaoAnterior` (a `Reviver`
+> produz um conjunto, a ação seguinte consome). Não foi construído: **dissolveu-se por uma solução
+> mais simples (ideia de Gabriel)** — a `Reviver` ganhou um `buffNoRevivido` (`Func<Buff>`) que
+> aplica o buff a cada revivido, checando `EstaVivo()` logo após reviver. A própria `Reviver` já
+> sabe quem voltou (e quem tinha Sentença e não voltou não pega) — o motor não precisa rastrear
+> "conjunto afetado". É o MESMO padrão da `AcaoSobreConjunto` (§3.4): um mecanismo geral planejado
+> que uma peça específica e simples dissolveu. **Reconstrói-se o pipeline SÓ se aparecer um cliente
+> que precise fazer algo NÃO-buff nos afetados por uma ação anterior (ex: curar só os revividos)** —
+> hoje não existe. Clientes do `buffNoRevivido`: Atlantis (Sereia), Circo (Palhaço, era bug — antes
+> pegava todos os outros vivos).
 
 ### 8.2 Derivação do pick do menu
 Com `EstadoAlvo` fora da habilidade, o **menu de seleção de alvo** precisa derivar da ação
@@ -386,7 +388,7 @@ NÃO moram na explosão — são ações separadas na lista, por isso ela é reu
 migrar (Decaídos — até lá o shim `Queima.Explodir` chama o Detonar e descarta o evento).
 
 **`Escopo.OutrosAliados` ✅ IMPLEMENTADO.** Clientes: OssoDuroDeRoer (Caveira, LadoSombrio) ✅,
-Galáxia (Alien, Tecnológicos) ✅, Circo e Esmagar (Palhaço/Ogro, Folclore) ✅.
+Galáxia (Alien, Tecnológicos) ✅, Esmagar (Ogro, Folclore) ✅. (Circo saiu — virou Reviver-com-buff.)
 
 **`EstenderBuffs` — bespoke-LOCAL do Robô (Tecnológicos).** Espelho EXATO do `RemoverBuffs`
 (mesmo `Seletor`, troca só o verbo: `AumentarDuracao` no lugar de `Remover`) — segue o padrão
@@ -410,8 +412,8 @@ decidir juntos se vale unir a seleção; não construir especulativo antes da ho
 
 **A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
 `Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology ✅ (Tecnológicos), Céu (Apóstolos),
-AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1**), Circo ✅ (Folclore, +
-Intocável em `OutrosAliados`) e Atlantis (Místicos, pipeline §8.1).
+AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1**), Circo ✅ (Folclore) e
+Atlantis ✅ (Místicos). Circo e Atlantis usam `buffNoRevivido` (Intocável só nos revividos — §8.1 dissolvido).
 
 **REGRA DO REVIVE (decisão de Gabriel, jul/2026):** a ação `Reviver` é per-alvo simples, só
 `percentualHP` — a SELEÇÃO de quantos/quais revive NÃO mora na ação, mora no mecanismo único
@@ -430,8 +432,8 @@ de seleção do jogo (`ResolverAlvos`):
 
 A Sentença é checada central no `Morto.Reviver` — a ação não escreve nada disso. Esses 7 são
 exatamente os usuários do `Ambos`; migrados eles, o enum-value e o check do
-`CombateService:282` morrem juntos. **4 de 7 feitos** (Nigiri, DocesDeAbobora, Tecnology, Circo;
-faltam Céu, AnjoCaído, Atlantis).
+`CombateService:282` morrem juntos. **5 de 7 feitos** (Nigiri, DocesDeAbobora, Tecnology, Circo,
+Atlantis; faltam Céu, AnjoCaído).
 
 ---
 
@@ -500,8 +502,13 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
   `chance` (Pancada) + overload de proveniência `Func<Combate,Debuff>` (Irritar/Quebrar); Circo é o
   4º do revive e mais um cliente de `OutrosAliados` (com o Esmagar); Porradeiro = molde do Tiroteio
   + cura do Zumbi (ZERO bespoke — Gabriel cortou a ideia de bespoke que eu tinha).
-  Segue: Místicos (Atlantis bespoke)
-  → Especial → Decaídos (AnjoCaído, `Explodir`/Inferno migra de vez) → Apóstolos
+  **Místicos ✅** (Gênio/Sereia/Fada/Dragão): o "pipeline §8.1" foi **DISSOLVIDO** — a `Reviver`
+  ganhou `buffNoRevivido` (Intocável só nos revividos), o que fez o Atlantis (5º do revive) e
+  **CONSERTOU o Circo** (bugfix: antes pegava todos os outros vivos). PoMágico virou vocabulário
+  puro (o `ignorarStatus` passou a casar por tipo-BASE — `typeof(Buff)` = todos os buffs);
+  `RestaurarHPMaximo` = bespoke local no Dragão. A unificação dos 3 mecanismos de ignorar fica pra
+  tema próprio (na hora do Vampiro/Decaídos).
+  Segue: Especial → Decaídos (AnjoCaído, `Explodir`/Inferno migra de vez) → Apóstolos
   (Copiando/`MoverBuffs`). Vocabulário nasce quando a facção do 1º cliente chega.
   Facção que estreia mecanismo = momento de design, não sweep mecânico.
 - **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).

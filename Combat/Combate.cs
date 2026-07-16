@@ -302,7 +302,7 @@ namespace ApostlesWar
                 foreach (var contribuidor in StatusAtivos.OfType<IContribuiDefesa>())
                 {
                     var status = (StatusEffect)contribuidor;
-                    if (ignorados.Contains(status.GetType()))
+                    if (ignorados.Any(t => t.IsAssignableFrom(status.GetType())))
                         defesaEfetiva -= contribuidor.ContribuicaoDefesa(this);
                 }
                 defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
@@ -330,7 +330,7 @@ namespace ApostlesWar
             foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
             {
                 var status = (StatusEffect)modificador;
-                if (ignorados.Contains(status.GetType())) continue;   // mecanismo lista (PoMagico/Vampiro) — fica
+                if (ignorados.Any(t => t.IsAssignableFrom(status.GetType()))) continue;   // mecanismo lista: match por tipo EXATO ou BASE (typeof(Buff) = todos os buffs, ex: PoMagico; Vampiro passa tipos concretos)
                 if (!modificador.DeveAgir(natureza)) continue;         // mecanismo natureza — agora dentro do status
 
                 int antes = danoFinal;

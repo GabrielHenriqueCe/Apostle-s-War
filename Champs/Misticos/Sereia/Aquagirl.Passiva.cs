@@ -1,6 +1,6 @@
 using ApostlesWar;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Misticos
 {
     /// <summary>
     /// Recebe 15% menos dano durante todo o combate. Capacidade direta

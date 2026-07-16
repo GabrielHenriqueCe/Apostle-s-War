@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Buffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Misticos
 {
     /// <summary>
     /// Todo início de turno, aplica RefletirDano 2t em si mesmo (renova sempre).

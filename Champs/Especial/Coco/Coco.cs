@@ -5,13 +5,13 @@ namespace ApostlesWar.Champs.Especial
 {
     /// <summary>
     /// Cocô — champ como DADO. Vocabulário puro: Descarga e Desentupidor são dano + Veneno.
-    /// Passiva: PassivaCoco.Passiva.cs (nome de jogo "Fedorento").
+    /// Passiva: Fedorento.Passiva.cs (o Zumbi passou a se chamar "Vômito Tóxico", liberando o nome).
     /// </summary>
     static class Coco
     {
         public static Personagem Definir() => new(
             1, Faccao.Especial, "Cocô", "💩", 1200, 160, 200,
-            Descarga(), Desentupidor(), new PassivaCoco());
+            Descarga(), Desentupidor(), new Fedorento());
 
         static HabilidadeAtiva Descarga() => new(
             "Descarga", "🚽", turnos: 3, "+150% ATK e aplica 5 stacks de Veneno.",

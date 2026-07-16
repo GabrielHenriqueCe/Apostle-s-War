@@ -1,7 +1,9 @@
 # ADR — Estado de Vida (Vivo/Morto) e Atos do Turno
 
 > **Tipo:** Architecture Decision Record
-> **Status:** Aceito (conceitos fechados; implementação pendente)
+> **Status:** Aceito — **Passos 1–5 IMPLEMENTADOS** (State Pattern Vivo/Morto, status no Morto,
+>   Atos, Guarda limpa, seleção por estado). Doc de CONCEITO durável + gameplay futuro
+>   (decomposição / Alma como 3º estado). Absorveu o antigo `ADR-selecao-por-estado` (ver §11).
 > **Contexto:** Apostle's War. A morte é hoje implícita (`HPAtual <= 0`), sem um
 >   momento de transição onde efeitos possam reagir/prevenir. O ExecutarHabilidade
 >   resolve tudo num bloco plano, sem etapas nomeadas. Este ADR define (a) o estado
@@ -209,3 +211,28 @@ Decisões de implementação a tomar na hora (não são dúvidas de conceito):
 
 Validação: jogar uma fase completa e confirmar que morte, revive (Necromancia),
 bloquear-revive (Vilão), cura, Guarda e seleção de alvo se comportam corretamente.
+
+---
+
+## 11. Passo 5 — Seleção de alvo por estado + passiva-pura (FEITO; absorve o `ADR-selecao-por-estado`)
+
+> Este ADR e o antigo `ADR-selecao-por-estado.md` eram o MESMO fio — o Passo 5 acima. O
+> selecao-por-estado foi arquivado em `historico/`; a essência durável fica aqui.
+
+**Decisões (feitas, PR #111):**
+- **`EstadoAlvo { Vivos, Mortos, Ambos }` declarado pela habilidade** — "make illegal states
+  unrepresentable" (uma cura não consegue nem mirar um morto). `ResolverAlvos` passou a filtrar
+  pelo estado (some o hardcode `.Where(EstaVivo())`); `SalvandoDia`/`Celestial` largaram o loop
+  manual duplicado.
+- **`SelecaoDeAlvoService` ganhou overload pra Aliados** (sem Provocar/Bloqueio/Intocável, que só
+  fazem sentido mirando inimigos); o `CombateService` liga o pick real de alvo aliado quando
+  `NumeroDeAlvos` é finito e `EstadoAlvo != Ambos`.
+- **Passiva-pura (mesmo PR):** Abóbora/Dragão/Herói/Morcego/Anjo/Sereia largaram o buff-de-contorno
+  (`IPassivaInicial`) e viraram a capacidade direta (interface); Fantasma virou `Removivel=false`.
+- **Barata NÃO é `Ambos`:** mira Vivos (ataque) + consequência no morto resultante (Sentença) —
+  é uma seleção + efeito colateral, não duas seleções.
+
+**EVOLUÍDO PELO MOTOR:** o `EstadoAlvo` deixou de ser da habilidade e **desceu pra AÇÃO**, avaliado
+na execução (`ADR-composicao-de-acoes.md §5.3`) — e o `Ambos` está morrendo (uma habilidade que
+mira 2 estados vira 2 ações de estados diferentes). A forma ATUAL mora no composicao-de-acoes;
+esta seção é o registro de origem.

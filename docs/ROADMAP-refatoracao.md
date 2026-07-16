@@ -692,6 +692,12 @@ atacante automaticamente (a `PassivaPiromancer` para de ser fiada à mão em cad
 fogo). Espelho do `IModificaDanoRecebido`. Cruza com `FontesDeCapacidade` (dispatch das duas
 fontes: StatusAtivos + Personagem.Habilidades).
 
+### Identidade comum (Nome/Simbolo/Descricao) — resíduo do ADR-sistema-de-efeitos (arquivado)
+**Status:** boy-scout, cosmético. A "Separação 1" do `sistema-de-efeitos` (uma base comum de
+identidade — Nome/Simbolo/Descricao — herdada por `Habilidade` E `StatusEffect`, hoje duplicada)
+nunca foi feita; era "a última, cosmética". O ADR foi pra `docs/historico/`; o resíduo fica aqui
+pra não se perder. Fazer só se incomodar (puro DRY, sem dor conhecida).
+
 ### Faxina de comentários
 **Status:** ÚLTIMO da fila. Bisturi: remove ruído, mantém os porquês. Branch própria, depois de
 tudo estabilizar.

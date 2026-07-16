@@ -66,6 +66,9 @@ A **unificação dos mecanismos de ignorar** é um fio transversal já começado
 
 ## Composição de Ações + Motor de Habilidades (MOTOR FEITO — SWEEP POR FACÇÃO)
 
+> **Índice das Ações (o que já existe pra reusar): `CATALOGO-de-acoes.md`.** Ler antes de criar
+> habilidade nova — verbo compartilhado 1º, promover bespoke no 2º cliente, não duplicar.
+
 **Status:** MOTOR IMPLEMENTADO (#116, verificado em jogo: Furtividade/Sushi/Prender + regressão
 do Mago) e **forma-construtor + champ-como-arquivo FEITOS** (Mago piloto em `Champs/Reino/Mago/`).
 Ver **ADR-composicao-de-acoes.md**. É a "Auditoria das ativas" com dor real: ~70% das ativas

@@ -66,6 +66,9 @@ A **unificação dos mecanismos de ignorar** é um fio transversal já começado
 
 ## Composição de Ações + Motor de Habilidades (MOTOR FEITO — SWEEP POR FACÇÃO)
 
+> **Índice das Ações (o que já existe pra reusar): `CATALOGO-de-acoes.md`.** Ler antes de criar
+> habilidade nova — verbo compartilhado 1º, promover bespoke no 2º cliente, não duplicar.
+
 **Status:** MOTOR IMPLEMENTADO (#116, verificado em jogo: Furtividade/Sushi/Prender + regressão
 do Mago) e **forma-construtor + champ-como-arquivo FEITOS** (Mago piloto em `Champs/Reino/Mago/`).
 Ver **ADR-composicao-de-acoes.md**. É a "Auditoria das ativas" com dor real: ~70% das ativas
@@ -688,6 +691,12 @@ id/nome. Mudança real; fazemos quando for natural. (Não é "web/2027" — é q
 atacante automaticamente (a `PassivaPiromancer` para de ser fiada à mão em cada habilidade de
 fogo). Espelho do `IModificaDanoRecebido`. Cruza com `FontesDeCapacidade` (dispatch das duas
 fontes: StatusAtivos + Personagem.Habilidades).
+
+### Identidade comum (Nome/Simbolo/Descricao) — resíduo do ADR-sistema-de-efeitos (arquivado)
+**Status:** boy-scout, cosmético. A "Separação 1" do `sistema-de-efeitos` (uma base comum de
+identidade — Nome/Simbolo/Descricao — herdada por `Habilidade` E `StatusEffect`, hoje duplicada)
+nunca foi feita; era "a última, cosmética". O ADR foi pra `docs/historico/`; o resíduo fica aqui
+pra não se perder. Fazer só se incomodar (puro DRY, sem dor conhecida).
 
 ### Faxina de comentários
 **Status:** ÚLTIMO da fila. Bisturi: remove ruído, mantém os porquês. Branch própria, depois de

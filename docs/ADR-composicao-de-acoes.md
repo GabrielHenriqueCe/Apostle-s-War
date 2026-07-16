@@ -199,6 +199,9 @@ recipiente (de `Ativar` override para `Acao` custom), e ganha uniformidade de gr
 Uma ação combina eixos independentes: **Operação × Escopo × EstadoAlvo × (Valor) × (Seletor)**.
 
 ### 5.1 Operação (o quê) — o vocabulário
+> **Índice vivo (compartilhadas + bespokes + mapeadas, com caminhos): `CATALOGO-de-acoes.md`.**
+> Leia-o antes de criar habilidade — evita reinventar verbo que já existe.
+
 `Dano`, `Cura`, `Escudo`, `AplicarBuff`, `AplicarDebuff`, `Reviver`, `RemoverDebuffs`
 (cleanse), `MoverBuffs` (roubo), `ConcederTurnoExtra`, `Explodir`, `Transformar` (futuro)...
 O vocabulário compartilhado do jogo. **Cresce por descoberta** — quando um pedaço recorre em

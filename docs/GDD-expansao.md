@@ -2,7 +2,7 @@
 
 > **Status:** Ideias registradas, NÃO implementar no console.
 > Destino: expansão pós-lançamento da versão web.
-> Última atualização: maio/2026.
+> Última atualização: julho/2026.
 
 ---
 
@@ -49,6 +49,7 @@ pode ter:
 | Raro      | Azul           | 2         |
 | Épico     | Roxo           | 3         |
 | Lendário  | Dourado/Laranja| 4         |
+| Mítico    | Vermelho       | 5 (provisório) |
 
 ### Estrelas e Níveis
 
@@ -79,6 +80,21 @@ sub-stat de HP:
 > Nota de design: ranges aleatórios criam variação entre cópias do mesmo item,
 > incentivando "farmar" a cópia ideal — núcleo do loop de coleção.
 
+### Conjuntos (sets) — ideia (jul/2026)
+Peças de um mesmo conjunto, equipadas juntas, dão um **efeito único** (ex: *Conjunto do Inferno* —
+queima quem te ataca). Substatísticas **fixas por conjunto** (sem RNG estilo Raid). Tensão a
+resolver no design: isto convive com os ranges aleatórios de sub-stat acima — provavelmente
+conjuntos = fixo, itens avulsos = RNG.
+
+### Fusão de itens — ideia (jul/2026)
+2 itens iguais de uma raridade = 1 item da raridade seguinte (2 Comuns → 1 Incomum → … → Mítico).
+Progressão **linear e previsível, sem aleatoriedade**.
+
+### Global → por-personagem (reforço da direção deste §1)
+Hoje (console) equipamento é status GLOBAL somado no jogador; a expansão migra pra **itens
+equipados individualmente em cada personagem** (é o que este §1 já assume). Em aberto: nível nos
+itens + sistema de +1/+2/+3.
+
 ---
 
 ## 2. Progressão de Personagem
@@ -100,6 +116,11 @@ sub-stat de HP:
 
 - A fase final de cada capítulo dropa item(ns) de evolução.
 - Capítulos mais avançados dropam mais itens de evolução.
+
+### Raridade de personagem + Regra de ouro (ideia jul/2026)
+- Personagens têm **raridade** (mais difícil de conseguir ≠ exclusivo — **todos sempre obtíveis**).
+- **Regra de ouro:** personagem fraco NUNCA é fraco pra sempre. Um Comum pode evoluir até Lendário
+  com investimento — o primeiro personagem do jogador pode virar o mais forte do jogo se ele treinar.
 
 ### Maestrias por herói (ideia futura)
 
@@ -290,7 +311,44 @@ Esta é a conexão entre a mecânica de morte (fio técnico) e o design da Arena
 
 ---
 
-## 7. Escopo — o que NÃO fazer agora
+## 7. Posicionamento Tático (ideia jul/2026)
+
+> Ideia nova e grande — muda o combate. Registrar, não implementar. **Prioridade:** depois do
+> balanceamento da base E do refactor do `ExecutarTurno` (separar seleção-de-ação / seleção-de-alvo
+> / execução). Interage com o targeting (`SelecaoDeAlvoService`), o motor (habilidade declara quais
+> posições alcança) e o cálculo de dano (bônus por tipo de alvo).
+
+- **Posições front/back importam:** cada habilidade define quais posições pode atingir.
+- Tanque com espada só ataca o inimigo **mais próximo** (não pula posições).
+- Arqueiros alcançam a **linha de trás** (magos); magos atingem a **linha da frente**.
+- **Dano varia por tipo de alvo:** mago dá +dano em armadura pesada; arqueiro dá +dano em magos;
+  linha de frente resiste melhor a arqueiros; magos têm +resistência mágica.
+
+---
+
+## 8. Sinergia de Facções (ideia jul/2026)
+
+> As 9 facções já são temas de sinergia (ver Arena §6); isto as premia mecanicamente.
+
+- **Bônus por quantidade** de personagens da mesma facção no time (ex: 3+ = +dano/resistência).
+- **Passivas de facção amplificadas** com mais membros (ex: 3 personagens = passiva 50% mais forte).
+- Possível **habilidade ativável exclusiva** ao atingir X membros da facção (ex: ataque cooperativo).
+
+---
+
+## 9. Modo Automático (ideia jul/2026 — NEAR-TERM, pré-web)
+
+> Diferente do resto deste GDD (que é pós-web): o auto-battle é o **passo 2 do roadmap de dev**
+> (ver topo). Fica aqui como spec, mas é near-term. **Pré-requisito:** o refactor do `ExecutarTurno`
+> (separar seleção-de-ação / seleção-de-alvo / execução) + o balanceamento da base.
+
+- Botão **auto liga/desliga**; ao desligar, completa a ação atual e volta ao manual.
+- Implementação com **async/await**: uma `Task` roda o loop de turnos com `Task.Delay()`,
+  interrompida via `CancellationToken`.
+
+---
+
+## 10. Escopo — o que NÃO fazer agora
 
 - NAO implementar itens com estrela/nível/raridade no console
 - NAO implementar XP/níveis de personagem no console

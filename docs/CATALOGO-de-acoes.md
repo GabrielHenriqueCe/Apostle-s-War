@@ -16,13 +16,14 @@
 
 | Ação | O que faz | Eixos | Arquivo |
 |---|---|---|---|
-| `Dano` | dano ao alvo (mult ATK; `ignorarDefesaPct`/`forcaCritico` opcionais; mult pode ser `Func(atk,alvo)`) | — | `Skills/Acoes/Dano.cs` |
+| `Dano` | dano ao alvo (mult ATK; `ignorarDefesaPct`/`forcaCritico`/`ignorarStatus` opcionais; mult pode ser `Func(atk,alvo)`) | — | `Skills/Acoes/Dano.cs` |
 | `Cura` | cura o alvo por um fragmento de Valor | Valor | `Skills/Acoes/Cura.cs` |
 | `AplicarEscudo` | Escudo no alvo por um fragmento de Valor (+ turnos) | Valor | `Skills/Acoes/AplicarEscudo.cs` |
 | `AplicarBuff` | aplica um buff (recebe FÁBRICA; sobrecarga `Func<Combate,Buff>` p/ proveniência) | — | `Skills/Acoes/AplicarBuff.cs` |
-| `AplicarDebuff` | aplica um debuff (recebe FÁBRICA) | — | `Skills/Acoes/AplicarDebuff.cs` |
+| `AplicarDebuff` | aplica um debuff (FÁBRICA; sobrecarga `Func<Combate,Debuff>` p/ proveniência; `chance` opcional) | — | `Skills/Acoes/AplicarDebuff.cs` |
 | `Reviver` | revive um morto por % do HP máximo | — | `Skills/Acoes/Reviver.cs` |
 | `RemoverBuffs` | remove buffs do alvo conforme um Seletor | Seletor | `Skills/Acoes/RemoverBuffs.cs` |
+| `RemoverDebuffs` | remove debuffs do alvo conforme um Seletor (gêmeo do RemoverBuffs) | Seletor | `Skills/Acoes/RemoverDebuffs.cs` |
 | `Explodir` | detona status de tick (`IStatusComTick`) conforme Seletor → devolve `EventoDano` | Seletor | `Skills/Acoes/Explodir.cs` |
 
 ### Eixos (compõem as ações acima)
@@ -56,7 +57,6 @@ Nomes reservados (ADR §9) — não invente sinônimo, use estes quando o client
 
 | Vocabulário | O que seria | Clientes previstos |
 |---|---|---|
-| `RemoverDebuffs` | cleanse (espelho do `RemoverBuffs`) | Celestial, Coringa, DestruindoDia, AnjoCaído |
 | `MoverBuffs` | roubo de buff (do alvo pro conjurador) | Copiando |
 | `ConcederTurnoExtra` | concede um turno extra | Copiando |
 | `AcaoSobreConjunto` | 2º formato de ação p/ agregação cross-alvo (construída e removida — ADR §3.4) | candidata: Atlantis (§8.1) |

@@ -6,6 +6,7 @@ using ApostlesWar.Champs.Humanos;
 using ApostlesWar.Champs.Reino;
 using ApostlesWar.Champs.LadoSombrio;
 using ApostlesWar.Champs.Tecnologicos;
+using ApostlesWar.Champs.Folclore;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Passivas;
 
@@ -43,26 +44,11 @@ namespace ApostlesWar.Services
             Robo.Definir(),
             Cientista.Definir(),
 
-            // Folclore
-            new Personagem(1, Faccao.Folclore, "Ogro", "👹", 1400, 160, 160,
-            new Esmagar(),
-            new Quebrar(),
-            new Intimidador()),
-
-            new Personagem(2, Faccao.Folclore, "Tengu", "👺", 800, 280, 160,
-            new CorteDeVento(),
-            new Vendaval(),
-            new Ventania()),
-
-            new Personagem(3, Faccao.Folclore, "Palhaço", "🤡", 800, 160, 280,
-            new Coringa(),
-            new Circo(),
-            new PiadaDeMauGosto()),
-
-            new Personagem(4, Faccao.Folclore, "Troll", "🧌", 1200, 160, 200,
-            new Pancada(),
-            new Porradeiro(),
-            new Ambicao()),
+            // Folclore — facção migrada pra forma final (Champs/Folclore/), cada arquivo é a view.
+            Ogro.Definir(),
+            Tengu.Definir(),
+            Palhaco.Definir(),
+            Troll.Definir(),
  
 
             // Místicos

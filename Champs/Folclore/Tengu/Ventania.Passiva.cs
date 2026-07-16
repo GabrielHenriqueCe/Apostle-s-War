@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Buffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Folclore
 {
     /// <summary>
     /// Todo início de turno, aplica BuffAtaque 25% por 2 turnos (renova sempre).

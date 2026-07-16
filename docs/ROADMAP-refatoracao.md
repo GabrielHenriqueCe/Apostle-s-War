@@ -157,12 +157,15 @@ Explodir + cura-por-dano)) → **Tecnológicos ✅** (Invasor/Alien/Robô/Cienti
 estado/ao-matar via `Dano`+`AplicarDebuff(Mortos)`, sem condicional; Tecnology 3º do Reviver;
 `EstenderBuffs` bespoke-local no Robô/RaioX, espelho do `RemoverBuffs` (§9); Galáxia = novo
 cliente de `OutrosAliados`; `EstenderTurno`→`AumentarDuracao` consolidado; princípio DECOMPOR
-firmado — ADR §3.3) → **sweep segue** (Folclore [Quebrar, 2º cliente de `OutrosAliados` — Circo] → Místicos
+firmado — ADR §3.3) → **Folclore ✅** (Ogro/Tengu/Palhaço/Troll — `RemoverDebuffs` nasceu [Coringa,
+gêmeo do RemoverBuffs]; `Dano`+`ignorarStatus` [CorteDeVento/Vendaval]; `AplicarDebuff`+`chance`
+[Pancada] + overload de proveniência [Irritar/Quebrar]; Circo 4º do revive + cliente de
+`OutrosAliados`; Porradeiro = molde do Tiroteio + cura do Zumbi; ZERO bespoke) → **sweep segue** (Místicos
 [Atlantis bespoke] → Especial → Decaídos [AnjoCaído; Inferno migra pro `Explodir` genérico
 (`Seletor.Tipo<Queima>()`) e o shim `Queima.Explodir` morre — 3º da família do revive] →
 Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
-quando o `Ambos` morrer (3 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology — faltam Céu,
-AnjoCaído, Circo, Atlantis). Quando uma facção ESTREIA um mecanismo, o champ é momento de
+quando o `Ambos` morrer (4 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology, Circo — faltam Céu,
+AnjoCaído, Atlantis). Quando uma facção ESTREIA um mecanismo, o champ é momento de
 design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---

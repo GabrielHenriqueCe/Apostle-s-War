@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Buffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Misticos
 {
     /// <summary>
     /// Ao matar um inimigo, aplica BloqueioTotal 3t em si mesma. Migrada para

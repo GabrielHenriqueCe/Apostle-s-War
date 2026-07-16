@@ -1,7 +1,7 @@
 using ApostlesWar;
 using ApostlesWar.Skills.Debuffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Misticos
 {
     /// <summary>
     /// Imune a Veneno e Queima durante todo o combate. Capacidade direta

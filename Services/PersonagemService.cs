@@ -7,6 +7,7 @@ using ApostlesWar.Champs.Reino;
 using ApostlesWar.Champs.LadoSombrio;
 using ApostlesWar.Champs.Tecnologicos;
 using ApostlesWar.Champs.Folclore;
+using ApostlesWar.Champs.Misticos;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Passivas;
 
@@ -51,26 +52,11 @@ namespace ApostlesWar.Services
             Troll.Definir(),
  
 
-            // Místicos
-            new Personagem(1, Faccao.Misticos, "Gênio", "🧞", 1400, 120, 200,
-            new Desejo(),
-            new Profecia(),
-            new Realidade()),
-
-            new Personagem(2, Faccao.Misticos, "Sereia", "🧜", 600, 280, 200,
-            new CantoDeSereia(),
-            new Atlantis(),
-            new Aquagirl()),
-
-            new Personagem(3, Faccao.Misticos, "Fada", "🧚", 1000, 280, 120,
-            new Sininho(),
-            new PoMagico(),
-            new Voar()),
-
-            new Personagem(4, Faccao.Misticos, "Dragão", "🐲", 1400, 200, 120,
-            new SoproDoDragao(),
-            new DragaoProtetor(),
-            new PeleDeDragao()),
+            // Místicos — facção migrada pra forma final (Champs/Misticos/), cada arquivo é a view.
+            Genio.Definir(),
+            Sereia.Definir(),
+            Fada.Definir(),
+            Dragao.Definir(),
 
             // Especial
             new Personagem(1, Faccao.Especial, "Cocô", "💩", 1200, 160, 200,

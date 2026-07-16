@@ -160,12 +160,16 @@ cliente de `OutrosAliados`; `EstenderTurno`→`AumentarDuracao` consolidado; pri
 firmado — ADR §3.3) → **Folclore ✅** (Ogro/Tengu/Palhaço/Troll — `RemoverDebuffs` nasceu [Coringa,
 gêmeo do RemoverBuffs]; `Dano`+`ignorarStatus` [CorteDeVento/Vendaval]; `AplicarDebuff`+`chance`
 [Pancada] + overload de proveniência [Irritar/Quebrar]; Circo 4º do revive + cliente de
-`OutrosAliados`; Porradeiro = molde do Tiroteio + cura do Zumbi; ZERO bespoke) → **sweep segue** (Místicos
-[Atlantis bespoke] → Especial → Decaídos [AnjoCaído; Inferno migra pro `Explodir` genérico
+`OutrosAliados`; Porradeiro = molde do Tiroteio + cura do Zumbi; ZERO bespoke) → **Místicos ✅**
+(Gênio/Sereia/Fada/Dragão — pipeline §8.1 DISSOLVIDO: `Reviver` ganhou `buffNoRevivido` [Intocável só
+nos revividos], fez o Atlantis (5º do revive) e CONSERTOU o Circo (bug: pegava todos os outros vivos);
+PoMágico = vocabulário puro [`ignorarStatus` casa por tipo-BASE, `typeof(Buff)`=todos os buffs];
+`RestaurarHPMaximo` bespoke no Dragão; unificar-ignorar fica pra tema próprio no Vampiro/Decaídos) →
+**sweep segue** (Especial → Decaídos [AnjoCaído; Inferno migra pro `Explodir` genérico
 (`Seletor.Tipo<Queima>()`) e o shim `Queima.Explodir` morre — 3º da família do revive] →
 Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
-quando o `Ambos` morrer (4 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology, Circo — faltam Céu,
-AnjoCaído, Atlantis). Quando uma facção ESTREIA um mecanismo, o champ é momento de
+quando o `Ambos` morrer (5 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology, Circo, Atlantis — faltam
+Céu, AnjoCaído). Quando uma facção ESTREIA um mecanismo, o champ é momento de
 design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---

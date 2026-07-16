@@ -426,5 +426,43 @@ namespace Tests
                 .Ativar(ctx1, alvoSempre);
             Assert.Single(alvoSempre.StatusAtivos.OfType<Preso>()); // chance 1.0 sempre aplica
         }
+
+        // ---------- Vocabulário novo (Místicos) ----------
+
+        [Fact]
+        public void Reviver_ComBuff_BuffaSoOsRevividos_NaoOsJaVivos()
+        {
+            var atacante = Novo();
+            var morto = Novo(); Matar(morto);
+            var jaVivo = Novo();                 // já estava vivo
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, morto, jaVivo },
+                new List<Combate> { Novo() });
+            var hab = Hab(new() { new Reviver(0.50, buffNoRevivido: () => new Intocavel(turnos: 2)) },
+                alvos: int.MaxValue, lista: TipoLista.Aliados);
+
+            hab.Ativar(ctx, atacante);
+
+            Assert.True(morto.EstaVivo());                                // reviveu
+            Assert.True(morto.StatusAtivos.OfType<Intocavel>().Any());    // revivido pegou o buff
+            Assert.False(jaVivo.StatusAtivos.OfType<Intocavel>().Any());  // já-vivo NÃO pegou (o bug do Circo)
+        }
+
+        [Fact]
+        public void IgnorarStatus_TipoBase_IgnoraTodosOsBuffs()
+        {
+            var atacante = Novo();
+            var alvo = Novo(hp: 5000);
+            new Escudo(2000, turnos: 2).Aplicar(alvo);   // escudo que normalmente absorveria o golpe
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante },
+                new List<Combate> { alvo });
+            var hab = Hab(new() { new Dano(1.0, ignorarStatus: new[] { typeof(Buff) }) }, alvos: 1);
+
+            var eventos = hab.Ativar(ctx, alvo);
+
+            Assert.Equal(0, eventos[0].AbsorvidoPeloEscudo);            // typeof(Buff) ignorou o Escudo (match por tipo-base)
+            Assert.True(alvo.StatusAtivos.OfType<Escudo>().Any());      // e não consumiu o escudo
+        }
     }
 }

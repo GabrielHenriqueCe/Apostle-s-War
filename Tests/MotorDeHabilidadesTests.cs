@@ -1,4 +1,5 @@
 using ApostlesWar;
+using ApostlesWar.Skills;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Buffs;
 using ApostlesWar.Skills.Debuffs;
@@ -383,6 +384,47 @@ namespace Tests
 
             Assert.Equal(1000, atacante.HPAtual);               // capado
             Assert.Equal(600 + 150, aliado.HPAtual);            // 15% de 1000
+        }
+
+        // ---------- Vocabulário novo (Folclore) ----------
+
+        [Fact]
+        public void RemoverDebuffs_LimpaTodosOsDebuffsDoAlvo()
+        {
+            var atacante = Novo();
+            var alvo = Novo();
+            new Preso(turnos: 2).Aplicar(alvo);
+            new Veneno(stacks: 1).Aplicar(alvo);
+            Assert.Equal(2, alvo.StatusAtivos.OfType<Debuff>().Count());
+
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante },
+                new List<Combate> { alvo });
+            var hab = Hab(new() { new RemoverDebuffs(Seletor.Todos()) }, alvos: 1);
+
+            hab.Ativar(ctx, alvo);
+
+            Assert.Empty(alvo.StatusAtivos.OfType<Debuff>());     // cleanse total (gêmeo do RemoverBuffs)
+        }
+
+        [Fact]
+        public void AplicarDebuff_Chance_ZeroNuncaAplica_UmSempreAplica()
+        {
+            var atacante = Novo();
+
+            var alvoNunca = Novo();
+            var ctx0 = new ContextoCombate(atacante,
+                new List<Combate> { atacante }, new List<Combate> { alvoNunca });
+            Hab(new() { new AplicarDebuff(() => new Preso(turnos: 2), chance: 0.0) }, alvos: 1)
+                .Ativar(ctx0, alvoNunca);
+            Assert.Empty(alvoNunca.StatusAtivos.OfType<Preso>());  // chance 0.0 nunca aplica
+
+            var alvoSempre = Novo();
+            var ctx1 = new ContextoCombate(atacante,
+                new List<Combate> { atacante }, new List<Combate> { alvoSempre });
+            Hab(new() { new AplicarDebuff(() => new Preso(turnos: 2), chance: 1.0) }, alvos: 1)
+                .Ativar(ctx1, alvoSempre);
+            Assert.Single(alvoSempre.StatusAtivos.OfType<Preso>()); // chance 1.0 sempre aplica
         }
     }
 }

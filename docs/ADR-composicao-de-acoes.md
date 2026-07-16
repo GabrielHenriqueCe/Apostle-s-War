@@ -211,7 +211,7 @@ O vocabulário compartilhado do jogo. **Cresce por descoberta** — quando um pe
 `AlvosResolvidos` (default, herda o pick da habilidade), `TodosAliados` (o time do atacante —
 que **inclui o próprio atacante**), `TodosInimigos`, `ProprioAtacante`, `OutrosAliados` ✅
 **IMPLEMENTADO** (aliados menos o conjurador — clientes reais: OssoDuroDeRoer ✅ (LadoSombrio),
-Galáxia ✅ (Alien, Tecnológicos); Circo (Folclore) ainda por vir).
+Galáxia ✅ (Alien, Tecnológicos), Circo ✅ e Esmagar ✅ (Palhaço/Ogro, Folclore)).
 
 ### 5.3 EstadoAlvo por ação (Vivos/Mortos) — avaliado na execução
 `EstadoAlvo` **desce da habilidade pra ação** e é avaliado no momento em que a ação roda
@@ -356,8 +356,9 @@ especulativo (YAGNI / "não desenhar no escuro"). Duas travas:
    - `AnjoCaido`/`Putridao` "pareciam cleanse" e não eram.
    - `Atlantis` parecia igual ao `AnjoCaido` e escondia um boundary (§8.1).
 
-**Cravado (nascem compartilhados, clientes reais mapeados):** `RemoverDebuffs` (Celestial,
-Coringa, DestruindoDia, AnjoCaido — ainda sem cliente migrado), `RemoverBuffs` ✅ **IMPLEMENTADA**
+**Cravado (nascem compartilhados, clientes reais mapeados):** `RemoverDebuffs`
+✅ **IMPLEMENTADA** (gêmeo do `RemoverBuffs`; 1º cliente Coringa/Folclore; próximos Celestial,
+DestruindoDia, AnjoCaído), `RemoverBuffs` ✅ **IMPLEMENTADA**
 (DocesOuTravessuras, LadoSombrio), `MoverBuffs` (Copiando — ainda sem cliente migrado),
 `Explodir` ✅ **IMPLEMENTADA** genérica com `Seletor` + `IStatusComTick` (1º cliente: Putrefação
 com `Seletor.Tipo<Veneno>()`; Inferno mapeado pra Decaídos; Gabriel planeja mais clientes de
@@ -385,7 +386,7 @@ NÃO moram na explosão — são ações separadas na lista, por isso ela é reu
 migrar (Decaídos — até lá o shim `Queima.Explodir` chama o Detonar e descarta o evento).
 
 **`Escopo.OutrosAliados` ✅ IMPLEMENTADO.** Clientes: OssoDuroDeRoer (Caveira, LadoSombrio) ✅,
-Galáxia (Alien, Tecnológicos) ✅. Falta Circo (Folclore).
+Galáxia (Alien, Tecnológicos) ✅, Circo e Esmagar (Palhaço/Ogro, Folclore) ✅.
 
 **`EstenderBuffs` — bespoke-LOCAL do Robô (Tecnológicos).** Espelho EXATO do `RemoverBuffs`
 (mesmo `Seletor`, troca só o verbo: `AumentarDuracao` no lugar de `Remover`) — segue o padrão
@@ -408,8 +409,8 @@ em Humanos. **REGRA (Gabriel):** ao chegar nessas passivas, **PARAR e reavaliar 
 decidir juntos se vale unir a seleção; não construir especulativo antes da hora.
 
 **A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
-`Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology (Tecnológicos), Céu (Apóstolos),
-AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1**), Circo (Folclore, +
+`Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology ✅ (Tecnológicos), Céu (Apóstolos),
+AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1**), Circo ✅ (Folclore, +
 Intocável em `OutrosAliados`) e Atlantis (Místicos, pipeline §8.1).
 
 **REGRA DO REVIVE (decisão de Gabriel, jul/2026):** a ação `Reviver` é per-alvo simples, só
@@ -429,7 +430,8 @@ de seleção do jogo (`ResolverAlvos`):
 
 A Sentença é checada central no `Morto.Reviver` — a ação não escreve nada disso. Esses 7 são
 exatamente os usuários do `Ambos`; migrados eles, o enum-value e o check do
-`CombateService:282` morrem juntos. **2 de 7 feitos.**
+`CombateService:282` morrem juntos. **4 de 7 feitos** (Nigiri, DocesDeAbobora, Tecnology, Circo;
+faltam Céu, AnjoCaído, Atlantis).
 
 ---
 
@@ -493,7 +495,12 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
   `RemoverBuffs` — ver §9; Galáxia entrou como cliente de `OutrosAliados`; consolidado
   `StatusEffect.EstenderTurno` → `AumentarDuracao(1)` (eram idênticos). Cura/extensão do RaioX e
   as ações da Barata seguem o princípio DECOMPOR (§3.3).
-  Segue: Folclore (Quebrar, 2º cliente de `OutrosAliados` — Circo) → Místicos (Atlantis bespoke)
+  **Folclore ✅** (Ogro/Tengu/Palhaço/Troll): `RemoverDebuffs` nasceu (Coringa, gêmeo do
+  `RemoverBuffs`); `Dano` ganhou `ignorarStatus` (CorteDeVento/Vendaval) e `AplicarDebuff` ganhou
+  `chance` (Pancada) + overload de proveniência `Func<Combate,Debuff>` (Irritar/Quebrar); Circo é o
+  4º do revive e mais um cliente de `OutrosAliados` (com o Esmagar); Porradeiro = molde do Tiroteio
+  + cura do Zumbi (ZERO bespoke — Gabriel cortou a ideia de bespoke que eu tinha).
+  Segue: Místicos (Atlantis bespoke)
   → Especial → Decaídos (AnjoCaído, `Explodir`/Inferno migra de vez) → Apóstolos
   (Copiando/`MoverBuffs`). Vocabulário nasce quando a facção do 1º cliente chega.
   Facção que estreia mecanismo = momento de design, não sweep mecânico.

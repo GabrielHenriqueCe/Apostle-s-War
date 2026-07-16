@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Folclore
 {
     /// <summary>
     /// Ao ser atacado, aumenta o próprio ATK em 5% (sobre AtaqueComItens) até um

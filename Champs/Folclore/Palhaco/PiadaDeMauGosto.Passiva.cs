@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Debuffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Folclore
 {
     /// <summary>
     /// Ao ser atacado, aplica 1 stack de Maldição no atacante. Migrada para o

@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
+using ApostlesWar;
 using ApostlesWar.Skills.Debuffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Folclore
 {
     /// <summary>
     /// Ao ser atacado, 25% de chance de aplicar Medo 1t no atacante. Migrada para

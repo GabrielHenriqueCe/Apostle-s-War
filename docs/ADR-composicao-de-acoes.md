@@ -515,9 +515,18 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
   Colisão do nome "Invencível" RESOLVIDA (PR de refactor pós-#129): a passiva do Guarda virou classe
   `GuardaReal` com nome de jogo "Guarda Real" — colidia com o buff `Skills.Buffs.Invencivel` que ela
   própria aplica. Com isso as duas colisões nomeadas no #117 (Fedorento e Invencível) estão fechadas.
-  Segue: Decaídos (AnjoCaído, `Explodir`/Inferno migra de vez; Vampiro traz a unificação-do-ignorar)
-  → Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce quando a facção do 1º cliente chega.
-  Facção que estreia mecanismo = momento de design, não sweep mecânico.
+  **Decaídos ✅** (Morcego/Vampiro/Elfo/Diabo): 100% vocabulário puro, ZERO bespoke. `ConcederTurnoExtra`
+  **construído** (1º cliente real = Rato Voador, não o Copiando como o catálogo previa); Inferno migrou
+  pro `Explodir` genérico e o shim `Queima.Explodir` MORREU (os EventoDano da explosão passam a entrar
+  no pipeline — antes o Inferno os descartava); Anjo Caído (6º do revive) = `RemoverDebuffs`(Sentença,
+  Mortos)+`Reviver`+`Cura` — a ordem das ações quebra a Sentença antes de reviver, sem bespoke. Renomes
+  de jogo do Vampiro (pedido do Gabriel): Bat Man→"Controle de Sangue" 🩸, Cinto de Utilidades→"Vampiro
+  Primordial" 🌙. Colisão "Espinhos" RESOLVIDA: a passiva do Elfo virou classe `EspinhosCorrompidos`
+  ("Espinhos Corrompidos") — colidia no display com o buff `EspinhosVenenosos` (que exibe "Espinhos").
+  **A unificação-do-ignorar NÃO foi feita aqui** (a Drenagem é fonte, não muda): vira PR próprio logo
+  após, com desenho fechado (natureza fala a língua da lista, os `DeveAgir` morrem). Revive 6/7.
+  Segue: unificação-do-ignorar → Apóstolos (Copiando/`MoverBuffs`, Céu = 7º do revive). Vocabulário
+  nasce quando a facção do 1º cliente chega. Facção que estreia mecanismo = momento de design, não sweep.
 - **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).
 - **Depois:** rename do repo/namespace (§12).
 

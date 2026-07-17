@@ -9,6 +9,7 @@ using ApostlesWar.Champs.Tecnologicos;
 using ApostlesWar.Champs.Folclore;
 using ApostlesWar.Champs.Misticos;
 using ApostlesWar.Champs.Especial;
+using ApostlesWar.Champs.Decaidos;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Passivas;
 
@@ -65,27 +66,12 @@ namespace ApostlesWar.Services
             Vilao.Definir(),
             TRex.Definir(),
 
-            // Decaídos
-            new Personagem(1, Faccao.Decaidos, "Morcego", "🦇", 800, 160, 280,
-            new Mordida(),
-            new RatoVoador(),
-            new SedentoDeSangue()),
+            // Decaídos — facção migrada pra forma final (Champs/Decaidos/), cada arquivo é a view.
+            Morcego.Definir(),
+            Vampiro.Definir(),
+            Elfo.Definir(),
+            Diabo.Definir(),
 
-            new Personagem(2, Faccao.Decaidos, "Vampiro", "🧛", 800, 280, 160,
-            new BatMan(),
-            new CintoUtilidades(),
-            new Drenagem()),
-
-            new Personagem(3, Faccao.Decaidos, "Elfo", "🧝", 1400, 160, 160,
-            new ArvoreDoMundo(),
-            new Natureza(),
-            new Espinhos()),
-
-            new Personagem(4, Faccao.Decaidos, "Diabo", "😈", 1400, 160, 160,
-            new Inferno(),
-            new AnjoCaido(),
-            new CresceComDor()),
- 
 
             // Apóstolos
             new Personagem(1, Faccao.Apostolos, "Boneco de Neve", "⛄", 1000, 200, 200,

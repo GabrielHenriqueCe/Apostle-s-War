@@ -167,11 +167,15 @@ PoMágico = vocabulário puro [`ignorarStatus` casa por tipo-BASE, `typeof(Buff)
 `RestaurarHPMaximo` bespoke no Dragão; unificar-ignorar fica pra tema próprio no Vampiro/Decaídos) →
 **Especial ✅** (Cocô/Herói/Vilão/T-Rex — 100% vocabulário puro, ZERO bespoke, 1ª facção totalmente
 mecânica; DestruindoDia = 2º cliente do `RemoverDebuffs`, SalvandoDia = mais um de `OutrosAliados`) →
-**sweep segue** (Decaídos [AnjoCaído; Inferno migra pro `Explodir` genérico
-(`Seletor.Tipo<Queima>()`) e o shim `Queima.Explodir` morre — 3º da família do revive] →
-Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
-quando o `Ambos` morrer (5 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology, Circo, Atlantis — faltam
-Céu, AnjoCaído). Quando uma facção ESTREIA um mecanismo, o champ é momento de
+**Decaídos ✅** (Morcego/Vampiro/Elfo/Diabo — 100% vocabulário puro, ZERO bespoke; `ConcederTurnoExtra`
+construído [1º cliente = Rato Voador, não o Copiando]; Inferno migrou pro `Explodir` genérico e o shim
+`Queima.Explodir` morreu [explosão agora entra no pipeline]; Anjo Caído = 6º do revive
+[`RemoverDebuffs`(Sentença,Mortos)+`Reviver`+`Cura`, a ordem quebra a Sentença antes de reviver];
+renomes do Vampiro: "Controle de Sangue" 🩸 + "Vampiro Primordial" 🌙; colisão "Espinhos" resolvida
+[passiva do Elfo → `EspinhosCorrompidos`]; unificar-ignorar NÃO feito aqui — vira PR próprio a seguir) →
+**sweep segue** (unificar-ignorar → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
+quando o `Ambos` morrer (6 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology, Circo, Atlantis, AnjoCaído —
+falta Céu). Quando uma facção ESTREIA um mecanismo, o champ é momento de
 design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---
@@ -650,6 +654,25 @@ ExecutarCombate. Implementa quando uma fase concreta pedir.
 ---
 
 ## BOY SCOUT (quando tocar) / FUTURO ARQUITETURAL
+
+### Modernização e robustez (auditoria jul/2026 — PR próprio pós-sweep)
+**Status:** registrado. Sai como PR próprio quando o sweep de facções acabar (Apóstolos é a última).
+Tema próprio — NÃO misturar com sweep/unificação ("um PR, um tema"). Nenhum item é bug; são "formas
+melhores hoje do que fizemos antigamente" + a única fronteira de confiança real. Guard-clause em código
+interno fica DE FORA de propósito (YAGNI — compilador + testes cobrem o miolo).
+1. **`Random.Shared`** — mata as 4 instâncias `new Random()` independentes (`Combate`, `AplicarDebuff`,
+   `Medo`, `HabilidadeAtiva`). Idioma .NET 6+.
+2. **Encapsular coleções mutáveis expostas** — `List<>` público deixa mutação passar por fora das
+   regras (`PodeReceber`/bloqueios): `Combate.StatusAtivos`, `Personagem.Habilidades`,
+   `Vivo.StatusNoVivo`/`Morto.StatusNoMorto`. Expor `IReadOnlyList<T>`; mutar só pelos métodos.
+   Refatorar "quando doer" — hoje ninguém abusa, mas passa a garantia pro TIPO, não pra disciplina.
+3. **Save defensivo (a ÚNICA fronteira de confiança real)** — save é JSON lido do disco, pode vir
+   corrompido/editado à mão. `CapitulosService`/`ArsenalService` devem envolver a desserialização em
+   try/catch com fallback (save inválido → estado limpo, nunca crash). "Segurança" num single-player
+   offline = não morrer com arquivo estragado.
+4. **"Nulo morre na porta" no resto do código** — o encanamento dos ignorar já foi limpo no PR da
+   unificação; varrer os demais `IEnumerable<T>? = null` que vazam nulo pra dentro e normalizar na
+   fronteira (`?? []`), deixando o interior não-nulo.
 
 ### Capacidades — stat sob demanda e comportamento de turno
 **Status:** ADR em docs/ADR-modelo-de-capacidades.md. Migração incremental.

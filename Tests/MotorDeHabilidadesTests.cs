@@ -448,6 +448,61 @@ namespace Tests
             Assert.False(jaVivo.StatusAtivos.OfType<Intocavel>().Any());  // já-vivo NÃO pegou (o bug do Circo)
         }
 
+        // ---------- Vocabulário/cadeias novos (Decaídos) ----------
+
+        [Fact]
+        public void AnjoCaido_QuebraASentencaAntesDeReviver_EntaoCuraOsRevividos()
+        {
+            var atacante = Novo();
+            var aliado = Novo(hp: 800); Matar(aliado);
+            new ImpedirRessurreicao().Aplicar(aliado);   // Sentença: sem quebrar, o revive é recusado
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, aliado },
+                new List<Combate> { Novo() });
+
+            // A cadeia do Anjo Caído: limpa a Sentença dos MORTOS, revive, cura os VIVOS.
+            // A ordem é o que importa — se o cleanse rodasse DEPOIS do Reviver, o Morto.Reviver
+            // teria recusado (Sentença presente) e o aliado seguiria morto.
+            var hab = Hab(new()
+            {
+                new RemoverDebuffs(Seletor.Tipo<ImpedirRessurreicao>(), Escopo.TodosAliados, EstadoAlvo.Mortos),
+                new Reviver(0.50),
+                new Cura(Valor.PorHP(0.30), Escopo.TodosAliados),
+            }, alvos: int.MaxValue, lista: TipoLista.Aliados);
+
+            hab.Ativar(ctx, atacante);
+
+            Assert.True(aliado.EstaVivo());                                    // reviveu ⇒ a Sentença caiu ANTES
+            Assert.False(aliado.StatusAtivos.OfType<ImpedirRessurreicao>().Any());
+            Assert.Equal(400 + 240, aliado.HPAtual);   // 50% de 800 revivido + 30% de 800 de cura (recém-vivo)
+        }
+
+        [Fact]
+        public void Inferno_ExplodeAQueima_RegistraOEventoNoPipeline()
+        {
+            var atacante = Novo();
+            var inimigo = Novo(hp: 2000, atk: 0);
+            inimigo.IniciarCombate();   // Queima usa HPMaximoInicial, setado aqui (≠ Veneno, que usa HPMaximo)
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante },
+                new List<Combate> { inimigo });
+
+            // O Inferno migrado: aplica Queima e explode via a ação genérica. O ponto do teste
+            // é que a explosão agora REGISTRA seu EventoDano (o Inferno antigo o descartava).
+            var hab = Hab(new()
+            {
+                new AplicarDebuff(() => new Queima(stacks: 2), Escopo.TodosInimigos),
+                new Explodir(Seletor.Tipo<Queima>(), Escopo.TodosInimigos),
+            }, alvos: int.MaxValue);
+
+            var eventos = hab.Ativar(ctx, inimigo);
+
+            Assert.Single(eventos);                                    // a explosão entra no pipeline
+            Assert.Equal(200, eventos[0].DanoEfetivo);                 // 2 stacks × 5% de 2000
+            Assert.False(inimigo.StatusAtivos.OfType<Queima>().Any()); // detonada e removida
+            Assert.Equal(1800, inimigo.HPAtual);
+        }
+
         [Fact]
         public void IgnorarStatus_TipoBase_IgnoraTodosOsBuffs()
         {

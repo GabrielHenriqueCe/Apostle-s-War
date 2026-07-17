@@ -71,14 +71,6 @@ namespace ApostlesWar.Skills.Debuffs
         }
 
         /// <summary>
-        /// Shim de compatibilidade — o Inferno (ainda não migrado, Skills/Ativas/Inferno.cs)
-        /// chama este método direto e descarta o evento; quando migrar (Decaídos), vira a Ação
-        /// Explodir com Seletor.Tipo&lt;Queima&gt;() e este shim morre. O detonador do evento
-        /// descartado é irrelevante — passa o próprio portador.
-        /// </summary>
-        public void Explodir(Combate portador) => Detonar(portador, portador);
-
-        /// <summary>
         /// IStatusComTick: aplica imediatamente todo o efeito remanescente FAZENDO O QUE A
         /// QUEIMA FAZ (dano + redução de HP máximo, respeitando o cap próprio), remove a Queima
         /// e devolve o EventoDano da detonação. Dano = stacks × 5% HPMaximoInicial.

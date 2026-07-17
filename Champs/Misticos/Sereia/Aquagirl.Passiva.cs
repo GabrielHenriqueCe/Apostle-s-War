@@ -15,8 +15,6 @@ namespace ApostlesWar.Champs.Misticos
             "Recebe 15% menos dano.")
         { }
 
-        public bool DeveAgir(NaturezaDano natureza) => true;
-
         public int ModificarDanoRecebido(Combate portador, int dano) =>
             (int)(dano * (1 - PercentualReducao));
 

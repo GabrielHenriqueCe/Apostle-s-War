@@ -20,7 +20,6 @@ namespace ApostlesWar.Skills.Buffs
                 $"-{percentual * 100:F0}% dano recebido.")
         { }
 
-        public bool DeveAgir(NaturezaDano natureza) => true;
         public int ModificarDanoRecebido(Combate portador, int dano)
         {
             return (int)(dano * (1 - Valor));

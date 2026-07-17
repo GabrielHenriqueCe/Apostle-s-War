@@ -24,6 +24,7 @@
 | `Reviver` | revive um morto por % do HP máx (buff opcional `buffNoRevivido` — só nos revividos) | — | `Skills/Acoes/Reviver.cs` |
 | `RemoverBuffs` | remove buffs do alvo conforme um Seletor | Seletor | `Skills/Acoes/RemoverBuffs.cs` |
 | `RemoverDebuffs` | remove debuffs do alvo conforme um Seletor (gêmeo do RemoverBuffs) | Seletor | `Skills/Acoes/RemoverDebuffs.cs` |
+| `MoverBuffs` | move buffs do alvo PRO ATACANTE conforme um Seletor (gêmeo do RemoverBuffs, move a instância) | Seletor | `Skills/Acoes/MoverBuffs.cs` |
 | `Explodir` | detona status de tick (`IStatusComTick`) conforme Seletor → devolve `EventoDano` | Seletor | `Skills/Acoes/Explodir.cs` |
 | `ConcederTurnoExtra` | concede um turno extra ao escopo (default `ProprioAtacante`) | — | `Skills/Acoes/ConcederTurnoExtra.cs` |
 
@@ -59,8 +60,10 @@ Nomes reservados (ADR §9) — não invente sinônimo, use estes quando o client
 
 | Vocabulário | O que seria | Clientes previstos |
 |---|---|---|
-| `MoverBuffs` | roubo de buff (do alvo pro conjurador) | Copiando |
 | `AcaoSobreConjunto` | 2º formato de ação p/ agregação cross-alvo (construída e removida — ADR §3.4) | candidata: Atlantis (§8.1) |
 
 > `ConcederTurnoExtra` saiu desta tabela — **construído** nos Decaídos (1º cliente real: Rato
 > Voador do Morcego, não o Copiando como previsto). Ver tabela 1.
+> `MoverBuffs` saiu desta tabela — **construído** nos Apóstolos (cliente: Copiando do Mímico).
+> Ver tabela 1. Com isso o sweep das 9 facções está COMPLETO e o vocabulário mapeado esgotou-se
+> (só resta `AcaoSobreConjunto`, que segue sem cliente).

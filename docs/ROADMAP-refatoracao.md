@@ -173,9 +173,13 @@ construído [1º cliente = Rato Voador, não o Copiando]; Inferno migrou pro `Ex
 [`RemoverDebuffs`(Sentença,Mortos)+`Reviver`+`Cura`, a ordem quebra a Sentença antes de reviver];
 renomes do Vampiro: "Controle de Sangue" 🩸 + "Vampiro Primordial" 🌙; colisão "Espinhos" resolvida
 [passiva do Elfo → `EspinhosCorrompidos`]; unificar-ignorar NÃO feito aqui — vira PR próprio a seguir) →
-**sweep segue** (unificar-ignorar → Apóstolos [Copiando/`MoverBuffs`, Céu]) → pick do menu (lado UI, §8.2)
-quando o `Ambos` morrer (6 dos 7 feitos: Nigiri, DocesDeAbobora, Tecnology, Circo, Atlantis, AnjoCaído —
-falta Céu). Quando uma facção ESTREIA um mecanismo, o champ é momento de
+**Apóstolos ✅ — SWEEP DAS 9 FACÇÕES COMPLETO** (Boneco de Neve/Mímico/Anjo/Papai Noel — 100%
+vocabulário puro, ZERO bespoke; `MoverBuffs` construído [gêmeo do RemoverBuffs, cliente Copiando] e
+com ele o vocabulário mapeado esgotou; Imitação = `Dano(Func)` [molde Tengu]; Céu = 7º/último do revive
+e último champ com `Ambos` → agora NENHUM champ usa `Ambos`; fio §9 fechado com Repetindo deixada como
+está [3ª de 3, igual AnáliseCrítica/Policial]) → **sweep segue** (unificar-ignorar → pick do menu/§8.2
+quando o `Ambos` morrer). Revive 7/7 (Nigiri, DocesDeAbobora, Tecnology, Circo, Atlantis, AnjoCaído,
+Céu). Quando uma facção ESTREIA um mecanismo, o champ é momento de
 design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---

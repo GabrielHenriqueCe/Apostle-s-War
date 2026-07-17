@@ -410,6 +410,13 @@ Tecnológicos (deixada como estava, DE PROPÓSITO), Repetindo cai em Apóstolos,
 em Humanos. **REGRA (Gabriel):** ao chegar nessas passivas, **PARAR e reavaliar este ponto** —
 decidir juntos se vale unir a seleção; não construir especulativo antes da hora.
 
+**RESOLUÇÃO (jul/2026 — as 3 avaliadas, fio FECHADO):** as três passivas foram deixadas como
+estão, de propósito. Cada uma já usa o primitivo unificado (`AumentarDuracao`/`ReduzirDuracao`);
+fundir o dispatch numa `Acao` foi rejeitado (passiva ≠ ação — o `IReageAo*` é o invólucro certo
+pra "reagir a ser atacado"). Unir a seleção-de-status via `Seletor` nas 3 seria cerimônia sobre 3
+usos triviais (um estende Preso, um estende 1 debuff aleatório, um reduz todos os buffs) — YAGNI.
+Se um dia nascer uma 4ª passiva de duração com seleção complexa, reabrir; até lá, fechado.
+
 **A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
 `Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology ✅ (Tecnológicos), Céu (Apóstolos),
 AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1**), Circo ✅ (Folclore) e
@@ -525,8 +532,17 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
   ("Espinhos Corrompidos") — colidia no display com o buff `EspinhosVenenosos` (que exibe "Espinhos").
   **A unificação-do-ignorar NÃO foi feita aqui** (a Drenagem é fonte, não muda): vira PR próprio logo
   após, com desenho fechado (natureza fala a língua da lista, os `DeveAgir` morrem). Revive 6/7.
-  Segue: unificação-do-ignorar → Apóstolos (Copiando/`MoverBuffs`, Céu = 7º do revive). Vocabulário
-  nasce quando a facção do 1º cliente chega. Facção que estreia mecanismo = momento de design, não sweep.
+  **Apóstolos ✅ — SWEEP DAS 9 FACÇÕES COMPLETO** (Boneco de Neve/Mímico/Anjo/Papai Noel): 100%
+  vocabulário puro, ZERO bespoke. `MoverBuffs` **construído** (gêmeo do `RemoverBuffs`, move a
+  instância; cliente = Copiando) — com ele o vocabulário mapeado esgotou (só resta `AcaoSobreConjunto`,
+  sem cliente). Imitação usa `Dano(Func)` (escala com os buffs do Mímico, molde do Tengu). Céu = **7º e
+  ÚLTIMO da família do revive** (`Reviver`+2×`AplicarBuff`); era o último champ com `EstadoAlvo.Ambos` —
+  agora NENHUM champ usa `Ambos`, o que desbloqueia a remoção do enum no §8.2 (pick-do-menu). **Fio §9
+  fechado:** Repetindo (3ª e última passiva de duração) avaliada e deixada como está, igual a
+  AnáliseCrítica e Policial — passiva ≠ ação, o dispatch não funde (só o primitivo `AumentarDuracao` e
+  o conceito de Seletor são compartilhados). `PersonagemService` não instancia mais nenhum champ à mão.
+  Segue: unificação-do-ignorar → pick-do-menu/§8.2 (o `Ambos` morre). Facção que estreia mecanismo =
+  momento de design, não sweep.
 - **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).
 - **Depois:** rename do repo/namespace (§12).
 

@@ -10,6 +10,7 @@ using ApostlesWar.Champs.Folclore;
 using ApostlesWar.Champs.Misticos;
 using ApostlesWar.Champs.Especial;
 using ApostlesWar.Champs.Decaidos;
+using ApostlesWar.Champs.Apostolos;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Passivas;
 
@@ -73,26 +74,11 @@ namespace ApostlesWar.Services
             Diabo.Definir(),
 
 
-            // Apóstolos
-            new Personagem(1, Faccao.Apostolos, "Boneco de Neve", "⛄", 1000, 200, 200,
-            new BolaDeNeve(),
-            new Gelado(),
-            new Derretendo()),
-
-            new Personagem(2, Faccao.Apostolos, "Mímico", "🎭", 1000, 200, 200,
-            new Imitacao(),
-            new Copiando(),
-            new Repetindo()),
-
-            new Personagem(3, Faccao.Apostolos, "Anjo", "😇", 1200, 160, 200,
-            new Celestial(),
-            new Ceu(),
-            new Bencao()),
-
-            new Personagem(4, Faccao.Apostolos, "Papai Noel", "🎅", 1000, 200, 200,
-            new SacoDePresente(),
-            new FabricaDePresente(),
-            new Surpresa()),
+            // Apóstolos — facção migrada pra forma final (Champs/Apostolos/), cada arquivo é a view.
+            BonecoDeNeve.Definir(),
+            Mimico.Definir(),
+            Anjo.Definir(),
+            PapaiNoel.Definir(),
         };
 
         public PersonagemService()

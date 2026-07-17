@@ -1,7 +1,7 @@
 ﻿using ApostlesWar;
 using ApostlesWar.Skills.Debuffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Apostolos
 {
     /// <summary>
     /// Ao ser atacado, 10% de chance de aplicar Preso 1t no atacante. Migrada para

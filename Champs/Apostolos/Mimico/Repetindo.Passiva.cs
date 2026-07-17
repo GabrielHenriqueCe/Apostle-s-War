@@ -1,6 +1,7 @@
 ﻿using ApostlesWar;
+using ApostlesWar.Skills;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Apostolos
 {
     /// <summary>
     /// Ao ser atacado, escolhe 1 debuff aleatório do atacante e aumenta sua

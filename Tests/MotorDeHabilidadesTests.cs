@@ -503,6 +503,29 @@ namespace Tests
             Assert.Equal(1800, inimigo.HPAtual);
         }
 
+        // ---------- Vocabulário novo (Apóstolos) ----------
+
+        [Fact]
+        public void MoverBuffs_RoubaSoOsRemoviveis_DoAlvoProAtacante()
+        {
+            var atacante = Novo();
+            var alvo = Novo();
+            new Provocar(turnos: 2).Aplicar(alvo);                     // removível
+            new Intocavel(turnos: 2, removivel: false).Aplicar(alvo);  // NÃO removível (fica)
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante },
+                new List<Combate> { alvo });
+
+            // Copiando-like: rouba os buffs removíveis do inimigo pro conjurador (move a instância).
+            var hab = Hab(new() { new MoverBuffs(Seletor.Removiveis()) }, alvos: 1);
+
+            hab.Ativar(ctx, alvo);
+
+            Assert.True(atacante.StatusAtivos.OfType<Provocar>().Any());   // roubou o removível
+            Assert.False(alvo.StatusAtivos.OfType<Provocar>().Any());      // saiu do alvo
+            Assert.True(alvo.StatusAtivos.OfType<Intocavel>().Any());      // o não-removível ficou
+        }
+
         [Fact]
         public void IgnorarStatus_TipoBase_IgnoraTodosOsBuffs()
         {

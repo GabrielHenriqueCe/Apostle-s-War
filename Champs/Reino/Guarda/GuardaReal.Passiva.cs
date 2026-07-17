@@ -8,11 +8,12 @@ namespace ApostlesWar.Champs.Reino
     /// O portador é restaurado com 1 HP e ganha Invencível 1 turno. Por disparar
     /// antes do Vilão (IReageAoMatar), o Vilão nunca enxerga a morte — ImpedirRessurreicao
     /// não é aplicado e a Necromância também não precisa intervir.
-    /// Renomeada de PassivaGuarda (o nome antigo colidia com Skills.Buffs.Invencivel).
+    /// Nome de jogo "Guarda Real" (era "Invencível", que colidia com o buff Skills.Buffs.Invencivel
+    /// no display; a classe já não colidia).
     /// </summary>
-    class GuardaInvencivel : HabilidadePassiva, IReageAntesDeMorrer
+    class GuardaReal : HabilidadePassiva, IReageAntesDeMorrer
     {
-        public GuardaInvencivel() : base("Invencível", "⚜️", 4,
+        public GuardaReal() : base("Guarda Real", "⚜️", 4,
             "Ao receber ataque fatal, sobrevive com 1 HP e ganha invencibilidade por 1 turno.")
         { }
 

@@ -512,6 +512,9 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
   a 1ª facção totalmente mecânica. DestruindoDia = 2º cliente do `RemoverDebuffs`, SalvandoDia =
   mais um de `OutrosAliados`. Colisão do nome "Fedorento" RESOLVIDA: o ativo do Zumbi virou "Vômito
   Tóxico" (método `VomitoToxico`) e a passiva do Cocô ficou classe `Fedorento`.
+  Colisão do nome "Invencível" RESOLVIDA (PR de refactor pós-#129): a passiva do Guarda virou classe
+  `GuardaReal` com nome de jogo "Guarda Real" — colidia com o buff `Skills.Buffs.Invencivel` que ela
+  própria aplica. Com isso as duas colisões nomeadas no #117 (Fedorento e Invencível) estão fechadas.
   Segue: Decaídos (AnjoCaído, `Explodir`/Inferno migra de vez; Vampiro traz a unificação-do-ignorar)
   → Apóstolos (Copiando/`MoverBuffs`). Vocabulário nasce quando a facção do 1º cliente chega.
   Facção que estreia mecanismo = momento de design, não sweep mecânico.

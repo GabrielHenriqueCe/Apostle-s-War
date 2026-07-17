@@ -360,14 +360,14 @@ sem critério — o "monte de ignorar que ninguém sabia qual usar".
 De quem é a perfuração? essência do dano → perfil de `NaturezaDano`; só o golpe → `ignorarStatus`
 no `Dano`; o champ sempre → passiva `IIgnoraStatusNoAtaque`; % do stat DEF → `ignorarDefesaPct`.
 
-### Resíduo (NÃO feito — backlog, §BOY SCOUT)
-- **Defesa montada limpa:** a etapa 1 do ReceberDano ainda SOMA a defesa (getter) e DESCONTA os
-  ignorados (loop) — "soma tudo, depois desconta", lógica invertida vs o `continue` dos
-  modificadores. A unificação NÃO precisou mexer nisso (nenhuma natureza lista BuffDefesa; a etapa 1
-  segue idêntica). Limpeza prevista: montar `defesaEfetiva` SEM os ignorados desde o início. É
-  readability com risco de sinal na matemática de defesa — fica pro PR de modernização.
-- **ATENÇÃO (segue válido):** IContribuiDefesa não é "mina dual-source" (usa tipos concretos, não a
-  interface; passivas não entram na lista `ignorados`). Resolver junto da defesa-montada-limpa.
+### Resíduo — ✅ FEITO (PR limpeza-e-robustez pós-sweep, jul/2026)
+- **Defesa montada limpa:** a etapa 1 do ReceberDano agora monta `defesaEfetiva = DefesaComStacks +
+  soma dos IContribuiDefesa NÃO-ignorados`, em vez de somar tudo (getter `Defesa`) e descontar os
+  ignorados. Paridade exata (ContribuicaoDefesa já vem com sinal: BuffDefesa +, ReducaoDefesa −).
+  Teste novo cobriu o buraco (nenhum teste exercitava a etapa 1 com ignore): def 400 + BuffDefesa
+  furado = 700 de dano vs 550 sem furar.
+- **ATENÇÃO (resolvido):** IContribuiDefesa não era "mina dual-source" (usa tipos concretos; passivas
+  não entram na lista `ignorados`) — a montagem-limpa lidou com isso sem varrer passivas.
 
 ---
 
@@ -644,24 +644,22 @@ ExecutarCombate. Implementa quando uma fase concreta pedir.
 
 ## BOY SCOUT (quando tocar) / FUTURO ARQUITETURAL
 
-### Modernização e robustez (auditoria jul/2026 — PR próprio pós-sweep)
-**Status:** registrado. Sai como PR próprio quando o sweep de facções acabar (Apóstolos é a última).
-Tema próprio — NÃO misturar com sweep/unificação ("um PR, um tema"). Nenhum item é bug; são "formas
-melhores hoje do que fizemos antigamente" + a única fronteira de confiança real. Guard-clause em código
-interno fica DE FORA de propósito (YAGNI — compilador + testes cobrem o miolo).
-1. **`Random.Shared`** — mata as 4 instâncias `new Random()` independentes (`Combate`, `AplicarDebuff`,
-   `Medo`, `HabilidadeAtiva`). Idioma .NET 6+.
-2. **Encapsular coleções mutáveis expostas** — `List<>` público deixa mutação passar por fora das
-   regras (`PodeReceber`/bloqueios): `Combate.StatusAtivos`, `Personagem.Habilidades`,
-   `Vivo.StatusNoVivo`/`Morto.StatusNoMorto`. Expor `IReadOnlyList<T>`; mutar só pelos métodos.
-   Refatorar "quando doer" — hoje ninguém abusa, mas passa a garantia pro TIPO, não pra disciplina.
-3. **Save defensivo (a ÚNICA fronteira de confiança real)** — save é JSON lido do disco, pode vir
-   corrompido/editado à mão. `CapitulosService`/`ArsenalService` devem envolver a desserialização em
-   try/catch com fallback (save inválido → estado limpo, nunca crash). "Segurança" num single-player
-   offline = não morrer com arquivo estragado.
-4. **"Nulo morre na porta" no resto do código** — o encanamento dos ignorar já foi limpo no PR da
+### Modernização e robustez (auditoria jul/2026)
+**Status:** PARCIALMENTE FEITO. Os itens pequenos saíram no PR "limpeza e robustez pós-sweep"
+(jul/2026, junto do enum `Ambos` e da defesa-montada-limpa). Nenhum item é bug; são "formas melhores
+hoje do que fizemos antigamente". Guard-clause em código interno fica DE FORA de propósito (YAGNI).
+1. **`Random.Shared`** ✅ FEITO — matou as 8 instâncias `new Random()` (eram 8, não 4: Combate,
+   HabilidadeAtiva, Medo, AplicarDebuff, Repetindo, Surpresa, PeleGrossa, Intimidador). Idioma .NET 6+.
+2. **Encapsular coleções mutáveis expostas** — PENDENTE, PR própria "quando doer". `StatusAtivos` é
+   mutado em **46 lugares** (`.Add`/`.Remove`) — expor `IReadOnlyList<T>` + métodos de mutação é
+   invasivo, NÃO é "pequeno". Hoje ninguém abusa; refatorar quando a garantia-pelo-tipo pagar o custo.
+   Também: `Personagem.Habilidades`, `Vivo.StatusNoVivo`/`Morto.StatusNoMorto`.
+3. **Save defensivo** ✅ JÁ ESTAVA FEITO — `CapitulosService.CarregarProgresso` e
+   `ArsenalService.CarregarItensEquipados` já têm try/catch com fallback (JsonException/IOException/
+   UnauthorizedAccess → mantém default, não crasha). A auditoria assumiu que faltava; o código já fazia.
+4. **"Nulo morre na porta" no resto do código** — PENDENTE. O encanamento dos ignorar já foi limpo na
    unificação; varrer os demais `IEnumerable<T>? = null` que vazam nulo pra dentro e normalizar na
-   fronteira (`?? []`), deixando o interior não-nulo.
+   fronteira (`?? []`). Baixa prioridade.
 
 ### Capacidades — stat sob demanda e comportamento de turno
 **Status:** ADR em docs/ADR-modelo-de-capacidades.md. Migração incremental.

@@ -12,7 +12,6 @@ namespace ApostlesWar
     /// </summary>
     class HabilidadeAtiva : Habilidade
     {
-        private static readonly Random _random = new Random();
 
         private readonly int _numeroDeAlvos;
         private readonly TipoAlvo _tipoAlvo;
@@ -115,12 +114,7 @@ namespace ApostlesWar
                 _ => resolvidos,
             };
             return conjunto
-                .Where(c => acao.EstadoAlvo switch
-                {
-                    EstadoAlvo.Mortos => !c.EstaVivo(),
-                    EstadoAlvo.Vivos => c.EstaVivo(),
-                    _ => true, // Ambos: sem filtro (vivos E mortos) — honesto enquanto o enum-value existir
-                })
+                .Where(c => acao.EstadoAlvo == EstadoAlvo.Mortos ? !c.EstaVivo() : c.EstaVivo())
                 .ToList();
         }
 
@@ -137,9 +131,7 @@ namespace ApostlesWar
         };
 
         /// <summary>
-        /// Filtra a lista pelo EstadoAlvo declarado pela habilidade. Ambos não usa este
-        /// caminho (a habilidade resolve as duas seleções sozinha no Ativar) — cai no
-        /// default (Vivos) só por segurança de compilação, nunca deveria ser chamado.
+        /// Filtra a lista pelo EstadoAlvo declarado pela habilidade (Vivos ou Mortos).
         /// </summary>
         private List<Combate> FiltrarPorEstado(List<Combate> lista) => EstadoAlvo switch
         {
@@ -179,7 +171,7 @@ namespace ApostlesWar
             else
             {
                 for (int i = 0; i < extras; i++)
-                    resultado.Add(candidatos[_random.Next(candidatos.Count)]);
+                    resultado.Add(candidatos[Random.Shared.Next(candidatos.Count)]);
             }
 
             return resultado;

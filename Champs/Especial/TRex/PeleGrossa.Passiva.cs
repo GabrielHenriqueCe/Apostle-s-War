@@ -11,7 +11,6 @@ namespace ApostlesWar.Champs.Especial
     class PeleGrossa : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChanceReducao = 0.25;
-        private static readonly Random _random = new Random();
 
         public PeleGrossa() : base("Pele Grossa", "🦖", 0,
             "25% de chance de reduzir DEF do atacante ao ser atacado.")
@@ -20,7 +19,7 @@ namespace ApostlesWar.Champs.Especial
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
             if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
-            if (_random.NextDouble() >= ChanceReducao) return new List<ResultadoReacao>();
+            if (Random.Shared.NextDouble() >= ChanceReducao) return new List<ResultadoReacao>();
 
             new ReducaoDefesa(turnos: 2).Aplicar(ctx.Contraparte);
 

@@ -10,7 +10,6 @@ namespace ApostlesWar.Champs.Folclore
     class Intimidador : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChanceMedo = 0.25;
-        private static readonly Random _random = new Random();
 
         public Intimidador() : base("Intimidador", "👹", 0,
             "25% de chance de aplicar Medo no atacante ao ser atacado.")
@@ -19,7 +18,7 @@ namespace ApostlesWar.Champs.Folclore
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {
             if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
-            if (_random.NextDouble() >= ChanceMedo) return new List<ResultadoReacao>();
+            if (Random.Shared.NextDouble() >= ChanceMedo) return new List<ResultadoReacao>();
 
             new Medo(turnos: 1).Aplicar(ctx.Contraparte);
 

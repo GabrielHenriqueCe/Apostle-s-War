@@ -11,7 +11,6 @@ namespace ApostlesWar.Champs.Apostolos
     class Repetindo : HabilidadePassiva, IReageAoSerAtacado
     {
         private const int AumentoDuracao = 2;
-        private static readonly Random _random = new Random();
 
         public Repetindo() : base("Repetindo", "🎭", 0,
             "Ao ser atacado, aumenta a duração de 1 debuff aleatório do atacante em 2 turnos.")
@@ -26,7 +25,7 @@ namespace ApostlesWar.Champs.Apostolos
             if (debuffs.Count == 0)
                 return new List<ResultadoReacao>();
 
-            var escolhido = debuffs[_random.Next(debuffs.Count)];
+            var escolhido = debuffs[Random.Shared.Next(debuffs.Count)];
             escolhido.AumentarDuracao(AumentoDuracao);
 
             return new List<ResultadoReacao>

@@ -2,18 +2,17 @@
 {
     /// <summary>
     /// Status que modifica o dano recebido durante o cálculo (Escudo, Bloqueio,
-    /// Invencível, Proteção, Redução). DeveAgir decide se o modificador atua neste
-    /// golpe; ModificarDanoRecebido aplica a modificação.
+    /// Invencível, Proteção, Redução). ModificarDanoRecebido aplica a modificação.
+    ///
+    /// Se o modificador AGE neste golpe é decidido fora, por UMA língua só (unificação
+    /// jul/2026): o ReceberDano pergunta "este status está na lista de ignorados?" — a lista
+    /// unida de natureza.Ignora + ignorarStatus (golpe) + IIgnoraStatusNoAtaque (champ). Não há
+    /// mais `DeveAgir` por-status lendo flags da natureza; as regras que eram flags viraram
+    /// entradas na lista `NaturezasDano` (ex: QueimaDano fura Escudo; todo dano sem reação fura
+    /// ProtecaoAliado — o anti-loop de proteção mútua).
     /// </summary>
     interface IModificaDanoRecebido
     {
-        /// <summary>
-        /// O modificador deve agir neste golpe? Hoje decide pela natureza do dano.
-        /// Futuro (unificação dos mecanismos de ignorar): considerará também a lista
-        /// de ignorados e passivas como IIgnoraStatusNoAtaque.
-        /// </summary>
-        bool DeveAgir(NaturezaDano natureza);
-
         int ModificarDanoRecebido(Combate portador, int dano);
     }
 

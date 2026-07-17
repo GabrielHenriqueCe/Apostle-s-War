@@ -67,3 +67,21 @@ Nomes reservados (ADR §9) — não invente sinônimo, use estes quando o client
 > `MoverBuffs` saiu desta tabela — **construído** nos Apóstolos (cliente: Copiando do Mímico).
 > Ver tabela 1. Com isso o sweep das 9 facções está COMPLETO e o vocabulário mapeado esgotou-se
 > (só resta `AcaoSobreConjunto`, que segue sem cliente).
+
+---
+
+## 4. "Ignorar status" — de quem é a perfuração? (língua única, unificada jul/2026)
+
+Ao criar habilidade que FURA um status, pergunte **de quem vem a perfuração** — há UMA língua só
+(lista de tipos), com 4 fontes conforme o dono:
+
+| A perfuração é… | Use | Exemplo |
+|---|---|---|
+| da ESSÊNCIA do dano (todo dano desse tipo, sempre) | perfil de `NaturezaDano` (campo `Ignora`) | QueimaDano fura Escudo |
+| só DESTE GOLPE | `ignorarStatus` na ação `Dano` | CorteDeVento fura Escudo; PóMágico fura `typeof(Buff)` |
+| DESTE CHAMP, em todo ataque (identidade) | passiva `IIgnoraStatusNoAtaque` | Drenagem (Vampiro) fura Invencível+Bloqueio |
+| % do stat DEFESA (não é status) | `ignorarDefesaPct` no `Dano` | Vendaval, Controle de Sangue |
+
+As três primeiras convergem numa lista só no `ReceberDano` (match por tipo EXATO ou BASE —
+`typeof(Buff)` fura todos os buffs). NÃO existe mais `DeveAgir` por-status lendo flags da natureza.
+Passiva defensiva (Aquagirl) NÃO é perfurável por lista de propósito (não é status — PóMágico não a fura).

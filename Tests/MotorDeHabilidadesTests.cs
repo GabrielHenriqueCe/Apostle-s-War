@@ -542,5 +542,79 @@ namespace Tests
             Assert.Equal(0, eventos[0].AbsorvidoPeloEscudo);            // typeof(Buff) ignorou o Escudo (match por tipo-base)
             Assert.True(alvo.StatusAtivos.OfType<Escudo>().Any());      // e não consumiu o escudo
         }
+
+        // ---------- Unificar ignorar: a natureza fala a língua da lista (paridade) ----------
+
+        [Fact]
+        public void Natureza_QueimaDano_FuraOEscudo_PelaListaIgnora()
+        {
+            var alvo = Novo(hp: 2000);
+            new Escudo(500, turnos: 2).Aplicar(alvo);
+
+            // QueimaDano.Ignora ∋ Escudo → o escudo é pulado (era DeveAgir => !IgnoraEscudo).
+            var (efetivo, absorvido) = alvo.ReceberDano(300, NaturezasDano.QueimaDano);
+
+            Assert.Equal(0, absorvido);                              // escudo furado
+            Assert.Equal(300, efetivo);                             // dano foi todo pro HP
+            Assert.True(alvo.StatusAtivos.OfType<Escudo>().Any());  // e não foi consumido
+        }
+
+        [Fact]
+        public void Natureza_Veneno_NaoFuraOEscudo_PoisNaoOLista()
+        {
+            var alvo = Novo(hp: 2000);
+            new Escudo(500, turnos: 2).Aplicar(alvo);
+
+            // Veneno.Ignora NÃO tem Escudo → o escudo absorve (contraste com o Queima acima).
+            var (efetivo, absorvido) = alvo.ReceberDano(300, NaturezasDano.Veneno);
+
+            Assert.Equal(300, absorvido);   // escudo absorveu
+            Assert.Equal(0, efetivo);       // HP intocado
+        }
+
+        [Fact]
+        public void Natureza_Veneno_NaoRedirecionaPelaProtecaoAliado()
+        {
+            var aplicador = Novo(hp: 2000);
+            var portador = Novo(hp: 2000);
+            new ProtecaoAliado(aplicador, turnos: 2, percentual: 0.30).Aplicar(portador);
+
+            // Todo dano sem reação (Veneno/Queima/DanoIndireto) lista ProtecaoAliado → NÃO redireciona
+            // (era DeveAgir => Reacao != Nenhuma). O portador toma tudo, o aplicador não recebe nada.
+            portador.ReceberDano(1000, NaturezasDano.Veneno);
+
+            Assert.Equal(2000, aplicador.HPAtual);          // nada redirecionado
+            Assert.Equal(2000 - 1000, portador.HPAtual);    // tomou o golpe inteiro
+        }
+
+        [Fact]
+        public void Golpe_ComIgnorarStatusInvencivel_MataAtravesDaInvencibilidade()
+        {
+            var atacante = Novo(atk: 500);
+            var alvo = Novo(hp: 100);
+            new Invencivel(turnos: 2).Aplicar(alvo);   // normalmente seguraria o HP em 1
+
+            // A lista DO GOLPE fura o Invencível (mecanismo 2, inalterado) — prova que golpe e
+            // natureza falam a MESMA língua no gate único.
+            atacante.Atacar(alvo, 1.0, ignorarStatus: new[] { typeof(Invencivel) });
+
+            Assert.False(alvo.EstaVivo());   // matou através do Invencível
+        }
+
+        [Fact]
+        public void ProtecaoAliadoMutua_NaoEntraEmLoopInfinito()
+        {
+            var a = Novo(hp: 2000);
+            var b = Novo(hp: 2000);
+            new ProtecaoAliado(b, turnos: 2, percentual: 0.30).Aplicar(a);   // a protegido por b
+            new ProtecaoAliado(a, turnos: 2, percentual: 0.30).Aplicar(b);   // b protegido por a
+
+            // Ataque real em A → A redireciona 30% pra B (via DanoIndireto) → B NÃO re-redireciona
+            // (DanoIndireto.Ignora ∋ ProtecaoAliado, o anti-loop estrutural). Se travar, é StackOverflow.
+            a.ReceberDano(1000, NaturezasDano.Ataque);
+
+            Assert.Equal(2000 - 700, a.HPAtual);   // A tomou 700 (redirecionou 300)
+            Assert.Equal(2000 - 300, b.HPAtual);   // B tomou os 300, sem redirecionar de volta
+        }
     }
 }

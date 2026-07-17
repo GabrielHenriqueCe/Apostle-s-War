@@ -293,7 +293,10 @@ namespace ApostlesWar
             int ataque, NaturezaDano natureza, Combate? atacante = null,
             IEnumerable<Type>? ignorarStatus = null, double ignorarDefesaPct = 0.0)
         {
+            // Uma língua só de ignorar: golpe ∪ champ (já compostos no Atacar via ComporListaIgnorar)
+            // ∪ natureza.Ignora. Match por tipo EXATO ou BASE (typeof(Buff) = todos os buffs).
             var ignorados = ignorarStatus?.ToHashSet() ?? new HashSet<Type>();
+            ignorados.UnionWith(natureza.Ignora);
             int danoFinal = ataque;
 
             if (!natureza.IgnoraDefesa)
@@ -323,15 +326,15 @@ namespace ApostlesWar
             // absorvidoPeloEscudo (não é Escudo).
             foreach (var modificador in Personagem.Habilidades.OfType<IModificaDanoRecebido>())
             {
-                if (!modificador.DeveAgir(natureza)) continue;
+                // Passiva-pura (Aquagirl) sempre age: NÃO entra na lista de ignorados de
+                // propósito (lista é de tipos de status; passiva não é status — PóMágico não a fura).
                 danoFinal = modificador.ModificarDanoRecebido(this, danoFinal);
             }
 
             foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
             {
                 var status = (StatusEffect)modificador;
-                if (ignorados.Any(t => t.IsAssignableFrom(status.GetType()))) continue;   // mecanismo lista: match por tipo EXATO ou BASE (typeof(Buff) = todos os buffs, ex: PoMagico; Vampiro passa tipos concretos)
-                if (!modificador.DeveAgir(natureza)) continue;         // mecanismo natureza — agora dentro do status
+                if (ignorados.Any(t => t.IsAssignableFrom(status.GetType()))) continue;   // gate ÚNICO: o dano fura este status?
 
                 int antes = danoFinal;
                 danoFinal = modificador.ModificarDanoRecebido(this, danoFinal);

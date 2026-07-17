@@ -11,7 +11,6 @@ namespace ApostlesWar.Skills.Buffs
             "Bloqueia todo o dano recebido.")
         { }
 
-        public bool DeveAgir(NaturezaDano natureza) => !natureza.IgnoraBloqueio;
         public int ModificarDanoRecebido(Combate portador, int dano) => 0;
 
         public override void Remover(Combate alvo)

@@ -17,11 +17,10 @@ namespace ApostlesWar.Skills.Buffs
             Aplicador = aplicador;
         }
 
-        // Só redireciona golpes que provocam reação (ataques/revides). Não age em dano
-        // sem reação (Veneno/Queima/DanoIndireto) — e como o redirecionamento usa
-        // DanoIndireto, isso corta o loop de proteção mútua (A→B→A).
-        public bool DeveAgir(NaturezaDano natureza) => natureza.Reacao != TipoReacao.Nenhuma;
-
+        // Só redireciona golpes que provocam reação (ataques/revides). Quem NÃO redireciona
+        // (Veneno/Queima/DanoIndireto) lista ProtecaoAliado em NaturezasDano.Ignora — e como o
+        // redirecionamento abaixo usa DanoIndireto (que ignora ProtecaoAliado), isso corta o loop
+        // de proteção mútua (A→B→A) estruturalmente, sem depender de disciplina.
         public int ModificarDanoRecebido(Combate portador, int dano)
         {
             if (!Aplicador.EstaVivo()) return dano;

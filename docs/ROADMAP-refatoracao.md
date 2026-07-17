@@ -60,7 +60,8 @@ velho aposentado). O que resta:
 6. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria,
    pós-composição.
 
-A **unificação dos mecanismos de ignorar** é um fio transversal já começado (DeveAgir = passo 1).
+A **unificação dos mecanismos de ignorar** ✅ CONCLUÍDA (jul/2026) — a natureza virou lista, o
+`DeveAgir` morreu, 1 gate só. Ver a seção própria abaixo.
 
 ---
 
@@ -330,59 +331,43 @@ ContextoReacao atual: (Portador, Contraparte, DanoCausado, Natureza, FoiCritico,
 
 ---
 
-## Unificar os 3 mecanismos de ignorar status (FIO NOVO — passo 1 FEITO)
+## Unificar os 3 mecanismos de ignorar status (✅ CONCLUÍDO — jul/2026)
 
-**Status:** EM CURSO. O DeveAgir foi o passo 1. Faltam os passos 2+.
+**Status:** ✅ FEITO. Uma língua só de ignorar; o `DeveAgir` morreu.
 
-**A descoberta:** "ignorar um status" no cálculo de dano tem TRÊS caminhos sem padrão único:
+**A descoberta (original):** "ignorar um status" tinha TRÊS caminhos sem padrão único:
 1. **Por natureza** — flags no NaturezaDano (IgnoraEscudo, IgnoraBloqueio, IgnoraDefesa).
-   Ex: QueimaDano ignora defesa+escudo; Veneno ignora só defesa.
-2. **Por lista na chamada** — parâmetro ignorarStatus: Type[]. Ex: PoMagico (todos os buffs),
-   CorteDeVento (Escudo), Vendaval (ProtecaoAliado + BuffDefesa). Atravessa
-   IModificaDanoRecebido E IContribuiDefesa.
-3. **Por passiva permanente** — IIgnoraStatusNoAtaque. Ex: Vampiro (Invencivel + BloqueioTotal).
-   Consultada no Combate.Atacar via ComporListaIgnorar.
+2. **Por lista na chamada** — `ignorarStatus: Type[]` (PóMágico, CorteDeVento, Vendaval).
+3. **Por passiva permanente** — `IIgnoraStatusNoAtaque` (Drenagem/Vampiro), unida no Atacar.
 
-Os mecanismos 2 e 3 convergem na lista `ignorados`; o 1 era um `if natureza.IgnoraX` no
-ReceberDano. A inconsistência: a MESMA coisa (ignorar Escudo) pode ser expressa por natureza
-(Queima) OU por lista (CorteDeVento), sem critério. Foi a limpeza que revelou — bug latente,
-não criado agora.
+A inconsistência: a MESMA coisa (furar Escudo) podia ser natureza (Queima) OU lista (CorteDeVento),
+sem critério — o "monte de ignorar que ninguém sabia qual usar".
 
-**Meta:** UM caminho canônico de ignorar. Cada status responde "devo agir neste golpe?".
+### A resolução — a natureza passou a falar a língua da LISTA
+- `NaturezaDano` trocou os bools de STATUS (`IgnoraEscudo`/`IgnoraBloqueio`) por
+  `Ignora: IReadOnlyCollection<Type>` (default `[]`, molde da Drenagem). `IgnoraDefesa` FICOU bool
+  (defesa é STAT, não status). `NaturezasDano.Direto` foi DELETADO (zero clientes + doc mentirosa).
+- Perfis: QueimaDano `Ignora = [Escudo, ProtecaoAliado]`; Veneno/DanoIndireto `= [ProtecaoAliado]`;
+  Ataque `= []`.
+- `IModificaDanoRecebido.DeveAgir` **DELETADO** (interface + as 6 implementações). O ReceberDano
+  agora tem **1 gate só**: `ignorados` = natureza.Ignora ∪ golpe ∪ champ; o status pergunta "fui
+  listado?". Nenhum número de dano mudou (tradução flag→lista fiel; provada por 5 testes de paridade).
+- **Anti-StackOverflow de proteção mútua agora ESTRUTURAL:** `DanoIndireto.Ignora ∋ ProtecaoAliado`
+  → o redirect (que usa DanoIndireto) não re-redireciona. Numa linha, sem depender de disciplina de
+  perfil. (Era o `DeveAgir => Reacao != Nenhuma`.)
 
-### Passo 1 — FEITO: DeveAgir(natureza) no IModificaDanoRecebido
-- A interface ganhou `bool DeveAgir(NaturezaDano natureza)`. Cada status decide:
-  - Escudo: `!natureza.IgnoraEscudo`
-  - BloqueioTotal: `!natureza.IgnoraBloqueio`
-  - Invencivel, ReducaoDanoFixo: `true`
-  - ProtecaoAliado: `natureza.Reacao != TipoReacao.Nenhuma`
-- ReceberDano perdeu os guardas de natureza por-tipo; consulta DeveAgir. Mantém o
-  `ignorados.Contains` (lista — genérico).
-- **De quebra, corrigiu o StackOverflow de proteção mútua** (A protege B, B protege A): o
-  redirecionamento usa DanoIndireto (Reacao = Nenhuma) → DeveAgir do segundo ProtecaoAliado
-  retorna false → não re-redireciona → loop morto. Bug PRÉ-EXISTENTE, exposto ao testar 2
-  aliados com proteção.
+### Critério de autoria (o produto pro usuário — no CATALOGO)
+De quem é a perfuração? essência do dano → perfil de `NaturezaDano`; só o golpe → `ignorarStatus`
+no `Dano`; o champ sempre → passiva `IIgnoraStatusNoAtaque`; % do stat DEF → `ignorarDefesaPct`.
 
-### Passos futuros (2+)
-- **Lista (mecanismo 2) entra no DeveAgir** — o status pergunta "fui listado pra ignorar?" em
-  vez do ReceberDano fazer `ignorados.Contains`. Some o critério separado.
-- **IIgnoraStatusNoAtaque (mecanismo 3) entra no DeveAgir** — provavelmente o
-  IIgnoraStatusNoAtaque some ou se transforma; o Vampiro contribui pro DeveAgir de outra forma.
-- Cruza com IContribuiDefesa (o ignorarStatus também afeta a defesa — Vendaval ignora
-  BuffDefesa). A unificação precisa cobrir as duas categorias. NOTA: ignorar IContribuiDefesa
-  NÃO é igual a pular (continue) como Escudo/ProtecaoAliado — a defesa do buff já foi SOMADA
-  ao stat (Defesa), então pra ignorá-la o ReceberDano SUBTRAI a ContribuicaoDefesa (lógica
-  invertida vs o continue dos modificadores). Funciona, mas é confuso ("soma tudo, depois
-  desconta o ignorado"). Limpeza prevista: o cálculo de quanto descontar deveria morar na
-  própria reação/natureza, não no loop do ReceberDano — montar a defesa SEM os ignorados desde
-  o início, em vez de incluir e descontar.
-- **ATENÇÃO (avaliado jul/2026):** IContribuiDefesa NÃO é a mesma "mina dual-source" que
-  IBloqueiaStatus/IModificaDanoRecebido eram (aquelas ganharam a varredura de
-  Personagem.Habilidades). Aqui é diferente: o getter `Defesa` usa os tipos CONCRETOS
-  BuffDefesa/ReducaoDefesa, não a interface; a interface só serve ao loop de subtração-do-ignorado
-  no ReceberDano, e passivas nem entram na lista `ignorados`. Adicionar varredura de passivas
-  aqui seria inútil/errado (subtrairia o que nunca foi somado). Resolver só JUNTO desta unificação,
-  não como "consistência de dispatch".
+### Resíduo (NÃO feito — backlog, §BOY SCOUT)
+- **Defesa montada limpa:** a etapa 1 do ReceberDano ainda SOMA a defesa (getter) e DESCONTA os
+  ignorados (loop) — "soma tudo, depois desconta", lógica invertida vs o `continue` dos
+  modificadores. A unificação NÃO precisou mexer nisso (nenhuma natureza lista BuffDefesa; a etapa 1
+  segue idêntica). Limpeza prevista: montar `defesaEfetiva` SEM os ignorados desde o início. É
+  readability com risco de sinal na matemática de defesa — fica pro PR de modernização.
+- **ATENÇÃO (segue válido):** IContribuiDefesa não é "mina dual-source" (usa tipos concretos, não a
+  interface; passivas não entram na lista `ignorados`). Resolver junto da defesa-montada-limpa.
 
 ---
 
@@ -681,7 +666,8 @@ interno fica DE FORA de propósito (YAGNI — compilador + testes cobrem o miolo
 ### Capacidades — stat sob demanda e comportamento de turno
 **Status:** ADR em docs/ADR-modelo-de-capacidades.md. Migração incremental.
 - A) Reação após evento → IReageAo* — buffs FEITOS; passivas no C5 (quase fim).
-- B) Intervenção no dano → IModificaDanoRecebido FEITO (+ DeveAgir agora).
+- B) Intervenção no dano → IModificaDanoRecebido FEITO (o `DeveAgir` foi REMOVIDO na unificação
+  do ignorar — jul/2026; a decisão virou 1 gate de lista no ReceberDano).
 - E) Bloqueio de aplicação → IBloqueiaStatus FEITO.
 - C) Stat sob demanda → IContribui* (BuffDefesa/ReducaoDefesa já espelhados). PENDENTE.
 - D) Comportamento de turno (Medo/Preso/Irritar) → PENDENTE, baixa prioridade. Medo com grau,
@@ -772,9 +758,11 @@ tudo estabilizar.
 - **EventoDano (Fatia 1):** ResultadoAtaque convergiu em EventoDano (record rico do golpe).
   ReceberDano retorna (Efetivo, AbsorvidoPeloEscudo). Atacar monta o evento. Base da exibição
   rica/web (Propósito B).
-- **DeveAgir (IModificaDanoRecebido):** cada status decide se age via DeveAgir(natureza). Removeu
-  os guardas de natureza por-tipo do ReceberDano. Corrigiu o StackOverflow de proteção mútua.
-  Passo 1 da unificação dos mecanismos de ignorar.
+- **Unificação do ignorar (✅ jul/2026):** a natureza virou lista (`NaturezaDano.Ignora`), o
+  `DeveAgir` foi REMOVIDO (interface + 6 impl), o ReceberDano ficou com 1 gate de lista só
+  (natureza ∪ golpe ∪ champ). Anti-StackOverflow de proteção mútua agora estrutural
+  (`DanoIndireto.Ignora ∋ ProtecaoAliado`). `NaturezasDano.Direto` deletado (órfão). Paridade
+  provada por 5 testes. (Antes: o passo 1 introduziu o `DeveAgir`; agora ele morreu no passo final.)
 - **Capacidade C (IContribuiDefesa):** BuffDefesa/ReducaoDefesa sobre DefesaComStacks; sem
   inconsistência (camadas distintas).
 - **fix Veneno tick:** dano do tick é 5% fixo (não × Stacks); acúmulo só na Explosão.

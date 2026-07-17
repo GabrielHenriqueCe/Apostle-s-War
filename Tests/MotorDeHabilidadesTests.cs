@@ -23,6 +23,9 @@ namespace Tests
         private static Combate Novo(int hp = 1000, int atk = 200)
             => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, 0));
 
+        private static Combate NovoComDefesa(int hp, int atk, int def)
+            => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, def));
+
         private static HabilidadeAtiva Hab(List<Acao> acoes, int alvos,
             TipoLista lista = TipoLista.Inimigos, TipoAlvo modo = TipoAlvo.Explicito,
             EstadoAlvo estado = EstadoAlvo.Vivos)
@@ -172,27 +175,6 @@ namespace Tests
 
             inimigo.Reviver(500);                        // a Sentença bloqueia central (Morto.Reviver)
             Assert.False(inimigo.EstaVivo());
-        }
-
-        [Fact]
-        public void EstadoAmbos_SemFiltro_AtingeVivosEMortos()
-        {
-            var atacante = Novo();
-            var aliadoVivo = Novo();
-            var aliadoMorto = Novo(); Matar(aliadoMorto);
-            var ctx = new ContextoCombate(atacante,
-                new List<Combate> { atacante, aliadoVivo, aliadoMorto },
-                new List<Combate> { Novo() });
-
-            var hab = Hab(new()
-            {
-                new AplicarBuff(() => new BuffAtaque(), Escopo.TodosAliados, EstadoAlvo.Ambos),
-            }, alvos: int.MaxValue, lista: TipoLista.Aliados);
-
-            hab.Ativar(ctx, atacante);
-
-            Assert.True(aliadoVivo.StatusAtivos.OfType<BuffAtaque>().Any());
-            Assert.True(aliadoMorto.StatusAtivos.OfType<BuffAtaque>().Any()); // na lista do Morto
         }
 
         // ---------- Ordem + agregação ----------
@@ -615,6 +597,25 @@ namespace Tests
 
             Assert.Equal(2000 - 700, a.HPAtual);   // A tomou 700 (redirecionou 300)
             Assert.Equal(2000 - 300, b.HPAtual);   // B tomou os 300, sem redirecionar de volta
+        }
+
+        [Fact]
+        public void DefesaIgnorada_GolpeFuraOBuffDefesa_CausaMaisDano()
+        {
+            // Dois alvos idênticos (def 400 + BuffDefesa 50%, abaixo do cap de redução); mesmo golpe
+            // bruto (1000), um normal e outro furando o BuffDefesa pela lista. Cobre a etapa 1 do
+            // ReceberDano (defesa montada sem os ignorados). Via ReceberDano direto = sem crit random.
+            var alvoNormal = NovoComDefesa(hp: 100000, atk: 0, def: 400);
+            var alvoFurado = NovoComDefesa(hp: 100000, atk: 0, def: 400);
+            new BuffDefesa(turnos: 2, percentual: 0.50).Aplicar(alvoNormal);
+            new BuffDefesa(turnos: 2, percentual: 0.50).Aplicar(alvoFurado);
+
+            var (efNormal, _) = alvoNormal.ReceberDano(1000, NaturezasDano.Ataque);
+            var (efFurado, _) = alvoFurado.ReceberDano(1000, NaturezasDano.Ataque,
+                ignorarStatus: new[] { typeof(BuffDefesa) });
+
+            Assert.Equal(550, efNormal);   // def 600 → 45% de redução
+            Assert.Equal(700, efFurado);   // buff furado → def 400 → 30% de redução
         }
     }
 }

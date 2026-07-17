@@ -279,7 +279,7 @@ namespace ApostlesWar.Services
                     ? _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores)
                     : _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
             }
-            else if (hab.TipoLista == TipoLista.Aliados && hab.NumeroDeAlvos != int.MaxValue && hab.EstadoAlvo != EstadoAlvo.Ambos)
+            else if (hab.TipoLista == TipoLista.Aliados && hab.NumeroDeAlvos != int.MaxValue)
             {
                 // Pick real de alvo aliado (por estado) — antes disso nunca existia,
                 // porque toda habilidade de aliado mirava o time inteiro.

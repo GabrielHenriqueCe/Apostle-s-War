@@ -11,8 +11,6 @@ namespace ApostlesWar.Skills.Debuffs
     {
         public const double ChancePadrao = 0.50;
 
-        private static readonly Random _random = new Random();
-
         public double Chance { get; }
 
         public Medo(int turnos = 1, double chance = ChancePadrao)
@@ -25,7 +23,7 @@ namespace ApostlesWar.Skills.Debuffs
         /// Rola o dado. true = ação foi paralizada (deve ser cancelada).
         /// false = ação procede normalmente.
         /// </summary>
-        public bool TentaParalizar() => _random.NextDouble() < Chance;
+        public bool TentaParalizar() => Random.Shared.NextDouble() < Chance;
 
         public override void Remover(Combate alvo)
         {

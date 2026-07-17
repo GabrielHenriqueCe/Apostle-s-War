@@ -25,7 +25,6 @@ namespace ApostlesWar
 
     abstract class Combate
     {
-        private static readonly Random random = new Random();
         // Balanceamento de defesa: cada N pontos de DEF reduzem 1 ponto percentual
         // de dano, com cap máximo. Modificar aqui afeta todos os combatentes.
         private const double DefesaPorPontoReducao = 1000.0;
@@ -268,7 +267,7 @@ namespace ApostlesWar
         public bool TentarContraAtacar(Combate agressor, double chance)
         {
             if (_jaContraAtacou.Contains(agressor)) return false;
-            if (random.NextDouble() >= chance) return false;
+            if (Random.Shared.NextDouble() >= chance) return false;
             _jaContraAtacou.Add(agressor);
             return true;
         }
@@ -301,13 +300,14 @@ namespace ApostlesWar
 
             if (!natureza.IgnoraDefesa)
             {
-                int defesaEfetiva = Defesa;
-                foreach (var contribuidor in StatusAtivos.OfType<IContribuiDefesa>())
-                {
-                    var status = (StatusEffect)contribuidor;
-                    if (ignorados.Any(t => t.IsAssignableFrom(status.GetType())))
-                        defesaEfetiva -= contribuidor.ContribuicaoDefesa(this);
-                }
+                // Monta a defesa JÁ sem os status ignorados (em vez de somar tudo e descontar depois).
+                // ContribuicaoDefesa já vem com sinal (BuffDefesa +, ReducaoDefesa −), então somar os
+                // não-ignorados = DefesaComStacks + todos − ignorados (idêntico ao getter Defesa).
+                int defesaEfetiva = DefesaComStacks
+                    + StatusAtivos.OfType<IContribuiDefesa>()
+                        .Where(c => !ignorados.Any(t => t.IsAssignableFrom(((StatusEffect)c).GetType())))
+                        .Sum(c => c.ContribuicaoDefesa(this));
+
                 defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
                 defesaEfetiva = Math.Max(0, defesaEfetiva);
 
@@ -365,7 +365,7 @@ namespace ApostlesWar
         {
             var nat = natureza ?? NaturezasDano.Ataque;
 
-            bool critico = forcaCritico || random.NextDouble() < TaxaCrit;
+            bool critico = forcaCritico || Random.Shared.NextDouble() < TaxaCrit;
             int danoBase = (int)(Ataque * multiplicador);
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
 

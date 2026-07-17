@@ -217,11 +217,10 @@ Galáxia ✅ (Alien, Tecnológicos), Esmagar ✅ (Ogro, Folclore)).
 `EstadoAlvo` **desce da habilidade pra ação** e é avaliado no momento em que a ação roda
 (não uma vez, na resolução). É isso que faz `Cura(Vivos)` pegar os recém-revividos e
 `Sentença(Mortos)` pegar os recém-mortos. **O `Ambos` MORRE** — uma habilidade que mira dois
-estados é só uma habilidade com duas ações de estados diferentes; o `throw` no `Ambos` fica
-sem sentido e está descartado. Enquanto o enum-value existir (Strangler), `Ambos` passado a
-uma AÇÃO significa **sem filtro** (vivos E mortos) — semanticamente honesto, nunca silêncio
-errado. Usuários mapeados: os 7 da família do revive (§9) + 1 check no `CombateService:282`;
-o value morre quando o 7º migrar.
+estados é só uma habilidade com duas ações de estados diferentes; o `throw` no `Ambos` ficou
+sem sentido e foi descartado. **✅ O enum-value `Ambos` MORREU (jul/2026):** o 7º e último cliente
+(o Céu) migrou nos Apóstolos; o value, o check no `CombateService:282` e o branch "sem filtro" do
+interpretador foram removidos no PR de limpeza pós-sweep. `EstadoAlvo` hoje é só `{ Vivos, Mortos }`.
 
 ### 5.4 Seletor (quais/quantos STATUS por combatente)
 Só para operações de manipulação de status (`RemoverDebuffs`/`MoverBuffs`/`Explodir`/
@@ -336,6 +335,8 @@ Com `EstadoAlvo` fora da habilidade, o **menu de seleção de alvo** precisa der
 que consome a escolha do jogador (a com `Escopo.AlvosResolvidos`): o estado+lista dela mandam
 no menu (ataque → inimigos vivos; revive-de-1 → aliados mortos). Isso encosta no
 `SelecaoDeAlvoService`/`CombateService`, não só no combate — é o lado UI da Frente 2.
+**Status:** a parte pequena (matar o enum `Ambos`) FEITA no PR de limpeza pós-sweep; a **derivação
+do menu** em si é tema estrutural próprio, junto do refactor do `ExecutarTurno` — NÃO feito ainda.
 
 ### 8.3 Escopo do dano no `PorDanoCausado`
 `PorDanoCausado` soma **tudo** no `eventos`. Se uma habilidade quer curar/escudar só do dano

@@ -62,11 +62,12 @@ namespace ApostlesWar
     /// <summary>
     /// Define qual estado de vida a habilidade mira dentro da TipoLista escolhida.
     /// Vivos: maioria (ataques, curas, buffs). Mortos: revive de N fixo (seleção
-    /// única sobre os mortos). Ambos: a habilidade faz duas seleções independentes
-    /// na mesma chamada (ex: revive mortos E cura vivos) — opta por fora do pick
-    /// automático de alvo explícito, resolve as duas listas sozinha no Ativar.
+    /// única sobre os mortos). Uma habilidade que "mira dois estados" (ex: revive mortos
+    /// E buffa vivos) NÃO usa um valor especial — é só duas ações com EstadoAlvo diferente
+    /// na mesma lista (cada ação filtra o seu estado na execução). Por isso o antigo `Ambos`
+    /// morreu (jul/2026): quando o sweep migrou o último cliente — o Céu — ele deixou de existir.
     /// </summary>
-    enum EstadoAlvo { Vivos, Mortos, Ambos }
+    enum EstadoAlvo { Vivos, Mortos }
 
     /// <summary>
     /// Em quais combatentes uma AÇÃO age (eixo da composição — ver ADR-composicao-de-acoes §5.2).

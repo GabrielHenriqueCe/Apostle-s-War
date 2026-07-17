@@ -14,7 +14,6 @@ namespace ApostlesWar
     /// </summary>
     class AplicarDebuff : Acao
     {
-        private static readonly Random _random = new();
         private readonly Func<Combate, Debuff> _fabrica;
         private readonly double _chance;
 
@@ -30,7 +29,7 @@ namespace ApostlesWar
 
         public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
         {
-            if (_chance < 1.0 && _random.NextDouble() >= _chance) return;
+            if (_chance < 1.0 && Random.Shared.NextDouble() >= _chance) return;
             _fabrica(atacante).Aplicar(alvo);
         }
     }

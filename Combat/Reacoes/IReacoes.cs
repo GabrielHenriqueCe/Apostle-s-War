@@ -117,7 +117,7 @@
     /// a transição chamando AplicarRevive — mantendo o personagem como Vivo, impedindo
     /// que o Vilão perceba a morte e que a Necromância tente reviver.
     /// Portador = quem quase morreu; Contraparte = quem matou.
-    /// Implementador: PassivaGuarda.
+    /// Implementador: GuardaReal (passiva do Guarda).
     /// </summary>
     interface IReageAntesDeMorrer
     {

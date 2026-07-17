@@ -1,6 +1,6 @@
 using ApostlesWar;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Decaidos
 {
     /// <summary>
     /// Cura 15% do dano causado ao atacar. Capacidade direta (IReageAoCausarDano)

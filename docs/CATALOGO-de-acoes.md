@@ -25,6 +25,7 @@
 | `RemoverBuffs` | remove buffs do alvo conforme um Seletor | Seletor | `Skills/Acoes/RemoverBuffs.cs` |
 | `RemoverDebuffs` | remove debuffs do alvo conforme um Seletor (gêmeo do RemoverBuffs) | Seletor | `Skills/Acoes/RemoverDebuffs.cs` |
 | `Explodir` | detona status de tick (`IStatusComTick`) conforme Seletor → devolve `EventoDano` | Seletor | `Skills/Acoes/Explodir.cs` |
+| `ConcederTurnoExtra` | concede um turno extra ao escopo (default `ProprioAtacante`) | — | `Skills/Acoes/ConcederTurnoExtra.cs` |
 
 ### Eixos (compõem as ações acima)
 - **`Valor`** (`Skills/Acoes/Valor.cs`) — fragmento de magnitude: `Fixo(v)`, `PorHP(%)`,
@@ -59,5 +60,7 @@ Nomes reservados (ADR §9) — não invente sinônimo, use estes quando o client
 | Vocabulário | O que seria | Clientes previstos |
 |---|---|---|
 | `MoverBuffs` | roubo de buff (do alvo pro conjurador) | Copiando |
-| `ConcederTurnoExtra` | concede um turno extra | Copiando |
 | `AcaoSobreConjunto` | 2º formato de ação p/ agregação cross-alvo (construída e removida — ADR §3.4) | candidata: Atlantis (§8.1) |
+
+> `ConcederTurnoExtra` saiu desta tabela — **construído** nos Decaídos (1º cliente real: Rato
+> Voador do Morcego, não o Copiando como previsto). Ver tabela 1.

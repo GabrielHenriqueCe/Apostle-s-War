@@ -1,6 +1,6 @@
 ﻿using ApostlesWar;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Decaidos
 {
     /// <summary>
     /// A cada hit recebido, o Diabo ganha +5% de HP máximo permanente, até 25%

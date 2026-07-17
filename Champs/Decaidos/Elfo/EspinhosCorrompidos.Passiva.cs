@@ -1,15 +1,16 @@
 ﻿using ApostlesWar;
 using ApostlesWar.Skills.Buffs;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Decaidos
 {
     /// <summary>
     /// Todo início de turno, aplica EspinhosVenenosos 2t (renova sempre). Quem ataca
-    /// o Elfo recebe Veneno + Queima enquanto ativo.
+    /// o Elfo recebe Veneno + Queima enquanto ativo. Nome de jogo "Espinhos Corrompidos"
+    /// (era "Espinhos", que colidia no display com o buff EspinhosVenenosos — que exibe "Espinhos").
     /// </summary>
-    class Espinhos : HabilidadePassiva, IReageAoInicioTurno
+    class EspinhosCorrompidos : HabilidadePassiva, IReageAoInicioTurno
     {
-        public Espinhos() : base("Espinhos", "🌿", 0,
+        public EspinhosCorrompidos() : base("Espinhos Corrompidos", "🌿", 0,
             "Todo turno: atacantes recebem Veneno e Queima (2t).")
         { }
 

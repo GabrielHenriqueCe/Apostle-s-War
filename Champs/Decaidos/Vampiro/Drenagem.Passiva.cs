@@ -1,7 +1,8 @@
 ﻿using ApostlesWar;
 using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Skills.Passivas;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Champs.Decaidos
 {
     /// <summary>
     /// Passiva permanente: todos os ataques do Vampiro ignoram Invencível e BloqueioTotal

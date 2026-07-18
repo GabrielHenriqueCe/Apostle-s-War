@@ -335,8 +335,11 @@ Com `EstadoAlvo` fora da habilidade, o **menu de seleção de alvo** precisa der
 que consome a escolha do jogador (a com `Escopo.AlvosResolvidos`): o estado+lista dela mandam
 no menu (ataque → inimigos vivos; revive-de-1 → aliados mortos). Isso encosta no
 `SelecaoDeAlvoService`/`CombateService`, não só no combate — é o lado UI da Frente 2.
-**Status:** a parte pequena (matar o enum `Ambos`) FEITA no PR de limpeza pós-sweep; a **derivação
-do menu** em si é tema estrutural próprio, junto do refactor do `ExecutarTurno` — NÃO feito ainda.
+**Status:** a parte pequena (matar o enum `Ambos`) FEITA no PR de limpeza pós-sweep; o refactor do
+`ExecutarTurno` (separar controle × execução via `IControladorDeTurno` + seam de apresentação/espera
+`IApresentacao`) FEITO (jul/2026); a **derivação do menu pela ação** em si (o pick derivar do
+`Escopo.AlvosResolvidos` em vez do `if TipoLista` no `ResolverAlvoInicial`) segue pendente — slice de
+"menus" próprio, em cima do seam que o refactor deixou.
 
 ### 8.3 Escopo do dano no `PorDanoCausado`
 `PorDanoCausado` soma **tudo** no `eventos`. Se uma habilidade quer curar/escudar só do dano

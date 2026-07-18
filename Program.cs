@@ -20,7 +20,10 @@ var faccaoService = new FaccaoService();
 var selecaoDeAlvoService = new SelecaoDeAlvoService();
 var menuService = new MenuService(faccaoService, arsenalService, capitulosService);
 var campeoesService = new CampeoesService(personagemService, campanhaService, menuService, capitulosService);
-var combateService = new CombateService(arsenalService, campanhaService, campeoesService, personagemService, menuService, selecaoDeAlvoService);
+var apresentacao = new ApresentacaoConsole();
+var controladorJogador = new ControladorJogador(menuService);   // trocar por controlador automático liga o modo auto
+var controladorBot = new ControladorBot(selecaoDeAlvoService);
+var combateService = new CombateService(arsenalService, campanhaService, campeoesService, personagemService, menuService, selecaoDeAlvoService, controladorJogador, controladorBot, apresentacao);
 new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, menuService, combateService).Executar();
 
 #endregion

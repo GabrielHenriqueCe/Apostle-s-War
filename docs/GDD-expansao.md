@@ -339,8 +339,10 @@ Esta é a conexão entre a mecânica de morte (fio técnico) e o design da Arena
 ## 9. Modo Automático (ideia jul/2026 — NEAR-TERM, pré-web)
 
 > Diferente do resto deste GDD (que é pós-web): o auto-battle é o **passo 2 do roadmap de dev**
-> (ver topo). Fica aqui como spec, mas é near-term. **Pré-requisito:** o refactor do `ExecutarTurno`
-> (separar seleção-de-ação / seleção-de-alvo / execução) + o balanceamento da base.
+> (ver topo). Fica aqui como spec, mas é near-term. **Pré-requisito PARCIALMENTE FEITO:** o refactor
+> do `ExecutarTurno` separou o CONTROLE (quem decide ação/alvo) da execução via `IControladorDeTurno`
+> (jul/2026) — o auto-mode é só um `ControladorAutomatico` novo trocado no composition root, sem tocar
+> no loop. Falta: a implementação do controlador automático + o balanceamento da base.
 
 - Botão **auto liga/desliga**; ao desligar, completa a ação atual e volta ao manual.
 - Implementação com **async/await**: uma `Task` roda o loop de turnos com `Task.Delay()`,

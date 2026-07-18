@@ -1,5 +1,4 @@
 ﻿using ApostlesWar;
-using GHUtils;
 using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Buffs;
 using ApostlesWar.Skills.Debuffs;
@@ -17,9 +16,14 @@ namespace ApostlesWar.Services
         private readonly PersonagemService _personagemService;
         private readonly MenuService _menuService;
         private readonly SelecaoDeAlvoService _selecaoDeAlvoService;
+        private readonly IControladorDeTurno _controladorJogador;
+        private readonly IControladorDeTurno _controladorBot;
+        private readonly IApresentacao _apresentacao;
 
         public CombateService(ArsenalService arsenalService, CampanhaService campanhaService,
-            CampeoesService campeoesService, PersonagemService personagemService, MenuService menuService, SelecaoDeAlvoService selecaoDeAlvoService    )
+            CampeoesService campeoesService, PersonagemService personagemService, MenuService menuService,
+            SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
+            IControladorDeTurno controladorBot, IApresentacao apresentacao)
         {
             _arsenalService = arsenalService;
             _campanhaService = campanhaService;
@@ -27,13 +31,15 @@ namespace ApostlesWar.Services
             _personagemService = personagemService;
             _menuService = menuService;
             _selecaoDeAlvoService = selecaoDeAlvoService;
+            _controladorJogador = controladorJogador;
+            _controladorBot = controladorBot;
+            _apresentacao = apresentacao;
         }
 
-        #endregion
+        /// <summary>O controlador que DECIDE ação/alvo deste combatente (humano/bot; futuro: auto).</summary>
+        private IControladorDeTurno ControladorDe(Combate combatente)
+            => combatente is Jogador ? _controladorJogador : _controladorBot;
 
-        #region Estrutura de ação
-
-        private record AcaoEscolhida(HabilidadeAtiva Habilidade);
         #endregion
 
         #region Loop principal
@@ -146,7 +152,7 @@ namespace ApostlesWar.Services
                 _menuService.ExibirPartida(aliados, defensores);
                 _menuService.ExibirMensagemPassiva(
                     $"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
-                Thread.Sleep(1500);
+                _apresentacao.AguardarAnimacao(1500);
 
                 if (VerificarMedoEAplicar(atacante)) return;
 
@@ -155,11 +161,10 @@ namespace ApostlesWar.Services
                 return;
             }
 
-            AcaoEscolhida acao = atacante is Jogador
-                ? EscolherAcaoJogador(atacante, defensores, aliados)
-                : EscolherAcaoInimigo(atacante);
-
-            ExecutarAcao(atacante, acao, defensores, aliados);
+            // Seleção (quem decide) via controlador; execução (o que acontece) separada.
+            var controlador = ControladorDe(atacante);
+            HabilidadeAtiva hab = controlador.EscolherAcao(atacante, aliados, defensores);
+            ExecutarHabilidade(atacante, hab, defensores, aliados, controlador);
         }
 
         /// <summary>
@@ -174,69 +179,39 @@ namespace ApostlesWar.Services
 
             _menuService.ExibirMensagemPassiva(
                 $"{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} estava com medo e não conseguiu agir!");
-            Thread.Sleep(1500);
+            _apresentacao.AguardarAnimacao(1500);
             return true;
-        }
-
-        #endregion
-
-        #region Escolha de ação
-
-        private AcaoEscolhida EscolherAcaoJogador(Combate atacante, List<Combate> defensores, List<Combate> aliados)
-        {
-            var habilidadesAtivas = atacante.Personagem.Habilidades.OfType<HabilidadeAtiva>().ToList();
-            int totalOpcoes = habilidadesAtivas.Count;
-            int acao = 1;
-
-            while (true)
-            {
-                Console.Clear();
-                _menuService.ExibirPartida(aliados, defensores);
-                _menuService.ExibirAcoes(atacante, acao);
-
-                ConsoleKeyInfo key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Enter) break;
-
-                int novaAcao = ConsoleUtils.SelecionarComCursor(acao, 1, totalOpcoes, key.Key);
-                bool descendo = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
-
-                // Pula habilidades em cooldown. A1 (AtaqueBasico) tem cooldown 0 sempre,
-                // então nunca é pulada — a A1 é sempre selecionável.
-                while (novaAcao != acao)
-                {
-                    var hab = habilidadesAtivas[novaAcao - 1];
-                    if (atacante.Cooldowns[hab].Disponivel) break;
-
-                    int proximo = descendo ? novaAcao + 1 : novaAcao - 1;
-                    if (proximo < 1 || proximo > totalOpcoes)
-                    {
-                        novaAcao = acao;
-                        break;
-                    }
-                    novaAcao = proximo;
-                }
-
-                acao = novaAcao;
-            }
-
-            return new AcaoEscolhida(habilidadesAtivas[acao - 1]);
-        }
-
-        private AcaoEscolhida EscolherAcaoInimigo(Combate atacante)
-        {
-            // Inimigo usa sempre AtaqueBasico (A1) por enquanto.
-            // Futuro: bot escolherá entre habilidades disponíveis (modo automático).
-            var ataqueBasico = atacante.Personagem.Habilidades.OfType<AtaqueBasico>().First();
-            return new AcaoEscolhida(ataqueBasico);
         }
 
         #endregion
 
         #region Execução
 
-        private void ExecutarAcao(Combate atacante, AcaoEscolhida acao, List<Combate> defensores, List<Combate> aliados)
+        /// <summary>
+        /// Resolve o alvo-semente do golpe (o que a habilidade recebe pra derivar seus AlvosResolvidos).
+        /// A COLA (qual lista consultar, lista vazia → o próprio, hit-all → o próprio) fica aqui; o PICK
+        /// em si (menu/bot) é do controlador. §8.2 (derivar o menu da ação) é slice à parte, depois.
+        /// </summary>
+        private Combate ResolverAlvoInicial(Combate atacante, HabilidadeAtiva hab,
+            List<Combate> defensores, List<Combate> aliados, IControladorDeTurno controlador)
         {
-            ExecutarHabilidade(atacante, acao.Habilidade, defensores, aliados);
+            if (hab.TipoLista == TipoLista.Inimigos)
+            {
+                var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(defensores);
+                return controlador.EscolherAlvo(disponiveis, aliados, defensores);
+            }
+
+            if (hab.TipoLista == TipoLista.Aliados && hab.NumeroDeAlvos != int.MaxValue)
+            {
+                // Pick real de alvo aliado (por estado). Sem candidato no estado pedido (ex: revive
+                // sem mortos): pula o pick — ResolverAlvos devolve vazio pra ação que herda o alvo, e
+                // as demais ações (escopos próprios) rodam normalmente (DocesDeAbobora sem mortos
+                // ainda vale pelo Reflexo).
+                var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(aliados, hab.EstadoAlvo);
+                return disponiveis.Count == 0 ? atacante : controlador.EscolherAlvo(disponiveis, aliados, defensores);
+            }
+
+            return atacante; // hit-all (NumeroDeAlvos=MaxValue) ou próprio: a habilidade resolve sozinha
         }
 
         /// <summary>
@@ -250,7 +225,7 @@ namespace ApostlesWar.Services
             foreach (var r in resultados)
             {
                 _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
-                Thread.Sleep(1500);
+                _apresentacao.AguardarAnimacao(1500);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
                 ProcessarReacoesAntesDeMorrer(r.Alvo, atacante, r, aliados, defensores);
@@ -266,40 +241,19 @@ namespace ApostlesWar.Services
                 ProcessarReacoesAtacantePorAtaque(atacante, resultados[0].Alvo, resultados[0], aliados, defensores);
         }
 
-        private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores, List<Combate> aliados)
+        private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores,
+            List<Combate> aliados, IControladorDeTurno controlador)
         {
             var ctx = new ContextoCombate(atacante, aliados, defensores);
 
-            // Setup: seleção de alvo
-            Combate alvoInicial;
-            if (hab.TipoLista == TipoLista.Inimigos)
-            {
-                var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(defensores);
-                alvoInicial = atacante is Jogador
-                    ? _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores)
-                    : _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
-            }
-            else if (hab.TipoLista == TipoLista.Aliados && hab.NumeroDeAlvos != int.MaxValue)
-            {
-                // Pick real de alvo aliado (por estado) — antes disso nunca existia,
-                // porque toda habilidade de aliado mirava o time inteiro.
-                // Sem candidato no estado pedido (ex: revive sem mortos): pula o pick —
-                // ResolverAlvos devolve vazio pra ação que herda o alvo, e as demais ações
-                // da habilidade (escopos próprios) rodam normalmente (DocesDeAbobora sem
-                // mortos ainda vale pelo Reflexo).
-                var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(aliados, hab.EstadoAlvo);
-                alvoInicial = disponiveis.Count == 0 ? atacante
-                    : atacante is Jogador
-                        ? _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores)
-                        : _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
-            }
-            else alvoInicial = atacante; // hit-all (NumeroDeAlvos=MaxValue) ou Ambos: a própria habilidade resolve
+            // Seleção de alvo (cola no service; o pick em si é do controlador)
+            Combate alvoInicial = ResolverAlvoInicial(atacante, hab, defensores, aliados, controlador);
 
             // Setup: UX de preparação (inimigo com A1)
             if (atacante is Inimigo && hab is AtaqueBasico)
             {
                 _menuService.ExibirPreparacaoAtaque(atacante, defensores);
-                Thread.Sleep(1500);
+                _apresentacao.AguardarAnimacao(1500);
             }
 
             // Setup: Medo trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
@@ -316,7 +270,7 @@ namespace ApostlesWar.Services
             if (hab is not AtaqueBasico)
             {
                 _menuService.ExibirUsoHabilidade(atacante, hab);
-                Thread.Sleep(2500);
+                _apresentacao.AguardarAnimacao(2500);
             }
         }
 
@@ -371,7 +325,7 @@ namespace ApostlesWar.Services
 
                 var revide = res.Revide.Habilidade.AtivarComNatureza(alvo, res.Revide.Alvo, NaturezasDano.Ataque);
                 _menuService.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
-                Thread.Sleep(1500);
+                _apresentacao.AguardarAnimacao(1500);
                 // No revide, o portador do próximo nível é o revidado; passa os times do
                 // ponto de vista atual (alvo é quem revida agora → seus aliados/inimigos).
                 ProcessarReacoesAlvo(res.Revide.Alvo, alvo, revide, inimigosDoAtacante, aliadosDoAtacante, profundidade + 1);
@@ -467,7 +421,7 @@ namespace ApostlesWar.Services
                 // C1 não tem implementador de cura ainda, então fica como TODO.
 
                 if (res.Mensagem != "" || res.Dano != null)
-                    Thread.Sleep(1500);
+                    _apresentacao.AguardarAnimacao(1500);
             }
         }
 

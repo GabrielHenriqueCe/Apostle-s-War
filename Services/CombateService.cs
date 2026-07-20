@@ -42,6 +42,17 @@ namespace ApostlesWar.Services
         private IControladorDeTurno ControladorDe(Combate combatente)
             => combatente is Jogador ? _controladorJogador : _controladorBot;
 
+        /// <summary>
+        /// Espera dramática entre eventos que ESCUTA o Esc: se o jogador pediu pra encerrar e confirmou,
+        /// aborta a batalha (BatalhaAbortada, capturada em ExecutarFase → a fase vira derrota). Todas as
+        /// esperas do combate passam por aqui — é o ponto único do cancelamento.
+        /// </summary>
+        private void Aguardar(int ms)
+        {
+            if (_apresentacao.AguardarAnimacao(ms) && _combateView.ConfirmarEncerramento())
+                throw new BatalhaAbortada();
+        }
+
         #endregion
 
         #region Loop principal
@@ -154,7 +165,7 @@ namespace ApostlesWar.Services
                 _combateView.ExibirPartida(aliados, defensores);
                 _combateView.ExibirMensagemPassiva(
                     $"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
-                _apresentacao.AguardarAnimacao(1500);
+                Aguardar(1500);
 
                 if (VerificarMedoEAplicar(atacante)) return;
 
@@ -181,7 +192,7 @@ namespace ApostlesWar.Services
 
             _combateView.ExibirMensagemPassiva(
                 $"{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} estava com medo e não conseguiu agir!");
-            _apresentacao.AguardarAnimacao(1500);
+            Aguardar(1500);
             return true;
         }
 
@@ -227,7 +238,7 @@ namespace ApostlesWar.Services
             foreach (var r in resultados)
             {
                 _combateView.ExibirResultadoAtaque(atacante, r.Alvo, r);
-                _apresentacao.AguardarAnimacao(1500);
+                Aguardar(1500);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
                 ProcessarReacoesAntesDeMorrer(r.Alvo, atacante, r, aliados, defensores);
@@ -255,7 +266,7 @@ namespace ApostlesWar.Services
             if (atacante is Inimigo && hab is AtaqueBasico)
             {
                 _combateView.ExibirPreparacaoAtaque(atacante, defensores);
-                _apresentacao.AguardarAnimacao(1500);
+                Aguardar(1500);
             }
 
             // Setup: Medo trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
@@ -272,7 +283,7 @@ namespace ApostlesWar.Services
             if (hab is not AtaqueBasico)
             {
                 _combateView.ExibirUsoHabilidade(atacante, hab);
-                _apresentacao.AguardarAnimacao(2500);
+                Aguardar(2500);
             }
         }
 
@@ -327,7 +338,7 @@ namespace ApostlesWar.Services
 
                 var revide = res.Revide.Habilidade.AtivarComNatureza(alvo, res.Revide.Alvo, NaturezasDano.Ataque);
                 _combateView.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
-                _apresentacao.AguardarAnimacao(1500);
+                Aguardar(1500);
                 // No revide, o portador do próximo nível é o revidado; passa os times do
                 // ponto de vista atual (alvo é quem revida agora → seus aliados/inimigos).
                 ProcessarReacoesAlvo(res.Revide.Alvo, alvo, revide, inimigosDoAtacante, aliadosDoAtacante, profundidade + 1);
@@ -423,7 +434,7 @@ namespace ApostlesWar.Services
                 // C1 não tem implementador de cura ainda, então fica como TODO.
 
                 if (res.Mensagem != "" || res.Dano != null)
-                    _apresentacao.AguardarAnimacao(1500);
+                    Aguardar(1500);
             }
         }
 
@@ -533,8 +544,15 @@ namespace ApostlesWar.Services
             foreach (Combate c in jogador)
                 c.IniciarCombate();
 
-            if (!ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)) return false;
-            return ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
+            try
+            {
+                if (!ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)) return false;
+                return ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
+            }
+            catch (BatalhaAbortada)
+            {
+                return false;   // jogador encerrou a batalha no meio → derrota, sem recompensa
+            }
         }
 
         private bool ExecutarRodada(List<Combate> jogador, List<Slot> slotsInimigos, Faccao capitulo, MultiplicadorFase mult)

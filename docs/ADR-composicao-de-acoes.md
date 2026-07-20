@@ -337,9 +337,17 @@ no menu (ataque → inimigos vivos; revive-de-1 → aliados mortos). Isso encost
 `SelecaoDeAlvoService`/`CombateService`, não só no combate — é o lado UI da Frente 2.
 **Status:** a parte pequena (matar o enum `Ambos`) FEITA no PR de limpeza pós-sweep; o refactor do
 `ExecutarTurno` (separar controle × execução via `IControladorDeTurno` + seam de apresentação/espera
-`IApresentacao`) FEITO (jul/2026); a **derivação do menu pela ação** em si (o pick derivar do
-`Escopo.AlvosResolvidos` em vez do `if TipoLista` no `ResolverAlvoInicial`) segue pendente — slice de
-"menus" próprio, em cima do seam que o refactor deixou.
+`IApresentacao`) FEITO (jul/2026). A **derivação do menu pela ação** em si: ❌ **AVALIADA A FUNDO —
+NÃO FAZER (jul/2026).** A premissa ("EstadoAlvo fora da habilidade") NÃO se concretizou: a ação não
+carrega `TipoLista`/`NumeroDeAlvos`, então a habilidade tem que mantê-los pro menu. E **pick-estado ≠
+ação-estado são concerns SEPARADOS, não redundantes** — o **Barata** (Invasor) prova: mira um inimigo
+VIVO (pick) e, na MESMA habilidade, tem uma ação `AlvosResolvidos` de Mortos (marca o cadáver se
+morreu). Derivar o pick da "1ª ação AlvosResolvidos" força **acoplamento de ordem** (reordenar muda o
+menu em silêncio) + `FirstOrDefault() ?? default` (o nulo-vazando que a gente combinou evitar). A
+declaração explícita `estadoAlvo:` na habilidade é o CORRETO — clara, sem ordem-load-bearing. A
+"redundância" só existe pra habilidades simples (estado default) e é o preço barato do explícito.
+Fantasma enterrado; se um dia incomodar, o certo seria AGRUPAR os params de mira num objeto coeso
+(juntar o que é do pick, separado das ações), não derivar — mas é cosmético, não fazer especulativo.
 
 ### 8.3 Escopo do dano no `PorDanoCausado`
 `PorDanoCausado` soma **tudo** no `eventos`. Se uma habilidade quer curar/escudar só do dano

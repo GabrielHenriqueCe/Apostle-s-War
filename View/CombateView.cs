@@ -158,5 +158,27 @@ namespace ApostlesWar.View
             if (!string.IsNullOrEmpty(mensagem))
                 Console.WriteLine(mensagem);
         }
+
+        /// <summary>
+        /// Diálogo "Encerrar a batalha?" (Esc no meio da luta). Auto-contido: renderiza + lê o input.
+        /// Retorna true se o jogador confirmou o encerramento (aí a batalha vira derrota). Esc aqui =
+        /// desistir de encerrar (volta pra luta).
+        /// </summary>
+        public bool ConfirmarEncerramento()
+        {
+            int opcao = 1; // 1 = Sim, 2 = Não
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Encerrar a batalha? Você perde a fase.\n");
+                Console.WriteLine(opcao == 1 ? "▶ 1 - Sim" : "  1 - Sim");
+                Console.WriteLine(opcao == 2 ? "▶ 2 - Não" : "  2 - Não");
+
+                Comando cmd = _entrada.Ler();
+                if (cmd.Tipo == TipoComando.Confirmar) return opcao == 1;
+                if (cmd.Tipo == TipoComando.Cancelar) return false;   // Esc no confirm = não encerra
+                opcao = Navegacao.MoverCursor(opcao, 1, 2, cmd);
+            }
+        }
     }
 }

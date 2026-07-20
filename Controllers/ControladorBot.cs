@@ -15,10 +15,11 @@ namespace ApostlesWar.Controllers
         public ControladorBot(SelecaoDeAlvoService selecaoDeAlvoService)
             => _selecaoDeAlvoService = selecaoDeAlvoService;
 
-        public HabilidadeAtiva EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores)
+        // O bot nunca encerra nem volta: sempre devolve algo (non-null).
+        public HabilidadeAtiva? EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores)
             => atacante.Personagem.Habilidades.OfType<AtaqueBasico>().First();
 
-        public Combate EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores)
+        public Combate? EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores)
             => _selecaoDeAlvoService.EscolherAlvoBot(disponiveis);
     }
 }

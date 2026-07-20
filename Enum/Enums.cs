@@ -92,5 +92,12 @@ namespace ApostlesWar
     /// </summary>
     enum TipoAtaque { AreaDeEfeito, Sequencial, NaoAtaque }
 
+    /// <summary>
+    /// Desfecho de uma tentativa de fase. Distingue os três "não-vitória": Perdeu (batalha perdida
+    /// ou encerrada no meio → derrota) vs Cancelou (jogador desistiu na seleção de time, ANTES da
+    /// luta → sem derrota, volta silencioso). Consumido pelo GerenciadorDeJogo pra decidir a tela.
+    /// </summary>
+    enum ResultadoFase { Venceu, Perdeu, Cancelou }
+
     #endregion
 }

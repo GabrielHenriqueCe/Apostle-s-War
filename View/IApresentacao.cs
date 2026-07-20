@@ -1,21 +1,33 @@
 namespace ApostlesWar.View
 {
     /// <summary>
-    /// Seam de apresentação do combate. Hoje só encapsula a ESPERA (o `Thread.Sleep` das pausas
-    /// dramáticas entre eventos). É o ponto ÚNICO onde o futuro pluga sem nova cirurgia no loop de
-    /// turno: (a) a animação real do ataque (dano subindo na tela etc.) nasce aqui, e (b) o
-    /// cancelamento da batalha (Esc → "encerrar?") mora aqui — a espera passa a escutar o teclado e
-    /// sinalizar o cancelamento em vez de dormir cego. Ver ROADMAP / plano do refactor do ExecutarTurno.
+    /// Seam de apresentação do combate. Encapsula a ESPERA (as pausas dramáticas entre eventos) — e é
+    /// o ponto único onde o cancelamento pluga: a espera ESCUTA o teclado e avisa se o jogador apertou
+    /// Esc pra encerrar a batalha (em vez de dormir cego). No porte web/Unity, troca-se `EntradaConsole`
+    /// e este adapter; o combate não muda. (Forma 1 — espera interrompível; ver ROADMAP/plano.)
     /// </summary>
     interface IApresentacao
     {
-        /// <summary>Pausa dramática entre eventos do combate. Hoje bloqueia; amanhã anima/cancela.</summary>
-        void AguardarAnimacao(int ms);
+        /// <summary>
+        /// Pausa dramática entre eventos. Retorna TRUE se o jogador apertou Esc durante a espera
+        /// (pedido de encerrar a batalha) — quem chama decide o que fazer com isso.
+        /// </summary>
+        bool AguardarAnimacao(int ms);
     }
 
-    /// <summary>Implementação de console: a espera é um Thread.Sleep. Trocável (front/web, testes).</summary>
+    /// <summary>Console: dorme em fatias curtas escutando Esc. Trocável (web/Unity/testes).</summary>
     internal class ApresentacaoConsole : IApresentacao
     {
-        public void AguardarAnimacao(int ms) => Thread.Sleep(ms);
+        public bool AguardarAnimacao(int ms)
+        {
+            const int fatia = 40;
+            for (int passou = 0; passou < ms; passou += fatia)
+            {
+                if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape)
+                    return true;
+                Thread.Sleep(Math.Min(fatia, ms - passou));
+            }
+            return false;
+        }
     }
 }

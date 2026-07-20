@@ -42,6 +42,17 @@ namespace ApostlesWar.Services
         private IControladorDeTurno ControladorDe(Combate combatente)
             => combatente is Jogador ? _controladorJogador : _controladorBot;
 
+        /// <summary>
+        /// Espera dramática entre eventos que ESCUTA o Esc: se o jogador pediu pra encerrar e confirmou,
+        /// aborta a batalha (BatalhaAbortada, capturada em ExecutarFase → a fase vira derrota). Todas as
+        /// esperas do combate passam por aqui — é o ponto único do cancelamento.
+        /// </summary>
+        private void Aguardar(int ms)
+        {
+            if (_apresentacao.AguardarAnimacao(ms) && _combateView.ConfirmarEncerramento())
+                throw new BatalhaAbortada();
+        }
+
         #endregion
 
         #region Loop principal
@@ -154,7 +165,7 @@ namespace ApostlesWar.Services
                 _combateView.ExibirPartida(aliados, defensores);
                 _combateView.ExibirMensagemPassiva(
                     $"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
-                _apresentacao.AguardarAnimacao(1500);
+                Aguardar(1500);
 
                 if (VerificarMedoEAplicar(atacante)) return;
 
@@ -164,9 +175,19 @@ namespace ApostlesWar.Services
             }
 
             // Seleção (quem decide) via controlador; execução (o que acontece) separada.
+            // Loop: Esc no menu de AÇÃO = encerrar (hab null → aborta); Esc no ALVO = voltar (alvo null).
             var controlador = ControladorDe(atacante);
-            HabilidadeAtiva hab = controlador.EscolherAcao(atacante, aliados, defensores);
-            ExecutarHabilidade(atacante, hab, defensores, aliados, controlador);
+            while (true)
+            {
+                HabilidadeAtiva? hab = controlador.EscolherAcao(atacante, aliados, defensores);
+                if (hab == null) throw new BatalhaAbortada();
+
+                Combate? alvo = ResolverAlvoInicial(atacante, hab, defensores, aliados, controlador);
+                if (alvo == null) continue;   // Esc no alvo → volta pra seleção de habilidade
+
+                ExecutarHabilidade(atacante, hab, alvo, defensores, aliados);
+                return;
+            }
         }
 
         /// <summary>
@@ -181,7 +202,7 @@ namespace ApostlesWar.Services
 
             _combateView.ExibirMensagemPassiva(
                 $"{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} estava com medo e não conseguiu agir!");
-            _apresentacao.AguardarAnimacao(1500);
+            Aguardar(1500);
             return true;
         }
 
@@ -194,7 +215,7 @@ namespace ApostlesWar.Services
         /// A COLA (qual lista consultar, lista vazia → o próprio, hit-all → o próprio) fica aqui; o PICK
         /// em si (menu/bot) é do controlador. §8.2 (derivar o menu da ação) é slice à parte, depois.
         /// </summary>
-        private Combate ResolverAlvoInicial(Combate atacante, HabilidadeAtiva hab,
+        private Combate? ResolverAlvoInicial(Combate atacante, HabilidadeAtiva hab,
             List<Combate> defensores, List<Combate> aliados, IControladorDeTurno controlador)
         {
             if (hab.TipoLista == TipoLista.Inimigos)
@@ -227,7 +248,7 @@ namespace ApostlesWar.Services
             foreach (var r in resultados)
             {
                 _combateView.ExibirResultadoAtaque(atacante, r.Alvo, r);
-                _apresentacao.AguardarAnimacao(1500);
+                Aguardar(1500);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
                 ProcessarReacoesAntesDeMorrer(r.Alvo, atacante, r, aliados, defensores);
@@ -243,19 +264,16 @@ namespace ApostlesWar.Services
                 ProcessarReacoesAtacantePorAtaque(atacante, resultados[0].Alvo, resultados[0], aliados, defensores);
         }
 
-        private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores,
-            List<Combate> aliados, IControladorDeTurno controlador)
+        private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, Combate alvoInicial,
+            List<Combate> defensores, List<Combate> aliados)
         {
             var ctx = new ContextoCombate(atacante, aliados, defensores);
-
-            // Seleção de alvo (cola no service; o pick em si é do controlador)
-            Combate alvoInicial = ResolverAlvoInicial(atacante, hab, defensores, aliados, controlador);
 
             // Setup: UX de preparação (inimigo com A1)
             if (atacante is Inimigo && hab is AtaqueBasico)
             {
                 _combateView.ExibirPreparacaoAtaque(atacante, defensores);
-                _apresentacao.AguardarAnimacao(1500);
+                Aguardar(1500);
             }
 
             // Setup: Medo trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
@@ -272,7 +290,7 @@ namespace ApostlesWar.Services
             if (hab is not AtaqueBasico)
             {
                 _combateView.ExibirUsoHabilidade(atacante, hab);
-                _apresentacao.AguardarAnimacao(2500);
+                Aguardar(2500);
             }
         }
 
@@ -327,7 +345,7 @@ namespace ApostlesWar.Services
 
                 var revide = res.Revide.Habilidade.AtivarComNatureza(alvo, res.Revide.Alvo, NaturezasDano.Ataque);
                 _combateView.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
-                _apresentacao.AguardarAnimacao(1500);
+                Aguardar(1500);
                 // No revide, o portador do próximo nível é o revidado; passa os times do
                 // ponto de vista atual (alvo é quem revida agora → seus aliados/inimigos).
                 ProcessarReacoesAlvo(res.Revide.Alvo, alvo, revide, inimigosDoAtacante, aliadosDoAtacante, profundidade + 1);
@@ -423,7 +441,7 @@ namespace ApostlesWar.Services
                 // C1 não tem implementador de cura ainda, então fica como TODO.
 
                 if (res.Mensagem != "" || res.Dano != null)
-                    _apresentacao.AguardarAnimacao(1500);
+                    Aguardar(1500);
             }
         }
 
@@ -511,7 +529,7 @@ namespace ApostlesWar.Services
 
         #region Fluxo de fase
 
-        public bool ExecutarFase(Faccao capitulo, Fases fase)
+        public ResultadoFase ExecutarFase(Faccao capitulo, Fases fase)
         {
             Fase fas = _campanhaService.ObterFase((int)fase);
             MultiplicadorFase mult = new MultiplicadorFase
@@ -522,7 +540,7 @@ namespace ApostlesWar.Services
             };
 
             var time = _campeoesService.SelecionarTime();
-            if (time.Count == 0) return false;
+            if (time.Count == 0) return ResultadoFase.Cancelou;   // desistiu na seleção de time — sem derrota
 
             var jogador = time.Select(p => (Combate)new Jogador(p)).ToList();
             foreach (Combate c in jogador)
@@ -533,8 +551,16 @@ namespace ApostlesWar.Services
             foreach (Combate c in jogador)
                 c.IniciarCombate();
 
-            if (!ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)) return false;
-            return ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
+            try
+            {
+                bool venceu = ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)
+                           && ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
+                return venceu ? ResultadoFase.Venceu : ResultadoFase.Perdeu;
+            }
+            catch (BatalhaAbortada)
+            {
+                return ResultadoFase.Perdeu;   // encerrou a batalha no meio → derrota, sem recompensa
+            }
         }
 
         private bool ExecutarRodada(List<Combate> jogador, List<Slot> slotsInimigos, Faccao capitulo, MultiplicadorFase mult)

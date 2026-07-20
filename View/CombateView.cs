@@ -111,7 +111,8 @@ namespace ApostlesWar.View
             Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {resultado.HPRestante}/{alvo.HPMaximo}");
         }
 
-        public Combate EscolherAlvoNaTela(List<Combate> alvosDisponiveis, List<Combate> aliados, List<Combate> defensores)
+        /// <summary>Menu de alvo. Retorna o escolhido, ou NULL se Esc (voltar pra seleção de habilidade).</summary>
+        public Combate? EscolherAlvoNaTela(List<Combate> alvosDisponiveis, List<Combate> aliados, List<Combate> defensores)
         {
             int idx = 1;
             while (true)
@@ -124,9 +125,11 @@ namespace ApostlesWar.View
                     string cursor = idx == i + 1 ? "▶" : " ";
                     Console.WriteLine($"{cursor} {i + 1} - {alvosDisponiveis[i].Personagem.Simbolo} {alvosDisponiveis[i].Personagem.Nome} | HP:{alvosDisponiveis[i].HPAtual} ATK:{alvosDisponiveis[i].Ataque} DEF:{alvosDisponiveis[i].Defesa}");
                 }
+                Console.WriteLine("\nEsc - Voltar");
 
                 Comando cmd = _entrada.Ler();
                 if (cmd.Tipo == TipoComando.Confirmar) return alvosDisponiveis[idx - 1];
+                if (cmd.Tipo == TipoComando.Cancelar) return null;   // voltar pra seleção de habilidade
 
                 idx = Navegacao.MoverCursor(idx, 1, alvosDisponiveis.Count, cmd);
             }
@@ -157,6 +160,28 @@ namespace ApostlesWar.View
         {
             if (!string.IsNullOrEmpty(mensagem))
                 Console.WriteLine(mensagem);
+        }
+
+        /// <summary>
+        /// Diálogo "Encerrar a batalha?" (Esc no meio da luta). Auto-contido: renderiza + lê o input.
+        /// Retorna true se o jogador confirmou o encerramento (aí a batalha vira derrota). Esc aqui =
+        /// desistir de encerrar (volta pra luta).
+        /// </summary>
+        public bool ConfirmarEncerramento()
+        {
+            int opcao = 1; // 1 = Sim, 2 = Não
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Encerrar a batalha? Você perde a fase.\n");
+                Console.WriteLine(opcao == 1 ? "▶ 1 - Sim" : "  1 - Sim");
+                Console.WriteLine(opcao == 2 ? "▶ 2 - Não" : "  2 - Não");
+
+                Comando cmd = _entrada.Ler();
+                if (cmd.Tipo == TipoComando.Confirmar) return opcao == 1;
+                if (cmd.Tipo == TipoComando.Cancelar) return false;   // Esc no confirm = não encerra
+                opcao = Navegacao.MoverCursor(opcao, 1, 2, cmd);
+            }
         }
     }
 }

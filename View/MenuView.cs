@@ -84,6 +84,18 @@ namespace ApostlesWar.View
             Console.WriteLine("\nPressione Enter para continuar...");
         }
 
+        /// <summary>Tela de derrota (perdeu a batalha ou encerrou no meio). Temática, com a Deusa.</summary>
+        public void ExibirTelaDerrota()
+        {
+            Console.Clear();
+            Console.WriteLine("═════ 🕯️ Derrota 🕯️ ═════\n");
+            Console.WriteLine("Você tombou nesta batalha, Apóstolo.\n");
+            Console.WriteLine("Mas a Deusa não abandona os que lutam em Seu nome. Ela viu sua coragem —");
+            Console.WriteLine("e sabe que você há de se erguer, mais forte, e reivindicar a vitória.\n");
+            Console.WriteLine("Levante-se. A guerra dos Apóstolos ainda não terminou. ⚜️\n");
+            Console.WriteLine("Pressione Enter para continuar...");
+        }
+
         /// <summary>Exibe um aviso curto e segura na tela por um tempo (ex: "inventário vazio").</summary>
         public void ExibirAviso(string mensagem, int ms)
         {

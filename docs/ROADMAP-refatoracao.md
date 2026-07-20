@@ -727,6 +727,19 @@ propósito:** `Combat/` fica (subsistema, não modelo solto); `Fases` enum fica 
 mantém o nome (serviço da área-de-domínio no plural é ok, o MODELO é que ficou singular). **Falta:**
 quando o alvo (web/Unity) for escolhido, o input de MOUSE. Portfólio: recrutador lê o repo.
 
+### Cancelamento de batalha (Esc → encerra → perde) ✅ FEITO (jul/2026) — o payoff dos seams
+O jogador ficava preso no turno do inimigo/animações sem poder sair. Agora Esc durante a batalha →
+"Encerrar? Você perde a fase" → Sim → a fase vira derrota (sem recompensa). **Forma 1 (espera
+interrompível), decidida PROVANDO** contra a async: no console, a Forma 2 (async+CancellationToken)
+COLAPSA no mesmo poll da Forma 1 (o console tem UM consumidor de input — um listener de Esc em
+background brigaria com o `ReadKey` dos menus), pagando cascata async por ~20 métodos por ZERO ganho;
+e o porte web/Unity re-arquiteta o loop de qualquer jeito e reaproveita os SEAMS, não a async-ness.
+Mecânica: `IApresentacao.AguardarAnimacao` retorna `bool` (Esc na espera; poll em fatias no
+`ApresentacaoConsole`); `CombateView.ConfirmarEncerramento()` (diálogo auto-contido); `CombateService.
+Aguardar(ms)` reage e lança `BatalhaAbortada`, capturada em `ExecutarFase` → `false` (desenrola a
+cadeia profunda sem threading de flag). **Escopo:** só nas ESPERAS (a dor real); Esc-nos-menus-de-ação
+fica como follow-up trivial. Não testável headless → verificação em jogo do Gabriel.
+
 ### EventoDano por ID (desacoplar dos objetos vivos)
 **Status:** registrado, sem data. O `EventoDano` carrega hoje `Combate Atacante`/`Combate Alvo`
 (objetos vivos). Pra ser um registro limpo do golpe (log/stream desacoplado), referenciaria por

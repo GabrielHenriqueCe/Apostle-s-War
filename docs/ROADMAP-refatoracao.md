@@ -711,9 +711,14 @@ simétrico do `IApresentacao` (saída). TODO `Console.ReadKey` (9 sites) passa p
 O comando `Selecionar(N)` capturou o atalho numérico do teclado (apertar "3" pula pra opção 3) — que
 é a MESMA forma de um clique de mouse, então mouse-futuro entra por aí sem reescrever o seam. Mouse
 NÃO feito de propósito (modelo diferente — navegação vs seleção direta; desenhar antes de saber
-web-vs-Unity = generalidade especulativa; o `Selecionar` já deixa a ponte). **Falta:** corrigir a pasta
-`Campaingn` (typo de Campaign); a faxina interna do `GerenciadorDeJogo` (tirar o Console de SAÍDA dele
-pra View); e, quando o alvo (web/Unity) for escolhido, o input de MOUSE. Portfólio: recrutador lê o repo.
+web-vs-Unity = generalidade especulativa; o `Selecionar` já deixa a ponte). ✅ **FEITO (jul/2026) a
+faxina do `GerenciadorDeJogo`:** a renderização de saída (confirmar-saída, créditos, tela de vitória,
+aviso de inventário vazio) migrou pra `MenuView` (`ExibirConfirmacaoSaida`/`ExibirCreditos`/
+`ExibirTelaVitoria`/`ExibirAviso`); os `Thread.Sleep` passaram pelo `IApresentacao` (injetado na
+MenuView). O Gerenciador ficou com **ZERO `Console.*`/`Thread.*`** — orquestração pura (decide QUANDO,
+a View faz COMO; o cálculo de domínio "quem é novo" fica no Gerenciador). **Falta:** corrigir a pasta
+`Campaingn` (typo de Campaign); e, quando o alvo (web/Unity) for escolhido, o input de MOUSE. Portfólio:
+recrutador lê o repo.
 
 ### EventoDano por ID (desacoplar dos objetos vivos)
 **Status:** registrado, sem data. O `EventoDano` carrega hoje `Combate Atacante`/`Combate Alvo`

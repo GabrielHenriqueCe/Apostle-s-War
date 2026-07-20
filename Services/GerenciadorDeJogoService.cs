@@ -91,10 +91,7 @@ namespace ApostlesWar.Services
             int opcao = 1;
             while (true)
             {
-                Console.Clear();
-                Console.WriteLine("Deseja sair do jogo?\n");
-                Console.WriteLine(opcao == 1 ? "▶ 1 - Sim" : "  1 - Sim");
-                Console.WriteLine(opcao == 2 ? "▶ 2 - Não" : "  2 - Não");
+                _menuView.ExibirConfirmacaoSaida(opcao);
 
                 Comando cmd = _entrada.Ler();
 
@@ -102,7 +99,7 @@ namespace ApostlesWar.Services
                 {
                     if (opcao == 1)
                     {
-                        ExibirCreditos();
+                        _menuView.ExibirCreditos();
                         return true;
                     }
                     return false;
@@ -112,33 +109,6 @@ namespace ApostlesWar.Services
 
                 opcao = Navegacao.MoverCursor(opcao, 1, 2, cmd);
             }
-        }
-
-        private void ExibirCreditos()
-        {
-            string[] linhas =
-            {
-        "",
-        "    ⚔️  Apostle's War  ⚔️",
-        "",
-        "    Obrigado por jogar, Apóstolo...",
-        "",
-        "    👑  Desenvolvido por: Gabriel Henrique Cé",
-        "    🛠️  Versão: 1.0",
-        "    🌑  GitHub: GabrielHenriqueCe",
-        "",
-        "    Que a guerra dos Apóstolos nunca termine. 🌬️",
-        "",
-    };
-
-            Console.Clear();
-            foreach (string linha in linhas)
-            {
-                Console.WriteLine(linha);
-                Thread.Sleep(180);
-            }
-
-            Thread.Sleep(2000);
         }
 
         #endregion
@@ -220,17 +190,9 @@ namespace ApostlesWar.Services
 
         private void ExibirTelaVitoria(List<Personagem> antesDosDesbloqueios, Item? itemDropado)
         {
-            Console.Clear();
-            Console.WriteLine("=====Fase Concluída!=====\n");
-
+            // Computa o que é NOVO (domínio) aqui; a View só desenha e o input espera aqui.
             var novos = _campeoesService.ObterDesbloqueados().Except(antesDosDesbloqueios).ToList();
-            foreach (Personagem p in novos)
-                Console.WriteLine($"Novo campeão: {p.Simbolo} {p.Nome}!");
-
-            if (itemDropado != null)
-                Console.WriteLine($"Novo item: {itemDropado.Simbolo} {itemDropado.Nome} | {itemDropado.NomeStat()} + {itemDropado.ValorFormatado()}");
-
-            Console.WriteLine("\nPressione Enter para continuar...");
+            _menuView.ExibirTelaVitoria(novos, itemDropado);
             while (_entrada.Ler().Tipo != TipoComando.Confirmar) { }
         }
 
@@ -256,8 +218,7 @@ namespace ApostlesWar.Services
 
                 if (itensDoTipo.Count == 0)
                 {
-                    Console.WriteLine("\nNenhum item desse tipo disponível.");
-                    Thread.Sleep(1200);
+                    _menuView.ExibirAviso("\nNenhum item desse tipo disponível.", 1200);
                     continue;
                 }
 

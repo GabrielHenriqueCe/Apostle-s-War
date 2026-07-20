@@ -17,13 +17,78 @@ namespace ApostlesWar.View
         private readonly ArsenalService _arsenalService;
         private readonly CapitulosService _capitulosService;
         private readonly IEntrada _entrada;
+        private readonly IApresentacao _apresentacao;
 
-        public MenuView(FaccaoService faccaoService, ArsenalService arsenalService, CapitulosService capitulosService, IEntrada entrada)
+        public MenuView(FaccaoService faccaoService, ArsenalService arsenalService, CapitulosService capitulosService,
+            IEntrada entrada, IApresentacao apresentacao)
         {
             _faccaoService = faccaoService;
             _arsenalService = arsenalService;
             _capitulosService = capitulosService;
             _entrada = entrada;
+            _apresentacao = apresentacao;
+        }
+
+        // ===== Telas meta (fora do combate): confirmação de saída, créditos, vitória, avisos.
+        // A renderização mora aqui (View); o GerenciadorDeJogo só orquestra (decide QUANDO exibir). =====
+
+        /// <summary>Desenha o diálogo "sair do jogo?" com o cursor na opção atual (1=Sim, 2=Não).</summary>
+        public void ExibirConfirmacaoSaida(int opcao)
+        {
+            Console.Clear();
+            Console.WriteLine("Deseja sair do jogo?\n");
+            Console.WriteLine(opcao == 1 ? "▶ 1 - Sim" : "  1 - Sim");
+            Console.WriteLine(opcao == 2 ? "▶ 2 - Não" : "  2 - Não");
+        }
+
+        /// <summary>Rola os créditos (com a pausa dramática entre linhas via IApresentacao).</summary>
+        public void ExibirCreditos()
+        {
+            string[] linhas =
+            {
+                "",
+                "    ⚔️  Apostle's War  ⚔️",
+                "",
+                "    Obrigado por jogar, Apóstolo...",
+                "",
+                "    👑  Desenvolvido por: Gabriel Henrique Cé",
+                "    🛠️  Versão: 1.0",
+                "    🌑  GitHub: GabrielHenriqueCe",
+                "",
+                "    Que a guerra dos Apóstolos nunca termine. 🌬️",
+                "",
+            };
+
+            Console.Clear();
+            foreach (string linha in linhas)
+            {
+                Console.WriteLine(linha);
+                _apresentacao.AguardarAnimacao(180);
+            }
+
+            _apresentacao.AguardarAnimacao(2000);
+        }
+
+        /// <summary>Desenha a tela de vitória: campeões novos e item dropado (o GerenciadorDeJogo já computou).</summary>
+        public void ExibirTelaVitoria(List<Personagem> novosCampeoes, Item? itemDropado)
+        {
+            Console.Clear();
+            Console.WriteLine("=====Fase Concluída!=====\n");
+
+            foreach (Personagem p in novosCampeoes)
+                Console.WriteLine($"Novo campeão: {p.Simbolo} {p.Nome}!");
+
+            if (itemDropado != null)
+                Console.WriteLine($"Novo item: {itemDropado.Simbolo} {itemDropado.Nome} | {itemDropado.NomeStat()} + {itemDropado.ValorFormatado()}");
+
+            Console.WriteLine("\nPressione Enter para continuar...");
+        }
+
+        /// <summary>Exibe um aviso curto e segura na tela por um tempo (ex: "inventário vazio").</summary>
+        public void ExibirAviso(string mensagem, int ms)
+        {
+            Console.WriteLine(mensagem);
+            _apresentacao.AguardarAnimacao(ms);
         }
 
         public void ExibirMenu(int selecionado)

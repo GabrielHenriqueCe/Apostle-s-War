@@ -716,9 +716,16 @@ faxina do `GerenciadorDeJogo`:** a renderização de saída (confirmar-saída, c
 aviso de inventário vazio) migrou pra `MenuView` (`ExibirConfirmacaoSaida`/`ExibirCreditos`/
 `ExibirTelaVitoria`/`ExibirAviso`); os `Thread.Sleep` passaram pelo `IApresentacao` (injetado na
 MenuView). O Gerenciador ficou com **ZERO `Console.*`/`Thread.*`** — orquestração pura (decide QUANDO,
-a View faz COMO; o cálculo de domínio "quem é novo" fica no Gerenciador). **Falta:** corrigir a pasta
-`Campaingn` (typo de Campaign); e, quando o alvo (web/Unity) for escolhido, o input de MOUSE. Portfólio:
-recrutador lê o repo.
+a View faz COMO; o cálculo de domínio "quem é novo" fica no Gerenciador). ✅ **FEITO (jul/2026) a
+faxina de modelos/nomes:** auditadas `Campaingn/` e `Combat/` — NADA fora de lugar (tudo domínio, zero
+Console/IO, zero dependência das camadas de cima). `Capitulos.cs`+`Fase.cs` migraram pra `Models/`
+(gêmeos de Item/Personagem, namespace-raiz → zero mudança de using) e a pasta typo `Campaingn/` SUMIU.
+Classe `Capitulos`→`Capitulo` (era plural num modelo singular; save intacto, JSON é por propriedade).
+Enum morto `OpcoesMenu` deletado; `using System.Text.Json` morto do Capitulo removido. **Deixados de
+propósito:** `Combat/` fica (subsistema, não modelo solto); `Fases` enum fica (25 refs + colide com
+`class Fase` — churn > ganho); `NaturezasDano` fica (catálogo estático, plural ok); `CapitulosService`
+mantém o nome (serviço da área-de-domínio no plural é ok, o MODELO é que ficou singular). **Falta:**
+quando o alvo (web/Unity) for escolhido, o input de MOUSE. Portfólio: recrutador lê o repo.
 
 ### EventoDano por ID (desacoplar dos objetos vivos)
 **Status:** registrado, sem data. O `EventoDano` carrega hoje `Combate Atacante`/`Combate Alvo`

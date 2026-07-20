@@ -165,9 +165,18 @@ namespace ApostlesWar.Services
 
         private void TentarExecutarFase(Faccao faccao, Fases fase)
         {
-            if (!_combateService.ExecutarFase(faccao, fase)) return;
+            switch (_combateService.ExecutarFase(faccao, fase))
+            {
+                case ResultadoFase.Venceu: ProcessarVitoria(faccao, fase); break;
+                case ResultadoFase.Perdeu: ExibirDerrota(); break;
+                case ResultadoFase.Cancelou: break;   // desistiu antes da luta → volta silencioso, sem derrota
+            }
+        }
 
-            ProcessarVitoria(faccao, fase);
+        private void ExibirDerrota()
+        {
+            _menuView.ExibirTelaDerrota();
+            while (_entrada.Ler().Tipo != TipoComando.Confirmar) { }
         }
 
         /// <summary>

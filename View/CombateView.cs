@@ -111,7 +111,8 @@ namespace ApostlesWar.View
             Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {resultado.HPRestante}/{alvo.HPMaximo}");
         }
 
-        public Combate EscolherAlvoNaTela(List<Combate> alvosDisponiveis, List<Combate> aliados, List<Combate> defensores)
+        /// <summary>Menu de alvo. Retorna o escolhido, ou NULL se Esc (voltar pra seleção de habilidade).</summary>
+        public Combate? EscolherAlvoNaTela(List<Combate> alvosDisponiveis, List<Combate> aliados, List<Combate> defensores)
         {
             int idx = 1;
             while (true)
@@ -124,9 +125,11 @@ namespace ApostlesWar.View
                     string cursor = idx == i + 1 ? "▶" : " ";
                     Console.WriteLine($"{cursor} {i + 1} - {alvosDisponiveis[i].Personagem.Simbolo} {alvosDisponiveis[i].Personagem.Nome} | HP:{alvosDisponiveis[i].HPAtual} ATK:{alvosDisponiveis[i].Ataque} DEF:{alvosDisponiveis[i].Defesa}");
                 }
+                Console.WriteLine("\nEsc - Voltar");
 
                 Comando cmd = _entrada.Ler();
                 if (cmd.Tipo == TipoComando.Confirmar) return alvosDisponiveis[idx - 1];
+                if (cmd.Tipo == TipoComando.Cancelar) return null;   // voltar pra seleção de habilidade
 
                 idx = Navegacao.MoverCursor(idx, 1, alvosDisponiveis.Count, cmd);
             }

@@ -175,9 +175,19 @@ namespace ApostlesWar.Services
             }
 
             // Seleção (quem decide) via controlador; execução (o que acontece) separada.
+            // Loop: Esc no menu de AÇÃO = encerrar (hab null → aborta); Esc no ALVO = voltar (alvo null).
             var controlador = ControladorDe(atacante);
-            HabilidadeAtiva hab = controlador.EscolherAcao(atacante, aliados, defensores);
-            ExecutarHabilidade(atacante, hab, defensores, aliados, controlador);
+            while (true)
+            {
+                HabilidadeAtiva? hab = controlador.EscolherAcao(atacante, aliados, defensores);
+                if (hab == null) throw new BatalhaAbortada();
+
+                Combate? alvo = ResolverAlvoInicial(atacante, hab, defensores, aliados, controlador);
+                if (alvo == null) continue;   // Esc no alvo → volta pra seleção de habilidade
+
+                ExecutarHabilidade(atacante, hab, alvo, defensores, aliados);
+                return;
+            }
         }
 
         /// <summary>
@@ -205,7 +215,7 @@ namespace ApostlesWar.Services
         /// A COLA (qual lista consultar, lista vazia → o próprio, hit-all → o próprio) fica aqui; o PICK
         /// em si (menu/bot) é do controlador. §8.2 (derivar o menu da ação) é slice à parte, depois.
         /// </summary>
-        private Combate ResolverAlvoInicial(Combate atacante, HabilidadeAtiva hab,
+        private Combate? ResolverAlvoInicial(Combate atacante, HabilidadeAtiva hab,
             List<Combate> defensores, List<Combate> aliados, IControladorDeTurno controlador)
         {
             if (hab.TipoLista == TipoLista.Inimigos)
@@ -254,13 +264,10 @@ namespace ApostlesWar.Services
                 ProcessarReacoesAtacantePorAtaque(atacante, resultados[0].Alvo, resultados[0], aliados, defensores);
         }
 
-        private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, List<Combate> defensores,
-            List<Combate> aliados, IControladorDeTurno controlador)
+        private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, Combate alvoInicial,
+            List<Combate> defensores, List<Combate> aliados)
         {
             var ctx = new ContextoCombate(atacante, aliados, defensores);
-
-            // Seleção de alvo (cola no service; o pick em si é do controlador)
-            Combate alvoInicial = ResolverAlvoInicial(atacante, hab, defensores, aliados, controlador);
 
             // Setup: UX de preparação (inimigo com A1)
             if (atacante is Inimigo && hab is AtaqueBasico)
@@ -522,7 +529,7 @@ namespace ApostlesWar.Services
 
         #region Fluxo de fase
 
-        public bool ExecutarFase(Faccao capitulo, Fases fase)
+        public ResultadoFase ExecutarFase(Faccao capitulo, Fases fase)
         {
             Fase fas = _campanhaService.ObterFase((int)fase);
             MultiplicadorFase mult = new MultiplicadorFase
@@ -533,7 +540,7 @@ namespace ApostlesWar.Services
             };
 
             var time = _campeoesService.SelecionarTime();
-            if (time.Count == 0) return false;
+            if (time.Count == 0) return ResultadoFase.Cancelou;   // desistiu na seleção de time — sem derrota
 
             var jogador = time.Select(p => (Combate)new Jogador(p)).ToList();
             foreach (Combate c in jogador)
@@ -546,12 +553,13 @@ namespace ApostlesWar.Services
 
             try
             {
-                if (!ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)) return false;
-                return ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
+                bool venceu = ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)
+                           && ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
+                return venceu ? ResultadoFase.Venceu : ResultadoFase.Perdeu;
             }
             catch (BatalhaAbortada)
             {
-                return false;   // jogador encerrou a batalha no meio → derrota, sem recompensa
+                return ResultadoFase.Perdeu;   // encerrou a batalha no meio → derrota, sem recompensa
             }
         }
 

@@ -10,14 +10,18 @@ namespace ApostlesWar.Controllers
     /// </summary>
     internal interface IControladorDeTurno
     {
-        /// <summary>Qual habilidade o combatente usa neste turno.</summary>
-        HabilidadeAtiva EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores);
+        /// <summary>
+        /// Qual habilidade o combatente usa neste turno. NULL = o jogador pediu pra ENCERRAR a batalha
+        /// (Esc no menu de ação, já confirmado) — o CombateService aborta. O bot nunca devolve null.
+        /// </summary>
+        HabilidadeAtiva? EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores);
 
         /// <summary>
         /// Qual alvo, dentre os já disponíveis (filtrados pela regra de targeting no CombateService).
         /// Só é chamado quando há pick a fazer — a cola de "qual lista / lista vazia → próprio" fica
-        /// no CombateService, não aqui.
+        /// no CombateService. NULL = o jogador apertou Esc = VOLTAR pra seleção de habilidade. O bot
+        /// nunca devolve null.
         /// </summary>
-        Combate EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores);
+        Combate? EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores);
     }
 }

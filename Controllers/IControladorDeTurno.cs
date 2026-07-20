@@ -1,4 +1,4 @@
-namespace ApostlesWar.Services
+namespace ApostlesWar.Controllers
 {
     /// <summary>
     /// Seam de CONTROLE do turno: quem DECIDE a ação e o alvo. O loop de combate pergunta ao

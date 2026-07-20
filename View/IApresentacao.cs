@@ -1,4 +1,4 @@
-namespace ApostlesWar.Services
+namespace ApostlesWar.View
 {
     /// <summary>
     /// Seam de apresentação do combate. Hoje só encapsula a ESPERA (o `Thread.Sleep` das pausas

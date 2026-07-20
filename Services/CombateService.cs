@@ -3,6 +3,8 @@ using ApostlesWar.Skills.Ativas;
 using ApostlesWar.Skills.Buffs;
 using ApostlesWar.Skills.Debuffs;
 using ApostlesWar.Skills.Passivas;
+using ApostlesWar.View;
+using ApostlesWar.Controllers;
 
 namespace ApostlesWar.Services
 {
@@ -14,14 +16,14 @@ namespace ApostlesWar.Services
         private readonly CampanhaService _campanhaService;
         private readonly CampeoesService _campeoesService;
         private readonly PersonagemService _personagemService;
-        private readonly MenuService _menuService;
+        private readonly CombateView _combateView;
         private readonly SelecaoDeAlvoService _selecaoDeAlvoService;
         private readonly IControladorDeTurno _controladorJogador;
         private readonly IControladorDeTurno _controladorBot;
         private readonly IApresentacao _apresentacao;
 
         public CombateService(ArsenalService arsenalService, CampanhaService campanhaService,
-            CampeoesService campeoesService, PersonagemService personagemService, MenuService menuService,
+            CampeoesService campeoesService, PersonagemService personagemService, CombateView combateView,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
             IControladorDeTurno controladorBot, IApresentacao apresentacao)
         {
@@ -29,7 +31,7 @@ namespace ApostlesWar.Services
             _campanhaService = campanhaService;
             _campeoesService = campeoesService;
             _personagemService = personagemService;
-            _menuService = menuService;
+            _combateView = combateView;
             _selecaoDeAlvoService = selecaoDeAlvoService;
             _controladorJogador = controladorJogador;
             _controladorBot = controladorBot;
@@ -149,8 +151,8 @@ namespace ApostlesWar.Services
             var irritar = atacante.StatusAtivos.OfType<Irritar>().FirstOrDefault();
             if (irritar != null)
             {
-                _menuService.ExibirPartida(aliados, defensores);
-                _menuService.ExibirMensagemPassiva(
+                _combateView.ExibirPartida(aliados, defensores);
+                _combateView.ExibirMensagemPassiva(
                     $"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
                 _apresentacao.AguardarAnimacao(1500);
 
@@ -177,7 +179,7 @@ namespace ApostlesWar.Services
             if (medo == null) return false;
             if (!medo.TentaParalizar()) return false;
 
-            _menuService.ExibirMensagemPassiva(
+            _combateView.ExibirMensagemPassiva(
                 $"{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} estava com medo e não conseguiu agir!");
             _apresentacao.AguardarAnimacao(1500);
             return true;
@@ -224,7 +226,7 @@ namespace ApostlesWar.Services
         {
             foreach (var r in resultados)
             {
-                _menuService.ExibirResultadoAtaque(atacante, r.Alvo, r);
+                _combateView.ExibirResultadoAtaque(atacante, r.Alvo, r);
                 _apresentacao.AguardarAnimacao(1500);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
@@ -252,7 +254,7 @@ namespace ApostlesWar.Services
             // Setup: UX de preparação (inimigo com A1)
             if (atacante is Inimigo && hab is AtaqueBasico)
             {
-                _menuService.ExibirPreparacaoAtaque(atacante, defensores);
+                _combateView.ExibirPreparacaoAtaque(atacante, defensores);
                 _apresentacao.AguardarAnimacao(1500);
             }
 
@@ -269,7 +271,7 @@ namespace ApostlesWar.Services
             atacante.Cooldowns[hab].Usar();                                            // AtoEncerramento
             if (hab is not AtaqueBasico)
             {
-                _menuService.ExibirUsoHabilidade(atacante, hab);
+                _combateView.ExibirUsoHabilidade(atacante, hab);
                 _apresentacao.AguardarAnimacao(2500);
             }
         }
@@ -324,7 +326,7 @@ namespace ApostlesWar.Services
                 if (!res.Revide.Alvo.EstaVivo()) continue;
 
                 var revide = res.Revide.Habilidade.AtivarComNatureza(alvo, res.Revide.Alvo, NaturezasDano.Ataque);
-                _menuService.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
+                _combateView.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
                 _apresentacao.AguardarAnimacao(1500);
                 // No revide, o portador do próximo nível é o revidado; passa os times do
                 // ponto de vista atual (alvo é quem revida agora → seus aliados/inimigos).
@@ -412,12 +414,12 @@ namespace ApostlesWar.Services
             foreach (var res in resultados)
             {
                 if (!string.IsNullOrEmpty(res.Mensagem))
-                    _menuService.ExibirMensagemPassiva(res.Mensagem);
+                    _combateView.ExibirMensagemPassiva(res.Mensagem);
 
                 if (res.Dano != null)
-                    _menuService.ExibirResultadoAtaque(origem, res.Dano.Alvo, res.Dano);
+                    _combateView.ExibirResultadoAtaque(origem, res.Dano.Alvo, res.Dano);
 
-                // Cura: exibição a definir num sub-PR (depende de método no MenuService).
+                // Cura: exibição a definir num sub-PR (depende de método na CombateView).
                 // C1 não tem implementador de cura ainda, então fica como TODO.
 
                 if (res.Mensagem != "" || res.Dano != null)

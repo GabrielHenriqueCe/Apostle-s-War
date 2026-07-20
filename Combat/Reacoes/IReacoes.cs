@@ -19,7 +19,7 @@
 
     /// <summary>
     /// O que uma reação produziu, pro CombateService exibir. A reação DECLARA
-    /// o que fez; o orquestrador EXIBE. A reação nunca chama MenuService direto.
+    /// o que fez; o orquestrador EXIBE. A reação nunca chama a view do combate direto.
     /// Dano: se a reação causou dano (reflexo). Cura: se curou (Sedento).
     /// Revide: se a reação declarou um contra-ataque (ContraAtaque, Operário) —
     /// carrega QUAL habilidade usar, não executa nada aqui.

@@ -1,4 +1,5 @@
 ﻿using ApostlesWar;
+using ApostlesWar.View;
 using GHUtils;
 
 namespace ApostlesWar.Services
@@ -10,17 +11,17 @@ namespace ApostlesWar.Services
         private readonly ArsenalService _arsenalService;
         private readonly CampeoesService _campeoesService;
         private readonly CapitulosService _capitulosService;
-        private readonly MenuService _menuService;
+        private readonly MenuView _menuView;
         private readonly CombateService _combateService;
 
         public GerenciadorDeJogoService(ArsenalService arsenalService,
             CampeoesService campeoesService, CapitulosService capitulosService,
-            MenuService menuService, CombateService combateService)
+            MenuView menuService, CombateService combateService)
         {
             _arsenalService = arsenalService;
             _campeoesService = campeoesService;
             _capitulosService = capitulosService;
-            _menuService = menuService;
+            _menuView = menuService;
             _combateService = combateService;
         }
 
@@ -69,7 +70,7 @@ namespace ApostlesWar.Services
             int opcaoMenu = 1;
             while (true)
             {
-                _menuService.ExibirMenu(opcaoMenu);
+                _menuView.ExibirMenu(opcaoMenu);
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
                 if (key.Key == ConsoleKey.Enter) return opcaoMenu;
@@ -148,7 +149,7 @@ namespace ApostlesWar.Services
             int opcaoFaccao = 1;
             while (true)
             {
-                _menuService.MenuCapitulos(opcaoFaccao);
+                _menuView.MenuCapitulos(opcaoFaccao);
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
                 if (key.Key == ConsoleKey.Escape) return;
@@ -173,7 +174,7 @@ namespace ApostlesWar.Services
             int opcaoFase = 1;
             while (true)
             {
-                _menuService.MenuFases(faccao, opcaoFase);
+                _menuView.MenuFases(faccao, opcaoFase);
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
                 if (key.Key == ConsoleKey.Escape) return;
@@ -238,13 +239,13 @@ namespace ApostlesWar.Services
 
         /// <summary>
         /// Loop do inventário: exibe, deixa jogador escolher item, equipa.
-        /// A lógica de equipar saiu do MenuService (que agora só exibe e retorna).
+        /// A lógica de equipar saiu do MenuView (que agora só exibe e retorna).
         /// </summary>
         private void ExecutarFluxoInventario()
         {
             while (true)
             {
-                int slot = _menuService.NavegarBoneco();
+                int slot = _menuView.NavegarBoneco();
                 if (slot == -1) return;
 
                 Fases faseDoSlot = (Fases)(slot + 1);
@@ -259,7 +260,7 @@ namespace ApostlesWar.Services
                     continue;
                 }
 
-                Item? escolhido = _menuService.NavegarTrocaItem(slot, itensDoTipo);
+                Item? escolhido = _menuView.NavegarTrocaItem(slot, itensDoTipo);
                 if (escolhido != null)
                     _arsenalService.EquiparItem(escolhido);
             }

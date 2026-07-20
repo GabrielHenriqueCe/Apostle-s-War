@@ -695,11 +695,19 @@ ReceberDano — os pontos onde bug já apareceu.
 **Status:** observado, sem dor. FaccaoService/CampanhaService são tabelas. Candidatos a virar
 dados. Fazer só se incomodar.
 
-### Faxina de nomes (rename do repo/namespace)
+### Faxina de nomes (rename do repo/namespace) + organização de camadas
 **Status:** ✅ **FEITO** o rename do `v1` — namespace `v1_Apostle_s_War` → `ApostlesWar`,
-sln/csproj (`v1-Apostle's-War.*` → `ApostlesWar.*`) junto. **Falta:** corrigir a pasta
-`Campaingn` (typo de Campaign) e a mistura PT/EN — boy-scout, sem dor conhecida ainda.
-Portfólio: recrutador lê o repo.
+sln/csproj junto. ✅ **FEITO (jul/2026) a organização de camadas:** pastas `View/`
+(`ApostlesWar.View`) e `Controllers/` (`ApostlesWar.Controllers`) criadas fora de `Services/`; o
+god-object `MenuService` foi QUEBRADO em **`MenuView`** (telas de menu: principal/capítulos/fases/
+inventário/seleção-de-time) + **`CombateView`** (render da partida + menu de alvo); `IApresentacao`
+foi pro View, os 3 controladores pro Controllers. **Convenção FIXADA:** pasta/namespace em inglês
+(`View`/`Controllers`/`Services`/`Skills`/`Combat`), sufixo de camada em inglês (`View`/`Controller`/
+`Service`), raiz de domínio em português (`Menu`, `Combate`, `Controlador`) — "domínio na língua local,
+andaime em inglês", padrão comum em time não-anglófono. **Falta:** corrigir a pasta `Campaingn` (typo
+de Campaign); a porta de ENTRADA `IEntrada`/`EntradaConsole` (par do `IApresentacao`, centraliza os
+`Console.ReadKey`) — tema próprio, depois; a faxina interna do `GerenciadorDeJogo` (tirar o Console dele
+pra View). Portfólio: recrutador lê o repo.
 
 ### EventoDano por ID (desacoplar dos objetos vivos)
 **Status:** registrado, sem data. O `EventoDano` carrega hoje `Combate Atacante`/`Combate Alvo`
@@ -779,7 +787,9 @@ tudo estabilizar.
 
 ## NÃO FAZER (decisões conscientes de NÃO refatorar)
 
-- **Separar mensagens de combate do MenuService.** Apresentação do console — MORRE na web.
+- ~~**Separar mensagens de combate do MenuService.**~~ REVERTIDO — foi FEITO (jul/2026): o
+  `MenuService` virou `MenuView` + `CombateView`. A razão antiga ("morre na web") caiu porque a
+  camada View é justamente o que se troca no porte web; separar deu organização + o seam do front.
 - **Centralizar descrições das habilidades.** A descrição mora na habilidade (coesão correta).
 - **try-catch no núcleo de combate.** Domínio controlado; exceção lá seria bug mascarado.
 - **Refatorar as ativas preventivamente.** Só se a auditoria achar dor real.

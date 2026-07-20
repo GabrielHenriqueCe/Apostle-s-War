@@ -1,4 +1,5 @@
 ﻿using ApostlesWar;
+using ApostlesWar.View;
 using GHUtils;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace ApostlesWar.Services
 
         private readonly PersonagemService _personagemService;
         private readonly CampanhaService _campanhaService;
-        private readonly MenuService _menuService;
+        private readonly MenuView _menuView;
         private readonly CapitulosService _capitulosService;
 
         #endregion
@@ -21,11 +22,11 @@ namespace ApostlesWar.Services
 
         private List<Personagem> desbloqueados = new List<Personagem>();
 
-        public CampeoesService(PersonagemService personagemService, CampanhaService campanhaService, MenuService menuService, CapitulosService capitulosService)
+        public CampeoesService(PersonagemService personagemService, CampanhaService campanhaService, MenuView menuService, CapitulosService capitulosService)
         {
             _personagemService = personagemService;
             _campanhaService = campanhaService;
-            _menuService = menuService;
+            _menuView = menuService;
             _capitulosService = capitulosService;
 
             desbloqueados.Add(_personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot1));
@@ -60,7 +61,7 @@ namespace ApostlesWar.Services
         /// </summary>
         public List<Personagem> SelecionarTime()
         {
-            return _menuService.NavegarSelecaoTime(ObterDesbloqueados());
+            return _menuView.NavegarSelecaoTime(ObterDesbloqueados());
         }
 
         public void CarregarCampeoes()

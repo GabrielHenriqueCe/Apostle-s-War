@@ -1,0 +1,161 @@
+using ApostlesWar;
+using GHUtils;
+
+namespace ApostlesWar.View
+{
+    /// <summary>
+    /// View da PARTIDA: renderiza a luta em andamento (times, ações, resultado de ataque, mensagens)
+    /// e o menu de alvo. Separada do MenuView (telas de opção) na quebra do antigo MenuService.
+    /// Sem dependência de service — só desenha combatentes. Ver View/ e o plano de organização.
+    /// NOTA: EscolherAlvoNaTela ainda lê input aqui dentro; a porta de entrada (IEntrada) é tema
+    /// próprio, depois.
+    /// </summary>
+    internal class CombateView
+    {
+        public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)
+        {
+            Console.WriteLine("Seu time:");
+            foreach (Combate j in jogadores)
+            {
+                string status = string.Join(" ", j.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
+                string escudo = FormatarEscudo(j);
+                Console.WriteLine($"{j.Personagem.Simbolo} {j.Personagem.Nome} | HP:{j.HPAtual}{escudo} ATK:{j.Ataque} DEF:{j.Defesa} {status}");
+            }
+
+            Console.WriteLine("\nInimigos:");
+            int i = 1;
+            foreach (Combate inimigo in inimigos.Where(d => d.EstaVivo()))
+            {
+                string status = string.Join(" ", inimigo.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
+                string escudo = FormatarEscudo(inimigo);
+                Console.WriteLine($"{i} - {inimigo.Personagem.Simbolo} {inimigo.Personagem.Nome} | HP:{inimigo.HPAtual}{escudo} ATK:{inimigo.Ataque} DEF:{inimigo.Defesa} {status}");
+                i++;
+            }
+        }
+
+        /// <summary>
+        /// Retorna " 🛡️N" se o combatente tem Escudo ativo, ou string vazia.
+        /// </summary>
+        private string FormatarEscudo(Combate c)
+        {
+            var escudo = c.StatusAtivos.OfType<Skills.Buffs.Escudo>().FirstOrDefault();
+            return escudo != null ? $" 🛡️{escudo.PontosRestantes}" : "";
+        }
+
+        public void ExibirAcoes(Combate atacante, int acaoSelecionada = 1)
+        {
+            Console.WriteLine("\nAções:");
+
+            int i = 1;
+            foreach (Habilidade hab in atacante.Personagem.Habilidades)
+            {
+                if (hab is HabilidadeAtiva)
+                {
+                    var cd = atacante.Cooldowns[hab];
+                    string relogio = ObterRelogio(cd.TurnosRestantes, cd.CooldownTotal);
+                    string disponivel = cd.Disponivel ? "✅" : "🟣";
+                    string cursor = acaoSelecionada == i ? "▶" : " ";
+                    Console.WriteLine($"{cursor} {i} - {hab.Simbolo} {hab.Nome} {disponivel} {relogio}  {hab.Descricao}");
+                    i++;
+                }
+            }
+
+            bool temPassiva = atacante.Personagem.Habilidades.Any(h => h is HabilidadePassiva);
+            if (temPassiva)
+            {
+                Console.WriteLine("\nPassivas:");
+                foreach (Habilidade hab in atacante.Personagem.Habilidades)
+                {
+                    if (hab is HabilidadePassiva)
+                    {
+                        var cd = atacante.Cooldowns[hab];
+                        string relogio = ObterRelogio(cd.TurnosRestantes, cd.CooldownTotal);
+                        string disponivel = cd.Disponivel ? "✅" : "🟣";
+                        Console.WriteLine($"  {hab.Simbolo} {hab.Nome} {disponivel} {relogio}  {hab.Descricao}");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retorna o emoji de relógio proporcional ao progresso do cooldown
+        /// </summary>
+        string ObterRelogio(int turnosRestantes, int cooldownTotal)
+        {
+            if (turnosRestantes == 0) return "🕛";
+
+            string[] relogios = { "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙" };
+            int turnosPassados = cooldownTotal - turnosRestantes;
+            int indice = (int)Math.Round((double)turnosPassados * 9 / cooldownTotal) - 1;
+            indice = Math.Clamp(indice, 0, 8);
+            return relogios[indice];
+        }
+
+        private string ObterNumeroEmoji(int numero)
+        {
+            string[] numeros = { "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩" };
+            if (numero >= 1 && numero <= 10)
+                return numeros[numero - 1];
+            if (numero >= 999) return "♾️";   // permanente — mostra infinito
+            return $"({numero})";
+        }
+
+        /// <summary>
+        /// Exibe o dano causado, HP restante no momento do hit e indicação de crítico.
+        /// </summary>
+        public void ExibirResultadoAtaque(Combate atacante, Combate alvo, EventoDano resultado)
+        {
+            string critico = resultado.Critico ? " 💥 ATAQUE CRÍTICO!" : "";
+            Console.WriteLine($"{atacante.Personagem.Simbolo} causou {resultado.DanoEfetivo} de dano em {alvo.Personagem.Simbolo} {alvo.Personagem.Nome}{critico}");
+            Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {resultado.HPRestante}/{alvo.HPMaximo}");
+        }
+
+        public Combate EscolherAlvoNaTela(List<Combate> alvosDisponiveis, List<Combate> aliados, List<Combate> defensores)
+        {
+            int idx = 1;
+            while (true)
+            {
+                Console.Clear();
+                ExibirPartida(aliados, defensores);
+                Console.WriteLine("\nAlvos:");
+                for (int i = 0; i < alvosDisponiveis.Count; i++)
+                {
+                    string cursor = idx == i + 1 ? "▶" : " ";
+                    Console.WriteLine($"{cursor} {i + 1} - {alvosDisponiveis[i].Personagem.Simbolo} {alvosDisponiveis[i].Personagem.Nome} | HP:{alvosDisponiveis[i].HPAtual} ATK:{alvosDisponiveis[i].Ataque} DEF:{alvosDisponiveis[i].Defesa}");
+                }
+
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter) return alvosDisponiveis[idx - 1];
+
+                idx = ConsoleUtils.SelecionarComCursor(idx, 1, alvosDisponiveis.Count, key.Key);
+            }
+        }
+
+        /// <summary>
+        /// Exibe a mensagem de preparação de ataque do inimigo.
+        /// </summary>
+        public void ExibirPreparacaoAtaque(Combate atacante, List<Combate> defensores)
+        {
+            Console.Clear();
+            ExibirPartida(defensores, new List<Combate>());
+            Console.WriteLine($"\n{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} prepara o ataque!");
+        }
+
+        /// <summary>
+        /// Exibe a mensagem de uso de habilidade.
+        /// </summary>
+        public void ExibirUsoHabilidade(Combate atacante, Habilidade hab)
+        {
+            Console.WriteLine($"{atacante.Personagem.Simbolo} usou {hab.Nome}!");
+        }
+
+        /// <summary>
+        /// Exibe a mensagem de uma passiva (sobreviveu ou morreu).
+        /// </summary>
+        public void ExibirMensagemPassiva(string mensagem)
+        {
+            if (!string.IsNullOrEmpty(mensagem))
+                Console.WriteLine(mensagem);
+        }
+    }
+}

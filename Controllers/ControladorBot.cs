@@ -1,6 +1,7 @@
 using ApostlesWar.Skills.Ativas;
+using ApostlesWar.Services;
 
-namespace ApostlesWar.Services
+namespace ApostlesWar.Controllers
 {
     /// <summary>
     /// Controlador do INIMIGO (e base do futuro bot inteligente / modo automático). Hoje: usa sempre

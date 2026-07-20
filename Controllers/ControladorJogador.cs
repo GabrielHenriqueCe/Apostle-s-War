@@ -1,18 +1,19 @@
 using GHUtils;
+using ApostlesWar.View;
 
-namespace ApostlesWar.Services
+namespace ApostlesWar.Controllers
 {
     /// <summary>
     /// Controlador do JOGADOR humano: a ação vem do menu (navegação com cursor, pula habilidades em
-    /// cooldown) e o alvo do menu de alvo. Envolve o MenuService (o I/O de console). No modo
+    /// cooldown) e o alvo do menu de alvo. Envolve a CombateView (o I/O de console da partida). No modo
     /// automático, o jogador troca este controlador por um automático no composition root — o loop de
     /// combate não muda.
     /// </summary>
     internal class ControladorJogador : IControladorDeTurno
     {
-        private readonly MenuService _menuService;
+        private readonly CombateView _combateView;
 
-        public ControladorJogador(MenuService menuService) => _menuService = menuService;
+        public ControladorJogador(CombateView combateView) => _combateView = combateView;
 
         public HabilidadeAtiva EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores)
         {
@@ -23,8 +24,8 @@ namespace ApostlesWar.Services
             while (true)
             {
                 Console.Clear();
-                _menuService.ExibirPartida(aliados, defensores);
-                _menuService.ExibirAcoes(atacante, acao);
+                _combateView.ExibirPartida(aliados, defensores);
+                _combateView.ExibirAcoes(atacante, acao);
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
                 if (key.Key == ConsoleKey.Enter) break;
@@ -55,6 +56,6 @@ namespace ApostlesWar.Services
         }
 
         public Combate EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores)
-            => _menuService.EscolherAlvoNaTela(disponiveis, aliados, defensores);
+            => _combateView.EscolherAlvoNaTela(disponiveis, aliados, defensores);
     }
 }

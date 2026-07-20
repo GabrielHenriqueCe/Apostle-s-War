@@ -66,7 +66,7 @@ namespace ApostlesWar.Services
 
         public void CarregarCampeoes()
         {
-            foreach (Capitulos cap in _capitulosService.ObterTodos())
+            foreach (Capitulo cap in _capitulosService.ObterTodos())
             {
                 foreach (Fases fase in Enum.GetValues<Fases>())
                 {

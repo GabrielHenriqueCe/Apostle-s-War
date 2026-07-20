@@ -10,23 +10,23 @@ namespace ApostlesWar.Services
     {
         #region Capitulos
 
-        List<Capitulos> capitulos = new List<Capitulos>
+        List<Capitulo> capitulos = new List<Capitulo>
         {
-            new Capitulos(Faccao.Reino, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.Reino, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, true),
-            new Capitulos(Faccao.LadoSombrio, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.LadoSombrio, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
-            new Capitulos(Faccao.Tecnologicos, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.Tecnologicos, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
-            new Capitulos(Faccao.Folclore, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.Folclore, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
-            new Capitulos(Faccao.Misticos, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.Misticos, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
-            new Capitulos(Faccao.Especial, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.Especial, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
-            new Capitulos(Faccao.Decaidos, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.Decaidos, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
-            new Capitulos(Faccao.Apostolos, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.Apostolos, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
         };
 
@@ -36,7 +36,7 @@ namespace ApostlesWar.Services
         private static readonly string CaminhoSave =
             Path.Combine(AppContext.BaseDirectory, "Save", "save.txt");
 
-        Capitulos ObterCapitulo(Faccao faccao)
+        Capitulo ObterCapitulo(Faccao faccao)
         {
             return capitulos.First(c => c.Faccao == faccao);
         }
@@ -47,13 +47,13 @@ namespace ApostlesWar.Services
         {
             Fases ultima = Enum.GetValues<Fases>().Last();
             if (fase == ultima) return;
-            Capitulos cap = ObterCapitulo(faccao);
+            Capitulo cap = ObterCapitulo(faccao);
             cap.FaseDesblock[(int)fase] = true;
         }
 
         public void ConcluirFase(Faccao faccao, Fases fase)
         {
-            Capitulos cap = ObterCapitulo(faccao);
+            Capitulo cap = ObterCapitulo(faccao);
             cap.FaseConcluida[(int)fase - 1] = true;
         }
 
@@ -62,7 +62,7 @@ namespace ApostlesWar.Services
         /// </summary>
         public void DesbloquearFaccao(Faccao faccao, Fases fase)
         {
-            Capitulos cap = ObterCapitulo(faccao);
+            Capitulo cap = ObterCapitulo(faccao);
             if (cap.FaseDesblock.All(f => f))
             {
                 Faccao ultima = Enum.GetValues<Faccao>().Last();
@@ -79,11 +79,11 @@ namespace ApostlesWar.Services
             File.WriteAllText(CaminhoSave, json);
         }
 
-        public List<Capitulos> ObterTodos() => capitulos;
+        public List<Capitulo> ObterTodos() => capitulos;
 
         public bool EstaDesbloqueado(Faccao faccao, Fases fase)
         {
-            Capitulos cap = ObterCapitulo(faccao);
+            Capitulo cap = ObterCapitulo(faccao);
             return cap.CapDesblock && cap.FaseDesblock[(int)fase - 1];
         }
 
@@ -97,7 +97,7 @@ namespace ApostlesWar.Services
             try
             {
                 var json = File.ReadAllText(CaminhoSave);
-                var lista = JsonSerializer.Deserialize<List<Capitulos>>(json);
+                var lista = JsonSerializer.Deserialize<List<Capitulo>>(json);
 
                 if (lista != null)
                 {

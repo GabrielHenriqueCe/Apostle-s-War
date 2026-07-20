@@ -36,12 +36,6 @@ namespace ApostlesWar
         [Description("Não")] Nao = 2
     }
 
-    enum OpcoesMenu
-    {
-        [Description("📜 - Jogar Campanha")] JogarCampanha = 1,
-        [Description("💰 - Inventário")] Inventario = 2
-    }
-
     enum TipoStat { ATKFlat, HPFlat, DEFFlat, HPPct, DEFPct, TaxaCritPct, DanoCritPct }
 
     /// <summary>

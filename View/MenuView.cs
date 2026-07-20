@@ -16,12 +16,14 @@ namespace ApostlesWar.View
         private readonly FaccaoService _faccaoService;
         private readonly ArsenalService _arsenalService;
         private readonly CapitulosService _capitulosService;
+        private readonly IEntrada _entrada;
 
-        public MenuView(FaccaoService faccaoService, ArsenalService arsenalService, CapitulosService capitulosService)
+        public MenuView(FaccaoService faccaoService, ArsenalService arsenalService, CapitulosService capitulosService, IEntrada entrada)
         {
             _faccaoService = faccaoService;
             _arsenalService = arsenalService;
             _capitulosService = capitulosService;
+            _entrada = entrada;
         }
 
         public void ExibirMenu(int selecionado)
@@ -203,12 +205,12 @@ namespace ApostlesWar.View
             while (true)
             {
                 ExibirBonecoInventario(slot);
-                ConsoleKeyInfo key = Console.ReadKey(true);
+                Comando cmd = _entrada.Ler();
 
-                if (key.Key == ConsoleKey.Escape) return -1;
-                if (key.Key == ConsoleKey.Enter) return slot;
+                if (cmd.Tipo == TipoComando.Cancelar) return -1;
+                if (cmd.Tipo == TipoComando.Confirmar) return slot;
 
-                slot = MoverNoBoneco(slot, key.Key);
+                slot = MoverNoBoneco(slot, cmd);
             }
         }
 
@@ -223,15 +225,15 @@ namespace ApostlesWar.View
             while (true)
             {
                 ExibirTrocaItem(slotEmEdicao, itensDoTipo, idx);
-                ConsoleKeyInfo key = Console.ReadKey(true);
+                Comando cmd = _entrada.Ler();
 
-                if (key.Key == ConsoleKey.Escape) return null;
-                if (key.Key == ConsoleKey.Enter) return itensDoTipo[idx];
+                if (cmd.Tipo == TipoComando.Cancelar) return null;
+                if (cmd.Tipo == TipoComando.Confirmar) return itensDoTipo[idx];
 
                 // navegação horizontal
-                if (key.Key == ConsoleKey.A || key.Key == ConsoleKey.LeftArrow)
+                if (cmd.Tipo == TipoComando.Esquerda)
                     idx = Math.Max(0, idx - 1);
-                if (key.Key == ConsoleKey.D || key.Key == ConsoleKey.RightArrow)
+                if (cmd.Tipo == TipoComando.Direita)
                     idx = Math.Min(itensDoTipo.Count - 1, idx + 1);
             }
         }
@@ -239,16 +241,16 @@ namespace ApostlesWar.View
         /// <summary>
         /// Calcula o próximo slot no boneco com base na tecla (WASD).
         /// </summary>
-        private int MoverNoBoneco(int atual, ConsoleKey tecla)
+        private int MoverNoBoneco(int atual, Comando cmd)
         {
             var (linha, coluna) = _posicoesBoneco[atual];
             int novaLinha = linha;
             int novaColuna = coluna;
 
-            if (tecla == ConsoleKey.W || tecla == ConsoleKey.UpArrow) novaLinha--;
-            if (tecla == ConsoleKey.S || tecla == ConsoleKey.DownArrow) novaLinha++;
-            if (tecla == ConsoleKey.A || tecla == ConsoleKey.LeftArrow) novaColuna--;
-            if (tecla == ConsoleKey.D || tecla == ConsoleKey.RightArrow) novaColuna++;
+            if (cmd.Tipo == TipoComando.Cima) novaLinha--;
+            if (cmd.Tipo == TipoComando.Baixo) novaLinha++;
+            if (cmd.Tipo == TipoComando.Esquerda) novaColuna--;
+            if (cmd.Tipo == TipoComando.Direita) novaColuna++;
 
             for (int i = 0; i < _posicoesBoneco.Length; i++)
             {
@@ -365,11 +367,11 @@ namespace ApostlesWar.View
             while (true)
             {
                 DesenharSelecaoTime(time, desbloqueados, cursorNoBotao, cursorNoTime, idxTime, idxGrid);
-                ConsoleKeyInfo key = Console.ReadKey(true);
+                Comando cmd = _entrada.Ler();
 
-                if (key.Key == ConsoleKey.Escape) return new List<Personagem>();
+                if (cmd.Tipo == TipoComando.Cancelar) return new List<Personagem>();
 
-                if (key.Key == ConsoleKey.Enter)
+                if (cmd.Tipo == TipoComando.Confirmar)
                 {
                     if (cursorNoBotao)
                     {
@@ -408,10 +410,10 @@ namespace ApostlesWar.View
                     continue;
                 }
 
-                bool sobe = key.Key == ConsoleKey.W || key.Key == ConsoleKey.UpArrow;
-                bool desce = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
-                bool esq = key.Key == ConsoleKey.A || key.Key == ConsoleKey.LeftArrow;
-                bool dir = key.Key == ConsoleKey.D || key.Key == ConsoleKey.RightArrow;
+                bool sobe = cmd.Tipo == TipoComando.Cima;
+                bool desce = cmd.Tipo == TipoComando.Baixo;
+                bool esq = cmd.Tipo == TipoComando.Esquerda;
+                bool dir = cmd.Tipo == TipoComando.Direita;
 
                 if (cursorNoBotao)
                 {

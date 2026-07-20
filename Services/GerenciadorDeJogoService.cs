@@ -1,6 +1,5 @@
 ﻿using ApostlesWar;
 using ApostlesWar.View;
-using GHUtils;
 
 namespace ApostlesWar.Services
 {
@@ -13,16 +12,18 @@ namespace ApostlesWar.Services
         private readonly CapitulosService _capitulosService;
         private readonly MenuView _menuView;
         private readonly CombateService _combateService;
+        private readonly IEntrada _entrada;
 
         public GerenciadorDeJogoService(ArsenalService arsenalService,
             CampeoesService campeoesService, CapitulosService capitulosService,
-            MenuView menuService, CombateService combateService)
+            MenuView menuView, CombateService combateService, IEntrada entrada)
         {
             _arsenalService = arsenalService;
             _campeoesService = campeoesService;
             _capitulosService = capitulosService;
-            _menuView = menuService;
+            _menuView = menuView;
             _combateService = combateService;
+            _entrada = entrada;
         }
 
         #endregion
@@ -71,17 +72,17 @@ namespace ApostlesWar.Services
             while (true)
             {
                 _menuView.ExibirMenu(opcaoMenu);
-                ConsoleKeyInfo key = Console.ReadKey(true);
+                Comando cmd = _entrada.Ler();
 
-                if (key.Key == ConsoleKey.Enter) return opcaoMenu;
+                if (cmd.Tipo == TipoComando.Confirmar) return opcaoMenu;
 
-                if (key.Key == ConsoleKey.Escape)
+                if (cmd.Tipo == TipoComando.Cancelar)
                 {
                     if (ConfirmarSaida()) return -1;
                     continue;
                 }
 
-                opcaoMenu = ConsoleUtils.SelecionarComCursor(opcaoMenu, 1, 2, key.Key);
+                opcaoMenu = Navegacao.MoverCursor(opcaoMenu, 1, 2, cmd);
             }
         }
 
@@ -95,9 +96,9 @@ namespace ApostlesWar.Services
                 Console.WriteLine(opcao == 1 ? "▶ 1 - Sim" : "  1 - Sim");
                 Console.WriteLine(opcao == 2 ? "▶ 2 - Não" : "  2 - Não");
 
-                ConsoleKeyInfo key = Console.ReadKey(true);
+                Comando cmd = _entrada.Ler();
 
-                if (key.Key == ConsoleKey.Enter)
+                if (cmd.Tipo == TipoComando.Confirmar)
                 {
                     if (opcao == 1)
                     {
@@ -107,9 +108,9 @@ namespace ApostlesWar.Services
                     return false;
                 }
 
-                if (key.Key == ConsoleKey.Escape) return false;
+                if (cmd.Tipo == TipoComando.Cancelar) return false;
 
-                opcao = ConsoleUtils.SelecionarComCursor(opcao, 1, 2, key.Key);
+                opcao = Navegacao.MoverCursor(opcao, 1, 2, cmd);
             }
         }
 
@@ -150,11 +151,11 @@ namespace ApostlesWar.Services
             while (true)
             {
                 _menuView.MenuCapitulos(opcaoFaccao);
-                ConsoleKeyInfo key = Console.ReadKey(true);
+                Comando cmd = _entrada.Ler();
 
-                if (key.Key == ConsoleKey.Escape) return;
+                if (cmd.Tipo == TipoComando.Cancelar) return;
 
-                if (key.Key == ConsoleKey.Enter)
+                if (cmd.Tipo == TipoComando.Confirmar)
                 {
                     var faccoes = Enum.GetValues<Faccao>().Where(f => f != Faccao.Humanos).ToList();
                     Faccao faccao = faccoes[opcaoFaccao - 1];
@@ -164,7 +165,7 @@ namespace ApostlesWar.Services
                 }
                 else
                 {
-                    opcaoFaccao = ConsoleUtils.SelecionarComCursor(opcaoFaccao, 1, 8, key.Key);
+                    opcaoFaccao = Navegacao.MoverCursor(opcaoFaccao, 1, 8, cmd);
                 }
             }
         }
@@ -175,11 +176,11 @@ namespace ApostlesWar.Services
             while (true)
             {
                 _menuView.MenuFases(faccao, opcaoFase);
-                ConsoleKeyInfo key = Console.ReadKey(true);
+                Comando cmd = _entrada.Ler();
 
-                if (key.Key == ConsoleKey.Escape) return;
+                if (cmd.Tipo == TipoComando.Cancelar) return;
 
-                if (key.Key == ConsoleKey.Enter)
+                if (cmd.Tipo == TipoComando.Confirmar)
                 {
                     Fases fase = (Fases)opcaoFase;
                     if (_capitulosService.EstaDesbloqueado(faccao, fase))
@@ -187,7 +188,7 @@ namespace ApostlesWar.Services
                 }
                 else
                 {
-                    opcaoFase = ConsoleUtils.SelecionarComCursor(opcaoFase, 1, 7, key.Key);
+                    opcaoFase = Navegacao.MoverCursor(opcaoFase, 1, 7, cmd);
                 }
             }
         }
@@ -230,7 +231,7 @@ namespace ApostlesWar.Services
                 Console.WriteLine($"Novo item: {itemDropado.Simbolo} {itemDropado.Nome} | {itemDropado.NomeStat()} + {itemDropado.ValorFormatado()}");
 
             Console.WriteLine("\nPressione Enter para continuar...");
-            Console.ReadLine();
+            while (_entrada.Ler().Tipo != TipoComando.Confirmar) { }
         }
 
         #endregion

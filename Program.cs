@@ -20,13 +20,14 @@ var campanhaService = new CampanhaService();
 var personagemService = new PersonagemService();
 var faccaoService = new FaccaoService();
 var selecaoDeAlvoService = new SelecaoDeAlvoService();
-var menuView = new MenuView(faccaoService, arsenalService, capitulosService);
-var combateView = new CombateView();
+var entrada = new EntradaConsole();                 // porta de ENTRADA (trocar por EntradaWeb/Unity no porte)
+var menuView = new MenuView(faccaoService, arsenalService, capitulosService, entrada);
+var combateView = new CombateView(entrada);
 var campeoesService = new CampeoesService(personagemService, campanhaService, menuView, capitulosService);
-var apresentacao = new ApresentacaoConsole();
-var controladorJogador = new ControladorJogador(combateView);   // trocar por controlador automático liga o modo auto
+var apresentacao = new ApresentacaoConsole();       // porta de SAÍDA (par do entrada)
+var controladorJogador = new ControladorJogador(combateView, entrada);   // trocar por controlador automático liga o modo auto
 var controladorBot = new ControladorBot(selecaoDeAlvoService);
 var combateService = new CombateService(arsenalService, campanhaService, campeoesService, personagemService, combateView, selecaoDeAlvoService, controladorJogador, controladorBot, apresentacao);
-new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, menuView, combateService).Executar();
+new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, menuView, combateService, entrada).Executar();
 
 #endregion

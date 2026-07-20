@@ -1,17 +1,18 @@
 using ApostlesWar;
-using GHUtils;
 
 namespace ApostlesWar.View
 {
     /// <summary>
     /// View da PARTIDA: renderiza a luta em andamento (times, ações, resultado de ataque, mensagens)
     /// e o menu de alvo. Separada do MenuView (telas de opção) na quebra do antigo MenuService.
-    /// Sem dependência de service — só desenha combatentes. Ver View/ e o plano de organização.
-    /// NOTA: EscolherAlvoNaTela ainda lê input aqui dentro; a porta de entrada (IEntrada) é tema
-    /// próprio, depois.
+    /// Sem dependência de service — só desenha combatentes. O input do menu de alvo vem da porta
+    /// IEntrada (não lê tecla crua).
     /// </summary>
     internal class CombateView
     {
+        private readonly IEntrada _entrada;
+
+        public CombateView(IEntrada entrada) => _entrada = entrada;
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)
         {
             Console.WriteLine("Seu time:");
@@ -124,10 +125,10 @@ namespace ApostlesWar.View
                     Console.WriteLine($"{cursor} {i + 1} - {alvosDisponiveis[i].Personagem.Simbolo} {alvosDisponiveis[i].Personagem.Nome} | HP:{alvosDisponiveis[i].HPAtual} ATK:{alvosDisponiveis[i].Ataque} DEF:{alvosDisponiveis[i].Defesa}");
                 }
 
-                ConsoleKeyInfo key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Enter) return alvosDisponiveis[idx - 1];
+                Comando cmd = _entrada.Ler();
+                if (cmd.Tipo == TipoComando.Confirmar) return alvosDisponiveis[idx - 1];
 
-                idx = ConsoleUtils.SelecionarComCursor(idx, 1, alvosDisponiveis.Count, key.Key);
+                idx = Navegacao.MoverCursor(idx, 1, alvosDisponiveis.Count, cmd);
             }
         }
 

@@ -1,4 +1,3 @@
-using GHUtils;
 using ApostlesWar.View;
 
 namespace ApostlesWar.Controllers
@@ -12,8 +11,13 @@ namespace ApostlesWar.Controllers
     internal class ControladorJogador : IControladorDeTurno
     {
         private readonly CombateView _combateView;
+        private readonly IEntrada _entrada;
 
-        public ControladorJogador(CombateView combateView) => _combateView = combateView;
+        public ControladorJogador(CombateView combateView, IEntrada entrada)
+        {
+            _combateView = combateView;
+            _entrada = entrada;
+        }
 
         public HabilidadeAtiva EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores)
         {
@@ -27,11 +31,11 @@ namespace ApostlesWar.Controllers
                 _combateView.ExibirPartida(aliados, defensores);
                 _combateView.ExibirAcoes(atacante, acao);
 
-                ConsoleKeyInfo key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Enter) break;
+                Comando cmd = _entrada.Ler();
+                if (cmd.Tipo == TipoComando.Confirmar) break;
 
-                int novaAcao = ConsoleUtils.SelecionarComCursor(acao, 1, totalOpcoes, key.Key);
-                bool descendo = key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow;
+                int novaAcao = Navegacao.MoverCursor(acao, 1, totalOpcoes, cmd);
+                bool descendo = cmd.Tipo == TipoComando.Baixo;
 
                 // Pula habilidades em cooldown. A1 (AtaqueBasico) tem cooldown 0 sempre,
                 // então nunca é pulada — a A1 é sempre selecionável.

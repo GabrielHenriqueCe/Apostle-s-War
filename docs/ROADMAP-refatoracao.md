@@ -704,10 +704,16 @@ inventário/seleção-de-time) + **`CombateView`** (render da partida + menu de 
 foi pro View, os 3 controladores pro Controllers. **Convenção FIXADA:** pasta/namespace em inglês
 (`View`/`Controllers`/`Services`/`Skills`/`Combat`), sufixo de camada em inglês (`View`/`Controller`/
 `Service`), raiz de domínio em português (`Menu`, `Combate`, `Controlador`) — "domínio na língua local,
-andaime em inglês", padrão comum em time não-anglófono. **Falta:** corrigir a pasta `Campaingn` (typo
-de Campaign); a porta de ENTRADA `IEntrada`/`EntradaConsole` (par do `IApresentacao`, centraliza os
-`Console.ReadKey`) — tema próprio, depois; a faxina interna do `GerenciadorDeJogo` (tirar o Console dele
-pra View). Portfólio: recrutador lê o repo.
+andaime em inglês", padrão comum em time não-anglófono. ✅ **FEITO (jul/2026) a porta de ENTRADA:**
+`IEntrada`/`EntradaConsole` + `Comando(Tipo, Numero)` + `Navegacao.MoverCursor` (em `View/`) — o par
+simétrico do `IApresentacao` (saída). TODO `Console.ReadKey` (9 sites) passa por ela; agora o único
+`ReadKey` do código está na `EntradaConsole`. `ConsoleUtils.SelecionarComCursor` do GHUtils aposentado.
+O comando `Selecionar(N)` capturou o atalho numérico do teclado (apertar "3" pula pra opção 3) — que
+é a MESMA forma de um clique de mouse, então mouse-futuro entra por aí sem reescrever o seam. Mouse
+NÃO feito de propósito (modelo diferente — navegação vs seleção direta; desenhar antes de saber
+web-vs-Unity = generalidade especulativa; o `Selecionar` já deixa a ponte). **Falta:** corrigir a pasta
+`Campaingn` (typo de Campaign); a faxina interna do `GerenciadorDeJogo` (tirar o Console de SAÍDA dele
+pra View); e, quando o alvo (web/Unity) for escolhido, o input de MOUSE. Portfólio: recrutador lê o repo.
 
 ### EventoDano por ID (desacoplar dos objetos vivos)
 **Status:** registrado, sem data. O `EventoDano` carrega hoje `Combate Atacante`/`Combate Alvo`

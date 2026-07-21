@@ -17,7 +17,7 @@ namespace ApostlesWar.Champs.Decaidos
             Mordida(), RatoVoador(), new SedentoDeSangue());
 
         static HabilidadeAtiva Mordida() => new(
-            "Mordida", "🦇", turnos: 3, "Aplica Sangramento (2t) e ataca todos com +100% ATK.",
+            "Mordida", "🦇", cooldown: 3, "Aplica Sangramento (2t) e ataca todos com +100% ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -27,14 +27,14 @@ namespace ApostlesWar.Champs.Decaidos
             });
 
         static HabilidadeAtiva RatoVoador() => new(
-            "Rato Voador", "🐀", turnos: 4, "Medo 1t em todos os inimigos, +25% ATK e +25% Crit em si (2t) e ganha turno extra.",
+            "Rato Voador", "🐀", cooldown: 4, "Medo 1t em todos os inimigos, +25% ATK e +25% Crit em si (2t) e ganha turno extra.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarDebuff(() => new Medo(turnos: 1), Escopo.TodosInimigos),
-                new AplicarBuff(() => new BuffAtaque(turnos: 2, percentual: 0.25), Escopo.ProprioAtacante),
-                new AplicarBuff(() => new BuffTaxaCrit(turnos: 2, valor: 0.25), Escopo.ProprioAtacante),
+                new AplicarDebuff(() => new Medo(duracao: 1), Escopo.TodosInimigos),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.ProprioAtacante),
+                new AplicarBuff(() => new BuffTaxaCrit(duracao: 2, valor: 0.25), Escopo.ProprioAtacante),
                 new ConcederTurnoExtra(),
             });
     }

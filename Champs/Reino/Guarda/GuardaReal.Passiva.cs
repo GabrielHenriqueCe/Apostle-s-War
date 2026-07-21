@@ -22,7 +22,7 @@ namespace ApostlesWar.Champs.Reino
             var portador = ctx.Portador;
 
             portador.AplicarRevive(1);
-            new Invencivel(turnos: 1).Aplicar(portador);
+            new Invencivel(duracao: 1).Aplicar(portador);
 
             return new List<ResultadoReacao>
             {

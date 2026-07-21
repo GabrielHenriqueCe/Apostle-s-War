@@ -67,7 +67,13 @@
    save com `Console.WriteLine`+`Thread.Sleep` nos services ficam pro item 6 (a porta tira o IO
    de lá). `Program.cs` `Console.OutputEncoding` deixado de propósito (bootstrap do composition
    root — o ponto que sabe que é app de console; descartado no porte Unity).
-4. **Identidade comum** (Nome/Símbolo/Descrição) — base comum `Habilidade`+`StatusEffect`.
+4. ✅ **Identidade comum + libertar "Turno"** — base `ElementoDeJogo` (Nome/Símbolo/Descrição)
+   herdada por `Habilidade` e `StatusEffect`. **De quebra (pedido do Gabriel): o homônimo `Turnos`
+   morreu** — era *cooldown* na Habilidade e *duração* no StatusEffect, poluindo o conceito real de
+   "Turno" (a jogada inteira). Agora: `Habilidade.Cooldown`, `SkillCooldown.CooldownRestante`,
+   `StatusEffect.DuracaoRestante`; params de status → `duracao`, de habilidade → `cooldown`. Achado:
+   `StatusEffect.Turnos` estava MORTO (setado, nunca lido) → deletado. "Turno"/`PassarTurno`/
+   `AoIniciarTurno`/`TurnoDoPersonagem` preservados (o turno de verdade).
 5. **Services-lookup** — `FaccaoService`/`CampanhaService` viram dado. Cosmético.
 6. **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — extrair o IO de arquivo
    (hoje em `CapitulosService`/`ArsenalService`) pra trás de uma porta; JSON = `SaveLocal`.
@@ -878,10 +884,10 @@ fogo). Espelho do `IModificaDanoRecebido`. Cruza com `FontesDeCapacidade` (dispa
 fontes: StatusAtivos + Personagem.Habilidades).
 
 ### Identidade comum (Nome/Simbolo/Descricao) — resíduo do ADR-sistema-de-efeitos (arquivado)
-**Status:** boy-scout, cosmético. A "Separação 1" do `sistema-de-efeitos` (uma base comum de
-identidade — Nome/Simbolo/Descricao — herdada por `Habilidade` E `StatusEffect`, hoje duplicada)
-nunca foi feita; era "a última, cosmética". O ADR foi pra `docs/historico/`; o resíduo fica aqui
-pra não se perder. Fazer só se incomodar (puro DRY, sem dor conhecida).
+**Status:** ✅ **FEITO (FILA A #4, jul/2026).** A "Separação 1" do `sistema-de-efeitos` (base comum de
+identidade — Nome/Simbolo/Descricao — herdada por `Habilidade` E `StatusEffect`) virou a classe
+`ElementoDeJogo` (`Skills/ElementoDeJogo.cs`). No mesmo PR morreu o homônimo `Turnos`
+(cooldown/duração viraram `Cooldown`/`DuracaoRestante`, libertando "Turno").
 
 ### Faxina de comentários
 **Status:** ÚLTIMO da fila. Bisturi: remove ruído, mantém os porquês. Branch própria, depois de

@@ -15,17 +15,17 @@ namespace ApostlesWar.Champs.Reino
             Protetor(), Esgrima(), new GuardaReal());
 
         static HabilidadeAtiva Protetor() => new(
-            "Protetor", "🛡️", turnos: 4, "Aplica Provocar (2t) e Bloqueio Total (1t) em si mesmo.",
+            "Protetor", "🛡️", cooldown: 4, "Aplica Provocar (2t) e Bloqueio Total (1t) em si mesmo.",
             numeroDeAlvos: 0, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Self,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarBuff(() => new Provocar(turnos: 2), Escopo.ProprioAtacante),
-                new AplicarBuff(() => new BloqueioTotal(turnos: 1), Escopo.ProprioAtacante),
+                new AplicarBuff(() => new Provocar(duracao: 2), Escopo.ProprioAtacante),
+                new AplicarBuff(() => new BloqueioTotal(duracao: 1), Escopo.ProprioAtacante),
             });
 
         static HabilidadeAtiva Esgrima() => new(
-            "Esgrima", "🤺", turnos: 3, "Ataca 2 inimigos aleatórios com +50% ATK.",
+            "Esgrima", "🤺", cooldown: 3, "Ataca 2 inimigos aleatórios com +50% ATK.",
             numeroDeAlvos: 2, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()

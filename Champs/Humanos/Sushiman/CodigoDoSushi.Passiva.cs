@@ -20,7 +20,7 @@ namespace ApostlesWar.Champs.Humanos
             if (!ctx.FoiCritico) return new List<ResultadoReacao>();
 
             foreach (Combate aliado in ctx.Aliados.Where(a => a.EstaVivo()))
-                new RefletirDano(turnos: 2, percentual: 0.15).Aplicar(aliado);
+                new RefletirDano(duracao: 2, percentual: 0.15).Aplicar(aliado);
 
             return new List<ResultadoReacao>
             {

@@ -14,7 +14,7 @@ namespace ApostlesWar.Champs.Reino
             Democracia(), Lealdade(), new CoroaDoSoberano());
 
         static HabilidadeAtiva Democracia() => new(
-            "Democracia", "🗳️", turnos: 3, "Cura todos os aliados em 30% do HP máximo.",
+            "Democracia", "🗳️", cooldown: 3, "Cura todos os aliados em 30% do HP máximo.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -23,12 +23,12 @@ namespace ApostlesWar.Champs.Reino
             });
 
         static HabilidadeAtiva Lealdade() => new(
-            "Lealdade", "🎖️", turnos: 3, "Aplica Escudo de 30% do HP máximo em todos os aliados por 2 turnos.",
+            "Lealdade", "🎖️", cooldown: 3, "Aplica Escudo de 30% do HP máximo em todos os aliados por 2 turnos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarEscudo(Valor.PorHP(0.30), turnos: 2, Escopo.TodosAliados),
+                new AplicarEscudo(Valor.PorHP(0.30), duracao: 2, Escopo.TodosAliados),
             });
     }
 }

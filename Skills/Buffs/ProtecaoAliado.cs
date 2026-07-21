@@ -10,8 +10,8 @@ namespace ApostlesWar.Skills.Buffs
     {
         public Combate Aplicador { get; }
 
-        public ProtecaoAliado(Combate aplicador, int turnos = 2, double percentual = 0.30)
-            : base("Proteção de Aliado", "🦴", turnos, percentual,
+        public ProtecaoAliado(Combate aplicador, int duracao = 2, double percentual = 0.30)
+            : base("Proteção de Aliado", "🦴", duracao, percentual,
                 $"Redireciona {percentual * 100:F0}% do dano para o aplicador.")
         {
             Aplicador = aplicador;

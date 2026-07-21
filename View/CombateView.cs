@@ -25,7 +25,7 @@ namespace ApostlesWar.View
             Console.WriteLine("Seu time:");
             foreach (Combate j in jogadores)
             {
-                string status = string.Join(" ", j.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
+                string status = string.Join(" ", j.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.DuracaoRestante)}"));
                 string escudo = FormatarEscudo(j);
                 Console.WriteLine($"{j.Personagem.Simbolo} {j.Personagem.Nome} | HP:{j.HPAtual}{escudo} ATK:{j.Ataque} DEF:{j.Defesa} {status}");
             }
@@ -34,7 +34,7 @@ namespace ApostlesWar.View
             int i = 1;
             foreach (Combate inimigo in inimigos.Where(d => d.EstaVivo()))
             {
-                string status = string.Join(" ", inimigo.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.TurnosRestantes)}"));
+                string status = string.Join(" ", inimigo.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.DuracaoRestante)}"));
                 string escudo = FormatarEscudo(inimigo);
                 Console.WriteLine($"{i} - {inimigo.Personagem.Simbolo} {inimigo.Personagem.Nome} | HP:{inimigo.HPAtual}{escudo} ATK:{inimigo.Ataque} DEF:{inimigo.Defesa} {status}");
                 i++;
@@ -60,7 +60,7 @@ namespace ApostlesWar.View
                 if (hab is HabilidadeAtiva)
                 {
                     var cd = atacante.Cooldowns[hab];
-                    string relogio = ObterRelogio(cd.TurnosRestantes, cd.CooldownTotal);
+                    string relogio = ObterRelogio(cd.CooldownRestante, cd.CooldownTotal);
                     string disponivel = cd.Disponivel ? "✅" : "🟣";
                     string cursor = acaoSelecionada == i ? "▶" : " ";
                     Console.WriteLine($"{cursor} {i} - {hab.Simbolo} {hab.Nome} {disponivel} {relogio}  {hab.Descricao}");
@@ -77,7 +77,7 @@ namespace ApostlesWar.View
                     if (hab is HabilidadePassiva)
                     {
                         var cd = atacante.Cooldowns[hab];
-                        string relogio = ObterRelogio(cd.TurnosRestantes, cd.CooldownTotal);
+                        string relogio = ObterRelogio(cd.CooldownRestante, cd.CooldownTotal);
                         string disponivel = cd.Disponivel ? "✅" : "🟣";
                         Console.WriteLine($"  {hab.Simbolo} {hab.Nome} {disponivel} {relogio}  {hab.Descricao}");
                     }
@@ -88,13 +88,13 @@ namespace ApostlesWar.View
         /// <summary>
         /// Retorna o emoji de relógio proporcional ao progresso do cooldown
         /// </summary>
-        string ObterRelogio(int turnosRestantes, int cooldownTotal)
+        string ObterRelogio(int cooldownRestante, int cooldownTotal)
         {
-            if (turnosRestantes == 0) return "🕛";
+            if (cooldownRestante == 0) return "🕛";
 
             string[] relogios = { "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙" };
-            int turnosPassados = cooldownTotal - turnosRestantes;
-            int indice = (int)Math.Round((double)turnosPassados * 9 / cooldownTotal) - 1;
+            int cooldownPassado = cooldownTotal - cooldownRestante;
+            int indice = (int)Math.Round((double)cooldownPassado * 9 / cooldownTotal) - 1;
             indice = Math.Clamp(indice, 0, 8);
             return relogios[indice];
         }

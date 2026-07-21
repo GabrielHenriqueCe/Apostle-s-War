@@ -10,8 +10,8 @@ namespace ApostlesWar.Skills.Buffs
     {
         public int PontosRestantes { get; private set; }
 
-        public Escudo(int pontos, int turnos = 2)
-            : base("Escudo", "🛡️", turnos, pontos, $"Absorve {pontos} de dano.")
+        public Escudo(int pontos, int duracao = 2)
+            : base("Escudo", "🛡️", duracao, pontos, $"Absorve {pontos} de dano.")
         {
             PontosRestantes = pontos;
         }

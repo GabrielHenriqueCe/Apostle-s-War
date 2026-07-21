@@ -15,7 +15,7 @@ namespace ApostlesWar.Champs.LadoSombrio
             Ossinho(), OssoDuroDeRoer(), new Necromancia());
 
         static HabilidadeAtiva Ossinho() => new(
-            "Ossinho", "🦴", turnos: 3, "Ataca todos os inimigos. Dano aumenta conforme o HP da Caveira diminui (até 2x).",
+            "Ossinho", "🦴", cooldown: 3, "Ataca todos os inimigos. Dano aumenta conforme o HP da Caveira diminui (até 2x).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -24,13 +24,13 @@ namespace ApostlesWar.Champs.LadoSombrio
             });
 
         static HabilidadeAtiva OssoDuroDeRoer() => new(
-            "Osso Duro de Roer", "🦴", turnos: 3, "Protege aliados (30% do dano vai pra Caveira) e ganha Escudo de 30% HP.",
+            "Osso Duro de Roer", "🦴", cooldown: 3, "Protege aliados (30% do dano vai pra Caveira) e ganha Escudo de 30% HP.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarBuff(atk => new ProtecaoAliado(atk, turnos: 2, percentual: 0.30), Escopo.OutrosAliados),
-                new AplicarEscudo(Valor.PorHPDoAtacante(0.30), turnos: 2, Escopo.ProprioAtacante),
+                new AplicarBuff(atk => new ProtecaoAliado(atk, duracao: 2, percentual: 0.30), Escopo.OutrosAliados),
+                new AplicarEscudo(Valor.PorHPDoAtacante(0.30), duracao: 2, Escopo.ProprioAtacante),
             });
     }
 }

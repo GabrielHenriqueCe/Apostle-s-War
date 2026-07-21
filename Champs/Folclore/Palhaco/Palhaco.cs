@@ -17,22 +17,22 @@ namespace ApostlesWar.Champs.Folclore
             Coringa(), Circo(), new PiadaDeMauGosto());
 
         static HabilidadeAtiva Coringa() => new(
-            "Coringa", "🃏", turnos: 3, "Remove malefícios dos aliados e dá imunidade por 2 turnos.",
+            "Coringa", "🃏", cooldown: 3, "Remove malefícios dos aliados e dá imunidade por 2 turnos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new RemoverDebuffs(Seletor.Todos(), Escopo.TodosAliados),
-                new AplicarBuff(() => new ImunidadeDebuffs(turnos: 2), Escopo.TodosAliados),
+                new AplicarBuff(() => new ImunidadeDebuffs(duracao: 2), Escopo.TodosAliados),
             });
 
         static HabilidadeAtiva Circo() => new(
-            "Circo", "🎪", turnos: 4, "Revive aliados (50% HP) e dá Intocável aos revividos.",
+            "Circo", "🎪", cooldown: 4, "Revive aliados (50% HP) e dá Intocável aos revividos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new Reviver(0.50, buffNoRevivido: () => new Intocavel(turnos: 2)),
+                new Reviver(0.50, buffNoRevivido: () => new Intocavel(duracao: 2)),
             });
     }
 }

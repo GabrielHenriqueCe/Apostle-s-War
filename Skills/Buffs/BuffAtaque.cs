@@ -12,8 +12,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class BuffAtaque : Buff
     {
-        public BuffAtaque(int turnos = 2, double percentual = 0.25)
-            : base("ATK+", "⚔️", turnos, percentual, $"+{percentual * 100:F0}% ATK.") { }
+        public BuffAtaque(int duracao = 2, double percentual = 0.25)
+            : base("ATK+", "⚔️", duracao, percentual, $"+{percentual * 100:F0}% ATK.") { }
 
         public override void Aplicar(Combate alvo)
         {
@@ -24,7 +24,7 @@ namespace ApostlesWar.Skills.Buffs
             {
                 // Mais forte prevalece: maior Valor; empate decide pela duração.
                 if (Valor < existente.Valor) return;
-                if (Valor == existente.Valor && TurnosRestantes <= existente.TurnosRestantes) return;
+                if (Valor == existente.Valor && DuracaoRestante <= existente.DuracaoRestante) return;
                 alvo.StatusAtivos.Remove(existente);
             }
 

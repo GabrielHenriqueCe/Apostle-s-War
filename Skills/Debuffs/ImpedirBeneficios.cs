@@ -8,8 +8,8 @@ namespace ApostlesWar.Skills.Debuffs
     /// </summary>
     class ImpedirBeneficios : Debuff, IBloqueiaStatus
     {
-        public ImpedirBeneficios(int turnos = 2)
-            : base("Impedir Benefícios", "🚫", turnos, 0, "Bloqueia novos benefícios.") { }
+        public ImpedirBeneficios(int duracao = 2)
+            : base("Impedir Benefícios", "🚫", duracao, 0, "Bloqueia novos benefícios.") { }
 
         public bool Bloqueia(StatusEffect novo) => novo is Buff;
 

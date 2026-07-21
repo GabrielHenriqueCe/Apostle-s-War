@@ -7,7 +7,7 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class Invencivel : Buff, IModificaDanoRecebido
     {
-        public Invencivel(int turnos = 1) : base("Invencível", "⚜️", turnos, 0,
+        public Invencivel(int duracao = 1) : base("Invencível", "⚜️", duracao, 0,
             "Não pode morrer. HP mínimo de 1.")
         { }
 

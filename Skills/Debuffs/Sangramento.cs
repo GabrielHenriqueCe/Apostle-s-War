@@ -29,7 +29,7 @@ namespace ApostlesWar.Skills.Debuffs
             if (existente != null)
             {
                 existente.Stacks += this.Stacks;
-                existente.TurnosRestantes = existente.Stacks;
+                existente.DuracaoRestante = existente.Stacks;
                 return;
             }
 

@@ -14,16 +14,16 @@ namespace ApostlesWar
     class AplicarEscudo : Acao
     {
         private readonly ValorFn _valor;
-        private readonly int _turnos;
+        private readonly int _duracao;
 
-        public AplicarEscudo(ValorFn valor, int turnos, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
+        public AplicarEscudo(ValorFn valor, int duracao, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo)
         {
             _valor = valor;
-            _turnos = turnos;
+            _duracao = duracao;
         }
 
         public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
-            => new ApostlesWar.Skills.Buffs.Escudo(_valor(atacante, alvo, eventos), _turnos).Aplicar(alvo);
+            => new ApostlesWar.Skills.Buffs.Escudo(_valor(atacante, alvo, eventos), _duracao).Aplicar(alvo);
     }
 }

@@ -16,17 +16,17 @@ namespace ApostlesWar.Champs.Folclore
             Pancada(), Porradeiro(), new Ambicao());
 
         static HabilidadeAtiva Pancada() => new(
-            "Pancada", "🤜", turnos: 3, "Ataca todos +75% ATK e 50% chance de Medo 1t em cada.",
+            "Pancada", "🤜", cooldown: 3, "Ataca todos +75% ATK e 50% chance de Medo 1t em cada.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
                 new Dano(1.75),
-                new AplicarDebuff(() => new Medo(turnos: 1), chance: 0.50),
+                new AplicarDebuff(() => new Medo(duracao: 1), chance: 0.50),
             });
 
         static HabilidadeAtiva Porradeiro() => new(
-            "Porradeiro", "🥊", turnos: 4, "6 ataques aleatórios +50% ATK. Cura 30% do dano causado.",
+            "Porradeiro", "🥊", cooldown: 4, "6 ataques aleatórios +50% ATK. Cura 30% do dano causado.",
             numeroDeAlvos: 6, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()

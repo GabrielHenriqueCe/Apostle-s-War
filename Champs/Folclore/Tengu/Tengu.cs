@@ -16,7 +16,7 @@ namespace ApostlesWar.Champs.Folclore
             CorteDeVento(), Vendaval(), new Ventania());
 
         static HabilidadeAtiva CorteDeVento() => new(
-            "Corte de Vento", "🌬️", turnos: 3, "Ataca todos ignorando Escudo. Dano aumenta com escudo do alvo.",
+            "Corte de Vento", "🌬️", cooldown: 3, "Ataca todos ignorando Escudo. Dano aumenta com escudo do alvo.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -25,7 +25,7 @@ namespace ApostlesWar.Champs.Folclore
             });
 
         static HabilidadeAtiva Vendaval() => new(
-            "Vendaval", "🌪️", turnos: 4, "+150% ATK ignorando Proteção, BuffDefesa e 50% DEF.",
+            "Vendaval", "🌪️", cooldown: 4, "+150% ATK ignorando Proteção, BuffDefesa e 50% DEF.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()

@@ -13,8 +13,8 @@ namespace ApostlesWar.Skills
     /// </summary>
     abstract class Debuff : StatusEffect
     {
-        public Debuff(string nome, string simbolo, int turnosRestantes, double valor, string descricao = "")
-            : base(nome, simbolo, turnosRestantes, valor, descricao) { }
+        public Debuff(string nome, string simbolo, int duracao, double valor, string descricao = "")
+            : base(nome, simbolo, duracao, valor, descricao) { }
     }
 
     #endregion

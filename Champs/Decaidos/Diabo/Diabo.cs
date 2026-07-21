@@ -17,7 +17,7 @@ namespace ApostlesWar.Champs.Decaidos
             Inferno(), AnjoCaido(), new CresceComDor());
 
         static HabilidadeAtiva Inferno() => new(
-            "Inferno", "🔥", turnos: 3, "Aplica 2 stacks de Queima em todos os inimigos e explode imediatamente.",
+            "Inferno", "🔥", cooldown: 3, "Aplica 2 stacks de Queima em todos os inimigos e explode imediatamente.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -27,7 +27,7 @@ namespace ApostlesWar.Champs.Decaidos
             });
 
         static HabilidadeAtiva AnjoCaido() => new(
-            "Anjo Caído", "😇", turnos: 3, "Revive aliados (50% HP, quebra a Sentença) e cura todos (30% HP).",
+            "Anjo Caído", "😇", cooldown: 3, "Revive aliados (50% HP, quebra a Sentença) e cura todos (30% HP).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()

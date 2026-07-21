@@ -13,8 +13,8 @@ namespace ApostlesWar.Skills.Debuffs
     /// </summary>
     class ReducaoDefesa : Debuff, IContribuiDefesa
     {
-        public ReducaoDefesa(int turnos = 2)
-            : base("Redução DEF", "🔎", turnos, 0.30, "-30% DEF.") { }
+        public ReducaoDefesa(int duracao = 2)
+            : base("Redução DEF", "🔎", duracao, 0.30, "-30% DEF.") { }
 
         public override void Aplicar(Combate alvo)
         {
@@ -24,7 +24,7 @@ namespace ApostlesWar.Skills.Debuffs
             if (existente != null)
             {
                 if (Valor < existente.Valor) return;
-                if (Valor == existente.Valor && TurnosRestantes <= existente.TurnosRestantes) return;
+                if (Valor == existente.Valor && DuracaoRestante <= existente.DuracaoRestante) return;
                 alvo.StatusAtivos.Remove(existente);
             }
 

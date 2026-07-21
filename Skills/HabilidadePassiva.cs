@@ -2,8 +2,8 @@
 {
     abstract class HabilidadePassiva : Habilidade
     {
-        public HabilidadePassiva(string nome, string simbolo, int turnos, string descricao = "")
-            : base(nome, simbolo, turnos, descricao) { }
+        public HabilidadePassiva(string nome, string simbolo, int cooldown, string descricao = "")
+            : base(nome, simbolo, cooldown, descricao) { }
 
         protected List<EventoDano> SemDano() => new List<EventoDano>();
 

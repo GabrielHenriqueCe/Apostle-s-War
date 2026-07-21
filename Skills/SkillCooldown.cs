@@ -7,9 +7,9 @@
     /// </summary>
     class SkillCooldown
     {
-        public int TurnosRestantes => turnosRestantes;
+        public int CooldownRestante => cooldownRestante;
         public int CooldownTotal => cooldownTotal;
-        private int turnosRestantes = 0;
+        private int cooldownRestante = 0;
         private int cooldownTotal;
 
         public SkillCooldown(int cooldown)
@@ -17,17 +17,17 @@
             cooldownTotal = cooldown;
         }
 
-        public bool Disponivel => turnosRestantes == 0;
+        public bool Disponivel => cooldownRestante == 0;
 
         public void Usar()
         {
-            turnosRestantes = cooldownTotal;
+            cooldownRestante = cooldownTotal;
         }
 
         public void PassarTurno()
         {
-            if (turnosRestantes > 0)
-                turnosRestantes--;
+            if (cooldownRestante > 0)
+                cooldownRestante--;
         }
     }
 

@@ -15,7 +15,7 @@ namespace ApostlesWar.Champs.Tecnologicos
             Quimica(), Fisica(), new AnaliseCritica());
 
         static HabilidadeAtiva Quimica() => new(
-            "Química", "🧪", turnos: 3, "Ataca todos e aplica Veneno (5% HP/turno por stack).",
+            "Química", "🧪", cooldown: 3, "Ataca todos e aplica Veneno (5% HP/turno por stack).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -25,7 +25,7 @@ namespace ApostlesWar.Champs.Tecnologicos
             });
 
         static HabilidadeAtiva Fisica() => new(
-            "Física", "⚛️", turnos: 3, "Ataca todos e aplica Queima 2t.",
+            "Física", "⚛️", cooldown: 3, "Ataca todos e aplica Queima 2t.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()

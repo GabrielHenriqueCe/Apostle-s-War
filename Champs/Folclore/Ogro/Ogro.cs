@@ -16,24 +16,24 @@ namespace ApostlesWar.Champs.Folclore
             Esmagar(), Quebrar(), new Intimidador());
 
         static HabilidadeAtiva Esmagar() => new(
-            "Esmagar", "👊", turnos: 3, "Cura 50% HP em si e protege os aliados (2t).",
+            "Esmagar", "👊", cooldown: 3, "Cura 50% HP em si e protege os aliados (2t).",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Self,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new Cura(Valor.PorHP(0.50), Escopo.ProprioAtacante),
-                new AplicarBuff(atk => new ProtecaoAliado(atk, turnos: 2, percentual: 0.30), Escopo.OutrosAliados),
+                new AplicarBuff(atk => new ProtecaoAliado(atk, duracao: 2, percentual: 0.30), Escopo.OutrosAliados),
             });
 
         static HabilidadeAtiva Quebrar() => new(
-            "Quebrar", "💥", turnos: 3, "Ataca todos +100% ATK, Irritar 1t e ganha Escudo de 30% do dano.",
+            "Quebrar", "💥", cooldown: 3, "Ataca todos +100% ATK, Irritar 1t e ganha Escudo de 30% do dano.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
                 new Dano(2.0),
-                new AplicarDebuff(atk => new Irritar(atk, turnos: 1)),
-                new AplicarEscudo(Valor.PorDanoCausado(0.30), turnos: 2, Escopo.ProprioAtacante),
+                new AplicarDebuff(atk => new Irritar(atk, duracao: 1)),
+                new AplicarEscudo(Valor.PorDanoCausado(0.30), duracao: 2, Escopo.ProprioAtacante),
             });
     }
 }

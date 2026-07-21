@@ -1,24 +1,20 @@
-﻿namespace ApostlesWar
+namespace ApostlesWar
 {
     #region Habilidade
 
     /// <summary>
-    /// Classe base para todas as habilidades.
+    /// Classe base para todas as habilidades. A identidade (Nome/Simbolo/Descricao) vem
+    /// de ElementoDeJogo; aqui mora o Cooldown (turnos de recarga entre usos).
     /// Ativar recebe ContextoCombate (atacante + aliados + inimigos) e o alvo selecionado.
     /// </summary>
-    abstract class Habilidade
+    abstract class Habilidade : ElementoDeJogo
     {
-        public string Nome { get; }
-        public int Turnos { get; }
-        public string Descricao { get; }
-        public string Simbolo { get; }
+        public int Cooldown { get; }
 
-        public Habilidade(string nome, string simbolo, int turnos, string descricao = "")
+        public Habilidade(string nome, string simbolo, int cooldown, string descricao = "")
+            : base(nome, simbolo, descricao)
         {
-            Nome = nome;
-            Simbolo = simbolo;
-            Turnos = turnos;
-            Descricao = descricao;
+            Cooldown = cooldown;
         }
 
         /// <summary>

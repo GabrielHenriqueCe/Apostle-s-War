@@ -14,7 +14,7 @@ namespace ApostlesWar.Champs.Folclore
 
         public List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx)
         {
-            new BuffAtaque(turnos: 2, percentual: 0.25).Aplicar(ctx.Atacante);
+            new BuffAtaque(duracao: 2, percentual: 0.25).Aplicar(ctx.Atacante);
             return new List<ResultadoReacao>();
         }
     }

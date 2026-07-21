@@ -21,7 +21,7 @@ namespace ApostlesWar.Champs.Especial
             if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
             if (Random.Shared.NextDouble() >= ChanceReducao) return new List<ResultadoReacao>();
 
-            new ReducaoDefesa(turnos: 2).Aplicar(ctx.Contraparte);
+            new ReducaoDefesa(duracao: 2).Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {

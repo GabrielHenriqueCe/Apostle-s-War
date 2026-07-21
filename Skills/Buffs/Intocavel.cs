@@ -8,7 +8,7 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class Intocavel : Buff
     {
-        public Intocavel(int turnos = 2, bool removivel = true) : base("Intocável", "🕳️", turnos, 0,
+        public Intocavel(int duracao = 2, bool removivel = true) : base("Intocável", "🕳️", duracao, 0,
             "Não pode ser selecionado como alvo.", removivel)
         { }
 

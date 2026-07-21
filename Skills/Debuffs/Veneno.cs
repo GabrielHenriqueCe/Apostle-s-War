@@ -31,7 +31,7 @@ namespace ApostlesWar.Skills.Debuffs
                 int novosStacks = existente.Stacks + this.Stacks;
                 if (CapStacks.HasValue) novosStacks = Math.Min(novosStacks, CapStacks.Value);
                 existente.Stacks = novosStacks;
-                existente.TurnosRestantes = novosStacks;
+                existente.DuracaoRestante = novosStacks;
                 return;
             }
 

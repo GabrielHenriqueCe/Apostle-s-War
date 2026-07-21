@@ -15,7 +15,7 @@ namespace ApostlesWar.Champs.Misticos
 
         public List<ResultadoReacao> AoMatar(ContextoReacao ctx)
         {
-            new BloqueioTotal(turnos: 3).Aplicar(ctx.Portador);
+            new BloqueioTotal(duracao: 3).Aplicar(ctx.Portador);
 
             return new List<ResultadoReacao>
             {

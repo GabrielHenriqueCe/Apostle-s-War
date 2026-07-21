@@ -20,7 +20,7 @@ namespace ApostlesWar.Champs.Folclore
             if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
             if (Random.Shared.NextDouble() >= ChanceMedo) return new List<ResultadoReacao>();
 
-            new Medo(turnos: 1).Aplicar(ctx.Contraparte);
+            new Medo(duracao: 1).Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {

@@ -12,8 +12,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class EspinhosVenenosos : Buff, IReageAoSerAtacado
     {
-        public EspinhosVenenosos(int turnos = int.MaxValue)
-            : base("Espinhos", "🌿", turnos, 0,
+        public EspinhosVenenosos(int duracao = int.MaxValue)
+            : base("Espinhos", "🌿", duracao, 0,
                 "Atacantes recebem Veneno e Queima.")
         { }
 

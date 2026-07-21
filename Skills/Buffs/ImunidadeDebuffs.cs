@@ -9,8 +9,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class ImunidadeDebuffs : Buff, IBloqueiaStatus
     {
-        public ImunidadeDebuffs(int turnos = int.MaxValue)
-            : base("Imunidade", "🎃", turnos, 0, "Imune a maleficios.")
+        public ImunidadeDebuffs(int duracao = int.MaxValue)
+            : base("Imunidade", "🎃", duracao, 0, "Imune a maleficios.")
         { }
 
         public bool Bloqueia(StatusEffect novo) => novo is Debuff;

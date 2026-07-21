@@ -15,7 +15,7 @@ namespace ApostlesWar.Champs.Misticos
 
         public List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx)
         {
-            new RefletirDano(turnos: 2).Aplicar(ctx.Atacante);
+            new RefletirDano(duracao: 2).Aplicar(ctx.Atacante);
             return new List<ResultadoReacao>();
         }
     }

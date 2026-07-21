@@ -23,7 +23,7 @@ namespace ApostlesWar.Champs.Tecnologicos
 
             if (aliadoMenorHP == null) return new List<ResultadoReacao>();
 
-            new CuraContinua(turnos: 1, percentual: 0.10).Aplicar(aliadoMenorHP);
+            new CuraContinua(duracao: 1, percentual: 0.10).Aplicar(aliadoMenorHP);
 
             return new List<ResultadoReacao>
             {

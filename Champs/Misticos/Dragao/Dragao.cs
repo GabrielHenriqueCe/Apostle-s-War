@@ -17,7 +17,7 @@ namespace ApostlesWar.Champs.Misticos
             SoproDoDragao(), DragaoProtetor(), new PeleDeDragao());
 
         static HabilidadeAtiva SoproDoDragao() => new(
-            "Sopro do Dragão", "🔥", turnos: 3, "Ataca todos com +100% ATK e aplica Queima (2 stacks).",
+            "Sopro do Dragão", "🔥", cooldown: 3, "Ataca todos com +100% ATK e aplica Queima (2 stacks).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -27,12 +27,12 @@ namespace ApostlesWar.Champs.Misticos
             });
 
         static HabilidadeAtiva DragaoProtetor() => new(
-            "Dragão Protetor", "🐲", turnos: 3, "Contra-ataque, restaura HP máx perdido (até 25%) e cura 25% HP em todos.",
+            "Dragão Protetor", "🐲", cooldown: 3, "Contra-ataque, restaura HP máx perdido (até 25%) e cura 25% HP em todos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarBuff(() => new ContraAtaque(turnos: 2), Escopo.TodosAliados),
+                new AplicarBuff(() => new ContraAtaque(duracao: 2), Escopo.TodosAliados),
                 new RestaurarHPMaximo(0.25, Escopo.TodosAliados),
                 new Cura(Valor.PorHP(0.25), Escopo.TodosAliados),
             });

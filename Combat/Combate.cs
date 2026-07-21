@@ -213,7 +213,7 @@ namespace ApostlesWar
             Cooldowns = new Dictionary<Habilidade, SkillCooldown>();
             EstadoHabilidades = new Dictionary<Habilidade, object>();
             foreach (Habilidade hab in personagem.Habilidades)
-                Cooldowns[hab] = new SkillCooldown(hab.Turnos);
+                Cooldowns[hab] = new SkillCooldown(hab.Cooldown);
         }
 
         /// <summary>

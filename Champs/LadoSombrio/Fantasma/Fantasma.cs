@@ -15,7 +15,7 @@ namespace ApostlesWar.Champs.LadoSombrio
         // Cura AGREGADA (decisão de Gabriel): 20% da SOMA do dano causado no ataque inteiro,
         // uma vez ao fim — não 20% por hit. É o fragmento PorDanoCausado lendo o eventos completo.
         static HabilidadeAtiva Assombracao() => new(
-            "Assombração", "👻", turnos: 3, "Ataca todos. Cura 20% de todo o dano causado.",
+            "Assombração", "👻", cooldown: 3, "Ataca todos. Cura 20% de todo o dano causado.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -25,7 +25,7 @@ namespace ApostlesWar.Champs.LadoSombrio
             });
 
         static HabilidadeAtiva VindoDoAlem() => new(
-            "Vindo do Além", "💀", turnos: 3, "Ataque crítico ignorando DEF. Sofre 20% do dano causado.",
+            "Vindo do Além", "💀", cooldown: 3, "Ataque crítico ignorando DEF. Sofre 20% do dano causado.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()

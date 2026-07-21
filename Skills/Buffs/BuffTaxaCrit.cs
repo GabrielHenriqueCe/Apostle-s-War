@@ -11,8 +11,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class BuffTaxaCrit : Buff
     {
-        public BuffTaxaCrit(int turnos = 2, double valor = 0.25)
-            : base("Crit+", "🎯", turnos, valor, $"+{valor * 100:F0}% TaxaCrit.") { }
+        public BuffTaxaCrit(int duracao = 2, double valor = 0.25)
+            : base("Crit+", "🎯", duracao, valor, $"+{valor * 100:F0}% TaxaCrit.") { }
 
         public override void Aplicar(Combate alvo)
         {
@@ -22,7 +22,7 @@ namespace ApostlesWar.Skills.Buffs
             if (existente != null)
             {
                 if (Valor < existente.Valor) return;
-                if (Valor == existente.Valor && TurnosRestantes <= existente.TurnosRestantes) return;
+                if (Valor == existente.Valor && DuracaoRestante <= existente.DuracaoRestante) return;
                 alvo.StatusAtivos.Remove(existente);
             }
 

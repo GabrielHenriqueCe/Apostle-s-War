@@ -14,7 +14,7 @@ namespace ApostlesWar.Skills.Ativas
     /// </summary>
     class AtaqueBasico : HabilidadeAtiva, IAtaquePrimario, IAtivavelComNatureza
     {
-        public AtaqueBasico() : base("Atacar", "⚔️", turnos: 0, "Ataque básico (100% ATK).") { }
+        public AtaqueBasico() : base("Atacar", "⚔️", cooldown: 0, "Ataque básico (100% ATK).") { }
 
         public override int NumeroDeAlvos => 1;
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;

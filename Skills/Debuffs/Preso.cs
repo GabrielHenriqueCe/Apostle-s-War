@@ -8,7 +8,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// </summary>
     class Preso : Debuff
     {
-        public Preso(int turnos = 2) : base("Preso", "⛓️", turnos, 0, "Pula os próximos turnos.") { }
+        public Preso(int duracao = 2) : base("Preso", "⛓️", duracao, 0, "Pula os próximos turnos.") { }
 
         public override void Remover(Combate alvo)
         {

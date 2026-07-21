@@ -9,8 +9,8 @@ namespace ApostlesWar.Skills.Debuffs
     {
         public Combate Aplicador { get; }
 
-        public Irritar(Combate aplicador, int turnos = 1)
-            : base("Irritar", "😡", turnos, 0, "Força atacar com A1 quem aplicou.")
+        public Irritar(Combate aplicador, int duracao = 1)
+            : base("Irritar", "😡", duracao, 0, "Força atacar com A1 quem aplicou.")
         {
             Aplicador = aplicador;
         }

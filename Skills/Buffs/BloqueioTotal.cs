@@ -7,7 +7,7 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class BloqueioTotal : Buff, IModificaDanoRecebido
     {
-        public BloqueioTotal(int turnos = 1) : base("Bloqueio Total", "🧱", turnos, 1,
+        public BloqueioTotal(int duracao = 1) : base("Bloqueio Total", "🧱", duracao, 1,
             "Bloqueia todo o dano recebido.")
         { }
 

@@ -8,7 +8,7 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class Provocar : Buff
     {
-        public Provocar(int turnos = 2) : base("Provocar", "😤", turnos, 0,
+        public Provocar(int duracao = 2) : base("Provocar", "😤", duracao, 0,
             "Força inimigos a atacar apenas este personagem.")
         { }
 

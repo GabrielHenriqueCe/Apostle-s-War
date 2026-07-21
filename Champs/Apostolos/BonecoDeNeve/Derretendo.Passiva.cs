@@ -25,7 +25,7 @@ namespace ApostlesWar.Champs.Apostolos
             foreach (var q in queimas)
                 q.Remover(ctx.Atacante);
 
-            new CuraContinua(turnos: TurnosCura, percentual: CuraPercentual).Aplicar(ctx.Atacante);
+            new CuraContinua(duracao: TurnosCura, percentual: CuraPercentual).Aplicar(ctx.Atacante);
 
             return new List<ResultadoReacao>
             {

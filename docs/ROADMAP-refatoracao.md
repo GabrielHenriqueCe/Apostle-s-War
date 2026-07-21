@@ -20,9 +20,11 @@
 - **Refatore por DOR, não por pureza.** Migra o que incomoda; o resto segue por
   boy scout (quando tocar) ou PR dedicado quando virar dor.
 - **Refatore o que PERSISTE; tolere imperfeição no que vai MORRER.** A camada de
-  apresentação do console (MenuService, telas) e o save em arquivo morrem na
-  migração web (2027). Não investir rigor neles. A LÓGICA de domínio (combate,
-  turno, reações, stats) vira a .NET API — é onde o rigor rende.
+  apresentação do console (telas, render) morre no porte **Unity**. Não investir
+  rigor nela. A LÓGICA de domínio (combate, turno, reações, stats) pluga DIRETO no
+  Unity como assembly C# — é onde o rigor rende. **Destino: Unity, single-player,
+  save local** (sincronizado por Steam Cloud / Google Play Saved Games — SDK de
+  plataforma, não backend próprio). Sem web/API REST/servidor SQL.
 - **Um PR, um tema.** Não abrir duas frentes grandes ao mesmo tempo.
 - **Destravar de forma encadeada.** Escolher a ordem onde cada peça destrava a
   próxima e minimiza retrabalho. Pode-se reabrir algo, mas o caminho limpo é melhor
@@ -32,8 +34,59 @@
 - **Build verde (Ctrl+Shift+B) antes de todo push.** CI manual do dev solo.
 - **Não desenhar no escuro.** Interface/categoria nasce servindo efeitos reais que
   existem, não casos hipotéticos. YAGNI até o efeito que justifica aparecer.
-  EXCEÇÃO consciente: o EventoDano foi investido cedo na fundação de exibição/web
+  EXCEÇÃO consciente: o EventoDano foi investido cedo na fundação de exibição/porte
   (Propósito B) — decisão explícita de aceitar mais trabalho por uma base sólida.
+
+---
+
+## FILA DE EXECUÇÃO (rumo ao Unity) — ordem mestra
+
+> **Decisão (jul/2026):** o porte vai ser **Unity**, single-player, **save local**
+> (sincronizado por Steam Cloud / Google Play Saved Games — SDK de plataforma, NÃO
+> backend próprio). Isso MATOU o enquadramento web/RESTful/SQL antigo. O domínio C#
+> pluga direto no Unity; a camada de console (View) é que morre no porte.
+>
+> **Como atacar:** os itens da FILA A são o que dá pra fazer **agora, no console**,
+> 1 por 1 (cada um = 1 PR, 1 mergeado antes do próximo). A FILA B espera o porte
+> (precisa dos SDKs/loop do Unity). A FILA C está descartada.
+
+### 🟢 FILA A — console, agora (numerada)
+1. **Doc/organização** — este bump (grava esta fila, mata o enquadramento web, reancora
+   encapsular-coleções, fecha nulo-na-porta, corrige drift dos testes).
+2. **`ColetarReacoes<T>` helper** — DRY das 3 varreduras de reação. Baixo risco.
+3. **Identidade comum** (Nome/Símbolo/Descrição) — base comum `Habilidade`+`StatusEffect`.
+4. **Services-lookup** — `FaccaoService`/`CampanhaService` viram dado. Cosmético.
+5. **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — extrair o IO de arquivo
+   (hoje em `CapitulosService`/`ArsenalService`) pra trás de uma porta; JSON = `SaveLocal`.
+   Habilita Steam/Play plugarem no porte sem cirurgia. Seam future-facing (Steam+Play já
+   nomeados), mesmo padrão de `IEntrada`/`IApresentacao`.
+6. **Capacidade C — stat sob demanda (`IContribui*`)** — generalizar pros outros stats.
+7. **Capacidade D — comportamento de turno** (Medo/Preso/Irritar como família).
+8. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado
+   à mão. Follow-on da Composição.
+9. **Turno (resto)** — reset 1x-por-agressor das outras reações + `TimeAtualDoTurno` +
+   eventualmente o Caminho B (`TurnoDoPersonagem` persistente → medidor de velocidade).
+10. **Passiva-conta-mortos** — desbloqueada (EventoDano Fatia 2 pronta); falta a passiva.
+11. **Observabilidade Crit na UI** — exibir TaxaCrit/DanoCrit (OlhoClinico/Virus).
+12. **Ampliar testes xUnit** — ordem crítica de morte, `ReceberDano` ponta-a-ponta.
+13. **Faxina de comentários** — bisturi. Penúltimo.
+14. **REBALANCEAMENTO** — fase própria, o FIM. Números em playtest.
+
+**Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
+lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
+
+### 🔵 FILA B — precisa do porte (sair do console → Unity)
+- **Encapsular coleções → choke-point de evento de status** (gatilho da camada de eventos).
+- **`EventoDano` por ID** — desacoplar dos objetos `Combate` vivos → log/stream limpo.
+- **Input via Unity Input System** (mouse/gamepad; `Selecionar(N)` já é a ponte).
+- **Camada de animação/eventos** (coroutines/UnityEvents/animation events) — consome o acima.
+- **`SaveSteam` / `SavePlayGames`** — impls da porta `IRepositorioDeSave` (Steamworks.NET /
+  Google Play Games plugin). Steam Auto-Cloud ≈ zero código; Play usa Snapshots.
+- **[bônus] champ-como-dado → ScriptableObjects** (o motor de Ações já está pré-moldado pra isso).
+
+### 🟠 FILA C — DESCARTADA (nenhum servidor SQL/REST próprio)
+- Cloud save é via SDK de plataforma (Steam/Play), plugado na porta `IRepositorioDeSave` — não é
+  backend seu. SQL/REST só reabrem se um dia quiser contas/ranking/servidor próprio.
 
 ---
 
@@ -291,15 +344,14 @@ comportamento e estrutura juntos esconde bugs. Ideias de Gabriel registradas pra
 foi enriquecido (FoiCritico, Aliados, Inimigos). Só falta a passiva-conta-mortos (1b) como
 cliente futuro do contexto rico (seção própria).
 
-**O que é:** o tipo canônico que descreve um golpe — o "Model do golpe" (conceito MVC) que
-a apresentação consome (console hoje, React/web amanhã via JSON). Convergiu o antigo
-ResultadoAtaque.
+**O que é:** o tipo canônico que descreve um golpe — o "Model do golpe" que a apresentação
+consome (console hoje, **Unity amanhã**). Convergiu o antigo ResultadoAtaque.
 
-**Propósito B (decisão de Gabriel):** investir cedo na fundação de exibição/web, não só na
-lógica. Na versão web, o EventoDano é a linguagem entre back (.NET API, calcula) e front
-(React, desenha) — o front consome uma stream de eventos e os transforma em animação. Mesmo
-princípio das reações (declaram, o orquestrador exibe), levado ao combate inteiro. Aceito
-refatorar depois.
+**Propósito B (decisão de Gabriel):** investir cedo na fundação de exibição, não só na lógica.
+No porte **Unity**, o EventoDano é a linguagem entre a lógica (calcula) e a apresentação
+(desenha) — a camada de eventos consome uma stream de EventoDano e a transforma em animação
+(UnityEvents/coroutines). Mesmo princípio das reações (declaram, o orquestrador exibe), levado
+ao combate inteiro. Aceito refatorar depois. (Ver `EventoDano por ID` na FILA B.)
 
 ### Fatia 1 — FEITA (record + produção)
 - **EventoDano** (record em Combate.cs): Atacante, Alvo, DanoBruto, DanoEfetivo,
@@ -310,7 +362,7 @@ refatorar depois.
 - **Atacar** monta o EventoDano com bruto + efetivo/absorvido + crítico.
 - **RefletirDano** ajustado (desestrutura a tupla, monta EventoDano).
 - Descartado conscientemente: "aparado pela defesa" (nunca tem cliente). DanoBruto e
-  AbsorvidoPeloEscudo entram pela exibição/web (Propósito B), sem efeito que REAJA a eles hoje.
+  AbsorvidoPeloEscudo entram pela exibição/porte (Propósito B), sem efeito que REAJA a eles hoje.
 
 ### Fatia 2 — FEITA (enriquecer o ContextoReacao)
 O ContextoReacao era magro (Portador, Contraparte, DanoCausado, Natureza). A Fatia 2 levou pras
@@ -650,16 +702,26 @@ ExecutarCombate. Implementa quando uma fase concreta pedir.
 hoje do que fizemos antigamente". Guard-clause em código interno fica DE FORA de propósito (YAGNI).
 1. **`Random.Shared`** ✅ FEITO — matou as 8 instâncias `new Random()` (eram 8, não 4: Combate,
    HabilidadeAtiva, Medo, AplicarDebuff, Repetindo, Surpresa, PeleGrossa, Intimidador). Idioma .NET 6+.
-2. **Encapsular coleções mutáveis expostas** — PENDENTE, PR própria "quando doer". `StatusAtivos` é
-   mutado em **46 lugares** (`.Add`/`.Remove`) — expor `IReadOnlyList<T>` + métodos de mutação é
-   invasivo, NÃO é "pequeno". Hoje ninguém abusa; refatorar quando a garantia-pelo-tipo pagar o custo.
-   Também: `Personagem.Habilidades`, `Vivo.StatusNoVivo`/`Morto.StatusNoMorto`.
+2. **Encapsular coleções mutáveis → choke-point de evento (FILA B, gatilho do porte)** — REANCORADO
+   (jul/2026). O valor NÃO é pureza de encapsulação — é ser o **único ponto onde disparar "status X
+   aplicado/removido em Y"** pra camada de eventos/animação do Unity. **Descoberta ao ler o código:**
+   os "46 lugares" são enganosos — quase todos são **auto-mutação de dentro do próprio `StatusEffect`**
+   (`Aplicar` base faz `alvo.StatusAtivos.Add(this)` em `StatusEffect.cs:72`; cada `Remover` faz
+   `.Remove(this)`). É **1 padrão conceitual** repetido ~44×, não 46 callers caóticos; externo real só
+   `MoverBuffs` e `Escudo`. **Forma alvo:** `List` privada + `IReadOnlyList` público +
+   `AplicarStatus`/`RemoverStatus` no `Combate` (onde o evento dispara). Também `Personagem.Habilidades`,
+   `Vivo.StatusNoVivo`/`Morto.StatusNoMorto`. **Gatilho:** fazer JUNTO da camada de eventos no porte —
+   agora seria seam vazio custando 44 arquivos. Converge com `EventoDano por ID` e `IModificaDanoCausado`.
 3. **Save defensivo** ✅ JÁ ESTAVA FEITO — `CapitulosService.CarregarProgresso` e
    `ArsenalService.CarregarItensEquipados` já têm try/catch com fallback (JsonException/IOException/
    UnauthorizedAccess → mantém default, não crasha). A auditoria assumiu que faltava; o código já fazia.
-4. **"Nulo morre na porta" no resto do código** — PENDENTE. O encanamento dos ignorar já foi limpo na
-   unificação; varrer os demais `IEnumerable<T>? = null` que vazam nulo pra dentro e normalizar na
-   fronteira (`?? []`). Baixa prioridade.
+4. **"Nulo morre na porta" no resto do código** — ✅ **PRATICAMENTE RESOLVIDO** (verificado jul/2026).
+   Varrido: as ÚNICAS coleções anuláveis são a família `ignorarStatus` (`Combate.ReceberDano`/`Atacar`,
+   `Dano.cs`). O `= null` NÃO é desleixo — é **imposto pelo C#** (valor default de parâmetro tem que ser
+   constante; `[]`/`new List()` não são → `IEnumerable<Type>? x = null` é o único jeito de ter param de
+   coleção opcional). E o nulo já morre na fronteira: `ReceberDano` faz `ignorarStatus?.ToHashSet() ??
+   new HashSet<Type>()`. Resíduo só cosmético: `ComporListaIgnorar` (`Combate.cs`) retorna anulável e
+   passa o nulo um pulo, mas nunca é iterado enquanto nulo. Nada a fazer de substancial.
 
 ### Capacidades — stat sob demanda e comportamento de turno
 **Status:** ADR em docs/ADR-modelo-de-capacidades.md. Migração incremental.
@@ -667,9 +729,10 @@ hoje do que fizemos antigamente". Guard-clause em código interno fica DE FORA d
 - B) Intervenção no dano → IModificaDanoRecebido FEITO (o `DeveAgir` foi REMOVIDO na unificação
   do ignorar — jul/2026; a decisão virou 1 gate de lista no ReceberDano).
 - E) Bloqueio de aplicação → IBloqueiaStatus FEITO.
-- C) Stat sob demanda → IContribui* (BuffDefesa/ReducaoDefesa já espelhados). PENDENTE.
-- D) Comportamento de turno (Medo/Preso/Irritar) → PENDENTE, baixa prioridade. Medo com grau,
-  Preso como família futura, Irritar fica de fora. NÃO desenhar até os efeitos pedirem.
+- C) Stat sob demanda → IContribui* (BuffDefesa/ReducaoDefesa já espelhados). PENDENTE (FILA A #6).
+- D) Comportamento de turno (Medo/Preso/Irritar) → PENDENTE (FILA A #7). Medo com grau, Preso como
+  família futura, Irritar fica de fora. (Antes era "não desenhar até pedir"/YAGNI; Gabriel decidiu
+  jul/2026 fazer mesmo assim — sair do "em espera" pra fila ativa.)
 
 ### Helper ColetarReacoes<T> (dívida de repetição)
 **Status:** dívida registrada. O padrão "varre StatusAtivos.OfType<T> + ColetarPassivasReativas<T>"
@@ -681,15 +744,22 @@ métodos está correta; só o loop interno é repetido.
 aparecem na tela — não-testáveis hoje. Conecta com o test bed (modo Versus).
 
 ### Testes automatizados (xUnit na lógica de domínio)
-**Status:** ADIADO CONSCIENTE (Gabriel, jul/2026 — nunca usou xUnit, prefere não parar o embalo
-agora). Não esquecido: é o maior diferencial de portfólio e a rede de segurança dos refactors
-(os bugs sérios — StackOverflow de proteção mútua, crítico-exige-dano, dispatch dual-source —
-foram achados por raciocínio, não por teste). **On-ramp pra quando quiser:** o 1º teste verde
-leva ~15 min guiado, começando pela ordem crítica de morte (Guarda→Vilão→Necromancia) e pelo
-ReceberDano — os pontos onde bug já apareceu.
+**Status:** ✅ **xUnit JÁ RODA** — o projeto `Tests/` existe com `MotorDeHabilidadesTests.cs` +
+`NavegacaoTests.cs` (~30 testes verdes, somados facção a facção durante o sweep). A antiga nota
+"nunca usou xUnit / adiado" ficou desatualizada (drift corrigido jul/2026). O que segue **PENDENTE
+(FILA A #12) é AMPLIAR a cobertura** pra além do motor/navegação: a **ordem crítica de morte**
+(Guarda→Vilão→Necromancia) e o `ReceberDano` ponta-a-ponta — os pontos onde bug sério já apareceu
+(StackOverflow de proteção mútua, crítico-exige-dano, dispatch dual-source). É a rede de segurança
+antes do Rebalanceamento e diferencial de portfólio.
 
-### Persistência — arquivo → SQL (futuro web)
-**Status:** FUTURO (web 2027). Isolar persistência atrás de repositório. YAGNI até a web.
+### Persistência — porta `IRepositorioDeSave` (Steam/Play cloud save, NÃO SQL)
+**Status:** REANCORADO (jul/2026). O SQL/servidor-próprio foi **DESCARTADO** (Unity single-player).
+O save fica **local** (JSON em `Save/`), mas precisa sincronizar com **Steam Cloud** e **Google Play
+Saved Games** — que são **SDK de plataforma, não backend seu** (Steam Auto-Cloud = arquivos locais
+sincronizados sozinhos; Play = API de Snapshots). O que isso pede: **isolar a persistência atrás de
+uma porta `IRepositorioDeSave`** (`FILA A #5`) com `SaveLocal` (JSON, feita agora, no console);
+`SaveSteam`/`SavePlayGames` plugam no porte (`FILA B`, precisam dos plugins Unity). SQL/REST só
+reabrem se um dia quiser contas/ranking/servidor próprio.
 
 ### Services-lookup (cosmético, baixa prioridade)
 **Status:** observado, sem dor. FaccaoService/CampanhaService são tabelas. Candidatos a virar
@@ -740,10 +810,11 @@ Aguardar(ms)` reage e lança `BatalhaAbortada`, capturada em `ExecutarFase` → 
 cadeia profunda sem threading de flag). **Escopo:** só nas ESPERAS (a dor real); Esc-nos-menus-de-ação
 fica como follow-up trivial. Não testável headless → verificação em jogo do Gabriel.
 
-### EventoDano por ID (desacoplar dos objetos vivos)
-**Status:** registrado, sem data. O `EventoDano` carrega hoje `Combate Atacante`/`Combate Alvo`
-(objetos vivos). Pra ser um registro limpo do golpe (log/stream desacoplado), referenciaria por
-id/nome. Mudança real; fazemos quando for natural. (Não é "web/2027" — é quando der.)
+### EventoDano por ID (desacoplar dos objetos vivos) — FILA B
+**Status:** registrado (FILA B, junto da camada de eventos do porte). O `EventoDano` carrega hoje
+`Combate Atacante`/`Combate Alvo` (objetos vivos). Pra ser um registro limpo do golpe (log/stream
+desacoplado que a apresentação Unity consome), referenciaria por id/nome. Converge com
+`Encapsular coleções → choke-point de evento`. Fazemos no porte.
 
 ### IModificaDanoCausado (modificador de dano do atacante)
 **Status:** follow-on da Composição de Ações. A ação `Dano` passa a consultar modificadores do
@@ -794,7 +865,7 @@ tudo estabilizar.
   Os 4 métodos de reação recebem os times; ProcessarReacoesAlvo inverte a perspectiva.
 - **EventoDano (Fatia 1):** ResultadoAtaque convergiu em EventoDano (record rico do golpe).
   ReceberDano retorna (Efetivo, AbsorvidoPeloEscudo). Atacar monta o evento. Base da exibição
-  rica/web (Propósito B).
+  rica no porte (Propósito B).
 - **Unificação do ignorar (✅ jul/2026):** a natureza virou lista (`NaturezaDano.Ignora`), o
   `DeveAgir` foi REMOVIDO (interface + 6 impl), o ReceberDano ficou com 1 gate de lista só
   (natureza ∪ golpe ∪ champ). Anti-StackOverflow de proteção mútua agora estrutural
@@ -819,8 +890,8 @@ tudo estabilizar.
 ## NÃO FAZER (decisões conscientes de NÃO refatorar)
 
 - ~~**Separar mensagens de combate do MenuService.**~~ REVERTIDO — foi FEITO (jul/2026): o
-  `MenuService` virou `MenuView` + `CombateView`. A razão antiga ("morre na web") caiu porque a
-  camada View é justamente o que se troca no porte web; separar deu organização + o seam do front.
+  `MenuService` virou `MenuView` + `CombateView`. A razão antiga ("morre no porte") caiu porque a
+  camada View é justamente o que se troca no porte Unity; separar deu organização + o seam do front.
 - **Centralizar descrições das habilidades.** A descrição mora na habilidade (coesão correta).
 - **try-catch no núcleo de combate.** Domínio controlado; exceção lá seria bug mascarado.
 - **Refatorar as ativas preventivamente.** Só se a auditoria achar dor real.

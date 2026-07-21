@@ -74,7 +74,10 @@
    `StatusEffect.DuracaoRestante`; params de status → `duracao`, de habilidade → `cooldown`. Achado:
    `StatusEffect.Turnos` estava MORTO (setado, nunca lido) → deletado. "Turno"/`PassarTurno`/
    `AoIniciarTurno`/`TurnoDoPersonagem` preservados (o turno de verdade).
-5. **Services-lookup** — `FaccaoService`/`CampanhaService` viram dado. Cosmético.
+5. ✅ **Services-lookup** — `FaccaoService`/`CampanhaService` (tabelas puras injetadas) viraram DADO
+   estático (`Models/Faccoes.cs`, `Models/Campanha.cs`), fora do grafo de DI. Achado: `ObterNome` era
+   MORTO **e** duplicava o `[Description]` do enum `Faccao` (que o `Helper.GetDescricao` já lê) →
+   deletado; sobrou só o Símbolo. Program.cs enxugou 2 instâncias + args de 3 ctors.
 6. **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — extrair o IO de arquivo
    (hoje em `CapitulosService`/`ArsenalService`) pra trás de uma porta; JSON = `SaveLocal`.
    Habilita Steam/Play plugarem no porte sem cirurgia. Seam future-facing (Steam+Play já
@@ -823,8 +826,9 @@ uma porta `IRepositorioDeSave`** (`FILA A #5`) com `SaveLocal` (JSON, feita agor
 reabrem se um dia quiser contas/ranking/servidor próprio.
 
 ### Services-lookup (cosmético, baixa prioridade)
-**Status:** observado, sem dor. FaccaoService/CampanhaService são tabelas. Candidatos a virar
-dados. Fazer só se incomodar.
+**Status:** ✅ **FEITO (FILA A #5, jul/2026).** `FaccaoService`→`Models/Faccoes.cs` (estático, só o
+Símbolo — o Nome já vive no `[Description]` do enum); `CampanhaService`→`Models/Campanha.cs` (estático).
+Saíram da DI; `ObterNome` morto+duplicado deletado. Base natural pra virar ScriptableObject no porte.
 
 ### Faxina de nomes (rename do repo/namespace) + organização de camadas
 **Status:** ✅ **FEITO** o rename do `v1` — namespace `v1_Apostle_s_War` → `ApostlesWar`,

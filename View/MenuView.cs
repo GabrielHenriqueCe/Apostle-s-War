@@ -13,16 +13,14 @@ namespace ApostlesWar.View
     /// </summary>
     internal class MenuView
     {
-        private readonly FaccaoService _faccaoService;
         private readonly ArsenalService _arsenalService;
         private readonly CapitulosService _capitulosService;
         private readonly IEntrada _entrada;
         private readonly IApresentacao _apresentacao;
 
-        public MenuView(FaccaoService faccaoService, ArsenalService arsenalService, CapitulosService capitulosService,
+        public MenuView(ArsenalService arsenalService, CapitulosService capitulosService,
             IEntrada entrada, IApresentacao apresentacao)
         {
-            _faccaoService = faccaoService;
             _arsenalService = arsenalService;
             _capitulosService = capitulosService;
             _entrada = entrada;
@@ -134,7 +132,7 @@ namespace ApostlesWar.View
                     icone = " ☑️  ";
 
                 string cursor = selecionado == i + 1 ? "▶" : " ";
-                Console.WriteLine($"{cursor} {(int)faccao} - {icone} {_faccaoService.ObterSimbolo(faccao)}  {Helper.GetDescricao(faccao)}");
+                Console.WriteLine($"{cursor} {(int)faccao} - {icone} {Faccoes.Simbolo(faccao)}  {Helper.GetDescricao(faccao)}");
             }
             Console.WriteLine("\nEsc - Voltar");
         }

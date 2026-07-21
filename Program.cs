@@ -16,18 +16,16 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 var capitulosService = new CapitulosService();
 var arsenalService = new ArsenalService(capitulosService);
-var campanhaService = new CampanhaService();
 var personagemService = new PersonagemService();
-var faccaoService = new FaccaoService();
 var selecaoDeAlvoService = new SelecaoDeAlvoService();
 var entrada = new EntradaConsole();                 // porta de ENTRADA (trocar por EntradaWeb/Unity no porte)
 var apresentacao = new ApresentacaoConsole();       // porta de SAÍDA (par do entrada)
-var menuView = new MenuView(faccaoService, arsenalService, capitulosService, entrada, apresentacao);
+var menuView = new MenuView(arsenalService, capitulosService, entrada, apresentacao);
 var combateView = new CombateView(entrada);
-var campeoesService = new CampeoesService(personagemService, campanhaService, menuView, capitulosService);
+var campeoesService = new CampeoesService(personagemService, menuView, capitulosService);
 var controladorJogador = new ControladorJogador(combateView, entrada);   // trocar por controlador automático liga o modo auto
 var controladorBot = new ControladorBot(selecaoDeAlvoService);
-var combateService = new CombateService(arsenalService, campanhaService, campeoesService, personagemService, combateView, selecaoDeAlvoService, controladorJogador, controladorBot, apresentacao);
+var combateService = new CombateService(arsenalService, campeoesService, personagemService, combateView, selecaoDeAlvoService, controladorJogador, controladorBot, apresentacao);
 new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, menuView, combateService, entrada).Executar();
 
 #endregion

@@ -85,12 +85,17 @@
    `itens.txt` (compat). **Aviso de save-corrompido DROPADO** (corrompido → default silencioso). Os 2
    `Console.WriteLine`+`Thread.Sleep` dos fallbacks (dívida do #3) morreram → **`Services/` inteiro
    ficou Console-free.** Steam/Play plugam no porte (FILA B) trocando só a impl.
-7. **Log de combate + estatísticas de fim de batalha** *(pedido do Gabriel, jul/2026)* —
-   acumular os `EventoDano` da partida (o fato do golpe já existe; hoje é jogado fora) e
-   exibir no fim da batalha: **dano causado / dano recebido / cura POR PERSONAGEM**.
-   Paga 3x: feature de UX, ferramenta de debug do REBALANCEAMENTO (item 16), e embrião do
-   log/stream que a FILA B consome. (Curas hoje não geram evento — o log pode nascer só de
-   dano e crescer, ou nascer com um EventoCura irmão; decidir no design do item.)
+7. **Estatísticas de fim de batalha + cura/DoT visíveis** *(pedido do Gabriel, jul/2026)* —
+   **7a ✅ FEITO:** `Combate` acumula `DanoCausado`/`DanoRecebido`/`CuraRecebida` nos funis únicos
+   (`ReceberDano` pega ataque+veneno+queima+explosão; `AplicarCura` a cura); tela de **resumo de fim
+   de batalha** por personagem do time (`CombateView.ExibirResumoBatalha`); **TaxaCrit/DanoCrit ao
+   vivo** na tela de combate (🎯%/💥x — absorve o item #11). Sem tocar no canal de eventos do motor.
+   **7b PENDENTE (superfície larga, PR próprio):** cura vira `EventoCura` (irmão do `EventoDano`) e
+   **veneno/queima/cura ficam VISÍVEIS com mensagem durante o combate** (ideia do Gabriel: no início
+   do turno, estado → pausa → "☠️ Veneno causou X" com o HP caindo), seguindo o MESMO padrão de
+   mensagem que já existe (`ExibirResultadoAtaque`). O DoT reusa `EventoDano`+display existente; só a
+   cura toca a assinatura compartilhada das ~15 Ações (por isso é PR à parte). Embrião do log/stream
+   da FILA B.
 8. **Capacidade C — stat sob demanda (`IContribui*`)** — generalizar pros outros stats.
 9. **Capacidade D — comportamento de turno** (Medo/Preso/Irritar como família).
 10. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado
@@ -806,8 +811,9 @@ de cura no `ExibirResultadosReacao` (conferir no item 7 se reações que curam j
 envelheceu).
 
 ### Observabilidade — exibir TaxaCrit/DanoCrit na UI de combate
-**Status:** dívida, pré-requisito de teste. OlhoClinico/Virus mexem em TaxaCrit/DanoCrit, que NÃO
-aparecem na tela — não-testáveis hoje. Conecta com o test bed (modo Versus).
+**Status:** ✅ **FEITO (absorvido pela FILA A #7a, jul/2026).** TaxaCrit/DanoCrit agora aparecem na
+`CombateView.ExibirPartida` (🎯%/💥x) e no resumo de fim de batalha. OlhoClinico/Virus (que mexem
+nesses stats) viraram observáveis ao vivo.
 
 ### Testes automatizados (xUnit na lógica de domínio)
 **Status:** ✅ **xUnit JÁ RODA** — o projeto `Tests/` existe com `MotorDeHabilidadesTests.cs` +

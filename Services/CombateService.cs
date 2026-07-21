@@ -534,6 +534,7 @@ namespace ApostlesWar.Services
             {
                 bool venceu = ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)
                            && ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
+                _combateView.ExibirResumoBatalha(jogador);   // resumo (vitória ou derrota; não em abandono)
                 return venceu ? ResultadoFase.Venceu : ResultadoFase.Perdeu;
             }
             catch (BatalhaAbortada)

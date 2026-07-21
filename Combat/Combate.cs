@@ -50,6 +50,13 @@ namespace ApostlesWar
         /// </summary>
         public int HPMaximoReduzidoTotal { get; private set; }
 
+        // === Estatísticas da batalha (acumuladas na fase, pro resumo de fim) ===
+        // Somadas nos funis únicos: dano em ReceberDano (pega ataque, veneno, queima, explosão),
+        // cura em AplicarCura. Os Jogador são recriados por fase, então zeram naturalmente.
+        public int DanoCausado { get; private set; }
+        public int DanoRecebido { get; private set; }
+        public int CuraRecebida { get; private set; }
+
         // === Camadas de Ataque (stat calculado) ===
         // AtaqueBase: valor cru do personagem, imutável na fase.
         // MultiplicadorAtaque: multiplicador de fase (jogador=1.0, inimigo=mult da fase).
@@ -344,6 +351,10 @@ namespace ApostlesWar
 
             HPAtual -= danoFinal;
 
+            // Estatísticas do resumo: este é o funil único de todo dano.
+            DanoRecebido += danoFinal;
+            if (atacante != null) atacante.DanoCausado += danoFinal;
+
             // Invariante: HP <= 0 ⟺ Morto. A transição mora aqui (ponto único de dano —
             // ataque, Veneno, Queima, explosão, todos passam por ReceberDano), colada à
             // mudança de HP, pra nunca dessincronizar. As REAÇÕES de morte (Vilão,
@@ -435,7 +446,12 @@ namespace ApostlesWar
         /// Aplica a cura no HP. Chamado pelo estado Vivo. Não checar estado aqui —
         /// quem decide se cura é o EstadoVida.
         /// </summary>
-        public void AplicarCura(int valor) => HPAtual = Math.Min(HPMaximo, HPAtual + valor);
+        public void AplicarCura(int valor)
+        {
+            int antes = HPAtual;
+            HPAtual = Math.Min(HPMaximo, HPAtual + valor);
+            CuraRecebida += HPAtual - antes;   // funil único de cura (só conta o que de fato entrou)
+        }
 
         /// <summary>
         /// Aplica o revive: define o HP e transiciona Morto → Vivo. Chamado pelo estado

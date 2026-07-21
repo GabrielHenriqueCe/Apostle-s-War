@@ -13,6 +13,13 @@ namespace ApostlesWar.View
         private readonly IEntrada _entrada;
 
         public CombateView(IEntrada entrada) => _entrada = entrada;
+
+        /// <summary>
+        /// Limpa a tela da partida. Mora aqui (o adapter de console do combate) pra que nenhum
+        /// Console.* vaze pro CombateService/Controlador — no porte Unity, é só uma troca de View.
+        /// </summary>
+        public void LimparTela() => Console.Clear();
+
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)
         {
             Console.WriteLine("Seu time:");

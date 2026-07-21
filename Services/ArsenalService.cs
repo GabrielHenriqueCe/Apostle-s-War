@@ -11,16 +11,13 @@ namespace ApostlesWar.Services
         #region Construtor
 
         private readonly CapitulosService _capitulosService;
+        private readonly IRepositorioDeSave _repo;
 
         // 7 slots de equipamento (um por fase), null = vazio
         private Item?[] equipados = new Item?[7];
 
         // Itens obtidos ao longo da campanha
         private List<Item> obtidos = new List<Item>();
-
-        // Itens equipados salvos na pasta Save/ ao lado do executável (ver CapitulosService.CaminhoSave).
-        private static readonly string CaminhoItens =
-            Path.Combine(AppContext.BaseDirectory, "Save", "itens.txt");
 
         #endregion
 
@@ -64,32 +61,22 @@ namespace ApostlesWar.Services
             return item;
         }
 
-        public ArsenalService(CapitulosService capitulosService)
+        public ArsenalService(CapitulosService capitulosService, IRepositorioDeSave repo)
         {
             _capitulosService = capitulosService;
+            _repo = repo;
         }
 
         /// <summary>
-        /// Restaura os itens equipados a partir do arquivo salvo anteriormente
+        /// Restaura os itens equipados do save. Ausente/corrompido → mantém os slots vazios (a porta
+        /// devolve null). A cópia é elemento-a-elemento pelo guard de tamanho.
         /// </summary>
         public void CarregarItensEquipados()
         {
-            if (!File.Exists(CaminhoItens)) return;
-
-            try
-            {
-                var json = File.ReadAllText(CaminhoItens);
-                var lista = JsonSerializer.Deserialize<Item?[]>(json);
-                if (lista != null)
-                    for (int i = 0; i < lista.Length && i < equipados.Length; i++)
-                        equipados[i] = lista[i];
-            }
-            catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
-            {
-                // Itens corrompidos ou ilegíveis: mantém os slots vazios (default) em vez de crashar.
-                Console.WriteLine("⚠️ Não foi possível carregar os itens equipados (arquivo inválido).");
-                Thread.Sleep(2000);
-            }
+            var lista = _repo.Carregar<Item?[]>("itens");
+            if (lista != null)
+                for (int i = 0; i < lista.Length && i < equipados.Length; i++)
+                    equipados[i] = lista[i];
         }
 
         /// <summary>
@@ -140,14 +127,9 @@ namespace ApostlesWar.Services
         }
 
         /// <summary>
-        /// Serializa e persiste os itens equipados em arquivo para restauração futura
+        /// Persiste os itens equipados para restauração futura.
         /// </summary>
-        public void SalvarItens()
-        {
-            var json = JsonSerializer.Serialize(equipados);
-            Directory.CreateDirectory(Path.GetDirectoryName(CaminhoItens)!);
-            File.WriteAllText(CaminhoItens, json);
-        }
+        public void SalvarItens() => _repo.Salvar("itens", equipados);
 
         #endregion
     }

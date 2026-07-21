@@ -30,11 +30,9 @@ namespace ApostlesWar.Services
             new List<bool> { false, false, false, false, false, false, false }, false),
         };
 
-        // Save "vivo": gravado na pasta Save/ ao lado do executável (AppContext.BaseDirectory),
-        // não em caminho relativo — assim independe da working directory (VS x dotnet run) e
-        // sempre bate com a semente Save/ que o csproj copia pra saída no build.
-        private static readonly string CaminhoSave =
-            Path.Combine(AppContext.BaseDirectory, "Save", "save.txt");
+        private readonly IRepositorioDeSave _repo;
+
+        public CapitulosService(IRepositorioDeSave repo) => _repo = repo;
 
         Capitulo ObterCapitulo(Faccao faccao)
         {
@@ -72,12 +70,7 @@ namespace ApostlesWar.Services
             }
         }
 
-        public void SalvarProgresso()
-        {
-            var json = JsonSerializer.Serialize(capitulos);
-            Directory.CreateDirectory(Path.GetDirectoryName(CaminhoSave)!);
-            File.WriteAllText(CaminhoSave, json);
-        }
+        public void SalvarProgresso() => _repo.Salvar("save", capitulos);
 
         public List<Capitulo> ObterTodos() => capitulos;
 
@@ -88,29 +81,16 @@ namespace ApostlesWar.Services
         }
 
         /// <summary>
-        /// Carrega o progresso salvo em arquivo, restaurando capítulos, campeões desbloqueados e itens obtidos
+        /// Carrega o progresso salvo, restaurando os capítulos. Save ausente/corrompido → mantém o
+        /// progresso inicial (default em memória): a porta devolve null e o jogo abre do zero.
         /// </summary>
         public void CarregarProgresso()
         {
-            if (!File.Exists(CaminhoSave)) return;
-
-            try
+            var lista = _repo.Carregar<List<Capitulo>>("save");
+            if (lista != null)
             {
-                var json = File.ReadAllText(CaminhoSave);
-                var lista = JsonSerializer.Deserialize<List<Capitulo>>(json);
-
-                if (lista != null)
-                {
-                    capitulos.Clear();
-                    capitulos.AddRange(lista);
-                }
-            }
-            catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
-            {
-                // Save corrompido ou ilegível: mantém o progresso inicial (default em memória)
-                // em vez de crashar. O jogador recomeça do zero, mas o jogo abre.
-                Console.WriteLine("⚠️ Não foi possível carregar o progresso salvo (save inválido). Iniciando do começo.");
-                Thread.Sleep(2000);
+                capitulos.Clear();
+                capitulos.AddRange(lista);
             }
         }
         public bool CapituloConcluido(Faccao faccao)

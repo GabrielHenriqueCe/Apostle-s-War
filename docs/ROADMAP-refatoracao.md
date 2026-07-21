@@ -64,8 +64,8 @@
 3. ✅ **Faxina de seams restantes** *(auditoria jul/2026)* — os 2 `Console.Clear` fora da View
    (`CombateService.ExecutarTurno`, `ControladorJogador`) viraram `CombateView.LimparTela()`
    (mora no adapter de console do combate, onde os outros `Console.*` já estavam). Os avisos de
-   save com `Console.WriteLine`+`Thread.Sleep` nos services ficam pro item 6 (a porta tira o IO
-   de lá). `Program.cs` `Console.OutputEncoding` deixado de propósito (bootstrap do composition
+   save com `Console.WriteLine`+`Thread.Sleep` nos services ✅ **morreram no #6** (a porta levou o IO
+   e o aviso foi dropado). `Program.cs` `Console.OutputEncoding` deixado de propósito (bootstrap do composition
    root — o ponto que sabe que é app de console; descartado no porte Unity).
 4. ✅ **Identidade comum + libertar "Turno"** — base `ElementoDeJogo` (Nome/Símbolo/Descrição)
    herdada por `Habilidade` e `StatusEffect`. **De quebra (pedido do Gabriel): o homônimo `Turnos`
@@ -78,11 +78,13 @@
    estático (`Models/Faccoes.cs`, `Models/Campanha.cs`), fora do grafo de DI. Achado: `ObterNome` era
    MORTO **e** duplicava o `[Description]` do enum `Faccao` (que o `Helper.GetDescricao` já lê) →
    deletado; sobrou só o Símbolo. Program.cs enxugou 2 instâncias + args de 3 ctors.
-6. **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — extrair o IO de arquivo
-   (hoje em `CapitulosService`/`ArsenalService`) pra trás de uma porta; JSON = `SaveLocal`.
-   Habilita Steam/Play plugarem no porte sem cirurgia. Seam future-facing (Steam+Play já
-   nomeados), mesmo padrão de `IEntrada`/`IApresentacao`. Inclui matar o Console/Sleep dos
-   fallbacks de save (o aviso vira responsabilidade de quem chama, não do service).
+6. ✅ **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — o IO de arquivo saiu de
+   `CapitulosService`/`ArsenalService` pra trás da porta (`Services/IRepositorioDeSave.cs`). **Corte
+   typed:** a porta é dona do JSON + IO + tratamento de corrupção; os services entregam/recebem OBJETO
+   (`_repo.Salvar("save", capitulos)` / `_repo.Carregar<List<Capitulo>>("save")`). `chave`→`save.txt`/
+   `itens.txt` (compat). **Aviso de save-corrompido DROPADO** (corrompido → default silencioso). Os 2
+   `Console.WriteLine`+`Thread.Sleep` dos fallbacks (dívida do #3) morreram → **`Services/` inteiro
+   ficou Console-free.** Steam/Play plugam no porte (FILA B) trocando só a impl.
 7. **Log de combate + estatísticas de fim de batalha** *(pedido do Gabriel, jul/2026)* —
    acumular os `EventoDano` da partida (o fato do golpe já existe; hoje é jogado fora) e
    exibir no fim da batalha: **dano causado / dano recebido / cura POR PERSONAGEM**.
@@ -817,11 +819,11 @@ aparecem na tela — não-testáveis hoje. Conecta com o test bed (modo Versus).
 antes do Rebalanceamento e diferencial de portfólio.
 
 ### Persistência — porta `IRepositorioDeSave` (Steam/Play cloud save, NÃO SQL)
-**Status:** REANCORADO (jul/2026). O SQL/servidor-próprio foi **DESCARTADO** (Unity single-player).
-O save fica **local** (JSON em `Save/`), mas precisa sincronizar com **Steam Cloud** e **Google Play
-Saved Games** — que são **SDK de plataforma, não backend seu** (Steam Auto-Cloud = arquivos locais
-sincronizados sozinhos; Play = API de Snapshots). O que isso pede: **isolar a persistência atrás de
-uma porta `IRepositorioDeSave`** (`FILA A #5`) com `SaveLocal` (JSON, feita agora, no console);
+**Status:** ✅ **PORTA FEITA (FILA A #6, jul/2026)** — `Services/IRepositorioDeSave.cs` (corte typed:
+dona do JSON+IO+corrupção) + `SaveLocal`. O SQL/servidor-próprio foi **DESCARTADO** (Unity
+single-player). O save fica **local** (JSON em `Save/`), mas precisa sincronizar com **Steam Cloud** e
+**Google Play Saved Games** — que são **SDK de plataforma, não backend seu** (Steam Auto-Cloud =
+arquivos locais sincronizados sozinhos; Play = API de Snapshots). Falta só:
 `SaveSteam`/`SavePlayGames` plugam no porte (`FILA B`, precisam dos plugins Unity). SQL/REST só
 reabrem se um dia quiser contas/ranking/servidor próprio.
 

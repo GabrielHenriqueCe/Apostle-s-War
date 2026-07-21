@@ -14,8 +14,9 @@ using ApostlesWar.Controllers;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-var capitulosService = new CapitulosService();
-var arsenalService = new ArsenalService(capitulosService);
+var repositorioDeSave = new SaveLocal();             // porta de PERSISTÊNCIA (trocar por SaveSteam/SavePlayGames no porte)
+var capitulosService = new CapitulosService(repositorioDeSave);
+var arsenalService = new ArsenalService(capitulosService, repositorioDeSave);
 var personagemService = new PersonagemService();
 var selecaoDeAlvoService = new SelecaoDeAlvoService();
 var entrada = new EntradaConsole();                 // porta de ENTRADA (trocar por EntradaWeb/Unity no porte)

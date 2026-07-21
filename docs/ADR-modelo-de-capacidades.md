@@ -176,8 +176,8 @@ arquitetura, são de execução)
 O ContextoReacao atual (Portador, Outro, DanoCausado, Natureza) é magro. Casos
 como Sushiman (FoiCritico, Aliados) pedem mais. O EventoDano — registro rico de
 um evento de dano (bruto, efetivo, absorvido, crítico, atacante, alvo,
-natureza) — é a evolução natural do ContextoReacao, e alimenta também a futura
-versão web (front-end consome eventos). A fila de eventos (Forma 3, adiada no
+natureza) — é a evolução natural do ContextoReacao, e alimenta também o porte
+Unity (a apresentação consome eventos). A fila de eventos (Forma 3, adiada no
 C6) nasce junto com o EventoDano. O revide hoje usa Forma 1 (recursão de
 profundidade 1, segura pela natureza Revide) e migra pra fila quando o
 EventoDano vier.

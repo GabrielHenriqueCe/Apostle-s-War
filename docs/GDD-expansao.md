@@ -1,7 +1,8 @@
-# Apostle's War — GDD da Expansão (Pós-Web)
+# Apostle's War — GDD da Expansão (Pós-Porte)
 
 > **Status:** Ideias registradas, NÃO implementar no console.
-> Destino: expansão pós-lançamento da versão web.
+> Destino: expansão pós-lançamento do porte **Unity** (single-player, save local
+> sincronizado por Steam Cloud / Google Play — SDK de plataforma, não backend próprio).
 > Última atualização: julho/2026.
 
 ---
@@ -15,16 +16,16 @@ progressão persistente.
 
 A ordem de desenvolvimento planejada é:
 
-1. **Console jogável** — completar habilidades de todas as facções (MVP jogável)
-2. **Modo auto-battle** — automação de combate no console
-3. **Web port** — mesmo jogo, React + .NET API (peça principal de portfólio)
-4. **Expansão (pós-web)** — tudo que está neste documento
+1. **Console jogável** — completar habilidades de todas as facções (MVP jogável) ✅
+2. **Back organizacional** — sweep de facções, motor, camadas, seams ✅ (ver ROADMAP)
+3. **Porte Unity** — mesmo domínio C# plugado no Unity (peça principal de portfólio)
+4. **Expansão (pós-porte)** — tudo que está neste documento
 
-A razão de tudo isto ser "pós-web" e não "console": cada sistema aqui exige
-persistência séria (banco de dados, inventário, tracking de XP, instâncias
-únicas de item) e uma interface visual rica (grids coloridos de raridade,
-telas de evolução, comparação de sub-stats). O console não comporta isso sem
-virar um segundo jogo.
+A razão de tudo isto ser "pós-porte" e não "console": cada sistema aqui exige
+persistência mais rica (inventário, tracking de XP, instâncias únicas de item —
+local via save/SQLite, sincronizado por Steam/Play) e uma interface visual rica
+(grids coloridos de raridade, telas de evolução, comparação de sub-stats). O
+console não comporta isso sem virar um segundo jogo.
 
 ---
 
@@ -266,7 +267,7 @@ volta o bug de timing, e aí valeria fazer o HP em camadas. Até lá, YAGNI.
 
 ---
 
-## 6. Modo Arena (Pós-Web)
+## 6. Modo Arena (Pós-Porte)
 
 > **Status:** Direção fechada; regras concretas a-definir em playtest.
 > Não implementar no console — exige persistência de run, UI de draft e
@@ -336,17 +337,18 @@ Esta é a conexão entre a mecânica de morte (fio técnico) e o design da Arena
 
 ---
 
-## 9. Modo Automático (ideia jul/2026 — NEAR-TERM, pré-web)
+## 9. Modo Automático (ideia jul/2026 — NEAR-TERM)
 
-> Diferente do resto deste GDD (que é pós-web): o auto-battle é o **passo 2 do roadmap de dev**
-> (ver topo). Fica aqui como spec, mas é near-term. **Pré-requisito PARCIALMENTE FEITO:** o refactor
-> do `ExecutarTurno` separou o CONTROLE (quem decide ação/alvo) da execução via `IControladorDeTurno`
-> (jul/2026) — o auto-mode é só um `ControladorAutomatico` novo trocado no composition root, sem tocar
-> no loop. Falta: a implementação do controlador automático + o balanceamento da base.
+> Diferente do resto deste GDD (que é pós-porte): o auto-battle é near-term e cabe já no console
+> ou no Unity. **Pré-requisito PARCIALMENTE FEITO:** o refactor do `ExecutarTurno` separou o CONTROLE
+> (quem decide ação/alvo) da execução via `IControladorDeTurno` (jul/2026) — o auto-mode é só um
+> `ControladorAutomatico` novo trocado no composition root, sem tocar no loop. Falta: a implementação
+> do controlador automático + o balanceamento da base.
 
 - Botão **auto liga/desliga**; ao desligar, completa a ação atual e volta ao manual.
-- Implementação com **async/await**: uma `Task` roda o loop de turnos com `Task.Delay()`,
-  interrompida via `CancellationToken`.
+- Implementação: no console, um flag consultado entre turnos (como o cancelamento de batalha, Forma 1
+  — ver ROADMAP). No **Unity**, o natural é poll-por-frame/coroutine (não favorece `CancellationToken`).
+  O seam `IControladorDeTurno` já isola o auto-mode do loop nos dois casos.
 
 ---
 

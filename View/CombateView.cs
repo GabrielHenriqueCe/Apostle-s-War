@@ -27,7 +27,7 @@ namespace ApostlesWar.View
             {
                 string status = string.Join(" ", j.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.DuracaoRestante)}"));
                 string escudo = FormatarEscudo(j);
-                Console.WriteLine($"{j.Personagem.Simbolo} {j.Personagem.Nome} | HP:{j.HPAtual}{escudo} ATK:{j.Ataque} DEF:{j.Defesa} {status}");
+                Console.WriteLine($"{j.Personagem.Simbolo} {j.Personagem.Nome} | HP:{j.HPAtual}{escudo} ATK:{j.Ataque} DEF:{j.Defesa} 🎯{(int)(j.TaxaCrit * 100)}% 💥x{1 + j.DanoCrit:0.0} {status}");
             }
 
             Console.WriteLine("\nInimigos:");
@@ -36,9 +36,29 @@ namespace ApostlesWar.View
             {
                 string status = string.Join(" ", inimigo.StatusAtivos.Select(s => $"{s.Simbolo}{s.Nome} {ObterNumeroEmoji(s.DuracaoRestante)}"));
                 string escudo = FormatarEscudo(inimigo);
-                Console.WriteLine($"{i} - {inimigo.Personagem.Simbolo} {inimigo.Personagem.Nome} | HP:{inimigo.HPAtual}{escudo} ATK:{inimigo.Ataque} DEF:{inimigo.Defesa} {status}");
+                Console.WriteLine($"{i} - {inimigo.Personagem.Simbolo} {inimigo.Personagem.Nome} | HP:{inimigo.HPAtual}{escudo} ATK:{inimigo.Ataque} DEF:{inimigo.Defesa} 🎯{(int)(inimigo.TaxaCrit * 100)}% 💥x{1 + inimigo.DanoCrit:0.0} {status}");
                 i++;
             }
+        }
+
+        /// <summary>
+        /// Tela de resumo do fim da batalha: por personagem do time, o que ele fez (dano causado/
+        /// recebido, cura) + os stats finais. Só o time do jogador (os inimigos são por-rodada).
+        /// Espera Confirmar pra seguir.
+        /// </summary>
+        public void ExibirResumoBatalha(List<Combate> jogador)
+        {
+            Console.Clear();
+            Console.WriteLine("═══ RESUMO DA BATALHA ═══\n");
+            foreach (Combate c in jogador)
+            {
+                string estado = c.EstaVivo() ? "" : " ☠️";
+                Console.WriteLine($"{c.Personagem.Simbolo} {c.Personagem.Nome}{estado}");
+                Console.WriteLine($"   ⚔️ Dano causado: {c.DanoCausado}   🛡️ Dano recebido: {c.DanoRecebido}   💚 Cura: {c.CuraRecebida}");
+                Console.WriteLine($"   HP:{c.HPAtual}/{c.HPMaximo}  ATK:{c.Ataque}  DEF:{c.Defesa}  🎯{(int)(c.TaxaCrit * 100)}%  💥x{1 + c.DanoCrit:0.0}\n");
+            }
+            Console.WriteLine("Enter - Continuar");
+            while (_entrada.Ler().Tipo != TipoComando.Confirmar) { }
         }
 
         /// <summary>

@@ -14,7 +14,7 @@ namespace ApostlesWar.Champs.Reino
             Shuriken(), Kunai(), new Sorrateiro());
 
         static HabilidadeAtiva Shuriken() => new(
-            "Shuriken", "🌟", turnos: 3, "Ataca 1 inimigo 2x +50% ATK. Se o 1º hit for crítico, o 2º ignora 25% da DEF.",
+            "Shuriken", "🌟", cooldown: 3, "Ataca 1 inimigo 2x +50% ATK. Se o 1º hit for crítico, o 2º ignora 25% da DEF.",
             numeroDeAlvos: 2, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
@@ -23,12 +23,12 @@ namespace ApostlesWar.Champs.Reino
             });
 
         static HabilidadeAtiva Kunai() => new(
-            "Kunai", "🗡️", turnos: 4, "Intocável 2t. Ataca 1 inimigo +50% ATK, sempre crítico, ignora 75% DEF.",
+            "Kunai", "🗡️", cooldown: 4, "Intocável 2t. Ataca 1 inimigo +50% ATK, sempre crítico, ignora 75% DEF.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new AplicarBuff(() => new Intocavel(turnos: 2), Escopo.ProprioAtacante),
+                new AplicarBuff(() => new Intocavel(duracao: 2), Escopo.ProprioAtacante),
                 new Dano(1.5, ignorarDefesaPct: 0.75, forcaCritico: true),
             });
     }

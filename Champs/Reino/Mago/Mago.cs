@@ -16,7 +16,7 @@ namespace ApostlesWar.Champs.Reino
             BolaDeFogo(), Incendio(), new Piromancer());
 
         static HabilidadeAtiva BolaDeFogo() => new(
-            "Bola de Fogo", "🔥", turnos: 4, "Causa +100% ATK em 1 inimigo e aplica Queima (2t).",
+            "Bola de Fogo", "🔥", cooldown: 4, "Causa +100% ATK em 1 inimigo e aplica Queima (2t).",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
@@ -26,7 +26,7 @@ namespace ApostlesWar.Champs.Reino
             });
 
         static HabilidadeAtiva Incendio() => new(
-            "Incêndio", "🌋", turnos: 4, "Ataca todos os inimigos com +50% ATK.",
+            "Incêndio", "🌋", cooldown: 4, "Ataca todos os inimigos com +50% ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()

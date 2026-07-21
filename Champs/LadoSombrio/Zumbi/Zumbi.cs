@@ -18,7 +18,7 @@ namespace ApostlesWar.Champs.LadoSombrio
             VomitoToxico(), Putridao(), new PutrefacaoContagiosa());
 
         static HabilidadeAtiva VomitoToxico() => new(
-            "Vômito Tóxico", "🤢", turnos: 4, "Ataca todos e aplica Veneno (5% HP/turno por stack).",
+            "Vômito Tóxico", "🤢", cooldown: 4, "Ataca todos e aplica Veneno (5% HP/turno por stack).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -28,7 +28,7 @@ namespace ApostlesWar.Champs.LadoSombrio
             });
 
         static HabilidadeAtiva Putridao() => new(
-            "Putrefação", "💀", turnos: 4, "Ataca todos. Explode os Venenos causando o dano imediato. Cura 20% do dano causado.",
+            "Putrefação", "💀", cooldown: 4, "Ataca todos. Explode os Venenos causando o dano imediato. Cura 20% do dano causado.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()

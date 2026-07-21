@@ -21,7 +21,7 @@ namespace ApostlesWar.Champs.Apostolos
             if (!ctx.Contraparte.EstaVivo()) return new List<ResultadoReacao>();
             if (Random.Shared.NextDouble() >= ChancePreso) return new List<ResultadoReacao>();
 
-            new Preso(turnos: 1).Aplicar(ctx.Contraparte);
+            new Preso(duracao: 1).Aplicar(ctx.Contraparte);
 
             return new List<ResultadoReacao>
             {

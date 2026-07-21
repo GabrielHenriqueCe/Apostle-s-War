@@ -15,22 +15,22 @@ namespace ApostlesWar.Champs.Misticos
             Desejo(), Profecia(), new Realidade());
 
         static HabilidadeAtiva Desejo() => new(
-            "Desejo", "🪔", turnos: 3, "+30% DEF nos aliados (2t) e Maldição nos inimigos (2t).",
+            "Desejo", "🪔", cooldown: 3, "+30% DEF nos aliados (2t) e Maldição nos inimigos (2t).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarBuff(() => new BuffDefesa(turnos: 2, percentual: 0.30), Escopo.TodosAliados),
+                new AplicarBuff(() => new BuffDefesa(duracao: 2, percentual: 0.30), Escopo.TodosAliados),
                 new AplicarDebuff(() => new Maldicao(stacks: 2), Escopo.TodosInimigos),
             });
 
         static HabilidadeAtiva Profecia() => new(
-            "Profecia", "🔮", turnos: 3, "-30% DEF em todos os inimigos (2t) e ataca todos com +50% ATK.",
+            "Profecia", "🔮", cooldown: 3, "-30% DEF em todos os inimigos (2t) e ataca todos com +50% ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new AplicarDebuff(() => new ReducaoDefesa(turnos: 2)),
+                new AplicarDebuff(() => new ReducaoDefesa(duracao: 2)),
                 new Dano(1.5),
             });
     }

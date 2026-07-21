@@ -16,23 +16,23 @@ namespace ApostlesWar.Champs.Apostolos
             SacoDePresente(), FabricaDePresente(), new Surpresa());
 
         static HabilidadeAtiva SacoDePresente() => new(
-            "Saco de Presente", "🎅", turnos: 3, "Ataca todos +75% ATK + Medo. +25% ATK aliados (2t).",
+            "Saco de Presente", "🎅", cooldown: 3, "Ataca todos +75% ATK + Medo. +25% ATK aliados (2t).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new AplicarBuff(() => new BuffAtaque(turnos: 2, percentual: 0.25), Escopo.TodosAliados),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.TodosAliados),
                 new Dano(1.75),
-                new AplicarDebuff(() => new Medo(turnos: 1)),
+                new AplicarDebuff(() => new Medo(duracao: 1)),
             });
 
         static HabilidadeAtiva FabricaDePresente() => new(
-            "Fábrica de Presente", "🏭", turnos: 3, "Reduz DEF dos inimigos e ataca todos +75% ATK.",
+            "Fábrica de Presente", "🏭", cooldown: 3, "Reduz DEF dos inimigos e ataca todos +75% ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new AplicarDebuff(() => new ReducaoDefesa(turnos: 2)),
+                new AplicarDebuff(() => new ReducaoDefesa(duracao: 2)),
                 new Dano(1.75),
             });
     }

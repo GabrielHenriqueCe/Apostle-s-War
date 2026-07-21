@@ -16,7 +16,7 @@ namespace ApostlesWar.Champs.Apostolos
             Imitacao(), Copiando(), new Repetindo());
 
         static HabilidadeAtiva Imitacao() => new(
-            "Imitação", "🎭", turnos: 3, "Ataca todos. +25% ATK por buff ativo (cap 4).",
+            "Imitação", "🎭", cooldown: 3, "Ataca todos. +25% ATK por buff ativo (cap 4).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -25,7 +25,7 @@ namespace ApostlesWar.Champs.Apostolos
             });
 
         static HabilidadeAtiva Copiando() => new(
-            "Copiando", "📋", turnos: 4, "Rouba todos os buffs de um inimigo e ganha turno extra.",
+            "Copiando", "📋", cooldown: 4, "Rouba todos os buffs de um inimigo e ganha turno extra.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()

@@ -17,22 +17,22 @@ namespace ApostlesWar.Champs.Tecnologicos
             Abduzir(), Galaxia(), new CarapacaAlienigena());
 
         static HabilidadeAtiva Abduzir() => new(
-            "Abduzir", "🛸", turnos: 4, "Incapacita 2 inimigos aleatórios por 1 turno.",
+            "Abduzir", "🛸", cooldown: 4, "Incapacita 2 inimigos aleatórios por 1 turno.",
             numeroDeAlvos: 2, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarDebuff(() => new Preso(turnos: 1)),
+                new AplicarDebuff(() => new Preso(duracao: 1)),
             });
 
         static HabilidadeAtiva Galaxia() => new(
-            "Galáxia", "🌌", turnos: 4, "+30% DEF em todos. Outros aliados ficam protegidos pelo Alien.",
+            "Galáxia", "🌌", cooldown: 4, "+30% DEF em todos. Outros aliados ficam protegidos pelo Alien.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarBuff(() => new BuffDefesa(turnos: 2, percentual: 0.30), Escopo.TodosAliados),
-                new AplicarBuff(atacante => new ProtecaoAliado(atacante, turnos: 2, percentual: 0.30), Escopo.OutrosAliados),
+                new AplicarBuff(() => new BuffDefesa(duracao: 2, percentual: 0.30), Escopo.TodosAliados),
+                new AplicarBuff(atacante => new ProtecaoAliado(atacante, duracao: 2, percentual: 0.30), Escopo.OutrosAliados),
             });
     }
 }

@@ -14,8 +14,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class ContraAtaque : Buff, IReageAoSerAtacado
     {
-        public ContraAtaque(int turnos = 2)
-            : base("Contra-Ataque", "↩️", turnos, 0,
+        public ContraAtaque(int duracao = 2)
+            : base("Contra-Ataque", "↩️", duracao, 0,
                 "Contra-ataca ao ser atacado (1x por agressor, por turno).")
         { }
 

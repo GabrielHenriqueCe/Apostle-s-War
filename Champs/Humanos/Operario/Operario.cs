@@ -14,7 +14,7 @@ namespace ApostlesWar.Champs.Humanos
             ParedeDeTijolos(), new Marretada(), new InstintoDoOperario());
 
         static HabilidadeAtiva ParedeDeTijolos() => new(
-            "Parede de Tijolos", "🧱", turnos: 6, "Bloqueia 100% do dano de todos os aliados por 1 turno.",
+            "Parede de Tijolos", "🧱", cooldown: 6, "Bloqueia 100% do dano de todos os aliados por 1 turno.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()

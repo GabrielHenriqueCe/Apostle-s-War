@@ -102,7 +102,8 @@ VONTADE: o relógio não decide o que você faz na sua vez, só marca início e 
 - (Futuro C5b) o reset do "1x por agressor por turno".
 
 ### Fica no StatusEffect (é estado/mecanismo do próprio status, NÃO do turno):
-- `Turnos`, `TurnosRestantes` — a duração é DADO do status. Buffs decidem "maior
+- `DuracaoRestante` — a duração é DADO do status (renomeada de `TurnosRestantes` na FILA A #4,
+  jul/2026, pra libertar a palavra "Turno" do conceito de duração). Buffs decidem "maior
   duração prevalece"; debuffs stack (Veneno/Queima/Maldicao) sincronizam com
   Stacks. O Turno manda "passe seu turno"; o status decide o que isso significa
   pra ele.

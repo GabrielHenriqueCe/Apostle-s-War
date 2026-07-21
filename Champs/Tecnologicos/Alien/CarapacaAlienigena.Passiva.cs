@@ -18,7 +18,7 @@ namespace ApostlesWar.Champs.Tecnologicos
             if (!ctx.Portador.EstaVivo()) return new List<ResultadoReacao>();
 
             int pontos = (int)(ctx.Portador.HPMaximo * 0.05);
-            new Escudo(pontos, turnos: 1).Aplicar(ctx.Portador);
+            new Escudo(pontos, duracao: 1).Aplicar(ctx.Portador);
 
             return new List<ResultadoReacao>();
         }

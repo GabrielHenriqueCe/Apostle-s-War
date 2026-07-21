@@ -13,8 +13,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class BuffDefesa : Buff, IContribuiDefesa
     {
-        public BuffDefesa(int turnos = 2, double percentual = 0.30)
-            : base("DEF+", "🛡️", turnos, percentual, $"+{percentual * 100:F0}% DEF.") { }
+        public BuffDefesa(int duracao = 2, double percentual = 0.30)
+            : base("DEF+", "🛡️", duracao, percentual, $"+{percentual * 100:F0}% DEF.") { }
 
         public override void Aplicar(Combate alvo)
         {
@@ -24,7 +24,7 @@ namespace ApostlesWar.Skills.Buffs
             if (existente != null)
             {
                 if (Valor < existente.Valor) return;
-                if (Valor == existente.Valor && TurnosRestantes <= existente.TurnosRestantes) return;
+                if (Valor == existente.Valor && DuracaoRestante <= existente.DuracaoRestante) return;
                 alvo.StatusAtivos.Remove(existente);
             }
 

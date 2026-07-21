@@ -14,7 +14,7 @@ namespace ApostlesWar.Champs.Especial
             Descarga(), Desentupidor(), new Fedorento());
 
         static HabilidadeAtiva Descarga() => new(
-            "Descarga", "🚽", turnos: 3, "+150% ATK e aplica 5 stacks de Veneno.",
+            "Descarga", "🚽", cooldown: 3, "+150% ATK e aplica 5 stacks de Veneno.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
@@ -24,7 +24,7 @@ namespace ApostlesWar.Champs.Especial
             });
 
         static HabilidadeAtiva Desentupidor() => new(
-            "Desentupidor", "🪠", turnos: 3, "Ataca todos +50% ATK e aplica 2 stacks de Veneno.",
+            "Desentupidor", "🪠", cooldown: 3, "Ataca todos +50% ATK e aplica 2 stacks de Veneno.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()

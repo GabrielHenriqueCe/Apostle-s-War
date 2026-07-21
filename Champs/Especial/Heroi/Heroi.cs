@@ -15,22 +15,22 @@ namespace ApostlesWar.Champs.Especial
             SalvandoDia(), Super(), new Vigilante());
 
         static HabilidadeAtiva SalvandoDia() => new(
-            "Salvando o Dia", "🦸", turnos: 3, "Protege e +30% DEF em todos os aliados (2t).",
+            "Salvando o Dia", "🦸", cooldown: 3, "Protege e +30% DEF em todos os aliados (2t).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarBuff(() => new BuffDefesa(turnos: 2, percentual: 0.30), Escopo.TodosAliados),
-                new AplicarBuff(atk => new ProtecaoAliado(atk, turnos: 2, percentual: 0.30), Escopo.OutrosAliados),
+                new AplicarBuff(() => new BuffDefesa(duracao: 2, percentual: 0.30), Escopo.TodosAliados),
+                new AplicarBuff(atk => new ProtecaoAliado(atk, duracao: 2, percentual: 0.30), Escopo.OutrosAliados),
             });
 
         static HabilidadeAtiva Super() => new(
-            "Super", "💪", turnos: 3, "+25% ATK aos aliados e ataca todos +100% ATK.",
+            "Super", "💪", cooldown: 3, "+25% ATK aos aliados e ataca todos +100% ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new AplicarBuff(() => new BuffAtaque(turnos: 2, percentual: 0.25), Escopo.TodosAliados),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.TodosAliados),
                 new Dano(2.0),
             });
     }

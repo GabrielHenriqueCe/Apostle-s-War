@@ -11,8 +11,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class Sedento : Buff, IReageAoCausarDano
     {
-        public Sedento(int turnos = int.MaxValue, double percentual = 0.15)
-            : base("Sedento", "🩸", turnos, percentual,
+        public Sedento(int duracao = int.MaxValue, double percentual = 0.15)
+            : base("Sedento", "🩸", duracao, percentual,
                 $"Cura {percentual * 100:F0}% do dano causado.")
         { }
 

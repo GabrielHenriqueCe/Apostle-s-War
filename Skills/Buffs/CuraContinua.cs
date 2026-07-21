@@ -7,8 +7,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class CuraContinua : Buff
     {
-        public CuraContinua(int turnos = 1, double percentual = 0.10)
-            : base("Cura Contínua", "💚", turnos, percentual,
+        public CuraContinua(int duracao = 1, double percentual = 0.10)
+            : base("Cura Contínua", "💚", duracao, percentual,
                 $"Cura {percentual * 100:F0}% HP no início do turno.")
         { }
 

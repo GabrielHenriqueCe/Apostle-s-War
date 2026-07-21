@@ -13,8 +13,8 @@ namespace ApostlesWar.Skills.Debuffs
 
         public double Chance { get; }
 
-        public Medo(int turnos = 1, double chance = ChancePadrao)
-            : base("Medo", "😱", turnos, chance, $"{chance * 100:F0}% de chance de cancelar ações.")
+        public Medo(int duracao = 1, double chance = ChancePadrao)
+            : base("Medo", "😱", duracao, chance, $"{chance * 100:F0}% de chance de cancelar ações.")
         {
             Chance = chance;
         }

@@ -15,7 +15,7 @@ namespace ApostlesWar.Champs.Misticos
             Sininho(), PoMagico(), new Voar());
 
         static HabilidadeAtiva Sininho() => new(
-            "Sininho", "🔔", turnos: 3, "Ataca 1 inimigo com +200% ATK.",
+            "Sininho", "🔔", cooldown: 3, "Ataca 1 inimigo com +200% ATK.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
@@ -24,7 +24,7 @@ namespace ApostlesWar.Champs.Misticos
             });
 
         static HabilidadeAtiva PoMagico() => new(
-            "Pó Mágico", "✨", turnos: 4, "Ataca todos ignorando TODOS os benefícios do alvo.",
+            "Pó Mágico", "✨", cooldown: 4, "Ataca todos ignorando TODOS os benefícios do alvo.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()

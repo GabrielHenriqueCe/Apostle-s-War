@@ -20,26 +20,26 @@ namespace ApostlesWar.Champs.LadoSombrio
             DocesOuTravessuras(), DocesDeAbobora(), new CascaDura());
 
         static HabilidadeAtiva DocesOuTravessuras() => new(
-            "Doces ou Travessuras", "🍬", turnos: 4, "Remove benefícios dos inimigos e bloqueia novos por 2 turnos.",
+            "Doces ou Travessuras", "🍬", cooldown: 4, "Remove benefícios dos inimigos e bloqueia novos por 2 turnos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new RemoverBuffs(Seletor.Removiveis()),
-                new AplicarDebuff(() => new ImpedirBeneficios(turnos: 2)),
+                new AplicarDebuff(() => new ImpedirBeneficios(duracao: 2)),
             });
 
         // Revive-de-N canônico (regra do revive, ver Reviver.cs): a habilidade declara o pick
         // (1 morto, Aleatorio = selecionado + extras sorteados se N crescer) e a ação herda os
         // AlvosResolvidos — mesma seleção de qualquer habilidade, sem contador na ação.
         static HabilidadeAtiva DocesDeAbobora() => new(
-            "Doces de Abóbora", "🍭", turnos: 4, "Revive 1 aliado (HP cheio) e aplica Reflexo de dano em todos os aliados.",
+            "Doces de Abóbora", "🍭", cooldown: 4, "Revive 1 aliado (HP cheio) e aplica Reflexo de dano em todos os aliados.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Mortos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new Reviver(1.0, Escopo.AlvosResolvidos),
-                new AplicarBuff(() => new RefletirDano(turnos: 2, percentual: 0.15),
+                new AplicarBuff(() => new RefletirDano(duracao: 2, percentual: 0.15),
                     Escopo.TodosAliados, EstadoAlvo.Vivos),                               // pega o revivido
             });
     }

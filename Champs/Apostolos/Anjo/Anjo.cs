@@ -16,7 +16,7 @@ namespace ApostlesWar.Champs.Apostolos
             Celestial(), Ceu(), new Bencao());
 
         static HabilidadeAtiva Celestial() => new(
-            "Celestial", "🌟", turnos: 3, "Limpa debuffs dos aliados e cura 30% HP em todos.",
+            "Celestial", "🌟", cooldown: 3, "Limpa debuffs dos aliados e cura 30% HP em todos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -26,14 +26,14 @@ namespace ApostlesWar.Champs.Apostolos
             });
 
         static HabilidadeAtiva Ceu() => new(
-            "Céu", "☁️", turnos: 4, "Revive aliados (50% HP), +25% ATK e Bloqueio Total (2t).",
+            "Céu", "☁️", cooldown: 4, "Revive aliados (50% HP), +25% ATK e Bloqueio Total (2t).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new Reviver(0.50),
-                new AplicarBuff(() => new BuffAtaque(turnos: 2, percentual: 0.25), Escopo.TodosAliados),
-                new AplicarBuff(() => new BloqueioTotal(turnos: 2), Escopo.TodosAliados),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.TodosAliados),
+                new AplicarBuff(() => new BloqueioTotal(duracao: 2), Escopo.TodosAliados),
             });
     }
 }

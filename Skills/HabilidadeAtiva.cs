@@ -25,8 +25,8 @@ namespace ApostlesWar
         /// virtuais — os backings ficam em default e nunca são lidos. Some quando a última
         /// subclasse migrar pra forma-construtor.
         /// </summary>
-        public HabilidadeAtiva(string nome, string simbolo, int turnos, string descricao = "")
-            : base(nome, simbolo, turnos, descricao)
+        public HabilidadeAtiva(string nome, string simbolo, int cooldown, string descricao = "")
+            : base(nome, simbolo, cooldown, descricao)
         {
             _tipoAtaque = TipoAtaque.Sequencial;
             _acoes = new List<Acao>();
@@ -37,10 +37,10 @@ namespace ApostlesWar
         /// criada UMA vez e reusada a cada ativação — por isso Acao só pode carregar config
         /// (multiplicador, fábrica), nunca estado por-ativação (invariante do ADR §3.1).
         /// </summary>
-        public HabilidadeAtiva(string nome, string simbolo, int turnos, string descricao,
+        public HabilidadeAtiva(string nome, string simbolo, int cooldown, string descricao,
             int numeroDeAlvos, TipoAlvo tipoAlvo, TipoLista tipoLista, EstadoAlvo estadoAlvo,
             List<Acao> acoes, TipoAtaque tipoAtaque = TipoAtaque.Sequencial)
-            : base(nome, simbolo, turnos, descricao)
+            : base(nome, simbolo, cooldown, descricao)
         {
             _numeroDeAlvos = numeroDeAlvos;
             _tipoAlvo = tipoAlvo;

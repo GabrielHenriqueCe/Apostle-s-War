@@ -13,8 +13,8 @@ namespace ApostlesWar.Skills.Buffs
     /// </summary>
     class RefletirDano : Buff, IReageAoReceberDano
     {
-        public RefletirDano(int turnos = 2, double percentual = 0.15)
-            : base("Reflexo", "🥢", turnos, percentual,
+        public RefletirDano(int duracao = 2, double percentual = 0.15)
+            : base("Reflexo", "🥢", duracao, percentual,
                 $"Reflete {percentual * 100:F0}% do dano recebido.")
         { }
 

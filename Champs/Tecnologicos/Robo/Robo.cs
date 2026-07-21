@@ -18,7 +18,7 @@ namespace ApostlesWar.Champs.Tecnologicos
             RaioX(), Tecnology(), new ReparoAutomatico());
 
         static HabilidadeAtiva RaioX() => new(
-            "Raio-X", "🩻", turnos: 4, "Cura 15% HP e estende em 1t os benefícios de todos os aliados.",
+            "Raio-X", "🩻", cooldown: 4, "Cura 15% HP e estende em 1t os benefícios de todos os aliados.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -28,13 +28,13 @@ namespace ApostlesWar.Champs.Tecnologicos
             });
 
         static HabilidadeAtiva Tecnology() => new(
-            "Technology", "🤖", turnos: 4, "Revive aliados (30% HP) e aplica Cura Contínua em todo o time.",
+            "Technology", "🤖", cooldown: 4, "Revive aliados (30% HP) e aplica Cura Contínua em todo o time.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new Reviver(0.30),
-                new AplicarBuff(() => new CuraContinua(turnos: 1, percentual: 0.10), Escopo.TodosAliados),
+                new AplicarBuff(() => new CuraContinua(duracao: 1, percentual: 0.10), Escopo.TodosAliados),
             });
     }
 }

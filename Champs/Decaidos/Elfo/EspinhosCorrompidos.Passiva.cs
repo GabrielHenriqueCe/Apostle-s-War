@@ -16,7 +16,7 @@ namespace ApostlesWar.Champs.Decaidos
 
         public List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx)
         {
-            new EspinhosVenenosos(turnos: 2).Aplicar(ctx.Atacante);
+            new EspinhosVenenosos(duracao: 2).Aplicar(ctx.Atacante);
             return new List<ResultadoReacao>();
         }
     }

@@ -51,7 +51,7 @@ namespace Tests
             // Furtividade-like: Intocável em SI, depois dano em todos os inimigos.
             var hab = Hab(new()
             {
-                new AplicarBuff(() => new Intocavel(turnos: 2), Escopo.ProprioAtacante),
+                new AplicarBuff(() => new Intocavel(duracao: 2), Escopo.ProprioAtacante),
                 new Dano(1.0),
             }, alvos: int.MaxValue);
 
@@ -119,7 +119,7 @@ namespace Tests
             // OssoDuroDeRoer-like: buff em todos os aliados EXCETO quem conjurou.
             var hab = Hab(new()
             {
-                new AplicarBuff(() => new Intocavel(turnos: 2), Escopo.OutrosAliados),
+                new AplicarBuff(() => new Intocavel(duracao: 2), Escopo.OutrosAliados),
             }, alvos: int.MaxValue, lista: TipoLista.Aliados);
 
             hab.Ativar(ctx, atacante);
@@ -375,7 +375,7 @@ namespace Tests
         {
             var atacante = Novo();
             var alvo = Novo();
-            new Preso(turnos: 2).Aplicar(alvo);
+            new Preso(duracao: 2).Aplicar(alvo);
             new Veneno(stacks: 1).Aplicar(alvo);
             Assert.Equal(2, alvo.StatusAtivos.OfType<Debuff>().Count());
 
@@ -397,14 +397,14 @@ namespace Tests
             var alvoNunca = Novo();
             var ctx0 = new ContextoCombate(atacante,
                 new List<Combate> { atacante }, new List<Combate> { alvoNunca });
-            Hab(new() { new AplicarDebuff(() => new Preso(turnos: 2), chance: 0.0) }, alvos: 1)
+            Hab(new() { new AplicarDebuff(() => new Preso(duracao: 2), chance: 0.0) }, alvos: 1)
                 .Ativar(ctx0, alvoNunca);
             Assert.Empty(alvoNunca.StatusAtivos.OfType<Preso>());  // chance 0.0 nunca aplica
 
             var alvoSempre = Novo();
             var ctx1 = new ContextoCombate(atacante,
                 new List<Combate> { atacante }, new List<Combate> { alvoSempre });
-            Hab(new() { new AplicarDebuff(() => new Preso(turnos: 2), chance: 1.0) }, alvos: 1)
+            Hab(new() { new AplicarDebuff(() => new Preso(duracao: 2), chance: 1.0) }, alvos: 1)
                 .Ativar(ctx1, alvoSempre);
             Assert.Single(alvoSempre.StatusAtivos.OfType<Preso>()); // chance 1.0 sempre aplica
         }
@@ -420,7 +420,7 @@ namespace Tests
             var ctx = new ContextoCombate(atacante,
                 new List<Combate> { atacante, morto, jaVivo },
                 new List<Combate> { Novo() });
-            var hab = Hab(new() { new Reviver(0.50, buffNoRevivido: () => new Intocavel(turnos: 2)) },
+            var hab = Hab(new() { new Reviver(0.50, buffNoRevivido: () => new Intocavel(duracao: 2)) },
                 alvos: int.MaxValue, lista: TipoLista.Aliados);
 
             hab.Ativar(ctx, atacante);
@@ -492,8 +492,8 @@ namespace Tests
         {
             var atacante = Novo();
             var alvo = Novo();
-            new Provocar(turnos: 2).Aplicar(alvo);                     // removível
-            new Intocavel(turnos: 2, removivel: false).Aplicar(alvo);  // NÃO removível (fica)
+            new Provocar(duracao: 2).Aplicar(alvo);                     // removível
+            new Intocavel(duracao: 2, removivel: false).Aplicar(alvo);  // NÃO removível (fica)
             var ctx = new ContextoCombate(atacante,
                 new List<Combate> { atacante },
                 new List<Combate> { alvo });
@@ -513,7 +513,7 @@ namespace Tests
         {
             var atacante = Novo();
             var alvo = Novo(hp: 5000);
-            new Escudo(2000, turnos: 2).Aplicar(alvo);   // escudo que normalmente absorveria o golpe
+            new Escudo(2000, duracao: 2).Aplicar(alvo);   // escudo que normalmente absorveria o golpe
             var ctx = new ContextoCombate(atacante,
                 new List<Combate> { atacante },
                 new List<Combate> { alvo });
@@ -531,7 +531,7 @@ namespace Tests
         public void Natureza_QueimaDano_FuraOEscudo_PelaListaIgnora()
         {
             var alvo = Novo(hp: 2000);
-            new Escudo(500, turnos: 2).Aplicar(alvo);
+            new Escudo(500, duracao: 2).Aplicar(alvo);
 
             // QueimaDano.Ignora ∋ Escudo → o escudo é pulado (era DeveAgir => !IgnoraEscudo).
             var (efetivo, absorvido) = alvo.ReceberDano(300, NaturezasDano.QueimaDano);
@@ -545,7 +545,7 @@ namespace Tests
         public void Natureza_Veneno_NaoFuraOEscudo_PoisNaoOLista()
         {
             var alvo = Novo(hp: 2000);
-            new Escudo(500, turnos: 2).Aplicar(alvo);
+            new Escudo(500, duracao: 2).Aplicar(alvo);
 
             // Veneno.Ignora NÃO tem Escudo → o escudo absorve (contraste com o Queima acima).
             var (efetivo, absorvido) = alvo.ReceberDano(300, NaturezasDano.Veneno);
@@ -559,7 +559,7 @@ namespace Tests
         {
             var aplicador = Novo(hp: 2000);
             var portador = Novo(hp: 2000);
-            new ProtecaoAliado(aplicador, turnos: 2, percentual: 0.30).Aplicar(portador);
+            new ProtecaoAliado(aplicador, duracao: 2, percentual: 0.30).Aplicar(portador);
 
             // Todo dano sem reação (Veneno/Queima/DanoIndireto) lista ProtecaoAliado → NÃO redireciona
             // (era DeveAgir => Reacao != Nenhuma). O portador toma tudo, o aplicador não recebe nada.
@@ -574,7 +574,7 @@ namespace Tests
         {
             var atacante = Novo(atk: 500);
             var alvo = Novo(hp: 100);
-            new Invencivel(turnos: 2).Aplicar(alvo);   // normalmente seguraria o HP em 1
+            new Invencivel(duracao: 2).Aplicar(alvo);   // normalmente seguraria o HP em 1
 
             // A lista DO GOLPE fura o Invencível (mecanismo 2, inalterado) — prova que golpe e
             // natureza falam a MESMA língua no gate único.
@@ -588,8 +588,8 @@ namespace Tests
         {
             var a = Novo(hp: 2000);
             var b = Novo(hp: 2000);
-            new ProtecaoAliado(b, turnos: 2, percentual: 0.30).Aplicar(a);   // a protegido por b
-            new ProtecaoAliado(a, turnos: 2, percentual: 0.30).Aplicar(b);   // b protegido por a
+            new ProtecaoAliado(b, duracao: 2, percentual: 0.30).Aplicar(a);   // a protegido por b
+            new ProtecaoAliado(a, duracao: 2, percentual: 0.30).Aplicar(b);   // b protegido por a
 
             // Ataque real em A → A redireciona 30% pra B (via DanoIndireto) → B NÃO re-redireciona
             // (DanoIndireto.Ignora ∋ ProtecaoAliado, o anti-loop estrutural). Se travar, é StackOverflow.
@@ -607,8 +607,8 @@ namespace Tests
             // ReceberDano (defesa montada sem os ignorados). Via ReceberDano direto = sem crit random.
             var alvoNormal = NovoComDefesa(hp: 100000, atk: 0, def: 400);
             var alvoFurado = NovoComDefesa(hp: 100000, atk: 0, def: 400);
-            new BuffDefesa(turnos: 2, percentual: 0.50).Aplicar(alvoNormal);
-            new BuffDefesa(turnos: 2, percentual: 0.50).Aplicar(alvoFurado);
+            new BuffDefesa(duracao: 2, percentual: 0.50).Aplicar(alvoNormal);
+            new BuffDefesa(duracao: 2, percentual: 0.50).Aplicar(alvoFurado);
 
             var (efNormal, _) = alvoNormal.ReceberDano(1000, NaturezasDano.Ataque);
             var (efFurado, _) = alvoFurado.ReceberDano(1000, NaturezasDano.Ataque,

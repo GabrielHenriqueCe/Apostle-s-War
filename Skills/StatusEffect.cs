@@ -1,22 +1,20 @@
-﻿namespace ApostlesWar
+namespace ApostlesWar
 {
     #region StatusEffect
 
     /// <summary>
-    /// Classe base para todos os efeitos de status (Buffs e Debuffs).
+    /// Classe base para todos os efeitos de status (Buffs e Debuffs). A identidade
+    /// (Nome/Simbolo/Descricao) vem de ElementoDeJogo; aqui mora a DuracaoRestante
+    /// (quantos turnos o efeito ainda dura).
     /// Hooks disponíveis pra sobrescrever:
     /// - Aplicar: efeitos colaterais ao aplicar
     /// - Remover: limpeza ao expirar
     /// - AoIniciarTurno: efeitos no início do turno do portador (Veneno, CuraContinua)
     /// </summary>
-    abstract class StatusEffect
+    abstract class StatusEffect : ElementoDeJogo
     {
-        public string Nome { get; }
-        public string Simbolo { get; }
-        public int Turnos { get; }
-        public string Descricao { get; }
         public double Valor { get; }
-        public int TurnosRestantes { get; protected set; }
+        public int DuracaoRestante { get; protected set; }
         public bool AcabouDeAplicar { get; private set; }
 
         /// <summary>
@@ -27,14 +25,11 @@
         /// </summary>
         public bool Removivel { get; }
 
-        public StatusEffect(string nome, string simbolo, int turnosRestantes, double valor, string descricao = "", bool removivel = true)
+        public StatusEffect(string nome, string simbolo, int duracao, double valor, string descricao = "", bool removivel = true)
+            : base(nome, simbolo, descricao)
         {
-            Nome = nome;
-            Simbolo = simbolo;
-            Turnos = turnosRestantes;
             Valor = valor;
-            Descricao = descricao;
-            TurnosRestantes = turnosRestantes;
+            DuracaoRestante = duracao;
             AcabouDeAplicar = true;
             Removivel = removivel;
         }
@@ -46,14 +41,14 @@
                 AcabouDeAplicar = false;
                 return;
             }
-            TurnosRestantes--;
+            DuracaoRestante--;
         }
 
-        public bool Expirou => TurnosRestantes <= 0;
+        public bool Expirou => DuracaoRestante <= 0;
         public abstract void Remover(Combate alvo);
 
-        public void AumentarDuracao(int turnos) => TurnosRestantes += turnos;
-        public void ReduzirDuracao(int turnos) => TurnosRestantes = Math.Max(0, TurnosRestantes - turnos);
+        public void AumentarDuracao(int turnos) => DuracaoRestante += turnos;
+        public void ReduzirDuracao(int turnos) => DuracaoRestante = Math.Max(0, DuracaoRestante - turnos);
         public virtual void AoIniciarTurno(Combate portador) { }
 
 
@@ -64,7 +59,7 @@
             var existente = alvo.StatusAtivos.FirstOrDefault(s => s.GetType() == this.GetType());
             if (existente != null)
             {
-                if (this.TurnosRestantes > existente.TurnosRestantes)
+                if (this.DuracaoRestante > existente.DuracaoRestante)
                     alvo.StatusAtivos.Remove(existente);
                 else
                     return;

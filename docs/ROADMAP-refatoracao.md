@@ -51,26 +51,50 @@
 > (precisa dos SDKs/loop do Unity). A FILA C está descartada.
 
 ### 🟢 FILA A — console, agora (numerada)
-1. **Doc/organização** — este bump (grava esta fila, mata o enquadramento web, reancora
-   encapsular-coleções, fecha nulo-na-porta, corrige drift dos testes).
-2. **`ColetarReacoes<T>` helper** — DRY das 3 varreduras de reação. Baixo risco.
-3. **Identidade comum** (Nome/Símbolo/Descrição) — base comum `Habilidade`+`StatusEffect`.
-4. **Services-lookup** — `FaccaoService`/`CampanhaService` viram dado. Cosmético.
-5. **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — extrair o IO de arquivo
+
+> **Regra do modo de ataque (Gabriel, jul/2026): nada fica "quando doer" — hoje TUDO dói.**
+> Item visto na auditoria = item na fila. O "quando doer" só sobrevive na FILA B, onde o
+> gatilho é nomeado (o porte), não adiamento genérico.
+
+1. ✅ **Doc/organização** (#141) — gravou esta fila, matou o enquadramento web, reancorou
+   encapsular-coleções, fechou nulo-na-porta, corrigiu drift dos testes.
+2. **`ColetarReacoes<T>` helper** — DRY das varreduras de reação do CombateService (o par
+   "status + passivas" repetido em 7 métodos). De quebra fecha a consistência de dispatch
+   no InicioTurno (que só varria passivas — hoje sem implementador status, então idêntico).
+3. **Faxina de seams restantes** *(auditoria jul/2026)* — os 2 `Console.Clear` fora da View
+   (`CombateService.ExecutarTurno`, `ControladorJogador`) viram tela-limpa atrás do seam
+   (CombateView/IApresentacao). Os avisos de save com `Console.WriteLine`+`Thread.Sleep`
+   nos services morrem no item 6 (a porta tira o IO de lá).
+4. **Identidade comum** (Nome/Símbolo/Descrição) — base comum `Habilidade`+`StatusEffect`.
+5. **Services-lookup** — `FaccaoService`/`CampanhaService` viram dado. Cosmético.
+6. **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — extrair o IO de arquivo
    (hoje em `CapitulosService`/`ArsenalService`) pra trás de uma porta; JSON = `SaveLocal`.
    Habilita Steam/Play plugarem no porte sem cirurgia. Seam future-facing (Steam+Play já
-   nomeados), mesmo padrão de `IEntrada`/`IApresentacao`.
-6. **Capacidade C — stat sob demanda (`IContribui*`)** — generalizar pros outros stats.
-7. **Capacidade D — comportamento de turno** (Medo/Preso/Irritar como família).
-8. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado
-   à mão. Follow-on da Composição.
-9. **Turno (resto)** — reset 1x-por-agressor das outras reações + `TimeAtualDoTurno` +
-   eventualmente o Caminho B (`TurnoDoPersonagem` persistente → medidor de velocidade).
-10. **Passiva-conta-mortos** — desbloqueada (EventoDano Fatia 2 pronta); falta a passiva.
-11. **Observabilidade Crit na UI** — exibir TaxaCrit/DanoCrit (OlhoClinico/Virus).
-12. **Ampliar testes xUnit** — ordem crítica de morte, `ReceberDano` ponta-a-ponta.
-13. **Faxina de comentários** — bisturi. Penúltimo.
-14. **REBALANCEAMENTO** — fase própria, o FIM. Números em playtest.
+   nomeados), mesmo padrão de `IEntrada`/`IApresentacao`. Inclui matar o Console/Sleep dos
+   fallbacks de save (o aviso vira responsabilidade de quem chama, não do service).
+7. **Log de combate + estatísticas de fim de batalha** *(pedido do Gabriel, jul/2026)* —
+   acumular os `EventoDano` da partida (o fato do golpe já existe; hoje é jogado fora) e
+   exibir no fim da batalha: **dano causado / dano recebido / cura POR PERSONAGEM**.
+   Paga 3x: feature de UX, ferramenta de debug do REBALANCEAMENTO (item 16), e embrião do
+   log/stream que a FILA B consome. (Curas hoje não geram evento — o log pode nascer só de
+   dano e crescer, ou nascer com um EventoCura irmão; decidir no design do item.)
+8. **Capacidade C — stat sob demanda (`IContribui*`)** — generalizar pros outros stats.
+9. **Capacidade D — comportamento de turno** (Medo/Preso/Irritar como família).
+10. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado
+    à mão. Follow-on da Composição.
+11. **Turno (resto)** — reset 1x-por-agressor das outras reações + `TimeAtualDoTurno` +
+    eventualmente o Caminho B (`TurnoDoPersonagem` persistente → medidor de velocidade).
+12. **Passiva-conta-mortos** — desbloqueada (EventoDano Fatia 2 pronta); falta a passiva.
+13. **Observabilidade Crit na UI** — exibir TaxaCrit/DanoCrit (OlhoClinico/Virus).
+14. **Ampliar testes xUnit** — ordem crítica de morte, `ReceberDano` ponta-a-ponta, e o
+    guard+teste da mina do `ResolverAlvos` (auditoria: a semente é confiada sem checar se
+    está nos candidatos — nenhum champ ativa hoje, mas o contrato fica sem dono).
+15. **Faxina de comentários** — bisturi. Penúltimo.
+16. **REBALANCEAMENTO** — fase própria, o FIM. Números em playtest. **Passo 0 (auditoria):**
+    reunir as constantes de balance num lugar só — a fórmula do `MultiplicadorFase`
+    (0.5×capítulo + 0.1×fase, repetida 3× no CombateService) e
+    `DefesaPorPontoReducao`/`ReducaoMaximaPorDefesa` (Combate.cs) — senão mexer em alavanca
+    vira caça ao tesouro.
 
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
@@ -735,9 +759,38 @@ hoje do que fizemos antigamente". Guard-clause em código interno fica DE FORA d
   jul/2026 fazer mesmo assim — sair do "em espera" pra fila ativa.)
 
 ### Helper ColetarReacoes<T> (dívida de repetição)
-**Status:** dívida registrada. O padrão "varre StatusAtivos.OfType<T> + ColetarPassivasReativas<T>"
-se repete em ProcessarReacoesAlvo, PorAlvo e PorAtaque. Extrair helper genérico. A separação dos
-métodos está correta; só o loop interno é repetido.
+**Status:** ✅ **FEITO (jul/2026, FILA A #2).** O padrão "varre StatusAtivos.OfType<T> +
+ColetarPassivasReativas<T>" se repetia em **7** métodos do CombateService (Alvo, AntesDeMorrer,
+AtacanteMorte, AoMorrer, PorAlvo, PorAtaque, InicioTurno). Virou UM helper
+`ColetarReacoes<T>(portador, invocar)` — o `invocar` é lambda porque cada interface tem seu verbo
+(AoReceberDano, AoMatar...); o helper unifica a VARREDURA, não o verbo. Ordem preservada
+(status → passivas, mesma dos métodos à mão). Bônus de consistência: o InicioTurno passou a varrer
+as DUAS fontes (antes só passivas; hoje nenhum status implementa IReageAoInicioTurno — idêntico em
+comportamento, mas o dia que um buff quiser reagir ao início do turno, já funciona).
+
+### Auditoria de código (jul/2026 — olhar fresco, pós-fila)
+Leitura crítica do núcleo (CombateService, Combate, HabilidadeAtiva, Acao, TurnoDoPersonagem,
+Program.cs, champs na forma final) procurando o que discordar. **Veredito: a arquitetura está
+sólida** — motor de 8 linhas, composition root limpo, cadeia de Atos da morte robusta (cada ato
+re-checa EstaVivo — a Guarda reverter a morte e os posteriores não dispararem é design, não sorte).
+**4 achados, todos encaixados na fila:**
+1. **Seams violados (→ itens 3 e 6):** sobraram 4 `Console.*` fora da View — `Console.Clear` no
+   `CombateService.ExecutarTurno` (o único no coração do combate) e no `ControladorJogador`;
+   `Console.WriteLine`+`Thread.Sleep` nos fallbacks de save do `ArsenalService`/`CapitulosService`.
+2. **Mina latente no `ResolverAlvos` (→ item 14):** `resultado.Add(alvoSelecionado)` confia que a
+   semente está nos `candidatos` filtrados; se não estiver (ex.: hab `Mortos` + hit-all → semente =
+   atacante vivo), o vivo entra nos resolvidos e `IndexOf` devolve -1. VERIFICADO: nenhum champ
+   ativa esse caminho hoje (só DocesDeAbobora usa `Mortos`, com pick real que trata o vazio). Não é
+   bug vivo — é contrato sem guarda. Guard de 1 linha + teste que o documente.
+3. **Constantes de balance espalhadas (→ item 16 passo 0).**
+4. **Contrato traiçoeiro no `ColetarPassivasReativas`:** consome o cooldown AO COLETAR, antes de
+   saber se a passiva vai agir. Hoje inofensivo (reativas têm cooldown 0). **REGRA ao criar passiva
+   reativa com cooldown E condição interna:** mover o consumo pra DEPOIS da decisão de agir — senão
+   ela queima cooldown sem fazer nada, silenciosamente.
+**Avaliado e deixado como está (de propósito):** `EstadoHabilidades: Dictionary<Habilidade, object>`
+(object-typed, mas 2 usos contidos via `is not T` — o custo de tipar não paga); o TODO de exibição
+de cura no `ExibirResultadosReacao` (conferir no item 7 se reações que curam já existem e o TODO
+envelheceu).
 
 ### Observabilidade — exibir TaxaCrit/DanoCrit na UI de combate
 **Status:** dívida, pré-requisito de teste. OlhoClinico/Virus mexem em TaxaCrit/DanoCrit, que NÃO

@@ -138,15 +138,12 @@ namespace ApostlesWar.Services
         /// <summary>
         /// Dispara as reações de início de turno (IReageAoInicioTurno) do combatente.
         /// Sem golpe — usa o ContextoCombate (portador = combatente). Renova buffs/
-        /// efeitos que o portador aplica a cada turno.
+        /// efeitos que o portador aplica a cada turno. Varre as duas fontes como todo
+        /// dispatch (hoje só passivas implementam; um buff que queira reagir já entra).
         /// </summary>
         private void ProcessarReacoesInicioTurno(Combate combatente, ContextoCombate ctxCombate)
         {
-            var resultados = new List<ResultadoReacao>();
-
-            foreach (var p in ColetarPassivasReativas<IReageAoInicioTurno>(combatente))
-                resultados.AddRange(p.AoInicioTurno(ctxCombate));
-
+            var resultados = ColetarReacoes<IReageAoInicioTurno>(combatente, r => r.AoInicioTurno(ctxCombate));
             ExibirResultadosReacao(combatente, resultados);
         }
 
@@ -322,17 +319,9 @@ namespace ApostlesWar.Services
             var resultados = new List<ResultadoReacao>();
 
             if (r.DanoEfetivo > 0)
-            {
-                foreach (var s in alvo.StatusAtivos.OfType<IReageAoReceberDano>().ToList())
-                    resultados.AddRange(s.AoReceberDano(ctx));
-                foreach (var p in ColetarPassivasReativas<IReageAoReceberDano>(alvo))
-                    resultados.AddRange(p.AoReceberDano(ctx));
-            }
+                resultados.AddRange(ColetarReacoes<IReageAoReceberDano>(alvo, x => x.AoReceberDano(ctx)));
 
-            foreach (var s in alvo.StatusAtivos.OfType<IReageAoSerAtacado>().ToList())
-                resultados.AddRange(s.AoSerAtacado(ctx));
-            foreach (var p in ColetarPassivasReativas<IReageAoSerAtacado>(alvo))
-                resultados.AddRange(p.AoSerAtacado(ctx));
+            resultados.AddRange(ColetarReacoes<IReageAoSerAtacado>(alvo, x => x.AoSerAtacado(ctx)));
 
             ExibirResultadosReacao(alvo, resultados);
 
@@ -353,10 +342,32 @@ namespace ApostlesWar.Services
         }
 
         /// <summary>
+        /// Varredura ÚNICA de reações: coleta quem implementa a capacidade T nas DUAS fontes
+        /// (StatusAtivos + passivas do Personagem) e invoca a reação de cada um, na ordem
+        /// status → passivas — a mesma que os métodos repetiam à mão. O invocar é lambda
+        /// porque cada interface tem seu verbo (AoReceberDano, AoMatar...); o helper unifica
+        /// a VARREDURA, não o verbo. Snapshot (ToList) dos status porque a reação pode
+        /// remover/adicionar status do próprio portador.
+        /// </summary>
+        private List<ResultadoReacao> ColetarReacoes<T>(Combate portador,
+            Func<T, IEnumerable<ResultadoReacao>> invocar) where T : class
+        {
+            var resultados = new List<ResultadoReacao>();
+            foreach (var s in portador.StatusAtivos.OfType<T>().ToList())
+                resultados.AddRange(invocar(s));
+            foreach (var p in ColetarPassivasReativas<T>(portador))
+                resultados.AddRange(invocar(p));
+            return resultados;
+        }
+
+        /// <summary>
         /// Coleta as passivas do combatente que implementam a interface de reação T,
         /// respeitando o cooldown (passivas têm Cooldowns; buffs/status não). Consome o
         /// cooldown ao coletar — a passiva "usou" sua reação neste disparo. Passivas com
         /// cooldown 0 (a maioria das reativas) estão sempre disponíveis.
+        /// ATENÇÃO (contrato, auditoria jul/2026): o consumo acontece AO COLETAR, antes de
+        /// saber se a passiva vai agir. Com cooldown 0 é inofensivo; ao criar passiva
+        /// reativa com cooldown E condição interna, mover o consumo pra depois da decisão.
         /// </summary>
         private IEnumerable<T> ColetarPassivasReativas<T>(Combate combatente) where T : class
         {
@@ -383,20 +394,11 @@ namespace ApostlesWar.Services
 
             var ctx = new ContextoReacao(atacante, alvo, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoAtacante, inimigosDoAtacante);
-            var resultados = new List<ResultadoReacao>();
 
-            foreach (var s in atacante.StatusAtivos.OfType<IReagePorAtaque>().ToList())
-                resultados.AddRange(s.PorAtaque(ctx));
-            foreach (var p in ColetarPassivasReativas<IReagePorAtaque>(atacante))
-                resultados.AddRange(p.PorAtaque(ctx));
+            var resultados = ColetarReacoes<IReagePorAtaque>(atacante, x => x.PorAtaque(ctx));
 
             if (r.DanoEfetivo > 0)
-            {
-                foreach (var s in atacante.StatusAtivos.OfType<IReageAoCausarDano>().ToList())
-                    resultados.AddRange(s.AoCausarDano(ctx));
-                foreach (var p in ColetarPassivasReativas<IReageAoCausarDano>(atacante))
-                    resultados.AddRange(p.AoCausarDano(ctx));
-            }
+                resultados.AddRange(ColetarReacoes<IReageAoCausarDano>(atacante, x => x.AoCausarDano(ctx)));
 
             ExibirResultadosReacao(atacante, resultados);
         }
@@ -413,13 +415,8 @@ namespace ApostlesWar.Services
 
             var ctx = new ContextoReacao(atacante, alvoRef, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoAtacante, inimigosDoAtacante);
-            var resultados = new List<ResultadoReacao>();
 
-            foreach (var s in atacante.StatusAtivos.OfType<IReageAoAtacar>().ToList())
-                resultados.AddRange(s.AoAtacar(ctx));
-            foreach (var p in ColetarPassivasReativas<IReageAoAtacar>(atacante))
-                resultados.AddRange(p.AoAtacar(ctx));
-
+            var resultados = ColetarReacoes<IReageAoAtacar>(atacante, x => x.AoAtacar(ctx));
             ExibirResultadosReacao(atacante, resultados);
         }
 
@@ -463,13 +460,8 @@ namespace ApostlesWar.Services
 
             var ctx = new ContextoReacao(alvo, atacante, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoAlvo, inimigosDoAlvo);
-            var resultados = new List<ResultadoReacao>();
 
-            foreach (var s in alvo.StatusAtivos.OfType<IReageAntesDeMorrer>().ToList())
-                resultados.AddRange(s.AntesDeMorrer(ctx));
-            foreach (var p in ColetarPassivasReativas<IReageAntesDeMorrer>(alvo))
-                resultados.AddRange(p.AntesDeMorrer(ctx));
-
+            var resultados = ColetarReacoes<IReageAntesDeMorrer>(alvo, x => x.AntesDeMorrer(ctx));
             ExibirResultadosReacao(alvo, resultados);
         }
 
@@ -486,13 +478,8 @@ namespace ApostlesWar.Services
 
             var ctx = new ContextoReacao(atacante, alvoMorto, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoAtacante, inimigosDoAtacante);
-            var resultados = new List<ResultadoReacao>();
 
-            foreach (var s in atacante.StatusAtivos.OfType<IReageAoMatar>().ToList())
-                resultados.AddRange(s.AoMatar(ctx));
-            foreach (var p in ColetarPassivasReativas<IReageAoMatar>(atacante))
-                resultados.AddRange(p.AoMatar(ctx));
-
+            var resultados = ColetarReacoes<IReageAoMatar>(atacante, x => x.AoMatar(ctx));
             ExibirResultadosReacao(atacante, resultados);
         }
 
@@ -514,14 +501,8 @@ namespace ApostlesWar.Services
 
             var ctx = new ContextoReacao(morto, atacante, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoMorto, inimigosDoMorto);
-            var resultados = new List<ResultadoReacao>();
 
-            foreach (var s in morto.StatusAtivos.OfType<IReageAoMorrer>().ToList())
-                resultados.AddRange(s.AoMorrer(ctx));
-
-            foreach (var p in ColetarPassivasReativas<IReageAoMorrer>(morto))
-                resultados.AddRange(p.AoMorrer(ctx));
-
+            var resultados = ColetarReacoes<IReageAoMorrer>(morto, x => x.AoMorrer(ctx));
             ExibirResultadosReacao(morto, resultados);
         }
 

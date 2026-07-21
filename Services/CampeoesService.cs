@@ -12,7 +12,6 @@ namespace ApostlesWar.Services
         #region Construtor
 
         private readonly PersonagemService _personagemService;
-        private readonly CampanhaService _campanhaService;
         private readonly MenuView _menuView;
         private readonly CapitulosService _capitulosService;
 
@@ -22,10 +21,9 @@ namespace ApostlesWar.Services
 
         private List<Personagem> desbloqueados = new List<Personagem>();
 
-        public CampeoesService(PersonagemService personagemService, CampanhaService campanhaService, MenuView menuService, CapitulosService capitulosService)
+        public CampeoesService(PersonagemService personagemService, MenuView menuService, CapitulosService capitulosService)
         {
             _personagemService = personagemService;
-            _campanhaService = campanhaService;
             _menuView = menuService;
             _capitulosService = capitulosService;
 
@@ -39,7 +37,7 @@ namespace ApostlesWar.Services
 
         public void DesbloquearCampeoes(Faccao faccao, Fases fase)
         {
-            Fase fas = _campanhaService.ObterFase((int)fase);
+            Fase fas = Campanha.ObterFase((int)fase);
 
             foreach (Slot slot in fas.Rodada1)
             {

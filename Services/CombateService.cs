@@ -13,7 +13,6 @@ namespace ApostlesWar.Services
         #region Construtor
 
         private readonly ArsenalService _arsenalService;
-        private readonly CampanhaService _campanhaService;
         private readonly CampeoesService _campeoesService;
         private readonly PersonagemService _personagemService;
         private readonly CombateView _combateView;
@@ -22,13 +21,12 @@ namespace ApostlesWar.Services
         private readonly IControladorDeTurno _controladorBot;
         private readonly IApresentacao _apresentacao;
 
-        public CombateService(ArsenalService arsenalService, CampanhaService campanhaService,
+        public CombateService(ArsenalService arsenalService,
             CampeoesService campeoesService, PersonagemService personagemService, CombateView combateView,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
             IControladorDeTurno controladorBot, IApresentacao apresentacao)
         {
             _arsenalService = arsenalService;
-            _campanhaService = campanhaService;
             _campeoesService = campeoesService;
             _personagemService = personagemService;
             _combateView = combateView;
@@ -512,7 +510,7 @@ namespace ApostlesWar.Services
 
         public ResultadoFase ExecutarFase(Faccao capitulo, Fases fase)
         {
-            Fase fas = _campanhaService.ObterFase((int)fase);
+            Fase fas = Campanha.ObterFase((int)fase);
             MultiplicadorFase mult = new MultiplicadorFase
             {
                 HP = (0.5f * (float)capitulo) + (0.1f * (float)fase),

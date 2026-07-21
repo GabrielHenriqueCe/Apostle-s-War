@@ -1,15 +1,13 @@
-﻿using ApostlesWar;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ApostlesWar.Services
+namespace ApostlesWar
 {
-    internal class CampanhaService
+    /// <summary>
+    /// Estrutura estática da campanha: as 7 fases, cada uma com a composição de Slots dos inimigos
+    /// por rodada. Era o `CampanhaService` (tabela pura); virou dado. `ObterFase(numero)` é 1-based
+    /// (a Fase 1 é o índice 0).
+    /// </summary>
+    static class Campanha
     {
-        #region Campanha
-
-        List<Fase> fases = new List<Fase>
+        private static readonly List<Fase> fases = new()
         {
             new Fase(new List<Slot> { Slot.Slot1 }, new List<Slot> { Slot.Slot2 }),
             new Fase(new List<Slot> { Slot.Slot1, Slot.Slot1 }, new List<Slot> { Slot.Slot1, Slot.Slot2 }),
@@ -20,11 +18,6 @@ namespace ApostlesWar.Services
             new Fase(new List<Slot> { Slot.Slot2, Slot.Slot3, Slot.Slot2 }, new List<Slot> { Slot.Slot1, Slot.Slot3, Slot.Slot4, Slot.Slot2 }),
         };
 
-        public Fase ObterFase(int numero)
-        {
-            return fases[numero - 1];
-        }
-
-        #endregion
+        public static Fase ObterFase(int numero) => fases[numero - 1];
     }
 }

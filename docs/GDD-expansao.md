@@ -1,8 +1,9 @@
 # Apostle's War — GDD da Expansão (Pós-Porte)
 
 > **Status:** Ideias registradas, NÃO implementar no console.
-> Destino: expansão pós-lançamento do porte **Unity** (single-player, save local
-> sincronizado por Steam Cloud / Google Play — SDK de plataforma, não backend próprio).
+> Destino: expansão pós-porte. **Rumo do porte (jul/2026): Blazor WASM primeiro** (público,
+> jogável no GitHub Pages, reusa o motor C#), **Unity depois** (single-player, save local;
+> Steam/Play cloud via SDK de plataforma, não backend próprio). Sem SQL/servidor.
 > Última atualização: julho/2026.
 
 ---
@@ -17,13 +18,15 @@ progressão persistente.
 A ordem de desenvolvimento planejada é:
 
 1. **Console jogável** — completar habilidades de todas as facções (MVP jogável) ✅
-2. **Back organizacional** — sweep de facções, motor, camadas, seams ✅ (ver ROADMAP)
-3. **Porte Unity** — mesmo domínio C# plugado no Unity (peça principal de portfólio)
-4. **Expansão (pós-porte)** — tudo que está neste documento
+2. **Back organizacional** — sweep de facções, motor, camadas, seams (ver ROADMAP FILA A) 🔄
+3. **Porte Blazor WASM** — mesmo motor C# rodando no navegador, jogável no GitHub Pages
+   (peça principal de portfólio, sem reescrever nada)
+4. **Porte Unity** — o mesmo domínio C# (reusa motor+seams), versão nativa
+5. **Expansão (pós-porte)** — tudo que está neste documento
 
 A razão de tudo isto ser "pós-porte" e não "console": cada sistema aqui exige
 persistência mais rica (inventário, tracking de XP, instâncias únicas de item —
-local via save/SQLite, sincronizado por Steam/Play) e uma interface visual rica
+local via save, sincronizado por Steam/Play) e uma interface visual rica
 (grids coloridos de raridade, telas de evolução, comparação de sub-stats). O
 console não comporta isso sem virar um segundo jogo.
 

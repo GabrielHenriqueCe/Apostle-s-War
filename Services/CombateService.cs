@@ -153,7 +153,7 @@ namespace ApostlesWar.Services
 
         private void ExecutarTurno(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
-            Console.Clear();
+            _combateView.LimparTela();
 
             // Irritar: força A1 automático no aplicador (mas Medo pode interromper)
             var irritar = atacante.StatusAtivos.OfType<Irritar>().FirstOrDefault();

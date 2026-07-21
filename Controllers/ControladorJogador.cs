@@ -27,7 +27,7 @@ namespace ApostlesWar.Controllers
 
             while (true)
             {
-                Console.Clear();
+                _combateView.LimparTela();
                 _combateView.ExibirPartida(aliados, defensores);
                 _combateView.ExibirAcoes(atacante, acao);
 

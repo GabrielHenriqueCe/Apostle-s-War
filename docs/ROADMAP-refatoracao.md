@@ -61,10 +61,12 @@
 2. **`ColetarReacoes<T>` helper** — DRY das varreduras de reação do CombateService (o par
    "status + passivas" repetido em 7 métodos). De quebra fecha a consistência de dispatch
    no InicioTurno (que só varria passivas — hoje sem implementador status, então idêntico).
-3. **Faxina de seams restantes** *(auditoria jul/2026)* — os 2 `Console.Clear` fora da View
-   (`CombateService.ExecutarTurno`, `ControladorJogador`) viram tela-limpa atrás do seam
-   (CombateView/IApresentacao). Os avisos de save com `Console.WriteLine`+`Thread.Sleep`
-   nos services morrem no item 6 (a porta tira o IO de lá).
+3. ✅ **Faxina de seams restantes** *(auditoria jul/2026)* — os 2 `Console.Clear` fora da View
+   (`CombateService.ExecutarTurno`, `ControladorJogador`) viraram `CombateView.LimparTela()`
+   (mora no adapter de console do combate, onde os outros `Console.*` já estavam). Os avisos de
+   save com `Console.WriteLine`+`Thread.Sleep` nos services ficam pro item 6 (a porta tira o IO
+   de lá). `Program.cs` `Console.OutputEncoding` deixado de propósito (bootstrap do composition
+   root — o ponto que sabe que é app de console; descartado no porte Unity).
 4. **Identidade comum** (Nome/Símbolo/Descrição) — base comum `Habilidade`+`StatusEffect`.
 5. **Services-lookup** — `FaccaoService`/`CampanhaService` viram dado. Cosmético.
 6. **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — extrair o IO de arquivo

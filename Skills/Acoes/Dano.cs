@@ -5,9 +5,9 @@ namespace ApostlesWar
     /// atacante e do alvo (ex: bônus da Piromancer contra alvo com Queima) — por isso
     /// aceita uma função. Habilidades de multiplicador fixo usam a sobrecarga com double.
     ///
-    /// NOTA (ADR-composicao-de-acoes §12): o modificador do atacante (Piromancer) é passado à
-    /// mão aqui por enquanto. Quando existir IModificaDanoCausado, a Dano consultará os
-    /// modificadores do atacante sozinha e o multiplicador volta a ser só o número da habilidade.
+    /// NOTA (ADR-composicao-de-acoes §12): FEITO. A Dano consulta os modificadores do atacante
+    /// (IModificaDanoCausado — ex: Piromancer) sozinha no Executar, dobrando o multiplicador ANTES
+    /// do (int) do Atacar. O multiplicador da habilidade voltou a ser só o número da hab.
     ///
     /// ignorarDefesaPct/forcaCritico/ignorarStatus espelham os parâmetros homônimos de
     /// Combate.Atacar — nascem parâmetro opcional da Ação (não bespoke). Clientes: Kunai
@@ -38,7 +38,18 @@ namespace ApostlesWar
         }
 
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
-            => eventos.Add(atacante.Atacar(alvo, _multiplicador(atacante, alvo),
+        {
+            double mult = _multiplicador(atacante, alvo);
+
+            // Modificadores de dano do ATACANTE (Piromancer e futuros): dobram o multiplicador ANTES
+            // do (int) do Atacar. Varre as duas fontes, igual o ReceberDano faz no lado do defensor.
+            foreach (var m in atacante.Personagem.Habilidades.OfType<IModificaDanoCausado>())
+                mult *= m.MultiplicadorDeDano(atacante, alvo);
+            foreach (var m in atacante.StatusAtivos.OfType<IModificaDanoCausado>())
+                mult *= m.MultiplicadorDeDano(atacante, alvo);
+
+            eventos.Add(atacante.Atacar(alvo, mult,
                 ignorarDefesaPct: _ignorarDefesaPct, forcaCritico: _forcaCritico, ignorarStatus: _ignorarStatus));
+        }
     }
 }

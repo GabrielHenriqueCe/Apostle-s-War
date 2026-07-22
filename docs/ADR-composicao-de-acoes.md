@@ -564,9 +564,10 @@ Um PR, um tema. Build verde o tempo todo (Strangler). **Docs bumpam NO MESMO PR 
 
 ## 12. Fora de escopo deste fio (follow-ons, sem data)
 
-- **`IModificaDanoCausado`** — a ação `Dano` consulta modificadores do atacante sozinha (a
-  `PassivaPiromancer` para de ser fiada à mão). Espelho do `IModificaDanoRecebido`. Desenhar
-  a `Dano` sem fechar essa porta, mas não implementar agora.
+- ~~**`IModificaDanoCausado`**~~ ✅ FEITO (FILA A #10): a ação `Dano` consulta os modificadores do
+  atacante sozinha (forma multiplicador, dobrada antes do (int) do Atacar); o `Piromancer` implementa
+  a interface e o `static MultExtra` morreu. Espelho do `IModificaDanoRecebido`. Fórmula-de-hab
+  (Caveira/Tengu) segue no `Dano(Func)` — é outro balde (fórmula da hab ≠ modificador do atacante).
 - **Champ-como-dado + pastas** (§10) — tema separado, depois do motor provar-se.
 - **`EventoDano` por ID** — hoje carrega objetos vivos (`Combate`); referenciar por id/nome
   desacopla o log/stream dos objetos.

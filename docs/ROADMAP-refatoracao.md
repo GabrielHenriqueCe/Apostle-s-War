@@ -135,8 +135,16 @@
    `IParalisaAcao` (Medo, após a escolha — rola o dado). O `IPulaTurno` já nasce como a PORTA da
    família de pular-turno (Congelar/Stun/Enraizado/Petrificado plugam sem tocar no fluxo — variantes
    são tema à parte, o Gabriel desenha as diferenças). Migração pura; +3 testes headless.
-10. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado
-    à mão. Follow-on da Composição.
+10. ✅ **`IModificaDanoCausado`** — espelho do Recebido no ATACANTE (Combat/, forma multiplicador),
+    consultado pela Ação Dano (o comentário do Dano.cs já previa). O Piromancer virou capacidade
+    (implementa a interface), o `static MultExtra` MORREU e as habs do Mago voltaram a `Dano(2.0)`/
+    `Dano(1.5)` puras. **Distinção firmada (verify-before-fuse):** "ler status do alvo pra escalar
+    dano" tem 2 baldes — fórmula-DA-HAB (`Dano(Func)`: Caveira `2.0-HP%`, Tengu/CorteDeVento `1.0+escudo`)
+    vs modificador-DO-ATACANTE (passiva, vale pra todos os ataques: `IModificaDanoCausado`, só o
+    Piromancer). O Tengu PARECIA 2º cliente mas NÃO é (só o CorteDeVento escala; subir pra passiva
+    vazaria pro Vendaval) → fica no Func. **Única mudança de jogo:** o A1 do Mago (usa `Dano(1.0)`)
+    passou a ganhar os +25% vs alvo com Queima (antes só as 2 especiais) — contido, mais correto,
+    paridade exata nas especiais. +2 testes.
 11. **Turno (resto)** — reset 1x-por-agressor das outras reações + `TimeAtualDoTurno` +
     eventualmente o Caminho B (`TurnoDoPersonagem` persistente → medidor de velocidade).
 12. **Passiva-conta-mortos** — desbloqueada (EventoDano Fatia 2 pronta); falta a passiva.
@@ -828,7 +836,9 @@ hoje do que fizemos antigamente". Guard-clause em código interno fica DE FORA d
 **Status:** ADR em docs/ADR-modelo-de-capacidades.md. Migração incremental.
 - A) Reação após evento → IReageAo* — buffs FEITOS; passivas no C5 (quase fim).
 - B) Intervenção no dano → IModificaDanoRecebido FEITO (o `DeveAgir` foi REMOVIDO na unificação
-  do ignorar — jul/2026; a decisão virou 1 gate de lista no ReceberDano).
+  do ignorar — jul/2026; a decisão virou 1 gate de lista no ReceberDano). **Lado ATACANTE ✅ FEITO
+  (FILA A #10):** `IModificaDanoCausado` (forma multiplicador, consultado pela Ação Dano) — o irmão
+  do defensor. Cliente: Piromancer. Fórmula-de-hab (Caveira/Tengu) fica no `Dano(Func)`, é outro balde.
 - E) Bloqueio de aplicação → IBloqueiaStatus FEITO.
 - C) Stat sob demanda → IContribui* ✅ **FEITO (FILA A #8, jul/2026).** Generalizado pros 4 stats
   (`IContribuiAtaque`/`IContribuiDefesa`/`IContribuiTaxaCrit`/`IContribuiDanoCrit`); todo getter soma

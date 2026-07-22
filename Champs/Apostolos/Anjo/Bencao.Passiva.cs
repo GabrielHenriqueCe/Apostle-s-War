@@ -20,10 +20,7 @@ namespace ApostlesWar.Champs.Apostolos
 
             return new List<ResultadoReacao>
             {
-                new ResultadoReacao(
-                    Mensagem: $"{ctx.Atacante.Personagem.Nome} recupera {cura} HP com Bênção! 😇",
-                    Cura: cura
-                )
+                new ResultadoReacao(Cura: new EventoCura(ctx.Atacante, ctx.Atacante, cura, ctx.Atacante.HPAtual))
             };
         }
 

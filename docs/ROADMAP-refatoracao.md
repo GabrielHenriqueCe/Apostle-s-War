@@ -99,9 +99,10 @@
    A cura mostra mesmo curando 0 ("já está com a vida cheia" — decisão do Gabriel). **Nome da
    habilidade agora aparece ANTES dos resultados** (`ExibirUsoHabilidade` movido pra antes do
    `ExecutarAtos`). **Cura de REAÇÃO corrigida** (Sedento/Sangramento/SedentoDeSangue/Bênção): usavam o
-   valor PEDIDO na mensagem; agora usam o RETORNO de `Curar` (o real, capado no HP máximo). É o embrião
-   do log/stream da FILA B. **Follow-up opcional:** `ResultadoReacao.Cura` (int) é vestigial — a
-   reação já exibe pela `Mensagem`; se um dia unificar, vira `EventoCura?` simétrico ao `Dano`.
+   valor PEDIDO na mensagem; agora usam o RETORNO de `Curar` (o real, capado). E **`ResultadoReacao.Cura`
+   virou `EventoCura?`** (simétrico ao `Dano`): a cura de reação agora usa a **MESMA `ExibirCura`** da
+   cura de habilidade (mensagem padrão "💚 X recuperou Y", não bespoke por reação — pedido do Gabriel).
+   É o embrião do log/stream da FILA B.
 8. **Capacidade C — stat sob demanda (`IContribui*`)** — generalizar pros outros stats.
 9. **Capacidade D — comportamento de turno** (Medo/Preso/Irritar como família).
 10. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado

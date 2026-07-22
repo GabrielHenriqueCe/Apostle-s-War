@@ -23,10 +23,7 @@ namespace ApostlesWar.Champs.Decaidos
 
             return new List<ResultadoReacao>
             {
-                new ResultadoReacao(
-                    Mensagem: $"{ctx.Portador.Personagem.Nome} se cura em {cura} com Sedento de Sangue! 🦇",
-                    Cura: cura
-                )
+                new ResultadoReacao(Cura: new EventoCura(ctx.Portador, ctx.Portador, cura, ctx.Portador.HPAtual))
             };
         }
 

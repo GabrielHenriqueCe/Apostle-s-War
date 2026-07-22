@@ -465,10 +465,10 @@ namespace ApostlesWar.Services
                 if (res.Dano != null)
                     _combateView.ExibirResultadoAtaque(origem, res.Dano.Alvo, res.Dano);
 
-                // Cura: exibição a definir num sub-PR (depende de método na CombateView).
-                // C1 não tem implementador de cura ainda, então fica como TODO.
+                if (res.Cura != null)
+                    _combateView.ExibirCura(res.Cura);   // mesma view da cura de habilidade
 
-                if (res.Mensagem != "" || res.Dano != null)
+                if (res.Mensagem != "" || res.Dano != null || res.Cura != null)
                     Aguardar(1500);
             }
         }

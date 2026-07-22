@@ -47,10 +47,7 @@ namespace ApostlesWar.Skills.Debuffs
 
             return new List<ResultadoReacao>
             {
-                new ResultadoReacao(
-                    Mensagem: $"{ctx.Contraparte.Personagem.Nome} se cura em {cura} com o Sangramento do inimigo! 🩸",
-                    Cura: cura
-                )
+                new ResultadoReacao(Cura: new EventoCura(ctx.Contraparte, ctx.Contraparte, cura, ctx.Contraparte.HPAtual))
             };
         }
 

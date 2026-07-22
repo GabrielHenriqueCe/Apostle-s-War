@@ -22,13 +22,18 @@
 - **Refatore o que PERSISTE; tolere imperfeição no que vai MORRER.** A camada de
   apresentação do console (telas, render) morre no porte. Não investir rigor nela.
   A LÓGICA de domínio (combate, turno, reações, stats) pluga DIRETO no porte como
-  assembly C# — é onde o rigor rende. **Destino (jul/2026): BLAZOR WebAssembly
-  PRIMEIRO, Unity DEPOIS.** Blazor WASM = o mesmo motor C# roda no NAVEGADOR (WASM),
-  UI Razor simples, hospedagem GRÁTIS estática no GitHub Pages (link jogável de
-  portfólio), reusa motor+seams pro Unity depois. Single-player, **save local**
-  (`localStorage` no Blazor / arquivo+Steam/Play no Unity — pela porta
-  `IRepositorioDeSave`). Repo PÚBLICO + LICENSE. **Sem SQL, sem API/servidor próprio**
-  (descartados: reescrever em JS = 2º motor; C#-backend+API = precisa hospedar servidor).
+  assembly C# — é onde o rigor rende. **Destino (jul/2026): APP NATIVO DESKTOP,
+  baixável.** O jogo já é `<OutputType>Exe</OutputType>` — roda NATIVO na máquina, sem
+  servidor. Distribuição: `dotnet publish` self-contained → **.exe no GitHub Releases**
+  (baixa e joga; sem instalar .NET). A "pele" (View) vira **webview HTML/CSS/JS** (danos
+  pulando em CSS; o clique entra pelo `IEntrada`, o C# nativo faz a lógica atrás de uma
+  ponte local — sem WASM, sem demora de carregamento, sem servidor). Ferramenta específica
+  (Photino / WebView2) decidida na hora do porte. Single-player, **save local** pela porta
+  `IRepositorioDeSave`. Repo PÚBLICO + LICENSE. **Sem SQL, sem API/servidor próprio.**
+  Descartados: Blazor WASM (o runtime .NET baixa antes de rodar = demora que o Gabriel quer
+  evitar); reescrever em JS = 2º motor; C#-backend+API = precisa hospedar servidor. **Unity
+  fica como caminho alternativo futuro** (se um dia quiser mobile/console ou animação pesada;
+  os mesmos seams reaproveitam).
 - **Um PR, um tema.** Não abrir duas frentes grandes ao mesmo tempo.
 - **Destravar de forma encadeada.** Escolher a ordem onde cada peça destrava a
   próxima e minimiza retrabalho. Pode-se reabrir algo, mas o caminho limpo é melhor
@@ -43,17 +48,20 @@
 
 ---
 
-## FILA DE EXECUÇÃO (rumo ao porte: Blazor → Unity) — ordem mestra
+## FILA DE EXECUÇÃO (rumo ao porte: app nativo desktop) — ordem mestra
 
-> **Decisão (jul/2026): BLAZOR WebAssembly PRIMEIRO, Unity DEPOIS.** O objetivo do Blazor
-> é sair do console com um **link jogável no GitHub** (portfólio) sem reescrever nada: o
-> motor C# atual roda no NAVEGADOR (WASM), UI Razor simples, GitHub Pages grátis. Reusa o
-> mesmo motor+seams pro Unity depois (só a camada View muda por plataforma). Single-player,
-> **save local** (`localStorage` pela porta `IRepositorioDeSave`). Repo PÚBLICO + LICENSE.
-> **Sem SQL, sem API/servidor.** Isso MATOU o enquadramento web/RESTful/SQL antigo.
-> (Descartados com razão: reescrita em JS = 2º motor; C#-backend+API+JS = precisa hospedar
-> servidor, não é grátis/estático. No WASM o código vai pro browser de qualquer jeito — não
-> dá pra esconder sem servidor; por isso repo público + LICENSE em vez de tentar ocultar.)
+> **Decisão (jul/2026): APP NATIVO DESKTOP BAIXÁVEL.** O jogo já é um executável C#
+> (`OutputType Exe`) — roda NATIVO na máquina, sem servidor. Sai do console trocando só a
+> View: a "pele" vira **webview HTML/CSS/JS** (o Gabriel quer aprender web e o motor pluga
+> atrás de uma ponte local), com o C# rodando nativo (sem WASM → **sem demora de
+> carregamento**). Distribuição: `dotnet publish` self-contained → **.exe no GitHub
+> Releases** (baixa e joga, não precisa instalar .NET). Ferramenta de webview específica
+> (Photino / WebView2) decidida no porte. Single-player, **save local** pela porta
+> `IRepositorioDeSave`. Repo PÚBLICO + LICENSE. **Sem SQL, sem API/servidor.** Isso MATOU o
+> enquadramento web/RESTful/SQL antigo. (Descartados: **Blazor WASM** — o runtime baixa
+> antes de rodar, é a demora que se quer evitar; reescrita em JS = 2º motor;
+> C#-backend+API+JS = precisa hospedar servidor. **Unity** fica como alternativa futura para
+> mobile/console ou animação pesada — os mesmos seams reaproveitam.)
 >
 > **Como atacar:** FECHAR a FILA A no console (domínio, serve qualquer plataforma) ANTES do
 > porte. Itens 1 por 1 (cada um = 1 PR, 1 mergeado antes do próximo). A FILA B espera o porte.
@@ -112,7 +120,14 @@
    virou `EventoCura?`** (simétrico ao `Dano`): a cura de reação agora usa a **MESMA `ExibirCura`** da
    cura de habilidade (mensagem padrão "💚 X recuperou Y", não bespoke por reação — pedido do Gabriel).
    É o embrião do log/stream da FILA B.
-8. **Capacidade C — stat sob demanda (`IContribui*`)** — generalizar pros outros stats.
+8. ✅ **Capacidade C — stat sob demanda (`IContribui*`)** — generalizada pros 4 stats. Cada
+   getter (`Ataque`/`Defesa`/`TaxaCrit`/`DanoCrit`) agora SOMA a interface de contribuição com
+   sinal (`IContribuiAtaque`/`IContribuiDefesa`/`IContribuiTaxaCrit`/`IContribuiDanoCrit`), não
+   tipo concreto — inclusive o getter `Defesa`, que estava meio-migrado (ReceberDano já usava a
+   interface). **Matriz de status agora simétrica** (buff + debuff pra todo stat): nasceram
+   `ReducaoAtaque`, `ReducaoTaxaCrit`, `BuffDanoCrit`, `ReducaoDanoCrit` (só infra — champs ligam
+   no rebalance #16). `AtaqueComStacks` exposto (espelho de `DefesaComStacks`). Refactor puro,
+   nenhum número mudou; +6 testes headless (getters são puros).
 9. **Capacidade D — comportamento de turno** (Medo/Preso/Irritar como família).
 10. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado
     à mão. Follow-on da Composição.
@@ -134,15 +149,19 @@
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
 
 ### 🔵 FILA B — precisa do porte (sair do console)
-**Porte 1 = BLAZOR WASM (primeiro):**
-- **View Razor** — os componentes que substituem `CombateView`/`MenuView` (os seams
-  `IApresentacao`/`IEntrada`/`IControladorDeTurno` viram impls Blazor; o motor pluga direto).
-  Personagens = EMOJIS por ora (sem sprites).
-- **`SaveLocalStorage`** — impl da porta `IRepositorioDeSave` sobre o `localStorage` do navegador
-  (via JS interop). É a troca de impl que o #6 deixou pronta.
-- **Deploy GitHub Pages** — publish estático (base href, `.nojekyll`, redirect de 404). Grátis.
+**Porte = APP NATIVO DESKTOP com pele webview (HTML/CSS/JS):**
+- **View HTML/CSS/JS** — a UI que substitui `CombateView`/`MenuView`. Os seams
+  `IApresentacao`/`IEntrada`/`IControladorDeTurno` viram impls que conversam com a webview por
+  uma ponte local (`postMessage`): o clique volta pelo `IEntrada`, o C# nativo faz a lógica, o
+  resultado sobe pro JS animar (danos pulando em CSS). Personagens = EMOJIS por ora (sem sprites).
+- **Host da webview** — Photino (cross-platform) ou WebView2 (Windows); decisão no porte. O C#
+  roda NATIVO (não WASM) → zero tempo de carregamento.
+- **`SaveLocal` já serve** — a porta `IRepositorioDeSave` grava em arquivo na máquina (impl atual);
+  nada a trocar pro desktop. (Steam/Play Cloud entram só se um dia publicar em loja.)
+- **Distribuição** — `dotnet publish -c Release -r <rid> --self-contained` → .exe único → GitHub
+  Releases. Opcional: GitHub Actions builda o .exe a cada tag.
 
-**Porte 2 = UNITY (depois, reusa o mesmo motor):**
+**Alternativa futura = UNITY (se quiser mobile/console ou animação pesada; reusa o mesmo motor):**
 - **Input via Unity Input System** (mouse/gamepad; `Selecionar(N)` já é a ponte).
 - **Camada de animação/eventos** (coroutines/UnityEvents/animation events) — consome os eventos.
   Nota: contra-ataque com A1 usa a animação de A1 do PRÓPRIO champ (já roda a habilidade A1 real
@@ -805,8 +824,10 @@ hoje do que fizemos antigamente". Guard-clause em código interno fica DE FORA d
 - B) Intervenção no dano → IModificaDanoRecebido FEITO (o `DeveAgir` foi REMOVIDO na unificação
   do ignorar — jul/2026; a decisão virou 1 gate de lista no ReceberDano).
 - E) Bloqueio de aplicação → IBloqueiaStatus FEITO.
-- C) Stat sob demanda → IContribui* (BuffDefesa/ReducaoDefesa já espelhados). PENDENTE (FILA A #6).
-- D) Comportamento de turno (Medo/Preso/Irritar) → PENDENTE (FILA A #7). Medo com grau, Preso como
+- C) Stat sob demanda → IContribui* ✅ **FEITO (FILA A #8, jul/2026).** Generalizado pros 4 stats
+  (`IContribuiAtaque`/`IContribuiDefesa`/`IContribuiTaxaCrit`/`IContribuiDanoCrit`); todo getter soma
+  a interface com sinal. Matriz simétrica: cada stat tem buff (+) e debuff (−).
+- D) Comportamento de turno (Medo/Preso/Irritar) → PENDENTE (FILA A #9). Medo com grau, Preso como
   família futura, Irritar fica de fora. (Antes era "não desenhar até pedir"/YAGNI; Gabriel decidiu
   jul/2026 fazer mesmo assim — sair do "em espera" pra fila ativa.)
 
@@ -978,8 +999,9 @@ tudo estabilizar.
   (natureza ∪ golpe ∪ champ). Anti-StackOverflow de proteção mútua agora estrutural
   (`DanoIndireto.Ignora ∋ ProtecaoAliado`). `NaturezasDano.Direto` deletado (órfão). Paridade
   provada por 5 testes. (Antes: o passo 1 introduziu o `DeveAgir`; agora ele morreu no passo final.)
-- **Capacidade C (IContribuiDefesa):** BuffDefesa/ReducaoDefesa sobre DefesaComStacks; sem
-  inconsistência (camadas distintas).
+- **Capacidade C (IContribui*, generalizada FILA A #8):** os 4 stats (Ataque/Defesa/TaxaCrit/
+  DanoCrit) somam a interface de contribuição com sinal; matriz de status simétrica (buff+debuff
+  por stat). Sem inconsistência (camadas distintas; `Sum` == `FirstOrDefault` pois não-empilham).
 - **fix Veneno tick:** dano do tick é 5% fixo (não × Stacks); acúmulo só na Explosão.
 - **fix Save defensivo:** trata JSON corrompido com fallback, no limite de I/O.
 - **TurnoDoPersonagem (relógio)** extraído. ADR em docs/. Falta reset 1x-por-agressor + evento de

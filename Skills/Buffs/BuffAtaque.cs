@@ -9,8 +9,9 @@ namespace ApostlesWar.Skills.Buffs
     /// 
     /// Não acumula: se já houver BuffAtaque, mantém o de maior Valor;
     /// em empate de Valor, mantém o de maior duração.
+    /// ContribuicaoAtaque expõe quanto este buff soma agora, pro getter de Ataque.
     /// </summary>
-    class BuffAtaque : Buff
+    class BuffAtaque : Buff, IContribuiAtaque
     {
         public BuffAtaque(int duracao = 2, double percentual = 0.25)
             : base("ATK+", "⚔️", duracao, percentual, $"+{percentual * 100:F0}% ATK.") { }
@@ -30,6 +31,13 @@ namespace ApostlesWar.Skills.Buffs
 
             alvo.StatusAtivos.Add(this);
         }
+
+        /// <summary>
+        /// Quanto este buff soma ao ataque AGORA: percentual sobre a base com
+        /// itens e stacks permanentes (mesma base que o getter de Ataque usa).
+        /// </summary>
+        public int ContribuicaoAtaque(Combate portador) =>
+            (int)(portador.AtaqueComStacks * Valor);
 
         public override void Remover(Combate alvo)
         {

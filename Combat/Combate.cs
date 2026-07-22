@@ -372,6 +372,16 @@ namespace ApostlesWar
             DanoRecebido += danoFinal;
             if (atacante != null) atacante.DanoCausado += danoFinal;
 
+            // Piso de HP (Invencível, via IDefineHPMinimo): o dano acima já foi contado CHEIO — só o HP
+            // é clampado pro maior piso ativo. Respeita o MESMO gate de ignorados (um golpe fura o status
+            // pra "matar através"). Fica FORA da mitigação de dano de propósito: assim o DanoEfetivo segue
+            // integral e o lifesteal enxerga o valor real, mesmo com o portador em 1 HP.
+            var pisos = StatusAtivos.OfType<IDefineHPMinimo>()
+                .Where(s => !ignorados.Any(t => t.IsAssignableFrom(((StatusEffect)s).GetType())))
+                .Select(s => s.HPMinimo());
+            if (pisos.Any())
+                HPAtual = Math.Max(HPAtual, pisos.Max());
+
             // Confirma a morte AQUI (ponto único de dano — ataque, Veneno, Queima, explosão,
             // reflexo, todos passam por ReceberDano). Antes de finalizar, consulta o prevent-death
             // (IPrevineMorte, mesmo padrão do IModificaDanoRecebido acima): o Guarda sobrevive SEM

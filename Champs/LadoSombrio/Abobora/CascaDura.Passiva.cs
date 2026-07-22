@@ -15,7 +15,7 @@ namespace ApostlesWar.Champs.LadoSombrio
 
         public bool Bloqueia(StatusEffect novo) => novo is Debuff;
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo)
             => SemDano();
     }
 }

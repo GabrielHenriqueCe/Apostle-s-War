@@ -49,7 +49,12 @@ namespace ApostlesWar
 
         public void AumentarDuracao(int turnos) => DuracaoRestante += turnos;
         public void ReduzirDuracao(int turnos) => DuracaoRestante = Math.Max(0, DuracaoRestante - turnos);
-        public virtual void AoIniciarTurno(Combate portador) { }
+        /// <summary>
+        /// Tick de início do turno do portador. Devolve o EventoCombate do que aconteceu (dano do
+        /// Veneno/Queima, cura da CuraContinua) pro combate EXIBIR, ou null se o tick não é visível
+        /// (ex: Maldição só reduz HP máximo). O null morre na porta (TurnoDoPersonagem.Iniciar filtra).
+        /// </summary>
+        public virtual EventoCombate? AoIniciarTurno(Combate portador) => null;
 
 
         public virtual void Aplicar(Combate alvo)

@@ -27,7 +27,7 @@ namespace ApostlesWar
             _chance = chance;
         }
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             if (_chance < 1.0 && Random.Shared.NextDouble() >= _chance) return;
             _fabrica(atacante).Aplicar(alvo);

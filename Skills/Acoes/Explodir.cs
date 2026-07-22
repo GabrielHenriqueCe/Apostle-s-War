@@ -20,7 +20,7 @@ namespace ApostlesWar
         public Explodir(Seletor seletor, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _seletor = seletor;
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             IEnumerable<StatusEffect> candidatos = alvo.StatusAtivos
                 .Where(s => s is IStatusComTick && _seletor.Filtro(s));

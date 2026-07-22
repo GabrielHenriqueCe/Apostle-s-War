@@ -32,6 +32,6 @@ namespace ApostlesWar
         /// interpretador). Ações que causam dano acrescentam o EventoDano à lista — consumida
         /// pelas reações-do-atacante e pela exibição.
         /// </summary>
-        public abstract void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos);
+        public abstract void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos);
     }
 }

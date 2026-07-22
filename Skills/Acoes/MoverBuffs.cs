@@ -21,7 +21,7 @@ namespace ApostlesWar
         public MoverBuffs(Seletor seletor, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _seletor = seletor;
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             IEnumerable<Buff> candidatos = alvo.StatusAtivos.OfType<Buff>().Where(b => _seletor.Filtro(b));
             if (_seletor.Aleatorio)

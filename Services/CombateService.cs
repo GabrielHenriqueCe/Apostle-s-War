@@ -99,7 +99,8 @@ namespace ApostlesWar.Services
 
             var turno = new TurnoDoPersonagem(atacante);
 
-            turno.Iniciar();
+            var ticks = turno.Iniciar();
+            MostrarTicks(jogador, inimigo, ticks);   // veneno/queima/cura-contínua VISÍVEIS no início do turno
             DispararEventoInicioDeTurno(atacante, aliados, defensores);
             if (!atacante.EstaVivo()) return;
 
@@ -117,6 +118,25 @@ namespace ApostlesWar.Services
         #endregion
 
         #region Hooks de turno
+
+        /// <summary>
+        /// Mostra os eventos dos ticks de status do início do turno (veneno/queima causando dano,
+        /// cura-contínua curando) — o HP já foi aplicado no TurnoDoPersonagem.Iniciar; aqui redesenha
+        /// a partida e exibe cada evento com pausa, no mesmo padrão do ataque. Lista vazia = no-op.
+        /// </summary>
+        private void MostrarTicks(List<Combate> jogador, List<Combate> inimigo, List<EventoCombate> ticks)
+        {
+            if (ticks.Count == 0) return;
+
+            _combateView.LimparTela();
+            _combateView.ExibirPartida(jogador, inimigo);
+            foreach (var ev in ticks)
+            {
+                if (ev is EventoDano d) _combateView.ExibirDanoDeStatus(d);
+                else if (ev is EventoCura c) _combateView.ExibirCura(c);
+                Aguardar(1500);
+            }
+        }
 
         /// <summary>
         /// Dispara o evento InicioDoTurno das passivas via IReageAoInicioTurno (ex:
@@ -165,7 +185,7 @@ namespace ApostlesWar.Services
                 if (VerificarMedoEAplicar(atacante)) return;
 
                 var resultado = atacante.Atacar(irritar.Aplicador);
-                ExecutarAtos(new List<EventoDano> { resultado }, atacante, aliados, defensores, TipoAtaque.Sequencial);
+                ExecutarAtos(new List<EventoCombate> { resultado }, atacante, aliados, defensores, TipoAtaque.Sequencial);
                 return;
             }
 
@@ -237,11 +257,20 @@ namespace ApostlesWar.Services
         /// Ordem do ADR: AtoReacaoDoAlvo → AtoMorte → AtoReacaoDoAtacante.
         /// Compartilhado pelo caminho normal (ExecutarHabilidade) e pelo Irritar.
         /// </summary>
-        private void ExecutarAtos(List<EventoDano> resultados, Combate atacante,
+        private void ExecutarAtos(List<EventoCombate> resultados, Combate atacante,
             List<Combate> aliados, List<Combate> defensores, TipoAtaque tipoAtaque)
         {
-            foreach (var r in resultados)
+            foreach (var ev in resultados)
             {
+                // Cura é irmã do dano no stream, mas só EXIBE — não dispara reação de dano.
+                if (ev is EventoCura cura)
+                {
+                    _combateView.ExibirCura(cura);
+                    Aguardar(1500);
+                    continue;
+                }
+
+                var r = (EventoDano)ev;
                 _combateView.ExibirResultadoAtaque(atacante, r.Alvo, r);
                 Aguardar(1500);
 
@@ -255,8 +284,9 @@ namespace ApostlesWar.Services
                     ProcessarReacoesAtacantePorAtaque(atacante, r.Alvo, r, aliados, defensores);
             }
 
-            if (tipoAtaque == TipoAtaque.AreaDeEfeito && resultados.Count > 0)
-                ProcessarReacoesAtacantePorAtaque(atacante, resultados[0].Alvo, resultados[0], aliados, defensores);
+            var danos = resultados.OfType<EventoDano>().ToList();
+            if (tipoAtaque == TipoAtaque.AreaDeEfeito && danos.Count > 0)
+                ProcessarReacoesAtacantePorAtaque(atacante, danos[0].Alvo, danos[0], aliados, defensores);
         }
 
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, Combate alvoInicial,
@@ -280,13 +310,16 @@ namespace ApostlesWar.Services
 
             // Os Atos
             var resultados = hab.Ativar(ctx, alvoInicial);                             // AtoExecucao
-            ExecutarAtos(resultados, atacante, aliados, defensores, hab.TipoAtaque);   // Reação + Morte + Atacante
-            atacante.Cooldowns[hab].Usar();                                            // AtoEncerramento
+
+            // Nome da habilidade PRIMEIRO — "X usou {hab}!" antes dos resultados (narrativa).
             if (hab is not AtaqueBasico)
             {
                 _combateView.ExibirUsoHabilidade(atacante, hab);
-                Aguardar(2500);
+                Aguardar(1500);
             }
+
+            ExecutarAtos(resultados, atacante, aliados, defensores, hab.TipoAtaque);   // Reação + Morte + Atacante
+            atacante.Cooldowns[hab].Usar();                                            // AtoEncerramento
         }
 
         #endregion
@@ -432,10 +465,10 @@ namespace ApostlesWar.Services
                 if (res.Dano != null)
                     _combateView.ExibirResultadoAtaque(origem, res.Dano.Alvo, res.Dano);
 
-                // Cura: exibição a definir num sub-PR (depende de método na CombateView).
-                // C1 não tem implementador de cura ainda, então fica como TODO.
+                if (res.Cura != null)
+                    _combateView.ExibirCura(res.Cura);   // mesma view da cura de habilidade
 
-                if (res.Mensagem != "" || res.Dano != null)
+                if (res.Mensagem != "" || res.Dano != null || res.Cura != null)
                     Aguardar(1500);
             }
         }

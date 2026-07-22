@@ -15,7 +15,7 @@ namespace ApostlesWar
         public RemoverDebuffs(Seletor seletor, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _seletor = seletor;
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             IEnumerable<Debuff> candidatos = alvo.StatusAtivos.OfType<Debuff>().Where(d => _seletor.Filtro(d));
             if (_seletor.Aleatorio)

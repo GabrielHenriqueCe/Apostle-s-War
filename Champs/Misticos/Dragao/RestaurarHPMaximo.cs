@@ -14,7 +14,7 @@ namespace ApostlesWar.Champs.Misticos
         public RestaurarHPMaximo(double percentualCap, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _percentualCap = percentualCap;
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => alvo.RestaurarHPMaximo((int)(alvo.HPMaximoInicial * _percentualCap));
     }
 }

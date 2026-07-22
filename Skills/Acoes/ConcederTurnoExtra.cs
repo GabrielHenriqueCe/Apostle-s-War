@@ -11,7 +11,7 @@ namespace ApostlesWar
         public ConcederTurnoExtra(Escopo escopo = Escopo.ProprioAtacante, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) { }
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => alvo.ConcederTurnoExtra();
     }
 }

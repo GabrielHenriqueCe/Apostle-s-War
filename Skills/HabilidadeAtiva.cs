@@ -87,9 +87,9 @@ namespace ApostlesWar
         /// — é o que alimenta o menu de alvo. Cada ação re-filtra o seu conjunto pelo EstadoAlvo
         /// DELA na execução. A derivação do pick a partir das ações (§8.2) fica pra depois.
         /// </summary>
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo)
         {
-            var eventos = new List<EventoDano>();
+            var eventos = new List<EventoCombate>();
             var alvosResolvidos = ResolverAlvos(alvo, ObterListaPrincipal(ctx));
             foreach (var acao in Acoes)
                 foreach (Combate combatente in ResolverEscopo(acao, alvosResolvidos, ctx))
@@ -189,7 +189,7 @@ namespace ApostlesWar
         protected void AplicarDebuff(Combate alvo, Debuff debuff)
             => debuff.Aplicar(alvo);
 
-        protected List<EventoDano> SemDano() => new List<EventoDano>();
+        protected List<EventoCombate> SemDano() => new List<EventoCombate>();
 
         /// <summary>
         /// Semântica do evento de ataque. Default Sequencial (a maioria das habilidades de dano

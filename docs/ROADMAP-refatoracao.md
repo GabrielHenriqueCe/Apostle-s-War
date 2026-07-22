@@ -90,12 +90,19 @@
    (`ReceberDano` pega ataque+veneno+queima+explosão; `AplicarCura` a cura); tela de **resumo de fim
    de batalha** por personagem do time (`CombateView.ExibirResumoBatalha`); **TaxaCrit/DanoCrit ao
    vivo** na tela de combate (🎯%/💥x — absorve o item #11). Sem tocar no canal de eventos do motor.
-   **7b PENDENTE (superfície larga, PR próprio):** cura vira `EventoCura` (irmão do `EventoDano`) e
-   **veneno/queima/cura ficam VISÍVEIS com mensagem durante o combate** (ideia do Gabriel: no início
-   do turno, estado → pausa → "☠️ Veneno causou X" com o HP caindo), seguindo o MESMO padrão de
-   mensagem que já existe (`ExibirResultadoAtaque`). O DoT reusa `EventoDano`+display existente; só a
-   cura toca a assinatura compartilhada das ~15 Ações (por isso é PR à parte). Embrião do log/stream
-   da FILA B.
+   **7b ✅ FEITO:** stream único `EventoCombate` (base) com `EventoDano` e `EventoCura` irmãos;
+   `HabilidadeAtiva.Ativar`/`Acao.Executar` devolvem `List<EventoCombate>` (as reações filtram
+   `.OfType<EventoDano>()`). **Cura vira evento** (a Ação `Cura` emite `EventoCura`; `Curar`/`AplicarCura`
+   retornam o quanto curou); **veneno/queima/cura-contínua ficam VISÍVEIS no início do turno**
+   (`AoIniciarTurno` devolve `EventoCombate?`; `TurnoDoPersonagem.Iniciar` coleta — **nulo morre na
+   porta**; `CombateService.MostrarTicks` exibe). Views novas: `ExibirDanoDeStatus`/`ExibirCura`.
+   A cura mostra mesmo curando 0 ("já está com a vida cheia" — decisão do Gabriel). **Nome da
+   habilidade agora aparece ANTES dos resultados** (`ExibirUsoHabilidade` movido pra antes do
+   `ExecutarAtos`). **Cura de REAÇÃO corrigida** (Sedento/Sangramento/SedentoDeSangue/Bênção): usavam o
+   valor PEDIDO na mensagem; agora usam o RETORNO de `Curar` (o real, capado). E **`ResultadoReacao.Cura`
+   virou `EventoCura?`** (simétrico ao `Dano`): a cura de reação agora usa a **MESMA `ExibirCura`** da
+   cura de habilidade (mensagem padrão "💚 X recuperou Y", não bespoke por reação — pedido do Gabriel).
+   É o embrião do log/stream da FILA B.
 8. **Capacidade C — stat sob demanda (`IContribui*`)** — generalizar pros outros stats.
 9. **Capacidade D — comportamento de turno** (Medo/Preso/Irritar como família).
 10. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado

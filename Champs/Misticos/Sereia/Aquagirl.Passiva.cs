@@ -18,6 +18,6 @@ namespace ApostlesWar.Champs.Misticos
         public int ModificarDanoRecebido(Combate portador, int dano) =>
             (int)(dano * (1 - PercentualReducao));
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

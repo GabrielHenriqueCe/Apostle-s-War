@@ -21,15 +21,11 @@ namespace ApostlesWar.Skills.Buffs
             if (ctx.DanoCausado <= 0)
                 return new List<ResultadoReacao>();
 
-            int cura = (int)(ctx.DanoCausado * Valor);
-            ctx.Portador.Curar(cura);
+            int cura = ctx.Portador.Curar((int)(ctx.DanoCausado * Valor));   // retorno = cura real (capada)
 
             return new List<ResultadoReacao>
             {
-                new ResultadoReacao(
-                    Mensagem: $"{ctx.Portador.Personagem.Nome} se cura em {cura} com Sedento! 🩸",
-                    Cura: cura
-                )
+                new ResultadoReacao(Cura: new EventoCura(ctx.Portador, ctx.Portador, cura, ctx.Portador.HPAtual))
             };
         }
 

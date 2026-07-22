@@ -29,10 +29,15 @@
         /// (O evento InicioDoTurno das passivas é disparado pelo CombateService
         /// por enquanto — depende do sistema de passivas, que o C5 vai migrar.)
         /// </summary>
-        public void Iniciar()
+        public List<EventoCombate> Iniciar()
         {
+            var eventos = new List<EventoCombate>();
             foreach (StatusEffect status in _combatente.StatusAtivos.ToList())
-                status.AoIniciarTurno(_combatente);
+            {
+                EventoCombate? ev = status.AoIniciarTurno(_combatente);
+                if (ev != null) eventos.Add(ev);   // nulo morre na porta: a lista devolvida é sempre não-nula
+            }
+            return eventos;
         }
 
         /// <summary>

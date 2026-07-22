@@ -47,11 +47,11 @@ namespace ApostlesWar.Skills.Debuffs
         /// No início do turno do portador: causa dano direto e reduz HP máximo.
         /// Redução respeita o cap próprio (25% do HPMaximoInicial).
         /// </summary>
-        public override void AoIniciarTurno(Combate portador)
+        public override EventoCombate? AoIniciarTurno(Combate portador)
         {
             int valor = (int)(portador.HPMaximoInicial * DanoPorTurno);
             // Dano à vida: ignora defesa e escudo, mas BloquearDano ainda bloqueia.
-            portador.ReceberDano(valor, NaturezasDano.QueimaDano);
+            var (efetivo, absorvido) = portador.ReceberDano(valor, NaturezasDano.QueimaDano);
             // (a ReduzirHPMaximo abaixo continua igual — ignora tudo)
 
             // Redução só se cap próprio não foi atingido
@@ -63,6 +63,9 @@ namespace ApostlesWar.Skills.Debuffs
                 int reducao = Math.Min(valor, aindaPodeReduzir);
                 portador.ReduzirHPMaximo(reducao);
             }
+
+            return new EventoDano(portador, portador, valor, efetivo, absorvido,
+                Critico: false, HPRestante: Math.Max(0, portador.HPAtual), NaturezasDano.QueimaDano);
         }
 
         public override void Remover(Combate alvo)

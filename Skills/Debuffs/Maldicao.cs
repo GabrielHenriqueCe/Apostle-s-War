@@ -42,7 +42,7 @@ namespace ApostlesWar.Skills.Debuffs
         /// <summary>
         /// No início do turno do portador: reduz HPMaximo (sem dano).
         /// </summary>
-        public override void AoIniciarTurno(Combate portador)
+        public override EventoCombate? AoIniciarTurno(Combate portador)
         {
             int valor = (int)(portador.HPMaximoInicial * ReducaoPorTurno);
 
@@ -54,6 +54,8 @@ namespace ApostlesWar.Skills.Debuffs
                 int reducao = Math.Min(valor, aindaPodeReduzir);
                 portador.ReduzirHPMaximo(reducao);
             }
+
+            return null;   // redução de HP máximo não é evento de dano/cura visível
         }
 
         public override void Remover(Combate alvo)

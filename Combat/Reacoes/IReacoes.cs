@@ -20,14 +20,16 @@
     /// <summary>
     /// O que uma reação produziu, pro CombateService exibir. A reação DECLARA
     /// o que fez; o orquestrador EXIBE. A reação nunca chama a view do combate direto.
-    /// Dano: se a reação causou dano (reflexo). Cura: se curou (Sedento).
+    /// Dano: se a reação causou dano (reflexo) — exibido pela mesma view do ataque.
+    /// Cura: se curou (Sedento/Sangramento/Bênção) — um EventoCura exibido pela MESMA `ExibirCura`
+    /// da cura de habilidade (mensagem padrão, não bespoke por reação).
     /// Revide: se a reação declarou um contra-ataque (ContraAtaque, Operário) —
     /// carrega QUAL habilidade usar, não executa nada aqui.
     /// </summary>
     record ResultadoReacao(
         string Mensagem = "",
         EventoDano? Dano = null,
-        int Cura = 0,
+        EventoCura? Cura = null,
         Revide? Revide = null
     );
 

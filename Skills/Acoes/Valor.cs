@@ -8,7 +8,7 @@ namespace ApostlesWar
     /// final (ver ADR-composicao-de-acoes §5.5). A diversidade de fonte é mantida de propósito,
     /// sem forçar um padrão único.
     /// </summary>
-    delegate int ValorFn(Combate atacante, Combate alvo, List<EventoDano> eventos);
+    delegate int ValorFn(Combate atacante, Combate alvo, List<EventoCombate> eventos);
 
     static class Valor
     {
@@ -22,6 +22,6 @@ namespace ApostlesWar
         public static ValorFn PorHPDoAtacante(double percentual) => (atk, alvo, ev) => (int)(atk.HPMaximo * percentual);
 
         /// <summary>Percentual do dano TOTAL já causado pela habilidade (agregado no eventos).</summary>
-        public static ValorFn PorDanoCausado(double percentual) => (atk, alvo, ev) => (int)(ev.Sum(e => e.DanoEfetivo) * percentual);
+        public static ValorFn PorDanoCausado(double percentual) => (atk, alvo, ev) => (int)(ev.OfType<EventoDano>().Sum(e => e.DanoEfetivo) * percentual);
     }
 }

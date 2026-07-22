@@ -202,6 +202,10 @@ Refactor estrutural do núcleo. Sequência sugerida (cada passo buildável, Stra
    transição do passo 1.
 4. **Guarda limpa** — sai do hack [sistema-morte-como-estado]; vira prevenção real no
    AtoMorte (intervém antes da transição). Fecha o débito conceitual da Guarda.
+   **(Refinado jul/2026 — fix de bug):** a prevenção migrou de reação (`IReageAntesDeMorrer`, que
+   usava `AplicarRevive` e PERDIA os status) para a CAPACIDADE `IPrevineMorte`, consultada pelo
+   `Combate.ConfirmarMorte()` DENTRO do `ReceberDano` (funil único de dano). O portador evita a morte
+   sem nunca virar Morto → **status preservados**. `IReageAntesDeMorrer` foi removida (código morto).
 5. **Seleção de alvo por estado** — reviver seleciona morto, curar seleciona vivo.
 
 Decisões de implementação a tomar na hora (não são dúvidas de conceito):

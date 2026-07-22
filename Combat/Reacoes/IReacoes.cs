@@ -103,27 +103,14 @@
     /// Reage quando o portador MATA um alvo (o golpe reduziu o alvo a 0 HP).
     /// Dispara por alvo morto (numa AoE que mata vários, dispara por cada morto).
     /// Portador = quem matou; Contraparte = o morto.
-    /// IMPORTANTE: roda DEPOIS de IReageAntesDeMorrer (Guarda) e ANTES de
-    /// IReageAoMorrer (Necromancia). Se a Guarda reverteu a morte, este disparo
-    /// não ocorre (alvo voltou a EstaVivo).
+    /// IMPORTANTE: se o prevent-death (Guarda, via IPrevineMorte no ReceberDano) evitou a
+    /// morte, o alvo segue Vivo e este disparo não ocorre. Roda ANTES de IReageAoMorrer
+    /// (Necromancia) — a Sentença já está no morto quando a Necromancia tenta reviver.
     /// Implementadores: Fada, Vilao.
     /// </summary>
     interface IReageAoMatar
     {
         List<ResultadoReacao> AoMatar(ContextoReacao ctx);
-    }
-
-    /// <summary>
-    /// Intervém ANTES das consequências da morte (antes de IReageAoMatar e IReageAoMorrer).
-    /// O portador chegou a 0 HP e está em estado Morto; esta interface pode REVERTER
-    /// a transição chamando AplicarRevive — mantendo o personagem como Vivo, impedindo
-    /// que o Vilão perceba a morte e que a Necromância tente reviver.
-    /// Portador = quem quase morreu; Contraparte = quem matou.
-    /// Implementador: GuardaReal (passiva do Guarda).
-    /// </summary>
-    interface IReageAntesDeMorrer
-    {
-        List<ResultadoReacao> AntesDeMorrer(ContextoReacao ctx);
     }
 
     /// <summary>

@@ -336,9 +336,13 @@ ProcessarReacoesAtacante dividido em PorAlvo (dentro do foreach) e PorAtaque (se
 TipoAtaque). Ver "Dívidas" — a repetição do loop vira helper ColetarReacoes<T>.
 
 ### Ordem crítica preservada (morte/revive)
-IReageAntesDeMorrer (Guarda) → IReageAoMatar (Vilao) → IReageAoMorrer (Necromancia).
-A Guarda reverte a morte antes do Vilão enxergá-la; se reverteu, os outros dois não disparam.
-Se não reverteu, o Vilão bloqueia o revive antes da Necromância tentar.
+**ATUALIZADO (jul/2026 — fix do bug do Guarda):** prevent-death (`IPrevineMorte`, no `ConfirmarMorte`
+dentro do `ReceberDano`) → IReageAoMatar (Vilao) → IReageAoMorrer (Necromancia). O Guarda **EVITA a
+morte** (não reverte): consultado como CAPACIDADE no instante do golpe fatal, o portador segue Vivo
+**com os status intactos** (nunca vira Morto). Se não previne, o Vilão bloqueia o revive antes da
+Necromância tentar. **Bug corrigido:** antes o Guarda usava `AplicarRevive` (Vivo novo) e perdia todos
+os debuffs/buffs; `IReageAntesDeMorrer` (só o Guarda implementava) foi REMOVIDA junto — código morto.
+Ver ADR-estado-de-vida-e-atos §11.
 
 ### Aposentar o sistema velho
 DeveAtivar/Ativar virtual e o enum EventoCombate só saem quando a ÚLTIMA passiva migrar.

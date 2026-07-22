@@ -248,6 +248,35 @@ namespace Tests
             Assert.Equal(5000, inimigo2.HPAtual);
         }
 
+        // ---------- Prevent-death (Guarda) — fix do bug: sobreviver preserva os status ----------
+
+        [Fact]
+        public void GuardaReal_EvitaAMorte_MantendoOsStatus()
+        {
+            var guarda = new Jogador(new Personagem(1, Faccao.Reino, "Guarda", "⚜️", 1000, 200, 0,
+                new ApostlesWar.Champs.Reino.GuardaReal()));
+            new Veneno(2).Aplicar(guarda);                                 // debuff que DEVE sobreviver
+            Assert.True(guarda.StatusAtivos.OfType<Veneno>().Any());
+
+            Matar(guarda);                                                 // golpe fatal
+
+            Assert.True(guarda.EstaVivo());                                // sobreviveu (não virou Morto)
+            Assert.Equal(1, guarda.HPAtual);                               // com 1 HP
+            Assert.True(guarda.StatusAtivos.OfType<Veneno>().Any());       // STATUS PRESERVADO (era o bug)
+            Assert.True(guarda.StatusAtivos.OfType<Invencivel>().Any());   // ganhou Invencível
+        }
+
+        [Fact]
+        public void SemPreventDeath_MorreDeVerdade_ELimpaOsStatus()
+        {
+            var alvo = Novo();
+            new Veneno(2).Aplicar(alvo);
+            Matar(alvo);
+
+            Assert.False(alvo.EstaVivo());                                 // morreu de fato
+            Assert.Empty(alvo.StatusAtivos.OfType<Veneno>());              // Morto = status do Vivo somem
+        }
+
         [Fact]
         public void TipoAlvoAleatorio_ComUmVivoSo_AcertaOMesmoDuasVezes()
         {

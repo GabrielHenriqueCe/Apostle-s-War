@@ -128,7 +128,13 @@
    `ReducaoAtaque`, `ReducaoTaxaCrit`, `BuffDanoCrit`, `ReducaoDanoCrit` (só infra — champs ligam
    no rebalance #16). `AtaqueComStacks` exposto (espelho de `DefesaComStacks`). Refactor puro,
    nenhum número mudou; +6 testes headless (getters são puros).
-9. **Capacidade D — comportamento de turno** (Medo/Preso/Irritar como família).
+9. ✅ **Capacidade D — comportamento de turno** — o `CombateService` parou de decidir por tipo
+   concreto (`is Preso`/`OfType<Irritar>`/`OfType<Medo>`); cada status carrega a própria
+   capacidade. NÃO é uma "família" única (as formas diferem por FASE): `IPulaTurno` (Preso, antes
+   da escolha — marcador), `IForcaAcao` (Irritar, na escolha — devolve o alvo forçado),
+   `IParalisaAcao` (Medo, após a escolha — rola o dado). O `IPulaTurno` já nasce como a PORTA da
+   família de pular-turno (Congelar/Stun/Enraizado/Petrificado plugam sem tocar no fluxo — variantes
+   são tema à parte, o Gabriel desenha as diferenças). Migração pura; +3 testes headless.
 10. **`IModificaDanoCausado`** — espelho do Recebido no atacante; Piromancer para de ser fiado
     à mão. Follow-on da Composição.
 11. **Turno (resto)** — reset 1x-por-agressor das outras reações + `TimeAtualDoTurno` +
@@ -827,9 +833,14 @@ hoje do que fizemos antigamente". Guard-clause em código interno fica DE FORA d
 - C) Stat sob demanda → IContribui* ✅ **FEITO (FILA A #8, jul/2026).** Generalizado pros 4 stats
   (`IContribuiAtaque`/`IContribuiDefesa`/`IContribuiTaxaCrit`/`IContribuiDanoCrit`); todo getter soma
   a interface com sinal. Matriz simétrica: cada stat tem buff (+) e debuff (−).
-- D) Comportamento de turno (Medo/Preso/Irritar) → PENDENTE (FILA A #9). Medo com grau, Preso como
-  família futura, Irritar fica de fora. (Antes era "não desenhar até pedir"/YAGNI; Gabriel decidiu
-  jul/2026 fazer mesmo assim — sair do "em espera" pra fila ativa.)
+- D) Comportamento de turno → ✅ **FEITO (FILA A #9, jul/2026).** Três capacidades por FASE, cada
+  status dono do seu comportamento (o fluxo não decide mais por tipo concreto): `IPulaTurno` (Preso),
+  `IForcaAcao` (Irritar), `IParalisaAcao` (Medo). Descoberta ao investigar: NÃO eram uma "família"
+  única — hookam em fases diferentes (antes/na/depois da escolha) com formas diferentes (marcador/
+  alvo/bool), então ISP por fase, não interface-Deus. A "família" real é o pular-turno: `IPulaTurno`
+  é a porta pra Congelar/Stun/Enraizado/Petrificado (variantes = tema à parte, Gabriel desenha as
+  diferenças). A nota antiga "Irritar fica de fora" foi revista — ele entrou (o objetivo é tirar TODA
+  decisão de fluxo do combate).
 
 ### Helper ColetarReacoes<T> (dívida de repetição)
 **Status:** ✅ **FEITO (jul/2026, FILA A #2).** O padrão "varre StatusAtivos.OfType<T> +

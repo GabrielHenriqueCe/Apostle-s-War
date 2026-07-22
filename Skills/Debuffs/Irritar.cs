@@ -3,9 +3,10 @@
 namespace ApostlesWar.Skills.Debuffs
 {
     /// <summary>
-    /// Força o portador a atacar com A1 quem aplicou. Verificado no ExecutarTurno.
+    /// Força o portador a atacar com A1 quem aplicou. Carrega a capacidade IForcaAcao:
+    /// o turno pergunta o AlvoForcado, não olha o tipo concreto.
     /// </summary>
-    class Irritar : Debuff
+    class Irritar : Debuff, IForcaAcao
     {
         public Combate Aplicador { get; }
 
@@ -14,6 +15,9 @@ namespace ApostlesWar.Skills.Debuffs
         {
             Aplicador = aplicador;
         }
+
+        /// <summary>Alvo da ação forçada: quem aplicou o Irritar.</summary>
+        public Combate AlvoForcado() => Aplicador;
 
         public override void Remover(Combate alvo)
         {

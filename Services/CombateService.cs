@@ -104,7 +104,7 @@ namespace ApostlesWar.Services
             DispararEventoInicioDeTurno(atacante, aliados, defensores);
             if (!atacante.EstaVivo()) return;
 
-            if (atacante.StatusAtivos.Any(s => s is Preso))
+            if (atacante.StatusAtivos.OfType<IPulaTurno>().Any())
             {
                 turno.Finalizar();
                 return;
@@ -173,18 +173,19 @@ namespace ApostlesWar.Services
         {
             _combateView.LimparTela();
 
-            // Irritar: força A1 automático no aplicador (mas Medo pode interromper)
-            var irritar = atacante.StatusAtivos.OfType<Irritar>().FirstOrDefault();
-            if (irritar != null)
+            // Ação forçada (Irritar): o status decide o alvo; o fluxo executa A1 (mas paralisia pode interromper)
+            var forcaAcao = atacante.StatusAtivos.OfType<IForcaAcao>().FirstOrDefault();
+            if (forcaAcao != null)
             {
+                var alvoForcado = forcaAcao.AlvoForcado();
                 _combateView.ExibirPartida(aliados, defensores);
                 _combateView.ExibirMensagemPassiva(
-                    $"{atacante.Personagem.Simbolo} está irritado e ataca {irritar.Aplicador.Personagem.Simbolo} automaticamente!");
+                    $"{atacante.Personagem.Simbolo} está irritado e ataca {alvoForcado.Personagem.Simbolo} automaticamente!");
                 Aguardar(1500);
 
-                if (VerificarMedoEAplicar(atacante)) return;
+                if (VerificarParalisia(atacante)) return;
 
-                var resultado = atacante.Atacar(irritar.Aplicador);
+                var resultado = atacante.Atacar(alvoForcado);
                 ExecutarAtos(new List<EventoCombate> { resultado }, atacante, aliados, defensores, TipoAtaque.Sequencial);
                 return;
             }
@@ -206,14 +207,14 @@ namespace ApostlesWar.Services
         }
 
         /// <summary>
-        /// Verifica se o portador tem Medo e se trigga.
+        /// Consulta a capacidade de paralisia (Medo) do portador e rola o dado.
         /// Retorna true se a ação foi paralizada (chamador deve abortar).
         /// </summary>
-        private bool VerificarMedoEAplicar(Combate atacante)
+        private bool VerificarParalisia(Combate atacante)
         {
-            var medo = atacante.StatusAtivos.OfType<Medo>().FirstOrDefault();
-            if (medo == null) return false;
-            if (!medo.TentaParalizar()) return false;
+            var paralisia = atacante.StatusAtivos.OfType<IParalisaAcao>().FirstOrDefault();
+            if (paralisia == null) return false;
+            if (!paralisia.Paralisa()) return false;
 
             _combateView.ExibirMensagemPassiva(
                 $"{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} estava com medo e não conseguiu agir!");
@@ -300,8 +301,8 @@ namespace ApostlesWar.Services
                 Aguardar(1500);
             }
 
-            // Setup: Medo trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
-            if (VerificarMedoEAplicar(atacante))
+            // Setup: paralisia (Medo) trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
+            if (VerificarParalisia(atacante))
             {
                 atacante.Cooldowns[hab].Usar();
                 return;

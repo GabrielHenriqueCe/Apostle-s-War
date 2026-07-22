@@ -70,10 +70,12 @@ ReducaoDanoFixo.
 ### Categoria C — Modificação de stat (sob demanda)
 Soma/subtrai de um stat, calculado sob demanda pelos getters (Stats em
 Camadas). Buff e debuff do mesmo stat são ESPELHOS (mesmo mecanismo, sinal
-trocado): BuffDefesa (+) e ReducaoDefesa (−) já compartilham ContribuicaoDefesa.
-Vira: IContribuiDefesa (e futuros IContribuiAtaque / IContribuiCrit).
-Implementadores: BuffDefesa, ReducaoDefesa (e os getters de ATK/Crit quando
-houver buff/debuff correspondente).
+trocado): compartilham a Contribuicao<Stat>, com sinal.
+✅ CONSTRUÍDO pros 4 stats (FILA A #8, jul/2026): IContribuiAtaque,
+IContribuiDefesa, IContribuiTaxaCrit, IContribuiDanoCrit. Cada getter
+(Ataque/Defesa/TaxaCrit/DanoCrit) SOMA a interface — nenhum olha tipo concreto.
+Implementadores (matriz simétrica): BuffAtaque/ReducaoAtaque, BuffDefesa/
+ReducaoDefesa, BuffTaxaCrit/ReducaoTaxaCrit, BuffDanoCrit/ReducaoDanoCrit.
 Nota: passivas stat-builders permanentes (Ambicao, CoroaDoSoberano, Virus,
 OlhoClinico) NÃO são esta categoria — elas REAGEM a um momento (Categoria A) e,
 como efeito, chamam AdicionarBonusXPermanente. O gatilho é reação; o efeito é
@@ -122,7 +124,7 @@ migram quando tocadas (boy scout) ou em PRs dedicados sem urgência.
    - Criar as interfaces faltantes (IReageAoAtacar/Morrer/Matar).
 2. **Categoria B — intervenção no dano** (depois): IModificaDanoRecebido.
 3. **Categoria E — bloqueio** (depois): IBloqueiaStatus.
-4. **Categoria C — stat** (boy scout): IContribui* quando tocar.
+4. **Categoria C — stat** ✅ FEITO (FILA A #8): IContribui* pros 4 stats, matriz simétrica.
 5. **Categoria D — comportamento de turno** (baixa prioridade): avaliar se vale
    interface ou se a consulta atual basta.
 

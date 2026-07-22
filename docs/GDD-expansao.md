@@ -1,9 +1,11 @@
 # Apostle's War — GDD da Expansão (Pós-Porte)
 
 > **Status:** Ideias registradas, NÃO implementar no console.
-> Destino: expansão pós-porte. **Rumo do porte (jul/2026): Blazor WASM primeiro** (público,
-> jogável no GitHub Pages, reusa o motor C#), **Unity depois** (single-player, save local;
-> Steam/Play cloud via SDK de plataforma, não backend próprio). Sem SQL/servidor.
+> Destino: expansão pós-porte. **Rumo do porte (jul/2026): app nativo desktop baixável** —
+> o jogo já é `.exe` C#, roda nativo sem servidor; a pele vira **webview HTML/CSS/JS** (C#
+> nativo atrás, sem WASM → sem demora de carregamento), distribuído como .exe no **GitHub
+> Releases**. Single-player, save local pela porta `IRepositorioDeSave`. Sem SQL/servidor.
+> **Unity fica como alternativa futura** (mobile/console ou animação pesada; reusa motor+seams).
 > Última atualização: julho/2026.
 
 ---
@@ -19,9 +21,10 @@ A ordem de desenvolvimento planejada é:
 
 1. **Console jogável** — completar habilidades de todas as facções (MVP jogável) ✅
 2. **Back organizacional** — sweep de facções, motor, camadas, seams (ver ROADMAP FILA A) 🔄
-3. **Porte Blazor WASM** — mesmo motor C# rodando no navegador, jogável no GitHub Pages
-   (peça principal de portfólio, sem reescrever nada)
-4. **Porte Unity** — o mesmo domínio C# (reusa motor+seams), versão nativa
+3. **Porte app nativo desktop** — pele webview HTML/CSS/JS, C# nativo atrás, .exe no GitHub
+   Releases (peça principal de portfólio, sem reescrever o motor)
+4. **[alternativa futura] Unity** — o mesmo domínio C# (reusa motor+seams), se for pra
+   mobile/console ou animação pesada
 5. **Expansão (pós-porte)** — tudo que está neste documento
 
 A razão de tudo isto ser "pós-porte" e não "console": cada sistema aqui exige

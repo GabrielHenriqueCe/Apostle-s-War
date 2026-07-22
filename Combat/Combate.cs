@@ -100,17 +100,22 @@ namespace ApostlesWar
         }
 
         /// <summary>
+        /// Ataque com itens e bônus permanente (Ambicao), SEM buff/debuff temporário.
+        /// É a base sobre a qual BuffAtaque e ReducaoAtaque calculam seu percentual.
+        /// </summary>
+        public int AtaqueComStacks => AtaqueComItens + BonusAtaquePermanente;
+
+        /// <summary>
         /// Ataque final do combatente, calculado por camadas:
-        /// (base × mult + itens) + bônus permanente + buff sobre esse total.
+        /// (base × mult + itens) + bônus permanente + buff/debuff sobre esse total.
+        /// Buff/debuff contribuem via IContribuiAtaque (soma com sinal), não por tipo concreto.
         /// </summary>
         public int Ataque
         {
             get
             {
-                int comPermanente = AtaqueComItens + BonusAtaquePermanente;
-                int total = comPermanente;
-                var buff = StatusAtivos.OfType<BuffAtaque>().FirstOrDefault();
-                if (buff != null) total += (int)(comPermanente * buff.Valor);
+                int total = AtaqueComStacks
+                    + StatusAtivos.OfType<IContribuiAtaque>().Sum(c => c.ContribuicaoAtaque(this));
                 return Math.Max(0, total);
             }
         }
@@ -155,19 +160,15 @@ namespace ApostlesWar
         /// Defesa final do combatente, calculada por camadas:
         /// (base × mult + itens) + bônus permanente − redução permanente,
         /// e então buff/debuff temporários incidindo sobre esse total (independentes).
+        /// Buff/debuff contribuem via IContribuiDefesa (soma com sinal) — MESMA fonte que
+        /// o ReceberDano usa, sem tipo concreto.
         /// </summary>
         public int Defesa
         {
             get
             {
-                int total = DefesaComStacks;
-
-                var buff = StatusAtivos.OfType<BuffDefesa>().FirstOrDefault();
-                if (buff != null) total += (int)(DefesaComStacks * buff.Valor);
-
-                var debuff = StatusAtivos.OfType<ReducaoDefesa>().FirstOrDefault();
-                if (debuff != null) total -= (int)(DefesaComStacks * debuff.Valor);
-
+                int total = DefesaComStacks
+                    + StatusAtivos.OfType<IContribuiDefesa>().Sum(c => c.ContribuicaoDefesa(this));
                 return Math.Max(0, total);
             }
         }
@@ -190,22 +191,23 @@ namespace ApostlesWar
         {
             get
             {
-                double total = TaxaCritBase + ItensTaxaCrit + BonusTaxaCritPermanente;
-                var buff = StatusAtivos.OfType<ApostlesWar.Skills.Buffs.BuffTaxaCrit>().FirstOrDefault();
-                if (buff != null) total += buff.Valor;
+                double total = TaxaCritBase + ItensTaxaCrit + BonusTaxaCritPermanente
+                    + StatusAtivos.OfType<IContribuiTaxaCrit>().Sum(c => c.ContribuicaoTaxaCrit(this));
                 return Math.Clamp(total, 0, 1);
             }
         }
 
         /// <summary>
-        /// Multiplicador de dano crítico final: base + itens + bônus permanente (Invasor).
+        /// Multiplicador de dano crítico final: base + itens + bônus permanente (Invasor)
+        /// + buff/debuff temporário via IContribuiDanoCrit (soma com sinal).
         /// Sem teto superior (pode passar de +100%); piso em 0.
         /// </summary>
         public double DanoCrit
         {
             get
             {
-                double total = DanoCritBase + ItensDanoCrit + BonusDanoCritPermanente;
+                double total = DanoCritBase + ItensDanoCrit + BonusDanoCritPermanente
+                    + StatusAtivos.OfType<IContribuiDanoCrit>().Sum(c => c.ContribuicaoDanoCrit(this));
                 return Math.Max(0, total);
             }
         }

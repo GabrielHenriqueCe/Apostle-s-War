@@ -97,7 +97,7 @@ namespace ApostlesWar.Services
             List<Combate> aliados = atacante is Jogador ? jogador : inimigo;
             List<Combate> defensores = atacante is Jogador ? inimigo : jogador;
 
-            var turno = new TurnoDoPersonagem(atacante);
+            var turno = atacante.Turno;   // Turno PERSISTENTE (dono do estado turn-scoped), não mais criado por turno
 
             var ticks = turno.Iniciar();
             MostrarTicks(jogador, inimigo, ticks);   // veneno/queima/cura-contínua VISÍVEIS no início do turno

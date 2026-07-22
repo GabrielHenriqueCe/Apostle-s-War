@@ -83,12 +83,14 @@ stat. Categoriza-se pelo gatilho.
 
 ### Categoria D — Modificação de comportamento de turno
 Altera o que o portador pode fazer no próprio turno. Consultado por quem decide
-a ação, não dispara sozinho.
-- Medo (TentaParalizar — chance de cancelar ação)
-- Preso (pula turno)
-- Irritar (força A1 em quem aplicou)
-Padrão: consulta pelo CombateService no momento da ação. Pode virar interfaces
-(IParalisavel? IForcaAlvo?) no futuro, mas é categoria de baixa prioridade.
+a ação, não dispara sozinho. ✅ FEITO (FILA A #9, jul/2026): três capacidades por
+FASE (não uma "família" só — as formas diferem), cada status dono do próprio
+comportamento; o CombateService parou de decidir por tipo concreto.
+- `IParalisaAcao` — Medo (`Paralisa()` — chance de cancelar a ação, após a escolha)
+- `IPulaTurno` — Preso (marcador — pula o turno inteiro, antes da escolha). É a PORTA
+  da família de controle-de-turno: Congelar/Stun/Enraizado/Petrificado plugam aqui sem
+  tocar no fluxo (diferenças de cada um = outras capacidades compostas).
+- `IForcaAcao` — Irritar (`AlvoForcado()` — o status decide o alvo da A1 forçada)
 
 ### Categoria E — Bloqueio de aplicação
 Impede que outros status sejam aplicados no portador. Hoje é o método virtual

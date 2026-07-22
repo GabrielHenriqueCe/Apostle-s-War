@@ -5,9 +5,9 @@ namespace ApostlesWar.Skills.Debuffs
     /// <summary>
     /// Debuff de Medo. Quando o portador vai usar uma ação (a1 ou habilidade),
     /// tem uma chance de paralizar — cancela a ação e (se for habilidade) ativa cooldown.
-    /// O CombateService consulta TentaParalizar() antes de executar a ação.
+    /// Carrega a capacidade IParalisaAcao: o turno consulta Paralisa(), não o tipo concreto.
     /// </summary>
-    class Medo : Debuff
+    class Medo : Debuff, IParalisaAcao
     {
         public const double ChancePadrao = 0.50;
 
@@ -23,7 +23,7 @@ namespace ApostlesWar.Skills.Debuffs
         /// Rola o dado. true = ação foi paralizada (deve ser cancelada).
         /// false = ação procede normalmente.
         /// </summary>
-        public bool TentaParalizar() => Random.Shared.NextDouble() < Chance;
+        public bool Paralisa() => Random.Shared.NextDouble() < Chance;
 
         public override void Remover(Combate alvo)
         {

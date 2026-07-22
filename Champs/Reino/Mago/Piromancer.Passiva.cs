@@ -3,7 +3,7 @@ using ApostlesWar.Skills.Debuffs;
 
 namespace ApostlesWar.Champs.Reino
 {
-    class Piromancer : HabilidadePassiva
+    class Piromancer : HabilidadePassiva, IModificaDanoCausado
     {
         public Piromancer() : base("Piromancer", "🪄", 0,
             "Causa 25% mais dano contra alvos com Queima.")
@@ -13,13 +13,11 @@ namespace ApostlesWar.Champs.Reino
             => SemDano();
 
         /// <summary>
-        /// Multiplicador extra se o atacante tem essa passiva e o alvo tem Queima.
+        /// Multiplicador de dano do atacante: 25% a mais se o alvo tem Queima. Consultado pela
+        /// Ação Dano (a checagem "atacante tem a passiva" some — se esta instância está sendo
+        /// consultada, é porque vive nas Habilidades do atacante).
         /// </summary>
-        public static double MultExtra(Combate atacante, Combate alvo)
-        {
-            bool temPassiva = atacante.Personagem.Habilidades.OfType<Piromancer>().Any();
-            bool alvComQueima = alvo.StatusAtivos.Any(s => s is Queima);
-            return (temPassiva && alvComQueima) ? 1.25 : 1.0;
-        }
+        public double MultiplicadorDeDano(Combate atacante, Combate alvo)
+            => alvo.StatusAtivos.Any(s => s is Queima) ? 1.25 : 1.0;
     }
 }

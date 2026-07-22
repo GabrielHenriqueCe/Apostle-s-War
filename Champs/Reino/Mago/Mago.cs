@@ -21,7 +21,7 @@ namespace ApostlesWar.Champs.Reino
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new Dano((atk, alvo) => 2.0 * Piromancer.MultExtra(atk, alvo)),
+                new Dano(2.0),   // +25% vs alvo com Queima é aplicado pela passiva (IModificaDanoCausado)
                 new AplicarDebuff(() => new Queima(2)),
             });
 
@@ -31,7 +31,7 @@ namespace ApostlesWar.Champs.Reino
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new Dano((atk, alvo) => 1.5 * Piromancer.MultExtra(atk, alvo)),
+                new Dano(1.5),   // idem: o bônus da Queima vem da passiva, não fiado na hab
             });
     }
 }

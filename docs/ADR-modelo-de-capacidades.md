@@ -62,10 +62,14 @@ três faltam.
 
 ### Categoria B — Intervenção no dano (durante)
 Modifica o dano ENQUANTO ele acontece, antes do HP cair. Diferente da reação
-(que é depois). Hoje é o método virtual ModificarDanoRecebido.
-Vira: IModificaDanoRecebido.
-Implementadores: Escudo, BloqueioTotal, Invencivel, ProtecaoAliado,
-ReducaoDanoFixo.
+(que é depois). Dois lados:
+- **Defensor** (`IModificaDanoRecebido`, int→int no ReceberDano). Implementadores:
+  Escudo, BloqueioTotal, Invencivel, ProtecaoAliado, ReducaoDanoFixo, Aquagirl.
+- **Atacante** (`IModificaDanoCausado`, forma multiplicador, consultado pela Ação
+  Dano — FILA A #10). Uma passiva/status do atacante que modifica o dano que ELE
+  causa. Implementador: Piromancer (+25% vs alvo com Queima).
+  NÃO confundir com fórmula-DA-HABILIDADE (`Dano(Func)`, ex: Caveira `2.0-HP%`,
+  Tengu `1.0+escudo do alvo`) — aquilo é da hab, não do atacante.
 
 ### Categoria C — Modificação de stat (sob demanda)
 Soma/subtrai de um stat, calculado sob demanda pelos getters (Stats em

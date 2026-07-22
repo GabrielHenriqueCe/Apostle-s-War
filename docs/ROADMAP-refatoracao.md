@@ -147,9 +147,10 @@
     paridade exata nas especiais. +2 testes.
 11. **Turno (resto)** — 3 fatias: **(A) ✅ `TurnoDoPersonagem` PERSISTENTE (Caminho B)** — feito
     como FUNDAÇÃO primeiro (o Combate possui o seu Turno; o estado turn-scoped `_jaContraAtacou`
-    mudou de casa Combate→Turno, com fachada preservada; refactor puro, zero mudança). (B) orçamento
-    de reação por chave (`TentarReagir`) + migrar Espinhos/Zumbi/Cocô pra 1x-por-agressor (por-hit
-    segue first-class, opt-in). (C) `TimeAtualDoTurno`. Medidor de velocidade = habilitado, fora do #11.
+    mudou de casa Combate→Turno, com fachada preservada; refactor puro, zero mudança). **(B) ✅
+    orçamento de reação por chave (`TentarReagir`)** + migrou Espinhos/Zumbi/Cocô pra 1x-por-agressor
+    (por-hit segue first-class, opt-in). (C) `TimeAtualDoTurno`. Medidor de velocidade = habilitado,
+    fora do #11.
 12. **Passiva-conta-mortos** — desbloqueada (EventoDano Fatia 2 pronta); falta a passiva.
 13. **Observabilidade Crit na UI** — exibir TaxaCrit/DanoCrit (OlhoClinico/Virus).
 14. **Ampliar testes xUnit** — ordem crítica de morte, `ReceberDano` ponta-a-ponta, e o
@@ -560,11 +561,13 @@ como fundação, pra as fatias B/C nascerem na casa certa. Refactor puro: 45/45 
 comportamento. Habilita ideias de Gabriel: medidor de turno / velocidade nos stats (feature à parte).
 
 **FALTA (Turno resto):**
-- **(Fatia B) Reset 1x-por-agressor das OUTRAS reações** — Espinhos/Zumbi/Coco ainda são "por hit".
-  O `_jaContraAtacou` (HashSet) vira `_jaReagiu` (Dictionary POR CHAVE) no Turno + `TentarReagir(chave,
-  agressor, chance)`; contra-ataque usa chave compartilhada, cada reação de veneno a sua. **As duas
-  frequências são first-class:** `TentarReagir` é OPT-IN (por-agressor); por-hit dispara direto (sem
-  orçamento) — regra "só cria método quando há estado". Documentar as duas opções no `TentarReagir`.
+- **(Fatia B) Reset 1x-por-agressor das OUTRAS reações — ✅ FEITO (jul/2026).** O `_jaContraAtacou`
+  (HashSet) virou `_jaReagiu` (`Dictionary<object, HashSet<Combate>>` POR CHAVE) no Turno +
+  `TentarReagir(chave, agressor, chance)`; contra-ataque usa uma CHAVE compartilhada (sentinel), cada
+  reação de veneno keya por `GetType()`. `EspinhosVenenosos`/`PutrefacaoContagiosa`/`Fedorento` migradas
+  (gate no início do `AoSerAtacado`) — de por-hit → 1x por agressor por turno. **As duas frequências são
+  first-class:** `TentarReagir` é OPT-IN (por-agressor); por-hit dispara direto (sem orçamento) — regra
+  "só cria método quando há estado" (documentado no `TentarReagir`). 5 testes headless do mecanismo.
 - **(Fatia C) TimeAtualDoTurno** — centralizar "quais são os aliados e os inimigos de uma
   perspectiva" numa fonte única (o Turno persistente) que ContextoCombate E ContextoReacao consultam,
   em vez de cada ponto do CombateService recalcular `atacante is Jogador ? jogador : inimigo`.

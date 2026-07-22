@@ -13,19 +13,24 @@
     ///
     /// Duração/cooldown NÃO moram aqui — moram no próprio StatusEffect e no
     /// SkillCooldown; pra eles o Turno é o MAESTRO (manda "passou o turno"), não o
-    /// ARMAZÉM. Mas o estado TURN-SCOPED (o que nasce e morre no turno — hoje o
-    /// registro de contra-ataques) mora AQUI: é persistente (um Turno por combatente,
-    /// pro combate todo, via Combate.Turno), então é o dono natural desse estado.
+    /// ARMAZÉM. Mas o estado TURN-SCOPED (o que nasce e morre no turno — os orçamentos
+    /// de reação "1x por agressor": contra-ataque + reações de veneno) mora AQUI: é
+    /// persistente (um Turno por combatente, pro combate todo, via Combate.Turno), então
+    /// é o dono natural desse estado.
     /// </summary>
     class TurnoDoPersonagem
     {
         private readonly Combate _combatente;
 
-        // Agressores que este combatente já contra-atacou na janela do turno atual. Estado
-        // TURN-SCOPED: nasce e morre no turno, por isso mora AQUI (o Turno é o dono do estado
-        // de turno) — diferente de duração/cooldown, que são do combatente (persistem; o turno
-        // só avança). Limpo no Finalizar.
-        private readonly HashSet<Combate> _jaContraAtacou = new();
+        // Orçamento de reação "1x por agressor por turno", POR CHAVE de reação. Estado TURN-SCOPED
+        // (nasce e morre no turno), por isso mora AQUI (o Turno é o dono do estado de turno) —
+        // diferente de duração/cooldown, que são do combatente (persistem; o turno só avança).
+        // Limpo no Finalizar. A chave separa orçamentos: o contra-ataque usa UMA chave compartilhada
+        // (todas as suas fontes somam num limite só); cada reação de veneno usa a própria (GetType()).
+        private readonly Dictionary<object, HashSet<Combate>> _jaReagiu = new();
+
+        // Chave compartilhada do contra-ataque (buff ContraAtaque + Herói + Operário no mesmo limite).
+        private static readonly object ChaveContraAtaque = new();
 
         public TurnoDoPersonagem(Combate combatente)
         {
@@ -33,20 +38,36 @@
         }
 
         /// <summary>
-        /// Regra ÚNICA de contra-ataque: "1x por agressor por turno" + chance. Decide se este
-        /// combatente pode contra-atacar o agressor agora; registra em caso de sucesso (trava
-        /// aquele agressor até o reset no Finalizar). chance 1.0 = sempre (se ainda não contra-atacou
-        /// o agressor neste turno). Fonte única — o buff ContraAtaque E as passivas (Herói, Operário)
-        /// passam TODAS por aqui (via a fachada Combate.TentarContraAtacar), então múltiplas fontes no
-        /// mesmo combatente compartilham o mesmo limite (não somam contra-ataques).
+        /// Orçamento de reação "1x por agressor por turno" + chance, POR CHAVE. Decide se a reação
+        /// identificada por `chave` pode disparar contra `agressor` agora; registra no sucesso (trava
+        /// aquele agressor naquela chave até o reset no Finalizar). chance 1.0 = sempre (se ainda não
+        /// reagiu). Fontes que passam a MESMA chave compartilham o limite.
+        ///
+        /// As DUAS frequências são FIRST-CLASS: quem quer "1x por agressor" chama isto (OPT-IN); quem
+        /// quer "1x por hit" NÃO chama — dispara direto na própria reação (com o próprio roll de chance
+        /// se tiver). Regra: só se cria "método/gate" quando há ESTADO a guardar — aqui há (o registro);
+        /// o por-hit não tem estado, então não vira método.
         /// </summary>
-        public bool TentarContraAtacar(Combate agressor, double chance)
+        public bool TentarReagir(object chave, Combate agressor, double chance)
         {
-            if (_jaContraAtacou.Contains(agressor)) return false;
+            if (!_jaReagiu.TryGetValue(chave, out var jaReagidos))
+            {
+                jaReagidos = new HashSet<Combate>();
+                _jaReagiu[chave] = jaReagidos;
+            }
+            if (jaReagidos.Contains(agressor)) return false;
             if (Random.Shared.NextDouble() >= chance) return false;
-            _jaContraAtacou.Add(agressor);
+            jaReagidos.Add(agressor);
             return true;
         }
+
+        /// <summary>
+        /// Contra-ataque: "1x por agressor por turno" + chance. Fonte única — buff ContraAtaque E as
+        /// passivas (Herói, Operário) passam TODAS por aqui (via a fachada Combate.TentarContraAtacar),
+        /// compartilhando a MESMA chave, então múltiplas fontes no mesmo combatente somam num limite só.
+        /// </summary>
+        public bool TentarContraAtacar(Combate agressor, double chance)
+            => TentarReagir(ChaveContraAtaque, agressor, chance);
 
         /// <summary>
         /// Início do turno: dispara o tick dos status do combatente.
@@ -66,11 +87,11 @@
 
         /// <summary>
         /// Fim do turno: avança a duração dos status (removendo os expirados),
-        /// avança os cooldowns das habilidades e limpa o registro de contra-ataques
+        /// avança os cooldowns das habilidades e limpa os orçamentos de reação
         /// do turno. Três estados temporais diferentes, um único dono das transições
         /// (o Turno): duração e cooldown PERSISTEM entre turnos (o turno só avança);
-        /// o registro de contra-ataques é do TURNO (nasce e morre no turno) — por isso
-        /// é limpo, não avançado.
+        /// os orçamentos de reação são do TURNO (nascem e morrem no turno) — por isso
+        /// são limpos, não avançados.
         /// </summary>
         public void Finalizar()
         {
@@ -84,7 +105,7 @@
             foreach (var cd in _combatente.Cooldowns.Values)
                 cd.PassarTurno();
 
-            _jaContraAtacou.Clear();
+            _jaReagiu.Clear();
         }
     }
 }

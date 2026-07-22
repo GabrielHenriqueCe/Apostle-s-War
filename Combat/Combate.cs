@@ -293,6 +293,14 @@ namespace ApostlesWar
         public bool TentarContraAtacar(Combate agressor, double chance)
             => Turno.TentarContraAtacar(agressor, chance);
 
+        /// <summary>
+        /// Fachada do orçamento de reação "1x por agressor por turno", POR CHAVE — delega ao Turno.
+        /// As reações (Espinhos/Zumbi/Coco) chamam `ctx.Portador.TentarReagir(chave, agressor, chance)`
+        /// no início do AoSerAtacado; se false, não disparam. Ver TurnoDoPersonagem.TentarReagir.
+        /// </summary>
+        public bool TentarReagir(object chave, Combate agressor, double chance)
+            => Turno.TentarReagir(chave, agressor, chance);
+
         public bool PodeReceber(StatusEffect novo)
         {
             foreach (var bloqueador in StatusAtivos.OfType<IBloqueiaStatus>())

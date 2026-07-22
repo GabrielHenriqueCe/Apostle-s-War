@@ -145,8 +145,11 @@
     vazaria pro Vendaval) → fica no Func. **Única mudança de jogo:** o A1 do Mago (usa `Dano(1.0)`)
     passou a ganhar os +25% vs alvo com Queima (antes só as 2 especiais) — contido, mais correto,
     paridade exata nas especiais. +2 testes.
-11. **Turno (resto)** — reset 1x-por-agressor das outras reações + `TimeAtualDoTurno` +
-    eventualmente o Caminho B (`TurnoDoPersonagem` persistente → medidor de velocidade).
+11. **Turno (resto)** — 3 fatias: **(A) ✅ `TurnoDoPersonagem` PERSISTENTE (Caminho B)** — feito
+    como FUNDAÇÃO primeiro (o Combate possui o seu Turno; o estado turn-scoped `_jaContraAtacou`
+    mudou de casa Combate→Turno, com fachada preservada; refactor puro, zero mudança). (B) orçamento
+    de reação por chave (`TentarReagir`) + migrar Espinhos/Zumbi/Cocô pra 1x-por-agressor (por-hit
+    segue first-class, opt-in). (C) `TimeAtualDoTurno`. Medidor de velocidade = habilitado, fora do #11.
 12. **Passiva-conta-mortos** — desbloqueada (EventoDano Fatia 2 pronta); falta a passiva.
 13. **Observabilidade Crit na UI** — exibir TaxaCrit/DanoCrit (OlhoClinico/Virus).
 14. **Ampliar testes xUnit** — ordem crítica de morte, `ReceberDano` ponta-a-ponta, e o
@@ -539,36 +542,40 @@ Iniciar() (tick dos status) e Finalizar() (avança duração + remove expirados 
 + limpa contra-ataques do turno).
 
 **Reset "1x por agressor por turno" do CONTRA-ATAQUE — ✅ FEITO.** O registro de quem já foi
-contra-atacado saiu dos HashSets privados (ContraAtaque tinha o seu, Operário nem tinha) e virou
-`Combate._jaContraAtacou` + `Combate.TentarContraAtacar(agressor, chance)` (regra única: chance +
-"1x por agressor", registra no sucesso) + `Combate.LimparContraAtaques()` (chamado no
-Finalizar). Fonte única — buff ContraAtaque, PassivaHeroi e PassivaOperario passam TODOS por ela,
-então o gap multi-fonte (Herói com buff do Dragão + passiva) morreu: o primeiro registra, o
+contra-atacado saiu dos HashSets privados (ContraAtaque tinha o seu, Operário nem tinha) e virou a
+regra única `TentarContraAtacar(agressor, chance)` (chance + "1x por agressor", registra no sucesso),
+limpa no Finalizar. Fonte única — buff ContraAtaque, PassivaHeroi e PassivaOperario passam TODOS por
+ela, então o gap multi-fonte (Herói com buff do Dragão + passiva) morreu: o primeiro registra, o
 segundo vê que já contra-atacou. O hook `StatusEffect.AoPassarTurno` (virtual usado só pelo
 ContraAtaque, o único "capaz virtual sem irmã interface") foi REMOVIDO. Herói virou passiva-pura
 (IReageAoSerAtacado, sem buff via IPassivaInicial); Operário ganhou o limite 1x/agressor.
 
-**FALTA (Turno resto):**
-- **Reset 1x-por-agressor das OUTRAS reações** — Espinhos/Zumbi/Coco ainda são "por hit"; podem
-  passar a "1x por agressor" reusando o mesmo padrão do contra-ataque (registro no Combate,
-  limpo no Finalizar). Generalizar `TentarContraAtacar` pra um mecanismo de frequência por-reação
-  quando doer (hoje só o contra-ataque pediu).
-- **TimeAtualDoTurno** — centralizar a regra "quais são os aliados e os inimigos de uma
-  perspectiva" numa fonte única que ContextoCombate E ContextoReacao consultam, em vez de cada
-  ponto do CombateService recalcular `atacante is Jogador ? jogador : inimigo` e inverter na
-  mão. Refinamento puro (o CombateService já calcula os times). Nome a definir.
-- O disparo do evento InicioDoTurno das passivas — hoje em DispararEventoInicioDeTurno no
-  CombateService. Reavaliar se migra pro Turno.
+**Caminho B — TurnoDoPersonagem PERSISTENTE — ✅ FEITO (FILA A #11 Fatia A, jul/2026).** O
+TurnoDoPersonagem deixou de ser TRANSIENTE (`new` a cada turno): o `Combate` agora POSSUI o seu
+`Turno` (`Combate.Turno`, criado no ctor, vive o combate todo). O estado turn-scoped
+`_jaContraAtacou` + `TentarContraAtacar` MUDOU DE CASA (Combate → Turno); o `Combate.TentarContraAtacar`
+virou FACHADA que delega ao Turno (as passivas chamam `ctx.Portador.TentarContraAtacar` — não mudaram
+nada). O `Finalizar` limpa o próprio set (o `Combate.LimparContraAtaques` sumiu). Foi feito PRIMEIRO,
+como fundação, pra as fatias B/C nascerem na casa certa. Refactor puro: 45/45 testes, zero mudança de
+comportamento. Habilita ideias de Gabriel: medidor de turno / velocidade nos stats (feature à parte).
 
-**EVOLUÇÃO ARQUITETURAL — TurnoDoPersonagem PERSISTENTE (Caminho B, decisão fechada, futuro):**
-Hoje o TurnoDoPersonagem é TRANSIENTE (`new` a cada turno, só orquestra; o estado mora no
-Combate). O `_jaContraAtacou` foi posto no Combate por pragmatismo (Caminho A) — mas é
-conceitualmente estado DE TURNO (nasce e morre no turno), diferente de duração/cooldown que são
-do COMBATENTE (persistem, o turno só avança). Quando o "Turno resto" vier, o TurnoDoPersonagem
-vira PERSISTENTE (um por combatente, vive o combate todo) e passa a POSSUIR o estado turn-scoped
-(contra-ataques hoje; TimeAtualDoTurno depois) — deixa de ser procedimento e vira o MODELO de
-turno. Migração barata: o estado só muda de casa (Combate → Turno), a leitura/escrita das
-passivas via `TentarContraAtacar` não muda. Habilita ideias de Gabriel: medidor de turno /
+**FALTA (Turno resto):**
+- **(Fatia B) Reset 1x-por-agressor das OUTRAS reações** — Espinhos/Zumbi/Coco ainda são "por hit".
+  O `_jaContraAtacou` (HashSet) vira `_jaReagiu` (Dictionary POR CHAVE) no Turno + `TentarReagir(chave,
+  agressor, chance)`; contra-ataque usa chave compartilhada, cada reação de veneno a sua. **As duas
+  frequências são first-class:** `TentarReagir` é OPT-IN (por-agressor); por-hit dispara direto (sem
+  orçamento) — regra "só cria método quando há estado". Documentar as duas opções no `TentarReagir`.
+- **(Fatia C) TimeAtualDoTurno** — centralizar "quais são os aliados e os inimigos de uma
+  perspectiva" numa fonte única (o Turno persistente) que ContextoCombate E ContextoReacao consultam,
+  em vez de cada ponto do CombateService recalcular `atacante is Jogador ? jogador : inimigo`.
+  Refinamento puro. Nome a definir.
+- O disparo do evento InicioDoTurno das passivas — hoje em DispararEventoInicioDeTurno no
+  CombateService. Reavaliar se migra pro Turno (boy-scout na Fatia C).
+
+**(histórico) Motivação do Caminho B:** o `_jaContraAtacou` foi posto no Combate por pragmatismo
+(Caminho A) — mas é conceitualmente estado DE TURNO (nasce e morre no turno), diferente de
+duração/cooldown que são do COMBATENTE (persistem, o turno só avança). Habilita ideias de Gabriel:
+medidor de turno /
 velocidade nos stats. NÃO confundir com o RelógioDoCombate (contador GLOBAL de rodadas, nível
 acima — "boss mata todos após X turnos") — são dois relógios em níveis diferentes.
 

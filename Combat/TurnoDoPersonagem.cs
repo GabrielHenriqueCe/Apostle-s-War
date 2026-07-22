@@ -11,17 +11,41 @@
     /// CombateService, porque depende de UI/bot/seleção de alvo. O Turno é o
     /// relógio; o service orquestra a vontade em volta dele.
     ///
-    /// NÃO guarda o estado de duração/cooldown — esses moram no próprio
-    /// StatusEffect e no SkillCooldown. O Turno é o MAESTRO (manda "passou o
-    /// turno"), não o ARMAZÉM.
+    /// Duração/cooldown NÃO moram aqui — moram no próprio StatusEffect e no
+    /// SkillCooldown; pra eles o Turno é o MAESTRO (manda "passou o turno"), não o
+    /// ARMAZÉM. Mas o estado TURN-SCOPED (o que nasce e morre no turno — hoje o
+    /// registro de contra-ataques) mora AQUI: é persistente (um Turno por combatente,
+    /// pro combate todo, via Combate.Turno), então é o dono natural desse estado.
     /// </summary>
     class TurnoDoPersonagem
     {
         private readonly Combate _combatente;
 
+        // Agressores que este combatente já contra-atacou na janela do turno atual. Estado
+        // TURN-SCOPED: nasce e morre no turno, por isso mora AQUI (o Turno é o dono do estado
+        // de turno) — diferente de duração/cooldown, que são do combatente (persistem; o turno
+        // só avança). Limpo no Finalizar.
+        private readonly HashSet<Combate> _jaContraAtacou = new();
+
         public TurnoDoPersonagem(Combate combatente)
         {
             _combatente = combatente;
+        }
+
+        /// <summary>
+        /// Regra ÚNICA de contra-ataque: "1x por agressor por turno" + chance. Decide se este
+        /// combatente pode contra-atacar o agressor agora; registra em caso de sucesso (trava
+        /// aquele agressor até o reset no Finalizar). chance 1.0 = sempre (se ainda não contra-atacou
+        /// o agressor neste turno). Fonte única — o buff ContraAtaque E as passivas (Herói, Operário)
+        /// passam TODAS por aqui (via a fachada Combate.TentarContraAtacar), então múltiplas fontes no
+        /// mesmo combatente compartilham o mesmo limite (não somam contra-ataques).
+        /// </summary>
+        public bool TentarContraAtacar(Combate agressor, double chance)
+        {
+            if (_jaContraAtacou.Contains(agressor)) return false;
+            if (Random.Shared.NextDouble() >= chance) return false;
+            _jaContraAtacou.Add(agressor);
+            return true;
         }
 
         /// <summary>
@@ -60,7 +84,7 @@
             foreach (var cd in _combatente.Cooldowns.Values)
                 cd.PassarTurno();
 
-            _combatente.LimparContraAtaques();
+            _jaContraAtacou.Clear();
         }
     }
 }

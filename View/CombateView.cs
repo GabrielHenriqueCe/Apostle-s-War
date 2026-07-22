@@ -136,6 +136,15 @@ namespace ApostlesWar.View
             string critico = resultado.Critico ? " 💥 ATAQUE CRÍTICO!" : "";
             Console.WriteLine($"{atacante.Personagem.Simbolo} causou {resultado.DanoEfetivo} de dano em {alvo.Personagem.Simbolo} {alvo.Personagem.Nome}{critico}");
             Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {resultado.HPRestante}/{alvo.HPMaximo}");
+            ExibirMorteSe(alvo);
+        }
+
+        /// <summary>Mostra "morreu" quando o alvo caiu de fato (a morte já foi confirmada no ReceberDano).
+        /// Hoje é texto; no porte vira o gatilho da animação de morte.</summary>
+        private void ExibirMorteSe(Combate alvo)
+        {
+            if (!alvo.EstaVivo())
+                Console.WriteLine($"💀 {alvo.Personagem.Simbolo} {alvo.Personagem.Nome} morreu!");
         }
 
         /// <summary>
@@ -145,6 +154,7 @@ namespace ApostlesWar.View
         public void ExibirDanoDeStatus(EventoDano r)
         {
             Console.WriteLine($"☠️ {r.Alvo.Personagem.Simbolo} {r.Alvo.Personagem.Nome} sofreu {r.DanoEfetivo} de dano (HP: {r.HPRestante}/{r.Alvo.HPMaximo})");
+            ExibirMorteSe(r.Alvo);
         }
 
         /// <summary>

@@ -372,12 +372,12 @@ namespace ApostlesWar
             DanoRecebido += danoFinal;
             if (atacante != null) atacante.DanoCausado += danoFinal;
 
-            // Invariante: HP <= 0 ⟺ Morto. A transição mora aqui (ponto único de dano —
-            // ataque, Veneno, Queima, explosão, todos passam por ReceberDano), colada à
-            // mudança de HP, pra nunca dessincronizar. As REAÇÕES de morte (Vilão,
-            // Necromancia, Guarda) ficam no fluxo (AtoMorte), não aqui.
-            if (HPAtual <= 0 && _estado.EstaVivo())
-                _estado = new Morto();
+            // Confirma a morte AQUI (ponto único de dano — ataque, Veneno, Queima, explosão,
+            // reflexo, todos passam por ReceberDano). Antes de finalizar, consulta o prevent-death
+            // (IPrevineMorte, mesmo padrão do IModificaDanoRecebido acima): o Guarda sobrevive SEM
+            // perder os status, porque nunca chega no `new Morto()`. As reações de morte (Vilão,
+            // Necromancia) seguem no fluxo, lendo o estado já resolvido.
+            ConfirmarMorte();
 
             return (danoFinal, absorvidoPeloEscudo);
         }
@@ -471,6 +471,37 @@ namespace ApostlesWar
             CuraRecebida += curado;          // funil único de cura
             return curado;
         }
+
+        /// <summary>
+        /// Confirma (ou não) a morte após um dano. Chamado SÓ pelo ReceberDano (funil único). Se o HP
+        /// caiu a 0 e ainda está Vivo, dá a chance ao prevent-death (IPrevineMorte — Guarda hoje, itens
+        /// no futuro; capacidade, não reação) de EVITAR a morte: se algum previne (e está fora de
+        /// cooldown), o portador segue Vivo com os STATUS INTACTOS (não vira Morto). Senão, morre de
+        /// fato. É o único lugar do `new Morto()`. Distingue "evitar a morte" (fica Vivo) de "reviver"
+        /// (AplicarRevive, Vivo novo/limpo — Necromancia).
+        /// </summary>
+        private void ConfirmarMorte()
+        {
+            if (HPAtual > 0 || !_estado.EstaVivo()) return;
+
+            foreach (Habilidade hab in Personagem.Habilidades)
+            {
+                if (hab is IPrevineMorte prevencao && Cooldowns[hab].Disponivel)
+                {
+                    prevencao.Prevenir(this);
+                    Cooldowns[hab].Usar();
+                    return;   // sobreviveu — não vira Morto, status preservados
+                }
+            }
+
+            _estado = new Morto();   // morte de fato
+        }
+
+        /// <summary>
+        /// Restaura o HP pra um valor fixo (usado pelo prevent-death pra "voltar à vida" partindo de
+        /// HP ≤ 0). Diferente da cura, que soma a partir do HP atual (não serve quando está negativo).
+        /// </summary>
+        public void RestaurarVida(int hp) => HPAtual = hp;
 
         /// <summary>
         /// Aplica o revive: define o HP e transiciona Morto → Vivo. Chamado pelo estado

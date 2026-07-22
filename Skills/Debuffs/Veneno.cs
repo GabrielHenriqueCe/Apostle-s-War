@@ -41,10 +41,12 @@ namespace ApostlesWar.Skills.Debuffs
         /// <summary>
         /// Causa o dano no início do turno do portador, antes da escolha de ação.
         /// </summary>
-        public override void AoIniciarTurno(Combate portador)
+        public override EventoCombate? AoIniciarTurno(Combate portador)
         {
             int dano = (int)(portador.HPMaximo * DanoPorStack);
-            portador.ReceberDano(dano, NaturezasDano.Veneno);
+            var (efetivo, absorvido) = portador.ReceberDano(dano, NaturezasDano.Veneno);
+            return new EventoDano(portador, portador, dano, efetivo, absorvido,
+                Critico: false, HPRestante: Math.Max(0, portador.HPAtual), NaturezasDano.Veneno);
         }
 
         public override void Remover(Combate alvo)

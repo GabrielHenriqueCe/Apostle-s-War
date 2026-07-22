@@ -24,9 +24,10 @@ namespace ApostlesWar.Champs.Reino
             _ignorarDefesaPctSeAnteriorCritico = ignorarDefesaPctSeAnteriorCritico;
         }
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
-            double ignorar = eventos.Count > 0 && eventos[^1].Critico
+            var anterior = eventos.OfType<EventoDano>().LastOrDefault();
+            double ignorar = anterior?.Critico == true
                 ? _ignorarDefesaPctSeAnteriorCritico : 0.0;
             eventos.Add(atacante.Atacar(alvo, _multiplicador, ignorarDefesaPct: ignorar));
         }

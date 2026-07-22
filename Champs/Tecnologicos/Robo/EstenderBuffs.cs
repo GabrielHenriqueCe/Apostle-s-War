@@ -34,7 +34,7 @@ namespace ApostlesWar.Champs.Tecnologicos
             _turnos = turnos;
         }
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             IEnumerable<Buff> candidatos = alvo.StatusAtivos.OfType<Buff>().Where(b => _seletor.Filtro(b));
             if (_seletor.Aleatorio)

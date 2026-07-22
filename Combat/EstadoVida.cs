@@ -15,7 +15,7 @@
         public abstract List<StatusEffect> Status { get; }
 
         public abstract bool EstaVivo();
-        public abstract void Curar(Combate dono, int valor);
+        public abstract int Curar(Combate dono, int valor);   // retorna quanto de fato curou
         public abstract void Reviver(Combate dono, int hp);
     }
 }

@@ -19,8 +19,7 @@ namespace ApostlesWar.Champs.Decaidos
             if (ctx.DanoCausado <= 0)
                 return new List<ResultadoReacao>();
 
-            int cura = (int)(ctx.DanoCausado * PercentualCura);
-            ctx.Portador.Curar(cura);
+            int cura = ctx.Portador.Curar((int)(ctx.DanoCausado * PercentualCura));   // retorno = cura real
 
             return new List<ResultadoReacao>
             {
@@ -31,6 +30,6 @@ namespace ApostlesWar.Champs.Decaidos
             };
         }
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

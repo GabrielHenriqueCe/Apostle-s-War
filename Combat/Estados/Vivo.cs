@@ -12,7 +12,7 @@
 
         public override bool EstaVivo() => true;
 
-        public override void Curar(Combate dono, int valor) =>
+        public override int Curar(Combate dono, int valor) =>
             dono.AplicarCura(valor);
 
         public override void Reviver(Combate dono, int hp)

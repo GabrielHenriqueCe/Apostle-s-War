@@ -5,13 +5,13 @@
         public HabilidadePassiva(string nome, string simbolo, int cooldown, string descricao = "")
             : base(nome, simbolo, cooldown, descricao) { }
 
-        protected List<EventoDano> SemDano() => new List<EventoDano>();
+        protected List<EventoCombate> SemDano() => new List<EventoCombate>();
 
         // Passivas reativas não "ativam" pelo fluxo de habilidade — implementam
         // as interfaces IReageAo*. Este Ativar existe só pra satisfazer o contrato
         // abstrato de Habilidade; nunca é chamado. (Ver fio: separar hierarquia
         // Habilidade/Ativa/Passiva no roadmap.)
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
 
         protected T ObterEstado<T>(Combate combate) where T : new()
         {

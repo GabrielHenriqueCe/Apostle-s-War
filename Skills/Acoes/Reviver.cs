@@ -43,7 +43,7 @@ namespace ApostlesWar
             _buffNoRevivido = buffNoRevivido;
         }
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             alvo.Reviver((int)(alvo.HPMaximo * _percentualHP));
             if (_buffNoRevivido != null && alvo.EstaVivo())   // só quem REALMENTE voltou

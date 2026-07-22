@@ -7,10 +7,16 @@ namespace ApostlesWar
     #region Combate
 
     /// <summary>
-    /// Descrição completa de um golpe (o "fato" do que aconteceu). Produzido pelo
-    /// Atacar/ReceberDano, consumido pelas reações (contexto) e pela exibição (console
-    /// hoje, web amanhã). É o Model do golpe — descreve o que houve, sem decidir como
-    /// mostrar.
+    /// Base dos EVENTOS de combate — o "fato" do que aconteceu, produzido pelo motor/ticks e
+    /// consumido pela exibição (console hoje, porte amanhã). É um STREAM ordenado: dano e cura são
+    /// irmãos (EventoDano/EventoCura). Embrião do log/stream da FILA B (ADR). As reações olham só os
+    /// EventoDano (`.OfType<EventoDano>()`).
+    /// </summary>
+    abstract record EventoCombate;
+
+    /// <summary>
+    /// Descrição completa de um golpe. Produzido pelo Atacar/ReceberDano e pelos ticks de DoT,
+    /// consumido pelas reações (contexto) e pela exibição. É o Model do golpe.
     /// </summary>
     record EventoDano(
         Combate Atacante,
@@ -21,7 +27,18 @@ namespace ApostlesWar
         bool Critico,
         int HPRestante,
         NaturezaDano Natureza
-    );
+    ) : EventoCombate;
+
+    /// <summary>
+    /// Fato de uma CURA (irmão do EventoDano). Curador = quem curou (no auto-heal, = Alvo);
+    /// Quantidade = HP de fato recuperado; HPRestante = HP do alvo depois.
+    /// </summary>
+    record EventoCura(
+        Combate Curador,
+        Combate Alvo,
+        int Quantidade,
+        int HPRestante
+    ) : EventoCombate;
 
     abstract class Combate
     {
@@ -440,17 +457,19 @@ namespace ApostlesWar
         /// </summary>
         public void AdicionarBonusTaxaCritPermanente(double delta) =>
             BonusTaxaCritPermanente += delta;
-        public void Curar(int valor) => _estado.Curar(this, valor);
+        public int Curar(int valor) => _estado.Curar(this, valor);
 
         /// <summary>
         /// Aplica a cura no HP. Chamado pelo estado Vivo. Não checar estado aqui —
         /// quem decide se cura é o EstadoVida.
         /// </summary>
-        public void AplicarCura(int valor)
+        public int AplicarCura(int valor)
         {
             int antes = HPAtual;
             HPAtual = Math.Min(HPMaximo, HPAtual + valor);
-            CuraRecebida += HPAtual - antes;   // funil único de cura (só conta o que de fato entrou)
+            int curado = HPAtual - antes;   // só o que de fato entrou (cap no máximo)
+            CuraRecebida += curado;          // funil único de cura
+            return curado;
         }
 
         /// <summary>

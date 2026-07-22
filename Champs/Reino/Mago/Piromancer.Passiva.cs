@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Reino
             "Causa 25% mais dano contra alvos com Queima.")
         { }
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo)
             => SemDano();
 
         /// <summary>

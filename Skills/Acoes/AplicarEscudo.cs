@@ -23,7 +23,7 @@ namespace ApostlesWar
             _duracao = duracao;
         }
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => new ApostlesWar.Skills.Buffs.Escudo(_valor(atacante, alvo, eventos), _duracao).Aplicar(alvo);
     }
 }

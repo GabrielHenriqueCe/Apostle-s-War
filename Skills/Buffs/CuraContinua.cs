@@ -12,9 +12,10 @@ namespace ApostlesWar.Skills.Buffs
                 $"Cura {percentual * 100:F0}% HP no início do turno.")
         { }
 
-        public override void AoIniciarTurno(Combate portador)
+        public override EventoCombate? AoIniciarTurno(Combate portador)
         {
-            portador.Curar((int)(portador.HPMaximo * Valor));
+            int curado = portador.Curar((int)(portador.HPMaximo * Valor));
+            return new EventoCura(portador, portador, curado, portador.HPAtual);   // mostra mesmo curando 0
         }
 
         public override void Remover(Combate alvo)

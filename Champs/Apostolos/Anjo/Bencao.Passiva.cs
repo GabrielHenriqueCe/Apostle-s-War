@@ -16,8 +16,7 @@ namespace ApostlesWar.Champs.Apostolos
 
         public List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx)
         {
-            int cura = (int)(ctx.Atacante.HPMaximo * PercentualCura);
-            ctx.Atacante.Curar(cura);
+            int cura = ctx.Atacante.Curar((int)(ctx.Atacante.HPMaximo * PercentualCura));   // retorno = cura real
 
             return new List<ResultadoReacao>
             {
@@ -28,6 +27,6 @@ namespace ApostlesWar.Champs.Apostolos
             };
         }
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

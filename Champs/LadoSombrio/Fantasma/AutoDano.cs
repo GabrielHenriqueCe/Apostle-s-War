@@ -13,7 +13,7 @@ namespace ApostlesWar.Champs.LadoSombrio
         public AutoDano(ValorFn valor, Escopo escopo = Escopo.ProprioAtacante, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _valor = valor;
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => alvo.ReceberDano(_valor(atacante, alvo, eventos), NaturezasDano.DanoIndireto);
     }
 }

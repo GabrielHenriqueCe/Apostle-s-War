@@ -18,7 +18,7 @@ namespace ApostlesWar.Champs.LadoSombrio
             new Intocavel(duracao: int.MaxValue, removivel: false).Aplicar(portador);
         }
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo)
             => SemDano();
     }
 }

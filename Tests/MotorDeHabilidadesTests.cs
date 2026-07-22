@@ -108,6 +108,29 @@ namespace Tests
         }
 
         [Fact]
+        public void Cura_GeraEventoCura_PorAlvo_ComAQuantidadeRealCurada_MesmoQuando0()
+        {
+            var atacante = Novo(hp: 1000);                 // cheio → cura 0 (mas AINDA emite evento)
+            var aliado = Novo(hp: 800); Ferir(aliado, 400); // 400/800 → cura 240
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, aliado },
+                new List<Combate> { Novo() });
+
+            var hab = Hab(new()
+            {
+                new Cura(Valor.PorHP(0.30), Escopo.TodosAliados),
+            }, alvos: int.MaxValue, lista: TipoLista.Aliados);
+
+            var curas = hab.Ativar(ctx, atacante).OfType<EventoCura>().ToList();
+
+            Assert.Equal(2, curas.Count);                  // emite mesmo curando 0 (decisão do Gabriel)
+            Assert.Equal(0, curas.Single(c => c.Alvo == atacante).Quantidade);   // já estava cheio
+            var curaAliado = curas.Single(c => c.Alvo == aliado);
+            Assert.Equal(240, curaAliado.Quantidade);      // o que de FATO entrou
+            Assert.Equal(640, curaAliado.HPRestante);
+        }
+
+        [Fact]
         public void EscopoOutrosAliados_AtingeAliadosMenosOProprioAtacante()
         {
             var atacante = Novo();
@@ -198,8 +221,9 @@ namespace Tests
 
             var eventos = hab.Ativar(ctx, inimigo1);
 
-            int somaDano = eventos.Sum(e => e.DanoEfetivo);
-            Assert.Equal(2, eventos.Count);
+            int somaDano = eventos.OfType<EventoDano>().Sum(e => e.DanoEfetivo);
+            Assert.Equal(2, eventos.OfType<EventoDano>().Count());   // 2 alvos
+            Assert.Single(eventos.OfType<EventoCura>());             // a Cura agora emite EventoCura no stream
             Assert.True(somaDano > 0);
             Assert.Equal(500 + (int)(somaDano * 0.5), atacante.HPAtual);
         }
@@ -239,7 +263,7 @@ namespace Tests
             var eventos = hab.Ativar(ctx, inimigo);
 
             Assert.Equal(2, eventos.Count);
-            Assert.All(eventos, e => Assert.Same(inimigo, e.Alvo));
+            Assert.All(eventos.OfType<EventoDano>(), e => Assert.Same(inimigo, e.Alvo));
         }
 
         // ---------- Reviver (família do revive — ADR §9) ----------
@@ -318,8 +342,8 @@ namespace Tests
             var eventos = hab.Ativar(ctx, inimigo1);
 
             Assert.False(inimigo1.StatusAtivos.OfType<Veneno>().Any());   // detonado e removido
-            Assert.Single(eventos);                                        // só quem tinha veneno gera evento
-            Assert.Equal(200, eventos[0].DanoEfetivo);                     // 2 stacks × 5% de 2000
+            Assert.Single(eventos.OfType<EventoDano>());                   // só quem tinha veneno gera dano (a Cura emite EventoCura à parte)
+            Assert.Equal(200, eventos.OfType<EventoDano>().First().DanoEfetivo);   // 2 stacks × 5% de 2000
             Assert.Equal(2000 - 200, inimigo1.HPAtual);
             Assert.Equal(2000, inimigo2.HPAtual);                          // sem veneno, intocado
             Assert.Equal(100 + 40, atacante.HPAtual);                      // cura = 20% de 200
@@ -343,7 +367,7 @@ namespace Tests
             public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
             public override TipoAtaque TipoAtaque => TipoAtaque.NaoAtaque;
 
-            public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo)
+            public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo)
             {
                 foreach (Combate a in ResolverAlvos(alvo, ObterListaPrincipal(ctx)))
                     AplicarCura(a, 0.15);
@@ -480,7 +504,7 @@ namespace Tests
             var eventos = hab.Ativar(ctx, inimigo);
 
             Assert.Single(eventos);                                    // a explosão entra no pipeline
-            Assert.Equal(200, eventos[0].DanoEfetivo);                 // 2 stacks × 5% de 2000
+            Assert.Equal(200, eventos.OfType<EventoDano>().First().DanoEfetivo);   // 2 stacks × 5% de 2000
             Assert.False(inimigo.StatusAtivos.OfType<Queima>().Any()); // detonada e removida
             Assert.Equal(1800, inimigo.HPAtual);
         }
@@ -521,7 +545,7 @@ namespace Tests
 
             var eventos = hab.Ativar(ctx, alvo);
 
-            Assert.Equal(0, eventos[0].AbsorvidoPeloEscudo);            // typeof(Buff) ignorou o Escudo (match por tipo-base)
+            Assert.Equal(0, eventos.OfType<EventoDano>().First().AbsorvidoPeloEscudo);   // typeof(Buff) ignorou o Escudo (match por tipo-base)
             Assert.True(alvo.StatusAtivos.OfType<Escudo>().Any());      // e não consumiu o escudo
         }
 

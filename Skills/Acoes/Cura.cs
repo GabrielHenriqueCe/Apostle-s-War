@@ -12,7 +12,11 @@ namespace ApostlesWar
         public Cura(ValorFn valor, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _valor = valor;
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
-            => alvo.Curar(_valor(atacante, alvo, eventos));
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
+        {
+            int curado = alvo.Curar(_valor(atacante, alvo, eventos));
+            // Emite mesmo curando 0 (alvo já cheio) — o combate MOSTRA que a cura rodou.
+            eventos.Add(new EventoCura(atacante, alvo, curado, alvo.HPAtual));
+        }
     }
 }

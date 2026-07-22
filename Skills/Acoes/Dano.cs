@@ -37,7 +37,7 @@ namespace ApostlesWar
             _ignorarStatus = ignorarStatus;
         }
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => eventos.Add(atacante.Atacar(alvo, _multiplicador(atacante, alvo),
                 ignorarDefesaPct: _ignorarDefesaPct, forcaCritico: _forcaCritico, ignorarStatus: _ignorarStatus));
     }

@@ -15,10 +15,7 @@ namespace ApostlesWar
 
         public override bool EstaVivo() => false;
 
-        public override void Curar(Combate dono, int valor)
-        {
-            // Morto não cura.
-        }
+        public override int Curar(Combate dono, int valor) => 0;   // Morto não cura.
 
         public override void Reviver(Combate dono, int hp)
         {

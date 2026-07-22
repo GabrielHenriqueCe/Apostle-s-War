@@ -15,6 +15,6 @@ namespace ApostlesWar.Champs.Misticos
 
         public bool Bloqueia(StatusEffect novo) => novo is Veneno || novo is Queima;
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

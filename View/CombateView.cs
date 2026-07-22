@@ -138,6 +138,29 @@ namespace ApostlesWar.View
             Console.WriteLine($"HP de {alvo.Personagem.Simbolo}: {resultado.HPRestante}/{alvo.HPMaximo}");
         }
 
+        /// <summary>
+        /// Exibe o dano de um TICK de status (veneno/queima) — alvo-cêntrico, o portador sofrendo o
+        /// dano do próprio status no início do turno. Gêmeo do ExibirResultadoAtaque.
+        /// </summary>
+        public void ExibirDanoDeStatus(EventoDano r)
+        {
+            Console.WriteLine($"☠️ {r.Alvo.Personagem.Simbolo} {r.Alvo.Personagem.Nome} sofreu {r.DanoEfetivo} de dano (HP: {r.HPRestante}/{r.Alvo.HPMaximo})");
+        }
+
+        /// <summary>
+        /// Exibe uma cura — "irmã" da mensagem de dano. Auto-cura (Curador == Alvo) vira "recuperou";
+        /// cura em terceiro vira "curou X em Y".
+        /// </summary>
+        public void ExibirCura(EventoCura c)
+        {
+            if (c.Quantidade == 0)
+                Console.WriteLine($"💚 {c.Alvo.Personagem.Simbolo} {c.Alvo.Personagem.Nome} já está com a vida cheia ({c.HPRestante}/{c.Alvo.HPMaximo})");
+            else if (c.Curador == c.Alvo)
+                Console.WriteLine($"💚 {c.Alvo.Personagem.Simbolo} {c.Alvo.Personagem.Nome} recuperou {c.Quantidade} de vida (HP: {c.HPRestante}/{c.Alvo.HPMaximo})");
+            else
+                Console.WriteLine($"💚 {c.Curador.Personagem.Simbolo} curou {c.Quantidade} de {c.Alvo.Personagem.Simbolo} {c.Alvo.Personagem.Nome} (HP: {c.HPRestante}/{c.Alvo.HPMaximo})");
+        }
+
         /// <summary>Menu de alvo. Retorna o escolhido, ou NULL se Esc (voltar pra seleção de habilidade).</summary>
         public Combate? EscolherAlvoNaTela(List<Combate> alvosDisponiveis, List<Combate> aliados, List<Combate> defensores)
         {

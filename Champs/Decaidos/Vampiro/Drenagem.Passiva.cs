@@ -23,6 +23,6 @@ namespace ApostlesWar.Champs.Decaidos
 
         public IEnumerable<Type> TiposIgnorados => _tipos;
 
-        public override List<EventoDano> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
+        public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

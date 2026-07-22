@@ -39,11 +39,11 @@ namespace ApostlesWar.Skills.Debuffs
         public List<ResultadoReacao> AoReceberDano(ContextoReacao ctx)
         {
             // ctx.Portador tem o Sangramento; ctx.Contraparte (o atacante) é quem se cura.
-            int cura = (int)(ctx.DanoCausado * PercentualCura);
-            if (cura <= 0)
+            int pedido = (int)(ctx.DanoCausado * PercentualCura);
+            if (pedido <= 0)
                 return new List<ResultadoReacao>();
 
-            ctx.Contraparte.Curar(cura);
+            int cura = ctx.Contraparte.Curar(pedido);   // o que de FATO curou (capado no HP máximo)
 
             return new List<ResultadoReacao>
             {

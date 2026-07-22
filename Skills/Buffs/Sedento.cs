@@ -21,8 +21,7 @@ namespace ApostlesWar.Skills.Buffs
             if (ctx.DanoCausado <= 0)
                 return new List<ResultadoReacao>();
 
-            int cura = (int)(ctx.DanoCausado * Valor);
-            ctx.Portador.Curar(cura);
+            int cura = ctx.Portador.Curar((int)(ctx.DanoCausado * Valor));   // retorno = cura real (capada)
 
             return new List<ResultadoReacao>
             {

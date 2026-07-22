@@ -24,7 +24,7 @@ namespace ApostlesWar
         public AplicarBuff(Func<Combate, Buff> fabricaComAtacante, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _fabrica = fabricaComAtacante;
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoDano> eventos)
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => _fabrica(atacante).Aplicar(alvo);
     }
 }

@@ -637,6 +637,25 @@ namespace Tests
         }
 
         [Fact]
+        public void Invencivel_Em1HP_RecebeODanoCheio_MasHPFicaEm1()
+        {
+            // O bug: Invencível era IModificaDanoRecebido e capava o dano em HPAtual-1. Com o alvo em
+            // 1 HP, o dano virava 0 → DanoEfetivo 0 → o lifesteal (que só dispara com dano > 0) sumia.
+            // Agora é IDefineHPMinimo: recebe o dano CHEIO (lifesteal enxerga), só o HP floora em 1.
+            var atacante = Novo(atk: 500);
+            var alvo = Novo(hp: 1000);
+            Ferir(alvo, 999);                       // alvo em 1 HP
+            Assert.Equal(1, alvo.HPAtual);
+            new Invencivel(duracao: 2).Aplicar(alvo);
+
+            var golpe = atacante.Atacar(alvo, 1.0); // 500 de dano num alvo que só tem 1 HP
+
+            Assert.True(alvo.EstaVivo());           // não morreu
+            Assert.Equal(1, alvo.HPAtual);          // piso segurou o HP em 1
+            Assert.True(golpe.DanoEfetivo >= 500);  // recebeu o dano CHEIO (NÃO zerado) → lifesteal funciona
+        }
+
+        [Fact]
         public void ProtecaoAliadoMutua_NaoEntraEmLoopInfinito()
         {
             var a = Novo(hp: 2000);

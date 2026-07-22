@@ -20,11 +20,15 @@
 - **Refatore por DOR, não por pureza.** Migra o que incomoda; o resto segue por
   boy scout (quando tocar) ou PR dedicado quando virar dor.
 - **Refatore o que PERSISTE; tolere imperfeição no que vai MORRER.** A camada de
-  apresentação do console (telas, render) morre no porte **Unity**. Não investir
-  rigor nela. A LÓGICA de domínio (combate, turno, reações, stats) pluga DIRETO no
-  Unity como assembly C# — é onde o rigor rende. **Destino: Unity, single-player,
-  save local** (sincronizado por Steam Cloud / Google Play Saved Games — SDK de
-  plataforma, não backend próprio). Sem web/API REST/servidor SQL.
+  apresentação do console (telas, render) morre no porte. Não investir rigor nela.
+  A LÓGICA de domínio (combate, turno, reações, stats) pluga DIRETO no porte como
+  assembly C# — é onde o rigor rende. **Destino (jul/2026): BLAZOR WebAssembly
+  PRIMEIRO, Unity DEPOIS.** Blazor WASM = o mesmo motor C# roda no NAVEGADOR (WASM),
+  UI Razor simples, hospedagem GRÁTIS estática no GitHub Pages (link jogável de
+  portfólio), reusa motor+seams pro Unity depois. Single-player, **save local**
+  (`localStorage` no Blazor / arquivo+Steam/Play no Unity — pela porta
+  `IRepositorioDeSave`). Repo PÚBLICO + LICENSE. **Sem SQL, sem API/servidor próprio**
+  (descartados: reescrever em JS = 2º motor; C#-backend+API = precisa hospedar servidor).
 - **Um PR, um tema.** Não abrir duas frentes grandes ao mesmo tempo.
 - **Destravar de forma encadeada.** Escolher a ordem onde cada peça destrava a
   próxima e minimiza retrabalho. Pode-se reabrir algo, mas o caminho limpo é melhor
@@ -39,16 +43,21 @@
 
 ---
 
-## FILA DE EXECUÇÃO (rumo ao Unity) — ordem mestra
+## FILA DE EXECUÇÃO (rumo ao porte: Blazor → Unity) — ordem mestra
 
-> **Decisão (jul/2026):** o porte vai ser **Unity**, single-player, **save local**
-> (sincronizado por Steam Cloud / Google Play Saved Games — SDK de plataforma, NÃO
-> backend próprio). Isso MATOU o enquadramento web/RESTful/SQL antigo. O domínio C#
-> pluga direto no Unity; a camada de console (View) é que morre no porte.
+> **Decisão (jul/2026): BLAZOR WebAssembly PRIMEIRO, Unity DEPOIS.** O objetivo do Blazor
+> é sair do console com um **link jogável no GitHub** (portfólio) sem reescrever nada: o
+> motor C# atual roda no NAVEGADOR (WASM), UI Razor simples, GitHub Pages grátis. Reusa o
+> mesmo motor+seams pro Unity depois (só a camada View muda por plataforma). Single-player,
+> **save local** (`localStorage` pela porta `IRepositorioDeSave`). Repo PÚBLICO + LICENSE.
+> **Sem SQL, sem API/servidor.** Isso MATOU o enquadramento web/RESTful/SQL antigo.
+> (Descartados com razão: reescrita em JS = 2º motor; C#-backend+API+JS = precisa hospedar
+> servidor, não é grátis/estático. No WASM o código vai pro browser de qualquer jeito — não
+> dá pra esconder sem servidor; por isso repo público + LICENSE em vez de tentar ocultar.)
 >
-> **Como atacar:** os itens da FILA A são o que dá pra fazer **agora, no console**,
-> 1 por 1 (cada um = 1 PR, 1 mergeado antes do próximo). A FILA B espera o porte
-> (precisa dos SDKs/loop do Unity). A FILA C está descartada.
+> **Como atacar:** FECHAR a FILA A no console (domínio, serve qualquer plataforma) ANTES do
+> porte. Itens 1 por 1 (cada um = 1 PR, 1 mergeado antes do próximo). A FILA B espera o porte.
+> A FILA C está descartada.
 
 ### 🟢 FILA A — console, agora (numerada)
 
@@ -124,14 +133,28 @@
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
 
-### 🔵 FILA B — precisa do porte (sair do console → Unity)
-- **Encapsular coleções → choke-point de evento de status** (gatilho da camada de eventos).
-- **`EventoDano` por ID** — desacoplar dos objetos `Combate` vivos → log/stream limpo.
+### 🔵 FILA B — precisa do porte (sair do console)
+**Porte 1 = BLAZOR WASM (primeiro):**
+- **View Razor** — os componentes que substituem `CombateView`/`MenuView` (os seams
+  `IApresentacao`/`IEntrada`/`IControladorDeTurno` viram impls Blazor; o motor pluga direto).
+  Personagens = EMOJIS por ora (sem sprites).
+- **`SaveLocalStorage`** — impl da porta `IRepositorioDeSave` sobre o `localStorage` do navegador
+  (via JS interop). É a troca de impl que o #6 deixou pronta.
+- **Deploy GitHub Pages** — publish estático (base href, `.nojekyll`, redirect de 404). Grátis.
+
+**Porte 2 = UNITY (depois, reusa o mesmo motor):**
 - **Input via Unity Input System** (mouse/gamepad; `Selecionar(N)` já é a ponte).
-- **Camada de animação/eventos** (coroutines/UnityEvents/animation events) — consome o acima.
+- **Camada de animação/eventos** (coroutines/UnityEvents/animation events) — consome os eventos.
+  Nota: contra-ataque com A1 usa a animação de A1 do PRÓPRIO champ (já roda a habilidade A1 real
+  via `AtivarComNatureza`, então o vínculo mapeia natural).
 - **`SaveSteam` / `SavePlayGames`** — impls da porta `IRepositorioDeSave` (Steamworks.NET /
   Google Play Games plugin). Steam Auto-Cloud ≈ zero código; Play usa Snapshots.
 - **[bônus] champ-como-dado → ScriptableObjects** (o motor de Ações já está pré-moldado pra isso).
+
+**Comum aos dois portes (a "leva de eventos"):**
+- **Encapsular coleções → choke-point de evento de status** (gatilho da camada de eventos).
+- **`EventoDano` por ID** — desacoplar dos objetos `Combate` vivos → log/stream limpo.
+- **#7b — cura/veneno/queima visíveis** (o `EventoCura` + mensagens) alimenta essa camada.
 
 ### 🟠 FILA C — DESCARTADA (nenhum servidor SQL/REST próprio)
 - Cloud save é via SDK de plataforma (Steam/Play), plugado na porta `IRepositorioDeSave` — não é

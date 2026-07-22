@@ -11,8 +11,13 @@ namespace ApostlesWar.View
     internal class CombateView
     {
         private readonly IEntrada _entrada;
+        private readonly RelogioDoCombate _relogio;
 
-        public CombateView(IEntrada entrada) => _entrada = entrada;
+        public CombateView(IEntrada entrada, RelogioDoCombate relogio)
+        {
+            _entrada = entrada;
+            _relogio = relogio;
+        }
 
         /// <summary>
         /// Limpa a tela da partida. Mora aqui (o adapter de console do combate) pra que nenhum
@@ -22,6 +27,7 @@ namespace ApostlesWar.View
 
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)
         {
+            Console.WriteLine($"═══ Turno {_relogio.NumeroDoTurno} ═══\n");
             Console.WriteLine("Seu time:");
             foreach (Combate j in jogadores)
             {

@@ -804,9 +804,13 @@ a Fatia 2 destrava TRÊS coisas.
 
 ## RelógioDoCombate — enrage / limite de turnos
 
-**Status:** FUTURO, YAGNI. Conceito VIZINHO do TurnoDoPersonagem, num nível ACIMA (combate/
-rodada). Conta turnos GLOBAIS e dispara eventos em marcos (enrage; anti-stall). Mora no nível do
-ExecutarCombate. Implementa quando uma fase concreta pedir.
+**Status:** EMBRIÃO ✅ FEITO (jul/2026, a pedido do Gabriel: contador de turnos na tela de combate).
+`Combat/RelogioDoCombate.cs` — `NumeroDoTurno`/`Avancar`/`Reiniciar`. Injetado no CombateService
+(avança no início de cada `ExecutarTurnoCompleto` — inclui turno-extra e Preso; reinicia no
+`ExecutarCombate`) e no CombateView (cabeçalho `═══ Turno N ═══` no `ExibirPartida`). Conceito
+VIZINHO do TurnoDoPersonagem, num nível ACIMA (combate/rodada, turnos GLOBAIS). **FALTA (futuro,
+YAGNI):** disparar eventos em marcos (enrage / limite de turnos / anti-stall) — cresce daqui quando
+uma fase concreta pedir.
 
 ---
 

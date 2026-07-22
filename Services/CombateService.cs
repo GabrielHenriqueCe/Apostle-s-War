@@ -20,11 +20,12 @@ namespace ApostlesWar.Services
         private readonly IControladorDeTurno _controladorJogador;
         private readonly IControladorDeTurno _controladorBot;
         private readonly IApresentacao _apresentacao;
+        private readonly RelogioDoCombate _relogio;
 
         public CombateService(ArsenalService arsenalService,
             CampeoesService campeoesService, PersonagemService personagemService, CombateView combateView,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
-            IControladorDeTurno controladorBot, IApresentacao apresentacao)
+            IControladorDeTurno controladorBot, IApresentacao apresentacao, RelogioDoCombate relogio)
         {
             _arsenalService = arsenalService;
             _campeoesService = campeoesService;
@@ -34,6 +35,7 @@ namespace ApostlesWar.Services
             _controladorJogador = controladorJogador;
             _controladorBot = controladorBot;
             _apresentacao = apresentacao;
+            _relogio = relogio;
         }
 
         /// <summary>O controlador que DECIDE ação/alvo deste combatente (humano/bot; futuro: auto).</summary>
@@ -57,6 +59,7 @@ namespace ApostlesWar.Services
 
         private bool ExecutarCombate(List<Combate> jogador, List<Combate> inimigo, List<Combate> combatentes)
         {
+            _relogio.Reiniciar();   // nova batalha: zera o contador de turnos
             do
             {
                 for (int c = 0; c < combatentes.Count; c++)
@@ -94,6 +97,8 @@ namespace ApostlesWar.Services
         /// </summary>
         private void ExecutarTurnoCompleto(Combate atacante, List<Combate> jogador, List<Combate> inimigo)
         {
+            _relogio.Avancar();   // "cada vez que um personagem joga aumenta o contador" (inclui turno-extra e Preso)
+
             List<Combate> aliados = atacante is Jogador ? jogador : inimigo;
             List<Combate> defensores = atacante is Jogador ? inimigo : jogador;
 

@@ -105,13 +105,31 @@ namespace ApostlesWar.View
         {
             Console.Clear();
             Console.WriteLine("=====Apostle's War=====\n");
-            string[] opcoes = { "📜 - Jogar Campanha", "💰 - Inventário" };
+            string[] opcoes = { "📜 - Jogar Campanha", "💰 - Inventário", "⚔️ - Arena" };
             for (int i = 0; i < opcoes.Length; i++)
             {
                 string cursor = selecionado == i + 1 ? "▶" : " ";
                 Console.WriteLine($"{cursor} {i + 1} - {opcoes[i]}");
             }
             Console.WriteLine("\nEsc - Sair");
+        }
+
+        /// <summary>
+        /// Menu da Arena: escolhe quem controla cada time (os 4 modos). A ordem da lista é o número
+        /// da opção; o GerenciadorDeJogo mapeia opção → (bot1, bot2).
+        /// </summary>
+        public void ExibirMenuArena(int opcao)
+        {
+            Console.Clear();
+            Console.WriteLine("=====⚔️  Arena  ⚔️=====\n");
+            Console.WriteLine("Laboratório de duelos (sem fase, itens ou recompensa).\nQuem controla cada time?\n");
+            string[] modos = { "Você × Bot", "Bot × Você", "Você × Você (hotseat)", "Bot × Bot" };
+            for (int i = 0; i < modos.Length; i++)
+            {
+                string cursor = opcao == i + 1 ? "▶" : " ";
+                Console.WriteLine($"{cursor} {i + 1} - {modos[i]}");
+            }
+            Console.WriteLine("\nEsc - Voltar");
         }
 
         public void MenuCapitulos(int selecionado)

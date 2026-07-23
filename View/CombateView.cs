@@ -56,15 +56,39 @@ namespace ApostlesWar.View
         {
             Console.Clear();
             Console.WriteLine("═══ RESUMO DA BATALHA ═══\n");
-            foreach (Combate c in jogador)
+            ExibirLinhasResumo(jogador);
+            Console.WriteLine("Enter - Continuar");
+            while (_entrada.Ler().Tipo != TipoComando.Confirmar) { }
+        }
+
+        /// <summary>
+        /// Resumo do duelo da ARENA: os DOIS times (dano causado/recebido, cura, stats finais) + quem
+        /// venceu. É o instrumento de leitura do rebalance. Espera Confirmar pra seguir.
+        /// </summary>
+        public void ExibirResumoArena(List<Combate> equipe1, List<Combate> equipe2, bool venceuEquipe1)
+        {
+            Console.Clear();
+            Console.WriteLine("═══ RESUMO DA ARENA ═══\n");
+            Console.WriteLine($"🏆 Vencedor: Time {(venceuEquipe1 ? "1" : "2")}\n");
+            Console.WriteLine("── Time 1 ──");
+            ExibirLinhasResumo(equipe1);
+            Console.WriteLine("── Time 2 ──");
+            ExibirLinhasResumo(equipe2);
+            Console.WriteLine("Enter - Continuar");
+            while (_entrada.Ler().Tipo != TipoComando.Confirmar) { }
+        }
+
+        /// <summary>Linhas por combatente de um time num resumo (dano/cura + stats). Compartilhado
+        /// pela batalha da campanha e pela Arena.</summary>
+        private void ExibirLinhasResumo(List<Combate> combatentes)
+        {
+            foreach (Combate c in combatentes)
             {
                 string estado = c.EstaVivo() ? "" : " ☠️";
                 Console.WriteLine($"{c.Personagem.Simbolo} {c.Personagem.Nome}{estado}");
                 Console.WriteLine($"   ⚔️ Dano causado: {c.DanoCausado}   🛡️ Dano recebido: {c.DanoRecebido}   💚 Cura: {c.CuraRecebida}");
                 Console.WriteLine($"   HP:{c.HPAtual}/{c.HPMaximo}  ATK:{c.Ataque}  DEF:{c.Defesa}  🎯{(int)(c.TaxaCrit * 100)}%  💥x{1 + c.DanoCrit:0.0}\n");
             }
-            Console.WriteLine("Enter - Continuar");
-            while (_entrada.Ler().Tipo != TipoComando.Confirmar) { }
         }
 
         /// <summary>

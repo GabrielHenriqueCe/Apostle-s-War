@@ -75,9 +75,12 @@
 
 1. ✅ **Doc/organização** (#141) — gravou esta fila, matou o enquadramento web, reancorou
    encapsular-coleções, fechou nulo-na-porta, corrigiu drift dos testes.
-2. **`ColetarReacoes<T>` helper** — DRY das varreduras de reação do CombateService (o par
-   "status + passivas" repetido em 7 métodos). De quebra fecha a consistência de dispatch
-   no InicioTurno (que só varria passivas — hoje sem implementador status, então idêntico).
+2. ✅ **`ColetarReacoes<T>` helper** — DRY das varreduras de reação do CombateService. Vive em
+   `CombateService.ColetarReacoes<T>` e varre as DUAS fontes (`StatusAtivos` +
+   `ColetarPassivasReativas`, esta respeitando cooldown) numa fonte só; usado nas 8 varreduras
+   (InicioTurno, ReceberDano, SerAtacado, PorAtaque, CausarDano, AoAtacar, AoMatar, AoMorrer),
+   o que já fechou a consistência de dispatch no InicioTurno. *(Estava marcado pendente por
+   DRIFT do doc — auditoria jul/2026 achou o helper já implementado e em uso.)*
 3. ✅ **Faxina de seams restantes** *(auditoria jul/2026)* — os 2 `Console.Clear` fora da View
    (`CombateService.ExecutarTurno`, `ControladorJogador`) viraram `CombateView.LimparTela()`
    (mora no adapter de console do combate, onde os outros `Console.*` já estavam). Os avisos de
@@ -160,10 +163,33 @@
     (clone do Fedorento do Cocô — sem identidade) e ganhou **"Horda"** (+10% ATK/morto dos 2 times,
     placeholder pro rebalance). Irmã `EscalaComAbates` (on-kill permanente) DESENHADA, não construída
     (ver §conta-mortos). 4 testes.
-13. **Observabilidade Crit na UI** — exibir TaxaCrit/DanoCrit (OlhoClinico/Virus).
-14. **Ampliar testes xUnit** — ordem crítica de morte, `ReceberDano` ponta-a-ponta, e o
-    guard+teste da mina do `ResolverAlvos` (auditoria: a semente é confiada sem checar se
-    está nos candidatos — nenhum champ ativa hoje, mas o contrato fica sem dono).
+13. ✅ **Observabilidade Crit na UI** — absorvido pelo **#7a**: a `CombateView` mostra
+    🎯TaxaCrit/💥DanoCrit ao vivo pra todo combatente (time e inimigos) e no resumo de fim de
+    batalha. Como os getters somam os bônus permanentes, o acúmulo do OlhoClinico (TaxaCrit) e
+    do Vírus (DanoCrit) aparece na tela sozinho. *(Estava marcado pendente por DRIFT do doc.)*
+14. ✅ **Ampliar testes xUnit** — **`ReceberDano` ponta-a-ponta** (`Tests/ReceberDanoTests.cs`,
+    14 testes): matemática da defesa (fórmula proporcional, cap de 75%, `ignorarDefesaPct`,
+    `IgnoraDefesa` da natureza, BuffDefesa com sinal), ordem **passiva-pura ANTES dos status**
+    (provada pelo número: se invertesse, o dano efetivo mudaria), escudo absorvendo parcial,
+    os **acumuladores do resumo** (#7a: DanoRecebido/DanoCausado/CuraRecebida, incluindo dano
+    CHEIO sob piso de HP e cura capada no teto) e a confirmação de morte (prevent-death salva
+    1× e **consome cooldown** — o 2º golpe fatal mata). **Guard da mina do `ResolverAlvos`:** a
+    semente agora é validada contra os candidatos e **lança `InvalidOperationException`** se não
+    for candidata (antes entrava no resultado e o `IndexOf` devolvia -1, desalinhando o sorteio
+    dos extras — errado em silêncio). Critério do Gabriel: *mira errada é bug de declaração do
+    champ, tem que gritar* — não "consertar" escondido. O guard mora DEPOIS do early-return de
+    candidatos vazios, porque "sem ninguém no estado pedido" é caso LEGÍTIMO (Doces de Abóbora
+    sem mortos → o CombateService manda o próprio atacante e conta com o vazio). 3 testes cobrem
+    os 2 lados + o caso legítimo. 75 testes verdes.
+    - **Ordem crítica de morte — DIFERIDA pro FRONT (Fatia 1), de propósito.** A ordem
+      (Sentença/`IReageAoMatar` antes de Necromancia/`IReageAoMorrer`, CombateService) é
+      load-bearing de verdade: invertida, a Necromancia revive e a Sentença nem dispara (ela tem
+      `if (alvoMorto.EstaVivo()) return`). Mas um teste que PEGUE a troca precisa rodar o fluxo, e
+      o fluxo chama a View. Descartados na discussão: **wrapper** "só pra criar a ordem" (não
+      protege — a ordem continua trocável dentro dele) e **composição à mão** no teste (teatro: o
+      teste é que escolheria a ordem, não o fluxo). O teste real nasce quando a Fatia 1 do front
+      tornar a apresentação injetável — evita desenhar 2× o seam que o front vai redesenhar.
+      Até lá a ordem é guardada pelo comentário no `ProcessarReacoesAoMorrer` + ADR.
 15. **Faxina de comentários** — bisturi. Penúltimo.
 16. **REBALANCEAMENTO** — fase própria, o FIM. Números em playtest. **Passo 0 (auditoria):**
     reunir as constantes de balance num lugar só — a fórmula do `MultiplicadorFase`
@@ -242,6 +268,10 @@ render no JS, SEM tocar no motor.** Sem susto de performance (é por turnos, nã
 - **Fatia 0 — casca + ponte:** Photino + janela webview + prova do round-trip JS→C#→JS. Desenhar o
   contrato de mensagens (como o estado serializa, como o clique volta) ANTES.
 - **Fatia 1 — 1 tela real** (combate) via `IApresentacao`/`IEntrada` webview.
+  - **Carona da Fatia 1 (vinda do #14):** ao trocar o `CombateView` concreto do `CombateService`
+    por um seam injetável, nasce de graça a possibilidade de testar o FLUXO headless com uma
+    apresentação no-op. O primeiro cliente é o **teste da ordem crítica de morte** (Sentença antes
+    de Necromancia) — hoje impossível de testar sem rodar a View. Ver FILA A #14.
 - **Fatias seguintes:** menu principal, seleção de time, Arena, resumo — tela por tela, reusando os seams.
 
 ---

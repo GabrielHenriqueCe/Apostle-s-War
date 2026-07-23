@@ -689,5 +689,65 @@ namespace Tests
             Assert.Equal(550, efNormal);   // def 600 → 45% de redução
             Assert.Equal(700, efFurado);   // buff furado → def 400 → 30% de redução
         }
+
+        // ---------- Contrato da semente do ResolverAlvos (FILA A #14) ----------
+        //
+        // A semente (o alvo escolhido no menu/bot) TEM que ser um dos candidatos — já filtrada pelo
+        // mesmo EstadoAlvo que a habilidade declara. Violar isso colocava a semente inválida no
+        // resultado E fazia o IndexOf devolver -1, desalinhando o sorteio dos extras: erro silencioso.
+        // Agora explode. Nenhum champ viola hoje (a suíte inteira verde é parte da prova).
+
+        [Fact]
+        public void SementeMorta_NumaHabilidadeDeVivos_Explode()
+        {
+            var atacante = Novo();
+            var inimigoVivo = Novo();
+            var inimigoMorto = Novo(); Matar(inimigoMorto);
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante },
+                new List<Combate> { inimigoVivo, inimigoMorto });
+
+            var hab = Hab(new() { new Dano(1.0) }, alvos: 1, estado: EstadoAlvo.Vivos);
+
+            // Há candidato vivo (o outro inimigo), mas a semente entregue está morta.
+            Assert.Throws<InvalidOperationException>(() => hab.Ativar(ctx, inimigoMorto));
+        }
+
+        [Fact]
+        public void SementeViva_NumaHabilidadeDeMortos_Explode()
+        {
+            var atacante = Novo();
+            var aliadoVivo = Novo();
+            var aliadoMorto = Novo(); Matar(aliadoMorto);
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, aliadoVivo, aliadoMorto },
+                new List<Combate> { Novo() });
+
+            var hab = Hab(new() { new Reviver(0.5) }, alvos: 1,
+                lista: TipoLista.Aliados, estado: EstadoAlvo.Mortos);
+
+            Assert.Throws<InvalidOperationException>(() => hab.Ativar(ctx, aliadoVivo));
+        }
+
+        [Fact]
+        public void SemCandidatoNoEstadoPedido_NaoExplode_DevolveVazio()
+        {
+            // Caso LEGÍTIMO que o guard NÃO pode pegar: revive sem nenhum morto. O CombateService
+            // manda o próprio atacante (vivo) como semente e conta com o vazio — ver
+            // ResolverAlvoInicial. É por isso que o guard mora DEPOIS do early-return.
+            var atacante = Novo();
+            var aliadoVivo = Novo();
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, aliadoVivo },
+                new List<Combate> { Novo() });
+
+            var hab = Hab(new() { new Reviver(0.5) }, alvos: 1,
+                lista: TipoLista.Aliados, estado: EstadoAlvo.Mortos);
+
+            var eventos = hab.Ativar(ctx, atacante);   // não explode
+
+            Assert.Empty(eventos);
+            Assert.True(atacante.EstaVivo());
+        }
     }
 }

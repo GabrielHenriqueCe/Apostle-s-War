@@ -153,7 +153,13 @@
     do tipo `is Jogador`. Matou os 3 flips manuais (incl. a recursão do revide) e desacoplou
     time×controle×classe → **seam do modo VERSUS** (§Versus). Refactor puro, 54 testes. Medidor de
     velocidade = habilitado, fora do #11.
-12. **Passiva-conta-mortos** — desbloqueada (EventoDano Fatia 2 pronta); falta a passiva.
+12. ✅ **Passiva-conta-mortos** — FEITO. Capacidade genérica `EscalaComMortos` (Skills/Passivas/):
+    `IReageAoInicioTurno` que renova um buff proporcional aos mortos no campo (molde da Ventania;
+    valor dinâmico). Generaliza escopo (`ProprioTime`/`TimeInimigo`/`AmbosOsTimes`) × stat (fábrica
+    `Func<double,Buff>` da matriz #8) × por-morto. **Zumbi** = 1º cliente: perdeu a `PutrefacaoContagiosa`
+    (clone do Fedorento do Cocô — sem identidade) e ganhou **"Horda"** (+10% ATK/morto dos 2 times,
+    placeholder pro rebalance). Irmã `EscalaComAbates` (on-kill permanente) DESENHADA, não construída
+    (ver §conta-mortos). 4 testes.
 13. **Observabilidade Crit na UI** — exibir TaxaCrit/DanoCrit (OlhoClinico/Virus).
 14. **Ampliar testes xUnit** — ordem crítica de morte, `ReceberDano` ponta-a-ponta, e o
     guard+teste da mina do `ResolverAlvos` (auditoria: a semente é confiada sem checar se
@@ -829,13 +835,29 @@ estado morto, consulta o tabuleiro. Depende do contexto rico (Fatia 2). Seção 
 
 ---
 
-## Passiva-conta-mortos (1b) — depende do contexto rico (FIO NOVO)
+## Passiva-conta-mortos — ✅ FEITO (jul/2026) + IRMÃ desenhada
 
-**Status:** REGISTRADO, junto de Robo/Sushiman (Fatia 2 do EventoDano).
-**O que é:** passiva do vivo que fica mais forte por quantos inimigos/aliados estão mortos (ex:
-+10% ATK por inimigo morto). Efeitos de item pra isso no futuro. Precisa contar mortos nos times
-→ precisa de Aliados + Inimigos no ContextoReacao (mesma dependência do Robo/Sushiman). Por isso
-a Fatia 2 destrava TRÊS coisas.
+**`EscalaComMortos` (Skills/Passivas/EscalaComMortos.cs):** passiva genérica config-driven —
+`IReageAoInicioTurno` (molde da Ventania/Tengu) que RENOVA todo turno um buff cujo valor é
+proporcional aos MORTOS no campo. Lê o tabuleiro pelo `ContextoCombate` (Aliados/Inimigos, da Fatia
+2 — não é estado de morto). Generaliza 3 eixos: **escopo** (`EscopoMortos.ProprioTime`/`TimeInimigo`/
+`AmbosOsTimes`) × **stat** (fábrica `Func<double,Buff>` → BuffAtaque/BuffDefesa/… da matriz de stats)
+× **por-morto**. Cliente: **Zumbi "Horda"** (ambos os times → +10% ATK/morto, placeholder). Os escopos
+só-aliados/só-inimigos nascem prontos p/ passivas futuras. (O Zumbi perdeu a `PutrefacaoContagiosa`,
+que era clone do Fedorento do Cocô.)
+
+**IRMÃ — `EscalaComAbates` (DESIGN PRONTO, NÃO construída; Gabriel implementa depois do front + mais
+champs):** mesmo TEMA, gatilho/persistência diferentes.
+- Gatilho: `IReageAoMatar` (reage quando ESTE champ mata; `ctx.Portador` = matador), não tabuleiro.
+- Efeito: bônus **PERMANENTE** que ACUMULA por abate (molde da **Ambição** do Troll — `AdicionarBonus
+  XPermanente`), **não** é buff.
+- Generaliza **stat × por-abate** via closure `Action<Combate>` (os bônus permanentes são heterogêneos:
+  ATK/DEF = %-sobre-base int; DanoCrit/TaxaCrit = pontos absolutos double — closure captura tudo).
+  Ex.: `c => c.AdicionarBonusAtaquePermanente((int)(c.AtaqueComItens * 0.10))`.
+- **GAP a resolver na impl:** HP/vida NÃO tem `AdicionarBonusHPPermanente` (HP é HPMaximo, mexido só
+  no IniciarCombate/itens) — escalar HP por abate precisa de método novo (mexe no HPMaximo e/ou HPAtual?).
+  ATK/DEF/DanoCrit/TaxaCrit já têm método.
+- Aberto: cap (Ambição tem 25% via `ObterEstado`) vs sem cap (abates são finitos). Default sugerido: sem cap.
 
 ---
 

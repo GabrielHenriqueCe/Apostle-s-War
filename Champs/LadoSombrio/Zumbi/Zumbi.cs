@@ -1,5 +1,7 @@
 using ApostlesWar;
+using ApostlesWar.Skills.Buffs;
 using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Skills.Passivas;
 
 namespace ApostlesWar.Champs.LadoSombrio
 {
@@ -8,14 +10,16 @@ namespace ApostlesWar.Champs.LadoSombrio
     /// Putrefação é o 1º cliente da Ação Explodir (molde único das explosões — detona o que o
     /// status faz); a cura é um EXTRA da habilidade (ação separada, 20% de todo o dano causado
     /// via PorDanoCausado — a explosão entra na conta porque registra seus EventoDano), por
-    /// isso a explosão é reutilizável a seco por outros champs. Passiva:
-    /// PutrefacaoContagiosa.Passiva.cs.
+    /// isso a explosão é reutilizável a seco por outros champs. Passiva: "Horda" (EscalaComMortos)
+    /// — 1º cliente da capacidade que escala com os mortos no campo.
     /// </summary>
     static class Zumbi
     {
         public static Personagem Definir() => new(
             4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120,
-            VomitoToxico(), Putridao(), new PutrefacaoContagiosa());
+            VomitoToxico(), Putridao(),
+            new EscalaComMortos("Horda", "🧟", "+10% ATK por combatente morto no campo (dos dois times).",
+                EscopoMortos.AmbosOsTimes, porMorto: 0.10, v => new BuffAtaque(duracao: 2, percentual: v)));
 
         static HabilidadeAtiva VomitoToxico() => new(
             "Vômito Tóxico", "🤢", cooldown: 4, "Ataca todos e aplica Veneno (5% HP/turno por stack).",

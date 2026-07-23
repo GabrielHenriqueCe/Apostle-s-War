@@ -43,6 +43,7 @@ namespace ApostlesWar.Services
                 {
                     case 1: ExecutarFluxoCampanha(); break;
                     case 2: ExecutarFluxoInventario(); break;
+                    case 3: ExecutarFluxoArena(); break;
                 }
             }
         }
@@ -82,7 +83,7 @@ namespace ApostlesWar.Services
                     continue;
                 }
 
-                opcaoMenu = Navegacao.MoverCursor(opcaoMenu, 1, 2, cmd);
+                opcaoMenu = Navegacao.MoverCursor(opcaoMenu, 1, 3, cmd);
             }
         }
 
@@ -237,6 +238,42 @@ namespace ApostlesWar.Services
             }
         }
 
+
+        #endregion
+
+        #region Fluxo Arena
+
+        /// <summary>
+        /// Modo Arena: escolhe quem controla cada time (4 modos) e delega ao CombateService, que monta
+        /// os 2 times e roda o duelo. Sem recompensa/save — é só laboratório. Esc = volta ao menu.
+        /// </summary>
+        private void ExecutarFluxoArena()
+        {
+            int opcao = 1;
+            while (true)
+            {
+                _menuView.ExibirMenuArena(opcao);
+                Comando cmd = _entrada.Ler();
+
+                if (cmd.Tipo == TipoComando.Cancelar) return;
+
+                if (cmd.Tipo == TipoComando.Confirmar)
+                {
+                    // opção → (bot controla o time 1?, bot controla o time 2?)
+                    (bool bot1, bool bot2) = opcao switch
+                    {
+                        1 => (false, true),   // Você × Bot
+                        2 => (true, false),   // Bot × Você
+                        3 => (false, false),  // hotseat (Você × Você)
+                        _ => (true, true),    // Bot × Bot
+                    };
+                    _combateService.ExecutarArena(bot1, bot2);
+                    return;
+                }
+
+                opcao = Navegacao.MoverCursor(opcao, 1, 4, cmd);
+            }
+        }
 
         #endregion
     }

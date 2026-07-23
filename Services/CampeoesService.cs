@@ -62,6 +62,17 @@ namespace ApostlesWar.Services
             return _menuView.NavegarSelecaoTime(ObterDesbloqueados());
         }
 
+        /// <summary>TODOS os campeões (9 facções × 4 slots) — pool da Arena (laboratório de rebalance:
+        /// qualquer matchup, independente do progresso da campanha). Vazio = jogador desistiu.</summary>
+        public List<Personagem> SelecionarTimeArena()
+        {
+            var todos = new List<Personagem>();
+            foreach (Faccao faccao in Enum.GetValues<Faccao>())
+                foreach (Slot slot in Enum.GetValues<Slot>())
+                    todos.Add(_personagemService.ObterPersonagem(faccao, slot));
+            return _menuView.NavegarSelecaoTime(todos);
+        }
+
         public void CarregarCampeoes()
         {
             foreach (Capitulo cap in _capitulosService.ObterTodos())

@@ -595,17 +595,22 @@ acima — "boss mata todos após X turnos") — são dois relógios em níveis d
 
 ---
 
-## Modo VERSUS (SEAM feito na Fatia C; MODO = PR próprio) — instrumento do REBALANCE #16
+## Modo ARENA (SEAM na Fatia C; MODO ✅ FEITO) — instrumento do REBALANCE #16
 
-**Motivação (Gabriel):** "pro rebalanceamento vou PRECISAR desse Versus". Partida = Equipe1 × Equipe2
-com controle configurável por equipe → 4 modos: **J×B, B×J, J×J (hotseat), B×B**. O seam já existe
-(`Batalha` + o mapa `Dictionary<Equipe, IControladorDeTurno>` no CombateService): o `ExecutarVersus`
-será irmão do `ExecutarFase`, montando os 2 times + o mapa conforme o menu; o loop de combate NÃO muda.
-- **Menu:** "Versus" no principal → escolhe o controle das 2 equipes → humano monta AS DUAS equipes
-  (arma o confronto exato pro rebalance; sorteio de times = futuro).
-- **Regras (v1):** SEM MultiplicadorFase (mult 1.0, luta justa), SEM itens (leitura limpa de balance),
-  SEM recompensa/save. Vencedor + **resumo das DUAS equipes** (#7a já mede dano/cura por personagem —
-  é o instrumento de medição do rebalance).
+**Motivação (Gabriel):** "pro rebalanceamento vou PRECISAR desse Versus". ✅ **FEITO (jul/2026):**
+"⚔️ Arena" (3ª opção do menu principal) → menu de 4 modos de controle (**Você×Bot, Bot×Você,
+Você×Você hotseat, Bot×Bot**) → monta os 2 times com **TODOS os 36 campeões** (pool independente do
+progresso — qualquer matchup) → `CombateService.ExecutarArena(bot1, bot2)` (irmão do `ExecutarFase`:
+monta Equipes + o mapa `Dictionary<Equipe, IControladorDeTurno>` conforme o modo; o loop de combate
+NÃO muda — o seam faz tudo funcionar). Ambos os times são classe `Jogador` (a ESTRUTURA define quem é
+inimigo). SEM mult de fase, itens, recompensa ou save. `CombateView.ExibirResumoArena` mostra os 2
+times + vencedor (#7a mede dano/cura por personagem = o instrumento).
+- **CAVEAT do rebalance (importante):** o `ControladorBot` **só usa A1** (não as habilidades) — é o
+  bot da campanha, class-agnostic mas burro. Então **Bot×Bot NÃO exercita as skills**; pra testar
+  matchups de habilidades, o **hotseat (Você×Você)** é o modo forte (humano dirige os 2 lados). Bot
+  inteligente (escolher entre habilidades) = melhoria própria do ControladorBot, desacoplada.
+- **B×B headless** (simular N batalhas sem TTY, coletar números) segue na FILA B (precisa do seam de
+  View concreto) e depende também do bot inteligente pra ser representativo.
 - **Descobertas:** hotseat J×J sai quase de graça (a View já mostra "Seu time" da perspectiva de quem
   age, estilo xadrez); a vitória-bool já serve ("Equipe1 sobreviveu?").
 - **B×B headless** (simular N batalhas e coletar números sem TTY) → depende do seam de View concreto →

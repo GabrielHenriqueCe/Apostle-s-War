@@ -588,6 +588,40 @@ namespace ApostlesWar.Services
             return ExecutarCombate(batalha);
         }
 
+        /// <summary>
+        /// Modo ARENA (laboratório de rebalance): duelo Equipe1 × Equipe2 com controle configurável
+        /// (bot1/bot2 = cada equipe é bot?). SEM multiplicador de fase (luta justa, mult 1.0), SEM
+        /// itens (leitura limpa de balance) e SEM recompensa/save. Reusa o mesmo loop de combate — o
+        /// seam Batalha/controlador faz tudo funcionar independente da classe. Ambos os times são
+        /// Jogador (a estrutura, não o tipo, define quem é inimigo de quem). Esc = sai sem drama.
+        /// </summary>
+        public void ExecutarArena(bool bot1, bool bot2)
+        {
+            var time1 = _campeoesService.SelecionarTimeArena();
+            if (time1.Count == 0) return;   // desistiu na seleção
+            var time2 = _campeoesService.SelecionarTimeArena();
+            if (time2.Count == 0) return;
+
+            var equipe1 = new Equipe(time1.Select(p => (Combate)new Jogador(p)).ToList());
+            var equipe2 = new Equipe(time2.Select(p => (Combate)new Jogador(p)).ToList());
+            foreach (Combate c in equipe1.Membros) c.IniciarCombate();
+            foreach (Combate c in equipe2.Membros) c.IniciarCombate();
+
+            var batalha = new Batalha(equipe1, equipe2);
+            _controladores = new Dictionary<Equipe, IControladorDeTurno>
+            {
+                { equipe1, bot1 ? _controladorBot : _controladorJogador },
+                { equipe2, bot2 ? _controladorBot : _controladorJogador },
+            };
+
+            try
+            {
+                bool venceu1 = ExecutarCombate(batalha);
+                _combateView.ExibirResumoArena(equipe1.Membros, equipe2.Membros, venceu1);
+            }
+            catch (BatalhaAbortada) { }   // Esc no meio: volta pro menu sem tela de derrota
+        }
+
         #endregion
     }
 }

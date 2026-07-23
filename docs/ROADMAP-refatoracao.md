@@ -207,6 +207,45 @@ lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
 
 ---
 
+## FRONT (webview desktop) — ARQUITETURA DECIDIDA (jul/2026)
+
+**Ordem:** o front vem ANTES do REBALANCE #16 (decisão do Gabriel — quer balancear numa interface
+amigável, não no console). É uma FASE (várias fatias), não 1 PR.
+
+### Método — NÃO é MVC nem REST
+É uma **ponte de mensagens LOCAL, in-process, orientada a eventos.** O JS (tela) e o C# (motor) rodam
+no **MESMO processo** (o `.exe`) e trocam mensagens **direto pela webview** — sem HTTP, sem servidor,
+sem rede, offline. Analogia: não é "cliente e servidor pela internet", é "duas partes do mesmo programa
+passando bilhetes" (padrão de app desktop com webview — VS Code / Discord / Spotify desktop por dentro).
+- **REST/servidor foi DESCARTADO** (= FILA C): precisa hospedar, não é grátis/offline.
+- **Encaixa nos seams já prontos:** `IEntrada` recebe o clique-do-JS → `Comando`; `IApresentacao`
+  empurra o estado/eventos pro JS desenhar. O motor C# **não sabe** que é webview.
+- **MVC "de leve" (só a separação natural):** View = HTML/CSS/JS; Model = domínio C#; cola = o host
+  webview. NÃO é o framework ASP.NET MVC. Existe um "protocolo" (formato dos bilhetes, provavelmente
+  JSON), mas é um **contrato interno do app**, não uma API.
+
+### Ferramenta
+**Photino.NET** (recomendado — janela nativa + webview, cross-platform, leve; pacote NuGet) ou
+**WebView2** (Windows-only). O **HTML/CSS/JS mora NESTE repo** (sobe pro GitHub junto — não é
+site/serviço à parte). Distribuição: `dotnet publish` self-contained → **`.exe` no GitHub Releases**.
+C# roda NATIVO (não WASM) → zero carregamento. *(Confirmar compat do Photino com `net10.0` no setup;
+plano B = WebView2 ou ajustar TFM.)* Claude Code segue no MESMO repo/contexto — não precisa de nada novo.
+
+### Visual — emoji é PLACEHOLDER, não o teto
+v1 = emojis + CSS (dano pulando) pra o loop andar rápido sem depender de arte. **Teto real = sprites
+pixel ANIMADOS** (sprite sheets + CSS `steps()` ou `<canvas>`; `image-rendering: pixelated` mantém o
+pixel nítido; arte do **Pixelab** pluga direto). O motor só EMITE eventos (o stream `EventoCombate`/
+`EventoDano` = o gancho de animação); o front decide o quão rico renderiza. **Emoji → sprite = troca de
+render no JS, SEM tocar no motor.** Sem susto de performance (é por turnos, não ação 60fps).
+
+### Fatiamento (seam primeiro, sempre)
+- **Fatia 0 — casca + ponte:** Photino + janela webview + prova do round-trip JS→C#→JS. Desenhar o
+  contrato de mensagens (como o estado serializa, como o clique volta) ANTES.
+- **Fatia 1 — 1 tela real** (combate) via `IApresentacao`/`IEntrada` webview.
+- **Fatias seguintes:** menu principal, seleção de time, Arena, resumo — tela por tela, reusando os seams.
+
+---
+
 ## OS FIOS QUE FALTAM (visão de alto nível)
 
 Resumo do que resta no combate. **C5 COMPLETO** (todas as passivas migradas, sistema

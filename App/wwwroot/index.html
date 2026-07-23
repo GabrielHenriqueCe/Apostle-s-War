@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <title>Apostle's War</title>
+    <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+    <header id="topo">
+        <span id="turno">Turno 1</span>
+        <button id="alternarNumeros" type="button" title="Mostrar/esconder os números (ATK, DEF, crit)">
+            👁️ números
+        </button>
+    </header>
+
+    <main id="arena">
+        <section class="lado" id="ladoEsquerdo" aria-label="Seu time"></section>
+
+        <div id="meio">
+            <div id="narracao"></div>
+        </div>
+
+        <section class="lado" id="ladoDireito" aria-label="Inimigos"></section>
+    </main>
+
+    <!-- O "pergaminho": quem está selecionado, ampliado, com as habilidades clicáveis. -->
+    <footer id="painel">
+        <div id="painelVazio">clique num personagem pra ver os detalhes</div>
+
+        <div id="painelConteudo" hidden>
+            <div id="retrato">
+                <div id="retratoEmoji"></div>
+                <div id="retratoNome"></div>
+            </div>
+
+            <div id="painelCorpo">
+                <div id="painelStats"></div>
+                <div id="painelStatus"></div>
+                <div id="habilidades"></div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="jogo.js"></script>
+</body>
+</html>

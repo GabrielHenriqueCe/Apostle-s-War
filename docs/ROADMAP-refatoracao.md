@@ -250,12 +250,28 @@ passando bilhetes" (padrão de app desktop com webview — VS Code / Discord / S
   webview. NÃO é o framework ASP.NET MVC. Existe um "protocolo" (formato dos bilhetes, provavelmente
   JSON), mas é um **contrato interno do app**, não uma API.
 
-### Ferramenta
-**Photino.NET** (recomendado — janela nativa + webview, cross-platform, leve; pacote NuGet) ou
-**WebView2** (Windows-only). O **HTML/CSS/JS mora NESTE repo** (sobe pro GitHub junto — não é
-site/serviço à parte). Distribuição: `dotnet publish` self-contained → **`.exe` no GitHub Releases**.
-C# roda NATIVO (não WASM) → zero carregamento. *(Confirmar compat do Photino com `net10.0` no setup;
-plano B = WebView2 ou ajustar TFM.)* Claude Code segue no MESMO repo/contexto — não precisa de nada novo.
+### Ferramenta — **WebView2** (jul/2026: o Photino FOI TENTADO E DESCARTADO)
+O **HTML/CSS/JS mora NESTE repo** (sobe pro GitHub junto — não é site/serviço à parte).
+Distribuição: `dotnet publish` self-contained → **`.exe` no GitHub Releases**. C# roda NATIVO (não
+WASM) → zero carregamento.
+
+**Photino descartado por evidência, não por preferência.** Ele sobe em `net10.0` sem problema
+(o NuGet resolve `net8.0` como compatível; os binários nativos são por RID) — mas a **janela abre
+PRETA**: o título é setado, o processo não crasha, e nada é renderizado. Reproduzido com
+`LoadRawString` (HTML embutido, sem arquivo) E com `Load` de arquivo, com pasta de dados explícita,
+na última versão existente (Photino.NET 4.0.16 + Native 4.0.22). O WebView2 Runtime da máquina está
+instalado e íntegro (150.0.4078.83) — o **WebView2 direto renderizou de primeira** no mesmo runtime.
+Suspeita: shim nativo do Photino velho demais pro runtime atual. **Não vale investigar mais fundo:
+o Photino não expõe `CoreWebView2InitializationCompleted`/`NavigationCompleted`, então não dá pra
+instrumentar a falha — e essa opacidade é, por si só, o argumento contra ele.**
+
+**Preço do WebView2:** exige host WinForms → TFM `net10.0-windows`. Resolvido SEM contaminar o motor:
+o projeto foi partido em **`ApostlesWar` (biblioteca, `net10.0` puro — motor + views de console)** e
+**`App/ApostlesWar.App` (Exe, `net10.0-windows` — composition root + front)**. Os Tests seguem
+`net10.0` intocados. A separação de camadas que as portas já faziam no código agora aparece também na
+estrutura de projetos. *(Gotcha registrado: o pacote do WebView2 referencia as variantes WinForms E
+WPF sem condição — `build/Common.targets:133` — e a WPF arrasta outro `WindowsBase`, gerando MSB3277;
+removida num Target no csproj do App, já que é referência morta aqui.)*
 
 ### Visual — emoji é PLACEHOLDER, não o teto
 v1 = emojis + CSS (dano pulando) pra o loop andar rápido sem depender de arte. **Teto real = sprites
@@ -265,14 +281,29 @@ pixel nítido; arte do **Pixelab** pluga direto). O motor só EMITE eventos (o s
 render no JS, SEM tocar no motor.** Sem susto de performance (é por turnos, não ação 60fps).
 
 ### Fatiamento (seam primeiro, sempre)
-- **Fatia 0 — casca + ponte:** Photino + janela webview + prova do round-trip JS→C#→JS. Desenhar o
-  contrato de mensagens (como o estado serializa, como o clique volta) ANTES.
-- **Fatia 1 — 1 tela real** (combate) via `IApresentacao`/`IEntrada` webview.
-  - **Carona da Fatia 1 (vinda do #14):** ao trocar o `CombateView` concreto do `CombateService`
-    por um seam injetável, nasce de graça a possibilidade de testar o FLUXO headless com uma
-    apresentação no-op. O primeiro cliente é o **teste da ordem crítica de morte** (Sentença antes
-    de Necromancia) — hoje impossível de testar sem rodar a View. Ver FILA A #14.
-- **Fatias seguintes:** menu principal, seleção de time, Arena, resumo — tela por tela, reusando os seams.
+- **Fatia 0 — casca + ponte: ✅ FEITA.** Janela WebView2 + round-trip JS→C#→JS provado.
+- **Fatia 1 — tela de combate: ✅ FEITA** (`--front` cai direto numa Arena com times sorteados).
+  - **Descoberta que mudou o desenho:** `IApresentacao` **NÃO era** porta de render — só encapsula a
+    ESPERA (`AguardarAnimacao`). O render era `Console.WriteLine` dentro da `CombateView`, concreta
+    dentro do `CombateService`. A porta de verdade nasceu agora: **`View/ITelaDeCombate`**.
+  - **O contrato é GATILHO, não desenho.** Os nomes são imperativos por herança do console
+    (`Exibir...`), mas a impl web traduz cada chamada em (a) um RETRATO do estado serializado ou
+    (b) um EVENTO pra animar. A tela se redesenha do estado; nunca recebe ordem de desenho. É isso
+    que faz emoji→sprite ser troca só de front.
+  - **O laço síncrono foi PRESERVADO INTEIRO** — nada virou async. A UI fica na thread principal
+    (`Application.Run`) e o jogo numa thread de fundo; `IEntrada.Ler()` bloqueia num
+    `BlockingCollection.Take()` que o clique do JS alimenta. Foi a `IEntrada` bloqueante (que parecia
+    um problema pro porte) que salvou o motor de qualquer cirurgia.
+  - **Menu de ação e de alvo ficaram FORA da porta:** são navegação por CURSOR, formato do console.
+    Quem decide ação/alvo é o `IControladorDeTurno`, e o front tem o seu (`ControladorJogadorWeb`,
+    clique-na-habilidade → clique-no-alvo). Botá-los na porta obrigaria a impl web a carregar
+    método morto.
+  - **Carona ainda em aberto (do #14):** com a apresentação agora injetável, o **teste da ordem
+    crítica de morte** (Sentença antes de Necromancia) virou possível com uma tela no-op. Não feito
+    neste PR (1 PR, 1 tema) — é o próximo candidato.
+- **Fatias seguintes** (na ordem que o Gabriel descreveu): menu principal (novo jogo / continuar /
+  deletar save), opções (som, tela cheia), bastião/hub com portal+arena, mapa de campanha (linear
+  primeiro, bonito depois), picker de times em HTML, falas dos champs, sprites.
 
 ---
 

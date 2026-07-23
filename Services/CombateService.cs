@@ -15,7 +15,7 @@ namespace ApostlesWar.Services
         private readonly ArsenalService _arsenalService;
         private readonly CampeoesService _campeoesService;
         private readonly PersonagemService _personagemService;
-        private readonly CombateView _combateView;
+        private readonly ITelaDeCombate _combateView;
         private readonly SelecaoDeAlvoService _selecaoDeAlvoService;
         private readonly IControladorDeTurno _controladorJogador;
         private readonly IControladorDeTurno _controladorBot;
@@ -29,7 +29,7 @@ namespace ApostlesWar.Services
         private Dictionary<Equipe, IControladorDeTurno> _controladores = new();
 
         public CombateService(ArsenalService arsenalService,
-            CampeoesService campeoesService, PersonagemService personagemService, CombateView combateView,
+            CampeoesService campeoesService, PersonagemService personagemService, ITelaDeCombate combateView,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
             IControladorDeTurno controladorBot, IApresentacao apresentacao, RelogioDoCombate relogio)
         {
@@ -602,6 +602,16 @@ namespace ApostlesWar.Services
             var time2 = _campeoesService.SelecionarTimeArena();
             if (time2.Count == 0) return;
 
+            ExecutarArenaComTimes(time1, time2, bot1, bot2);
+        }
+
+        /// <summary>
+        /// A Arena a partir de times JÁ ESCOLHIDOS — a seleção é problema de quem chama. Existe porque
+        /// o pick de campeões é uma TELA (console hoje, front amanhã) e a luta não deveria depender
+        /// dela: o front entra direto numa batalha com times sorteados, sem passar por menu nenhum.
+        /// </summary>
+        public void ExecutarArenaComTimes(List<Personagem> time1, List<Personagem> time2, bool bot1, bool bot2)
+        {
             var equipe1 = new Equipe(time1.Select(p => (Combate)new Jogador(p)).ToList());
             var equipe2 = new Equipe(time2.Select(p => (Combate)new Jogador(p)).ToList());
             foreach (Combate c in equipe1.Membros) c.IniciarCombate();

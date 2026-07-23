@@ -29,5 +29,6 @@ var controladorJogador = new ControladorJogador(combateView, entrada);   // troc
 var controladorBot = new ControladorBot(selecaoDeAlvoService);
 var combateService = new CombateService(arsenalService, campeoesService, personagemService, combateView, selecaoDeAlvoService, controladorJogador, controladorBot, apresentacao, relogioDoCombate);
 new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, menuView, combateService, entrada).Executar();
+return 0;
 
 #endregion

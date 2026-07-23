@@ -145,12 +145,14 @@
     vazaria pro Vendaval) → fica no Func. **Única mudança de jogo:** o A1 do Mago (usa `Dano(1.0)`)
     passou a ganhar os +25% vs alvo com Queima (antes só as 2 especiais) — contido, mais correto,
     paridade exata nas especiais. +2 testes.
-11. **Turno (resto)** — 3 fatias: **(A) ✅ `TurnoDoPersonagem` PERSISTENTE (Caminho B)** — feito
-    como FUNDAÇÃO primeiro (o Combate possui o seu Turno; o estado turn-scoped `_jaContraAtacou`
-    mudou de casa Combate→Turno, com fachada preservada; refactor puro, zero mudança). **(B) ✅
-    orçamento de reação por chave (`TentarReagir`)** + migrou Espinhos/Zumbi/Cocô pra 1x-por-agressor
-    (por-hit segue first-class, opt-in). (C) `TimeAtualDoTurno`. Medidor de velocidade = habilitado,
-    fora do #11.
+11. ✅ **Turno (resto) — FECHADO (A+B+C).** **(A)** `TurnoDoPersonagem` PERSISTENTE (Caminho B),
+    fundação. **(B)** orçamento de reação por chave (`TentarReagir`), Espinhos/Zumbi/Cocô 1x-por-agressor
+    (por-hit segue first-class). **(C) RENASCEU** — a "TimeAtualDoTurno" original (times no combatente)
+    morreu (premissa velha: contexto já é a fonte de perspectiva); virou **`Equipe`/`Batalha`** (Combat/):
+    a perspectiva nasce num só lugar (`Batalha.PerspectivaDe`) derivada da ESTRUTURA (qual equipe), não
+    do tipo `is Jogador`. Matou os 3 flips manuais (incl. a recursão do revide) e desacoplou
+    time×controle×classe → **seam do modo VERSUS** (§Versus). Refactor puro, 54 testes. Medidor de
+    velocidade = habilitado, fora do #11.
 12. **Passiva-conta-mortos** — desbloqueada (EventoDano Fatia 2 pronta); falta a passiva.
 13. **Observabilidade Crit na UI** — exibir TaxaCrit/DanoCrit (OlhoClinico/Virus).
 14. **Ampliar testes xUnit** — ordem crítica de morte, `ReceberDano` ponta-a-ponta, e o
@@ -568,12 +570,21 @@ comportamento. Habilita ideias de Gabriel: medidor de turno / velocidade nos sta
   (gate no início do `AoSerAtacado`) — de por-hit → 1x por agressor por turno. **As duas frequências são
   first-class:** `TentarReagir` é OPT-IN (por-agressor); por-hit dispara direto (sem orçamento) — regra
   "só cria método quando há estado" (documentado no `TentarReagir`). 5 testes headless do mecanismo.
-- **(Fatia C) TimeAtualDoTurno** — centralizar "quais são os aliados e os inimigos de uma
-  perspectiva" numa fonte única (o Turno persistente) que ContextoCombate E ContextoReacao consultam,
-  em vez de cada ponto do CombateService recalcular `atacante is Jogador ? jogador : inimigo`.
-  Refinamento puro. Nome a definir.
+- **(Fatia C) — ✅ FEITO (RENASCIDA como `Equipe`/`Batalha`, jul/2026).** A ideia original
+  ("times no combatente / TimeAtualDoTurno") MORREU na investigação: a premissa ("cada ponto recalcula
+  `is Jogador`") era drift (é 1×, threaded como param) e os CONTEXTOS já são a fonte de perspectiva que
+  o domínio consome. Renasceu por um futuro NOVO que o Gabriel nomeou — o modo **VERSUS** (§Versus). O
+  que se fez: `Combat/Batalha.cs` (`Equipe { Membros }` + `Batalha { Equipe1/2, EquipeDe, OponenteDe,
+  PerspectivaDe, Combatentes }`), mora no CombateService (rebuild por rodada, como o RelogioDoCombate).
+  `PerspectivaDe(portador)` é o "um só caminho": derivada da ESTRUTURA (qual equipe), matou os 3 flips
+  manuais (`aliadosDoAlvo = inimigosDoAtacante` + a recursão do revide colapsou numa pergunta só). O
+  `is Jogador`/`is Inimigo` do fluxo saiu: **time** = `PerspectivaDe`; **controle** = mapa
+  `Dictionary<Equipe, IControladorDeTurno>` (campanha: E1→humano, E2→bot; Versus troca o mapa);
+  **apresentação** (UX de preparação) = "controlador é bot". As 5 `ProcessarReacoes*` + `ExecutarAtos`
+  perderam os params de perspectiva. Refactor PURO (54 testes). Sobrou o `is Jogador` em `AtaqueBasico`
+  (contexto próprio) — não é fluxo, fica.
 - O disparo do evento InicioDoTurno das passivas — hoje em DispararEventoInicioDeTurno no
-  CombateService. Reavaliar se migra pro Turno (boy-scout na Fatia C).
+  CombateService. Reavaliar se migra pro Turno (boy-scout futuro).
 
 **(histórico) Motivação do Caminho B:** o `_jaContraAtacou` foi posto no Combate por pragmatismo
 (Caminho A) — mas é conceitualmente estado DE TURNO (nasce e morre no turno), diferente de
@@ -581,6 +592,24 @@ duração/cooldown que são do COMBATENTE (persistem, o turno só avança). Habi
 medidor de turno /
 velocidade nos stats. NÃO confundir com o RelógioDoCombate (contador GLOBAL de rodadas, nível
 acima — "boss mata todos após X turnos") — são dois relógios em níveis diferentes.
+
+---
+
+## Modo VERSUS (SEAM feito na Fatia C; MODO = PR próprio) — instrumento do REBALANCE #16
+
+**Motivação (Gabriel):** "pro rebalanceamento vou PRECISAR desse Versus". Partida = Equipe1 × Equipe2
+com controle configurável por equipe → 4 modos: **J×B, B×J, J×J (hotseat), B×B**. O seam já existe
+(`Batalha` + o mapa `Dictionary<Equipe, IControladorDeTurno>` no CombateService): o `ExecutarVersus`
+será irmão do `ExecutarFase`, montando os 2 times + o mapa conforme o menu; o loop de combate NÃO muda.
+- **Menu:** "Versus" no principal → escolhe o controle das 2 equipes → humano monta AS DUAS equipes
+  (arma o confronto exato pro rebalance; sorteio de times = futuro).
+- **Regras (v1):** SEM MultiplicadorFase (mult 1.0, luta justa), SEM itens (leitura limpa de balance),
+  SEM recompensa/save. Vencedor + **resumo das DUAS equipes** (#7a já mede dano/cura por personagem —
+  é o instrumento de medição do rebalance).
+- **Descobertas:** hotseat J×J sai quase de graça (a View já mostra "Seu time" da perspectiva de quem
+  age, estilo xadrez); a vitória-bool já serve ("Equipe1 sobreviveu?").
+- **B×B headless** (simular N batalhas e coletar números sem TTY) → depende do seam de View concreto →
+  **FILA B** (conecta com #14 xUnit e o próprio #16).
 
 ---
 

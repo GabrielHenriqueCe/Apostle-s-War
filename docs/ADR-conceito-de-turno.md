@@ -132,7 +132,16 @@ por isso Preso ainda avança status/cooldown (Finalizar roda mesmo sem ação).
 
 ---
 
-## 7. Fronteira com o RelógioDoCombate (conceito vizinho, FUTURO)
+## 7. Fronteira: TRÊS donos, três conceitos (atualizado jul/2026)
+
+Depois das fatias do #11, a estrutura tem três donos distintos, não confundir:
+- **`Batalha`/`Equipe`** (Combat/) — dono da ESTRUTURA: quem é aliado/inimigo de quem
+  (`PerspectivaDe`), derivado da equipe, não do tipo `is Jogador`. Mora no CombateService
+  (rebuild por rodada). Habilita o modo Versus (controle desacoplado da classe).
+- **`TurnoDoPersonagem`** — dono do TEMPO per-combatente: estado turn-scoped (orçamento de
+  reação "1x por agressor"), tick/finalização. Persistente (`Combate.Turno`).
+- **`RelogioDoCombate`** — dono do TEMPO GLOBAL: contador de turnos da batalha
+  (`NumeroDoTurno`), embrião do enrage/limite-de-turnos.
 
 O TurnoDoPersonagem é o relógio de UM combatente (roda várias vezes por round).
 Há um conceito VIZINHO, num nível ACIMA, que NÃO é este ADR:

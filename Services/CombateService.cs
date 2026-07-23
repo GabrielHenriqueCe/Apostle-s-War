@@ -22,6 +22,12 @@ namespace ApostlesWar.Services
         private readonly IApresentacao _apresentacao;
         private readonly RelogioDoCombate _relogio;
 
+        // Estrutura da batalha atual (times/perspectiva) + quem controla cada equipe. Setados por
+        // rodada em ExecutarRodada (mesmo lifecycle do _relogio). No Versus, o ponto de entrada monta
+        // times e controladores diferentes; daqui pra baixo o loop não sabe a diferença.
+        private Batalha _batalha = null!;
+        private Dictionary<Equipe, IControladorDeTurno> _controladores = new();
+
         public CombateService(ArsenalService arsenalService,
             CampeoesService campeoesService, PersonagemService personagemService, CombateView combateView,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
@@ -38,9 +44,11 @@ namespace ApostlesWar.Services
             _relogio = relogio;
         }
 
-        /// <summary>O controlador que DECIDE ação/alvo deste combatente (humano/bot; futuro: auto).</summary>
+        /// <summary>O controlador que DECIDE ação/alvo deste combatente — pela EQUIPE que ele
+        /// integra, não pela classe (Jogador/Inimigo). No Versus, uma equipe de "Jogadores" pode ser
+        /// controlada por bot e vice-versa; a decisão vem do mapa montado no ponto de entrada.</summary>
         private IControladorDeTurno ControladorDe(Combate combatente)
-            => combatente is Jogador ? _controladorJogador : _controladorBot;
+            => _controladores[_batalha.EquipeDe(combatente)];
 
         /// <summary>
         /// Espera dramática entre eventos que ESCUTA o Esc: se o jogador pediu pra encerrar e confirmou,
@@ -57,17 +65,19 @@ namespace ApostlesWar.Services
 
         #region Loop principal
 
-        private bool ExecutarCombate(List<Combate> jogador, List<Combate> inimigo, List<Combate> combatentes)
+        private bool ExecutarCombate(Batalha batalha)
         {
+            _batalha = batalha;
             _relogio.Reiniciar();   // nova batalha: zera o contador de turnos
+            var combatentes = batalha.Combatentes;
             do
             {
                 for (int c = 0; c < combatentes.Count; c++)
                 {
                     if (!combatentes[c].EstaVivo()) continue;
-                    if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
+                    if (!batalha.Equipe1.TemVivos() || !batalha.Equipe2.TemVivos()) break;
 
-                    ExecutarTurnoCompleto(combatentes[c], jogador, inimigo);
+                    ExecutarTurnoCompleto(combatentes[c]);
 
                     // Turno extra: dispara enquanto a flag estiver setada.
                     // Loop teórico infinito é permitido por design (RNG decide quando para).
@@ -75,13 +85,13 @@ namespace ApostlesWar.Services
                     {
                         combatentes[c].ConsumirTurnoExtra();
                         if (!combatentes[c].EstaVivo()) break;
-                        if (!inimigo.Any(i => i.EstaVivo()) || !jogador.Any(j => j.EstaVivo())) break;
-                        ExecutarTurnoCompleto(combatentes[c], jogador, inimigo);
+                        if (!batalha.Equipe1.TemVivos() || !batalha.Equipe2.TemVivos()) break;
+                        ExecutarTurnoCompleto(combatentes[c]);
                     }
                 }
-            } while (jogador.Any(j => j.EstaVivo()) && inimigo.Any(i => i.EstaVivo()));
+            } while (batalha.Equipe1.TemVivos() && batalha.Equipe2.TemVivos());
 
-            return jogador.Any(j => j.EstaVivo());
+            return batalha.Equipe1.TemVivos();   // Equipe1 = jogador na campanha
         }
 
         /// <summary>
@@ -95,17 +105,17 @@ namespace ApostlesWar.Services
         /// Chamado uma vez por turno do round, e potencialmente N vezes a mais se o combatente
         /// tiver ConcederTurnoExtra acionado durante o próprio turno.
         /// </summary>
-        private void ExecutarTurnoCompleto(Combate atacante, List<Combate> jogador, List<Combate> inimigo)
+        private void ExecutarTurnoCompleto(Combate atacante)
         {
             _relogio.Avancar();   // "cada vez que um personagem joga aumenta o contador" (inclui turno-extra e Preso)
 
-            List<Combate> aliados = atacante is Jogador ? jogador : inimigo;
-            List<Combate> defensores = atacante is Jogador ? inimigo : jogador;
+            var (aliados, defensores) = _batalha.PerspectivaDe(atacante);
 
             var turno = atacante.Turno;   // Turno PERSISTENTE (dono do estado turn-scoped), não mais criado por turno
 
             var ticks = turno.Iniciar();
-            MostrarTicks(jogador, inimigo, ticks);   // veneno/queima/cura-contínua VISÍVEIS no início do turno
+            // Board FIXO na exibição dos ticks (Equipe1 = "Seu time", Equipe2 = "Inimigos"), como antes.
+            MostrarTicks(_batalha.Equipe1.Membros, _batalha.Equipe2.Membros, ticks);   // veneno/queima/cura-contínua VISÍVEIS no início do turno
             DispararEventoInicioDeTurno(atacante, aliados, defensores);
             if (!atacante.EstaVivo()) return;
 
@@ -191,7 +201,7 @@ namespace ApostlesWar.Services
                 if (VerificarParalisia(atacante)) return;
 
                 var resultado = atacante.Atacar(alvoForcado);
-                ExecutarAtos(new List<EventoCombate> { resultado }, atacante, aliados, defensores, TipoAtaque.Sequencial);
+                ExecutarAtos(new List<EventoCombate> { resultado }, atacante, TipoAtaque.Sequencial);
                 return;
             }
 
@@ -263,8 +273,7 @@ namespace ApostlesWar.Services
         /// Ordem do ADR: AtoReacaoDoAlvo → AtoMorte → AtoReacaoDoAtacante.
         /// Compartilhado pelo caminho normal (ExecutarHabilidade) e pelo Irritar.
         /// </summary>
-        private void ExecutarAtos(List<EventoCombate> resultados, Combate atacante,
-            List<Combate> aliados, List<Combate> defensores, TipoAtaque tipoAtaque)
+        private void ExecutarAtos(List<EventoCombate> resultados, Combate atacante, TipoAtaque tipoAtaque)
         {
             foreach (var ev in resultados)
             {
@@ -280,18 +289,18 @@ namespace ApostlesWar.Services
                 _combateView.ExibirResultadoAtaque(atacante, r.Alvo, r);
                 Aguardar(1500);
 
-                ProcessarReacoesAlvo(r.Alvo, atacante, r, aliados, defensores);
-                ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r, aliados, defensores);
-                ProcessarReacoesAoMorrer(r.Alvo, atacante, r, aliados, defensores);
-                ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r, aliados, defensores);
+                ProcessarReacoesAlvo(r.Alvo, atacante, r);
+                ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r);
+                ProcessarReacoesAoMorrer(r.Alvo, atacante, r);
+                ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r);
 
                 if (tipoAtaque == TipoAtaque.Sequencial)
-                    ProcessarReacoesAtacantePorAtaque(atacante, r.Alvo, r, aliados, defensores);
+                    ProcessarReacoesAtacantePorAtaque(atacante, r.Alvo, r);
             }
 
             var danos = resultados.OfType<EventoDano>().ToList();
             if (tipoAtaque == TipoAtaque.AreaDeEfeito && danos.Count > 0)
-                ProcessarReacoesAtacantePorAtaque(atacante, danos[0].Alvo, danos[0], aliados, defensores);
+                ProcessarReacoesAtacantePorAtaque(atacante, danos[0].Alvo, danos[0]);
         }
 
         private void ExecutarHabilidade(Combate atacante, HabilidadeAtiva hab, Combate alvoInicial,
@@ -299,8 +308,9 @@ namespace ApostlesWar.Services
         {
             var ctx = new ContextoCombate(atacante, aliados, defensores);
 
-            // Setup: UX de preparação (inimigo com A1)
-            if (atacante is Inimigo && hab is AtaqueBasico)
+            // Setup: UX de preparação — dá ao humano um beat pra ver o A1 de um combatente controlado
+            // por BOT chegando (apresentação segue o CONTROLE, não a classe).
+            if (ControladorDe(atacante) == _controladorBot && hab is AtaqueBasico)
             {
                 _combateView.ExibirPreparacaoAtaque(atacante, defensores);
                 Aguardar(1500);
@@ -323,7 +333,7 @@ namespace ApostlesWar.Services
                 Aguardar(1500);
             }
 
-            ExecutarAtos(resultados, atacante, aliados, defensores, hab.TipoAtaque);   // Reação + Morte + Atacante
+            ExecutarAtos(resultados, atacante, hab.TipoAtaque);   // Reação + Morte + Atacante
             atacante.Cooldowns[hab].Usar();                                            // AtoEncerramento
         }
 
@@ -341,14 +351,12 @@ namespace ApostlesWar.Services
         /// (profundidade 0); a recursão em si (profundidade 1) nunca declara outro
         /// revide, quebrando o loop A↔B. Não depende da Natureza do golpe.
         /// </summary>
-        private void ProcessarReacoesAlvo(Combate alvo, Combate atacante, EventoDano r,
-            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante, int profundidade = 0)
+        private void ProcessarReacoesAlvo(Combate alvo, Combate atacante, EventoDano r, int profundidade = 0)
         {
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
-            // Portador da reação é o ALVO: inverte os times (como ProcessarPassivasAlvo).
-            var aliadosDoAlvo = inimigosDoAtacante;
-            var inimigosDoAlvo = aliadosDoAtacante;
+            // Portador da reação é o ALVO: sua perspectiva vem da Batalha (um só caminho).
+            var (aliadosDoAlvo, inimigosDoAlvo) = _batalha.PerspectivaDe(alvo);
 
             var ctx = new ContextoReacao(alvo, atacante, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoAlvo, inimigosDoAlvo);
@@ -371,9 +379,9 @@ namespace ApostlesWar.Services
                 var revide = res.Revide.Habilidade.AtivarComNatureza(alvo, res.Revide.Alvo, NaturezasDano.Ataque);
                 _combateView.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
                 Aguardar(1500);
-                // No revide, o portador do próximo nível é o revidado; passa os times do
-                // ponto de vista atual (alvo é quem revida agora → seus aliados/inimigos).
-                ProcessarReacoesAlvo(res.Revide.Alvo, alvo, revide, inimigosDoAtacante, aliadosDoAtacante, profundidade + 1);
+                // No revide, o portador do próximo nível é o revidado; a Batalha resolve a
+                // perspectiva dele sozinha (não precisa mais passar/inverter times na mão).
+                ProcessarReacoesAlvo(res.Revide.Alvo, alvo, revide, profundidade + 1);
             }
         }
 
@@ -423,11 +431,11 @@ namespace ApostlesWar.Services
         /// Reações do atacante POR ALVO atingido (Nx). Chamado dentro do foreach.
         /// IReagePorAtaque (Sorrateiro, Policial) + IReageAoCausarDano (Sedento, dano > 0).
         /// </summary>
-        private void ProcessarReacoesAtacantePorAlvo(Combate atacante, Combate alvo, EventoDano r,
-            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
+        private void ProcessarReacoesAtacantePorAlvo(Combate atacante, Combate alvo, EventoDano r)
         {
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
+            var (aliadosDoAtacante, inimigosDoAtacante) = _batalha.PerspectivaDe(atacante);
             var ctx = new ContextoReacao(atacante, alvo, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoAtacante, inimigosDoAtacante);
 
@@ -444,11 +452,11 @@ namespace ApostlesWar.Services
         /// chamado por hit (Sequencial) ou 1x no fim (AoE), lado a lado com ProcessarPassivasAtacante.
         /// Para efeitos no próprio atacante (OlhoClinico, Virus).
         /// </summary>
-        private void ProcessarReacoesAtacantePorAtaque(Combate atacante, Combate alvoRef, EventoDano r,
-            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
+        private void ProcessarReacoesAtacantePorAtaque(Combate atacante, Combate alvoRef, EventoDano r)
         {
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
+            var (aliadosDoAtacante, inimigosDoAtacante) = _batalha.PerspectivaDe(atacante);
             var ctx = new ContextoReacao(atacante, alvoRef, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoAtacante, inimigosDoAtacante);
 
@@ -483,12 +491,12 @@ namespace ApostlesWar.Services
         /// Se o prevent-death (Guarda) evitou a morte no ReceberDano, o alvo segue Vivo
         /// e este método retorna sem disparar (checa EstaVivo).
         /// </summary>
-        private void ProcessarReacoesAtacanteMorte(Combate atacante, Combate alvoMorto, EventoDano r,
-            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
+        private void ProcessarReacoesAtacanteMorte(Combate atacante, Combate alvoMorto, EventoDano r)
         {
             if (alvoMorto.EstaVivo()) return;
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
 
+            var (aliadosDoAtacante, inimigosDoAtacante) = _batalha.PerspectivaDe(atacante);
             var ctx = new ContextoReacao(atacante, alvoMorto, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoAtacante, inimigosDoAtacante);
 
@@ -503,14 +511,13 @@ namespace ApostlesWar.Services
         /// (ao morrer). Portador = quem morreu; times invertidos (aliados do morto =
         /// time do alvo), como no ProcessarReacoesAlvo.
         /// </summary>
-        private void ProcessarReacoesAoMorrer(Combate morto, Combate atacante, EventoDano r,
-            List<Combate> aliadosDoAtacante, List<Combate> inimigosDoAtacante)
+        private void ProcessarReacoesAoMorrer(Combate morto, Combate atacante, EventoDano r)
         {
             if (r.Natureza.Reacao == TipoReacao.Nenhuma) return;
             if (morto.EstaVivo()) return;  // só dispara se realmente morreu
 
-            var aliadosDoMorto = inimigosDoAtacante;
-            var inimigosDoMorto = aliadosDoAtacante;
+            // Portador é o MORTO: sua perspectiva vem da Batalha (um só caminho).
+            var (aliadosDoMorto, inimigosDoMorto) = _batalha.PerspectivaDe(morto);
 
             var ctx = new ContextoReacao(morto, atacante, r.DanoEfetivo, r.Natureza,
                 r.Critico, aliadosDoMorto, inimigosDoMorto);
@@ -568,11 +575,17 @@ namespace ApostlesWar.Services
                 inimigo.Add(novoInimigo);
             }
 
-            var combatentes = new List<Combate>();
-            combatentes.AddRange(jogador);
-            combatentes.AddRange(inimigo);
+            var batalha = new Batalha(new Equipe(jogador), new Equipe(inimigo));
 
-            return ExecutarCombate(jogador, inimigo, combatentes);
+            // Campanha: Equipe1 (jogador) = humano, Equipe2 (inimigos) = bot. No Versus, o ponto de
+            // entrada monta este mapa conforme o modo escolhido (J×B / B×J / J×J / B×B).
+            _controladores = new Dictionary<Equipe, IControladorDeTurno>
+            {
+                { batalha.Equipe1, _controladorJogador },
+                { batalha.Equipe2, _controladorBot },
+            };
+
+            return ExecutarCombate(batalha);
         }
 
         #endregion

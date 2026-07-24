@@ -1,7 +1,6 @@
 using ApostlesWar.Domain;
 using ApostlesWar.Application.Portas;
 using ApostlesWar.Application.Services;
-using GHUtils;
 
 namespace ApostlesWar.ConsoleUI.Views
 {
@@ -151,7 +150,7 @@ namespace ApostlesWar.ConsoleUI.Views
                     icone = " ☑️  ";
 
                 string cursor = selecionado == i + 1 ? "▶" : " ";
-                Console.WriteLine($"{cursor} {(int)faccao} - {icone} {Faccoes.Simbolo(faccao)}  {Helper.GetDescricao(faccao)}");
+                Console.WriteLine($"{cursor} {(int)faccao} - {icone} {Faccoes.Simbolo(faccao)}  {faccao.Descricao()}");
             }
             Console.WriteLine("\nEsc - Voltar");
         }
@@ -173,7 +172,7 @@ namespace ApostlesWar.ConsoleUI.Views
                     icone = " ☑️  ";
 
                 string cursor = selecionado == idx + 1 ? "▶" : " ";
-                Console.WriteLine($"{cursor} {(int)fase} - {icone}  {Helper.GetDescricao(fase)}");
+                Console.WriteLine($"{cursor} {(int)fase} - {icone}  {fase.Descricao()}");
             }
             Console.WriteLine("\nEsc - Voltar");
         }

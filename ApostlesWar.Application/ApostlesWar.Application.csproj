@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApostlesWar.Domain\ApostlesWar.Domain.csproj" />
-    <ProjectReference Include="..\..\GHUtils\GHUtils.csproj" />
   </ItemGroup>
 
 </Project>

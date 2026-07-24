@@ -26,7 +26,7 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   agora vale — não é especulação. Verificar-antes-de-fundir ("o grep mente").
 
 ## Comandos
-- Build: `dotnet build`  ·  Testes: `dotnet test` (xUnit em `Tests/`).
+- Build: `dotnet build`  ·  Testes: `dotnet test` (xUnit em `ApostlesWar.Tests/`).
 - **Gotcha:** o jogo ABERTO trava o build (lock do `.exe`/`.dll`) — pedir pra fechar antes de buildar/testar.
 - Combate NÃO roda headless (`Console.Clear`/`ReadKey` precisam de TTY) → verificação em jogo é do Gabriel;
   testo só o que é PURO (motor, capacidades, `Batalha`).
@@ -40,6 +40,9 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   `Portas/` (IEntrada, IApresentacao, ITelaDeCombate, ITelaDeMenu, IControladorDeTurno, IRepositorioDeSave).
 - `ApostlesWar.Infrastructure/` impl das portas de dados (SaveLocal). Só o App enxerga.
 - `ApostlesWar.ConsoleUI/` pele console: views + EntradaConsole/ApresentacaoConsole + ControladorJogador.
-- `App/` casca executável Windows (composition root em `Program.cs`, front webview em `Front/`+`wwwroot/`).
+- `ApostlesWar.App/` casca executável Windows (composition root em `Program.cs`, front webview em
+  `Front/`+`wwwroot/`). No VS, o dropdown do Play tem os perfis **Console** e **Front (webview)** (`--front`).
+- Convenção: **pasta no disco = nome do projeto** (se divergir, o `dotnet sln add` cria uma pasta-de-solution
+  fantasma no VS). Sem dependências externas ao repo — o antigo `GHUtils` foi dissolvido (jul/2026).
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`.

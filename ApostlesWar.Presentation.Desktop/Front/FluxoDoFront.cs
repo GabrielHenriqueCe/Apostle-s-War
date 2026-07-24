@@ -74,6 +74,11 @@ namespace ApostlesWar.Presentation.Desktop.Front
         {
             try
             {
+                // Carrega o progresso UMA vez no boot: assim os champs desbloqueados já valem em todo
+                // lugar (ex: o picker de avatar do perfil libera conforme a campanha libera os champs),
+                // não só depois de entrar na Campanha. Depois o estado vive em memória (a vitória
+                // atualiza + salva).
+                _campanha.CarregarSaves();
                 GarantirPerfil();
 
                 while (true)
@@ -327,13 +332,12 @@ namespace ApostlesWar.Presentation.Desktop.Front
         // ---------- Campanha ----------
 
         /// <summary>
-        /// Campanha: carrega o progresso, mostra o mapa e roteia. O save fully-unlocked do console
-        /// carrega direto; sem save, cai nos defaults (Reino fase 1, só Humanos). A posição no mapa
-        /// (último lugar) persiste na chave "campanha".
+        /// Campanha: mostra o mapa e roteia. O progresso já foi carregado no boot (ver Rodar) e vive em
+        /// memória; sem save é o default (Reino fase 1, só Humanos). A posição no mapa (último lugar)
+        /// persiste na chave "campanha".
         /// </summary>
         private void MostrarCampanha()
         {
-            _campanha.CarregarSaves();
             int posicao = _repositorio.Carregar<int>(ChavePosicao);   // 0 (ausente) = Reino
 
             while (true)

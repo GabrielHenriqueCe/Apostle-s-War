@@ -14,7 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ApostlesWar.Domain\ApostlesWar.Domain.csproj" />
     <ProjectReference Include="..\ApostlesWar.Application\ApostlesWar.Application.csproj" />
-    <ProjectReference Include="..\..\GHUtils\GHUtils.csproj" />
   </ItemGroup>
 
 </Project>

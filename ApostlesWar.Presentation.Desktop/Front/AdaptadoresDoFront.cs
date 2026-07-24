@@ -30,8 +30,28 @@ namespace ApostlesWar.Presentation.Desktop.Front
     }
 
     /// <summary>
+    /// O RITMO da batalha no front, controlado pelo botão de velocidade da tela.
+    ///
+    /// Mora AQUI, e não no motor, porque velocidade de animação é assunto de PELE: o console segue
+    /// com os 1500ms de sempre e o `CombateService` não sabe que isto existe. É a porta
+    /// <see cref="IApresentacao"/> fazendo o trabalho dela.
+    ///
+    /// `volatile` porque quem escreve é a thread da UI (o clique) e quem lê é a thread do jogo.
+    /// </summary>
+    internal class RitmoDoFront
+    {
+        private volatile int _multiplicador = 2;
+
+        /// <summary>Divisor da espera: 2 = metade do tempo. Começa em 2x — com o log persistente,
+        /// a pausa não serve mais pra ler a mensagem, só pra ver a animação.</summary>
+        public int Multiplicador => _multiplicador;
+
+        public void Definir(int valor) => _multiplicador = Math.Clamp(valor, 1, 8);
+    }
+
+    /// <summary>
     /// Porta de ESPERA no front: a pausa dramática entre eventos, que dá tempo do JS animar o dano
-    /// pulando e o alvo tremendo.
+    /// pulando e o alvo tremendo — encurtada pelo <see cref="RitmoDoFront"/>.
     ///
     /// Dorme de verdade, como no console — e isso é DE PROPÓSITO nesta fatia. O passo natural depois é
     /// inverter: o C# manda o evento e espera o JS avisar "terminei de animar", em vez de chutar
@@ -42,9 +62,13 @@ namespace ApostlesWar.Presentation.Desktop.Front
     /// </summary>
     internal class ApresentacaoWebview : IApresentacao
     {
+        private readonly RitmoDoFront _ritmo;
+
+        public ApresentacaoWebview(RitmoDoFront ritmo) => _ritmo = ritmo;
+
         public bool AguardarAnimacao(int ms)
         {
-            Thread.Sleep(ms);
+            Thread.Sleep(ms / _ritmo.Multiplicador);
             return false;
         }
     }

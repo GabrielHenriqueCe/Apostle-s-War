@@ -47,7 +47,9 @@ body {
 
 #turno { color: var(--ouro); font-weight: 600; letter-spacing: .5px; }
 
-#alternarNumeros {
+#botoesTopo { display: flex; gap: 8px; }
+
+#alternarNumeros, #velocidade {
     background: transparent;
     color: var(--apagado);
     border: 1px solid var(--borda);
@@ -55,9 +57,13 @@ body {
     padding: 4px 10px;
     cursor: pointer;
     font-size: 13px;
+    font-family: inherit;
 }
-#alternarNumeros:hover { color: var(--texto); border-color: var(--apagado); }
+#alternarNumeros:hover, #velocidade:hover { color: var(--texto); border-color: var(--apagado); }
 #alternarNumeros.ativo { color: var(--ouro); border-color: var(--ouro); }
+
+/* Acelerado fica aceso: dá pra saber que a batalha está correndo sem clicar pra conferir. */
+#velocidade.rapido { color: var(--ouro); border-color: var(--ouro); }
 
 /* ---------- arena ---------- */
 #arena {
@@ -91,17 +97,47 @@ body {
 
 #meio {
     display: flex;
-    align-items: center;
-    min-width: 180px;
-    max-width: 260px;
+    align-items: stretch;
+    min-width: 230px;
+    max-width: 300px;
 }
 
-#narracao {
-    text-align: center;
+/* O LOG: histórico rolável da batalha. É o único lugar da arena com `overflow` — e aqui ele é o
+   ponto, não um acidente (ver o comentário do .lado). Ancorado embaixo: as linhas novas entram
+   no pé e empurram as velhas pra cima, como um chat. */
+#log {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 4px;
+    width: 100%;
+    overflow-y: auto;
+    padding: 8px 10px;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .22);
+    scrollbar-width: thin;
+}
+
+.linhaLog {
+    flex: none;                       /* senão o flex espreme as linhas antigas */
+    font-size: 12.5px;
+    line-height: 1.45;
     color: var(--apagado);
-    font-size: 14px;
-    line-height: 1.5;
-    min-height: 3em;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(255, 255, 255, .05);
+    animation: entrarLog .25s ease;
+}
+
+/* A última linha é a "narração atual" — o destaque que antes era a caixa do meio inteira. */
+.linhaLog.atual { color: var(--texto); font-weight: 600; }
+.linhaLog.critico { color: #ffcc44; }
+.linhaLog.morte { color: var(--alvo); font-weight: 600; }
+.linhaLog.cura { color: #7ee081; }
+
+@keyframes entrarLog {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ---------- combatente ---------- */
@@ -319,8 +355,5 @@ body {
 .flutuante.escudo { color: var(--escudo); font-size: 19px; }
 
 /* ---------- fim de batalha ---------- */
-#narracao.fim {
-    color: var(--ouro);
-    font-size: 20px;
-    font-weight: 700;
-}
+/* O antigo `#narracao.fim` morreu junto com a caixa de narração: agora o fecho da batalha é a
+   última linha do log (ver .linhaLog.morte). */

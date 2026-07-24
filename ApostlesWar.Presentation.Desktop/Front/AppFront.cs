@@ -48,7 +48,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
             var webview = new WebView2 { Dock = DockStyle.Fill };
             janela.Controls.Add(webview);
 
-            var ponte = new PonteWebView2(janela, webview);
+            // O ritmo nasce aqui pra ser COMPARTILHADO entre as duas threads: a ponte escreve nele
+            // (clique no >>, thread da UI) e a ApresentacaoWebview lê (thread do jogo).
+            var ritmo = new RitmoDoFront();
+            var ponte = new PonteWebView2(janela, webview, ritmo);
             Thread? jogo = null;
 
             webview.CoreWebView2InitializationCompleted += (_, e) =>
@@ -65,7 +68,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 ponte.Conectar(webview.CoreWebView2);
                 webview.CoreWebView2.Navigate(CaminhoDaTela());
 
-                jogo = new Thread(() => RodarJogo(ponte)) { IsBackground = true };
+                jogo = new Thread(() => RodarJogo(ponte, ritmo)) { IsBackground = true };
                 jogo.Start();
             };
 
@@ -93,7 +96,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// A thread do JOGO: monta os services (composition root do front) e entra na batalha. Roda o
         /// laço síncrono de sempre — as esperas por input viram esperas por clique.
         /// </summary>
-        private static void RodarJogo(PonteWebView2 ponte)
+        private static void RodarJogo(PonteWebView2 ponte, RitmoDoFront ritmo)
         {
             try
             {
@@ -103,7 +106,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 var sessao = new SessaoDoFront(ponte, relogio);
                 var tela = new TelaDeCombateWeb(sessao, ponte);
                 var entrada = new EntradaWebview(ponte);
-                var apresentacao = new ApresentacaoWebview();
+                var apresentacao = new ApresentacaoWebview(ritmo);
 
                 var repositorio = new SaveLocal();
                 var capitulos = new CapitulosService(repositorio);

@@ -24,6 +24,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
     {
         private readonly Form _janela;
         private readonly WebView2 _webview;
+        private readonly RitmoDoFront _ritmo;
         private readonly BlockingCollection<MensagemDoFront> _mensagens = new();
         private readonly TaskCompletionSource _telaPronta = new();
 
@@ -34,10 +35,11 @@ namespace ApostlesWar.Presentation.Desktop.Front
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
 
-        public PonteWebView2(Form janela, WebView2 webview)
+        public PonteWebView2(Form janela, WebView2 webview, RitmoDoFront ritmo)
         {
             _janela = janela;
             _webview = webview;
+            _ritmo = ritmo;
         }
 
         /// <summary>Espera o JS avisar que carregou. Sem isso, o 1º estado é enviado no vazio.</summary>
@@ -82,7 +84,12 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 var msg = JsonSerializer.Deserialize<MensagemDoFront>(bruto, Json);
                 if (msg is null) return;
 
+                // Mensagens de CONTROLE são atendidas aqui e não entram na fila: a fila é o
+                // `IEntrada.Ler` do jogo, e um clique de velocidade ali seria lido como escolha
+                // de habilidade/alvo.
                 if (msg.Tipo == "pronto") { _telaPronta.TrySetResult(); return; }
+                if (msg.Tipo == "velocidade") { _ritmo.Definir(msg.Valor); return; }
+
                 _mensagens.Add(msg);
             };
         }

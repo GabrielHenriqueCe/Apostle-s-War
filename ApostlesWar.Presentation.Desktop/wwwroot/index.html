@@ -8,16 +8,21 @@
 <body>
     <header id="topo">
         <span id="turno">Turno 1</span>
-        <button id="alternarNumeros" type="button" title="Mostrar/esconder os números (ATK, DEF, crit)">
-            👁️ números
-        </button>
+        <div id="botoesTopo">
+            <button id="velocidade" type="button" title="Velocidade da batalha">▶▶ 2x</button>
+            <button id="alternarNumeros" type="button" title="Mostrar/esconder os números (ATK, DEF, crit)">
+                👁️ números
+            </button>
+        </div>
     </header>
 
     <main id="arena">
         <section class="lado" id="ladoEsquerdo" aria-label="Seu time"></section>
 
+        <!-- O log é PERSISTENTE e rolável: a batalha inteira fica registrada, então a mensagem não
+             precisa mais ficar tempo na tela pra ser lida — dá pra subir e conferir depois. -->
         <div id="meio">
-            <div id="narracao"></div>
+            <div id="log" aria-label="Registro do combate" aria-live="polite"></div>
         </div>
 
         <section class="lado" id="ladoDireito" aria-label="Inimigos"></section>

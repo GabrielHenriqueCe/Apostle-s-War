@@ -404,8 +404,14 @@ body {
     background: var(--painel); border: 2px dashed var(--borda); border-radius: 10px;
     cursor: pointer; transition: border-color .15s;
 }
-.slot.preenchido { border-style: solid; }
+.slot.preenchido { border-style: solid; cursor: grab; }
+.slot.preenchido:active { cursor: grabbing; }
 .slot.selecionado { border-color: var(--ouro); border-style: solid; box-shadow: 0 0 10px rgba(217,180,91,.35); }
+/* casa recebendo um arraste em cima */
+.slot.dropAlvo { border-color: var(--ouro); border-style: solid; background: #2a2333; }
+/* célula do picker de montagem arrastável (só arena/campanha; o picker de avatar do perfil não arrasta) */
+#setupPicker .avatarCelula, #fasePicker .avatarCelula { cursor: grab; }
+#setupPicker .avatarCelula:active, #fasePicker .avatarCelula:active { cursor: grabbing; }
 .slot .slotEmoji { font-size: 30px; width: 40px; text-align: center; }
 .slot .slotNome { font-size: 13px; font-weight: 600; }
 .slot .slotVazio { color: var(--apagado); font-size: 12px; font-style: italic; }

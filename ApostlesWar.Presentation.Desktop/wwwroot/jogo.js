@@ -224,14 +224,76 @@ function mostrarMontagemArena(campeoes) {
     desenharSlotsArena();
 }
 
+// ---------- montagem de time: helpers compartilhados (arena e campanha) ----------
+// picker = a grade de champs (de onde escolhe); slot = as casas do time montado.
+// Cliques: picker → adiciona na casa selecionada/1ª vazia; casa vazia → seleciona; casa cheia → remove.
+// Arrastar: picker→casa substitui; casa→casa troca de posição; casa→fora dos slots remove.
+let arrastando = null;   // { tipo:'picker', idx } | { tipo:'slot', arr, i }
+
+function criarCelulaPicker(c) {
+    const cel = document.createElement('div');
+    cel.className = 'avatarCelula';
+    const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
+    const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
+    cel.append(em, nm);
+    return cel;
+}
+
+function tornarPickerArrastavel(cel, idx) {
+    cel.draggable = true;
+    cel.addEventListener('dragstart', e => { arrastando = { tipo: 'picker', idx }; e.dataTransfer.setData('text', ''); });
+    cel.addEventListener('dragend', () => { arrastando = null; });
+}
+
+function criarSlot(campeoes, idx, selecionado) {
+    const slot = document.createElement('div');
+    slot.className = 'slot' + (idx != null ? ' preenchido' : '') + (selecionado ? ' selecionado' : '');
+    if (idx != null) {
+        const c = campeoes[idx];
+        const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;
+        const nm = document.createElement('span'); nm.className = 'slotNome'; nm.textContent = c.nome;
+        slot.append(em, nm);
+    } else {
+        const v = document.createElement('span'); v.className = 'slotVazio'; v.textContent = 'clique e escolha';
+        slot.append(v);
+    }
+    return slot;
+}
+
+// `arr` = array do time (o lado, na arena); `i` = índice da casa; `redesenhar` re-renderiza.
+function configurarSlotDnD(slot, arr, i, redesenhar) {
+    if (arr[i] != null) {
+        slot.draggable = true;
+        slot.addEventListener('dragstart', e => { arrastando = { tipo: 'slot', arr, i }; e.dataTransfer.setData('text', ''); });
+        slot.addEventListener('dragend', () => {   // soltou FORA de qualquer slot → remove
+            if (arrastando && arrastando.tipo === 'slot') { arrastando.arr[arrastando.i] = null; arrastando = null; redesenhar(); }
+        });
+    }
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('dropAlvo'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('dropAlvo'));
+    slot.addEventListener('drop', e => {
+        e.preventDefault();
+        slot.classList.remove('dropAlvo');
+        if (!arrastando) return;
+        if (arrastando.tipo === 'picker') {
+            const k = arr.indexOf(arrastando.idx);   // dedup só NESTE time (o outro lado pode repetir)
+            if (k >= 0) arr[k] = null;
+            arr[i] = arrastando.idx;                 // substitui o que estava na casa
+        } else {                                     // casa → casa: troca de posição
+            const s = arrastando;
+            const tmp = arr[i]; arr[i] = s.arr[s.i]; s.arr[s.i] = tmp;
+        }
+        arrastando = null;
+        redesenhar();
+    });
+}
+
+// ---------- montagem: Arena ----------
 function montarPickerArena() {
     document.getElementById('setupPicker').replaceChildren(...arenaCampeoes.map((c, i) => {
-        const cel = document.createElement('div');
-        cel.className = 'avatarCelula';
-        const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
-        const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
-        cel.append(em, nm);
-        cel.addEventListener('click', () => escolherCampeaoArena(i));   // 1 clique alterna (adiciona/remove)
+        const cel = criarCelulaPicker(c);
+        cel.addEventListener('click', () => escolherCampeaoArena(i));
+        tornarPickerArrastavel(cel, i);
         return cel;
     }));
 }
@@ -240,23 +302,13 @@ function desenharSlotsArena() {
     for (const lado of ['esq', 'dir']) {
         const cont = document.getElementById(lado === 'esq' ? 'slotsEsq' : 'slotsDir');
         cont.replaceChildren(...arenaTimes[lado].map((idx, i) => {
-            const slot = document.createElement('div');
-            const sel = arenaSlotSel && arenaSlotSel.lado === lado && arenaSlotSel.i === i;
-            slot.className = 'slot' + (idx != null ? ' preenchido' : '') + (sel ? ' selecionado' : '');
-            if (idx != null) {
-                const c = arenaCampeoes[idx];
-                const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;
-                const nm = document.createElement('span'); nm.className = 'slotNome'; nm.textContent = c.nome;
-                slot.append(em, nm);
-            } else {
-                const v = document.createElement('span'); v.className = 'slotVazio'; v.textContent = 'clique e escolha';
-                slot.append(v);
-            }
+            const slot = criarSlot(arenaCampeoes, idx, arenaSlotSel && arenaSlotSel.lado === lado && arenaSlotSel.i === i);
             slot.addEventListener('click', () => {
-                if (arenaTimes[lado][i] != null) arenaTimes[lado][i] = null;   // clique no champ = remove
-                else arenaSlotSel = { lado, i };                                // slot vazio = foca este lado
+                if (arenaTimes[lado][i] != null) arenaTimes[lado][i] = null;   // casa cheia = remove
+                else arenaSlotSel = { lado, i };                                // casa vazia = seleciona (foca o lado)
                 desenharSlotsArena();
             });
+            configurarSlotDnD(slot, arenaTimes[lado], i, desenharSlotsArena);
             return slot;
         }));
     }
@@ -265,13 +317,16 @@ function desenharSlotsArena() {
     document.getElementById('setupLutar').disabled = !podeLutar;
 }
 
-// 1 clique alterna: se o champ já está no lado em foco (default esquerda), remove; senão entra no 1º
-// slot vazio dele. Pra montar o outro lado, clica num slot vazio dele antes (foca o lado).
+// Clique no picker = adiciona na casa selecionada (ou 1ª vazia do lado em foco). Não duplica NO MESMO
+// lado — mas o mesmo champ PODE estar nos dois times (espelho no versus).
 function escolherCampeaoArena(idx) {
     const lado = arenaSlotSel ? arenaSlotSel.lado : 'esq';
-    const k = arenaTimes[lado].indexOf(idx);
-    if (k >= 0) arenaTimes[lado][k] = null;
-    else { const e = arenaTimes[lado].indexOf(null); if (e >= 0) arenaTimes[lado][e] = idx; }
+    if (arenaTimes[lado].includes(idx)) return;
+    const i = (arenaSlotSel && arenaTimes[lado][arenaSlotSel.i] == null) ? arenaSlotSel.i : arenaTimes[lado].indexOf(null);
+    if (i < 0) return;
+    arenaTimes[lado][i] = idx;
+    const prox = arenaTimes[lado].indexOf(null);
+    arenaSlotSel = prox >= 0 ? { lado, i: prox } : null;
     desenharSlotsArena();
 }
 
@@ -390,13 +445,14 @@ let mapaArrastando = false, mapaStartX = 0, mapaOffset = 0, mapaOffsetBase = 0, 
 document.getElementById('mapaVoltar').addEventListener('click', () => mandar('voltar'));
 
 // ---------- Campanha: fases ----------
-let campFases = null, campFaseSel = null;
+let campFases = null, campFaseSel = null, campSlotSel = null;
 let campTime = [null, null, null, null];
 
 function mostrarFasesCampanha(f) {
     mostrarCena('campanhaFases');
     campFases = f;
     campFaseSel = null;
+    campSlotSel = null;
     campTime = [null, null, null, null];
     document.getElementById('fasesTitulo').textContent = `${f.capituloSimbolo} ${f.capituloNome}`;
     document.getElementById('faseDetalhe').hidden = true;
@@ -455,12 +511,9 @@ function grupoRodada(titulo, champs) {
 
 function montarPickerFase() {
     document.getElementById('fasePicker').replaceChildren(...campFases.meusCampeoes.map((c, i) => {
-        const cel = document.createElement('div');
-        cel.className = 'avatarCelula';
-        const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
-        const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
-        cel.append(em, nm);
-        cel.addEventListener('click', () => escolherChampFase(i));   // 1 clique alterna (adiciona/remove)
+        const cel = criarCelulaPicker(c);
+        cel.addEventListener('click', () => escolherChampFase(i));
+        tornarPickerArrastavel(cel, i);
         return cel;
     }));
     desenharSlotsFase();
@@ -468,29 +521,26 @@ function montarPickerFase() {
 
 function desenharSlotsFase() {
     document.getElementById('faseSlots').replaceChildren(...campTime.map((idx, i) => {
-        const slot = document.createElement('div');
-        slot.className = 'slot' + (idx != null ? ' preenchido' : '');
-        if (idx != null) {
-            const c = campFases.meusCampeoes[idx];
-            const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;
-            const nm = document.createElement('span'); nm.className = 'slotNome'; nm.textContent = c.nome;
-            slot.append(em, nm);
-        } else {
-            const v = document.createElement('span'); v.className = 'slotVazio'; v.textContent = 'vazio';
-            slot.append(v);
-        }
-        // Clique no champ montado = remove (slot vazio não faz nada; o picker preenche o 1º vazio).
-        slot.addEventListener('click', () => { if (campTime[i] != null) { campTime[i] = null; desenharSlotsFase(); } });
+        const slot = criarSlot(campFases.meusCampeoes, idx, campSlotSel === i);
+        slot.addEventListener('click', () => {
+            if (campTime[i] != null) campTime[i] = null;   // casa cheia = remove
+            else campSlotSel = i;                           // casa vazia = seleciona
+            desenharSlotsFase();
+        });
+        configurarSlotDnD(slot, campTime, i, desenharSlotsFase);
         return slot;
     }));
     atualizarLutarFase();
 }
 
-// 1 clique alterna: se o champ já está no time, remove; senão entra no 1º slot vazio.
+// Clique no picker = adiciona na casa selecionada (ou 1ª vazia). Não duplica.
 function escolherChampFase(idx) {
-    const k = campTime.indexOf(idx);
-    if (k >= 0) campTime[k] = null;
-    else { const e = campTime.indexOf(null); if (e >= 0) campTime[e] = idx; }
+    if (campTime.includes(idx)) return;
+    const i = (campSlotSel != null && campTime[campSlotSel] == null) ? campSlotSel : campTime.indexOf(null);
+    if (i < 0) return;
+    campTime[i] = idx;
+    const prox = campTime.indexOf(null);
+    campSlotSel = prox >= 0 ? prox : null;
     desenharSlotsFase();
 }
 

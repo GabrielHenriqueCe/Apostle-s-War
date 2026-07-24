@@ -61,22 +61,60 @@ function desenhar() {
     desenharPainel();
 }
 
+// Classes de animação em curso — precisam SOBREVIVER a um redesenho (ver desenharLado).
+const ANIMACOES = ['batendo', 'ferido', 'curado'];
+
+// O redesenho REAPROVEITA as caixas existentes (casadas por id) em vez de recriá-las.
+//
+// Isso não é otimização, é CORREÇÃO: o C# publica o estado logo depois de mandar o evento de
+// dano (ver TelaDeCombateWeb.ExibirResultadoAtaque). O `replaceChildren` antigo destruía a caixa
+// milissegundos depois da animação começar — o tremor sumia e o número flutuante, que é filho
+// dela, nunca chegava a aparecer. Mantendo o nó vivo, a animação roda até o fim.
 function desenharLado(idElemento, combatentes) {
-    const alvo = document.getElementById(idElemento);
-    alvo.replaceChildren(...combatentes.map(criarCombatente));
+    const container = document.getElementById(idElemento);
+    const existentes = new Map([...container.children].map(el => [el.dataset.id, el]));
+
+    combatentes.forEach((c, i) => {
+        const chave = String(c.id);
+        let el = existentes.get(chave);
+        if (el) existentes.delete(chave);
+        else el = criarCombatente(c);
+
+        atualizarCombatente(el, c);
+        // Reposiciona só se a ordem mudou (mover um nó à toa reinicia animação em alguns motores).
+        if (container.children[i] !== el) container.insertBefore(el, container.children[i] || null);
+    });
+
+    existentes.forEach(el => el.remove());   // sumiu da lista: fecha o caso, hoje não acontece
 }
 
+// A casca permanente: o que não muda entre quadros. O `.corpo` é o que será repintado — os
+// números flutuantes são IRMÃOS dele, por isso não morrem no repintar.
 function criarCombatente(c) {
+    const el = document.createElement('div');
+    el.dataset.id = c.id;
+
+    const corpo = document.createElement('div');
+    corpo.className = 'corpo';
+    el.appendChild(corpo);
+
+    // Busca pelo id na hora do clique: o objeto `c` deste quadro fica velho no quadro seguinte.
+    el.addEventListener('click', () => clicarEmCombatente(c.id));
+    return el;
+}
+
+function atualizarCombatente(el, c) {
     const escolhendoAlvo = nomeDaFase(estado) === 'EscolhendoAlvo';
     const ehAlvoValido = (estado.alvosValidos || []).includes(c.id);
 
-    const el = document.createElement('div');
+    // Preserva as animações em curso ao reescrever as classes de estado.
+    const animando = ANIMACOES.filter(k => el.classList.contains(k));
     el.className = 'combatente clicavel';
-    el.dataset.id = c.id;
     if (!c.vivo) el.classList.add('morto');
     if (c.id === estado.quemAge) el.classList.add('agindo');
     if (c.id === selecionadoId) el.classList.add('selecionado');
     if (escolhendoAlvo && ehAlvoValido) el.classList.add('alvo');
+    animando.forEach(k => el.classList.add(k));
 
     const emoji = document.createElement('div');
     emoji.className = 'emoji';
@@ -108,9 +146,8 @@ function criarCombatente(c) {
 
     if (c.status.length) infos.appendChild(criarStatus(c.status));
 
-    el.append(emoji, infos);
-    el.addEventListener('click', () => clicarEmCombatente(c));
-    return el;
+    // Troca só o CORPO: os `.flutuante` são irmãos e seguem animando por cima.
+    el.querySelector('.corpo').replaceChildren(emoji, infos);
 }
 
 function criarBarra(c) {
@@ -208,15 +245,15 @@ function escolherHabilidade(h) {
     mandar('habilidade', h.indice);   // o C# decide se pede alvo
 }
 
-function clicarEmCombatente(c) {
+function clicarEmCombatente(id) {
     const escolhendoAlvo = nomeDaFase(estado) === 'EscolhendoAlvo';
-    const ehAlvoValido = (estado.alvosValidos || []).includes(c.id);
+    const ehAlvoValido = (estado.alvosValidos || []).includes(id);
 
     // Com habilidade em curso e alvo legítimo: o clique EXECUTA.
-    if (escolhendoAlvo && ehAlvoValido) { mandar('alvo', c.id); return; }
+    if (escolhendoAlvo && ehAlvoValido) { mandar('alvo', id); return; }
 
     // Caso contrário, clicar é só olhar a ficha — inclusive a do inimigo, pra ver os status dele.
-    selecionadoId = c.id;
+    selecionadoId = id;
     desenhar();
 }
 
@@ -270,15 +307,24 @@ function reanimar(el, classe) {
     el.classList.remove(classe);
     void el.offsetWidth;
     el.classList.add(classe);
-    setTimeout(() => el.classList.remove(classe), 400);
+    setTimeout(() => el.classList.remove(classe), 520);   // acompanha o .5s do @keyframes tremer
 }
 
+// O número é CUSPIDO pra fora da caixa, na direção do seu próprio lado — a direita é o espelho
+// da esquerda. O mesmo champ pode lutar dos dois lados, então a animação não pode ter "lado
+// certo": ela deriva de onde a caixa está, não de quem é o personagem.
 function flutuar(el, texto, classe) {
     const n = document.createElement('span');
     n.className = `flutuante ${classe}`;
     n.textContent = texto;
+
+    const sentido = el.parentElement?.id === 'ladoDireito' ? 1 : -1;
+    // Embaralha distância e giro pra dois golpes seguidos não empilharem no mesmo ponto.
+    n.style.setProperty('--dx', `${sentido * (34 + Math.random() * 30)}px`);
+    n.style.setProperty('--giro', `${sentido * (4 + Math.random() * 8)}deg`);
+
     el.appendChild(n);
-    setTimeout(() => n.remove(), 1150);
+    setTimeout(() => n.remove(), 1250);
 }
 
 // ---------- partida ----------

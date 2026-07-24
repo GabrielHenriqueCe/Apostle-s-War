@@ -1,6 +1,6 @@
-using ApostlesWar;
-using ApostlesWar.Champs.Reino;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Champs.Reino;
+using ApostlesWar.Domain.Skills.Debuffs;
 
 namespace Tests
 {

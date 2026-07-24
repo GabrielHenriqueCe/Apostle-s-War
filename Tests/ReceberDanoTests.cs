@@ -1,6 +1,6 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
 namespace Tests
 {
@@ -216,7 +216,7 @@ namespace Tests
         {
             // GuardaReal tem cooldown 4 e é consumido ao prevenir: o 2º golpe fatal no mesmo
             // combate encontra a capacidade indisponível e a morte acontece.
-            var guarda = NovoCom(new ApostlesWar.Champs.Reino.GuardaReal(), hp: 1000);
+            var guarda = NovoCom(new ApostlesWar.Domain.Champs.Reino.GuardaReal(), hp: 1000);
 
             guarda.ReceberDano(5000, NaturezasDano.Ataque);
             Assert.True(guarda.EstaVivo());               // salvo pelo prevent-death

@@ -1,8 +1,8 @@
-using ApostlesWar;
-using ApostlesWar.Skills;
-using ApostlesWar.Skills.Ativas;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills;
+using ApostlesWar.Domain.Skills.Ativas;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
 namespace Tests
 {
@@ -254,7 +254,7 @@ namespace Tests
         public void GuardaReal_EvitaAMorte_MantendoOsStatus()
         {
             var guarda = new Jogador(new Personagem(1, Faccao.Reino, "Guarda", "⚜️", 1000, 200, 0,
-                new ApostlesWar.Champs.Reino.GuardaReal()));
+                new ApostlesWar.Domain.Champs.Reino.GuardaReal()));
             new Veneno(2).Aplicar(guarda);                                 // debuff que DEVE sobreviver
             Assert.True(guarda.StatusAtivos.OfType<Veneno>().Any());
 

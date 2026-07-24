@@ -1,4 +1,6 @@
-using ApostlesWar.Controllers;
+using ApostlesWar.Application.Portas;
+using ApostlesWar.Domain;
+using ApostlesWar.Application.Controllers;
 
 namespace ApostlesWar.App.Front
 {

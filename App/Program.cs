@@ -1,10 +1,13 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Infrastructure;
+using ApostlesWar.Application.Portas;
+using ApostlesWar.Domain;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
-using ApostlesWar.Services;
-using ApostlesWar.View;
-using ApostlesWar.Controllers;
+using ApostlesWar.Application.Services;
+using ApostlesWar.ConsoleUI.Views;
+using ApostlesWar.Application.Controllers;
+using ApostlesWar.ConsoleUI;
 
 #region Program
 

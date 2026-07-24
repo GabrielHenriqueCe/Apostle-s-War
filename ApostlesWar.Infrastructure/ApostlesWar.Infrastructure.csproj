@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- INFRAESTRUTURA: implementações concretas das portas de dados (hoje só SaveLocal, o save em
+       arquivo JSON). Referencia Application porque implementa interface declarada lá
+       (IRepositorioDeSave) — a dependência aponta pra dentro. Só o composition root (App) enxerga
+       este projeto; no porte Unity/Steam entra um SaveSteam aqui sem tocar nos services. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>ApostlesWar.Infrastructure</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApostlesWar.Application\ApostlesWar.Application.csproj" />
+  </ItemGroup>
+
+</Project>

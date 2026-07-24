@@ -14,6 +14,11 @@ using ApostlesWar.Controllers;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+// Duas peles, o mesmo motor: sem flag roda o console de sempre; com --front sobe a janela webview.
+// Conviver é de propósito — o front nasce tela a tela e o jogo segue inteiro e jogável no console
+// enquanto isso (ver docs/ROADMAP §FRONT).
+if (args.Contains("--front")) return ApostlesWar.App.Front.AppFront.Rodar();
+
 var repositorioDeSave = new SaveLocal();             // porta de PERSISTÊNCIA (trocar por SaveSteam/SavePlayGames no porte)
 var capitulosService = new CapitulosService(repositorioDeSave);
 var arsenalService = new ArsenalService(capitulosService, repositorioDeSave);
@@ -29,5 +34,6 @@ var controladorJogador = new ControladorJogador(combateView, entrada);   // troc
 var controladorBot = new ControladorBot(selecaoDeAlvoService);
 var combateService = new CombateService(arsenalService, campeoesService, personagemService, combateView, selecaoDeAlvoService, controladorJogador, controladorBot, apresentacao, relogioDoCombate);
 new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, menuView, combateService, entrada).Executar();
+return 0;
 
 #endregion

@@ -1,7 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- BIBLIOTECA do jogo: motor + regras + views de console. Sem dependência de plataforma
+       (net10.0 puro), então roda em qualquer lugar. Quem vira executável é a casca
+       App/ApostlesWar.App (net10.0-windows, por causa do WebView2). Essa separação é a mesma
+       ideia das portas IEntrada/IApresentacao/IRepositorioDeSave, só que no nível de projeto:
+       o domínio não conhece a plataforma. -->
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>ApostlesWar</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -9,15 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- O csproj mora na raiz e inclui **/*.cs por default — os testes são do projeto Tests. -->
+    <!-- O csproj mora na raiz e inclui **/*.cs por default — os testes são do projeto Tests,
+         e o Program.cs/front são do projeto App. -->
     <Compile Remove="Tests\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Semente de save versionada (vem com tudo liberado). Copiada pra saída no build, onde
-         o jogo lê/grava (AppContext.BaseDirectory/Save). PreserveNewest: não sobrescreve o
-         progresso local já jogado, mas semeia num clone novo. -->
-    <None Update="Save\**" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Remove="App\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,8 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- As classes do jogo são internal; os testes do motor (Tests/) precisam enxergá-las. -->
+    <!-- As classes do jogo são internal; os testes do motor (Tests/) e a casca executável
+         (App/, que monta o composition root) precisam enxergá-las. -->
     <InternalsVisibleTo Include="Tests" />
+    <InternalsVisibleTo Include="ApostlesWar.App" />
   </ItemGroup>
 
 </Project>

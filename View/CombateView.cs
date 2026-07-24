@@ -7,8 +7,12 @@ namespace ApostlesWar.View
     /// e o menu de alvo. Separada do MenuView (telas de opção) na quebra do antigo MenuService.
     /// Sem dependência de service — só desenha combatentes. O input do menu de alvo vem da porta
     /// IEntrada (não lê tecla crua).
+    ///
+    /// É a impl de CONSOLE da porta <see cref="ITelaDeCombate"/>. Os dois métodos que NÃO estão na
+    /// porta (`ExibirAcoes` e `EscolherAlvoNaTela`) são navegação por cursor, formato deste adapter:
+    /// quem os usa é o ControladorJogador (console), não o fluxo de combate.
     /// </summary>
-    internal class CombateView
+    internal class CombateView : ITelaDeCombate
     {
         private readonly IEntrada _entrada;
         private readonly RelogioDoCombate _relogio;

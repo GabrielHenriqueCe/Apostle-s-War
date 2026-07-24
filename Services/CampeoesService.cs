@@ -64,13 +64,20 @@ namespace ApostlesWar.Services
 
         /// <summary>TODOS os campeões (9 facções × 4 slots) — pool da Arena (laboratório de rebalance:
         /// qualquer matchup, independente do progresso da campanha). Vazio = jogador desistiu.</summary>
-        public List<Personagem> SelecionarTimeArena()
+        public List<Personagem> SelecionarTimeArena() => _menuView.NavegarSelecaoTime(TodosOsCampeoes());
+
+        /// <summary>
+        /// O pool COMPLETO (9 facções × 4 slots), sem passar por tela nenhuma. Separado do
+        /// SelecionarTimeArena porque montar a lista é DADO e escolher dela é TELA: o front sorteia
+        /// daqui pra cair direto numa batalha, sem depender do menu de console.
+        /// </summary>
+        public List<Personagem> TodosOsCampeoes()
         {
             var todos = new List<Personagem>();
             foreach (Faccao faccao in Enum.GetValues<Faccao>())
                 foreach (Slot slot in Enum.GetValues<Slot>())
                     todos.Add(_personagemService.ObterPersonagem(faccao, slot));
-            return _menuView.NavegarSelecaoTime(todos);
+            return todos;
         }
 
         public void CarregarCampeoes()

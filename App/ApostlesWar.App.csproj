@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- CASCA EXECUTÁVEL (a única parte amarrada ao Windows). É aqui que mora o composition root
+       (Program.cs) e o front webview. O TFM é net10.0-windows porque o WebView2 exige WinForms
+       pra hospedar o controle; o MOTOR (ApostlesWar) segue net10.0 puro e portátil.
+       Publicação: `dotnet publish -c Release -r win-x64` self-contained → .exe pro GitHub Releases. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>ApostlesWar.App</RootNamespace>
+    <AssemblyName>ApostlesWar.App</AssemblyName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApostlesWar.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3485.44" />
+  </ItemGroup>
+
+  <!-- O pacote do WebView2 referencia as variantes WinForms E WPF sem condição (ver
+       build/Common.targets do pacote). A WPF arrasta outro WindowsBase e gera MSB3277. Como esta
+       casca é WinForms-only, a referência WPF é morta: removemos em vez de silenciar o aviso.
+       Precisa ser num Target porque os targets do pacote são importados DEPOIS do corpo do csproj. -->
+  <Target Name="RemoverReferenciaWpfDoWebView2" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <!-- A "pele" do front (HTML/CSS/JS) mora no repo e é copiada pra saída, ao lado do .exe.
+         PreserveNewest permite iterar na tela sem rebuild completo. -->
+    <None Update="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Semente de save versionada (vem com tudo liberado), que vive na raiz do repo. O jogo
+         lê/grava em AppContext.BaseDirectory/Save — que agora é a saída DESTE projeto, por isso
+         o Link. PreserveNewest: não sobrescreve progresso já jogado, mas semeia num clone novo. -->
+    <None Include="..\Save\**" Link="Save\%(RecursiveDir)%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

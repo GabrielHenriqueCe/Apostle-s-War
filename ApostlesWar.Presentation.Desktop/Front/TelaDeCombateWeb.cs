@@ -45,7 +45,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
             if (!alvo.EstaVivo())
                 _ponte.EnviarEvento(new EventoVisto("morte", _sessao.IdDe(alvo), 0, false, 0, null));
 
-            _sessao.Publicar();   // HP/status mudaram
+            // Sincroniza SÓ este alvo: a barra dele desce junto com o número, e num golpe em área as
+            // barras dos outros alvos esperam a própria vez de ser narradas.
+            _sessao.SincronizarVida(alvo);
+            _sessao.Publicar(sincronizarVida: false);
         }
 
         public void ExibirDanoDeStatus(EventoDano r)
@@ -58,7 +61,8 @@ namespace ApostlesWar.Presentation.Desktop.Front
             if (!r.Alvo.EstaVivo())
                 _ponte.EnviarEvento(new EventoVisto("morte", _sessao.IdDe(r.Alvo), 0, false, 0, null));
 
-            _sessao.Publicar();
+            _sessao.SincronizarVida(r.Alvo);          // barra do alvo desce junto com o tick
+            _sessao.Publicar(sincronizarVida: false);
         }
 
         public void ExibirCura(EventoCura c)
@@ -66,7 +70,8 @@ namespace ApostlesWar.Presentation.Desktop.Front
             _ponte.EnviarEvento(new EventoVisto(
                 Tipo: "cura", AlvoId: _sessao.IdDe(c.Alvo), Valor: c.Quantidade,
                 Critico: false, AbsorvidoPeloEscudo: 0, Texto: null));
-            _sessao.Publicar();
+            _sessao.SincronizarVida(c.Alvo);          // barra sobe junto com o número de cura
+            _sessao.Publicar(sincronizarVida: false);
         }
 
         public void ExibirMensagemPassiva(string mensagem)
@@ -90,18 +95,18 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// <summary>
         /// A "fala" do champ ao usar a habilidade — o balão que o Gabriel pediu.
         ///
-        /// NÃO PUBLICA ESTADO DE PROPÓSITO. Quando isto roda, o `hab.Ativar` já mexeu no modelo
-        /// (o CombateService executa TUDO e só depois narra), então publicar aqui entregaria o HP
-        /// já descontado — a barra caía 1,5s ANTES do número de dano subir. Deixando o retrato pro
-        /// <see cref="ExibirResultadoAtaque"/>, a barra desce no mesmo instante em que o número salta.
-        /// O texto não se perde: viaja no evento de narração abaixo, e a Mensagem entra no próximo
-        /// retrato.
+        /// Publica SEM SINCRONIZAR A VIDA. Quando isto roda, o `hab.Ativar` já mexeu no modelo (o
+        /// CombateService executa tudo e só depois narra): sincronizar aqui entregaria o HP já
+        /// descontado e a barra cairia antes do número de dano subir. Mas PRECISA publicar — buff,
+        /// debuff e escudo não geram evento nenhum, então sem este retrato eles só apareceriam no
+        /// turno seguinte. Vida fica pro <see cref="ExibirResultadoAtaque"/>; o resto atualiza já.
         /// </summary>
         public void ExibirUsoHabilidade(Combate atacante, Habilidade hab)
         {
             _sessao.Mensagem = $"{atacante.Personagem.Simbolo} usou {hab.Simbolo} {hab.Nome}!";
             _ponte.EnviarEvento(new EventoVisto(
                 "narracao", _sessao.IdDe(atacante), 0, false, 0, _sessao.Mensagem));
+            _sessao.Publicar(sincronizarVida: false);
         }
 
         public void ExibirResumoBatalha(List<Combate> jogador) => Encerrar("Fim da batalha!");

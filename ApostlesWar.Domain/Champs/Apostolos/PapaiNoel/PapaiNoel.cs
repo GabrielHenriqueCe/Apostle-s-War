@@ -1,15 +1,15 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Apostolos
 {
     /// <summary>
     /// Papai Noel — champ como DADO. Saco de Presente buffa os aliados, ataca todos e aplica Medo.
     /// Fábrica de Presente reduz a DEF dos inimigos antes de atacar (o próprio golpe se beneficia,
     /// pela ordem das ações). Passiva: Surpresa.Passiva.cs.
     /// </summary>
-    static class PapaiNoel
+    public static class PapaiNoel
     {
         public static Personagem Definir() => new(
             4, Faccao.Apostolos, "Papai Noel", "🎅", 1000, 200, 200,

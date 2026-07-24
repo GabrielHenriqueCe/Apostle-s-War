@@ -1,12 +1,12 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
     /// <summary>
     /// Cada ataque reduz a DEF do alvo em 5% (sobre DefesaComItens), até -25% no alvo.
     /// A redução mora no alvo (cap compartilhado). Migrada para IReagePorAtaque (por alvo atingido).
     /// </summary>
-    class Sorrateiro : HabilidadePassiva, IReagePorAtaque
+    public class Sorrateiro : HabilidadePassiva, IReagePorAtaque
     {
         private const double ReducaoPorHit = 0.05;
         private const double Cap = 0.25;

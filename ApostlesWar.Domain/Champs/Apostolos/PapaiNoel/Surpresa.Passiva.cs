@@ -1,14 +1,14 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Apostolos
 {
     /// <summary>
     /// Ao ser atacado, 10% de chance de aplicar Preso 1t no atacante. Migrada para
     /// o modelo de reação (IReageAoSerAtacado). "Presente surpresa que te prende."
     /// Só declara mensagem quando dispara.
     /// </summary>
-    class Surpresa : HabilidadePassiva, IReageAoSerAtacado
+    public class Surpresa : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChancePreso = 0.10;
 

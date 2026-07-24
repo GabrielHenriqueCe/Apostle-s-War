@@ -1,15 +1,15 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Passivas;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Passivas;
 
-namespace ApostlesWar.Champs.Decaidos
+namespace ApostlesWar.Domain.Champs.Decaidos
 {
     /// <summary>
     /// Passiva permanente: todos os ataques do Vampiro ignoram Invencível e BloqueioTotal
     /// do alvo. Não tem evento — funciona via interface IIgnoraStatusNoAtaque consultada
     /// pelo Combate.Atacar.
     /// </summary>
-    class Drenagem : HabilidadePassiva, IIgnoraStatusNoAtaque
+    public class Drenagem : HabilidadePassiva, IIgnoraStatusNoAtaque
     {
         private static readonly Type[] _tipos = new[]
         {

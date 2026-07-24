@@ -1,15 +1,15 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Folclore
+namespace ApostlesWar.Domain.Champs.Folclore
 {
     /// <summary>
     /// Ogro — champ como DADO. Quebrar usa PorDanoCausado no escudo (30% do dano total) e o
     /// Irritar carrega proveniência (o overload Func&lt;Combate,Debuff&gt; do AplicarDebuff — o
     /// alvo é forçado a atacar quem aplicou). Passiva: Intimidador.Passiva.cs.
     /// </summary>
-    static class Ogro
+    public static class Ogro
     {
         public static Personagem Definir() => new(
             1, Faccao.Folclore, "Ogro", "👹", 1400, 160, 160,

@@ -1,6 +1,7 @@
-using ApostlesWar;
+using ApostlesWar.Application.Portas;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.View
+namespace ApostlesWar.ConsoleUI.Views
 {
     /// <summary>
     /// View da PARTIDA: renderiza a luta em andamento (times, ações, resultado de ataque, mensagens)
@@ -12,7 +13,7 @@ namespace ApostlesWar.View
     /// porta (`ExibirAcoes` e `EscolherAlvoNaTela`) são navegação por cursor, formato deste adapter:
     /// quem os usa é o ControladorJogador (console), não o fluxo de combate.
     /// </summary>
-    internal class CombateView : ITelaDeCombate
+    public class CombateView : ITelaDeCombate
     {
         private readonly IEntrada _entrada;
         private readonly RelogioDoCombate _relogio;
@@ -100,7 +101,7 @@ namespace ApostlesWar.View
         /// </summary>
         private string FormatarEscudo(Combate c)
         {
-            var escudo = c.StatusAtivos.OfType<Skills.Buffs.Escudo>().FirstOrDefault();
+            var escudo = c.StatusAtivos.OfType<Domain.Skills.Buffs.Escudo>().FirstOrDefault();
             return escudo != null ? $" 🛡️{escudo.PontosRestantes}" : "";
         }
 

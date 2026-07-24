@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Seleciona QUAIS/QUANTOS status um combatente perde/ganha — eixo compartilhado pelas
@@ -9,7 +9,7 @@ namespace ApostlesWar
     ///
     /// 1º cliente: DocesOuTravessuras (Seletor.Removiveis(), RemoverBuffs).
     /// </summary>
-    class Seletor
+    public class Seletor
     {
         public Func<StatusEffect, bool> Filtro { get; }
         public int Quantos { get; }

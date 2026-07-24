@@ -1,13 +1,13 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
     /// <summary>
     /// Ao ser atacado, aumenta a própria DEF em 5% (sobre DefesaComItens) até um
     /// cap de 25% acumulado. Estado interno guarda o total já ganho. Migrada para
     /// o modelo de reação (IReageAoSerAtacado). O bônus vai no PORTADOR (si mesmo).
     /// </summary>
-    class CoroaDoSoberano : HabilidadePassiva, IReageAoSerAtacado
+    public class CoroaDoSoberano : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;

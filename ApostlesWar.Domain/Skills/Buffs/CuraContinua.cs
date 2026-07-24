@@ -1,11 +1,11 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Cura % do HP máximo no início do turno do portador. Espelho positivo do Veneno.
     /// </summary>
-    class CuraContinua : Buff
+    public class CuraContinua : Buff
     {
         public CuraContinua(int duracao = 1, double percentual = 0.10)
             : base("Cura Contínua", "💚", duracao, percentual,

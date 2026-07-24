@@ -1,4 +1,4 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
 /// <summary>
 /// Capacidade C do modelo de capacidades: CONTRIBUIÇÃO DE STAT (taxa de crítico).
@@ -7,7 +7,7 @@ using ApostlesWar;
 /// Combate.TaxaCrit. A contribuição já vem COM SINAL.
 /// Implementadores: BuffTaxaCrit (positivo), ReducaoTaxaCrit (negativo).
 /// </summary>
-interface IContribuiTaxaCrit
+public interface IContribuiTaxaCrit
 {
     double ContribuicaoTaxaCrit(Combate portador);
 }

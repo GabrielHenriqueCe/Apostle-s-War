@@ -1,6 +1,6 @@
-using ApostlesWar.Skills;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar.Champs.Tecnologicos
+namespace ApostlesWar.Domain.Champs.Tecnologicos
 {
     /// <summary>
     /// Estende a duração de buffs do alvo conforme um Seletor — espelho EXATO do RemoverBuffs
@@ -22,7 +22,7 @@ namespace ApostlesWar.Champs.Tecnologicos
     /// reavaliar quando o sweep tocar cada passiva de duração (AnáliseCrítica nos Tecnológicos;
     /// Repetindo em Apóstolos), não agora.
     /// </summary>
-    class EstenderBuffs : Acao
+    public class EstenderBuffs : Acao
     {
         private readonly Seletor _seletor;
         private readonly int _turnos;

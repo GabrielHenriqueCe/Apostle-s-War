@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// A "Sentença": marca um morto como impossível de ressuscitar. Debuff permanente
@@ -14,7 +14,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// NOTA: por ora é Debuff. Se a mecânica de Alma fizer cleanses rodarem em mortos,
     /// reavaliar se vira tipo próprio. Ver "Vida de Alma" no roadmap.
     /// </summary>
-    class ImpedirRessurreicao : Debuff
+    public class ImpedirRessurreicao : Debuff
     {
         public ImpedirRessurreicao()
             : base("Sentença", "⚰️", int.MaxValue, 0, "Não pode ser ressuscitado.")

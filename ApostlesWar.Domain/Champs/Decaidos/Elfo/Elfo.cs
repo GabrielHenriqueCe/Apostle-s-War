@@ -1,15 +1,15 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Decaidos
+namespace ApostlesWar.Domain.Champs.Decaidos
 {
     /// <summary>
     /// Elfo — champ como DADO. Árvore do Mundo é tanque puro (buffs próprios, molde da
     /// Furtividade). Natureza ataca 1 e prende. Passiva: EspinhosCorrompidos.Passiva.cs (renomeada
     /// de "Espinhos" pra não colidir no display com o buff EspinhosVenenosos, que exibe "Espinhos").
     /// </summary>
-    static class Elfo
+    public static class Elfo
     {
         public static Personagem Definir() => new(
             3, Faccao.Decaidos, "Elfo", "🧝", 1400, 160, 160,

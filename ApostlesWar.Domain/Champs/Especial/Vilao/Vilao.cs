@@ -1,12 +1,12 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Especial
+namespace ApostlesWar.Domain.Champs.Especial
 {
     /// <summary>
     /// Vilão — champ como DADO. DestruindoDia é o 2º cliente do RemoverDebuffs (cleanse dos aliados
     /// + ataque); Vilania é o molde do Tiroteio (2 alvos aleatórios). Passiva: Sentenca.Passiva.cs.
     /// </summary>
-    static class Vilao
+    public static class Vilao
     {
         public static Personagem Definir() => new(
             3, Faccao.Especial, "Vilão", "🦹", 1200, 200, 160,

@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Services
+namespace ApostlesWar.Application.Services
 {
     /// <summary>
     /// Regra de domínio de targeting: dada uma lista de candidatos, decide quais
@@ -10,7 +10,7 @@ namespace ApostlesWar.Services
     /// a mesma regra). Injetável para permitir estratégias de alvo variáveis no
     /// futuro (ex: bot inteligente do AW v2).
     /// </summary>
-    internal class SelecaoDeAlvoService
+    public class SelecaoDeAlvoService
     {
         /// <summary>
         /// Filtra os candidatos vivos pela regra de prioridade de alvo:

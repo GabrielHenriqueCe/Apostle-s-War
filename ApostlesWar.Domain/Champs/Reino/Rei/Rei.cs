@@ -1,13 +1,13 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
     /// <summary>
     /// Rei — champ como DADO (ver ADR-composicao-de-acoes §10). Lealdade estreia a Ação de
     /// vocabulário AplicarEscudo (§5.5, valor por fragmento — compartilha o valor com Cura).
     /// Passiva: CoroaDoSoberano.Passiva.cs.
     /// </summary>
-    static class Rei
+    public static class Rei
     {
         public static Personagem Definir() => new(
             4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200,

@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Misticos
+namespace ApostlesWar.Domain.Champs.Misticos
 {
     /// <summary>
     /// Ao matar um inimigo, aplica BloqueioTotal 3t em si mesma. Migrada para
     /// IReageAoMatar. O buff vai no PORTADOR (a Fada).
     /// </summary>
-    class Voar : HabilidadePassiva, IReageAoMatar
+    public class Voar : HabilidadePassiva, IReageAoMatar
     {
         public Voar() : base("Voar", "🧚", 0,
             "Após matar, fica imune a dano por 3 turnos.")

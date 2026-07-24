@@ -1,6 +1,8 @@
-using ApostlesWar.View;
+using ApostlesWar.Application.Portas;
+using ApostlesWar.ConsoleUI.Views;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Controllers
+namespace ApostlesWar.ConsoleUI
 {
     /// <summary>
     /// Controlador do JOGADOR humano: a ação vem do menu (navegação com cursor, pula habilidades em
@@ -8,7 +10,7 @@ namespace ApostlesWar.Controllers
     /// automático, o jogador troca este controlador por um automático no composition root — o loop de
     /// combate não muda.
     /// </summary>
-    internal class ControladorJogador : IControladorDeTurno
+    public class ControladorJogador : IControladorDeTurno
     {
         private readonly CombateView _combateView;
         private readonly IEntrada _entrada;

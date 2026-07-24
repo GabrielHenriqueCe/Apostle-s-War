@@ -1,6 +1,6 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Buff temporário de DanoCrit (pontos absolutos). Não muta o stat — apenas
@@ -9,7 +9,7 @@ namespace ApostlesWar.Skills.Buffs
     ///
     /// Não acumula: mantém o de maior Valor; em empate, o de maior duração.
     /// </summary>
-    class BuffDanoCrit : Buff, IContribuiDanoCrit
+    public class BuffDanoCrit : Buff, IContribuiDanoCrit
     {
         public BuffDanoCrit(int duracao = 2, double valor = 0.25)
             : base("DanoCrit+", "💥", duracao, valor, $"+{valor * 100:F0}% Dano Crítico.") { }

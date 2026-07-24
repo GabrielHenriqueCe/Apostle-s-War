@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Especial
+namespace ApostlesWar.Domain.Champs.Especial
 {
     /// <summary>
     /// Ao matar um inimigo, aplica a Sentença (ImpedirRessurreicao) no morto — ele não
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Especial
     /// o debuff já está no morto quando a Necromancia/Guarda tentam reviver. O Diabo
     /// (AnjoCaido) remove a Sentença proposital.
     /// </summary>
-    class Sentenca : HabilidadePassiva, IReageAoMatar
+    public class Sentenca : HabilidadePassiva, IReageAoMatar
     {
         public Sentenca() : base("Sentença", "🦹", 0,
             "Inimigos mortos por ele não podem ser ressuscitados.")

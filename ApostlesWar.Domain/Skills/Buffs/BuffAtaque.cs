@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Buff temporário de ATK. Não muta o stat — apenas existe em StatusAtivos.
@@ -11,7 +11,7 @@ namespace ApostlesWar.Skills.Buffs
     /// em empate de Valor, mantém o de maior duração.
     /// ContribuicaoAtaque expõe quanto este buff soma agora, pro getter de Ataque.
     /// </summary>
-    class BuffAtaque : Buff, IContribuiAtaque
+    public class BuffAtaque : Buff, IContribuiAtaque
     {
         public BuffAtaque(int duracao = 2, double percentual = 0.25)
             : base("ATK+", "⚔️", duracao, percentual, $"+{percentual * 100:F0}% ATK.") { }

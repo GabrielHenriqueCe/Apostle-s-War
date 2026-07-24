@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Decaidos
+namespace ApostlesWar.Domain.Champs.Decaidos
 {
     /// <summary>
     /// Diabo — champ como DADO. Inferno migra o shim `Queima.Explodir` pra ação `Explodir`
@@ -10,7 +10,7 @@ namespace ApostlesWar.Champs.Decaidos
     /// Anjo Caído quebra a Sentença dos mortos (RemoverDebuffs), revive e cura os vivos — a ordem
     /// das ações faz a Cura pegar os recém-revividos. Passiva: CresceComDor.Passiva.cs.
     /// </summary>
-    static class Diabo
+    public static class Diabo
     {
         public static Personagem Definir() => new(
             4, Faccao.Decaidos, "Diabo", "😈", 1400, 160, 160,

@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Fragmento de valor de uma ação com magnitude (Cura, Escudo, ...). A UNIDADE de reúso é o
@@ -8,9 +8,9 @@ namespace ApostlesWar
     /// final (ver ADR-composicao-de-acoes §5.5). A diversidade de fonte é mantida de propósito,
     /// sem forçar um padrão único.
     /// </summary>
-    delegate int ValorFn(Combate atacante, Combate alvo, List<EventoCombate> eventos);
+    public delegate int ValorFn(Combate atacante, Combate alvo, List<EventoCombate> eventos);
 
-    static class Valor
+    public static class Valor
     {
         /// <summary>Valor fixo em pontos.</summary>
         public static ValorFn Fixo(int pontos) => (atk, alvo, ev) => pontos;

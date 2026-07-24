@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.LadoSombrio
+namespace ApostlesWar.Domain.Champs.LadoSombrio
 {
     /// <summary>
     /// Caveira — champ como DADO (ver ADR-composicao-de-acoes §10). OssoDuroDeRoer estreia o
     /// Escopo.OutrosAliados (2 clientes mapeados: aqui + Circo) e a fábrica de AplicarBuff
     /// ciente do atacante (ProtecaoAliado carrega o Aplicador). Passiva: Necromancia.Passiva.cs.
     /// </summary>
-    static class Caveira
+    public static class Caveira
     {
         public static Personagem Definir() => new(
             1, Faccao.LadoSombrio, "Caveira", "💀", 600, 280, 200,

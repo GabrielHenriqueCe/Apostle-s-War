@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Decaidos
+namespace ApostlesWar.Domain.Champs.Decaidos
 {
     /// <summary>
     /// Vampiro — champ como DADO. Controle de Sangue é golpe único furando 50% da DEF (molde do
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Decaidos
     /// Drenagem.Passiva.cs (ignora Invencível e Bloqueio Total no ataque — fonte permanente do
     /// "ignorar", ver ADR-composicao-de-acoes §8 / ROADMAP unificar-ignorar).
     /// </summary>
-    static class Vampiro
+    public static class Vampiro
     {
         public static Personagem Definir() => new(
             2, Faccao.Decaidos, "Vampiro", "🧛", 800, 280, 160,

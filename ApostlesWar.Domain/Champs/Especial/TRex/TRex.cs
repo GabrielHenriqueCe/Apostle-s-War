@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Especial
+namespace ApostlesWar.Domain.Champs.Especial
 {
     /// <summary>
     /// T-Rex — champ como DADO. Vocabulário puro: Rugido (Provocar + RefletirDano em si + Medo nos
     /// inimigos) e Pisada (ContraAtaque em si + ataque). Passiva: PeleGrossa.Passiva.cs.
     /// </summary>
-    static class TRex
+    public static class TRex
     {
         public static Personagem Definir() => new(
             4, Faccao.Especial, "T-Rex", "🦖", 1000, 160, 240,

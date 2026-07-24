@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Bloco de composição de uma habilidade — uma operação (Dano/Cura/AplicarBuff/...) sobre
@@ -16,7 +16,7 @@ namespace ApostlesWar
     /// Valor), nunca estado por-ativação. Valor que atravessa alvos passa pelo `eventos` (é
     /// assim que PorDanoCausado agrega), nunca por campo da instância.
     /// </summary>
-    abstract class Acao
+    public abstract class Acao
     {
         public Escopo Escopo { get; }
         public EstadoAlvo EstadoAlvo { get; }

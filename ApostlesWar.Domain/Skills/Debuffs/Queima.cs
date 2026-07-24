@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Debuff stack-based de queimadura.
@@ -11,7 +11,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// - Cap de stacks: 5 (configurável)
     /// - Reaplicar: adiciona N stacks (até o cap)
     /// </summary>
-    class Queima : Debuff, IStatusComTick
+    public class Queima : Debuff, IStatusComTick
     {
         public const double DanoPorTurno = 0.05;    // 5% HP inicial
         public const double CapPropio = 0.25;       // 25% redução acumulada

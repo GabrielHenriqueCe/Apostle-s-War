@@ -1,13 +1,13 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Misticos
+namespace ApostlesWar.Domain.Champs.Misticos
 {
     /// <summary>
     /// Recebe 15% menos dano durante todo o combate. Capacidade direta
     /// (IModificaDanoRecebido) — não usa mais buff de contorno (ReducaoDanoFixo).
     /// Processa antes do Escudo/BloqueioTotal (ver Combate.ReceberDano).
     /// </summary>
-    class Aquagirl : HabilidadePassiva, IModificaDanoRecebido
+    public class Aquagirl : HabilidadePassiva, IModificaDanoRecebido
     {
         private const double PercentualReducao = 0.15;
 

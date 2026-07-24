@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar.Champs.Tecnologicos
+namespace ApostlesWar.Domain.Champs.Tecnologicos
 {
     /// <summary>
     /// Ao ser atacado, reduz em 1 turno a duração de TODOS os buffs do atacante
     /// (removendo os que expiram). Migrada para o modelo de reação
     /// (IReageAoSerAtacado). Só declara mensagem se havia buff para reduzir.
     /// </summary>
-    class AnaliseCritica : HabilidadePassiva, IReageAoSerAtacado
+    public class AnaliseCritica : HabilidadePassiva, IReageAoSerAtacado
     {
         public AnaliseCritica() : base("Análise Crítica", "🔬", 0,
             "Ao ser atacado, reduz em 1t a duração dos benefícios do atacante.")

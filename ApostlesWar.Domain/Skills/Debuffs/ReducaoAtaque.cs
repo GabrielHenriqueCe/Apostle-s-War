@@ -1,6 +1,6 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Debuff temporário de ATK. Não muta o stat — apenas existe em StatusAtivos.
@@ -11,7 +11,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// ContribuicaoAtaque expõe (negativo) quanto este debuff tira agora — espelho
     /// do ReducaoDefesa.
     /// </summary>
-    class ReducaoAtaque : Debuff, IContribuiAtaque
+    public class ReducaoAtaque : Debuff, IContribuiAtaque
     {
         public ReducaoAtaque(int duracao = 2, double percentual = 0.25)
             : base("Redução ATK", "⚔️", duracao, percentual, $"-{percentual * 100:F0}% ATK.") { }

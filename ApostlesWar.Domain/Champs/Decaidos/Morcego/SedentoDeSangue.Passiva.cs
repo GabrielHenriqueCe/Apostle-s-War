@@ -1,12 +1,12 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Decaidos
+namespace ApostlesWar.Domain.Champs.Decaidos
 {
     /// <summary>
     /// Cura 15% do dano causado ao atacar. Capacidade direta (IReageAoCausarDano)
     /// — não usa mais buff de contorno (Sedento).
     /// </summary>
-    class SedentoDeSangue : HabilidadePassiva, IReageAoCausarDano
+    public class SedentoDeSangue : HabilidadePassiva, IReageAoCausarDano
     {
         private const double PercentualCura = 0.15;
 

@@ -1,5 +1,7 @@
-using ApostlesWar.Skills;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Application.Portas;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills;
+using ApostlesWar.Domain.Skills.Buffs;
 
 namespace ApostlesWar.App.Front
 {

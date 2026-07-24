@@ -1,10 +1,10 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Estado vivo: carrega os status do vivo (buffs, debuffs, escudos...).
     /// Cura normalmente; ignora revive (já está vivo).
     /// </summary>
-    class Vivo : EstadoVida
+    public class Vivo : EstadoVida
     {
         public List<StatusEffect> StatusNoVivo { get; } = new List<StatusEffect>();
 

@@ -1,4 +1,4 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
 /// <summary>
 /// Capacidade C do modelo de capacidades: CONTRIBUIÇÃO DE STAT (defesa).
@@ -8,7 +8,7 @@
 /// contribuição é descontada da defesa efetiva.
 /// Implementadores: BuffDefesa (positivo), ReducaoDefesa (negativo).
 /// </summary>
-interface IContribuiDefesa
+public interface IContribuiDefesa
 {
     int ContribuicaoDefesa(Combate portador);
 }

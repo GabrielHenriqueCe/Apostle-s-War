@@ -1,8 +1,8 @@
-﻿using ApostlesWar.Skills.Passivas;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+﻿using ApostlesWar.Domain.Skills.Passivas;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     #region Combate
 
@@ -12,13 +12,13 @@ namespace ApostlesWar
     /// irmãos (EventoDano/EventoCura). Embrião do log/stream da FILA B (ADR). As reações olham só os
     /// EventoDano (`.OfType<EventoDano>()`).
     /// </summary>
-    abstract record EventoCombate;
+    public abstract record EventoCombate;
 
     /// <summary>
     /// Descrição completa de um golpe. Produzido pelo Atacar/ReceberDano e pelos ticks de DoT,
     /// consumido pelas reações (contexto) e pela exibição. É o Model do golpe.
     /// </summary>
-    record EventoDano(
+    public record EventoDano(
         Combate Atacante,
         Combate Alvo,
         int DanoBruto,            // valor do golpe ao chegar, antes da mitigação do alvo
@@ -33,14 +33,14 @@ namespace ApostlesWar
     /// Fato de uma CURA (irmão do EventoDano). Curador = quem curou (no auto-heal, = Alvo);
     /// Quantidade = HP de fato recuperado; HPRestante = HP do alvo depois.
     /// </summary>
-    record EventoCura(
+    public record EventoCura(
         Combate Curador,
         Combate Alvo,
         int Quantidade,
         int HPRestante
     ) : EventoCombate;
 
-    abstract class Combate
+    public abstract class Combate
     {
         // Balanceamento de defesa: cada N pontos de DEF reduzem 1 ponto percentual
         // de dano, com cap máximo. Modificar aqui afeta todos os combatentes.

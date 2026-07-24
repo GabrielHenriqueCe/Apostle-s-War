@@ -1,11 +1,11 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     #region Item
 
     /// <summary>
     /// Representa um item equipável obtido ao concluir uma fase
     /// </summary>
-    class Item
+    public class Item
     {
         public string Nome { get; init; }
         public string Simbolo { get; init; }

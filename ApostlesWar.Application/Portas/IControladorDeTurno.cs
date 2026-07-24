@@ -1,4 +1,5 @@
-namespace ApostlesWar.Controllers
+using ApostlesWar.Domain;
+namespace ApostlesWar.Application.Portas
 {
     /// <summary>
     /// Seam de CONTROLE do turno: quem DECIDE a ação e o alvo. O loop de combate pergunta ao
@@ -8,7 +9,7 @@ namespace ApostlesWar.Controllers
     ///
     /// Separado da EXECUÇÃO (que é pura: recebe ação+alvo e aplica) e da APRESENTAÇÃO (IApresentacao).
     /// </summary>
-    internal interface IControladorDeTurno
+    public interface IControladorDeTurno
     {
         /// <summary>
         /// Qual habilidade o combatente usa neste turno. NULL = o jogador pediu pra ENCERRAR a batalha

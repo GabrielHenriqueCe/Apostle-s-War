@@ -1,13 +1,13 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Stack-based. Cada stack causa 5% do HP máximo no início do turno do portador (ignora defesa).
     /// Duração = nº de stacks. A cada passagem de turno, perde 1 stack.
     /// Reaplicar adiciona stacks (até o cap, se houver).
     /// </summary>
-    class Veneno : Debuff, IStatusComTick
+    public class Veneno : Debuff, IStatusComTick
     {
         public const double DanoPorStack = 0.05;
 

@@ -1,16 +1,16 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     #region Inimigo
 
     /// Define os multiplicadores de HP, Ataque e Defesa aplicados aos inimigos conforme o capítulo e fase
-    struct MultiplicadorFase
+    public struct MultiplicadorFase
     {
         public float HP;
         public float Ataque;
         public float Defesa;
     }
 
-    class Inimigo : Combate
+    public class Inimigo : Combate
     {
         public override Personagem Personagem { get; }
 

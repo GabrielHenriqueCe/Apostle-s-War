@@ -1,4 +1,4 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
 /// <summary>
 /// Capacidade C do modelo de capacidades: CONTRIBUIÇÃO DE STAT (ataque).
@@ -7,7 +7,7 @@ using ApostlesWar;
 /// (positiva no buff, negativa no debuff), então o getter só precisa somar.
 /// Implementadores: BuffAtaque (positivo), ReducaoAtaque (negativo).
 /// </summary>
-interface IContribuiAtaque
+public interface IContribuiAtaque
 {
     int ContribuicaoAtaque(Combate portador);
 }

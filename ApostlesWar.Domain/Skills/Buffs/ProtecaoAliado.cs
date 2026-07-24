@@ -1,12 +1,12 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Aliado com este buff sofre 30% a menos de dano; esse 30% vai pro Aplicador (sem defesa).
     /// Se o Aplicador morrer, o status se autoremove no próximo turno via expiração natural.
     /// </summary>
-    class ProtecaoAliado : Buff, IModificaDanoRecebido
+    public class ProtecaoAliado : Buff, IModificaDanoRecebido
     {
         public Combate Aplicador { get; }
 

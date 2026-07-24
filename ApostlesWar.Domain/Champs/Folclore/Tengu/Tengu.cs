@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Folclore
+namespace ApostlesWar.Domain.Champs.Folclore
 {
     /// <summary>
     /// Tengu — champ como DADO. CorteDeVento e Vendaval estreiam o `ignorarStatus` no Dano (a
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Folclore
     /// o multiplicador escala com o tamanho dele, via Func), Vendaval fura ProtecaoAliado +
     /// BuffDefesa. Passiva: Ventania.Passiva.cs.
     /// </summary>
-    static class Tengu
+    public static class Tengu
     {
         public static Personagem Definir() => new(
             2, Faccao.Folclore, "Tengu", "👺", 800, 280, 160,

@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Buff temporário de DEF. Não muta o stat — apenas existe em StatusAtivos.
@@ -11,7 +11,7 @@ namespace ApostlesWar.Skills.Buffs
     /// ContribuicaoDefesa expõe quanto este buff soma agora, pra habilidades
     /// que ignoram buffs de defesa no ataque (ex: Vendaval).
     /// </summary>
-    class BuffDefesa : Buff, IContribuiDefesa
+    public class BuffDefesa : Buff, IContribuiDefesa
     {
         public BuffDefesa(int duracao = 2, double percentual = 0.30)
             : base("DEF+", "🛡️", duracao, percentual, $"+{percentual * 100:F0}% DEF.") { }

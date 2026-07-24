@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Base de IDENTIDADE dos elementos que o jogo exibe: nome, símbolo e descrição.
@@ -6,7 +6,7 @@ namespace ApostlesWar
     /// Carrega SÓ a identidade — o cooldown (da Habilidade) e a duração (do StatusEffect)
     /// são conceitos próprios de cada uma e ficam nas subclasses.
     /// </summary>
-    abstract class ElementoDeJogo
+    public abstract class ElementoDeJogo
     {
         public string Nome { get; }
         public string Simbolo { get; }

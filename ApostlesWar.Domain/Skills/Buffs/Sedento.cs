@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Buff: cada vez que o portador causa dano, recupera um percentual desse
@@ -9,7 +9,7 @@ namespace ApostlesWar.Skills.Buffs
     /// passiva-pura (SedentoDeSangue implementa IReageAoCausarDano direto); este
     /// buff fica disponível pra reuso em habilidades ativas futuras (Rebalanceamento).
     /// </summary>
-    class Sedento : Buff, IReageAoCausarDano
+    public class Sedento : Buff, IReageAoCausarDano
     {
         public Sedento(int duracao = int.MaxValue, double percentual = 0.15)
             : base("Sedento", "🩸", duracao, percentual,

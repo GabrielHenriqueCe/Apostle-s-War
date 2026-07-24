@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
     /// <summary>
     /// EVITA a morte (IPrevineMorte): consultada pelo Combate.ConfirmarMorte no golpe fatal. O portador
@@ -10,7 +10,7 @@ namespace ApostlesWar.Champs.Reino
     /// Necromância nunca a enxergam. Cooldown 4 gerido pelo ConfirmarMorte.
     /// Nome de jogo "Guarda Real" (era "Invencível", que colidia com o buff Skills.Buffs.Invencivel).
     /// </summary>
-    class GuardaReal : HabilidadePassiva, IPrevineMorte
+    public class GuardaReal : HabilidadePassiva, IPrevineMorte
     {
         public GuardaReal() : base("Guarda Real", "⚜️", 4,
             "Ao receber ataque fatal, sobrevive com 1 HP e ganha invencibilidade por 1 turno.")

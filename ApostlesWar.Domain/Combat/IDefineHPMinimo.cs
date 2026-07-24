@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Capacidade de PISO DE HP (irmã do IModificaDanoRecebido, mas atua no HP, não no dano):
@@ -11,7 +11,7 @@ namespace ApostlesWar
     /// e roda no ConfirmarMorte. Este aqui é um piso CONTÍNUO enquanto o status estiver ativo.
     /// Implementador: Invencível. Futuro: itens/conjuntos com "HP não cai de X".
     /// </summary>
-    interface IDefineHPMinimo
+    public interface IDefineHPMinimo
     {
         /// <summary>O HP mínimo que o portador pode ter enquanto este status estiver ativo.</summary>
         int HPMinimo();

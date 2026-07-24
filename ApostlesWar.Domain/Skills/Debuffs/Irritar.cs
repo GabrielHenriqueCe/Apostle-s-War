@@ -1,12 +1,12 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Força o portador a atacar com A1 quem aplicou. Carrega a capacidade IForcaAcao:
     /// o turno pergunta o AlvoForcado, não olha o tipo concreto.
     /// </summary>
-    class Irritar : Debuff, IForcaAcao
+    public class Irritar : Debuff, IForcaAcao
     {
         public Combate Aplicador { get; }
 

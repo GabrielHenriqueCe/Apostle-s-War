@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Humanos
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>
     /// Ao receber um golpe CRÍTICO, todos os aliados ganham 15% de reflexo de dano
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Humanos
     /// importa é o crítico, que já vem correto do EventoDano: golpe sem dano não é
     /// crítico). Aliados = time do portador (vem do ContextoReacao).
     /// </summary>
-    class CodigoDoSushi : HabilidadePassiva, IReageAoSerAtacado
+    public class CodigoDoSushi : HabilidadePassiva, IReageAoSerAtacado
     {
         public CodigoDoSushi() : base("Código do Sushi", "🥢", 0,
             "Ao receber crítico, todos os aliados ganham 15% de reflexo de dano por 2 turnos.")

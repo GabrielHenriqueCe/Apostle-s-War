@@ -1,8 +1,8 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Tecnologicos
+namespace ApostlesWar.Domain.Champs.Tecnologicos
 {
     /// <summary>
     /// Invasor — champ como DADO (ver ADR-composicao-de-acoes §10). Barata estreia no sweep o
@@ -11,7 +11,7 @@ namespace ApostlesWar.Champs.Tecnologicos
     /// pega exatamente quem o Dano anterior acabou de matar, sem condicional "se matou". Passiva:
     /// Virus.Passiva.cs.
     /// </summary>
-    static class Invasor
+    public static class Invasor
     {
         public static Personagem Definir() => new(
             1, Faccao.Tecnologicos, "Invasor", "👾", 600, 240, 240,

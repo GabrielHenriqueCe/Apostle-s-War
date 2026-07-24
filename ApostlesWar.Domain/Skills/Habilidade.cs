@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     #region Habilidade
 
@@ -7,7 +7,7 @@ namespace ApostlesWar
     /// de ElementoDeJogo; aqui mora o Cooldown (turnos de recarga entre usos).
     /// Ativar recebe ContextoCombate (atacante + aliados + inimigos) e o alvo selecionado.
     /// </summary>
-    abstract class Habilidade : ElementoDeJogo
+    public abstract class Habilidade : ElementoDeJogo
     {
         public int Cooldown { get; }
 

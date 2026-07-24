@@ -1,4 +1,4 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Dono do RELÓGIO de um turno de um combatente: as fases mecânicas de
@@ -18,7 +18,7 @@
     /// persistente (um Turno por combatente, pro combate todo, via Combate.Turno), então
     /// é o dono natural desse estado.
     /// </summary>
-    class TurnoDoPersonagem
+    public class TurnoDoPersonagem
     {
         private readonly Combate _combatente;
 

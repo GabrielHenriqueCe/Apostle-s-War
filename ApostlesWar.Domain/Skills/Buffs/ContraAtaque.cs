@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Quando o portador é atacado, contra-ataca o agressor com a A1 — uma vez
@@ -12,7 +12,7 @@ namespace ApostlesWar.Skills.Buffs
     /// alvo revidado. O loop A↔B é quebrado por profundidade (o executor não
     /// processa Revide de um revide), não pela Natureza do golpe.
     /// </summary>
-    class ContraAtaque : Buff, IReageAoSerAtacado
+    public class ContraAtaque : Buff, IReageAoSerAtacado
     {
         public ContraAtaque(int duracao = 2)
             : base("Contra-Ataque", "↩️", duracao, 0,

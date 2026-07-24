@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Apostolos
 {
     /// <summary>
     /// Mímico — champ como DADO. Imitação escala o dano com os buffs do próprio Mímico via a
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Apostolos
     /// `MoverBuffs` (roubo de buff) + reusa o `ConcederTurnoExtra` (construído nos Decaídos pro
     /// Rato Voador). Passiva: Repetindo.Passiva.cs.
     /// </summary>
-    static class Mimico
+    public static class Mimico
     {
         public static Personagem Definir() => new(
             2, Faccao.Apostolos, "Mímico", "🎭", 1000, 200, 200,

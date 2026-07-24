@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Misticos
+namespace ApostlesWar.Domain.Champs.Misticos
 {
     /// <summary>
     /// Gênio — champ como DADO. Vocabulário puro: Desejo (buff nos aliados + Maldição nos inimigos,
     /// dois escopos numa habilidade só) e Profecia (ReduçãoDEF + dano). Passiva: Realidade.Passiva.cs.
     /// </summary>
-    static class Genio
+    public static class Genio
     {
         public static Personagem Definir() => new(
             1, Faccao.Misticos, "Gênio", "🧞", 1400, 120, 200,

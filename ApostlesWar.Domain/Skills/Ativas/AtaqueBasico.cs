@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Ativas
+namespace ApostlesWar.Domain.Skills.Ativas
 {
     /// <summary>
     /// Ataque básico (A1) como habilidade. Sempre disponível — cooldown 0.
@@ -12,7 +12,7 @@ namespace ApostlesWar.Skills.Ativas
     /// Acoes, igual qualquer outra habilidade. Híbrido do motor (ADR §4, Nível 1 +
     /// método custom): o Ativar é declarativo, o contra-ataque continua bespoke abaixo.
     /// </summary>
-    class AtaqueBasico : HabilidadeAtiva, IAtaquePrimario, IAtivavelComNatureza
+    public class AtaqueBasico : HabilidadeAtiva, IAtaquePrimario, IAtivavelComNatureza
     {
         public AtaqueBasico() : base("Atacar", "⚔️", cooldown: 0, "Ataque básico (100% ATK).") { }
 

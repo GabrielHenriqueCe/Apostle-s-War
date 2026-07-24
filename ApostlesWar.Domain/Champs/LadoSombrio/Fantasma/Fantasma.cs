@@ -1,12 +1,12 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.LadoSombrio
+namespace ApostlesWar.Domain.Champs.LadoSombrio
 {
     /// <summary>
     /// Fantasma — champ como DADO (ver ADR-composicao-de-acoes §10). VindoDoAlem usa a Ação
     /// bespoke local AutoDano.cs (Nível 2, §9). Passiva: Espectral.Passiva.cs.
     /// </summary>
-    static class Fantasma
+    public static class Fantasma
     {
         public static Personagem Definir() => new(
             2, Faccao.LadoSombrio, "Fantasma", "👻", 1400, 120, 200,

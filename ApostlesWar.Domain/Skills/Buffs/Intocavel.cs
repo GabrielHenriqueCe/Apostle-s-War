@@ -1,12 +1,12 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// O portador não pode ser selecionado como alvo (verificado em ResolverListaDeAlvosDisponiveis).
     /// NÃO bloqueia dano — apenas filtra seleção. Dano de habilidades em área ainda atinge.
     /// </summary>
-    class Intocavel : Buff
+    public class Intocavel : Buff
     {
         public Intocavel(int duracao = 2, bool removivel = true) : base("Intocável", "🕳️", duracao, 0,
             "Não pode ser selecionado como alvo.", removivel)

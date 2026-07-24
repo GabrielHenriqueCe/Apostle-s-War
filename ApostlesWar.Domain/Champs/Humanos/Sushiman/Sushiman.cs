@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Humanos
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>
     /// Sushiman — champ como DADO. Comportamento real: CodigoDoSushi.Passiva.cs.
     /// O Nigiri é o 1º cliente do Reviver: era EstadoAlvo.Ambos + Ativar bespoke; virou duas
     /// ações de estados diferentes (Mortos → Vivos), na ordem — os revividos pegam o buff.
     /// </summary>
-    static class Sushiman
+    public static class Sushiman
     {
         public static Personagem Definir() => new(
             4, Faccao.Humanos, "Sushiman ", "👲", 800, 280, 160,

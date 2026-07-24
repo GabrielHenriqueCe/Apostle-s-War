@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Especial
+namespace ApostlesWar.Domain.Champs.Especial
 {
     /// <summary>
     /// 1x por agressor por turno, aplica 2 stacks de Veneno no atacante. Modelo de reação
     /// (IReageAoSerAtacado). Mais agressiva que o Vômito Tóxico do Zumbi (1 stack). O gate
     /// 1x-por-agressor vem do Turno (TentarReagir); antes era por-hit.
     /// </summary>
-    class Fedorento : HabilidadePassiva, IReageAoSerAtacado
+    public class Fedorento : HabilidadePassiva, IReageAoSerAtacado
     {
         public Fedorento() : base("Fedorento", "💩", 0,
             "Ao ser atacado, aplica 2 stacks de Veneno no atacante.")

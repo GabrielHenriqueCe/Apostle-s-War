@@ -1,11 +1,11 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Cura o alvo por um fragmento de Valor (ex: Valor.PorHP(0.30) = 30% do HP máximo do alvo).
     /// Operação separada do AplicarBuff — cura mexe direto no HP, não aplica status. A cura no
     /// morto é no-op (o estado Morto ignora Curar), mas o interpretador já filtra por EstadoAlvo.
     /// </summary>
-    class Cura : Acao
+    public class Cura : Acao
     {
         private readonly ValorFn _valor;
 

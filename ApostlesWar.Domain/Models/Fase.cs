@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     #region Fase
 
     /// <summary>
     /// Define a composição de inimigos nas duas rodadas de uma fase da campanha
     /// </summary>
-    class Fase
+    public class Fase
     {
         public List<Slot> Rodada1 { get; }
         public List<Slot> Rodada2 { get; }

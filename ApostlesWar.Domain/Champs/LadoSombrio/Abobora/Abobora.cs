@@ -1,8 +1,8 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.LadoSombrio
+namespace ApostlesWar.Domain.Champs.LadoSombrio
 {
     /// <summary>
     /// Abóbora — champ como DADO (ver ADR-composicao-de-acoes §10). DocesOuTravessuras estreia
@@ -13,7 +13,7 @@ namespace ApostlesWar.Champs.LadoSombrio
     /// (Mortos → Vivos), na ordem — segue o precedente do Nigiri (Champs/Humanos/Sushiman/).
     /// Passiva: CascaDura.Passiva.cs.
     /// </summary>
-    static class Abobora
+    public static class Abobora
     {
         public static Personagem Definir() => new(
             3, Faccao.LadoSombrio, "Abóbora", "🎃", 600, 200, 280,

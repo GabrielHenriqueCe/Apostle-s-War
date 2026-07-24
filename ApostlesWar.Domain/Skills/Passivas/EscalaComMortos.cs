@@ -1,10 +1,10 @@
-using ApostlesWar;
-using ApostlesWar.Skills;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar.Skills.Passivas
+namespace ApostlesWar.Domain.Skills.Passivas
 {
     /// <summary>Quais mortos uma EscalaComMortos conta: só o próprio time, só o inimigo, ou os dois.</summary>
-    enum EscopoMortos { ProprioTime, TimeInimigo, AmbosOsTimes }
+    public enum EscopoMortos { ProprioTime, TimeInimigo, AmbosOsTimes }
 
     /// <summary>
     /// Passiva GENÉRICA (config-driven): o portador ganha um buff proporcional a quantos combatentes
@@ -18,7 +18,7 @@ namespace ApostlesWar.Skills.Passivas
     /// prontos pra passivas futuras. IRMÃ (design pronto, não construída): EscalaComAbates, que reage
     /// ao EVENTO de matar (IReageAoMatar) e dá bônus PERMANENTE (molde da Ambição), não buff.
     /// </summary>
-    class EscalaComMortos : HabilidadePassiva, IReageAoInicioTurno
+    public class EscalaComMortos : HabilidadePassiva, IReageAoInicioTurno
     {
         private readonly EscopoMortos _escopo;
         private readonly double _porMorto;

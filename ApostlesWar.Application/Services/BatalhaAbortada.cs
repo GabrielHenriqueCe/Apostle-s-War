@@ -1,4 +1,4 @@
-namespace ApostlesWar.Services
+namespace ApostlesWar.Application.Services
 {
     /// <summary>
     /// Sinaliza que o jogador escolheu ENCERRAR a batalha no meio (Esc → confirmou). Lançada de dentro
@@ -6,5 +6,5 @@ namespace ApostlesWar.Services
     /// sem threading de um `bool cancelado` por ~15 métodos. Uso legítimo de exceção pra "abortar a
     /// operação a pedido do usuário" (mapeia pro OperationCanceledException do futuro porte async).
     /// </summary>
-    internal sealed class BatalhaAbortada : Exception { }
+    public sealed class BatalhaAbortada : Exception { }
 }

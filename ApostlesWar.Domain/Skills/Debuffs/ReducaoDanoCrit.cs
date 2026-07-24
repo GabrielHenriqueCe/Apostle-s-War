@@ -1,6 +1,6 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Debuff temporário de DanoCrit (pontos absolutos). Não muta o stat — apenas
@@ -9,7 +9,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// Não acumula: mantém o de maior Valor; em empate, o de maior duração.
     /// ContribuicaoDanoCrit expõe (negativo) quanto este debuff tira agora.
     /// </summary>
-    class ReducaoDanoCrit : Debuff, IContribuiDanoCrit
+    public class ReducaoDanoCrit : Debuff, IContribuiDanoCrit
     {
         public ReducaoDanoCrit(int duracao = 2, double valor = 0.25)
             : base("Redução Dano Crit", "💥", duracao, valor, $"-{valor * 100:F0}% Dano Crítico.") { }

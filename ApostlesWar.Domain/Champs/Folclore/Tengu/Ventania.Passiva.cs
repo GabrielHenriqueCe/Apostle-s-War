@@ -1,12 +1,12 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Folclore
+namespace ApostlesWar.Domain.Champs.Folclore
 {
     /// <summary>
     /// Todo início de turno, aplica BuffAtaque 25% por 2 turnos (renova sempre).
     /// </summary>
-    class Ventania : HabilidadePassiva, IReageAoInicioTurno
+    public class Ventania : HabilidadePassiva, IReageAoInicioTurno
     {
         public Ventania() : base("Ventania", "👺", 0,
             "Todo turno: +25% ATK por 2 turnos.")

@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Tecnologicos
+namespace ApostlesWar.Domain.Champs.Tecnologicos
 {
     /// <summary>
     /// Ao receber dano (HP perdido), aplica Escudo de 5% do HP máximo por 1 turno em si.
     /// Reage via IReageAoReceberDano (só dispara com dano > 0).
     /// </summary>
-    class CarapacaAlienigena : HabilidadePassiva, IReageAoReceberDano
+    public class CarapacaAlienigena : HabilidadePassiva, IReageAoReceberDano
     {
         public CarapacaAlienigena() : base("Carapaça Alienígena", "👽", 0,
             "Ao receber dano, ganha Escudo de 5% HP por 1 turno.")

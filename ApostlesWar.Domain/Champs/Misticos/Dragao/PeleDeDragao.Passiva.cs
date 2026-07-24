@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Misticos
+namespace ApostlesWar.Domain.Champs.Misticos
 {
     /// <summary>
     /// Imune a Veneno e Queima durante todo o combate. Capacidade direta
     /// (IBloqueiaStatus) — a passiva É o bloqueio, sem buff de contorno.
     /// </summary>
-    class PeleDeDragao : HabilidadePassiva, IBloqueiaStatus
+    public class PeleDeDragao : HabilidadePassiva, IBloqueiaStatus
     {
         public PeleDeDragao() : base("Pele de Dragão", "🐉", 0,
             "Imune a Veneno e Queima.")

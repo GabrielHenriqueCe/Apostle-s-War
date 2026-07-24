@@ -1,6 +1,6 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
-    abstract class HabilidadePassiva : Habilidade
+    public abstract class HabilidadePassiva : Habilidade
     {
         public HabilidadePassiva(string nome, string simbolo, int cooldown, string descricao = "")
             : base(nome, simbolo, cooldown, descricao) { }

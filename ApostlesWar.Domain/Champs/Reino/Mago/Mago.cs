@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
     /// <summary>
     /// Mago — champ como DADO (ver ADR-composicao-de-acoes §10): stats + habilidades montadas
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Reino
     /// (números, alvos, descrições, ações) se lê aqui, sem rodar o jogo. O comportamento real
     /// (a passiva) mora ao lado, em Piromancer.cs.
     /// </summary>
-    static class Mago
+    public static class Mago
     {
         public static Personagem Definir() => new(
             3, Faccao.Reino, "Mago", "🧙", 1000, 280, 120,

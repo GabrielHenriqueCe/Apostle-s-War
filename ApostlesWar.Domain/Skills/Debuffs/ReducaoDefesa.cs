@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Debuff temporário de DEF (-30%). Não muta o stat — apenas existe em
@@ -11,7 +11,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// ContribuicaoDefesa expõe (negativo) quanto este debuff tira agora, pra
     /// habilidades que ignoram status de defesa no ataque.
     /// </summary>
-    class ReducaoDefesa : Debuff, IContribuiDefesa
+    public class ReducaoDefesa : Debuff, IContribuiDefesa
     {
         public ReducaoDefesa(int duracao = 2)
             : base("Redução DEF", "🔎", duracao, 0.30, "-30% DEF.") { }

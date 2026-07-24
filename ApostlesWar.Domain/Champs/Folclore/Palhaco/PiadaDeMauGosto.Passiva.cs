@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Folclore
+namespace ApostlesWar.Domain.Champs.Folclore
 {
     /// <summary>
     /// Ao ser atacado, aplica 1 stack de Maldição no atacante. Migrada para o
     /// modelo de reação (IReageAoSerAtacado).
     /// (Por-hit por enquanto; "1x por agressor por turno" vem com o Turno.)
     /// </summary>
-    class PiadaDeMauGosto : HabilidadePassiva, IReageAoSerAtacado
+    public class PiadaDeMauGosto : HabilidadePassiva, IReageAoSerAtacado
     {
         public PiadaDeMauGosto() : base("Piada de Mau Gosto", "🤡", 0,
             "Ao ser atacado, amaldiçoa o atacante.")

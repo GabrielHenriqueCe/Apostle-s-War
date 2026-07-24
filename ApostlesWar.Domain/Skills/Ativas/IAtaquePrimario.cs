@@ -1,4 +1,4 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Marca uma habilidade como o "ataque primário" (A1) do personagem.
@@ -9,5 +9,5 @@
     /// declarar sua própria A1 (ex: class Faisca : HabilidadeAtiva, IAtaquePrimario)
     /// e a injeção respeita, não duplica.
     /// </summary>
-    interface IAtaquePrimario { }
+    public interface IAtaquePrimario { }
 }

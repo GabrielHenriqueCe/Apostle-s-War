@@ -1,6 +1,6 @@
-using ApostlesWar.Skills;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Aplica um buff no alvo. Espelho do AplicarDebuff — recebe uma FÁBRICA (não instância)
@@ -14,7 +14,7 @@ namespace ApostlesWar
     /// aplicou — ProtecaoAliado.Aplicador, Irritar.Aplicador, ver ROADMAP "Proveniência de
     /// status"). 1º cliente: OssoDuroDeRoer (ProtecaoAliado).
     /// </summary>
-    class AplicarBuff : Acao
+    public class AplicarBuff : Acao
     {
         private readonly Func<Combate, Buff> _fabrica;
 

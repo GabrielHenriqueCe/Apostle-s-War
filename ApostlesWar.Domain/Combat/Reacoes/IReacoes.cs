@@ -1,4 +1,4 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Contexto passado para uma reação. Portador = quem reage; Contraparte = a outra
@@ -7,7 +7,7 @@
     /// o golpe foi crítico (já vem correto da fonte — golpe que não causou dano não
     /// é crítico); Aliados/Inimigos = times do PORTADOR.
     /// </summary>
-    record ContextoReacao(
+    public record ContextoReacao(
         Combate Portador,
         Combate Contraparte,
         int DanoCausado,
@@ -26,7 +26,7 @@
     /// Revide: se a reação declarou um contra-ataque (ContraAtaque, Operário) —
     /// carrega QUAL habilidade usar, não executa nada aqui.
     /// </summary>
-    record ResultadoReacao(
+    public record ResultadoReacao(
         string Mensagem = "",
         EventoDano? Dano = null,
         EventoCura? Cura = null,
@@ -39,7 +39,7 @@
     /// (A1 por padrão, Marretada no caso do Operário); o CombateService a
     /// executa polimorficamente via IAtivavelComNatureza, sem saber qual skill é.
     /// </summary>
-    record Revide(IAtivavelComNatureza Habilidade, Combate Alvo);
+    public record Revide(IAtivavelComNatureza Habilidade, Combate Alvo);
 
     /// <summary>
     /// ISP: habilidades que podem ser usadas como um contra-ataque — precisam
@@ -47,7 +47,7 @@
     /// (em vez da Natureza default da Ativar normal). Só faz sentido pra
     /// habilidades de alvo único (A1, Marretada); uma AoE não implementa.
     /// </summary>
-    interface IAtivavelComNatureza
+    public interface IAtivavelComNatureza
     {
         EventoDano AtivarComNatureza(Combate atacante, Combate alvo, NaturezaDano natureza);
     }
@@ -57,7 +57,7 @@
     /// (Escudo/Bloqueio absorveram). Reage ao ATO de ser atacado.
     /// Futuros implementadores: ContraAtaque, EspinhosVenenosos.
     /// </summary>
-    interface IReageAoSerAtacado
+    public interface IReageAoSerAtacado
     {
         List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx);
     }
@@ -67,7 +67,7 @@
     /// o dano foi todo absorvido. Reage ao SOFRIMENTO.
     /// Futuros implementadores: RefletirDano, Sangramento.
     /// </summary>
-    interface IReageAoReceberDano
+    public interface IReageAoReceberDano
     {
         List<ResultadoReacao> AoReceberDano(ContextoReacao ctx);
     }
@@ -76,7 +76,7 @@
     /// Reage quando o portador CAUSA dano em alguém. Lado do atacante.
     /// Futuro implementador: Sedento.
     /// </summary>
-    interface IReageAoCausarDano
+    public interface IReageAoCausarDano
     {
         List<ResultadoReacao> AoCausarDano(ContextoReacao ctx);
     }
@@ -85,7 +85,7 @@
     /// Reage ao evento de atacar, seguindo o TipoAtaque (AoE = 1x; Sequencial = por hit).
     /// Para efeitos que beneficiam o PRÓPRIO atacante. Implementadores: OlhoClinico, Virus.
     /// </summary>
-    interface IReageAoAtacar
+    public interface IReageAoAtacar
     {
         List<ResultadoReacao> AoAtacar(ContextoReacao ctx);
     }
@@ -94,7 +94,7 @@
     /// Reage POR ALVO atingido (Nx, sempre). Para efeitos aplicados em CADA alvo do golpe.
     /// Implementadores: Sorrateiro, Policial.
     /// </summary>
-    interface IReagePorAtaque
+    public interface IReagePorAtaque
     {
         List<ResultadoReacao> PorAtaque(ContextoReacao ctx);
     }
@@ -108,7 +108,7 @@
     /// (Necromancia) — a Sentença já está no morto quando a Necromancia tenta reviver.
     /// Implementadores: Fada, Vilao.
     /// </summary>
-    interface IReageAoMatar
+    public interface IReageAoMatar
     {
         List<ResultadoReacao> AoMatar(ContextoReacao ctx);
     }
@@ -120,7 +120,7 @@
     /// Portador = quem morreu; Contraparte = quem matou.
     /// Implementador: Necromancia.
     /// </summary>
-    interface IReageAoMorrer
+    public interface IReageAoMorrer
     {
         List<ResultadoReacao> AoMorrer(ContextoReacao ctx);
     }
@@ -132,7 +132,7 @@
     /// Tengu, cleanse do BonecoDeNeve).
     /// Implementadores: Genio, BonecoDeNeve, Tengu, Elfo.
     /// </summary>
-    interface IReageAoInicioTurno
+    public interface IReageAoInicioTurno
     {
         List<ResultadoReacao> AoInicioTurno(ContextoCombate ctx);
     }

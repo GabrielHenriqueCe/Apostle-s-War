@@ -1,4 +1,4 @@
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
     /// <summary>
     /// Ataque cujo bônus de ignorar-DEF depende do golpe anterior NESTA MESMA ativação
@@ -11,7 +11,7 @@ namespace ApostlesWar.Champs.Reino
     /// resolvido, NA ORDEM (ADR §3.3): a 1ª chamada vê `eventos` vazio (hit normal), a 2ª vê o
     /// EventoDano do hit anterior já anexado — é aí que o ignorar condicional entra.
     /// </summary>
-    class GolpeSeguidor : Acao
+    public class GolpeSeguidor : Acao
     {
         private readonly double _multiplicador;
         private readonly double _ignorarDefesaPctSeAnteriorCritico;

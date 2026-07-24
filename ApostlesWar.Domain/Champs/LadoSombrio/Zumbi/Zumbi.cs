@@ -1,9 +1,9 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
-using ApostlesWar.Skills.Passivas;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
+using ApostlesWar.Domain.Skills.Passivas;
 
-namespace ApostlesWar.Champs.LadoSombrio
+namespace ApostlesWar.Domain.Champs.LadoSombrio
 {
     /// <summary>
     /// Zumbi — champ como DADO (ver ADR-composicao-de-acoes §10), vocabulário puro (Nível 1).
@@ -13,7 +13,7 @@ namespace ApostlesWar.Champs.LadoSombrio
     /// isso a explosão é reutilizável a seco por outros champs. Passiva: "Horda" (EscalaComMortos)
     /// — 1º cliente da capacidade que escala com os mortos no campo.
     /// </summary>
-    static class Zumbi
+    public static class Zumbi
     {
         public static Personagem Definir() => new(
             4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120,

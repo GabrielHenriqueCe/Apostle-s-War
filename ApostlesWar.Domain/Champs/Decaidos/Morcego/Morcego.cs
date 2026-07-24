@@ -1,8 +1,8 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Decaidos
+namespace ApostlesWar.Domain.Champs.Decaidos
 {
     /// <summary>
     /// Morcego — champ como DADO. Mordida aplica Sangramento antes de atacar em área (a passiva
@@ -10,7 +10,7 @@ namespace ApostlesWar.Champs.Decaidos
     /// (1º cliente real do verbo — ver catálogo): Medo nos inimigos, buffs próprios e joga de
     /// novo. Passiva: SedentoDeSangue.Passiva.cs.
     /// </summary>
-    static class Morcego
+    public static class Morcego
     {
         public static Personagem Definir() => new(
             1, Faccao.Decaidos, "Morcego", "🦇", 800, 160, 280,

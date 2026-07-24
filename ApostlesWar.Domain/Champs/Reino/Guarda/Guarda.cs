@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
     /// <summary>
     /// Guarda — champ como DADO (ver ADR-composicao-de-acoes §10): stats + habilidades montadas
     /// como config, na forma-construtor. Este arquivo é a VIEW do champ. O comportamento real
     /// (a passiva) mora ao lado, em GuardaReal.Passiva.cs.
     /// </summary>
-    static class Guarda
+    public static class Guarda
     {
         public static Personagem Definir() => new(
             1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200,

@@ -1,6 +1,6 @@
-using ApostlesWar.Skills;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Aplica um debuff no alvo. Recebe uma FÁBRICA (não uma instância) porque cada alvo
@@ -12,7 +12,7 @@ namespace ApostlesWar
     /// O parâmetro `chance` (default 1.0) aplica só com probabilidade — 1º cliente: Pancada
     /// (Medo 50%). chance=1.0 aplica sempre (caminho comum, sem sortear).
     /// </summary>
-    class AplicarDebuff : Acao
+    public class AplicarDebuff : Acao
     {
         private readonly Func<Combate, Debuff> _fabrica;
         private readonly double _chance;

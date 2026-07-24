@@ -1,22 +1,22 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ApostlesWar.Champs.Humanos;
-using ApostlesWar.Champs.Reino;
-using ApostlesWar.Champs.LadoSombrio;
-using ApostlesWar.Champs.Tecnologicos;
-using ApostlesWar.Champs.Folclore;
-using ApostlesWar.Champs.Misticos;
-using ApostlesWar.Champs.Especial;
-using ApostlesWar.Champs.Decaidos;
-using ApostlesWar.Champs.Apostolos;
-using ApostlesWar.Skills.Ativas;
-using ApostlesWar.Skills.Passivas;
+using ApostlesWar.Domain.Champs.Humanos;
+using ApostlesWar.Domain.Champs.Reino;
+using ApostlesWar.Domain.Champs.LadoSombrio;
+using ApostlesWar.Domain.Champs.Tecnologicos;
+using ApostlesWar.Domain.Champs.Folclore;
+using ApostlesWar.Domain.Champs.Misticos;
+using ApostlesWar.Domain.Champs.Especial;
+using ApostlesWar.Domain.Champs.Decaidos;
+using ApostlesWar.Domain.Champs.Apostolos;
+using ApostlesWar.Domain.Skills.Ativas;
+using ApostlesWar.Domain.Skills.Passivas;
 
-namespace ApostlesWar.Services
+namespace ApostlesWar.Application.Services
 {
-    internal class PersonagemService
+    public class PersonagemService
     {
         #region Personagem
 

@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Passivas;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Passivas;
 
-namespace ApostlesWar.Champs.LadoSombrio
+namespace ApostlesWar.Domain.Champs.LadoSombrio
 {
     /// <summary>
     /// Aplica Intocavel permanente no portador no início do combate.
     /// </summary>
-    class Espectral : HabilidadePassiva, IPassivaInicial
+    public class Espectral : HabilidadePassiva, IPassivaInicial
     {
         public Espectral() : base("Espectral", "👻", 0,
             "Intocável durante todo o combate.")

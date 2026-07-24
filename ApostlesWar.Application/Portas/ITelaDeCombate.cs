@@ -1,4 +1,5 @@
-namespace ApostlesWar.View
+using ApostlesWar.Domain;
+namespace ApostlesWar.Application.Portas
 {
     /// <summary>
     /// Porta de APRESENTAÇÃO DA PARTIDA — o que o fluxo de combate (CombateService) precisa mostrar.
@@ -16,7 +17,7 @@ namespace ApostlesWar.View
     /// <see cref="Controllers.IControladorDeTurno"/>, e cada plataforma tem o seu (no front, clique na
     /// habilidade + clique no alvo). Botar os dois aqui obrigaria a impl web a carregar método morto.
     /// </summary>
-    internal interface ITelaDeCombate
+    public interface ITelaDeCombate
     {
         /// <summary>Prepara a tela pro próximo quadro (no console, limpa; no front, pode ser no-op).</summary>
         void LimparTela();

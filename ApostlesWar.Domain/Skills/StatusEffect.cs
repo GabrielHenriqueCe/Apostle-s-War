@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     #region StatusEffect
 
@@ -11,7 +11,7 @@ namespace ApostlesWar
     /// - Remover: limpeza ao expirar
     /// - AoIniciarTurno: efeitos no início do turno do portador (Veneno, CuraContinua)
     /// </summary>
-    abstract class StatusEffect : ElementoDeJogo
+    public abstract class StatusEffect : ElementoDeJogo
     {
         public double Valor { get; }
         public int DuracaoRestante { get; protected set; }

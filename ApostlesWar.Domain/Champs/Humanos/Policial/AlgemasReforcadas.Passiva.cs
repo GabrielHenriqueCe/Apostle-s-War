@@ -1,13 +1,13 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Humanos
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>
     /// Atacar um inimigo Preso adiciona +1 turno ao debuff. Migrada para IReagePorAtaque
     /// (por alvo atingido). Só declara mensagem se o alvo tinha Preso.
     /// </summary>
-    class AlgemasReforcadas : HabilidadePassiva, IReagePorAtaque
+    public class AlgemasReforcadas : HabilidadePassiva, IReagePorAtaque
     {
         public AlgemasReforcadas() : base("Algemas Reforçadas", "🔗", 0,
             "Atacar um inimigo Preso adiciona +1 turno ao debuff.")

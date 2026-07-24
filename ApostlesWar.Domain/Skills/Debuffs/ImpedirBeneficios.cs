@@ -1,12 +1,12 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Enquanto ativo, o portador não pode receber novos Buffs.
     /// Verificado no porteiro de status (Combate.PodeReceber).
     /// </summary>
-    class ImpedirBeneficios : Debuff, IBloqueiaStatus
+    public class ImpedirBeneficios : Debuff, IBloqueiaStatus
     {
         public ImpedirBeneficios(int duracao = 2)
             : base("Impedir Benefícios", "🚫", duracao, 0, "Bloqueia novos benefícios.") { }

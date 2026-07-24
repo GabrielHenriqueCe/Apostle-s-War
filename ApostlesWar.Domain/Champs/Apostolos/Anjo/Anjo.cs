@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Apostolos
 {
     /// <summary>
     /// Anjo — champ como DADO. Celestial limpa debuffs e cura os aliados (molde Coringa+Sushi).
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Apostolos
     /// recém-revividos, pela ordem das ações) — era `EstadoAlvo.Ambos`, agora Reviver(Mortos) +
     /// buffs(Vivos), o que mata o último `Ambos` de champ do jogo. Passiva: Bencao.Passiva.cs.
     /// </summary>
-    static class Anjo
+    public static class Anjo
     {
         public static Personagem Definir() => new(
             3, Faccao.Apostolos, "Anjo", "😇", 1200, 160, 200,

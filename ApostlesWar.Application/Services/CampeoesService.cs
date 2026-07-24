@@ -1,18 +1,18 @@
-﻿using ApostlesWar;
-using ApostlesWar.View;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Application.Portas;
 using GHUtils;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ApostlesWar.Services
+namespace ApostlesWar.Application.Services
 {
-    internal class CampeoesService
+    public class CampeoesService
     {
         #region Construtor
 
         private readonly PersonagemService _personagemService;
-        private readonly MenuView _menuView;
+        private readonly ITelaDeMenu _menuView;
         private readonly CapitulosService _capitulosService;
 
         #endregion
@@ -21,7 +21,7 @@ namespace ApostlesWar.Services
 
         private List<Personagem> desbloqueados = new List<Personagem>();
 
-        public CampeoesService(PersonagemService personagemService, MenuView menuService, CapitulosService capitulosService)
+        public CampeoesService(PersonagemService personagemService, ITelaDeMenu menuService, CapitulosService capitulosService)
         {
             _personagemService = personagemService;
             _menuView = menuService;

@@ -1,11 +1,11 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     #region Jogador
 
     /// <summary>
     /// Representa um jogador com nome, índice e personagem selecionado
     /// </summary>
-    class Jogador : Combate
+    public class Jogador : Combate
     {
         public override Personagem Personagem { get; }
 

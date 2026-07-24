@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Tecnologicos
+namespace ApostlesWar.Domain.Champs.Tecnologicos
 {
     /// <summary>
     /// Robô — champ como DADO. RaioX estreia o EstenderBuffs (ver EstenderBuffs.cs): a cura e a
@@ -11,7 +11,7 @@ namespace ApostlesWar.Champs.Tecnologicos
     /// mortos, a CuraContinua pega os vivos — os revividos entram no buff pela ORDEM das ações.
     /// Passiva: ReparoAutomatico.Passiva.cs.
     /// </summary>
-    static class Robo
+    public static class Robo
     {
         public static Personagem Definir() => new(
             3, Faccao.Tecnologicos, "Robô", "🤖", 1200, 120, 240,

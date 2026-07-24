@@ -1,12 +1,12 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Tecnologicos
+namespace ApostlesWar.Domain.Champs.Tecnologicos
 {
     /// <summary>
     /// Ao atacar, ganha +5% de Dano Crítico (cap 25% acumulado). Migrada para IReageAoAtacar
     /// (segue TipoAtaque). Ganho no PRÓPRIO atacante.
     /// </summary>
-    class Virus : HabilidadePassiva, IReageAoAtacar
+    public class Virus : HabilidadePassiva, IReageAoAtacar
     {
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;

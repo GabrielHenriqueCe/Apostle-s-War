@@ -1,6 +1,6 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Debuff temporário de TaxaCrit (pontos absolutos). Não muta o stat — apenas
@@ -10,7 +10,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// Não acumula: mantém o de maior Valor; em empate, o de maior duração.
     /// ContribuicaoTaxaCrit expõe (negativo) quanto este debuff tira agora.
     /// </summary>
-    class ReducaoTaxaCrit : Debuff, IContribuiTaxaCrit
+    public class ReducaoTaxaCrit : Debuff, IContribuiTaxaCrit
     {
         public ReducaoTaxaCrit(int duracao = 2, double valor = 0.25)
             : base("Redução Crit", "🎯", duracao, valor, $"-{valor * 100:F0}% TaxaCrit.") { }

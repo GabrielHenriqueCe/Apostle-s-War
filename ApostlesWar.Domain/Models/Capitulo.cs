@@ -1,7 +1,7 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     // Define as fases disponíveis e o progresso de desbloqueio de um capítulo
-    class Capitulo
+    public class Capitulo
     {
         public Faccao Faccao { get; }
         public List<bool> FaseDesblock { get; private set; }

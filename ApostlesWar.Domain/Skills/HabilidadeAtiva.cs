@@ -1,6 +1,6 @@
-﻿using ApostlesWar.Skills;
+﻿using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     #region HabilidadeAtiva
 
@@ -10,7 +10,7 @@ namespace ApostlesWar
     /// arquivo do champ. Durante a migração (Strangler), as habilidades antigas continuam como
     /// subclasses usando o construtor curto + override das propriedades virtuais.
     /// </summary>
-    class HabilidadeAtiva : Habilidade
+    public class HabilidadeAtiva : Habilidade
     {
 
         private readonly int _numeroDeAlvos;

@@ -1,14 +1,14 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Apostolos
 {
     /// <summary>
     /// Início do turno: se tem Queima, remove (cleanse) e aplica CuraContinua 2t.
     /// Só age se havia Queima — "o calor da queima vira gelo derretendo e curando".
     /// </summary>
-    class Derretendo : HabilidadePassiva, IReageAoInicioTurno
+    public class Derretendo : HabilidadePassiva, IReageAoInicioTurno
     {
         private const double CuraPercentual = 0.10;
         private const int TurnosCura = 2;

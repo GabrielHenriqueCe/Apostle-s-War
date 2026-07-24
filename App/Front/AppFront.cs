@@ -1,6 +1,9 @@
-using ApostlesWar.Controllers;
-using ApostlesWar.Services;
-using ApostlesWar.View;
+using ApostlesWar.Infrastructure;
+using ApostlesWar.Application.Portas;
+using ApostlesWar.Domain;
+using ApostlesWar.Application.Controllers;
+using ApostlesWar.Application.Services;
+using ApostlesWar.ConsoleUI.Views;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
@@ -78,7 +81,8 @@ namespace ApostlesWar.App.Front
                 await webview.EnsureCoreWebView2Async(ambiente);
             };
 
-            Application.Run(janela);
+            // Qualificado: "Application" cru resolveria pro namespace ApostlesWar.Application (vizinho), nao pro WinForms.
+            System.Windows.Forms.Application.Run(janela);
             return 0;
         }
 

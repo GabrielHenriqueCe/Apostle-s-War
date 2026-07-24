@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Folclore
+namespace ApostlesWar.Domain.Champs.Folclore
 {
     /// <summary>
     /// Ao ser atacado, 25% de chance de aplicar Medo 1t no atacante. Migrada para
     /// o modelo de reação (IReageAoSerAtacado). Só declara mensagem quando dispara.
     /// </summary>
-    class Intimidador : HabilidadePassiva, IReageAoSerAtacado
+    public class Intimidador : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChanceMedo = 0.25;
 

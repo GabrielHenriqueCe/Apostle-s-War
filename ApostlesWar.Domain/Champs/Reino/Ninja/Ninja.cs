@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
     /// <summary>
     /// Ninja — champ como DADO (ver ADR-composicao-de-acoes §10). Shuriken usa a Ação bespoke
     /// GolpeSeguidor.cs (Nível 3, ADR §9) pro acoplamento hit-a-hit. Passiva: Sorrateiro.Passiva.cs.
     /// </summary>
-    static class Ninja
+    public static class Ninja
     {
         public static Personagem Definir() => new(
             2, Faccao.Reino, "Ninja", "🥷", 600, 280, 200,

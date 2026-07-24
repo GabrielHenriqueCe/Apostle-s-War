@@ -1,14 +1,14 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Apostolos
 {
     /// <summary>
     /// Ao ser atacado, escolhe 1 debuff aleatório do atacante e aumenta sua
     /// duração em 2 turnos. Migrada para o modelo de reação (IReageAoSerAtacado).
     /// Simétrica à AnaliseCritica (que reduz buffs do atacante).
     /// </summary>
-    class Repetindo : HabilidadePassiva, IReageAoSerAtacado
+    public class Repetindo : HabilidadePassiva, IReageAoSerAtacado
     {
         private const int AumentoDuracao = 2;
 

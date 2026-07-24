@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Relógio GLOBAL do combate: conta os turnos jogados na batalha atual — avança 1 a cada
@@ -8,7 +8,7 @@ namespace ApostlesWar
     /// limite de turnos crescem daqui). NÃO confundir com o TurnoDoPersonagem (relógio POR
     /// combatente, dono do estado turn-scoped).
     /// </summary>
-    class RelogioDoCombate
+    public class RelogioDoCombate
     {
         public int NumeroDoTurno { get; private set; }
 

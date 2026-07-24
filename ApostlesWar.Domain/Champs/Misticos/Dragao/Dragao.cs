@@ -1,8 +1,8 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Misticos
+namespace ApostlesWar.Domain.Champs.Misticos
 {
     /// <summary>
     /// Dragão — champ como DADO. SoproDoDragão é vocabulário puro (dano + Queima). DragãoProtetor
@@ -10,7 +10,7 @@ namespace ApostlesWar.Champs.Misticos
     /// — cada coisa é uma ação (DECOMPOR). Passiva: PeleDeDragao.Passiva.cs (passiva-pura,
     /// IBloqueiaStatus — imune a Veneno/Queima).
     /// </summary>
-    static class Dragao
+    public static class Dragao
     {
         public static Personagem Definir() => new(
             4, Faccao.Misticos, "Dragão", "🐲", 1400, 200, 120,

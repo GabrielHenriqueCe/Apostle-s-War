@@ -1,11 +1,11 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Bloqueia 100% do dano recebido enquanto ativo.
     /// </summary>
-    class BloqueioTotal : Buff, IModificaDanoRecebido
+    public class BloqueioTotal : Buff, IModificaDanoRecebido
     {
         public BloqueioTotal(int duracao = 1) : base("Bloqueio Total", "🧱", duracao, 1,
             "Bloqueia todo o dano recebido.")

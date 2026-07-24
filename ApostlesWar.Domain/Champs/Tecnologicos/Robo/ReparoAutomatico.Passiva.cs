@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Tecnologicos
+namespace ApostlesWar.Domain.Champs.Tecnologicos
 {
     /// <summary>
     /// Ao atacar, aplica CuraContinua 1t no aliado vivo com menor HP atual (inclui o
     /// Robô). Reage 1x por ataque (IReageAoAtacar segue o TipoAtaque). Aliados = time
     /// do portador (vem do ContextoReacao).
     /// </summary>
-    class ReparoAutomatico : HabilidadePassiva, IReageAoAtacar
+    public class ReparoAutomatico : HabilidadePassiva, IReageAoAtacar
     {
         public ReparoAutomatico() : base("Reparo Automático", "🔧", 0,
             "Ao atacar, aplica Cura Contínua no aliado com menor HP.")

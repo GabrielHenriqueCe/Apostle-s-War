@@ -1,4 +1,4 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Estado de vida de um combatente (Vivo ou Morto). State Pattern: o Combate
@@ -9,7 +9,7 @@
     /// O Combate expõe a do estado atual via a view StatusAtivos. Ao morrer, os status
     /// do vivo somem (a lista do Vivo é descartada com ele); o Morto começa limpo.
     /// </summary>
-    abstract class EstadoVida
+    public abstract class EstadoVida
     {
         /// <summary>A lista de status DESTE estado. O Combate expõe a do estado atual.</summary>
         public abstract List<StatusEffect> Status { get; }

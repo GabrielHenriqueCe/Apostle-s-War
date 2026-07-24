@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Quanto de reação um dano provoca em quem o recebe.
@@ -6,7 +6,7 @@ namespace ApostlesWar
     /// Nenhuma: não dispara reação alguma. Dano que é consequência de uma ação já
     ///   resolvida (auto-dano, redirecionamento, reflexo).
     /// </summary>
-    enum TipoReacao { Completa, Nenhuma }
+    public enum TipoReacao { Completa, Nenhuma }
 
     /// <summary>
     /// Descreve como uma instância de dano se comporta: o que ela ignora e se provoca
@@ -21,7 +21,7 @@ namespace ApostlesWar
     ///
     /// Use os perfis prontos em NaturezasDano em vez de montar manualmente.
     /// </summary>
-    record NaturezaDano(
+    public record NaturezaDano(
         bool IgnoraDefesa = false,
         TipoReacao Reacao = TipoReacao.Completa)
     {
@@ -34,7 +34,7 @@ namespace ApostlesWar
     /// Perfis prontos de NaturezaDano pros casos do jogo. Centraliza as regras
     /// pra ninguém montar combinação errada na chamada.
     /// </summary>
-    static class NaturezasDano
+    public static class NaturezasDano
     {
         /// Ataque normal: passa por defesa/escudo/bloqueio, dispara todas as reações.
         /// Usado também pro revide (contra-ataque) — mecanicamente é um ataque igual

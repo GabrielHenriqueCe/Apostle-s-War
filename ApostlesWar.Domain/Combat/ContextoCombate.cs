@@ -1,4 +1,4 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Contexto passado a toda habilidade ao ativar.
@@ -10,7 +10,7 @@
     /// Permite habilidades que precisam interagir com os dois times
     /// (revive aliados + ataca inimigos, etc).
     /// </summary>
-    record ContextoCombate(
+    public record ContextoCombate(
         Combate Atacante,
         List<Combate> Aliados,
         List<Combate> Inimigos

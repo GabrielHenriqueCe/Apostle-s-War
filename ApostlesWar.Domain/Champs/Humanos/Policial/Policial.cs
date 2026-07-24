@@ -1,10 +1,10 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Humanos
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>Policial — champ como DADO. Comportamento real: AlgemasReforcadas.Passiva.cs.</summary>
-    static class Policial
+    public static class Policial
     {
         public static Personagem Definir() => new(
             3, Faccao.Humanos, "Policial", "👮", 1000, 120, 280,

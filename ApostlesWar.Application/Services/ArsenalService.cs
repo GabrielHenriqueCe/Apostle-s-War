@@ -1,12 +1,13 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Application.Portas;
+using ApostlesWar.Domain;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
-namespace ApostlesWar.Services
+namespace ApostlesWar.Application.Services
 {
-    internal class ArsenalService
+    public class ArsenalService
     {
         #region Construtor
 

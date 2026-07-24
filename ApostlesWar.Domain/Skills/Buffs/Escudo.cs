@@ -1,12 +1,12 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Absorve dano antes de afetar o HP. Quando os pontos zeram, o buff se remove.
     /// Não acumula — se aplicado em cima de outro Escudo, mantém o de maior valor.
     /// </summary>
-    class Escudo : Buff, IModificaDanoRecebido
+    public class Escudo : Buff, IModificaDanoRecebido
     {
         public int PontosRestantes { get; private set; }
 

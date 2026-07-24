@@ -1,12 +1,12 @@
-﻿using ApostlesWar;
-namespace ApostlesWar.Champs.Humanos
+﻿using ApostlesWar.Domain;
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>
     /// Habilidade-CLASSE híbrida (ADR §4, Nível 1 + método custom): o Ativar é declarativo
     /// (Acoes), mas ela continua classe porque o InstintoDoOperario a encontra por tipo
     /// (OfType) e o contra-ataque entra pelo AtivarComNatureza.
     /// </summary>
-    class Marretada : HabilidadeAtiva, IAtivavelComNatureza
+    public class Marretada : HabilidadeAtiva, IAtivavelComNatureza
     {
         private const double Multiplicador = 1.25;
 

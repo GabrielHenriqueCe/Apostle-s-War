@@ -1,4 +1,4 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
 /// <summary>
 /// Capacidade C do modelo de capacidades: CONTRIBUIÇÃO DE STAT (dano de crítico).
@@ -7,7 +7,7 @@ using ApostlesWar;
 /// já vem COM SINAL.
 /// Implementadores: BuffDanoCrit (positivo), ReducaoDanoCrit (negativo).
 /// </summary>
-interface IContribuiDanoCrit
+public interface IContribuiDanoCrit
 {
     double ContribuicaoDanoCrit(Combate portador);
 }

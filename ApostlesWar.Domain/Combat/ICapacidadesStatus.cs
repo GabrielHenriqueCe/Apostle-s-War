@@ -1,4 +1,4 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Status que modifica o dano recebido durante o cálculo (Escudo, Bloqueio,
@@ -11,7 +11,7 @@
     /// entradas na lista `NaturezasDano` (ex: QueimaDano fura Escudo; todo dano sem reação fura
     /// ProtecaoAliado — o anti-loop de proteção mútua).
     /// </summary>
-    interface IModificaDanoRecebido
+    public interface IModificaDanoRecebido
     {
         int ModificarDanoRecebido(Combate portador, int dano);
     }
@@ -23,7 +23,7 @@
     /// Implementadores: ImunidadeDebuffs, ImpedirBeneficios (status); CascaDura,
     /// PeleDeDragao (passivas-pura).
     /// </summary>
-    interface IBloqueiaStatus
+    public interface IBloqueiaStatus
     {
         bool Bloqueia(StatusEffect novo);
     }
@@ -36,7 +36,7 @@
     /// máximo). Implementadores: Veneno (cliente: Putrefação), Queima (cliente: Inferno, migra
     /// nos Decaídos).
     /// </summary>
-    interface IStatusComTick
+    public interface IStatusComTick
     {
         /// <summary>
         /// Aplica o efeito remanescente de uma vez, remove o status e devolve o EventoDano da

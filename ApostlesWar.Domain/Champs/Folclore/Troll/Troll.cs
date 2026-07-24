@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Folclore
+namespace ApostlesWar.Domain.Champs.Folclore
 {
     /// <summary>
     /// Troll — champ como DADO. Pancada estreia o `chance` do AplicarDebuff (Medo 50% por alvo).
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Folclore
     /// dano do Zumbi (PorDanoCausado no próprio — 30% do dano total dos 6 hits). Passiva:
     /// Ambicao.Passiva.cs.
     /// </summary>
-    static class Troll
+    public static class Troll
     {
         public static Personagem Definir() => new(
             4, Faccao.Folclore, "Troll", "🧌", 1200, 160, 200,

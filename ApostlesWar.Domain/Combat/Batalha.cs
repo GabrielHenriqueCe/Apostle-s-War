@@ -1,11 +1,11 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Uma EQUIPE: quem joga junto (aliados entre si). Só a estrutura — quem CONTROLA a equipe
     /// (humano/bot) é decisão da orquestração (CombateService mapeia Equipe→IControladorDeTurno),
     /// não mora aqui, pra manter o domínio livre da camada de controle.
     /// </summary>
-    class Equipe
+    public class Equipe
     {
         public List<Combate> Membros { get; }
 
@@ -26,7 +26,7 @@ namespace ApostlesWar
     /// Mora no nível do CombateService (rebuild por rodada, como o RelogioDoCombate) — não no domínio
     /// do combatente, então não há referência velha entre rodadas.
     /// </summary>
-    class Batalha
+    public class Batalha
     {
         public Equipe Equipe1 { get; }
         public Equipe Equipe2 { get; }

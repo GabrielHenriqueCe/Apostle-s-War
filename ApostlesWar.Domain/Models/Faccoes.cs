@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Tabela estática Facção → Símbolo (emoji). O NOME da facção vive no próprio enum `Faccao`
@@ -6,7 +6,7 @@ namespace ApostlesWar
     /// `FaccaoService` (tabela pura disfarçada de service injetável); virou dado. Plural do enum,
     /// convenção do repo (ex.: `NaturezasDano` p/ `NaturezaDano`).
     /// </summary>
-    static class Faccoes
+    public static class Faccoes
     {
         private static readonly Dictionary<Faccao, string> simbolos = new()
         {

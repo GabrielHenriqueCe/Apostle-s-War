@@ -1,6 +1,6 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.LadoSombrio
+namespace ApostlesWar.Domain.Champs.LadoSombrio
 {
     /// <summary>
     /// Ao morrer, revive o portador com 50% do HP máximo — se não estiver bloqueado
@@ -8,7 +8,7 @@ namespace ApostlesWar.Champs.LadoSombrio
     /// Cooldown 6 (consumido ao reagir, revivendo ou não — bloqueio e cooldown são
     /// independentes).
     /// </summary>
-    class Necromancia : HabilidadePassiva, IReageAoMorrer
+    public class Necromancia : HabilidadePassiva, IReageAoMorrer
     {
         public Necromancia() : base("Necromancia", "🪦", 6,
             "Revive o personagem com 50% do HP máximo ao morrer.")

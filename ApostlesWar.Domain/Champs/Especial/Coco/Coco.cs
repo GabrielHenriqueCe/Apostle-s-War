@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Especial
+namespace ApostlesWar.Domain.Champs.Especial
 {
     /// <summary>
     /// Cocô — champ como DADO. Vocabulário puro: Descarga e Desentupidor são dano + Veneno.
     /// Passiva: Fedorento.Passiva.cs (o Zumbi passou a se chamar "Vômito Tóxico", liberando o nome).
     /// </summary>
-    static class Coco
+    public static class Coco
     {
         public static Personagem Definir() => new(
             1, Faccao.Especial, "Cocô", "💩", 1200, 160, 200,

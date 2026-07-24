@@ -1,4 +1,4 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
 /// <summary>
 /// Capacidade D do modelo de capacidades: PARALISAR A AÇÃO. Depois de a ação ser escolhida,
@@ -6,7 +6,7 @@ using ApostlesWar;
 /// era habilidade, o cooldown). O CombateService consulta após a seleção — a chance é do status.
 /// Implementadores: Medo (chance de paralisar).
 /// </summary>
-interface IParalisaAcao
+public interface IParalisaAcao
 {
     bool Paralisa();
 }

@@ -1,12 +1,12 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Humanos
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>
     /// Ao atacar, ganha +5% de TaxaCrit (cap 25% acumulado). Migrada para IReageAoAtacar
     /// (segue TipoAtaque: 1x em AoE, por hit em Sequencial). Ganho no PRÓPRIO atacante.
     /// </summary>
-    class OlhoClinico : HabilidadePassiva, IReageAoAtacar
+    public class OlhoClinico : HabilidadePassiva, IReageAoAtacar
     {
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;

@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Debuff stack-based. Quando o portador recebe dano, o ATACANTE é curado em
@@ -8,7 +8,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// - Duração = nº de stacks (perde 1 por turno, igual Veneno)
     /// - Stacks não afetam o % (sempre 15%) — só duração
     /// </summary>
-    class Sangramento : Debuff, IReageAoReceberDano
+    public class Sangramento : Debuff, IReageAoReceberDano
     {
         public const double PercentualCura = 0.15;
 

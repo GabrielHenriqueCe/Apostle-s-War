@@ -1,22 +1,22 @@
-﻿using ApostlesWar;
-using ApostlesWar.View;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Application.Portas;
 
-namespace ApostlesWar.Services
+namespace ApostlesWar.Application.Services
 {
-    internal class GerenciadorDeJogoService
+    public class GerenciadorDeJogoService
     {
         #region Construtor
 
         private readonly ArsenalService _arsenalService;
         private readonly CampeoesService _campeoesService;
         private readonly CapitulosService _capitulosService;
-        private readonly MenuView _menuView;
+        private readonly ITelaDeMenu _menuView;
         private readonly CombateService _combateService;
         private readonly IEntrada _entrada;
 
         public GerenciadorDeJogoService(ArsenalService arsenalService,
             CampeoesService campeoesService, CapitulosService capitulosService,
-            MenuView menuView, CombateService combateService, IEntrada entrada)
+            ITelaDeMenu menuView, CombateService combateService, IEntrada entrada)
         {
             _arsenalService = arsenalService;
             _campeoesService = campeoesService;

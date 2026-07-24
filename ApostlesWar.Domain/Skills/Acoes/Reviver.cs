@@ -1,6 +1,6 @@
-using ApostlesWar.Skills;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Revive combatentes mortos com um percentual do HP máximo. Família de 7 clientes
@@ -30,7 +30,7 @@ namespace ApostlesWar
     /// escreve nada disso. EstadoAlvo default Mortos — o único que faz sentido; o filtro do
     /// interpretador garante que a ação nem visita os vivos.
     /// </summary>
-    class Reviver : Acao
+    public class Reviver : Acao
     {
         private readonly double _percentualHP;
         private readonly Func<Buff>? _buffNoRevivido;

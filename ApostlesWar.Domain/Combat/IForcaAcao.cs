@@ -1,4 +1,4 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
 /// <summary>
 /// Capacidade D do modelo de capacidades: FORÇAR A AÇÃO. O status decide o alvo da ação
@@ -6,7 +6,7 @@ using ApostlesWar;
 /// o AlvoForcado e executa A1 (Atacar) nele — a decisão de QUEM é do status.
 /// Implementadores: Irritar (força atacar quem aplicou).
 /// </summary>
-interface IForcaAcao
+public interface IForcaAcao
 {
     Combate AlvoForcado();
 }

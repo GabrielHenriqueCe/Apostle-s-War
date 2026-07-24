@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Misticos
+namespace ApostlesWar.Domain.Champs.Misticos
 {
     /// <summary>
     /// Todo início de turno, aplica RefletirDano 2t em si mesmo (renova sempre).
     /// Se ImpedirBeneficios estiver ativo, falha silenciosamente.
     /// </summary>
-    class Realidade : HabilidadePassiva, IReageAoInicioTurno
+    public class Realidade : HabilidadePassiva, IReageAoInicioTurno
     {
         public Realidade() : base("Realidade", "🔮", 0,
             "Todo turno aplica Refletir Dano em si mesmo.")

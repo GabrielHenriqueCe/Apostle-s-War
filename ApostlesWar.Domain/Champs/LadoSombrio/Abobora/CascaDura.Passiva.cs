@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar.Champs.LadoSombrio
+namespace ApostlesWar.Domain.Champs.LadoSombrio
 {
     /// <summary>
     /// Bloqueia a aplicação de qualquer Debuff no portador. Capacidade direta
     /// (IBloqueiaStatus) — não usa mais buff de contorno (ImunidadeDebuffs).
     /// </summary>
-    class CascaDura : HabilidadePassiva, IBloqueiaStatus
+    public class CascaDura : HabilidadePassiva, IBloqueiaStatus
     {
         public CascaDura() : base("Casca Dura", "🎃", 0,
             "Imune a maleficios.")

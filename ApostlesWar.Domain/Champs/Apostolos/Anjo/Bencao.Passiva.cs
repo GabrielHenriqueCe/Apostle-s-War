@@ -1,12 +1,12 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Apostolos
 {
     /// <summary>
     /// Recupera 5% HP no início do turno, permanentemente. Capacidade direta
     /// (IReageAoInicioTurno) — não usa mais buff de contorno (CuraContinua).
     /// </summary>
-    class Bencao : HabilidadePassiva, IReageAoInicioTurno
+    public class Bencao : HabilidadePassiva, IReageAoInicioTurno
     {
         private const double PercentualCura = 0.05;
 

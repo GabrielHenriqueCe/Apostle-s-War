@@ -1,13 +1,13 @@
 ﻿using System.Linq;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Estado morto: carrega os status do morto (na Fatia 2, o ImpedirRessurreicao
     /// e futuros status de morto). Ignora cura; revive transiciona de volta pra Vivo.
     /// Começa com a lista limpa — os status do vivo somem na transição.
     /// </summary>
-    class Morto : EstadoVida
+    public class Morto : EstadoVida
     {
         public List<StatusEffect> StatusNoMorto { get; } = new List<StatusEffect>();
 
@@ -23,7 +23,7 @@ namespace ApostlesWar
             // (ImpedirRessurreicao), não revive. Toda tentativa de revive passa por
             // aqui, então nenhuma habilidade precisa checar — é à prova de esquecimento.
             // O Diabo (AnjoCaido) remove o debuff ANTES de chamar Reviver, daí passa.
-            if (StatusNoMorto.OfType<ApostlesWar.Skills.Debuffs.ImpedirRessurreicao>().Any())
+            if (StatusNoMorto.OfType<ApostlesWar.Domain.Skills.Debuffs.ImpedirRessurreicao>().Any())
                 return;
 
             dono.AplicarRevive(hp);

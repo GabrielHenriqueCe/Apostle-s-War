@@ -1,13 +1,13 @@
-using ApostlesWar.Skills;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Remove buffs do alvo conforme um Seletor (ADR-composicao-de-acoes §5.4/§9 — "cravada",
     /// 1º cliente: DocesOuTravessuras). Espelho futuro de RemoverDebuffs (cleanse), que ainda
     /// não tem cliente migrado.
     /// </summary>
-    class RemoverBuffs : Acao
+    public class RemoverBuffs : Acao
     {
         private readonly Seletor _seletor;
 

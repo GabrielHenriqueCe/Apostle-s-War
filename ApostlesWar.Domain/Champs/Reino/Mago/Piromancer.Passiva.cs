@@ -1,9 +1,9 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Reino
+namespace ApostlesWar.Domain.Champs.Reino
 {
-    class Piromancer : HabilidadePassiva, IModificaDanoCausado
+    public class Piromancer : HabilidadePassiva, IModificaDanoCausado
     {
         public Piromancer() : base("Piromancer", "🪄", 0,
             "Causa 25% mais dano contra alvos com Queima.")

@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Buff: reflete uma % do dano efetivamente recebido de volta ao atacante.
@@ -11,7 +11,7 @@ namespace ApostlesWar.Skills.Buffs
     /// bloqueio do atacante, mas NÃO dispara reação (não reflete de volta — loop
     /// quebrado). Reflete qualquer golpe que tenha causado dano recebido.
     /// </summary>
-    class RefletirDano : Buff, IReageAoReceberDano
+    public class RefletirDano : Buff, IReageAoReceberDano
     {
         public RefletirDano(int duracao = 2, double percentual = 0.15)
             : base("Reflexo", "🥢", duracao, percentual,

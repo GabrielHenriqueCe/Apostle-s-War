@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Humanos
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>
     /// 10% de chance de contra-atacar com Marretada ao ser atacado. Reage via
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Humanos
     /// Contraparte); o CombateService executa via IAtivavelComNatureza e exibe —
     /// mesmo fluxo do ContraAtaque, só troca A1 por Marretada.
     /// </summary>
-    class InstintoDoOperario : HabilidadePassiva, IReageAoSerAtacado
+    public class InstintoDoOperario : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double Chance = 0.10;
 

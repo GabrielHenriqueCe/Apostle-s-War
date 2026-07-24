@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Buff temporário de TaxaCrit (pontos absolutos). Não muta o stat — apenas
@@ -10,7 +10,7 @@ namespace ApostlesWar.Skills.Buffs
     /// Não acumula: mantém o de maior Valor; em empate, o de maior duração.
     /// ContribuicaoTaxaCrit expõe quanto este buff soma agora, pro getter de TaxaCrit.
     /// </summary>
-    class BuffTaxaCrit : Buff, IContribuiTaxaCrit
+    public class BuffTaxaCrit : Buff, IContribuiTaxaCrit
     {
         public BuffTaxaCrit(int duracao = 2, double valor = 0.25)
             : base("Crit+", "🎯", duracao, valor, $"+{valor * 100:F0}% TaxaCrit.") { }

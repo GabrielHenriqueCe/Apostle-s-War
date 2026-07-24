@@ -1,13 +1,13 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Humanos
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>
     /// Operário — champ como DADO. A Marretada mora ao lado (Marretada.Ativa.cs) porque é
     /// híbrida: o InstintoDoOperario a busca por tipo pro contra-ataque.
     /// </summary>
-    static class Operario
+    public static class Operario
     {
         public static Personagem Definir() => new(
             1, Faccao.Humanos, "Operário", "👷", 1200, 240, 120,

@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     #region Enums
 
-    enum Faccao
+    public enum Faccao
     {
         [Description("Humanos")] Humanos,
         [Description("Reino")] Reino,
@@ -17,9 +17,9 @@ namespace ApostlesWar
         [Description("Apóstolos")] Apostolos
     }
 
-    enum Slot { Slot1 = 1, Slot2 = 2, Slot3 = 3, Slot4 = 4 }
+    public enum Slot { Slot1 = 1, Slot2 = 2, Slot3 = 3, Slot4 = 4 }
 
-    enum Fases
+    public enum Fases
     {
         [Description("Arma")] Fase1 = 1,
         [Description("Elmo")] Fase2 = 2,
@@ -30,20 +30,20 @@ namespace ApostlesWar
         [Description("Bota")] Fase7 = 7
     }
 
-    enum SimOuNao
+    public enum SimOuNao
     {
         [Description("Sim")] Sim = 1,
         [Description("Não")] Nao = 2
     }
 
-    enum TipoStat { ATKFlat, HPFlat, DEFFlat, HPPct, DEFPct, TaxaCritPct, DanoCritPct }
+    public enum TipoStat { ATKFlat, HPFlat, DEFFlat, HPPct, DEFPct, TaxaCritPct, DanoCritPct }
 
     /// <summary>
     /// Define como os alvos adicionais são selecionados.
     /// Explicito: selecionado + próximos em ordem, sem repetição.
     /// Aleatorio: selecionado + demais sorteados, com repetição permitida.
     /// </summary>
-    enum TipoAlvo { Explicito, Aleatorio }
+    public enum TipoAlvo { Explicito, Aleatorio }
 
     /// <summary>
     /// Define em qual lista a habilidade age.
@@ -51,7 +51,7 @@ namespace ApostlesWar
     /// Aliados: age no próprio time.
     /// Self: age apenas no próprio atacante.
     /// </summary>
-    enum TipoLista { Inimigos, Aliados, Self }
+    public enum TipoLista { Inimigos, Aliados, Self }
 
     /// <summary>
     /// Define qual estado de vida a habilidade mira dentro da TipoLista escolhida.
@@ -61,7 +61,7 @@ namespace ApostlesWar
     /// na mesma lista (cada ação filtra o seu estado na execução). Por isso o antigo `Ambos`
     /// morreu (jul/2026): quando o sweep migrou o último cliente — o Céu — ele deixou de existir.
     /// </summary>
-    enum EstadoAlvo { Vivos, Mortos }
+    public enum EstadoAlvo { Vivos, Mortos }
 
     /// <summary>
     /// Em quais combatentes uma AÇÃO age (eixo da composição — ver ADR-composicao-de-acoes §5.2).
@@ -74,7 +74,7 @@ namespace ApostlesWar
     /// - OutrosAliados: o time do atacante EXCETO o próprio atacante (ex: OssoDuroDeRoer,
     ///   Circo — ADR-composicao-de-acoes §5.2).
     /// </summary>
-    enum Escopo { AlvosResolvidos, TodosAliados, TodosInimigos, ProprioAtacante, OutrosAliados }
+    public enum Escopo { AlvosResolvidos, TodosAliados, TodosInimigos, ProprioAtacante, OutrosAliados }
 
     /// <summary>
     /// Define a semântica do evento de ataque, usada pelo CombateService
@@ -90,14 +90,14 @@ namespace ApostlesWar
     /// Nota: DepoisDeMatar dispara por alvo morto independente deste tipo —
     /// só DepoisDeAtacar é afetado por AreaDeEfeito vs Sequencial.
     /// </summary>
-    enum TipoAtaque { AreaDeEfeito, Sequencial, NaoAtaque }
+    public enum TipoAtaque { AreaDeEfeito, Sequencial, NaoAtaque }
 
     /// <summary>
     /// Desfecho de uma tentativa de fase. Distingue os três "não-vitória": Perdeu (batalha perdida
     /// ou encerrada no meio → derrota) vs Cancelou (jogador desistiu na seleção de time, ANTES da
     /// luta → sem derrota, volta silencioso). Consumido pelo GerenciadorDeJogo pra decidir a tela.
     /// </summary>
-    enum ResultadoFase { Venceu, Perdeu, Cancelou }
+    public enum ResultadoFase { Venceu, Perdeu, Cancelou }
 
     #endregion
 }

@@ -1,8 +1,9 @@
-using ApostlesWar;
-using ApostlesWar.Services;
+using ApostlesWar.Domain;
+using ApostlesWar.Application.Portas;
+using ApostlesWar.Application.Services;
 using GHUtils;
 
-namespace ApostlesWar.View
+namespace ApostlesWar.ConsoleUI.Views
 {
     /// <summary>
     /// View dos MENUS: telas de escolha de opção fora da luta (menu principal, capítulos, fases,
@@ -11,7 +12,7 @@ namespace ApostlesWar.View
     /// ler o que exibir. NOTA: a navegação lê input aqui dentro; a porta de entrada (IEntrada) é
     /// tema próprio, depois.
     /// </summary>
-    internal class MenuView
+    public class MenuView : ITelaDeMenu
     {
         private readonly ArsenalService _arsenalService;
         private readonly CapitulosService _capitulosService;

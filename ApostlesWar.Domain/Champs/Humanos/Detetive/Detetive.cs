@@ -1,11 +1,11 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Humanos
+namespace ApostlesWar.Domain.Champs.Humanos
 {
     /// <summary>Detetive — champ como DADO. Comportamento real: OlhoClinico.Passiva.cs.</summary>
-    static class Detetive
+    public static class Detetive
     {
         public static Personagem Definir() => new(
             2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160,

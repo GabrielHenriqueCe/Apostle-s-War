@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Apostolos
 {
     /// <summary>
     /// Boneco de Neve — champ como DADO. Bola de Neve ataca 1 e prende (molde da Natureza).
     /// Gelado dá Escudo (PorHP) aos aliados e ataca todos (molde do gelo/Lealdade). Passiva:
     /// Derretendo.Passiva.cs.
     /// </summary>
-    static class BonecoDeNeve
+    public static class BonecoDeNeve
     {
         public static Personagem Definir() => new(
             1, Faccao.Apostolos, "Boneco de Neve", "⛄", 1000, 200, 200,

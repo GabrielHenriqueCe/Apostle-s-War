@@ -32,10 +32,14 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   testo só o que é PURO (motor, capacidades, `Batalha`).
 - Distribuição futura: `dotnet publish -c Release -r <rid> --self-contained` → `.exe` no GitHub Releases.
 
-## Mapa rápido
-- `Combat/` domínio (Combate, Batalha/Equipe, TurnoDoPersonagem, RelogioDoCombate, interfaces de capacidade).
-- `Skills/` habilidades, ações (`Acoes/`), status (`Buffs`/`Debuffs`), passivas.
-- `Champs/<Faccao>/<Champ>/` — cada campeão como dado.
-- `Services/` orquestração · `View/` render (console) · `Controllers/` controle de turno.
-- Portas do porte já prontas: `IEntrada` (entrada), `IApresentacao` (saída), `IRepositorioDeSave` (save).
+## Mapa rápido — Clean Architecture, 1 PROJETO por camada (a dependência aponta pra dentro)
+- `ApostlesWar.Domain/` regras do jogo, ZERO referências: `Combat/` (Combate, Batalha/Equipe,
+  TurnoDoPersonagem, RelogioDoCombate, capacidades), `Skills/` (ações/buffs/debuffs/passivas),
+  `Champs/<Faccao>/<Champ>/`, `Models/`, `Enum/`.
+- `ApostlesWar.Application/` casos de uso: `Services/` orquestração · `Controllers/` (bot) ·
+  `Portas/` (IEntrada, IApresentacao, ITelaDeCombate, ITelaDeMenu, IControladorDeTurno, IRepositorioDeSave).
+- `ApostlesWar.Infrastructure/` impl das portas de dados (SaveLocal). Só o App enxerga.
+- `ApostlesWar.ConsoleUI/` pele console: views + EntradaConsole/ApresentacaoConsole + ControladorJogador.
+- `App/` casca executável Windows (composition root em `Program.cs`, front webview em `Front/`+`wwwroot/`).
+- Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`.

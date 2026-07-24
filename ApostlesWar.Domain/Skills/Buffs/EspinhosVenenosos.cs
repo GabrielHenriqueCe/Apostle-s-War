@@ -1,7 +1,7 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Buff: 1x por agressor por turno, o atacante recebe Veneno (1 stack) e Queima (1 stack).
@@ -10,7 +10,7 @@ namespace ApostlesWar.Skills.Buffs
     /// vem do orçamento do Turno (TentarReagir); antes era por-hit.
     /// Usado pela Espinhos (aplicado permanente via IPassivaInicial).
     /// </summary>
-    class EspinhosVenenosos : Buff, IReageAoSerAtacado
+    public class EspinhosVenenosos : Buff, IReageAoSerAtacado
     {
         public EspinhosVenenosos(int duracao = int.MaxValue)
             : base("Espinhos", "🌿", duracao, 0,

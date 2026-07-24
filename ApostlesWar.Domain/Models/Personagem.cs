@@ -1,11 +1,11 @@
-﻿namespace ApostlesWar
+﻿namespace ApostlesWar.Domain
 {
     #region Personagem
 
     /// <summary>
     /// Representa o Personagem
     /// </summary>
-    class Personagem
+    public class Personagem
     {
         // Valores base de crit aplicados a TODOS os personagens. Modificar aqui
         // afeta o balanceamento global. Itens e habilidades modificam por cima.

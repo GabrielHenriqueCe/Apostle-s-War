@@ -1,13 +1,13 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Folclore
+namespace ApostlesWar.Domain.Champs.Folclore
 {
     /// <summary>
     /// Ao ser atacado, aumenta o próprio ATK em 5% (sobre AtaqueComItens) até um
     /// cap de 25% acumulado. Estado interno guarda o total já ganho. Migrada para
     /// o modelo de reação (IReageAoSerAtacado). O bônus vai no PORTADOR (si mesmo).
     /// </summary>
-    class Ambicao : HabilidadePassiva, IReageAoSerAtacado
+    public class Ambicao : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double AumentoPorHit = 0.05;
         private const double Cap = 0.25;

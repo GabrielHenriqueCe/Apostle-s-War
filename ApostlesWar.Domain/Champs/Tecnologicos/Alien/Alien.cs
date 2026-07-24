@@ -1,8 +1,8 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Tecnologicos
+namespace ApostlesWar.Domain.Champs.Tecnologicos
 {
     /// <summary>
     /// Alien — champ como DADO. Galáxia é mais um cliente de Escopo.OutrosAliados (a
@@ -10,7 +10,7 @@ namespace ApostlesWar.Champs.Tecnologicos
     /// AplicarBuff com proveniência (o buff carrega quem protege). Passiva:
     /// CarapacaAlienigena.Passiva.cs.
     /// </summary>
-    static class Alien
+    public static class Alien
     {
         public static Personagem Definir() => new(
             2, Faccao.Tecnologicos, "Alien", "👽", 1200, 240, 120,

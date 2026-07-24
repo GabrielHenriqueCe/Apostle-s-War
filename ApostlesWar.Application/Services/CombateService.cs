@@ -1,14 +1,14 @@
-﻿using ApostlesWar;
-using ApostlesWar.Skills.Ativas;
-using ApostlesWar.Skills.Buffs;
-using ApostlesWar.Skills.Debuffs;
-using ApostlesWar.Skills.Passivas;
-using ApostlesWar.View;
-using ApostlesWar.Controllers;
+﻿using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Ativas;
+using ApostlesWar.Domain.Skills.Buffs;
+using ApostlesWar.Domain.Skills.Debuffs;
+using ApostlesWar.Domain.Skills.Passivas;
+using ApostlesWar.Application.Portas;
+using ApostlesWar.Application.Controllers;
 
-namespace ApostlesWar.Services
+namespace ApostlesWar.Application.Services
 {
-    internal class CombateService
+    public class CombateService
     {
         #region Construtor
 

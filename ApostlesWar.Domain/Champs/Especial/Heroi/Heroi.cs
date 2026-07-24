@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Especial
+namespace ApostlesWar.Domain.Champs.Especial
 {
     /// <summary>
     /// Herói — champ como DADO. SalvandoDia é mais um cliente de OutrosAliados (ProtecaoAliado com
     /// proveniência); Super é buff-nos-aliados + ataque. Passiva: Vigilante.Passiva.cs (contra-ataque
     /// via Revide/A1 — passiva-pura, imune a roubo).
     /// </summary>
-    static class Heroi
+    public static class Heroi
     {
         public static Personagem Definir() => new(
             2, Faccao.Especial, "Herói", "🦸", 800, 240, 200,

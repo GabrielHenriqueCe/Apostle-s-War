@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Debuff stack-based de maldição.
@@ -10,7 +10,7 @@ namespace ApostlesWar.Skills.Debuffs
     /// - Após o cap: nada acontece
     /// - Sem cap de stacks
     /// </summary>
-    class Maldicao : Debuff
+    public class Maldicao : Debuff
     {
         public const double ReducaoPorTurno = 0.10;    // 10% HP inicial
         public const double CapPropio = 0.50;          // 50% redução acumulada

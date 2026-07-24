@@ -1,13 +1,13 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Debuffs
+namespace ApostlesWar.Domain.Skills.Debuffs
 {
     /// <summary>
     /// Debuff de Medo. Quando o portador vai usar uma ação (a1 ou habilidade),
     /// tem uma chance de paralizar — cancela a ação e (se for habilidade) ativa cooldown.
     /// Carrega a capacidade IParalisaAcao: o turno consulta Paralisa(), não o tipo concreto.
     /// </summary>
-    class Medo : Debuff, IParalisaAcao
+    public class Medo : Debuff, IParalisaAcao
     {
         public const double ChancePadrao = 0.50;
 

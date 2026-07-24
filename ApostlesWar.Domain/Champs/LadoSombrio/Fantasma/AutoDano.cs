@@ -1,4 +1,4 @@
-namespace ApostlesWar.Champs.LadoSombrio
+namespace ApostlesWar.Domain.Champs.LadoSombrio
 {
     /// <summary>
     /// Dano ao PRÓPRIO atacante, por um fragmento de Valor — reusa Valor.PorDanoCausado, o
@@ -6,7 +6,7 @@ namespace ApostlesWar.Champs.LadoSombrio
     /// (ADR-composicao-de-acoes §5.5). Bespoke local — só VindoDoAlem tem esse padrão hoje
     /// (§9, Nível 2: promove no 2º cliente real).
     /// </summary>
-    class AutoDano : Acao
+    public class AutoDano : Acao
     {
         private readonly ValorFn _valor;
 

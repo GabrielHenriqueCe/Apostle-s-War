@@ -1,4 +1,4 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
 /// <summary>
 /// Capacidade D do modelo de capacidades: PULAR O TURNO. Marcador — a presença de um
@@ -11,4 +11,4 @@ using ApostlesWar;
 /// variante faz A MAIS é OUTRA capacidade composta por cima — não entra neste contrato.
 /// Implementadores: Preso.
 /// </summary>
-interface IPulaTurno { }
+public interface IPulaTurno { }

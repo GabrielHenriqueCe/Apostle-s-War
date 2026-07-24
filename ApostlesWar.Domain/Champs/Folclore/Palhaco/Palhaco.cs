@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Folclore
+namespace ApostlesWar.Domain.Champs.Folclore
 {
     /// <summary>
     /// Palhaço — champ como DADO. Coringa é o 1º cliente do RemoverDebuffs (cleanse total dos
@@ -10,7 +10,7 @@ namespace ApostlesWar.Champs.Folclore
     /// os outros vivos, que sempre foi errado vs a intenção; ver Reviver.cs e ADR §8.1). Passiva:
     /// PiadaDeMauGosto.Passiva.cs.
     /// </summary>
-    static class Palhaco
+    public static class Palhaco
     {
         public static Personagem Definir() => new(
             3, Faccao.Folclore, "Palhaço", "🤡", 800, 160, 280,

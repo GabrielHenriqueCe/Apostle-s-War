@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Decaidos
+namespace ApostlesWar.Domain.Champs.Decaidos
 {
     /// <summary>
     /// A cada hit recebido, o Diabo ganha +5% de HP máximo permanente, até 25%
@@ -8,7 +8,7 @@ namespace ApostlesWar.Champs.Decaidos
     /// sobre HPMaximoInicial (consistente com Queima/Maldição). Migrada para o
     /// modelo de reação (IReageAoSerAtacado). O ganho vai no PORTADOR (si mesmo).
     /// </summary>
-    class CresceComDor : HabilidadePassiva, IReageAoSerAtacado
+    public class CresceComDor : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double GanhoPorHit = 0.05;
         private const double Cap = 0.25;

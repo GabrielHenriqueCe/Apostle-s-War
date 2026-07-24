@@ -1,4 +1,4 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
 /// <summary>
 /// Capacidade B do modelo de capacidades, lado ATACANTE — espelho do IModificaDanoRecebido.
@@ -11,7 +11,7 @@ using ApostlesWar;
 /// pra passivas futuras "causa X% mais dano se o alvo tem Y".
 /// Implementadores: Piromancer (25% a mais contra alvo com Queima).
 /// </summary>
-interface IModificaDanoCausado
+public interface IModificaDanoCausado
 {
     double MultiplicadorDeDano(Combate atacante, Combate alvo);
 }

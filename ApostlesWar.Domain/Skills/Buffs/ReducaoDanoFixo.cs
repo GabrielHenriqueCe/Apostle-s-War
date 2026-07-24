@@ -1,6 +1,6 @@
-﻿using ApostlesWar;
+﻿using ApostlesWar.Domain;
 
-namespace ApostlesWar.Skills.Buffs
+namespace ApostlesWar.Domain.Skills.Buffs
 {
     /// <summary>
     /// Buff que reduz o dano recebido em um percentual fixo ("Couraça"). A Sereia
@@ -13,7 +13,7 @@ namespace ApostlesWar.Skills.Buffs
     /// que tinha quando era o buff de contorno da Sereia (essa ordem agora é da
     /// passiva-pura, ver Combate.ReceberDano).
     /// </summary>
-    class ReducaoDanoFixo : Buff, IModificaDanoRecebido
+    public class ReducaoDanoFixo : Buff, IModificaDanoRecebido
     {
         public ReducaoDanoFixo(double percentual = 0.15)
             : base("Couraça", "🐚", int.MaxValue, percentual,

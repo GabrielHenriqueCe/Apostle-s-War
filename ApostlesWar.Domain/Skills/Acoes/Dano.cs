@@ -1,4 +1,4 @@
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Causa dano ao alvo com um multiplicador de ATK. O multiplicador pode depender do
@@ -16,7 +16,7 @@ namespace ApostlesWar
     /// LISTA de tipos de status que o golpe pula no cálculo (mecanismo 2 do fio "unificar
     /// ignorar" do ROADMAP — aqui só EXPOSTO no motor, sem unificação).
     /// </summary>
-    class Dano : Acao
+    public class Dano : Acao
     {
         private readonly Func<Combate, Combate, double> _multiplicador;
         private readonly double _ignorarDefesaPct;

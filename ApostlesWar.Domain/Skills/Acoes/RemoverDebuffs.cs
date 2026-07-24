@@ -1,6 +1,6 @@
-using ApostlesWar.Skills;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Remove debuffs do alvo conforme um Seletor — gêmeo EXATO do RemoverBuffs (troca só
@@ -8,7 +8,7 @@ namespace ApostlesWar
     /// (ADR-composicao-de-acoes §9 / catálogo §3); 1º cliente: Coringa (Palhaço, Folclore —
     /// cleanse total dos aliados + ImunidadeDebuffs).
     /// </summary>
-    class RemoverDebuffs : Acao
+    public class RemoverDebuffs : Acao
     {
         private readonly Seletor _seletor;
 

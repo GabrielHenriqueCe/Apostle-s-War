@@ -1,7 +1,7 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Buffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Champs.Misticos
+namespace ApostlesWar.Domain.Champs.Misticos
 {
     /// <summary>
     /// Sereia — champ como DADO. Atlantis é o 5º da família do revive e o cliente que estreou o
@@ -9,7 +9,7 @@ namespace ApostlesWar.Champs.Misticos
     /// (ADR §8.1), e o Circo (Folclore) foi consertado no mesmo movimento. Passiva: Aquagirl.Passiva.cs
     /// (passiva-pura, IModificaDanoRecebido -15%).
     /// </summary>
-    static class Sereia
+    public static class Sereia
     {
         public static Personagem Definir() => new(
             2, Faccao.Misticos, "Sereia", "🧜", 600, 280, 200,

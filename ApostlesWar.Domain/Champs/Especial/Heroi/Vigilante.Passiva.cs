@@ -1,6 +1,6 @@
-using ApostlesWar;
+using ApostlesWar.Domain;
 
-namespace ApostlesWar.Champs.Especial
+namespace ApostlesWar.Domain.Champs.Especial
 {
     /// <summary>
     /// Contra-ataca com a A1 sempre que é atacado (1x por agressor por turno).
@@ -10,7 +10,7 @@ namespace ApostlesWar.Champs.Especial
     /// então se o Herói também tiver o buff (ex: do Dragão), os dois não somam — o
     /// primeiro registra o agressor, o segundo vê que já contra-atacou.
     /// </summary>
-    class Vigilante : HabilidadePassiva, IReageAoSerAtacado
+    public class Vigilante : HabilidadePassiva, IReageAoSerAtacado
     {
         public Vigilante() : base("Vigilante", "🦸", 0,
             "Contra-ataca sempre que é atacado.")

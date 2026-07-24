@@ -1,6 +1,6 @@
-using ApostlesWar.Skills;
+using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar
+namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Move buffs do alvo PRO ATACANTE conforme um Seletor — gêmeo do RemoverBuffs, mas em vez de
@@ -14,7 +14,7 @@ namespace ApostlesWar
     /// atacante — aceito. Destino é sempre o conjurador (o único caso do jogo); se um 2º destino
     /// aparecer, nasce um parâmetro `destino` (esboçado no ADR §274, omitido por YAGNI).
     /// </summary>
-    class MoverBuffs : Acao
+    public class MoverBuffs : Acao
     {
         private readonly Seletor _seletor;
 

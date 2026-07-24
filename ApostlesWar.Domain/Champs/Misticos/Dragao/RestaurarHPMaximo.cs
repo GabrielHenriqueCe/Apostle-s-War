@@ -1,4 +1,4 @@
-namespace ApostlesWar.Champs.Misticos
+namespace ApostlesWar.Domain.Champs.Misticos
 {
     /// <summary>
     /// Restaura HP máximo PERDIDO do alvo (o que Maldição/Queima reduziram do teto), até um cap de
@@ -7,7 +7,7 @@ namespace ApostlesWar.Champs.Misticos
     /// Verbo nichado: mexe no TETO (HPMaximo), não no HP atual — por isso não é Cura nem fragmento
     /// de Valor.
     /// </summary>
-    class RestaurarHPMaximo : Acao
+    public class RestaurarHPMaximo : Acao
     {
         private readonly double _percentualCap;
 

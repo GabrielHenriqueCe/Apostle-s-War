@@ -1,14 +1,14 @@
-using ApostlesWar;
-using ApostlesWar.Skills.Debuffs;
+using ApostlesWar.Domain;
+using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Champs.Especial
+namespace ApostlesWar.Domain.Champs.Especial
 {
     /// <summary>
     /// Ao ser atacado, 25% de chance de aplicar ReducaoDefesa 2t no atacante.
     /// Migrada para o modelo de reação (IReageAoSerAtacado). Só declara mensagem
     /// quando dispara.
     /// </summary>
-    class PeleGrossa : HabilidadePassiva, IReageAoSerAtacado
+    public class PeleGrossa : HabilidadePassiva, IReageAoSerAtacado
     {
         private const double ChanceReducao = 0.25;
 

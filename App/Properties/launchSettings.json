@@ -1,0 +1,15 @@
+{
+  // Perfis de execução do VS: o dropdown da setinha ao lado do Play.
+  // O jogo tem duas peles sobre o mesmo motor (ver App/Program.cs): sem argumento
+  // abre o CONSOLE; com --front abre a janela WEBVIEW. Versionado de propósito —
+  // quem clonar o repo já ganha os dois botões.
+  "profiles": {
+    "Console": {
+      "commandName": "Project"
+    },
+    "Front (webview)": {
+      "commandName": "Project",
+      "commandLineArgs": "--front"
+    }
+  }
+}

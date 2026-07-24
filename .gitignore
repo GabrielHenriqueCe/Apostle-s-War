@@ -368,4 +368,4 @@ FodyWeavers.xsd
 /save.txt
 /itens.txt
 # launchSettings do Visual Studio (era do csproj raiz, que virou os projetos por camada)
-Properties/
+/Properties/

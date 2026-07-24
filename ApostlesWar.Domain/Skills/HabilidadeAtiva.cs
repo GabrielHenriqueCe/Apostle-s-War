@@ -68,6 +68,18 @@ namespace ApostlesWar.Domain
         public virtual EstadoAlvo EstadoAlvo => _estadoAlvo;
 
         /// <summary>
+        /// Esta habilidade PEDE um alvo ao jogador (abre o passo de escolha)? Regra ESTÁTICA — só olha
+        /// a config, não o tabuleiro: inimigos sempre pedem; aliados só quando o número de alvos é
+        /// finito; Self e hit-all resolvem sozinhos. É a FONTE ÚNICA da regra: o
+        /// <c>CombateService.ResolverAlvoInicial</c> e o front (que monta o menu de habilidade) leem
+        /// daqui em vez de reescrever a expressão. A parte que DEPENDE do tabuleiro (aliado finito sem
+        /// candidato vivo → não abre o pick) segue no service, que é quem tem as listas.
+        /// </summary>
+        public bool PedeAlvoDoJogador =>
+            TipoLista == TipoLista.Inimigos
+            || (TipoLista == TipoLista.Aliados && NumeroDeAlvos != int.MaxValue);
+
+        /// <summary>
         /// Ações que a habilidade executa (Balde 1: só aplica uma lista fixa de efeitos).
         /// Na forma-construtor vêm do ctor; subclasses Strangler sobrescrevem (ou sobrescrevem
         /// Ativar direto, se ainda bespoke). Ver ADR-composicao-de-acoes.md.

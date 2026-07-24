@@ -111,8 +111,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
         public void ExibirResumoBatalha(List<Combate> jogador) => Encerrar("Fim da batalha!");
 
+        // Na Arena do front o jogador é sempre a equipe1 (à esquerda), então dá pra falar do ponto de
+        // vista dele. Se um dia entrar Bot×Bot na tela, isto volta pra "Esquerda/Direita venceu".
         public void ExibirResumoArena(List<Combate> equipe1, List<Combate> equipe2, bool venceuEquipe1)
-            => Encerrar(venceuEquipe1 ? "🏆 Equipe da ESQUERDA venceu!" : "🏆 Equipe da DIREITA venceu!");
+            => Encerrar(venceuEquipe1 ? "🏆 Vitória!" : "☠️ Derrota!");
 
         private void Encerrar(string texto)
         {

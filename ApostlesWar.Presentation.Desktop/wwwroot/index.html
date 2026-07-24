@@ -6,6 +6,53 @@
     <link rel="stylesheet" href="estilo.css" />
 </head>
 <body>
+    <!-- Cena de MENU: overlay por cima de tudo. O C# manda o que mostrar; o clique volta o índice. -->
+    <section id="menu" hidden>
+        <!-- Perfil do jogador no canto: avatar + caixa do nome são UMA entidade clicável (abre a
+             edição). A caixa cresce depois (nível de conta, progresso...). -->
+        <div id="menuPerfil" hidden title="Editar perfil">
+            <div id="menuAvatar"></div>
+            <div id="menuNomeBox"><span id="menuNome"></span></div>
+        </div>
+        <h1 id="menuTitulo">Apostle's War</h1>
+        <p id="menuSubtitulo"></p>
+        <div id="menuOpcoes"></div>
+    </section>
+
+    <!-- Cena de CRIAR PERFIL: só na 1ª vez (sem save). O C# abre; o nome volta como texto. -->
+    <section id="criarPerfil" hidden>
+        <h1>Bem-vindo, Apóstolo</h1>
+        <p id="criarPerfilDica">Como você quer ser chamado?</p>
+        <input id="nomePerfil" type="text" maxlength="16" placeholder="seu nome" autocomplete="off" spellcheck="false" />
+        <button id="confirmarPerfil" type="button">Começar</button>
+    </section>
+
+    <!-- Cena de EDITAR PERFIL: nome + grade de avatares. O C# manda a lista; o clique volta o índice. -->
+    <section id="editarPerfil" hidden>
+        <h1>Seu perfil</h1>
+        <div id="editarNomeLinha">
+            <input id="nomeEditar" type="text" maxlength="16" placeholder="seu nome" autocomplete="off" spellcheck="false" readonly />
+            <button id="editarNomeBtn" type="button" title="Editar nome">✏️</button>
+        </div>
+        <p id="editarDica">Escolha seu personagem</p>
+        <div id="avatarGrade"></div>
+        <div id="editarBotoes">
+            <button id="voltarEditar" type="button">Voltar</button>
+            <button id="salvarEditar" type="button">Salvar</button>
+        </div>
+    </section>
+
+    <!-- MODAL de confirmação reutilizável: sobrepõe qualquer cena (sair, excluir conta, ...). -->
+    <section id="modal" hidden>
+        <div id="modalCaixa">
+            <p id="modalTexto"></p>
+            <div id="modalBotoes">
+                <button id="modalCancelar" type="button">Cancelar</button>
+                <button id="modalConfirmar" type="button">Confirmar</button>
+            </div>
+        </div>
+    </section>
+
     <header id="topo">
         <span id="turno">Turno 1</span>
         <div id="botoesTopo">
@@ -13,9 +60,10 @@
             <button id="alternarLog" type="button" title="Mostrar/esconder o registro do combate">
                 📜 log
             </button>
-            <button id="alternarNumeros" type="button" title="Mostrar/esconder os números (ATK, DEF, crit)">
-                👁️ números
+            <button id="alternarEstatisticas" type="button" title="Mostrar/esconder as estatísticas (ATK, DEF, crit)">
+                📊 estatísticas
             </button>
+            <button id="sairBatalha" type="button" title="Sair da batalha">🚪 sair</button>
         </div>
     </header>
 
@@ -48,6 +96,14 @@
             </div>
         </div>
     </footer>
+
+    <!-- Fim de batalha: mensagem central de vitória/derrota. Clique ou Enter volta pro menu. -->
+    <section id="fimBatalha" hidden>
+        <div id="fimCaixa">
+            <div id="fimTexto"></div>
+            <div id="fimDica">clique ou Enter pra sair</div>
+        </div>
+    </section>
 
     <script src="jogo.js"></script>
 </body>

@@ -18,6 +18,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
         private readonly SessaoDoFront _sessao;
         private readonly PonteWebView2 _ponte;
 
+        // Sair pedido DURANTE a escolha de alvo: lá o null significa "volta pra ação" (não aborta),
+        // então marcamos aqui e a próxima EscolherAcao aborta de fato. Ver EscolherAlvo.
+        private bool _sairSolicitado;
+
         public ControladorJogadorWeb(SessaoDoFront sessao, PonteWebView2 ponte)
         {
             _sessao = sessao;
@@ -26,6 +30,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
         public HabilidadeAtiva? EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores)
         {
+            // Sair clicado na fase de alvo só cancela o alvo (volta pra cá); é AQUI que ele vira abort.
+            if (_sairSolicitado) { _sairSolicitado = false; return null; }
+
             // Quem age é humano ⇒ os aliados DELE são o lado esquerdo da tela, por definição.
             _sessao.DefinirLadoDoJogador(aliados, defensores);
 
@@ -43,7 +50,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
             {
                 MensagemDoFront msg = _ponte.Esperar();
 
-                if (msg.Tipo == "encerrar") return null;   // janela fechou: aborta o turno
+                // Janela fechou OU o jogador pediu pra sair da batalha: null aborta a partida
+                // (o motor lança BatalhaAbortada, a Arena captura e volta pro menu).
+                if (msg.Tipo == "encerrar" || msg.Tipo == "sair") return null;
 
                 if (msg.Tipo == "habilidade")
                 {
@@ -75,6 +84,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 MensagemDoFront msg = _ponte.Esperar();
 
                 if (msg.Tipo == "encerrar") return null;
+
+                // Sair aqui não pode abortar direto (null = "volta pra ação"): marca e deixa a próxima
+                // EscolherAcao abortar. O jogador vê o menu de ação piscar e a batalha encerra.
+                if (msg.Tipo == "sair") { _sairSolicitado = true; return null; }
 
                 // Direito de arrependimento: volta pro menu de habilidades (o Esc do console).
                 if (msg.Tipo == "cancelar") return null;

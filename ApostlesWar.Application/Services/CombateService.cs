@@ -249,23 +249,25 @@ namespace ApostlesWar.Application.Services
         private Combate? ResolverAlvoInicial(Combate atacante, HabilidadeAtiva hab,
             List<Combate> defensores, List<Combate> aliados, IControladorDeTurno controlador)
         {
+            // Self/hit-all não pedem alvo: a habilidade resolve sozinha. Regra ESTÁTICA na fonte única
+            // (HabilidadeAtiva.PedeAlvoDoJogador) — o front lê a mesma pra montar o menu de habilidade.
+            if (!hab.PedeAlvoDoJogador) return atacante;
+
             if (hab.TipoLista == TipoLista.Inimigos)
             {
                 var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(defensores);
                 return controlador.EscolherAlvo(disponiveis, aliados, defensores);
             }
 
-            if (hab.TipoLista == TipoLista.Aliados && hab.NumeroDeAlvos != int.MaxValue)
-            {
-                // Pick real de alvo aliado (por estado). Sem candidato no estado pedido (ex: revive
-                // sem mortos): pula o pick — ResolverAlvos devolve vazio pra ação que herda o alvo, e
-                // as demais ações (escopos próprios) rodam normalmente (DocesDeAbobora sem mortos
-                // ainda vale pelo Reflexo).
-                var disponiveis = _selecaoDeAlvoService.ResolverAlvosDisponiveis(aliados, hab.EstadoAlvo);
-                return disponiveis.Count == 0 ? atacante : controlador.EscolherAlvo(disponiveis, aliados, defensores);
-            }
-
-            return atacante; // hit-all (NumeroDeAlvos=MaxValue) ou próprio: a habilidade resolve sozinha
+            // Sobra o aliado finito (PedeAlvoDoJogador garante NumeroDeAlvos != MaxValue). Pick real de
+            // alvo aliado (por estado). Sem candidato no estado pedido (ex: revive sem mortos): pula o
+            // pick — ResolverAlvos devolve vazio pra ação que herda o alvo, e as demais ações (escopos
+            // próprios) rodam normalmente (DocesDeAbobora sem mortos ainda vale pelo Reflexo). Esta
+            // parte DEPENDE do tabuleiro, por isso fica aqui e não na propriedade.
+            var disponiveisAliados = _selecaoDeAlvoService.ResolverAlvosDisponiveis(aliados, hab.EstadoAlvo);
+            return disponiveisAliados.Count == 0
+                ? atacante
+                : controlador.EscolherAlvo(disponiveisAliados, aliados, defensores);
         }
 
         /// <summary>
@@ -647,7 +649,9 @@ namespace ApostlesWar.Application.Services
         /// o pick de campeões é uma TELA (console hoje, front amanhã) e a luta não deveria depender
         /// dela: o front entra direto numa batalha com times sorteados, sem passar por menu nenhum.
         /// </summary>
-        public void ExecutarArenaComTimes(List<Personagem> time1, List<Personagem> time2, bool bot1, bool bot2)
+        /// <returns>true = a batalha terminou naturalmente (resumo na tela); false = foi ABORTADA no
+        /// meio (Esc/sair) — quem chama deve voltar ao menu sem esperar a tela de resultado.</returns>
+        public bool ExecutarArenaComTimes(List<Personagem> time1, List<Personagem> time2, bool bot1, bool bot2)
         {
             var equipe1 = new Equipe(time1.Select(p => (Combate)new Jogador(p)).ToList());
             var equipe2 = new Equipe(time2.Select(p => (Combate)new Jogador(p)).ToList());
@@ -665,8 +669,12 @@ namespace ApostlesWar.Application.Services
             {
                 bool venceu1 = ExecutarCombate(batalha);
                 _combateView.ExibirResumoArena(equipe1.Membros, equipe2.Membros, venceu1);
+                return true;
             }
-            catch (BatalhaAbortada) { }   // Esc no meio: volta pro menu sem tela de derrota
+            catch (BatalhaAbortada)
+            {
+                return false;   // Esc/sair no meio: volta pro menu sem tela de derrota
+            }
         }
 
         #endregion

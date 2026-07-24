@@ -40,6 +40,28 @@ namespace ApostlesWar.Presentation.Desktop.Front
         public List<Combate> AlvosValidos { get; set; } = new();
         public string? Mensagem { get; set; }
 
+        /// <summary>
+        /// Zera o estado pra uma batalha NOVA. A sessão vive o boot inteiro (não é recriada por luta),
+        /// e os mapas de combatente casam por REFERÊNCIA — sem limpar, o Publicar mandaria os
+        /// combatentes das batalhas anteriores junto (bug do "time antigo acumulando na tela"). Chamado
+        /// pelo FluxoDoFront antes de cada Arena.
+        /// </summary>
+        public void Reiniciar()
+        {
+            _ids.Clear();
+            _porId.Clear();
+            _lado.Clear();
+            _mostrado.Clear();
+            _proximoId = 1;
+            _ladoDoJogadorDefinido = false;
+
+            Fase = FaseDaTela.Assistindo;
+            QuemAge = null;
+            HabilidadesDoTurno = new();
+            AlvosValidos = new();
+            Mensagem = null;
+        }
+
         public int IdDe(Combate c)
         {
             if (_ids.TryGetValue(c, out int id)) return id;
@@ -153,10 +175,6 @@ namespace ApostlesWar.Presentation.Desktop.Front
         {
             Combate? dono = QuemAge;
             var cooldown = dono?.Cooldowns.GetValueOrDefault(h);
-            // Espelha a regra do CombateService.ResolverAlvoInicial: inimigo sempre pede alvo;
-            // aliado pede quando o número de alvos é finito; Self nunca pede.
-            bool pedeAlvo = h.TipoLista == TipoLista.Inimigos
-                || (h.TipoLista == TipoLista.Aliados && h.NumeroDeAlvos != int.MaxValue);
 
             return new HabilidadeVista(
                 Indice: HabilidadesDoTurno.IndexOf(h),
@@ -165,7 +183,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 Descricao: h.Descricao,
                 CooldownRestante: cooldown?.CooldownRestante ?? 0,
                 Disponivel: cooldown?.Disponivel ?? true,
-                PedeAlvo: pedeAlvo,
+                PedeAlvo: h.PedeAlvoDoJogador,
                 Escopo: h.TipoLista.ToString());
         }
     }

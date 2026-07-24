@@ -7,8 +7,12 @@ using Microsoft.Web.WebView2.WinForms;
 
 namespace ApostlesWar.Presentation.Desktop.Front
 {
-    /// <summary>Um clique vindo da tela, já com significado (não é "tecla X").</summary>
-    internal record MensagemDoFront(string Tipo, int Valor);
+    /// <summary>
+    /// Um clique vindo da tela, já com significado (não é "tecla X"). <see cref="Valor"/> = índice
+    /// (opção de menu, habilidade, id de alvo); <see cref="Texto"/> = carga de texto quando o valor é
+    /// uma string (ex.: o nome do perfil na 1ª vez) — a maioria das mensagens não usa.
+    /// </summary>
+    internal record MensagemDoFront(string Tipo, int Valor, string? Texto = null);
 
     /// <summary>
     /// A PONTE: janela nativa + webview, e o vai-e-vem de mensagens com o JS. Não é HTTP nem servidor —
@@ -56,6 +60,13 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
         public void EnviarEstado(EstadoDeBatalha estado) => Enviar("estado", estado);
         public void EnviarEvento(EventoVisto evento) => Enviar("evento", evento);
+        public void EnviarMenu(MenuVisto menu) => Enviar("menu", menu);
+
+        /// <summary>Pede ao front a tela de criar perfil (1ª vez). A resposta volta como "criarPerfil".</summary>
+        public void PedirPerfil() => Enviar("criarPerfil", new { });
+
+        /// <summary>Abre a tela de editar perfil com os dados atuais. A resposta volta como "salvarPerfil".</summary>
+        public void EnviarEdicaoPerfil(EdicaoPerfilVista edicao) => Enviar("edicaoPerfil", edicao);
 
         private void Enviar(string tipo, object conteudo)
         {
@@ -99,6 +110,18 @@ namespace ApostlesWar.Presentation.Desktop.Front
         {
             _telaPronta.TrySetResult();
             _mensagens.Add(new MensagemDoFront("encerrar", 0));
+        }
+
+        /// <summary>
+        /// O JOGO pediu pra sair (opção Sair / Esc no menu): fecha a janela na thread de UI. O
+        /// FormClosing dispara o <see cref="Encerrar"/> em seguida — este só faz a janela ir embora.
+        /// </summary>
+        public void FecharJanela()
+        {
+            if (_janela.IsDisposed) return;
+            try { _janela.Invoke(() => _janela.Close()); }
+            catch (ObjectDisposedException) { }   // já fechou
+            catch (InvalidOperationException) { }  // handle já foi embora
         }
     }
 }

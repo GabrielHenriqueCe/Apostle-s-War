@@ -2,7 +2,7 @@ using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
 using ApostlesWar.Application.Controllers;
 
-namespace ApostlesWar.App.Front
+namespace ApostlesWar.Presentation.Desktop.Front
 {
     /// <summary>
     /// O jogador humano decidindo por CLIQUE. Implementa <see cref="IControladorDeTurno"/> — o mesmo

@@ -1,6 +1,6 @@
 using ApostlesWar.Application.Portas;
 
-namespace ApostlesWar.ConsoleUI.Views
+namespace ApostlesWar.Presentation.ConsoleUI.Views
 {
     /// <summary>Implementação de console da <see cref="IEntrada"/>: lê tecla e mapeia pra <see cref="Comando"/>.</summary>
     public class EntradaConsole : IEntrada

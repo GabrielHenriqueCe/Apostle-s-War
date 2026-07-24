@@ -1,8 +1,8 @@
 using ApostlesWar.Application.Portas;
-using ApostlesWar.ConsoleUI.Views;
+using ApostlesWar.Presentation.ConsoleUI.Views;
 using ApostlesWar.Domain;
 
-namespace ApostlesWar.ConsoleUI
+namespace ApostlesWar.Presentation.ConsoleUI
 {
     /// <summary>
     /// Controlador do JOGADOR humano: a ação vem do menu (navegação com cursor, pula habilidades em

@@ -2,7 +2,7 @@ using ApostlesWar.Domain;
 using ApostlesWar.Application.Portas;
 using ApostlesWar.Application.Services;
 
-namespace ApostlesWar.ConsoleUI.Views
+namespace ApostlesWar.Presentation.ConsoleUI.Views
 {
     /// <summary>
     /// View dos MENUS: telas de escolha de opção fora da luta (menu principal, capítulos, fases,

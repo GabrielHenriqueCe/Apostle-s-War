@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using ApostlesWar.Application.Services;
-using ApostlesWar.ConsoleUI.Views;
+using ApostlesWar.Presentation.ConsoleUI.Views;
 using ApostlesWar.Application.Controllers;
-using ApostlesWar.ConsoleUI;
+using ApostlesWar.Presentation.ConsoleUI;
 
 #region Program
 
@@ -20,7 +20,7 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 // Duas peles, o mesmo motor: sem flag roda o console de sempre; com --front sobe a janela webview.
 // Conviver é de propósito — o front nasce tela a tela e o jogo segue inteiro e jogável no console
 // enquanto isso (ver docs/ROADMAP §FRONT).
-if (args.Contains("--front")) return ApostlesWar.App.Front.AppFront.Rodar();
+if (args.Contains("--front")) return ApostlesWar.Presentation.Desktop.Front.AppFront.Rodar();
 
 var repositorioDeSave = new SaveLocal();             // porta de PERSISTÊNCIA (trocar por SaveSteam/SavePlayGames no porte)
 var capitulosService = new CapitulosService(repositorioDeSave);

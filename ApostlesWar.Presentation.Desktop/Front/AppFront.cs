@@ -3,11 +3,11 @@ using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
 using ApostlesWar.Application.Controllers;
 using ApostlesWar.Application.Services;
-using ApostlesWar.ConsoleUI.Views;
+using ApostlesWar.Presentation.ConsoleUI.Views;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace ApostlesWar.App.Front
+namespace ApostlesWar.Presentation.Desktop.Front
 {
     /// <summary>
     /// Sobe o jogo com a pele webview. É o composition root do front — o irmão do Program.cs, trocando

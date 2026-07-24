@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- DOMÍNIO: as regras do jogo (Combat, Skills, Champs, Models). Não referencia NADA — nem
+       projeto, nem pacote. Essa ausência de <ProjectReference> não é esquecimento, é o contrato:
+       o domínio não conhece tela, arquivo nem plataforma, e o compilador é quem garante
+       (a antiga separação por pasta virou fronteira de assembly). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>ApostlesWar.Domain</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

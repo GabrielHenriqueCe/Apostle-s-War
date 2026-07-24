@@ -19,7 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ApostlesWar.csproj" />
+    <!-- Testa o motor: Domain + Application (via API pública — sem InternalsVisibleTo). -->
+    <ProjectReference Include="..\ApostlesWar.Domain\ApostlesWar.Domain.csproj" />
+    <ProjectReference Include="..\ApostlesWar.Application\ApostlesWar.Application.csproj" />
   </ItemGroup>
 
 </Project>

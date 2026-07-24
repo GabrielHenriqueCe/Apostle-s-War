@@ -15,7 +15,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ApostlesWar.csproj" />
+    <!-- Composition root: o ÚNICO projeto que enxerga todas as camadas — é aqui que os fios são
+         ligados (Program.cs). Referenciar Infrastructure é a "impureza" permitida do modelo. -->
+    <ProjectReference Include="..\ApostlesWar.Domain\ApostlesWar.Domain.csproj" />
+    <ProjectReference Include="..\ApostlesWar.Application\ApostlesWar.Application.csproj" />
+    <ProjectReference Include="..\ApostlesWar.Infrastructure\ApostlesWar.Infrastructure.csproj" />
+    <ProjectReference Include="..\ApostlesWar.ConsoleUI\ApostlesWar.ConsoleUI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

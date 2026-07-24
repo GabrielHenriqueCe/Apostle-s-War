@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- PRESENTATION (console): a pele de terminal — views, EntradaConsole/ApresentacaoConsole e o
+       ControladorJogador (menu com cursor é formato de console, por isso ele mora aqui e não na
+       Application). Par da outra Presentation, o front webview (App/Front). "ConsoleUI" e não
+       "Console" porque um namespace com segmento Console sombrearia System.Console. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>ApostlesWar.ConsoleUI</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApostlesWar.Domain\ApostlesWar.Domain.csproj" />
+    <ProjectReference Include="..\ApostlesWar.Application\ApostlesWar.Application.csproj" />
+    <ProjectReference Include="..\..\GHUtils\GHUtils.csproj" />
+  </ItemGroup>
+
+</Project>

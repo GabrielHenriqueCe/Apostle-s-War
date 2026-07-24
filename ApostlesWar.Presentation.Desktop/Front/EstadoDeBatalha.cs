@@ -70,7 +70,14 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// palpitou "pede" e não pedia → dispara no 1º clique (como era antes); palpitou "não pede"
         /// e pedia → um clique a mais. Nenhum dos dois corrompe estado.
         /// </summary>
-        bool PedeAlvo
+        bool PedeAlvo,
+        /// <summary>
+        /// Em quem a habilidade age: "Inimigos", "Aliados" ou "Self" (espelha a TipoLista). Só a tela
+        /// usa, e só pras que NÃO pedem alvo (Self, buff em todos os aliados): armada a habilidade, os
+        /// combatentes válidos brilham e clicar num deles confirma — clicar em si mesmo pro buff
+        /// próprio, num aliado pro buff de aliado. O duplo-clique na habilidade segue valendo.
+        /// </summary>
+        string Escopo
     );
 
     /// <summary>

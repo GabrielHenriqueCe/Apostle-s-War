@@ -165,7 +165,8 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 Descricao: h.Descricao,
                 CooldownRestante: cooldown?.CooldownRestante ?? 0,
                 Disponivel: cooldown?.Disponivel ?? true,
-                PedeAlvo: pedeAlvo);
+                PedeAlvo: pedeAlvo,
+                Escopo: h.TipoLista.ToString());
         }
     }
 }

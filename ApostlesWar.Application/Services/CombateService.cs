@@ -275,6 +275,16 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         private void ExecutarAtos(List<EventoCombate> resultados, Combate atacante, TipoAtaque tipoAtaque)
         {
+            // GOLPE EM ÁREA = um baque só: mostra o dano de TODOS os alvos junto (uma pausa, não uma
+            // por alvo) e só depois processa as reações. Sem isso, a vida de todos já tinha caído no
+            // modelo mas os números pingavam de um em um (pedido do Gabriel: número + vida no mesmo
+            // instante, pra todos). O ataque SEQUENCIAL segue golpe-a-golpe (é a natureza dele).
+            if (tipoAtaque == TipoAtaque.AreaDeEfeito)
+            {
+                ExecutarAtosEmArea(resultados, atacante);
+                return;
+            }
+
             foreach (var ev in resultados)
             {
                 // Cura é irmã do dano no stream, mas só EXIBE — não dispara reação de dano.
@@ -294,12 +304,39 @@ namespace ApostlesWar.Application.Services
                 ProcessarReacoesAoMorrer(r.Alvo, atacante, r);
                 ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r);
 
+                // NaoAtaque (buff/cura puros) não dispara reação-de-ataque — só o Sequencial.
                 if (tipoAtaque == TipoAtaque.Sequencial)
                     ProcessarReacoesAtacantePorAtaque(atacante, r.Alvo, r);
             }
+        }
+
+        /// <summary>
+        /// Exibição do golpe em ÁREA: primeiro mostra todos os resultados (dano/cura) SEM pausa entre
+        /// eles — os números sobem juntos e as barras caem juntas —, depois UMA pausa, e só então as
+        /// reações por alvo (mesma ordem de antes; o dano já foi aplicado no modelo pelo hab.Ativar,
+        /// então mover a exibição pra frente não muda regra nenhuma). A reação-por-ataque do atacante
+        /// dispara uma vez, no fim.
+        /// </summary>
+        private void ExecutarAtosEmArea(List<EventoCombate> resultados, Combate atacante)
+        {
+            foreach (var ev in resultados)
+            {
+                if (ev is EventoCura cura) _combateView.ExibirCura(cura);
+                else _combateView.ExibirResultadoAtaque(atacante, ((EventoDano)ev).Alvo, (EventoDano)ev);
+            }
+
+            if (resultados.Count > 0) Aguardar(1500);
 
             var danos = resultados.OfType<EventoDano>().ToList();
-            if (tipoAtaque == TipoAtaque.AreaDeEfeito && danos.Count > 0)
+            foreach (var r in danos)
+            {
+                ProcessarReacoesAlvo(r.Alvo, atacante, r);
+                ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r);
+                ProcessarReacoesAoMorrer(r.Alvo, atacante, r);
+                ProcessarReacoesAtacantePorAlvo(atacante, r.Alvo, r);
+            }
+
+            if (danos.Count > 0)
                 ProcessarReacoesAtacantePorAtaque(atacante, danos[0].Alvo, danos[0]);
         }
 

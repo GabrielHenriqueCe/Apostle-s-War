@@ -52,9 +52,9 @@ function desenhar() {
 
     document.getElementById('turno').textContent = `Turno ${estado.turno}`;
 
-    const narracao = document.getElementById('narracao');
-    narracao.textContent = estado.mensagem || '';
-    narracao.classList.toggle('fim', nomeDaFase(estado) === 'Fim');
+    // A mensagem do retrato entra no log (sem repetir a que já está lá). O fim de batalha ganha
+    // destaque próprio.
+    if (estado.mensagem) registrar(estado.mensagem, nomeDaFase(estado) === 'Fim' ? 'morte' : '');
 
     desenharLado('ladoEsquerdo', estado.equipe1);
     desenharLado('ladoDireito', estado.equipe2);
@@ -274,31 +274,93 @@ document.getElementById('alternarNumeros').addEventListener('click', e => {
     desenhar();
 });
 
+// ---------- velocidade ----------
+// Só encurta a ESPERA entre eventos (o C# divide os 1500ms por este número); as animações em si
+// mantêm a duração, senão o dano deixaria de ser visível — que era o ponto de tudo isto.
+const VELOCIDADES = [1, 2, 4];
+let velocidade = 2;   // começa acelerado: com o log persistente, ninguém precisa esperar pra ler
+
+function aplicarVelocidade() {
+    const b = document.getElementById('velocidade');
+    b.textContent = `${'▶'.repeat(velocidade === 1 ? 1 : velocidade === 2 ? 2 : 3)} ${velocidade}x`;
+    b.classList.toggle('rapido', velocidade > 1);
+    mandar('velocidade', velocidade);
+}
+
+document.getElementById('velocidade').addEventListener('click', () => {
+    velocidade = VELOCIDADES[(VELOCIDADES.indexOf(velocidade) + 1) % VELOCIDADES.length];
+    aplicarVelocidade();
+});
+
+// ---------- log persistente ----------
+// O log substitui a frase solta no meio da tela. Como tudo fica registrado e rolável, a espera
+// entre eventos deixou de servir pra "dar tempo de ler" — por isso o botão de velocidade (>>)
+// existe, e por isso ele começa em 2x.
+let ultimaLinha = null;
+
+// `permitirRepetir`: linhas de dano podem se repetir de verdade (dois golpes iguais seguidos);
+// já a mensagem do retrato é eco da que veio no evento, e essa a gente descarta.
+function registrar(texto, classe = '', permitirRepetir = false) {
+    if (!texto || (!permitirRepetir && texto === ultimaLinha)) return;
+    ultimaLinha = texto;
+
+    const log = document.getElementById('log');
+    log.querySelector('.linhaLog.atual')?.classList.remove('atual');
+
+    const linha = document.createElement('div');
+    linha.className = `linhaLog atual ${classe}`.trim();
+    linha.textContent = texto;
+    log.appendChild(linha);
+
+    // Só acompanha o fim se o jogador já estava no fim — se ele subiu pra ler, não arrastamos.
+    if (coladoNoFim) log.scrollTop = log.scrollHeight;
+}
+
+// Enquanto o jogador estiver lendo o histórico, o log não rouba a rolagem dele.
+let coladoNoFim = true;
+document.getElementById('log').addEventListener('scroll', e => {
+    const el = e.currentTarget;
+    coladoNoFim = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
+});
+
+const nomeDe = id => acharCombatente(id)?.nome ?? '';
+
 // ---------- eventos (animação) ----------
 function aplicarEvento(ev) {
     if (ev.tipo === 'narracao') {
-        if (ev.texto) document.getElementById('narracao').textContent = ev.texto;
+        registrar(ev.texto);
         return;
     }
 
     const el = document.querySelector(`.combatente[data-id="${ev.alvoId}"]`);
     if (!el) return;
 
+    const nome = nomeDe(ev.alvoId);
+
     if (ev.tipo === 'dano') {
         // Golpe todo aparado pelo escudo: mostra o escudo segurando, não um "0" seco.
         if (ev.valor <= 0 && ev.absorvidoPeloEscudo > 0) {
             flutuar(el, `🛡️ ${ev.absorvidoPeloEscudo}`, 'escudo');
+            registrar(`🛡️ ${nome} aparou o golpe (${ev.absorvidoPeloEscudo}).`, '', true);
         } else {
             reanimar(el, 'batendo');
             reanimar(el, 'ferido');
             flutuar(el, `-${ev.valor}`, ev.critico ? 'dano critico' : 'dano');
             if (ev.absorvidoPeloEscudo > 0) flutuar(el, `🛡️ ${ev.absorvidoPeloEscudo}`, 'escudo');
+
+            const escudo = ev.absorvidoPeloEscudo > 0 ? ` (🛡️ ${ev.absorvidoPeloEscudo})` : '';
+            registrar(
+                ev.critico ? `💥 CRÍTICO! ${nome} levou ${ev.valor}${escudo}.`
+                           : `${nome} levou ${ev.valor} de dano${escudo}.`,
+                ev.critico ? 'critico' : '', true);
         }
     } else if (ev.tipo === 'cura') {
         reanimar(el, 'curado');
         flutuar(el, `+${ev.valor}`, 'cura');
+        registrar(`💚 ${nome} recuperou ${ev.valor}.`, 'cura', true);
     } else if (ev.tipo === 'morte') {
         flutuar(el, '💀', 'dano');
+        registrar(`💀 ${nome} caiu!`, 'morte', true);
     }
 }
 
@@ -329,4 +391,5 @@ function flutuar(el, texto, classe) {
 
 // ---------- partida ----------
 document.getElementById('alternarNumeros').classList.toggle('ativo', mostrarNumeros);
-mandar('pronto');   // destrava a thread do jogo no C#
+aplicarVelocidade();   // sincroniza o C# com o 2x inicial
+mandar('pronto');      // destrava a thread do jogo no C#

@@ -87,13 +87,21 @@ namespace ApostlesWar.Presentation.Desktop.Front
             _sessao.Publicar();
         }
 
-        /// <summary>A "fala" do champ ao usar a habilidade — o balão que o Gabriel pediu.</summary>
+        /// <summary>
+        /// A "fala" do champ ao usar a habilidade — o balão que o Gabriel pediu.
+        ///
+        /// NÃO PUBLICA ESTADO DE PROPÓSITO. Quando isto roda, o `hab.Ativar` já mexeu no modelo
+        /// (o CombateService executa TUDO e só depois narra), então publicar aqui entregaria o HP
+        /// já descontado — a barra caía 1,5s ANTES do número de dano subir. Deixando o retrato pro
+        /// <see cref="ExibirResultadoAtaque"/>, a barra desce no mesmo instante em que o número salta.
+        /// O texto não se perde: viaja no evento de narração abaixo, e a Mensagem entra no próximo
+        /// retrato.
+        /// </summary>
         public void ExibirUsoHabilidade(Combate atacante, Habilidade hab)
         {
             _sessao.Mensagem = $"{atacante.Personagem.Simbolo} usou {hab.Simbolo} {hab.Nome}!";
             _ponte.EnviarEvento(new EventoVisto(
                 "narracao", _sessao.IdDe(atacante), 0, false, 0, _sessao.Mensagem));
-            _sessao.Publicar();
         }
 
         public void ExibirResumoBatalha(List<Combate> jogador) => Encerrar("Fim da batalha!");

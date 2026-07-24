@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ApostlesWar.Application;
+using ApostlesWar.Application.Portas;
 using ApostlesWar.Application.Services;
 using ApostlesWar.Domain;
 
@@ -35,20 +36,38 @@ namespace ApostlesWar.Presentation.Desktop.Front
         // "Janela fechada" desenrola a navegação inteira (mesma ideia do BatalhaAbortada no motor).
         private sealed class JogoEncerrado : Exception { }
 
+        // Chave do save da POSIÇÃO no mapa (último lugar). Ausente = 0 = Reino.
+        private const string ChavePosicao = "campanha";
+
+        // As 8 facções-capítulo, em ordem (Humanos é o time inicial, não é capítulo).
+        private static readonly List<Faccao> FaccoesDaCampanha =
+            Enum.GetValues<Faccao>().Where(f => f != Faccao.Humanos).ToList();
+
         private readonly PonteWebView2 _ponte;
         private readonly CombateService _combate;
         private readonly CampeoesService _campeoes;
         private readonly PerfilService _perfil;
         private readonly SessaoDoFront _sessao;
+        private readonly CampanhaService _campanha;
+        private readonly CapitulosService _capitulos;
+        private readonly ArsenalService _arsenal;
+        private readonly PersonagemService _personagens;
+        private readonly IRepositorioDeSave _repositorio;
 
         public FluxoDoFront(PonteWebView2 ponte, CombateService combate, CampeoesService campeoes,
-            PerfilService perfil, SessaoDoFront sessao)
+            PerfilService perfil, SessaoDoFront sessao, CampanhaService campanha, CapitulosService capitulos,
+            ArsenalService arsenal, PersonagemService personagens, IRepositorioDeSave repositorio)
         {
             _ponte = ponte;
             _combate = combate;
             _campeoes = campeoes;
             _perfil = perfil;
             _sessao = sessao;
+            _campanha = campanha;
+            _capitulos = capitulos;
+            _arsenal = arsenal;
+            _personagens = personagens;
+            _repositorio = repositorio;
         }
 
         public void Rodar()
@@ -61,6 +80,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 {
                     switch (MostrarMenuPrincipal())
                     {
+                        case Campanha:
+                            MostrarCampanha();
+                            break;
+
                         case Arena:
                             MontarArena();
                             break;
@@ -118,7 +141,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 "Apostle's War", "RPG por turnos",
                 new List<OpcaoMenuVista>
                 {
-                    new("Campanha",     "🗺️", Habilitado: false),   // próxima fatia
+                    new("Campanha",     "🗺️", Habilitado: true),
                     new("Arena",        "⚔️", Habilitado: true),
                     new("Configurações", "⚙️", Habilitado: true),
                     new("Sair",         "🚪", Habilitado: true),
@@ -298,6 +321,146 @@ namespace ApostlesWar.Presentation.Desktop.Front
                     _perfil.CriarPerfil(nome, escolhido.Simbolo);   // sobrescreve (mesma chave)
                     return;
                 }
+            }
+        }
+
+        // ---------- Campanha ----------
+
+        /// <summary>
+        /// Campanha: carrega o progresso, mostra o mapa e roteia. O save fully-unlocked do console
+        /// carrega direto; sem save, cai nos defaults (Reino fase 1, só Humanos). A posição no mapa
+        /// (último lugar) persiste na chave "campanha".
+        /// </summary>
+        private void MostrarCampanha()
+        {
+            _campanha.CarregarSaves();
+            int posicao = _repositorio.Carregar<int>(ChavePosicao);   // 0 (ausente) = Reino
+
+            while (true)
+            {
+                _ponte.LimparPendentes();
+                _ponte.EnviarMapa(MontarMapa(posicao));
+
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "voltar") return;   // volta pro menu principal
+
+                if (msg.Tipo == "selecionarCapitulo")
+                {
+                    int idx = msg.Valor;
+                    if (idx < 0 || idx >= FaccoesDaCampanha.Count) continue;
+                    Faccao faccao = FaccoesDaCampanha[idx];
+                    if (!_capitulos.EstaCapituloDesbloqueado(faccao)) continue;   // bloqueado: ignora
+
+                    posicao = idx;
+                    _repositorio.Salvar(ChavePosicao, posicao);   // último lugar
+                    MostrarFases(faccao);
+                }
+            }
+        }
+
+        private MapaVista MontarMapa(int posicao)
+        {
+            var capitulos = FaccoesDaCampanha.Select(f => new CapituloVista(
+                Faccoes.Simbolo(f), f.Descricao(),
+                _capitulos.EstaCapituloDesbloqueado(f),
+                _capitulos.CapituloConcluido(f))).ToList();
+            return new MapaVista(capitulos, posicao);
+        }
+
+        /// <summary>Tela de fases de uma facção: escolhe a fase, monta o time (≤4 dos liberados) e luta.</summary>
+        private void MostrarFases(Faccao faccao)
+        {
+            while (true)
+            {
+                _ponte.LimparPendentes();
+                _ponte.EnviarFases(MontarFases(faccao));
+
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "voltar") return;   // volta pro mapa
+
+                if (msg.Tipo == "iniciarFase" && ValidarFase(msg.Texto, faccao, out Fases fase, out var time))
+                {
+                    _sessao.Reiniciar();
+                    _ponte.LimparPendentes();
+                    ResultadoFase resultado = _combate.ExecutarFaseComTime(time, faccao, fase);
+
+                    if (resultado == ResultadoFase.Venceu)
+                        _ponte.EnviarVitoria(MontarRecompensa(_campanha.ProcessarVitoria(faccao, fase)));
+                    else
+                        _ponte.EnviarDerrota();   // Perdeu (Cancelou não acontece — o front pica o time)
+
+                    EsperarContinuar();
+                    // o while re-renderiza as fases já atualizadas
+                }
+            }
+        }
+
+        private FasesVista MontarFases(Faccao faccao)
+        {
+            var fases = Enum.GetValues<Fases>().Select(f => MontarFase(faccao, f)).ToList();
+            var meus = _campeoes.ObterDesbloqueados()
+                .Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+            return new FasesVista(faccao.Descricao(), Faccoes.Simbolo(faccao), fases, meus);
+        }
+
+        private FaseVista MontarFase(Faccao faccao, Fases fase)
+        {
+            Fase dados = ApostlesWar.Domain.Campanha.ObterFase((int)fase);   // qualificado: o const Campanha sombreia a classe
+            Item item = _arsenal.PreverItem(faccao, fase);
+            return new FaseVista(
+                (int)fase, fase.Descricao(),
+                _capitulos.EstaDesbloqueado(faccao, fase),
+                _capitulos.FaseConcluida(faccao, fase),
+                Inimigos(faccao, dados.Rodada1), Inimigos(faccao, dados.Rodada2),
+                new ItemVista(item.Simbolo, item.Nome, item.NomeStat(), item.ValorFormatado()));
+        }
+
+        private List<CampeaoVisto> Inimigos(Faccao faccao, List<Slot> slots) => slots
+            .Select(s => _personagens.ObterPersonagem(faccao, s))
+            .Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true))
+            .ToList();
+
+        private static RecompensaVista MontarRecompensa(RecompensaDaFase r)
+        {
+            var novos = r.NovosCampeoes.Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+            ItemVista? item = r.Item is null ? null
+                : new ItemVista(r.Item.Simbolo, r.Item.Nome, r.Item.NomeStat(), r.Item.ValorFormatado());
+            return new RecompensaVista(novos, item);
+        }
+
+        /// <summary>Valida o iniciarFase: fase liberada + time de 1 a 4 dos desbloqueados. Mapeia os índices.</summary>
+        private bool ValidarFase(string? texto, Faccao faccao, out Fases fase, out List<Personagem> time)
+        {
+            fase = default;
+            time = new List<Personagem>();
+            if (string.IsNullOrEmpty(texto)) return false;
+
+            FaseConfig? cfg;
+            try { cfg = JsonSerializer.Deserialize<FaseConfig>(texto, ConfigJson); }
+            catch (JsonException) { return false; }
+            if (cfg is null || cfg.Fase < 1 || cfg.Fase > 7) return false;
+
+            fase = (Fases)cfg.Fase;
+            if (!_capitulos.EstaDesbloqueado(faccao, fase)) return false;
+
+            var pool = _campeoes.ObterDesbloqueados();
+            if (cfg.Time is not { Length: >= 1 and <= 4 } || !cfg.Time.All(i => i >= 0 && i < pool.Count))
+                return false;
+
+            time = cfg.Time.Select(i => pool[i]).ToList();
+            return true;
+        }
+
+        /// <summary>Segura a tela de vitória/derrota até o jogador clicar pra continuar.</summary>
+        private void EsperarContinuar()
+        {
+            while (true)
+            {
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "continuar") return;
             }
         }
 

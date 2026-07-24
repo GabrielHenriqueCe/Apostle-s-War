@@ -132,4 +132,29 @@ namespace ApostlesWar.Presentation.Desktop.Front
     /// campo Texto da mensagem (a ponte só carrega 1 int/1 string por clique).
     /// </summary>
     internal record ArenaConfig(int[] Time1, int[] Time2, bool Bot1, bool Bot2);
+
+    // ---------- Campanha ----------
+
+    /// <summary>Um nó do mapa = uma facção-capítulo. Índice = posição na lista enviada (Reino..Apóstolos).</summary>
+    internal record CapituloVista(string Simbolo, string Nome, bool Desbloqueado, bool Concluido);
+
+    /// <summary>O mapa: as 8 facções em ordem + a posição atual (índice) onde o marcador começa.</summary>
+    internal record MapaVista(List<CapituloVista> Capitulos, int Posicao);
+
+    /// <summary>Um item pra mostrar (drop da fase / recompensa).</summary>
+    internal record ItemVista(string Simbolo, string Nome, string Stat, string Valor);
+
+    /// <summary>Uma fase: número (1..7), nome (do item), status, inimigos das 2 rodadas e o item que dropa.</summary>
+    internal record FaseVista(int Numero, string Nome, bool Desbloqueado, bool Concluido,
+        List<CampeaoVisto> Rodada1, List<CampeaoVisto> Rodada2, ItemVista Item);
+
+    /// <summary>A tela de fases de uma facção: as 7 fases + o pool de champs desbloqueados pra montar o time.</summary>
+    internal record FasesVista(string CapituloNome, string CapituloSimbolo, List<FaseVista> Fases,
+        List<CampeaoVisto> MeusCampeoes);
+
+    /// <summary>Recompensa da vitória: os champs novos desbloqueados + o item dropado (null se já tinha).</summary>
+    internal record RecompensaVista(List<CampeaoVisto> Novos, ItemVista? Item);
+
+    /// <summary>O que o front devolve ao iniciar uma fase: a fase (1..7) e o time como índices dos desbloqueados.</summary>
+    internal record FaseConfig(int Fase, int[] Time);
 }

@@ -15,8 +15,9 @@ let estado = null;
 let selecionadoId = null;    // quem está aberto no painel de baixo
 let habilidadeEscolhida = null;
 let mostrarEstatisticas = true;   // hoje ligado: fase de teste de balance
-let cenaAtual = 'menu';      // 'menu' | 'combate' | 'criarPerfil' — o Esc depende disto
+let cenaAtual = 'menu';      // cena atual (menu, combate, criarPerfil, arenaSetup, campanha*) — o Esc depende disto
 let menuRaiz = true;         // o menu na tela é o PRINCIPAL? (decide o Esc: sair do jogo × voltar)
+let perfilAvatar = '🧭';     // avatar do jogador; vira o marcador que caminha no mapa
 
 // ---------- envio ----------
 // `texto` só é usado quando o valor é uma string (ex: o nome do perfil); o resto manda só o índice.
@@ -34,6 +35,10 @@ ponte.addEventListener('message', e => {
     else if (msg.tipo === 'criarPerfil') mostrarCriarPerfil();
     else if (msg.tipo === 'edicaoPerfil') mostrarEditarPerfil(msg.conteudo);
     else if (msg.tipo === 'montagemArena') mostrarMontagemArena(msg.conteudo.campeoes);
+    else if (msg.tipo === 'campanhaMapa') mostrarMapa(msg.conteudo);
+    else if (msg.tipo === 'campanhaFases') mostrarFasesCampanha(msg.conteudo);
+    else if (msg.tipo === 'campanhaVitoria') mostrarVitoria(msg.conteudo);
+    else if (msg.tipo === 'campanhaDerrota') mostrarDerrota();
 });
 
 // ---------- cenas (menu × combate × criar/editar perfil) ----------
@@ -44,6 +49,10 @@ function mostrarCena(cena) {
     document.getElementById('criarPerfil').hidden = cena !== 'criarPerfil';
     document.getElementById('editarPerfil').hidden = cena !== 'editarPerfil';
     document.getElementById('arenaSetup').hidden = cena !== 'arenaSetup';
+    document.getElementById('campanhaMapa').hidden = cena !== 'campanhaMapa';
+    document.getElementById('campanhaFases').hidden = cena !== 'campanhaFases';
+    document.getElementById('campanhaVitoria').hidden = cena !== 'campanhaVitoria';
+    document.getElementById('campanhaDerrota').hidden = cena !== 'campanhaDerrota';
     document.getElementById('arena').hidden = !emCombate;
     document.getElementById('painel').hidden = !emCombate;
     // Os controles de combate só fazem sentido na batalha.
@@ -63,6 +72,7 @@ function aplicarMenu(m) {
     const perfil = document.getElementById('menuPerfil');
     perfil.hidden = !m.avatar;
     if (m.avatar) {
+        perfilAvatar = m.avatar;
         document.getElementById('menuAvatar').textContent = m.avatar;
         document.getElementById('menuNome').textContent = m.nome || '';
     }
@@ -221,7 +231,7 @@ function montarPickerArena() {
         const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
         const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
         cel.append(em, nm);
-        cel.addEventListener('click', () => escolherCampeaoArena(i));
+        cel.addEventListener('click', () => escolherCampeaoArena(i));   // 1 clique alterna (adiciona/remove)
         return cel;
     }));
 }
@@ -242,7 +252,11 @@ function desenharSlotsArena() {
                 const v = document.createElement('span'); v.className = 'slotVazio'; v.textContent = 'clique e escolha';
                 slot.append(v);
             }
-            slot.addEventListener('click', () => { arenaSlotSel = { lado, i }; desenharSlotsArena(); });
+            slot.addEventListener('click', () => {
+                if (arenaTimes[lado][i] != null) arenaTimes[lado][i] = null;   // clique no champ = remove
+                else arenaSlotSel = { lado, i };                                // slot vazio = foca este lado
+                desenharSlotsArena();
+            });
             return slot;
         }));
     }
@@ -251,23 +265,14 @@ function desenharSlotsArena() {
     document.getElementById('setupLutar').disabled = !podeLutar;
 }
 
+// 1 clique alterna: se o champ já está no lado em foco (default esquerda), remove; senão entra no 1º
+// slot vazio dele. Pra montar o outro lado, clica num slot vazio dele antes (foca o lado).
 function escolherCampeaoArena(idx) {
-    if (!arenaSlotSel) arenaSlotSel = primeiroVazioArena();   // sem slot: cai no 1º vazio
-    if (!arenaSlotSel) return;
-    const { lado, i } = arenaSlotSel;
-    if (arenaTimes[lado].some((v, k) => v === idx && k !== i)) return;   // sem repetir no mesmo time
-    arenaTimes[lado][i] = idx;
-    const prox = arenaTimes[lado].findIndex(v => v == null);            // avança pro próximo vazio do lado
-    arenaSlotSel = prox >= 0 ? { lado, i: prox } : null;
+    const lado = arenaSlotSel ? arenaSlotSel.lado : 'esq';
+    const k = arenaTimes[lado].indexOf(idx);
+    if (k >= 0) arenaTimes[lado][k] = null;
+    else { const e = arenaTimes[lado].indexOf(null); if (e >= 0) arenaTimes[lado][e] = idx; }
     desenharSlotsArena();
-}
-
-function primeiroVazioArena() {
-    for (const lado of ['esq', 'dir']) {
-        const i = arenaTimes[lado].findIndex(v => v == null);
-        if (i >= 0) return { lado, i };
-    }
-    return null;
 }
 
 function sortearLadoArena(lado) {
@@ -303,6 +308,242 @@ document.getElementById('setupLutar').addEventListener('click', () => {
     }));
 });
 
+// ---------- Campanha: mapa ----------
+const ESPACO_NO = 210;   // distância horizontal entre facções
+let mapaNodeX = [];      // x de cada nó (o marcador anda até um deles)
+let mapaSelecionado = -1;// facção com o marcador em cima e o botão "Entrar" visível; -1 = nenhuma
+
+function mostrarMapa(m) {
+    mostrarCena('campanhaMapa');
+    mapaSelecionado = -1;
+    const trilha = document.getElementById('mapaTrilha');
+    mapaNodeX = m.capitulos.map((_, i) => 110 + i * ESPACO_NO);
+
+    const nos = m.capitulos.map((c, i) => {
+        const no = document.createElement('div');
+        no.className = 'mapaNo' + (c.desbloqueado ? '' : ' bloqueado') + (c.concluido ? ' concluido' : '');
+        no.style.left = mapaNodeX[i] + 'px';
+        no.dataset.idx = i;
+        const circ = document.createElement('div'); circ.className = 'noCirculo'; circ.textContent = c.desbloqueado ? c.simbolo : '🔒';
+        const nome = document.createElement('div'); nome.className = 'noNome'; nome.textContent = c.nome;
+        no.append(circ, nome);
+        if (c.desbloqueado) {
+            const entrar = document.createElement('button');
+            entrar.type = 'button'; entrar.className = 'noEntrar'; entrar.textContent = 'Entrar'; entrar.hidden = true;
+            entrar.addEventListener('click', e => { e.stopPropagation(); mandar('selecionarCapitulo', i); });
+            no.appendChild(entrar);
+            no.addEventListener('click', () => clicarNo(i));
+        }
+        return no;
+    });
+
+    trilha.style.width = (220 + (m.capitulos.length - 1) * ESPACO_NO) + 'px';
+    const marcador = document.getElementById('mapaMarcador');
+    marcador.textContent = perfilAvatar;
+    trilha.replaceChildren(marcador, ...nos);
+
+    // posiciona SEM animar (troca de cena); zera o pan
+    marcador.style.transition = 'none';
+    marcador.style.left = mapaNodeX[Math.max(0, Math.min(m.posicao, mapaNodeX.length - 1))] + 'px';
+    mapaOffset = 0; mapaOffsetBase = 0; trilha.style.transform = 'translateX(0px)';
+    requestAnimationFrame(() => { marcador.style.transition = ''; });
+}
+
+// 1º clique numa facção: o marcador caminha até ela e o botão "Entrar" aparece. 2º clique na MESMA
+// (ou o botão): entra. Assim dá pra só andar pelo mapa sem entrar.
+function clicarNo(i) {
+    if (mapaMoveu) return;   // foi arrasto, não clique
+    if (i === mapaSelecionado) { mandar('selecionarCapitulo', i); return; }
+    mapaSelecionado = i;
+    document.getElementById('mapaMarcador').style.left = mapaNodeX[i] + 'px';   // caminha (~1.4s CSS)
+    atualizarEntrarBotoes();
+}
+
+function atualizarEntrarBotoes() {
+    document.querySelectorAll('#mapaTrilha .mapaNo').forEach(no => {
+        const btn = no.querySelector('.noEntrar');
+        if (btn) btn.hidden = Number(no.dataset.idx) !== mapaSelecionado;
+    });
+}
+
+// pan por arrasto (sem barra de rolagem)
+let mapaArrastando = false, mapaStartX = 0, mapaOffset = 0, mapaOffsetBase = 0, mapaMoveu = false;
+(() => {
+    const vp = document.getElementById('mapaViewport');
+    vp.addEventListener('mousedown', e => { mapaArrastando = true; mapaMoveu = false; mapaStartX = e.clientX; vp.classList.add('arrastando'); });
+    window.addEventListener('mousemove', e => {
+        if (!mapaArrastando) return;
+        const dx = e.clientX - mapaStartX;
+        if (Math.abs(dx) > 4) mapaMoveu = true;
+        const trilha = document.getElementById('mapaTrilha');
+        const limite = Math.min(0, vp.clientWidth - trilha.offsetWidth);
+        mapaOffset = Math.max(limite, Math.min(0, mapaOffsetBase + dx));
+        trilha.style.transform = `translateX(${mapaOffset}px)`;
+    });
+    window.addEventListener('mouseup', () => {
+        if (!mapaArrastando) return;
+        mapaArrastando = false; mapaOffsetBase = mapaOffset;
+        document.getElementById('mapaViewport').classList.remove('arrastando');
+    });
+})();
+
+document.getElementById('mapaVoltar').addEventListener('click', () => mandar('voltar'));
+
+// ---------- Campanha: fases ----------
+let campFases = null, campFaseSel = null;
+let campTime = [null, null, null, null];
+
+function mostrarFasesCampanha(f) {
+    mostrarCena('campanhaFases');
+    campFases = f;
+    campFaseSel = null;
+    campTime = [null, null, null, null];
+    document.getElementById('fasesTitulo').textContent = `${f.capituloSimbolo} ${f.capituloNome}`;
+    document.getElementById('faseDetalhe').hidden = true;
+    document.getElementById('fasesLutar').disabled = true;
+
+    document.getElementById('fasesLista').replaceChildren(...f.fases.map(fase => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'faseBtn';
+        b.disabled = !fase.desbloqueado;
+        const st = document.createElement('span'); st.className = 'faseStatus';
+        st.textContent = !fase.desbloqueado ? '🔒' : fase.concluido ? '✅' : '⚔️';
+        const nm = document.createElement('span'); nm.className = 'faseNome'; nm.textContent = `${fase.numero}. ${fase.nome}`;
+        b.append(st, nm);
+        if (fase.desbloqueado) b.addEventListener('click', () => selecionarFaseCampanha(fase, b));
+        return b;
+    }));
+
+    montarPickerFase();
+}
+
+function selecionarFaseCampanha(fase, btn) {
+    campFaseSel = fase;
+    [...document.getElementById('fasesLista').children].forEach(b => b.classList.remove('selecionada'));
+    btn.classList.add('selecionada');
+    document.getElementById('faseDetalhe').hidden = false;
+
+    document.getElementById('faseInimigos').replaceChildren(
+        grupoRodada('Rodada 1', fase.rodada1), grupoRodada('Rodada 2', fase.rodada2));
+
+    const it = fase.item;
+    const item = document.getElementById('faseItem');
+    item.replaceChildren();
+    const emo = document.createElement('span'); emo.className = 'fiEmoji'; emo.textContent = it.simbolo;
+    const txt = document.createElement('span'); txt.textContent = `${it.nome} · `;
+    const stat = document.createElement('span'); stat.className = 'fiStat'; stat.textContent = `${it.stat} ${it.valor}`;
+    item.append(emo, txt, stat);
+
+    atualizarLutarFase();
+}
+
+function grupoRodada(titulo, champs) {
+    const g = document.createElement('div'); g.className = 'rodadaGrupo';
+    const t = document.createElement('div'); t.className = 'rodadaTitulo'; t.textContent = titulo;
+    const cs = document.createElement('div'); cs.className = 'rodadaChamps';
+    cs.replaceChildren(...champs.map(c => {
+        const m = document.createElement('div'); m.className = 'miniChamp';
+        const e = document.createElement('span'); e.className = 'mcEmoji'; e.textContent = c.simbolo;
+        const n = document.createElement('span'); n.className = 'mcNome'; n.textContent = c.nome;
+        m.append(e, n);
+        return m;
+    }));
+    g.append(t, cs);
+    return g;
+}
+
+function montarPickerFase() {
+    document.getElementById('fasePicker').replaceChildren(...campFases.meusCampeoes.map((c, i) => {
+        const cel = document.createElement('div');
+        cel.className = 'avatarCelula';
+        const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
+        const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
+        cel.append(em, nm);
+        cel.addEventListener('click', () => escolherChampFase(i));   // 1 clique alterna (adiciona/remove)
+        return cel;
+    }));
+    desenharSlotsFase();
+}
+
+function desenharSlotsFase() {
+    document.getElementById('faseSlots').replaceChildren(...campTime.map((idx, i) => {
+        const slot = document.createElement('div');
+        slot.className = 'slot' + (idx != null ? ' preenchido' : '');
+        if (idx != null) {
+            const c = campFases.meusCampeoes[idx];
+            const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;
+            const nm = document.createElement('span'); nm.className = 'slotNome'; nm.textContent = c.nome;
+            slot.append(em, nm);
+        } else {
+            const v = document.createElement('span'); v.className = 'slotVazio'; v.textContent = 'vazio';
+            slot.append(v);
+        }
+        // Clique no champ montado = remove (slot vazio não faz nada; o picker preenche o 1º vazio).
+        slot.addEventListener('click', () => { if (campTime[i] != null) { campTime[i] = null; desenharSlotsFase(); } });
+        return slot;
+    }));
+    atualizarLutarFase();
+}
+
+// 1 clique alterna: se o champ já está no time, remove; senão entra no 1º slot vazio.
+function escolherChampFase(idx) {
+    const k = campTime.indexOf(idx);
+    if (k >= 0) campTime[k] = null;
+    else { const e = campTime.indexOf(null); if (e >= 0) campTime[e] = idx; }
+    desenharSlotsFase();
+}
+
+function atualizarLutarFase() {
+    const temTime = campTime.some(v => v != null);
+    document.getElementById('fasesLutar').disabled = !(campFaseSel && temTime);
+}
+
+document.getElementById('fasesVoltar').addEventListener('click', () => mandar('voltar'));
+document.getElementById('fasesLutar').addEventListener('click', () => {
+    if (!campFaseSel) return;
+    const time = campTime.filter(v => v != null);
+    if (!time.length) return;
+    mandar('iniciarFase', 0, JSON.stringify({ fase: campFaseSel.numero, time }));
+});
+
+// ---------- Campanha: vitória / derrota ----------
+function mostrarVitoria(r) {
+    mostrarCena('campanhaVitoria');
+    const cont = document.getElementById('vitoriaConteudo');
+    cont.replaceChildren();
+
+    if (r.novos && r.novos.length) {
+        const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
+        const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Novos campeões';
+        const cs = document.createElement('div'); cs.className = 'recompensaChamps';
+        cs.replaceChildren(...r.novos.map(c => {
+            const m = document.createElement('div'); m.className = 'miniChamp';
+            const e = document.createElement('span'); e.className = 'mcEmoji'; e.textContent = c.simbolo;
+            const n = document.createElement('span'); n.className = 'mcNome'; n.textContent = c.nome;
+            m.append(e, n); return m;
+        }));
+        bloco.append(t, cs); cont.append(bloco);
+    }
+    if (r.item) {
+        const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
+        const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Novo item';
+        const linha = document.createElement('div'); linha.style.fontSize = '16px';
+        linha.textContent = `${r.item.simbolo} ${r.item.nome} · ${r.item.stat} ${r.item.valor}`;
+        bloco.append(t, linha); cont.append(bloco);
+    }
+    if (!cont.children.length) {
+        const p = document.createElement('div'); p.textContent = 'Fase vencida!'; cont.append(p);
+    }
+}
+
+function mostrarDerrota() {
+    mostrarCena('campanhaDerrota');
+}
+
+document.getElementById('campanhaVitoria').addEventListener('click', () => mandar('continuar'));
+document.getElementById('campanhaDerrota').addEventListener('click', () => mandar('continuar'));
+
 // ---------- modal de confirmação ----------
 let modalAberto = false;
 let modalAoConfirmar = null;
@@ -328,6 +569,10 @@ document.getElementById('modalConfirmar').addEventListener('click', () => {
 document.getElementById('modalCancelar').addEventListener('click', fecharModal);
 
 function aplicarEstado(novo) {
+    // Batalha nova (entrando no combate de outra cena) → log limpo. O log não persiste entre fases/
+    // arenas: acabou a luta, morre; ao entrar de novo (mesma fase inclusive) nasce um log novo. Entre
+    // as 2 rodadas de uma fase a cena continua 'combate', então o log dessa fase é preservado.
+    if (cenaAtual !== 'combate') limparLog();
     mostrarCena('combate');   // chegou estado de batalha → sai do menu
 
     // Ao voltar pra escolha de ação, a habilidade anterior já foi usada (ou cancelada).
@@ -684,11 +929,17 @@ document.addEventListener('keydown', e => {
         return;
     }
 
+    // Vitória/derrota da campanha: Enter OU Esc continuam (o clique também).
+    if (cenaAtual === 'campanhaVitoria' || cenaAtual === 'campanhaDerrota') {
+        if (e.key === 'Enter' || e.key === 'Escape') mandar('continuar');
+        return;
+    }
+
     if (e.key !== 'Escape') return;
 
     if (modalAberto) { fecharModal(); return; }
     if (cenaAtual === 'criarPerfil') return;
-    if (cenaAtual === 'editarPerfil' || cenaAtual === 'arenaSetup') { mandar('voltar'); return; }
+    if (['editarPerfil', 'arenaSetup', 'campanhaMapa', 'campanhaFases'].includes(cenaAtual)) { mandar('voltar'); return; }
 
     if (cenaAtual === 'menu') {
         if (menuRaiz) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));
@@ -785,6 +1036,13 @@ document.getElementById('log').addEventListener('scroll', e => {
     const el = e.currentTarget;
     coladoNoFim = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
 });
+
+// Zera o log (nova batalha). O histórico não atravessa fases/arenas.
+function limparLog() {
+    document.getElementById('log').replaceChildren();
+    ultimaLinha = null;
+    coladoNoFim = true;
+}
 
 const nomeDe = id => acharCombatente(id)?.nome ?? '';
 

@@ -10,17 +10,20 @@ namespace ApostlesWar.Application.Services
         private readonly ArsenalService _arsenalService;
         private readonly CampeoesService _campeoesService;
         private readonly CapitulosService _capitulosService;
+        private readonly CampanhaService _campanhaService;
         private readonly ITelaDeMenu _menuView;
         private readonly CombateService _combateService;
         private readonly IEntrada _entrada;
 
         public GerenciadorDeJogoService(ArsenalService arsenalService,
             CampeoesService campeoesService, CapitulosService capitulosService,
-            ITelaDeMenu menuView, CombateService combateService, IEntrada entrada)
+            CampanhaService campanhaService, ITelaDeMenu menuView, CombateService combateService,
+            IEntrada entrada)
         {
             _arsenalService = arsenalService;
             _campeoesService = campeoesService;
             _capitulosService = capitulosService;
+            _campanhaService = campanhaService;
             _menuView = menuView;
             _combateService = combateService;
             _entrada = entrada;
@@ -52,13 +55,7 @@ namespace ApostlesWar.Application.Services
 
         #region Save / load
 
-        private void CarregarSaves()
-        {
-            _arsenalService.CarregarItensEquipados();
-            _capitulosService.CarregarProgresso();
-            _campeoesService.CarregarCampeoes();
-            _arsenalService.CarregarItens();
-        }
+        private void CarregarSaves() => _campanhaService.CarregarSaves();
 
         #endregion
 
@@ -185,24 +182,9 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         private void ProcessarVitoria(Faccao faccao, Fases fase)
         {
-            var antes = _campeoesService.ObterDesbloqueados().ToList();
-
-            _capitulosService.DesbloquearFase(faccao, fase);
-            _capitulosService.ConcluirFase(faccao, fase);
-            _campeoesService.DesbloquearCampeoes(faccao, fase);
-            Item? item = _arsenalService.DroparItem(faccao, fase);
-            _capitulosService.DesbloquearFaccao(faccao, fase);
-            _capitulosService.SalvarProgresso();
-            _arsenalService.SalvarItens();
-
-            ExibirTelaVitoria(antes, item);
-        }
-
-        private void ExibirTelaVitoria(List<Personagem> antesDosDesbloqueios, Item? itemDropado)
-        {
-            // Computa o que é NOVO (domínio) aqui; a View só desenha e o input espera aqui.
-            var novos = _campeoesService.ObterDesbloqueados().Except(antesDosDesbloqueios).ToList();
-            _menuView.ExibirTelaVitoria(novos, itemDropado);
+            // A lógica (desbloqueio/drop/save) mora no CampanhaService; aqui só desenhamos.
+            RecompensaDaFase recompensa = _campanhaService.ProcessarVitoria(faccao, fase);
+            _menuView.ExibirTelaVitoria(recompensa.NovosCampeoes, recompensa.Item);
             while (_entrada.Ler().Tipo != TipoComando.Confirmar) { }
         }
 

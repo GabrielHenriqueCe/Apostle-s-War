@@ -13,9 +13,9 @@ namespace ApostlesWar.Application.Services
     {
         private const string ChavePerfil = "perfil";
 
-        // O que "excluir conta" apaga além do perfil: todo o progresso de campanha. (O front ainda não
-        // grava esses slots — a Campanha é fatia futura —, mas o wipe já nasce completo.)
-        private static readonly string[] ChavesDoProgresso = { "save", "itens" };
+        // O que "excluir conta" apaga além do perfil: todo o progresso de campanha (capítulos, itens e
+        // a posição no mapa).
+        private static readonly string[] ChavesDoProgresso = { "save", "itens", "campanha" };
 
         private readonly IRepositorioDeSave _repositorio;
 

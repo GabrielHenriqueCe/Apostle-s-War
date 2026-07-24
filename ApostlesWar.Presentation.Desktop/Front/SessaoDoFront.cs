@@ -39,6 +39,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
         public List<HabilidadeAtiva> HabilidadesDoTurno { get; set; } = new();
         public List<Combate> AlvosValidos { get; set; } = new();
         public string? Mensagem { get; set; }
+        public int LadoVencedor { get; set; }   // no Fim: 1=esquerda venceu, 2=direita; 0=sem split
 
         /// <summary>
         /// Zera o estado pra uma batalha NOVA. A sessão vive o boot inteiro (não é recriada por luta),
@@ -60,6 +61,19 @@ namespace ApostlesWar.Presentation.Desktop.Front
             HabilidadesDoTurno = new();
             AlvosValidos = new();
             Mensagem = null;
+            LadoVencedor = 0;
+        }
+
+        /// <summary>
+        /// Arena (PVP): fixa os lados na ORDEM montada — equipe1 à esquerda, equipe2 à direita —,
+        /// independente de quem controla. Marca <c>_ladoDoJogadorDefinido</c> pra o
+        /// <see cref="DefinirLadoDoJogador"/> (o "humano à esquerda" da campanha) NÃO sobrescrever.
+        /// </summary>
+        public void FixarLados(List<Combate> equipe1, List<Combate> equipe2)
+        {
+            foreach (Combate c in equipe1) { IdDe(c); _lado[c] = 1; }
+            foreach (Combate c in equipe2) { IdDe(c); _lado[c] = 2; }
+            _ladoDoJogadorDefinido = true;
         }
 
         public int IdDe(Combate c)
@@ -149,7 +163,8 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 QuemAge: QuemAge is null ? null : IdDe(QuemAge),
                 Habilidades: HabilidadesDoTurno.Select(VerHabilidade).ToList(),
                 AlvosValidos: AlvosValidos.Select(IdDe).ToList(),
-                Mensagem: Mensagem);
+                Mensagem: Mensagem,
+                LadoVencedor: LadoVencedor);
 
             _ponte.EnviarEstado(estado);
         }

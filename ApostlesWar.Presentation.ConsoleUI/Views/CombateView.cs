@@ -70,6 +70,10 @@ namespace ApostlesWar.Presentation.ConsoleUI.Views
         /// Resumo do duelo da ARENA: os DOIS times (dano causado/recebido, cura, stats finais) + quem
         /// venceu. É o instrumento de leitura do rebalance. Espera Confirmar pra seguir.
         /// </summary>
+        // Lados fixos são coisa de tela gráfica (front). No console os times já são rotulados
+        // "Time 1/Time 2", então não há o que fixar.
+        public void ExibirInicioArena(List<Combate> equipe1, List<Combate> equipe2) { }
+
         public void ExibirResumoArena(List<Combate> equipe1, List<Combate> equipe2, bool venceuEquipe1)
         {
             Console.Clear();

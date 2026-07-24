@@ -665,6 +665,10 @@ namespace ApostlesWar.Application.Services
                 { equipe2, bot2 ? _controladorBot : _controladorJogador },
             };
 
+            // Arena é PVP: a tela fixa os lados na ordem montada (equipe1=esquerda, equipe2=direita),
+            // não importa quem controla. No console é no-op.
+            _combateView.ExibirInicioArena(equipe1.Membros, equipe2.Membros);
+
             try
             {
                 bool venceu1 = ExecutarCombate(batalha);

@@ -106,7 +106,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 var sessao = new SessaoDoFront(ponte, relogio);
                 var tela = new TelaDeCombateWeb(sessao, ponte);
                 var entrada = new EntradaWebview(ponte);
-                var apresentacao = new ApresentacaoWebview(ritmo);
+                var apresentacao = new ApresentacaoWebview(ritmo, ponte);
 
                 var repositorio = new SaveLocal();
                 var perfil = new PerfilService(repositorio);

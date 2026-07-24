@@ -58,18 +58,25 @@ namespace ApostlesWar.Presentation.Desktop.Front
     /// milissegundos. Aí a animação manda no ritmo, não o relógio. Fica pra quando a tela tiver
     /// animação de verdade — hoje seria complexidade sem cliente.
     ///
-    /// Sempre false: no front não há Esc encerrando batalha (ver TelaDeCombateWeb.ConfirmarEncerramento).
+    /// É AQUI que o "sair" entre turnos é detectado: quando não há turno humano (Bot×Bot, ou o turno
+    /// do bot) ninguém lê a fila de cliques, então a espera consulta o flag da ponte e devolve true —
+    /// o CombateService.Aguardar então aborta a batalha (é o mesmo ponto de cancelamento do console).
     /// </summary>
     internal class ApresentacaoWebview : IApresentacao
     {
         private readonly RitmoDoFront _ritmo;
+        private readonly PonteWebView2 _ponte;
 
-        public ApresentacaoWebview(RitmoDoFront ritmo) => _ritmo = ritmo;
+        public ApresentacaoWebview(RitmoDoFront ritmo, PonteWebView2 ponte)
+        {
+            _ritmo = ritmo;
+            _ponte = ponte;
+        }
 
         public bool AguardarAnimacao(int ms)
         {
             Thread.Sleep(ms / _ritmo.Multiplicador);
-            return false;
+            return _ponte.SairPedido;   // true = pediram pra sair durante a espera → aborta
         }
     }
 }

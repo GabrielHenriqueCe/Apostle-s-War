@@ -19,7 +19,8 @@ namespace ApostlesWar.Presentation.Desktop.Front
         int? QuemAge,                       // índice global (Id) de quem está agindo — o contorno verde
         List<HabilidadeVista> Habilidades,  // as do QuemAge, quando é a vez de um humano
         List<int> AlvosValidos,             // Ids clicáveis agora (vazio = ninguém)
-        string? Mensagem                    // linha de narração (uso de habilidade, passiva...)
+        string? Mensagem,                   // linha de narração (uso de habilidade, passiva...)
+        int LadoVencedor = 0                // no Fim: 1=esquerda venceu, 2=direita; 0=sem split (campanha)
     );
 
     /// <summary>Em que ponto do turno a tela está — o JS usa pra saber o que é clicável.</summary>
@@ -124,4 +125,11 @@ namespace ApostlesWar.Presentation.Desktop.Front
     /// na grade) e a lista completa de campeões (a ORDEM é o índice que o clique devolve).
     /// </summary>
     internal record EdicaoPerfilVista(string Nome, string Avatar, List<CampeaoVisto> Campeoes);
+
+    /// <summary>
+    /// A montagem da Arena que o front devolve: os dois times como ÍNDICES na lista de campeões
+    /// (mesma ordem do TodosOsCampeoes que foi enviada) + quem é bot de cada lado. Vem serializado no
+    /// campo Texto da mensagem (a ponte só carrega 1 int/1 string por clique).
+    /// </summary>
+    internal record ArenaConfig(int[] Time1, int[] Time2, bool Bot1, bool Bot2);
 }

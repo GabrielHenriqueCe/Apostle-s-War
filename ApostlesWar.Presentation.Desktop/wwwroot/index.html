@@ -42,6 +42,43 @@
         </div>
     </section>
 
+    <!-- Cena de MONTAGEM da Arena: 4 slots por lado + controle (Jogador/Bot) + picker embaixo. -->
+    <section id="arenaSetup" hidden>
+        <h1>Arena</h1>
+        <div id="setupTimes">
+            <div class="setupLado">
+                <div class="setupControles">
+                    <button class="setupSortear" data-lado="esq" type="button">🎲 sortear</button>
+                    <div class="setupToggle">
+                        <button class="setupJog ativo" data-lado="esq" type="button">👤 Jogador</button>
+                        <button class="setupBot" data-lado="esq" type="button">🤖 Bot</button>
+                    </div>
+                </div>
+                <div class="setupSlots" id="slotsEsq"></div>
+            </div>
+
+            <div id="setupVs">VS</div>
+
+            <div class="setupLado">
+                <div class="setupControles">
+                    <button class="setupSortear" data-lado="dir" type="button">🎲 sortear</button>
+                    <div class="setupToggle">
+                        <button class="setupJog" data-lado="dir" type="button">👤 Jogador</button>
+                        <button class="setupBot ativo" data-lado="dir" type="button">🤖 Bot</button>
+                    </div>
+                </div>
+                <div class="setupSlots" id="slotsDir"></div>
+            </div>
+        </div>
+
+        <div id="setupPicker"></div>
+
+        <div id="setupRodape">
+            <button id="setupVoltar" type="button">Voltar</button>
+            <button id="setupLutar" type="button" disabled>⚔️ Lutar</button>
+        </div>
+    </section>
+
     <!-- MODAL de confirmação reutilizável: sobrepõe qualquer cena (sair, excluir conta, ...). -->
     <section id="modal" hidden>
         <div id="modalCaixa">
@@ -97,12 +134,11 @@
         </div>
     </footer>
 
-    <!-- Fim de batalha: mensagem central de vitória/derrota. Clique ou Enter volta pro menu. -->
+    <!-- Fim de batalha: mensagem POR LADO (o que venceu / o que perdeu). Clique ou Enter volta pro menu. -->
     <section id="fimBatalha" hidden>
-        <div id="fimCaixa">
-            <div id="fimTexto"></div>
-            <div id="fimDica">clique ou Enter pra sair</div>
-        </div>
+        <div class="fimLado" id="fimEsq"><span class="fimMsg"></span></div>
+        <div class="fimLado" id="fimDir"><span class="fimMsg"></span></div>
+        <div id="fimDica">clique ou Enter pra sair</div>
     </section>
 
     <script src="jogo.js"></script>

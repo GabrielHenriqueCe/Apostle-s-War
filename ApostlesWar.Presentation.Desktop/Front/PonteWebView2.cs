@@ -32,6 +32,13 @@ namespace ApostlesWar.Presentation.Desktop.Front
         private readonly BlockingCollection<MensagemDoFront> _mensagens = new();
         private readonly TaskCompletionSource _telaPronta = new();
 
+        // "Sair" pedido pela tela (já confirmado no modal do JS). Fica num flag além de entrar na fila
+        // porque quando não há turno humano (Bot×Bot, ou o turno do bot) ninguém lê a fila — quem
+        // observa o flag é a espera entre eventos (ApresentacaoWebview.AguardarAnimacao). volatile:
+        // escrito pela thread da UI (clique), lido pela thread do jogo.
+        private volatile bool _sairPedido;
+        public bool SairPedido => _sairPedido;
+
         private static readonly JsonSerializerOptions Json = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -52,10 +59,12 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// <summary>Bloqueia até a tela mandar algo. É o coração do `IEntrada.Ler` no front.</summary>
         public MensagemDoFront Esperar() => _mensagens.Take();
 
-        /// <summary>Descarta cliques acumulados — evita "clique fantasma" de uma fase anterior.</summary>
+        /// <summary>Descarta cliques acumulados — evita "clique fantasma" de uma fase anterior. Também
+        /// zera o pedido de sair (nova espera/turno começa limpo).</summary>
         public void LimparPendentes()
         {
             while (_mensagens.TryTake(out _)) { }
+            _sairPedido = false;
         }
 
         public void EnviarEstado(EstadoDeBatalha estado) => Enviar("estado", estado);
@@ -67,6 +76,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
         /// <summary>Abre a tela de editar perfil com os dados atuais. A resposta volta como "salvarPerfil".</summary>
         public void EnviarEdicaoPerfil(EdicaoPerfilVista edicao) => Enviar("edicaoPerfil", edicao);
+
+        /// <summary>Abre a montagem da Arena com o pool de campeões. A resposta volta como "iniciarArena".</summary>
+        public void EnviarMontagemArena(List<CampeaoVisto> campeoes) => Enviar("montagemArena", new { campeoes });
 
         private void Enviar(string tipo, object conteudo)
         {
@@ -100,6 +112,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 // de habilidade/alvo.
                 if (msg.Tipo == "pronto") { _telaPronta.TrySetResult(); return; }
                 if (msg.Tipo == "velocidade") { _ritmo.Definir(msg.Valor); return; }
+
+                // "sair" também vira flag: o turno humano lê da fila (EscolherAcao), mas o Bot×Bot /
+                // turno do bot não lê nada — a espera entre eventos observa o flag.
+                if (msg.Tipo == "sair") _sairPedido = true;
 
                 _mensagens.Add(msg);
             };

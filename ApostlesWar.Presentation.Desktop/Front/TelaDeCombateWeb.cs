@@ -32,6 +32,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
             _sessao.Publicar();
         }
 
+        // Arena (PVP): fixa os lados na ordem montada, antes do 1º retrato.
+        public void ExibirInicioArena(List<Combate> equipe1, List<Combate> equipe2)
+            => _sessao.FixarLados(equipe1, equipe2);
+
         public void ExibirResultadoAtaque(Combate atacante, Combate alvo, EventoDano r)
         {
             _ponte.EnviarEvento(new EventoVisto(
@@ -111,10 +115,14 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
         public void ExibirResumoBatalha(List<Combate> jogador) => Encerrar("Fim da batalha!");
 
-        // Na Arena do front o jogador é sempre a equipe1 (à esquerda), então dá pra falar do ponto de
-        // vista dele. Se um dia entrar Bot×Bot na tela, isto volta pra "Esquerda/Direita venceu".
+        // Arena (PVP): os lados foram fixados na ordem montada (equipe1=esquerda), então o vencedor
+        // vira o LADO da tela — a mensagem por metade (Vitória de um lado, Derrota do outro) é decidida
+        // no JS a partir disso.
         public void ExibirResumoArena(List<Combate> equipe1, List<Combate> equipe2, bool venceuEquipe1)
-            => Encerrar(venceuEquipe1 ? "🏆 Vitória!" : "☠️ Derrota!");
+        {
+            _sessao.LadoVencedor = venceuEquipe1 ? 1 : 2;
+            Encerrar(venceuEquipe1 ? "🏆 Equipe da esquerda venceu!" : "🏆 Equipe da direita venceu!");
+        }
 
         private void Encerrar(string texto)
         {
@@ -127,10 +135,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
         }
 
         /// <summary>
-        /// Só é chamado quando a espera detecta pedido de encerrar — e a espera do front nunca detecta
-        /// (ver <see cref="ApresentacaoWebview"/>). Fica false pra a batalha nunca abortar sozinha;
-        /// quando a tela ganhar um botão de "sair", ele passa a responder daqui.
+        /// Só é chamado pelo CombateService.Aguardar DEPOIS de AguardarAnimacao já ter detectado o
+        /// pedido de sair (o JS confirmou no modal ANTES de mandar "sair"). Então aqui é sempre sim.
         /// </summary>
-        public bool ConfirmarEncerramento() => false;
+        public bool ConfirmarEncerramento() => true;
     }
 }

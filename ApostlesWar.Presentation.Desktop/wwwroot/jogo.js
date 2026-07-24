@@ -33,6 +33,7 @@ ponte.addEventListener('message', e => {
     else if (msg.tipo === 'menu') aplicarMenu(msg.conteudo);
     else if (msg.tipo === 'criarPerfil') mostrarCriarPerfil();
     else if (msg.tipo === 'edicaoPerfil') mostrarEditarPerfil(msg.conteudo);
+    else if (msg.tipo === 'montagemArena') mostrarMontagemArena(msg.conteudo.campeoes);
 });
 
 // ---------- cenas (menu × combate × criar/editar perfil) ----------
@@ -42,6 +43,7 @@ function mostrarCena(cena) {
     document.getElementById('menu').hidden = cena !== 'menu';
     document.getElementById('criarPerfil').hidden = cena !== 'criarPerfil';
     document.getElementById('editarPerfil').hidden = cena !== 'editarPerfil';
+    document.getElementById('arenaSetup').hidden = cena !== 'arenaSetup';
     document.getElementById('arena').hidden = !emCombate;
     document.getElementById('painel').hidden = !emCombate;
     // Os controles de combate só fazem sentido na batalha.
@@ -173,8 +175,133 @@ document.getElementById('nomeEditar').addEventListener('keydown', e => {
     if (e.key === 'Enter') salvarEdicao();
 });
 
-// ---------- fim de batalha (overlay central) ----------
+// ---------- fim de batalha (overlay por lado) ----------
 document.getElementById('fimBatalha').addEventListener('click', () => mandar('voltarMenu'));
+
+function mostrarFim(lado, mensagem) {
+    const esq = document.querySelector('#fimEsq .fimMsg');
+    const dir = document.querySelector('#fimDir .fimMsg');
+    if (lado === 1 || lado === 2) {
+        const venceuEsq = lado === 1;
+        esq.textContent = venceuEsq ? '🏆 Vitória!' : '☠️ Derrota!';
+        dir.textContent = venceuEsq ? '☠️ Derrota!' : '🏆 Vitória!';
+        esq.className = 'fimMsg ' + (venceuEsq ? 'venceu' : 'perdeu');
+        dir.className = 'fimMsg ' + (venceuEsq ? 'perdeu' : 'venceu');
+    } else {
+        // Campanha (futuro): mensagem única, guardando o molde.
+        esq.textContent = mensagem || 'Fim da batalha!';
+        esq.className = 'fimMsg venceu';
+        dir.textContent = '';
+        dir.className = 'fimMsg';
+    }
+}
+
+// ---------- montagem da Arena ----------
+let arenaCampeoes = [];                                            // pool [{simbolo, nome}] (índice = id)
+let arenaTimes = { esq: [null, null, null, null], dir: [null, null, null, null] };  // índices ou null
+let arenaControle = { esq: 'jogador', dir: 'bot' };               // padrão: esquerda joga, direita bot
+let arenaSlotSel = null;                                           // { lado, i } ou null
+
+function mostrarMontagemArena(campeoes) {
+    mostrarCena('arenaSetup');
+    arenaCampeoes = campeoes;
+    arenaTimes = { esq: [null, null, null, null], dir: [null, null, null, null] };
+    arenaControle = { esq: 'jogador', dir: 'bot' };
+    arenaSlotSel = null;
+    aplicarToggleArena('esq', 'jogador');
+    aplicarToggleArena('dir', 'bot');
+    montarPickerArena();
+    desenharSlotsArena();
+}
+
+function montarPickerArena() {
+    document.getElementById('setupPicker').replaceChildren(...arenaCampeoes.map((c, i) => {
+        const cel = document.createElement('div');
+        cel.className = 'avatarCelula';
+        const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
+        const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
+        cel.append(em, nm);
+        cel.addEventListener('click', () => escolherCampeaoArena(i));
+        return cel;
+    }));
+}
+
+function desenharSlotsArena() {
+    for (const lado of ['esq', 'dir']) {
+        const cont = document.getElementById(lado === 'esq' ? 'slotsEsq' : 'slotsDir');
+        cont.replaceChildren(...arenaTimes[lado].map((idx, i) => {
+            const slot = document.createElement('div');
+            const sel = arenaSlotSel && arenaSlotSel.lado === lado && arenaSlotSel.i === i;
+            slot.className = 'slot' + (idx != null ? ' preenchido' : '') + (sel ? ' selecionado' : '');
+            if (idx != null) {
+                const c = arenaCampeoes[idx];
+                const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;
+                const nm = document.createElement('span'); nm.className = 'slotNome'; nm.textContent = c.nome;
+                slot.append(em, nm);
+            } else {
+                const v = document.createElement('span'); v.className = 'slotVazio'; v.textContent = 'clique e escolha';
+                slot.append(v);
+            }
+            slot.addEventListener('click', () => { arenaSlotSel = { lado, i }; desenharSlotsArena(); });
+            return slot;
+        }));
+    }
+    // Basta 1 de cada lado (dá pra montar 1x1 pra testar algo).
+    const podeLutar = ['esq', 'dir'].every(l => arenaTimes[l].some(v => v != null));
+    document.getElementById('setupLutar').disabled = !podeLutar;
+}
+
+function escolherCampeaoArena(idx) {
+    if (!arenaSlotSel) arenaSlotSel = primeiroVazioArena();   // sem slot: cai no 1º vazio
+    if (!arenaSlotSel) return;
+    const { lado, i } = arenaSlotSel;
+    if (arenaTimes[lado].some((v, k) => v === idx && k !== i)) return;   // sem repetir no mesmo time
+    arenaTimes[lado][i] = idx;
+    const prox = arenaTimes[lado].findIndex(v => v == null);            // avança pro próximo vazio do lado
+    arenaSlotSel = prox >= 0 ? { lado, i: prox } : null;
+    desenharSlotsArena();
+}
+
+function primeiroVazioArena() {
+    for (const lado of ['esq', 'dir']) {
+        const i = arenaTimes[lado].findIndex(v => v == null);
+        if (i >= 0) return { lado, i };
+    }
+    return null;
+}
+
+function sortearLadoArena(lado) {
+    const ids = [...arenaCampeoes.keys()];
+    for (let k = ids.length - 1; k > 0; k--) {
+        const j = Math.floor(Math.random() * (k + 1));
+        [ids[k], ids[j]] = [ids[j], ids[k]];
+    }
+    arenaTimes[lado] = ids.slice(0, 4);
+    if (arenaSlotSel && arenaSlotSel.lado === lado) arenaSlotSel = null;
+    desenharSlotsArena();
+}
+
+function aplicarToggleArena(lado, tipo) {
+    arenaControle[lado] = tipo;
+    document.querySelectorAll(`.setupJog[data-lado="${lado}"]`).forEach(b => b.classList.toggle('ativo', tipo === 'jogador'));
+    document.querySelectorAll(`.setupBot[data-lado="${lado}"]`).forEach(b => b.classList.toggle('ativo', tipo === 'bot'));
+}
+
+document.querySelectorAll('.setupSortear').forEach(b => b.addEventListener('click', () => sortearLadoArena(b.dataset.lado)));
+document.querySelectorAll('.setupJog').forEach(b => b.addEventListener('click', () => aplicarToggleArena(b.dataset.lado, 'jogador')));
+document.querySelectorAll('.setupBot').forEach(b => b.addEventListener('click', () => aplicarToggleArena(b.dataset.lado, 'bot')));
+document.getElementById('setupVoltar').addEventListener('click', () => mandar('voltar'));
+document.getElementById('setupLutar').addEventListener('click', () => {
+    const time1 = arenaTimes.esq.filter(v => v != null);
+    const time2 = arenaTimes.dir.filter(v => v != null);
+    if (!time1.length || !time2.length) return;   // pelo menos 1 de cada lado
+    mandar('iniciarArena', 0, JSON.stringify({
+        time1,
+        time2,
+        bot1: arenaControle.esq === 'bot',
+        bot2: arenaControle.dir === 'bot',
+    }));
+});
 
 // ---------- modal de confirmação ----------
 let modalAberto = false;
@@ -292,12 +419,12 @@ function desenhar() {
     document.getElementById('turno').textContent = `Turno ${estado.turno}`;
     confirmarAtuais = alvosDeConfirmacao();
 
-    // Fim de batalha: mensagem central de vitória/derrota por cima de tudo (clique/Enter/Esc = sair).
+    // Fim de batalha: mensagem POR LADO (vitória/derrota) por cima de tudo (clique/Enter/Esc = sair).
     // O "🚪 sair" fica embaixo do overlay — não precisa escondê-lo, qualquer clique cai na tela de fim.
     const acabou = nomeDaFase(estado) === 'Fim';
     const fim = document.getElementById('fimBatalha');
     fim.hidden = !acabou;
-    if (acabou) document.getElementById('fimTexto').textContent = estado.mensagem || 'Fim da batalha!';
+    if (acabou) mostrarFim(estado.ladoVencedor || 0, estado.mensagem);
 
     // A mensagem do retrato entra no log (sem repetir a que já está lá). O fim de batalha ganha
     // destaque próprio.
@@ -561,7 +688,7 @@ document.addEventListener('keydown', e => {
 
     if (modalAberto) { fecharModal(); return; }
     if (cenaAtual === 'criarPerfil') return;
-    if (cenaAtual === 'editarPerfil') { mandar('voltar'); return; }
+    if (cenaAtual === 'editarPerfil' || cenaAtual === 'arenaSetup') { mandar('voltar'); return; }
 
     if (cenaAtual === 'menu') {
         if (menuRaiz) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));

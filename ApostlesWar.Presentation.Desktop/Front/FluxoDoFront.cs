@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ApostlesWar.Application;
 using ApostlesWar.Application.Services;
 using ApostlesWar.Domain;
@@ -61,9 +62,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                     switch (MostrarMenuPrincipal())
                     {
                         case Arena:
-                            // A Arena volta sozinha quando é abortada (Esc/sair); só esperamos o clique
-                            // de "voltar" quando ela terminou naturalmente e mostrou o resultado.
-                            if (RodarArenaRapida()) EsperarVoltarAoMenu();
+                            MontarArena();
                             break;
 
                         case Configuracao:
@@ -184,14 +183,58 @@ namespace ApostlesWar.Presentation.Desktop.Front
             return false;   // Voltar ou Esc
         }
 
-        /// <summary>Arena rápida: dois times NOVOS sorteados a cada clique (o sorteio é do service).</summary>
-        /// <returns>Repassa o retorno de ExecutarArenaComTimes (true = terminou; false = abortada).</returns>
-        private bool RodarArenaRapida()
+        // A config da Arena chega serializada no Texto; case-insensitive porque o JS manda camelCase.
+        private static readonly JsonSerializerOptions ConfigJson = new() { PropertyNameCaseInsensitive = true };
+
+        /// <summary>
+        /// Arena (PVP): manda o pool de campeões pro front montar os dois times + escolher o controle
+        /// de cada lado, espera a config e roda a luta. Uma batalha por entrada; abortar/sair/Esc volta
+        /// pro menu (o loop de Rodar redesenha).
+        /// </summary>
+        private void MontarArena()
         {
-            _sessao.Reiniciar();   // batalha nova = tela limpa (senão os combatentes antigos acumulam)
-            var (time1, time2) = _campeoes.SortearDoisTimesArena();
-            return _combate.ExecutarArenaComTimes(time1, time2, bot1: false, bot2: true);
+            var pool = _campeoes.TodosOsCampeoes();
+            var campeoes = pool.Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+
+            _ponte.LimparPendentes();
+            _ponte.EnviarMontagemArena(campeoes);
+
+            while (true)
+            {
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "voltar") return;   // Esc na montagem → volta pro menu
+
+                if (msg.Tipo == "iniciarArena")
+                {
+                    ArenaConfig? cfg = LerConfigArena(msg.Texto);
+                    if (cfg is null || !ConfigValida(cfg, pool.Count)) continue;   // config inválida: ignora
+
+                    var time1 = cfg.Time1.Select(i => pool[i]).ToList();
+                    var time2 = cfg.Time2.Select(i => pool[i]).ToList();
+
+                    _sessao.Reiniciar();       // batalha nova = tela limpa (senão os antigos acumulam)
+                    _ponte.LimparPendentes();  // dropa cliques da montagem + zera o "sair"
+                    if (_combate.ExecutarArenaComTimes(time1, time2, cfg.Bot1, cfg.Bot2))
+                        EsperarVoltarAoMenu();
+                    return;
+                }
+            }
         }
+
+        private static ArenaConfig? LerConfigArena(string? texto)
+        {
+            if (string.IsNullOrEmpty(texto)) return null;
+            try { return JsonSerializer.Deserialize<ArenaConfig>(texto, ConfigJson); }
+            catch (JsonException) { return null; }
+        }
+
+        // Cada time: de 1 a 4 champs, índices válidos (o front garante ≥1 de cada lado pra dar 1x1).
+        private static bool ConfigValida(ArenaConfig cfg, int total)
+            => TimeValido(cfg.Time1, total) && TimeValido(cfg.Time2, total);
+
+        private static bool TimeValido(int[]? time, int total)
+            => time is { Length: >= 1 and <= 4 } && time.All(i => i >= 0 && i < total);
 
         private void EsperarVoltarAoMenu()
         {

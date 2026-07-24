@@ -25,6 +25,14 @@ namespace ApostlesWar.Application.Portas
         /// <summary>O retrato dos dois times — é o estado completo da partida.</summary>
         void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos);
 
+        /// <summary>
+        /// Início da Arena (PVP): a tela recebe os dois times NA ORDEM montada pra fixar os lados
+        /// (equipe1=esquerda, equipe2=direita) independente de quem controla — na Arena os lados são
+        /// como o jogador montou. A campanha (PVE) não chama isto: segue "o humano à esquerda".
+        /// O console não tem lado fixo → no-op.
+        /// </summary>
+        void ExibirInicioArena(List<Combate> equipe1, List<Combate> equipe2);
+
         /// <summary>Resultado de um golpe (dano, crítico, escudo aparado) — o gancho de animação.</summary>
         void ExibirResultadoAtaque(Combate atacante, Combate alvo, EventoDano resultado);
 

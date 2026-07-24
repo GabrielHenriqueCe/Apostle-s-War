@@ -78,9 +78,46 @@ namespace ApostlesWar.Presentation.Desktop.Front
             foreach (Combate c in adversarios) { IdDe(c); _lado[c] = 2; }
         }
 
-        /// <summary>Manda o retrato completo pra tela redesenhar.</summary>
-        public void Publicar()
+        // HP/vida COMO A TELA ESTÁ MOSTRANDO — que não é o mesmo que o modelo tem agora.
+        //
+        // O motor executa a habilidade INTEIRA e só depois narra (CombateService: `hab.Ativar` roda,
+        // aí os eventos são exibidos um a um). Então, entre o Ativar e o evento de dano, o modelo já
+        // está com o HP descontado. Publicar nesse meio entregava a vida nova cedo — a barra caía
+        // antes do número subir.
+        //
+        // A tela é um NARRADOR: ela mostra a vida no ponto da narrativa em que está, não a do fim da
+        // história. Este dicionário é esse ponto; ele avança quando o evento correspondente é narrado.
+        private readonly Dictionary<Combate, (int HP, bool Vivo)> _mostrado = new();
+
+        private (int HP, bool Vivo) Mostrado(Combate c) =>
+            _mostrado.TryGetValue(c, out var v) ? v : (Math.Max(0, c.HPAtual), c.EstaVivo());
+
+        /// <summary>Alcança a narrativa ao modelo pra TODOS: a tela passa a mostrar a vida de agora.</summary>
+        public void SincronizarVida()
         {
+            foreach (Combate c in _ids.Keys) _mostrado[c] = (Math.Max(0, c.HPAtual), c.EstaVivo());
+        }
+
+        /// <summary>
+        /// Alcança a narrativa só de UM combatente. É o que faz a barra descer no mesmo instante em
+        /// que o número dele salta: num golpe em ÁREA, o motor já baixou o HP de todos os alvos no
+        /// modelo, mas cada `ExibirResultadoAtaque` narra um por vez — sincronizar só o alvo narrado
+        /// segura as outras barras até chegar a vez de cada uma. (Sincronizar todos aqui era o bug do
+        /// "a vida de todos desce de uma vez e os números vão pingando".)
+        /// </summary>
+        public void SincronizarVida(Combate alvo) => _mostrado[alvo] = (Math.Max(0, alvo.HPAtual), alvo.EstaVivo());
+
+        /// <summary>
+        /// Manda o retrato completo pra tela redesenhar.
+        ///
+        /// `sincronizarVida: false` publica TUDO (buffs, status, cooldown, fase) mas mantém a vida no
+        /// ponto já narrado — é o que o <see cref="TelaDeCombateWeb.ExibirUsoHabilidade"/> usa pra
+        /// anunciar a habilidade sem entregar o dano antes da hora.
+        /// </summary>
+        public void Publicar(bool sincronizarVida = true)
+        {
+            if (sincronizarVida) SincronizarVida();
+
             var todos = _ids.Keys.ToList();
             var estado = new EstadoDeBatalha(
                 Turno: _relogio.NumeroDoTurno,
@@ -99,14 +136,15 @@ namespace ApostlesWar.Presentation.Desktop.Front
             Id: IdDe(c),
             Nome: c.Personagem.Nome,
             Simbolo: c.Personagem.Simbolo,
-            HPAtual: Math.Max(0, c.HPAtual),
+            // Vida vem do ponto NARRADO (ver _mostrado), não do modelo — o resto é sempre o de agora.
+            HPAtual: Mostrado(c).HP,
             HPMaximo: c.HPMaximo,
             Escudo: c.StatusAtivos.OfType<Escudo>().FirstOrDefault()?.PontosRestantes ?? 0,
             Ataque: c.Ataque,
             Defesa: c.Defesa,
             TaxaCritPct: (int)(c.TaxaCrit * 100),
             DanoCritPct: (int)(c.DanoCrit * 100),
-            Vivo: c.EstaVivo(),
+            Vivo: Mostrado(c).Vivo,   // idem: quem morreu só "apaga" quando o golpe for narrado
             Status: c.StatusAtivos
                 .Select(s => new StatusVisto(s.Nome, s.Simbolo, s.DuracaoRestante, s is Buff))
                 .ToList());
@@ -115,13 +153,19 @@ namespace ApostlesWar.Presentation.Desktop.Front
         {
             Combate? dono = QuemAge;
             var cooldown = dono?.Cooldowns.GetValueOrDefault(h);
+            // Espelha a regra do CombateService.ResolverAlvoInicial: inimigo sempre pede alvo;
+            // aliado pede quando o número de alvos é finito; Self nunca pede.
+            bool pedeAlvo = h.TipoLista == TipoLista.Inimigos
+                || (h.TipoLista == TipoLista.Aliados && h.NumeroDeAlvos != int.MaxValue);
+
             return new HabilidadeVista(
                 Indice: HabilidadesDoTurno.IndexOf(h),
                 Nome: h.Nome,
                 Simbolo: h.Simbolo,
                 Descricao: h.Descricao,
                 CooldownRestante: cooldown?.CooldownRestante ?? 0,
-                Disponivel: cooldown?.Disponivel ?? true);
+                Disponivel: cooldown?.Disponivel ?? true,
+                PedeAlvo: pedeAlvo);
         }
     }
 }

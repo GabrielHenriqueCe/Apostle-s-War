@@ -61,9 +61,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
         public Combate? EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores)
         {
-            // Alvo único e óbvio: não faz o jogador clicar por obrigação.
-            if (disponiveis.Count == 1) return disponiveis[0];
-
+            // Antes havia um atalho aqui: alvo único ⇒ escolhia sozinho. Removido — o passo de alvo
+            // é também o de CONFIRMAÇÃO (o jogador vê quem vai levar e ainda pode desistir com Esc),
+            // e pular isso fazia a habilidade disparar sem direito a mudar de ideia.
             _sessao.Fase = FaseDaTela.EscolhendoAlvo;
             _sessao.AlvosValidos = disponiveis;
             _sessao.Mensagem = "Escolha o alvo";

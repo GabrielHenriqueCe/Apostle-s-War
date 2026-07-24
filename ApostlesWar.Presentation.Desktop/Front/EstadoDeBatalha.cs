@@ -59,7 +59,18 @@ namespace ApostlesWar.Presentation.Desktop.Front
         string Simbolo,
         string Descricao,
         int CooldownRestante,
-        bool Disponivel
+        bool Disponivel,
+        /// <summary>
+        /// Se o motor vai abrir um passo de ESCOLHA DE ALVO depois deste clique. A tela usa isto
+        /// pra decidir onde pedir a confirmação: quem pede alvo já tem um segundo passo natural
+        /// (clicar no alvo), quem não pede precisa de um segundo clique na própria habilidade —
+        /// senão o primeiro clique gastaria o turno sem direito a mudar de ideia.
+        ///
+        /// É um PALPITE da tela, espelhando `CombateService.ResolverAlvoInicial`. Errar é barato:
+        /// palpitou "pede" e não pedia → dispara no 1º clique (como era antes); palpitou "não pede"
+        /// e pedia → um clique a mais. Nenhum dos dois corrompe estado.
+        /// </summary>
+        bool PedeAlvo
     );
 
     /// <summary>

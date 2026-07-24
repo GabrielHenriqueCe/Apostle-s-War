@@ -34,12 +34,53 @@ function aplicarEstado(novo) {
     // Ao voltar pra escolha de ação, a habilidade anterior já foi usada (ou cancelada).
     if (nomeDaFase(novo) === 'EscolhendoAcao') habilidadeEscolhida = null;
 
+    // Buff não vem como evento (só dano e cura vêm) — então a piscada de buff nasce da DIFERENÇA
+    // entre o estado anterior e o novo: quem GANHOU escudo/buff desde o último quadro, brilha.
+    const brilhos = detectarBuffsGanhos(estado, novo);
+
     estado = novo;
 
     // Quem age vira o selecionado por padrão — poupa um clique a cada turno.
     if (novo.quemAge != null && nomeDaFase(novo) === 'EscolhendoAcao') selecionadoId = novo.quemAge;
 
     desenhar();
+
+    // Depois do desenho: os elementos já existem pra receber a animação.
+    for (const b of brilhos) {
+        const el = document.querySelector(`.combatente[data-id="${b.id}"]`);
+        if (el) reanimar(el, b.classe);
+    }
+}
+
+// Compara os status de cada combatente entre dois estados e devolve os ganhos a animar. Escudo
+// (campo numérico próprio) → azul; outro buff novo → dourado; debuff novo → roxo. Vermelho não
+// entra: é a cor do DANO (ferido), não de status.
+function detectarBuffsGanhos(anterior, novo) {
+    if (!anterior) return [];   // primeiro quadro: nada "ganhou", é o estado inicial
+
+    const antes = new Map(
+        [...(anterior.equipe1 || []), ...(anterior.equipe2 || [])].map(c => [c.id, c]));
+
+    const brilhos = [];
+    for (const c of [...(novo.equipe1 || []), ...(novo.equipe2 || [])]) {
+        const velho = antes.get(c.id);
+        if (!velho) continue;
+
+        const ganhouEscudo = (c.escudo || 0) > (velho.escudo || 0);
+        if (ganhouEscudo) brilhos.push({ id: c.id, classe: 'ganhouEscudo' });
+
+        // Status cujo nome não existia antes, separados por sinal. O escudo também é um buff na
+        // lista, mas já foi tratado pelo número — daí o `> (ganhouEscudo ? 1 : 0)`: só dispara o
+        // dourado quando o buff novo NÃO é (só) o escudo.
+        const nomesAntes = new Set((velho.status || []).map(s => s.nome));
+        const novos = (c.status || []).filter(s => !nomesAntes.has(s.nome));
+
+        if (novos.filter(s => s.ehBuff).length > (ganhouEscudo ? 1 : 0))
+            brilhos.push({ id: c.id, classe: 'ganhouBuff' });
+        if (novos.some(s => !s.ehBuff))
+            brilhos.push({ id: c.id, classe: 'ganhouDebuff' });
+    }
+    return brilhos;
 }
 
 // A fase chega como número (enum serializado) ou string, dependendo do serializador.
@@ -62,7 +103,7 @@ function desenhar() {
 }
 
 // Classes de animação em curso — precisam SOBREVIVER a um redesenho (ver desenharLado).
-const ANIMACOES = ['batendo', 'ferido', 'curado'];
+const ANIMACOES = ['batendo', 'ferido', 'curado', 'ganhouEscudo', 'ganhouBuff', 'ganhouDebuff'];
 
 // O redesenho REAPROVEITA as caixas existentes (casadas por id) em vez de recriá-las.
 //
@@ -171,14 +212,22 @@ function criarBarra(c) {
     return barra;
 }
 
+// Duração "permanente" no motor é int.MaxValue (ex: a Sentença do Vilão) — mostrar o número cru
+// dava "⚰️Sentença 2147483647". Acima de um turno qualquer plausível, vira ∞.
+const PERMANENTE = 9000;
+const duracaoTexto = t => t >= PERMANENTE ? '∞' : t;
+
 function criarStatus(status) {
     const caixa = document.createElement('div');
     caixa.className = 'status';
     for (const s of status) {
         const selo = document.createElement('span');
         selo.className = 'selo ' + (s.ehBuff ? 'buff' : 'debuff');
-        selo.textContent = `${s.simbolo}${s.nome} ${s.duracaoRestante}`;
-        selo.title = `${s.nome} — ${s.duracaoRestante} turno(s)`;
+        const dur = duracaoTexto(s.duracaoRestante);
+        selo.textContent = `${s.simbolo}${s.nome} ${dur}`;
+        selo.title = s.duracaoRestante >= PERMANENTE
+            ? `${s.nome} — permanente`
+            : `${s.nome} — ${s.duracaoRestante} turno(s)`;
         caixa.appendChild(selo);
     }
     return caixa;
@@ -218,9 +267,13 @@ function desenharHabilidades(c) {
     if (!podeAgir) { caixa.replaceChildren(); return; }
 
     caixa.replaceChildren(...estado.habilidades.map(h => {
+        const armada = habilidadeEscolhida === h.indice;
+        // Armada e sem passo de alvo: falta o clique de confirmação — a tela precisa dizer isso.
+        const aguardandoConfirmar = armada && !h.pedeAlvo;
+
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'habilidade' + (habilidadeEscolhida === h.indice ? ' escolhida' : '');
+        b.className = 'habilidade' + (armada ? ' escolhida' : '') + (aguardandoConfirmar ? ' confirmar' : '');
         b.disabled = !h.disponivel;
 
         const nome = document.createElement('span');
@@ -229,7 +282,7 @@ function desenharHabilidades(c) {
 
         const desc = document.createElement('span');
         desc.className = 'hDesc';
-        desc.textContent = h.descricao;
+        desc.textContent = aguardandoConfirmar ? 'clique de novo pra usar · Esc cancela' : h.descricao;
 
         b.append(nome, desc);
         b.addEventListener('click', () => escolherHabilidade(h));
@@ -238,11 +291,31 @@ function desenharHabilidades(c) {
 }
 
 // ---------- interação ----------
+// Clicar numa habilidade NUNCA deve gastar o turno de primeira — o Gabriel quer poder clicar só
+// pra olhar e mudar de ideia.
+//
+// Quem PEDE ALVO já tem esse direito de graça: o clique manda pro C#, que abre a escolha de alvo,
+// e o Esc volta atrás. Quem NÃO pede alvo (as Self) disparava na hora, sem volta — então aqui o
+// primeiro clique só ARMA (destaca e mostra a descrição) e o segundo é que usa.
 function escolherHabilidade(h) {
     if (!h.disponivel) return;
+
+    if (h.pedeAlvo) {
+        habilidadeEscolhida = h.indice;
+        desenhar();
+        mandar('habilidade', h.indice);   // o C# abre a escolha de alvo
+        return;
+    }
+
+    // Segundo clique na MESMA habilidade = confirmar.
+    if (habilidadeEscolhida === h.indice) {
+        mandar('habilidade', h.indice);
+        return;
+    }
+
+    // Primeiro clique (ou troca de ideia pra outra habilidade): só arma.
     habilidadeEscolhida = h.indice;
-    desenhar();                       // marca a habilidade como escolhida
-    mandar('habilidade', h.indice);   // o C# decide se pede alvo
+    desenhar();
 }
 
 function clicarEmCombatente(id) {
@@ -260,11 +333,18 @@ function clicarEmCombatente(id) {
 const acharCombatente = id => id == null ? null
     : [...(estado?.equipe1 || []), ...(estado?.equipe2 || [])].find(c => c.id === id) || null;
 
-// Esc = desistir do alvo e voltar pra escolha de habilidade.
+// Esc = desistir. Na escolha de ALVO avisa o C# (que volta pro menu de habilidade); na escolha de
+// AÇÃO é só desarmar a habilidade armada — o C# nem soube dela ainda.
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && nomeDaFase(estado || {}) === 'EscolhendoAlvo') {
+    if (e.key !== 'Escape') return;
+
+    const fase = nomeDaFase(estado || {});
+    if (fase === 'EscolhendoAlvo') {
         habilidadeEscolhida = null;
         mandar('cancelar');
+    } else if (fase === 'EscolhendoAcao' && habilidadeEscolhida !== null) {
+        habilidadeEscolhida = null;
+        desenhar();
     }
 });
 
@@ -272,6 +352,23 @@ document.getElementById('alternarNumeros').addEventListener('click', e => {
     mostrarNumeros = !mostrarNumeros;
     e.currentTarget.classList.toggle('ativo', mostrarNumeros);
     desenhar();
+});
+
+// ---------- mostrar/esconder o log ----------
+// Escondido, sobra só a arena: dá pra assistir as animações e os números sem ler nada. O log
+// SEGUE SENDO ALIMENTADO por trás, então ao reabrir o histórico está inteiro.
+let mostrarLog = true;
+
+document.getElementById('alternarLog').addEventListener('click', e => {
+    mostrarLog = !mostrarLog;
+    e.currentTarget.classList.toggle('ativo', mostrarLog);
+    document.getElementById('meio').classList.toggle('oculto', !mostrarLog);
+
+    // Ao reabrir, cai no fim do log (senão volta na posição de quando escondeu).
+    if (mostrarLog && coladoNoFim) {
+        const log = document.getElementById('log');
+        log.scrollTop = log.scrollHeight;
+    }
 });
 
 // ---------- velocidade ----------
@@ -391,5 +488,6 @@ function flutuar(el, texto, classe) {
 
 // ---------- partida ----------
 document.getElementById('alternarNumeros').classList.toggle('ativo', mostrarNumeros);
+document.getElementById('alternarLog').classList.toggle('ativo', mostrarLog);
 aplicarVelocidade();   // sincroniza o C# com o 2x inicial
 mandar('pronto');      // destrava a thread do jogo no C#

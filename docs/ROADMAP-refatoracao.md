@@ -557,6 +557,23 @@ comportamento e estrutura juntos esconde bugs. Ideias de Gabriel registradas pra
 - **Durações/quando inicia** — revisar buffs (quais 2t, quais permanentes, quando aplicam).
 - Trocas de habilidade entre personagens em geral. É DESIGN DE JOGO, não arquitetura.
 
+### Bugs de dano a VERIFICAR no rebalance (relatados jogando o front, jul/2026)
+Gabriel viu no front: **o log/número diz que causou dano, mas o HP do inimigo não desce** (ou só
+desce depois). NÃO reproduzido isoladamente — anotado pra investigar com o front na mão, no
+rebalance. Suspeitos, do mais provável ao menos:
+1. **Escudo absorvendo** — o golpe é registrado, mas o dano bate no Escudo (buff azul) e não no HP.
+   O front já diferencia (`🛡️ N aparou`), mas confirmar que o número mostrado bate com o que foi
+   pro HP vs pro escudo.
+2. **Piso de HP do Invencível** (`IDefineHPMinimo` = 1) — alvo em 1 HP leva dano CHEIO no
+   DanoEfetivo (pro lifesteal enxergar) mas o HP não passa de 1. Log diz "levou X", HP fica igual.
+   Comportamento CORRETO, só mal comunicado.
+3. **Redução de dano** (ReducaoDanoFixo/Couraça, IModificaDanoRecebido) — dano exibido pode ser o
+   bruto e o efetivo outro. Conferir se o número no log é o EFETIVO (o que de fato tirou HP).
+4. **Ordem de narração** — havia um bug (corrigido no PR do log persistente) em que a barra descia
+   1,5s antes do número; se sobrar sintoma parecido, é a mesma classe de problema (retrato x evento).
+Ação: quando pegar, decidir se é bug real ou só clareza de UI — e se for UI, o log já é o lugar de
+explicar ("aparou", "imune", "reduziu de X pra Y").
+
 ---
 
 ## EventoDano — o registro rico do golpe (✅ FATIA 1 + FATIA 2 FEITAS)

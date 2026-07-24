@@ -49,7 +49,7 @@ body {
 
 #botoesTopo { display: flex; gap: 8px; }
 
-#alternarNumeros, #velocidade {
+#alternarNumeros, #velocidade, #alternarLog {
     background: transparent;
     color: var(--apagado);
     border: 1px solid var(--borda);
@@ -59,19 +59,28 @@ body {
     font-size: 13px;
     font-family: inherit;
 }
-#alternarNumeros:hover, #velocidade:hover { color: var(--texto); border-color: var(--apagado); }
-#alternarNumeros.ativo { color: var(--ouro); border-color: var(--ouro); }
+#alternarNumeros:hover, #velocidade:hover, #alternarLog:hover { color: var(--texto); border-color: var(--apagado); }
+#alternarNumeros.ativo, #alternarLog.ativo { color: var(--ouro); border-color: var(--ouro); }
 
 /* Acelerado fica aceso: dá pra saber que a batalha está correndo sem clicar pra conferir. */
 #velocidade.rapido { color: var(--ouro); border-color: var(--ouro); }
 
 /* ---------- arena ---------- */
+/* `min-height: 0` NÃO é decoração — sem ele o log EMPURRAVA a arena.
+   Item de grid/flex nasce com `min-height: auto`, ou seja, se recusa a ficar menor que o próprio
+   conteúdo. Como o log só cresce, a linha da arena crescia junto e os times (centrados) desciam
+   pra fora da tela. Com `min-height: 0` a altura passa a ser a da tela e o excesso vira ROLAGEM
+   dentro do log, que é o que se quer. A regra vale pra cadeia inteira: #arena > #meio > #log. */
+/* A coluna do meio tem largura FIXA e é sempre reservada, mesmo com o log escondido. Assim os
+   times se posicionam em relação ao CENTRO da tela e não ao canto: esconder o log não empurra
+   mais ninguém pro meio. */
 #arena {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr 280px 1fr;
     gap: 12px;
     padding: 16px 24px;
     overflow: hidden;
+    min-height: 0;
 }
 
 /* Os dois lados são ESPELHOS: mesma largura de caixa, muda só pra que lado ela encosta e a
@@ -89,18 +98,27 @@ body {
     gap: 10px;
 }
 
-/* Largura idêntica nos dois lados: sem isto, `align-items: flex-end` encolhe as caixas da
-   direita pro tamanho do conteúdo e a simetria morre. */
+/* Largura idêntica nos dois lados: sem isto, o alinhamento encolhe as caixas de um lado pro
+   tamanho do conteúdo e a simetria morre. */
 .lado > .combatente { width: min(340px, 100%); }
 
-#ladoDireito { align-items: flex-end; }
+/* Os dois times encostam no MEIO (a esquerda alinha à direita, a direita à esquerda) — ficam
+   frente a frente e a distância entre eles é sempre a mesma, independente do que acontece nas
+   bordas da janela. */
+#ladoEsquerdo { align-items: flex-end; }
+#ladoDireito { align-items: flex-start; }
 
 #meio {
     display: flex;
     align-items: stretch;
     min-width: 230px;
     max-width: 300px;
+    min-height: 0;              /* ver #arena: sem isto o log estica a arena */
 }
+
+/* Log escondido: só a caixa some. A COLUNA continua ocupando o mesmo espaço, senão os times
+   escorregariam pro meio ao esconder (foi o que o Gabriel viu). */
+#meio.oculto > #log { visibility: hidden; }
 
 /* O LOG: histórico rolável da batalha. É o único lugar da arena com `overflow` — e aqui ele é o
    ponto, não um acidente (ver o comentário do .lado). Ancorado embaixo: as linhas novas entram
@@ -108,16 +126,21 @@ body {
 #log {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     gap: 4px;
     width: 100%;
+    min-height: 0;              /* ver #arena: é isto que faz ROLAR em vez de crescer */
     overflow-y: auto;
     padding: 8px 10px;
     border: 1px solid var(--borda);
     border-radius: 10px;
     background: rgba(0, 0, 0, .22);
     scrollbar-width: thin;
+    scrollbar-color: var(--borda) transparent;
 }
+
+/* Empurra as primeiras linhas pro pé da caixa (efeito de chat) SEM usar
+   `justify-content: flex-end`, que em coluna rolável trava a rolagem pro topo. */
+#log::before { content: ''; margin-top: auto; }
 
 .linhaLog {
     flex: none;                       /* senão o flex espreme as linhas antigas */
@@ -298,6 +321,15 @@ body {
 .habilidade .hDesc { font-size: 11px; color: var(--apagado); }
 .habilidade.escolhida { border-color: var(--ouro); background: #332b1c; }
 
+/* Armada esperando confirmação: pulsa devagar pra ficar claro que o turno ainda NÃO foi gasto. */
+.habilidade.confirmar { animation: pulsarConfirmar 1s ease-in-out infinite; }
+.habilidade.confirmar .hDesc { color: var(--ouro); font-style: italic; }
+
+@keyframes pulsarConfirmar {
+    0%, 100% { box-shadow: 0 0 0 rgba(217, 180, 91, 0); }
+    50% { box-shadow: 0 0 10px rgba(217, 180, 91, .55); }
+}
+
 /* ---------- animações ---------- */
 /* Pancada: treme FORTE e torto (o golpe empurra e gira um pouco), não só um vaivém horizontal.
    `transform` não reflowa nada — a caixa se mexe sem empurrar as vizinhas. */
@@ -323,6 +355,19 @@ body {
     35% { background: #1f4a24; }
 }
 .combatente.curado { animation: piscarVerde .38s ease; }
+
+/* Família STATUS (escudo/buff/debuff): mesma piscada, muda só a cor — um padrão só. A duração
+   acompanha o dano/cura (.42s) pra a intensidade ficar coerente; cada um só troca `--tint`
+   (fundo) e `--glow` (halo).
+     escudo → AZUL (casa com a barra de escudo)  ·  buff → DOURADO  ·  debuff → ROXO
+   Vermelho fica reservado ao DANO (ferido) e verde à cura. */
+@keyframes brilhoStatus {
+    0%, 100% { background: var(--painel); box-shadow: 0 0 0 var(--glow); }
+    40% { background: var(--tint); box-shadow: 0 0 15px var(--glow); }
+}
+.combatente.ganhouEscudo { --tint: #1c3a52; --glow: rgba(90,169,230,.55); animation: brilhoStatus .42s ease; }
+.combatente.ganhouBuff   { --tint: #3a3320; --glow: rgba(217,180,91,.6);  animation: brilhoStatus .42s ease; }
+.combatente.ganhouDebuff { --tint: #33204a; --glow: rgba(168,85,247,.6);  animation: brilhoStatus .42s ease; }
 
 /* O número CUSPIDO pra fora: sai voando na diagonal, cresce no impacto e cai perdendo força.
    `--dx` vem do JS e é ESPELHADO (a esquerda cospe pra esquerda, a direita pra direita), com um

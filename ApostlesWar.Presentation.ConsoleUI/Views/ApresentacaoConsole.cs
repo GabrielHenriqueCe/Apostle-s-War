@@ -1,6 +1,6 @@
 using ApostlesWar.Application.Portas;
 
-namespace ApostlesWar.ConsoleUI.Views
+namespace ApostlesWar.Presentation.ConsoleUI.Views
 {
     /// <summary>Console da <see cref="IApresentacao"/>: dorme em fatias curtas escutando Esc.</summary>
     public class ApresentacaoConsole : IApresentacao

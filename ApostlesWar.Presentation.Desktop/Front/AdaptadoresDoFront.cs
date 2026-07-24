@@ -1,8 +1,8 @@
 using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
-using ApostlesWar.ConsoleUI.Views;
+using ApostlesWar.Presentation.ConsoleUI.Views;
 
-namespace ApostlesWar.App.Front
+namespace ApostlesWar.Presentation.Desktop.Front
 {
     /// <summary>
     /// Porta de ENTRADA no front. Traduz clique em <see cref="Comando"/> semântico — o mesmo contrato

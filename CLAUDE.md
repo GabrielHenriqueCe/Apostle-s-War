@@ -38,10 +38,13 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   `Champs/<Faccao>/<Champ>/`, `Models/`, `Enum/`.
 - `ApostlesWar.Application/` casos de uso: `Services/` orquestração · `Controllers/` (bot) ·
   `Portas/` (IEntrada, IApresentacao, ITelaDeCombate, ITelaDeMenu, IControladorDeTurno, IRepositorioDeSave).
-- `ApostlesWar.Infrastructure/` impl das portas de dados (SaveLocal). Só o App enxerga.
-- `ApostlesWar.ConsoleUI/` pele console: views + EntradaConsole/ApresentacaoConsole + ControladorJogador.
-- `ApostlesWar.App/` casca executável Windows (composition root em `Program.cs`, front webview em
-  `Front/`+`wwwroot/`). No VS, o dropdown do Play tem os perfis **Console** e **Front (webview)** (`--front`).
+- `ApostlesWar.Infrastructure/` impl das portas de dados (SaveLocal). Só o Desktop enxerga.
+- **PRESENTATION são DOIS projetos** (duas peles sobre o mesmo motor — é o que o padrão libera):
+  - `ApostlesWar.Presentation.ConsoleUI/` pele console: views + EntradaConsole/ApresentacaoConsole +
+    ControladorJogador. (`ConsoleUI` e não `Console`: o segmento `Console` sombrearia `System.Console`.)
+  - `ApostlesWar.Presentation.Desktop/` casca executável Windows (composition root em `Program.cs`,
+    front webview em `Front/`+`wwwroot/`). O `.exe` continua `ApostlesWar.App.exe` (AssemblyName fixo).
+    No VS, o dropdown do Play tem os perfis **Console** e **Front (webview)** (`--front`).
 - Convenção: **pasta no disco = nome do projeto** (se divergir, o `dotnet sln add` cria uma pasta-de-solution
   fantasma no VS). Sem dependências externas ao repo — o antigo `GHUtils` foi dissolvido (jul/2026).
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.

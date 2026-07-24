@@ -5,7 +5,7 @@ using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace ApostlesWar.App.Front
+namespace ApostlesWar.Presentation.Desktop.Front
 {
     /// <summary>Um clique vindo da tela, já com significado (não é "tecla X").</summary>
     internal record MensagemDoFront(string Tipo, int Valor);

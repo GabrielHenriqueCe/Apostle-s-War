@@ -1,7 +1,7 @@
 using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
 
-namespace ApostlesWar.ConsoleUI.Views
+namespace ApostlesWar.Presentation.ConsoleUI.Views
 {
     /// <summary>
     /// View da PARTIDA: renderiza a luta em andamento (times, ações, resultado de ataque, mensagens)

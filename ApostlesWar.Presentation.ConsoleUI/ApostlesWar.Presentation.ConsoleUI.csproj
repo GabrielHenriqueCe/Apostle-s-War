@@ -6,7 +6,7 @@
        "Console" porque um namespace com segmento Console sombrearia System.Console. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>ApostlesWar.ConsoleUI</RootNamespace>
+    <RootNamespace>ApostlesWar.Presentation.ConsoleUI</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

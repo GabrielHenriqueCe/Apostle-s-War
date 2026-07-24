@@ -109,6 +109,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 var apresentacao = new ApresentacaoWebview(ritmo);
 
                 var repositorio = new SaveLocal();
+                var perfil = new PerfilService(repositorio);
                 var capitulos = new CapitulosService(repositorio);
                 var arsenal = new ArsenalService(capitulos, repositorio);
                 var personagens = new PersonagemService();
@@ -122,12 +123,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
                     controladorBot: new ControladorBot(selecaoDeAlvo),
                     apresentacao, relogio);
 
-                // Times sorteados do pool completo (9 facções × 4 slots). Você joga a equipe 1.
-                var pool = campeoes.TodosOsCampeoes().OrderBy(_ => Random.Shared.Next()).ToList();
-                var time1 = pool.Take(4).ToList();
-                var time2 = pool.Skip(4).Take(4).ToList();
-
-                combate.ExecutarArenaComTimes(time1, time2, bot1: false, bot2: true);
+                // Entra pelo MENU (não mais direto na batalha): o fluxo do front cuida do perfil,
+                // mostra o menu principal e roteia a escolha. Ver FluxoDoFront.
+                new FluxoDoFront(ponte, combate, campeoes, perfil, sessao).Rodar();
             }
             catch (Exception ex)
             {

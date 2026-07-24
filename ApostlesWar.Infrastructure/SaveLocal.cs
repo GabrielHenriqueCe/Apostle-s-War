@@ -38,5 +38,18 @@ namespace ApostlesWar.Infrastructure
                 return default;
             }
         }
+
+        public void Excluir(string chave)
+        {
+            string caminho = Caminho(chave);
+            try
+            {
+                if (File.Exists(caminho)) File.Delete(caminho);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Não deu pra apagar (arquivo em uso/permissão): silencioso, como o resto da porta.
+            }
+        }
     }
 }

@@ -14,10 +14,13 @@ const ponte = window.chrome.webview;
 let estado = null;
 let selecionadoId = null;    // quem está aberto no painel de baixo
 let habilidadeEscolhida = null;
-let mostrarNumeros = true;   // hoje ligado: fase de teste de balance
+let mostrarEstatisticas = true;   // hoje ligado: fase de teste de balance
+let cenaAtual = 'menu';      // 'menu' | 'combate' | 'criarPerfil' — o Esc depende disto
+let menuRaiz = true;         // o menu na tela é o PRINCIPAL? (decide o Esc: sair do jogo × voltar)
 
 // ---------- envio ----------
-const mandar = (tipo, valor = 0) => ponte.postMessage(JSON.stringify({ tipo, valor }));
+// `texto` só é usado quando o valor é uma string (ex: o nome do perfil); o resto manda só o índice.
+const mandar = (tipo, valor = 0, texto = null) => ponte.postMessage(JSON.stringify({ tipo, valor, texto }));
 
 // ---------- recepção ----------
 ponte.addEventListener('message', e => {
@@ -27,10 +30,179 @@ ponte.addEventListener('message', e => {
 
     if (msg.tipo === 'estado') aplicarEstado(msg.conteudo);
     else if (msg.tipo === 'evento') aplicarEvento(msg.conteudo);
+    else if (msg.tipo === 'menu') aplicarMenu(msg.conteudo);
+    else if (msg.tipo === 'criarPerfil') mostrarCriarPerfil();
+    else if (msg.tipo === 'edicaoPerfil') mostrarEditarPerfil(msg.conteudo);
 });
 
+// ---------- cenas (menu × combate × criar/editar perfil) ----------
+function mostrarCena(cena) {
+    cenaAtual = cena;
+    const emCombate = cena === 'combate';
+    document.getElementById('menu').hidden = cena !== 'menu';
+    document.getElementById('criarPerfil').hidden = cena !== 'criarPerfil';
+    document.getElementById('editarPerfil').hidden = cena !== 'editarPerfil';
+    document.getElementById('arena').hidden = !emCombate;
+    document.getElementById('painel').hidden = !emCombate;
+    // Os controles de combate só fazem sentido na batalha.
+    document.getElementById('botoesTopo').style.visibility = emCombate ? 'visible' : 'hidden';
+    document.getElementById('turno').style.visibility = emCombate ? 'visible' : 'hidden';
+    // O overlay de fim só existe em combate; ao trocar de cena garante que sumiu.
+    if (!emCombate) document.getElementById('fimBatalha').hidden = true;
+}
+
+function aplicarMenu(m) {
+    mostrarCena('menu');
+    menuRaiz = !!m.raiz;
+    document.getElementById('menuTitulo').textContent = m.titulo;
+    document.getElementById('menuSubtitulo').textContent = m.subtitulo || '';
+
+    // Perfil no canto (avatar + nome): só o menu principal manda. Editar é pelo botão ✏️, não pelo avatar.
+    const perfil = document.getElementById('menuPerfil');
+    perfil.hidden = !m.avatar;
+    if (m.avatar) {
+        document.getElementById('menuAvatar').textContent = m.avatar;
+        document.getElementById('menuNome').textContent = m.nome || '';
+    }
+
+    const cont = document.getElementById('menuOpcoes');
+    cont.replaceChildren(...m.opcoes.map((o, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opcaoMenu';
+        b.disabled = !o.habilitado;
+
+        const ic = document.createElement('span'); ic.className = 'opIcone'; ic.textContent = o.icone;
+        const rot = document.createElement('span'); rot.className = 'opRotulo'; rot.textContent = o.rotulo;
+        b.append(ic, rot);
+        if (!o.habilitado) {
+            const em = document.createElement('span'); em.className = 'opEmBreve'; em.textContent = 'em breve';
+            b.appendChild(em);
+        }
+
+        // Opção destrutiva (ex: excluir conta): confirma no modal ANTES de mandar a escolha.
+        b.addEventListener('click', () => o.confirmar
+            ? confirmar(o.confirmar, () => mandar('menuEscolha', i))
+            : mandar('menuEscolha', i));
+        return b;
+    }));
+}
+
+// ---------- criar perfil (1ª vez) ----------
+function mostrarCriarPerfil() {
+    mostrarCena('criarPerfil');
+    const input = document.getElementById('nomePerfil');
+    input.value = '';
+    input.focus();
+}
+
+function enviarPerfil() {
+    const nome = document.getElementById('nomePerfil').value.trim();
+    if (!nome) return;   // sem nome, não começa
+    mandar('criarPerfil', 0, nome);
+}
+
+document.getElementById('confirmarPerfil').addEventListener('click', enviarPerfil);
+document.getElementById('nomePerfil').addEventListener('keydown', e => {
+    if (e.key === 'Enter') enviarPerfil();
+});
+
+// ---------- editar perfil (nome + avatar) ----------
+// A entidade avatar+nome no menu é o gatilho inteiro.
+document.getElementById('menuPerfil').addEventListener('click', () => mandar('editarPerfil'));
+
+let avatarSelecionado = -1;   // índice na grade (= índice na lista completa que o C# mandou)
+
+function mostrarEditarPerfil(dados) {
+    mostrarCena('editarPerfil');
+    // O nome começa TRAVADO (display); só o botão ✏️ destrava pra editar.
+    const nomeInput = document.getElementById('nomeEditar');
+    nomeInput.value = dados.nome || '';
+    nomeInput.readOnly = true;
+
+    const grade = document.getElementById('avatarGrade');
+    avatarSelecionado = -1;
+
+    grade.replaceChildren(...dados.campeoes.map((c, i) => {
+        const cel = document.createElement('div');
+        cel.className = 'avatarCelula' + (c.desbloqueado ? '' : ' bloqueado');
+
+        const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
+        const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
+        cel.append(em, nm);
+
+        // Pré-seleciona o avatar atual (se desbloqueado).
+        if (c.desbloqueado && c.simbolo === dados.avatar && avatarSelecionado === -1) {
+            avatarSelecionado = i;
+            cel.classList.add('selecionado');
+        }
+        if (c.desbloqueado) cel.addEventListener('click', () => selecionarAvatar(i));
+        return cel;
+    }));
+
+    // Avatar atual não encontrado entre os desbloqueados: cai no 1º desbloqueado.
+    if (avatarSelecionado === -1) {
+        const i = dados.campeoes.findIndex(c => c.desbloqueado);
+        if (i >= 0) selecionarAvatar(i);
+    }
+}
+
+// ✏️ ao lado do nome: destrava a edição (não editável ao abrir).
+document.getElementById('editarNomeBtn').addEventListener('click', () => {
+    const nomeInput = document.getElementById('nomeEditar');
+    nomeInput.readOnly = false;
+    nomeInput.focus();
+    nomeInput.select();
+});
+
+function selecionarAvatar(i) {
+    avatarSelecionado = i;
+    const celulas = document.getElementById('avatarGrade').children;
+    for (let k = 0; k < celulas.length; k++) celulas[k].classList.toggle('selecionado', k === i);
+}
+
+function salvarEdicao() {
+    const nome = document.getElementById('nomeEditar').value.trim();
+    if (!nome || avatarSelecionado < 0) return;
+    mandar('salvarPerfil', avatarSelecionado, nome);
+}
+
+document.getElementById('salvarEditar').addEventListener('click', salvarEdicao);
+document.getElementById('voltarEditar').addEventListener('click', () => mandar('voltar'));
+document.getElementById('nomeEditar').addEventListener('keydown', e => {
+    if (e.key === 'Enter') salvarEdicao();
+});
+
+// ---------- fim de batalha (overlay central) ----------
+document.getElementById('fimBatalha').addEventListener('click', () => mandar('voltarMenu'));
+
+// ---------- modal de confirmação ----------
+let modalAberto = false;
+let modalAoConfirmar = null;
+
+function confirmar(texto, aoConfirmar) {
+    modalAberto = true;
+    modalAoConfirmar = aoConfirmar;
+    document.getElementById('modalTexto').textContent = texto;
+    document.getElementById('modal').hidden = false;
+}
+
+function fecharModal() {
+    modalAberto = false;
+    modalAoConfirmar = null;
+    document.getElementById('modal').hidden = true;
+}
+
+document.getElementById('modalConfirmar').addEventListener('click', () => {
+    const cb = modalAoConfirmar;
+    fecharModal();
+    if (cb) cb();
+});
+document.getElementById('modalCancelar').addEventListener('click', fecharModal);
+
 function aplicarEstado(novo) {
-    const fasesDeEscolha = ['EscolhendoAcao', 'EscolhendoAlvo', 1, 2];
+    mostrarCena('combate');   // chegou estado de batalha → sai do menu
+
     // Ao voltar pra escolha de ação, a habilidade anterior já foi usada (ou cancelada).
     if (nomeDaFase(novo) === 'EscolhendoAcao') habilidadeEscolhida = null;
 
@@ -120,6 +292,13 @@ function desenhar() {
     document.getElementById('turno').textContent = `Turno ${estado.turno}`;
     confirmarAtuais = alvosDeConfirmacao();
 
+    // Fim de batalha: mensagem central de vitória/derrota por cima de tudo (clique/Enter/Esc = sair).
+    // O "🚪 sair" fica embaixo do overlay — não precisa escondê-lo, qualquer clique cai na tela de fim.
+    const acabou = nomeDaFase(estado) === 'Fim';
+    const fim = document.getElementById('fimBatalha');
+    fim.hidden = !acabou;
+    if (acabou) document.getElementById('fimTexto').textContent = estado.mensagem || 'Fim da batalha!';
+
     // A mensagem do retrato entra no log (sem repetir a que já está lá). O fim de batalha ganha
     // destaque próprio.
     if (estado.mensagem) registrar(estado.mensagem, nomeDaFase(estado) === 'Fim' ? 'morte' : '');
@@ -202,7 +381,7 @@ function atualizarCombatente(el, c) {
 
     // Números exatos são muleta de TESTE. Escondidos, sobra só a barra — que é como os jogos do
     // gênero fazem (o Gabriel citou o Raid): você lê a situação, não a planilha.
-    if (mostrarNumeros) {
+    if (mostrarEstatisticas) {
         const hp = document.createElement('div');
         hp.className = 'numeroHP';
         hp.textContent = `${c.hpAtual}/${c.hpMaximo}` + (c.escudo > 0 ? `  🛡️${c.escudo}` : '');
@@ -276,7 +455,7 @@ function desenharPainel() {
     document.getElementById('retratoEmoji').textContent = c.simbolo;
     document.getElementById('retratoNome').textContent = c.nome;
 
-    document.getElementById('painelStats').textContent = mostrarNumeros
+    document.getElementById('painelStats').textContent = mostrarEstatisticas
         ? `HP ${c.hpAtual}/${c.hpMaximo}${c.escudo ? ` · 🛡️ ${c.escudo}` : ''} · ATK ${c.ataque} · DEF ${c.defesa} · 🎯 ${c.taxaCritPct}% · 💥 ${c.danoCritPct}%`
         : '';
 
@@ -366,25 +545,52 @@ function clicarEmCombatente(id) {
 const acharCombatente = id => id == null ? null
     : [...(estado?.equipe1 || []), ...(estado?.equipe2 || [])].find(c => c.id === id) || null;
 
-// Esc = desistir. Na escolha de ALVO avisa o C# (que volta pro menu de habilidade); na escolha de
-// AÇÃO é só desarmar a habilidade armada — o C# nem soube dela ainda.
+// Esc muda de sentido conforme a cena:
+//  - modal aberto → cancela o modal
+//  - criar perfil → ignora (nada de sair no meio de digitar o nome)
+//  - menu raiz → confirma sair do jogo; submenu → volta um nível
+//  - batalha → desarma alvo/habilidade; sem nada armado, confirma sair da batalha
 document.addEventListener('keydown', e => {
+    // Fim de batalha: Enter OU Esc saem pro menu (o clique no overlay também).
+    if (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim') {
+        if (e.key === 'Enter' || e.key === 'Escape') mandar('voltarMenu');
+        return;
+    }
+
     if (e.key !== 'Escape') return;
 
+    if (modalAberto) { fecharModal(); return; }
+    if (cenaAtual === 'criarPerfil') return;
+    if (cenaAtual === 'editarPerfil') { mandar('voltar'); return; }
+
+    if (cenaAtual === 'menu') {
+        if (menuRaiz) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));
+        else mandar('voltar');
+        return;
+    }
+
+    // cena de combate (não-Fim)
     const fase = nomeDaFase(estado || {});
     if (fase === 'EscolhendoAlvo') {
         habilidadeEscolhida = null;
         mandar('cancelar');
     } else if (fase === 'EscolhendoAcao' && habilidadeEscolhida !== null) {
-        habilidadeEscolhida = null;
+        habilidadeEscolhida = null;   // só desarma a habilidade — o C# nem soube dela ainda
         desenhar();
+    } else {
+        confirmar('Sair da batalha? O progresso desta luta será perdido.', () => mandar('sair'));
     }
 });
 
-document.getElementById('alternarNumeros').addEventListener('click', e => {
-    mostrarNumeros = !mostrarNumeros;
-    e.currentTarget.classList.toggle('ativo', mostrarNumeros);
+document.getElementById('alternarEstatisticas').addEventListener('click', e => {
+    mostrarEstatisticas = !mostrarEstatisticas;
+    e.currentTarget.classList.toggle('ativo', mostrarEstatisticas);
     desenhar();
+});
+
+// Sair da batalha: confirma antes (o C# aborta a partida e volta pro menu ao receber 'sair').
+document.getElementById('sairBatalha').addEventListener('click', () => {
+    confirmar('Sair da batalha? O progresso desta luta será perdido.', () => mandar('sair'));
 });
 
 // ---------- mostrar/esconder o log ----------
@@ -520,7 +726,8 @@ function flutuar(el, texto, classe) {
 }
 
 // ---------- partida ----------
-document.getElementById('alternarNumeros').classList.toggle('ativo', mostrarNumeros);
+document.getElementById('alternarEstatisticas').classList.toggle('ativo', mostrarEstatisticas);
 document.getElementById('alternarLog').classList.toggle('ativo', mostrarLog);
-aplicarVelocidade();   // sincroniza o C# com o 2x inicial
-mandar('pronto');      // destrava a thread do jogo no C#
+aplicarVelocidade();      // sincroniza o C# com o 2x inicial
+mostrarCena('menu');      // o jogo sempre abre no menu — evita o flash da arena vazia
+mandar('pronto');         // destrava a thread do jogo no C#

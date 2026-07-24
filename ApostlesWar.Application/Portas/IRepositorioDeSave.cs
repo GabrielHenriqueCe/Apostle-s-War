@@ -14,5 +14,8 @@ namespace ApostlesWar.Application.Portas
 
         /// <summary>Devolve o dado do slot, ou default(T) se AUSENTE ou CORROMPIDO (silencioso).</summary>
         T? Carregar<T>(string chave);
+
+        /// <summary>Apaga o slot. Idempotente: slot ausente = nada a fazer, sem erro.</summary>
+        void Excluir(string chave);
     }
 }

@@ -35,6 +35,310 @@ body {
     height: 100vh;
 }
 
+/* ---------- menu (overlay) ---------- */
+#menu {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+}
+#menu[hidden] { display: none; }
+
+#menuTitulo {
+    margin: 0;
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--ouro);
+    text-shadow: 0 2px 14px rgba(217,180,91,.3), 0 2px 3px #000;
+}
+#menuSubtitulo { margin: 0 0 28px; color: var(--apagado); font-size: 15px; letter-spacing: 3px; text-transform: uppercase; }
+
+#menuOpcoes { display: flex; flex-direction: column; gap: 12px; width: min(320px, 80vw); }
+
+.opcaoMenu {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    font-family: inherit;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--texto);
+    background: var(--painel);
+    border: 2px solid var(--borda);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color .15s, transform .1s, background .15s;
+}
+.opcaoMenu:hover:not(:disabled) { border-color: var(--ouro); transform: translateY(-2px); background: #262030; }
+.opcaoMenu:disabled { opacity: .4; cursor: not-allowed; }
+.opcaoMenu .opIcone { font-size: 26px; }
+.opcaoMenu .opRotulo { flex: 1; text-align: left; }
+.opcaoMenu .opEmBreve { font-size: 11px; color: var(--apagado); letter-spacing: 1px; text-transform: uppercase; }
+
+
+/* ---------- criar perfil (overlay, 1ª vez) ---------- */
+#criarPerfil {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+}
+#criarPerfil[hidden] { display: none; }
+#criarPerfil h1 { margin: 0; font-size: 40px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 14px rgba(217,180,91,.3), 0 2px 3px #000; }
+#criarPerfilDica { margin: 0; color: var(--apagado); font-size: 15px; letter-spacing: 1px; }
+
+#nomePerfil {
+    width: min(320px, 80vw);
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 20px;
+    text-align: center;
+    color: var(--texto);
+    background: var(--painel);
+    border: 2px solid var(--borda);
+    border-radius: 12px;
+    user-select: text;
+}
+#nomePerfil:focus { outline: none; border-color: var(--ouro); }
+
+#confirmarPerfil {
+    padding: 12px 28px;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--fundo);
+    background: var(--ouro);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform .1s, filter .15s;
+}
+#confirmarPerfil:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+/* ---------- modal de confirmação ---------- */
+#modal {
+    position: absolute;
+    inset: 0;
+    z-index: 50;                 /* acima de tudo, inclusive dos overlays de menu (z 30) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, .6);
+}
+#modal[hidden] { display: none; }
+
+#modalCaixa {
+    width: min(420px, 86vw);
+    padding: 24px;
+    background: var(--painel);
+    border: 2px solid var(--borda);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+    text-align: center;
+}
+#modalTexto { margin: 0 0 20px; font-size: 16px; line-height: 1.5; color: var(--texto); }
+
+#modalBotoes { display: flex; gap: 12px; justify-content: center; }
+#modalBotoes button {
+    padding: 10px 22px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid var(--borda);
+    background: transparent;
+    color: var(--texto);
+    transition: border-color .15s, background .15s, transform .1s;
+}
+#modalCancelar:hover { border-color: var(--apagado); transform: translateY(-1px); }
+#modalConfirmar { border-color: var(--alvo); color: var(--alvo); }
+#modalConfirmar:hover { background: var(--alvo); color: var(--texto); transform: translateY(-1px); }
+
+/* ---------- perfil do jogador (canto do menu) ---------- */
+/* Avatar + caixa do nome são UMA entidade clicável (abre a edição). A caixa é menor que a moldura
+   e cresce à direita — é onde nível/progresso da conta entram depois. */
+#menuPerfil {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform .12s;
+}
+#menuPerfil:hover { transform: translateY(-1px); }
+#menuPerfil:hover #menuAvatar { box-shadow: 0 0 22px rgba(217, 180, 91, .55); }
+#menuPerfil:hover #menuNomeBox { border-color: var(--ouro); }
+#menuPerfil[hidden] { display: none; }
+
+#menuAvatar {
+    flex: none;
+    position: relative;
+    z-index: 2;                 /* por cima da caixa, pra ela parecer sair de dentro do círculo */
+    width: 84px;
+    height: 84px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    line-height: 1;
+    background: var(--painel);
+    border: 3px solid var(--ouro);
+    border-radius: 50%;
+    box-shadow: 0 0 16px rgba(217, 180, 91, .3);
+    transition: box-shadow .15s;
+}
+
+/* Caixa do nome: MENOR que a moldura e POR TRÁS do círculo (margem negativa + z menor), com o nome
+   empurrado (padding esquerdo) pra emergir do lado de fora — dá a impressão de que a barra sai de
+   dentro do avatar. Cresce à direita (nível/progresso da conta entram aqui depois). */
+#menuNomeBox {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+    max-width: 190px;
+    margin-left: -44px;         /* recua a borda esquerda pra trás do círculo */
+    padding: 8px 16px 8px 56px; /* empurra o nome pra fora do círculo */
+    background: var(--painel);
+    border: 2px solid var(--borda);
+    border-radius: 23px;        /* pílula: casa com a curva do círculo ao emergir */
+    transition: border-color .15s;
+}
+#menuNome { font-size: 16px; font-weight: 700; color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- linha do nome na tela de edição (não editável até clicar no ✏️) ---------- */
+#editarNomeLinha { display: flex; align-items: center; gap: 8px; }
+#nomeEditar:read-only { color: var(--apagado); cursor: default; }
+#editarNomeBtn {
+    background: transparent;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color .15s, transform .1s;
+}
+#editarNomeBtn:hover { border-color: var(--ouro); transform: translateY(-1px); }
+
+/* ---------- editar perfil (overlay) ---------- */
+#editarPerfil {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+}
+#editarPerfil[hidden] { display: none; }
+#editarPerfil h1 { margin: 0; font-size: 34px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
+#editarDica { margin: 4px 0 0; color: var(--apagado); font-size: 14px; letter-spacing: 1px; }
+
+#nomeEditar {
+    width: min(320px, 80vw);
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 18px;
+    text-align: center;
+    color: var(--texto);
+    background: var(--painel);
+    border: 2px solid var(--borda);
+    border-radius: 10px;
+    user-select: text;
+}
+#nomeEditar:focus { outline: none; border-color: var(--ouro); }
+
+#avatarGrade {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 76px);
+    gap: 10px;
+    justify-content: center;
+    width: min(640px, 90vw);
+    max-height: 46vh;
+    overflow-y: auto;
+    padding: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--borda) transparent;
+}
+
+.avatarCelula {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 76px;
+    padding: 8px 4px;
+    background: var(--painel);
+    border: 2px solid var(--borda);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .12s, transform .1s;
+}
+.avatarCelula .aEmoji { font-size: 32px; line-height: 1; }
+.avatarCelula .aNome { font-size: 10px; color: var(--apagado); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.avatarCelula:hover:not(.bloqueado) { border-color: var(--ouro); transform: translateY(-2px); }
+.avatarCelula.selecionado { border-color: var(--ouro); background: #332b1c; box-shadow: 0 0 10px rgba(217,180,91,.4); }
+
+/* Bloqueado: cinza e sem clique — a mesma linguagem do inimigo morto (grayscale + opacidade). */
+.avatarCelula.bloqueado { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
+
+#editarBotoes { display: flex; gap: 12px; }
+#editarBotoes button {
+    padding: 10px 26px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid var(--borda);
+    background: transparent;
+    color: var(--texto);
+    transition: border-color .15s, background .15s, transform .1s;
+}
+#voltarEditar:hover { border-color: var(--apagado); transform: translateY(-1px); }
+#salvarEditar { border: none; background: var(--ouro); color: var(--fundo); }
+#salvarEditar:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+/* ---------- fim de batalha (overlay central) ---------- */
+#fimBatalha {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, .62);
+    cursor: pointer;
+}
+#fimBatalha[hidden] { display: none; }
+
+#fimCaixa { text-align: center; animation: entrarFim .3s ease; }
+#fimTexto { font-size: 56px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 16px rgba(217,180,91,.4), 0 3px 4px #000; }
+#fimDica { margin-top: 14px; font-size: 15px; color: var(--apagado); letter-spacing: 2px; text-transform: uppercase; }
+
+@keyframes entrarFim {
+    from { opacity: 0; transform: scale(.85); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 /* ---------- topo ---------- */
 #topo {
     display: flex;
@@ -49,7 +353,7 @@ body {
 
 #botoesTopo { display: flex; gap: 8px; }
 
-#alternarNumeros, #velocidade, #alternarLog {
+#alternarEstatisticas, #velocidade, #alternarLog, #sairBatalha {
     background: transparent;
     color: var(--apagado);
     border: 1px solid var(--borda);
@@ -59,8 +363,12 @@ body {
     font-size: 13px;
     font-family: inherit;
 }
-#alternarNumeros:hover, #velocidade:hover, #alternarLog:hover { color: var(--texto); border-color: var(--apagado); }
-#alternarNumeros.ativo, #alternarLog.ativo { color: var(--ouro); border-color: var(--ouro); }
+#alternarEstatisticas:hover, #velocidade:hover, #alternarLog:hover { color: var(--texto); border-color: var(--apagado); }
+#alternarEstatisticas.ativo, #alternarLog.ativo { color: var(--ouro); border-color: var(--ouro); }
+
+/* Sair da batalha: destaque discreto de "saída" (avermelhado no hover), some no fim (aí é o 🏠 menu). */
+#sairBatalha:hover { color: var(--alvo); border-color: var(--alvo); }
+#sairBatalha[hidden] { display: none; }
 
 /* Acelerado fica aceso: dá pra saber que a batalha está correndo sem clicar pra conferir. */
 #velocidade.rapido { color: var(--ouro); border-color: var(--ouro); }

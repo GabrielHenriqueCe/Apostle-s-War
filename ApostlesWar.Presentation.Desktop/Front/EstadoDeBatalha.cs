@@ -94,4 +94,34 @@ namespace ApostlesWar.Presentation.Desktop.Front
         int AbsorvidoPeloEscudo,
         string? Texto
     );
+
+    /// <summary>
+    /// Um menu pra tela desenhar. Mesma ideia do <see cref="EstadoDeBatalha"/>, do lado dos menus: o
+    /// C# manda "o que mostrar" e o JS pinta botões — o clique volta como o ÍNDICE da opção. Menu com
+    /// cursor é formato de console; no front cada opção é um botão (ver ITelaDeCombate sobre o mesmo
+    /// princípio pro combate).
+    ///
+    /// <see cref="Raiz"/> = é o menu PRINCIPAL (não um submenu): decide o que o Esc faz na tela —
+    /// na raiz confirma sair do jogo; num submenu, volta um nível. <see cref="Avatar"/>/<see cref="Nome"/>
+    /// != null = mostra a moldura do jogador (avatar + nome + botão ✏️ de editar); só o menu principal manda.
+    /// </summary>
+    internal record MenuVisto(string Titulo, string? Subtitulo, List<OpcaoMenuVista> Opcoes,
+        bool Raiz = false, string? Avatar = null, string? Nome = null);
+
+    /// <summary>
+    /// Uma opção clicável. `Habilitado: false` = aparece apagada com "em breve" (fatia futura).
+    /// <see cref="Confirmar"/> != null = ação destrutiva: o clique abre um modal com esse texto e só
+    /// dispara a escolha se o jogador confirmar (ex.: excluir conta).
+    /// </summary>
+    internal record OpcaoMenuVista(string Rotulo, string Icone, bool Habilitado, string? Confirmar = null);
+
+    /// <summary>Um campeão na grade de escolha de avatar. `Desbloqueado: false` = aparece em cinza,
+    /// não clicável (ainda não conquistado na campanha).</summary>
+    internal record CampeaoVisto(string Simbolo, string Nome, bool Desbloqueado);
+
+    /// <summary>
+    /// A tela de EDITAR PERFIL: o nome atual (pra pré-preencher), o avatar atual (pra pré-selecionar
+    /// na grade) e a lista completa de campeões (a ORDEM é o índice que o clique devolve).
+    /// </summary>
+    internal record EdicaoPerfilVista(string Nome, string Avatar, List<CampeaoVisto> Campeoes);
 }

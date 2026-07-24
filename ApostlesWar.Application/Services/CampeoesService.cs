@@ -2,6 +2,7 @@
 using ApostlesWar.Application.Portas;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ApostlesWar.Application.Services
@@ -77,6 +78,17 @@ namespace ApostlesWar.Application.Services
                 foreach (Slot slot in Enum.GetValues<Slot>())
                     todos.Add(_personagemService.ObterPersonagem(faccao, slot));
             return todos;
+        }
+
+        /// <summary>
+        /// Sorteia dois times de 4 sem repetição do pool completo — a batalha rápida da Arena. Sorteio
+        /// = SETUP de jogo, mora aqui (não no front): o front só chama e cai na luta. Irmão do
+        /// SelecionarTimeArena (que passa por tela); este é o caminho headless/sem-menu.
+        /// </summary>
+        public (List<Personagem> Time1, List<Personagem> Time2) SortearDoisTimesArena()
+        {
+            var pool = TodosOsCampeoes().OrderBy(_ => Random.Shared.Next()).ToList();
+            return (pool.Take(4).ToList(), pool.Skip(4).Take(4).ToList());
         }
 
         public void CarregarCampeoes()

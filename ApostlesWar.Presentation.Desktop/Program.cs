@@ -33,10 +33,11 @@ var relogioDoCombate = new RelogioDoCombate();      // contador global de turnos
 var menuView = new MenuView(arsenalService, capitulosService, entrada, apresentacao);
 var combateView = new CombateView(entrada, relogioDoCombate);
 var campeoesService = new CampeoesService(personagemService, menuView, capitulosService);
+var campanhaService = new CampanhaService(arsenalService, campeoesService, capitulosService);
 var controladorJogador = new ControladorJogador(combateView, entrada);   // trocar por controlador automático liga o modo auto
 var controladorBot = new ControladorBot(selecaoDeAlvoService);
 var combateService = new CombateService(arsenalService, campeoesService, personagemService, combateView, selecaoDeAlvoService, controladorJogador, controladorBot, apresentacao, relogioDoCombate);
-new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, menuView, combateService, entrada).Executar();
+new GerenciadorDeJogoService(arsenalService, campeoesService, capitulosService, campanhaService, menuView, combateService, entrada).Executar();
 return 0;
 
 #endregion

@@ -79,6 +79,46 @@
         </div>
     </section>
 
+    <!-- Cena do MAPA da campanha: trilha horizontal de facções, marcador que caminha, arrasta pra ver mais. -->
+    <section id="campanhaMapa" hidden>
+        <div id="mapaViewport">
+            <div id="mapaTrilha">
+                <div id="mapaMarcador"></div>
+                <!-- nós de facção inseridos pelo JS -->
+            </div>
+        </div>
+        <div id="mapaRodape"><button id="mapaVoltar" type="button">Voltar</button></div>
+    </section>
+
+    <!-- Cena das FASES de uma facção. -->
+    <section id="campanhaFases" hidden>
+        <h1 id="fasesTitulo"></h1>
+        <div id="fasesLista"></div>
+        <div id="faseDetalhe" hidden>
+            <div id="faseInimigos"></div>
+            <div id="faseItem"></div>
+            <p class="faseDica">Monte seu time (até 4)</p>
+            <div id="faseSlots"></div>
+            <div id="fasePicker"></div>
+        </div>
+        <div id="fasesRodape">
+            <button id="fasesVoltar" type="button">Voltar</button>
+            <button id="fasesLutar" type="button" disabled>⚔️ Lutar</button>
+        </div>
+    </section>
+
+    <!-- Vitória / Derrota da campanha (clique ou Enter continua). -->
+    <section id="campanhaVitoria" hidden>
+        <h1>🏆 Fase concluída!</h1>
+        <div id="vitoriaConteudo"></div>
+        <div class="continuarDica">clique ou Enter pra continuar</div>
+    </section>
+    <section id="campanhaDerrota" hidden>
+        <h1>🕯️ Derrota</h1>
+        <p id="derrotaTexto">A Deusa observa em silêncio. Levante e tente de novo.</p>
+        <div class="continuarDica">clique ou Enter pra continuar</div>
+    </section>
+
     <!-- MODAL de confirmação reutilizável: sobrepõe qualquer cena (sair, excluir conta, ...). -->
     <section id="modal" hidden>
         <div id="modalCaixa">

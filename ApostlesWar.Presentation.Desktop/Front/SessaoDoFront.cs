@@ -24,6 +24,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
         private readonly Dictionary<Combate, int> _ids = new();
         private readonly Dictionary<int, Combate> _porId = new();
         private readonly Dictionary<Combate, int> _lado = new();
+        // Os combatentes da RODADA atual (o que a tela mostra AGORA). Separado de _ids (que guarda o
+        // mapa de ids da sessão inteira) porque a campanha tem 2 rodadas: os inimigos da rodada 1 saem
+        // do board quando a 2 começa, senão apareceriam mortos junto (o RegistrarLados troca o board).
+        private readonly HashSet<Combate> _board = new();
         private int _proximoId = 1;
         private bool _ladoDoJogadorDefinido;
 
@@ -52,6 +56,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
             _ids.Clear();
             _porId.Clear();
             _lado.Clear();
+            _board.Clear();
             _mostrado.Clear();
             _proximoId = 1;
             _ladoDoJogadorDefinido = false;
@@ -71,8 +76,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// </summary>
         public void FixarLados(List<Combate> equipe1, List<Combate> equipe2)
         {
-            foreach (Combate c in equipe1) { IdDe(c); _lado[c] = 1; }
-            foreach (Combate c in equipe2) { IdDe(c); _lado[c] = 2; }
+            _board.Clear();
+            foreach (Combate c in equipe1) { IdDe(c); _lado[c] = 1; _board.Add(c); }
+            foreach (Combate c in equipe2) { IdDe(c); _lado[c] = 2; _board.Add(c); }
             _ladoDoJogadorDefinido = true;
         }
 
@@ -95,11 +101,16 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// </summary>
         private int LadoDe(Combate c) => _lado.GetValueOrDefault(c, 1);
 
-        /// <summary>Fixa os lados na primeira visão (provisório, pela perspectiva de quem age).</summary>
+        /// <summary>
+        /// Fixa os lados na primeira visão (provisório, pela perspectiva de quem age) E define o BOARD
+        /// atual (os combatentes desta rodada). Trocar o board aqui é o que faz a campanha virar de
+        /// rodada sem os inimigos velhos: a rodada 2 chama isto com os inimigos novos.
+        /// </summary>
         public void RegistrarLados(List<Combate> ladoEsquerdo, List<Combate> ladoDireito)
         {
-            foreach (Combate c in ladoEsquerdo) { IdDe(c); if (!_lado.ContainsKey(c)) _lado[c] = 1; }
-            foreach (Combate c in ladoDireito) { IdDe(c); if (!_lado.ContainsKey(c)) _lado[c] = 2; }
+            _board.Clear();
+            foreach (Combate c in ladoEsquerdo) { IdDe(c); if (!_lado.ContainsKey(c)) _lado[c] = 1; _board.Add(c); }
+            foreach (Combate c in ladoDireito) { IdDe(c); if (!_lado.ContainsKey(c)) _lado[c] = 2; _board.Add(c); }
         }
 
         /// <summary>
@@ -131,7 +142,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// <summary>Alcança a narrativa ao modelo pra TODOS: a tela passa a mostrar a vida de agora.</summary>
         public void SincronizarVida()
         {
-            foreach (Combate c in _ids.Keys) _mostrado[c] = (Math.Max(0, c.HPAtual), c.EstaVivo());
+            foreach (Combate c in _board) _mostrado[c] = (Math.Max(0, c.HPAtual), c.EstaVivo());
         }
 
         /// <summary>
@@ -154,7 +165,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
         {
             if (sincronizarVida) SincronizarVida();
 
-            var todos = _ids.Keys.ToList();
+            var todos = _board.ToList();   // só a rodada atual (ver _board): a campanha troca de rodada limpa
             var estado = new EstadoDeBatalha(
                 Turno: _relogio.NumeroDoTurno,
                 Fase: Fase,

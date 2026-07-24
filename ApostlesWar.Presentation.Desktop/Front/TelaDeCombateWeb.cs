@@ -113,7 +113,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
             _sessao.Publicar(sincronizarVida: false);
         }
 
-        public void ExibirResumoBatalha(List<Combate> jogador) => Encerrar("Fim da batalha!");
+        // Campanha: o fim é a tela de VITÓRIA/DERROTA que o FluxoDoFront manda logo depois (com champs
+        // novos + item). Aqui é no-op pra não piscar o overlay genérico de "Fim da batalha!" antes dela.
+        public void ExibirResumoBatalha(List<Combate> jogador) { }
 
         // Arena (PVP): os lados foram fixados na ordem montada (equipe1=esquerda), então o vencedor
         // vira o LADO da tela — a mensagem por metade (Vitória de um lado, Derrota do outro) é decidida

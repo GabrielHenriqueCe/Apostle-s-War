@@ -44,6 +44,18 @@ namespace ApostlesWar.Application.Services
             if (obtidos.Any(i => i.Faccao == faccao && i.Fase == fase))
                 return null;
 
+            var item = PreverItem(faccao, fase);
+            obtidos.Add(item);
+            return item;
+        }
+
+        /// <summary>
+        /// O item que (faccao, fase) dropa, sem efeito colateral (NÃO adiciona a obtidos). Pra a tela
+        /// de fase mostrar o drop antes de lutar. O DroparItem reusa isto. O item é determinístico:
+        /// a fase define nome+stat, a facção define o emoji e a magnitude (Item.CalcularValor).
+        /// </summary>
+        public Item PreverItem(Faccao faccao, Fases fase)
+        {
             string simbolo = simbolosPorFaccao[faccao][(int)fase - 1];
 
             (string nome, TipoStat tipo) = fase switch
@@ -57,9 +69,7 @@ namespace ApostlesWar.Application.Services
                 Fases.Fase7 => ("Bota", TipoStat.DanoCritPct),
                 _ => throw new ArgumentOutOfRangeException()
             };
-            var item = new Item(nome, simbolo, faccao, fase, tipo);
-            obtidos.Add(item);
-            return item;
+            return new Item(nome, simbolo, faccao, fase, tipo);
         }
 
         public ArsenalService(CapitulosService capitulosService, IRepositorioDeSave repo)

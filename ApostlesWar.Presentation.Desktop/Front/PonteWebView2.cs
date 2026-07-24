@@ -80,6 +80,12 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// <summary>Abre a montagem da Arena com o pool de campeões. A resposta volta como "iniciarArena".</summary>
         public void EnviarMontagemArena(List<CampeaoVisto> campeoes) => Enviar("montagemArena", new { campeoes });
 
+        // ---------- Campanha ----------
+        public void EnviarMapa(MapaVista mapa) => Enviar("campanhaMapa", mapa);
+        public void EnviarFases(FasesVista fases) => Enviar("campanhaFases", fases);
+        public void EnviarVitoria(RecompensaVista recompensa) => Enviar("campanhaVitoria", recompensa);
+        public void EnviarDerrota() => Enviar("campanhaDerrota", new { });
+
         private void Enviar(string tipo, object conteudo)
         {
             string json = JsonSerializer.Serialize(new { tipo, conteudo }, Json);

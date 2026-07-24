@@ -569,7 +569,24 @@ namespace ApostlesWar.Application.Services
 
         #region Fluxo de fase
 
+        /// <summary>
+        /// A fase da campanha COM a seleção de time embutida (tela de console via SelecionarTime). É o
+        /// wrapper do console; o front pica o time por conta própria e chama ExecutarFaseComTime direto —
+        /// mesmo split de ExecutarArena→ExecutarArenaComTimes.
+        /// </summary>
         public ResultadoFase ExecutarFase(Faccao capitulo, Fases fase)
+        {
+            var time = _campeoesService.SelecionarTime();
+            if (time.Count == 0) return ResultadoFase.Cancelou;   // desistiu na seleção de time — sem derrota
+            return ExecutarFaseComTime(time, capitulo, fase);
+        }
+
+        /// <summary>
+        /// A fase da campanha a partir de um time JÁ ESCOLHIDO — quem monta o time é problema de quem
+        /// chama (menu de console ou clique no front). Roda as 2 rodadas com o multiplicador de fase e os
+        /// itens equipados. A recompensa (unlock/drop/save) é DEPOIS, no CampanhaService.
+        /// </summary>
+        public ResultadoFase ExecutarFaseComTime(List<Personagem> time, Faccao capitulo, Fases fase)
         {
             Fase fas = Campanha.ObterFase((int)fase);
             MultiplicadorFase mult = new MultiplicadorFase
@@ -579,15 +596,12 @@ namespace ApostlesWar.Application.Services
                 Defesa = (0.5f * (float)capitulo) + (0.1f * (float)fase)
             };
 
-            var time = _campeoesService.SelecionarTime();
-            if (time.Count == 0) return ResultadoFase.Cancelou;   // desistiu na seleção de time — sem derrota
-
             var jogador = time.Select(p => (Combate)new Jogador(p)).ToList();
             foreach (Combate c in jogador)
                 _arsenalService.AplicarItens(c);
 
-            // NOVO: captura HPMaximoInicial DOS JOGADORES depois de mult + itens
-            // (jogadores não recebem multiplicador de fase, mas mantemos pra simetria/consistência)
+            // Captura HPMaximoInicial DOS JOGADORES depois de mult + itens (jogadores não recebem
+            // multiplicador de fase, mas mantemos pra simetria/consistência).
             foreach (Combate c in jogador)
                 c.IniciarCombate();
 
@@ -615,6 +629,10 @@ namespace ApostlesWar.Application.Services
             }
 
             var batalha = new Batalha(new Equipe(jogador), new Equipe(inimigo));
+
+            // Mostra o board da rodada ANTES de lutar. No console é um redraw a mais (inofensivo); no
+            // front é o que troca o board pros inimigos NOVOS (senão a rodada 2 mostraria os da 1 mortos).
+            _combateView.ExibirPartida(jogador, inimigo);
 
             // Campanha: Equipe1 (jogador) = humano, Equipe2 (inimigos) = bot. No Versus, o ponto de
             // entrada monta este mapa conforme o modo escolhido (J×B / B×J / J×J / B×B).

@@ -192,9 +192,18 @@ body {
 /* quem está agindo agora */
 .combatente.agindo { border-color: var(--agindo); box-shadow: 0 0 12px rgba(126,224,129,.25); }
 
-/* alvo legítimo do clique atual */
+/* alvo legítimo do clique atual (inimigo) — vermelho */
 .combatente.alvo { border-color: var(--alvo); }
 .combatente.alvo:hover { box-shadow: 0 0 12px rgba(224,87,79,.35); }
+
+/* alvo AMIGO de um buff armado (próprio/aliado) — verde, distinto do vermelho de inimigo.
+   Pulsa devagar convidando o clique de confirmação. */
+.combatente.alvoAmigo { border-color: var(--agindo); animation: pulsarAmigo 1.1s ease-in-out infinite; }
+.combatente.alvoAmigo:hover { box-shadow: 0 0 14px rgba(126,224,129,.45); }
+@keyframes pulsarAmigo {
+    0%, 100% { box-shadow: 0 0 0 rgba(126,224,129,0); }
+    50% { box-shadow: 0 0 12px rgba(126,224,129,.4); }
+}
 
 /* selecionado no painel de baixo */
 .combatente.selecionado { border-color: var(--ouro); }

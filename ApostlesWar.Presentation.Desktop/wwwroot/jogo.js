@@ -87,11 +87,38 @@ function detectarBuffsGanhos(anterior, novo) {
 const NOMES_FASE = ['Assistindo', 'EscolhendoAcao', 'EscolhendoAlvo', 'Fim'];
 const nomeDaFase = e => typeof e.fase === 'number' ? NOMES_FASE[e.fase] : e.fase;
 
+// A habilidade atualmente ARMADA (destacada, esperando confirmação), ou null.
+const habArmada = () => habilidadeEscolhida == null ? null
+    : (estado?.habilidades || []).find(h => h.indice === habilidadeEscolhida) || null;
+
+// O time (lista de combatentes) a que um id pertence.
+function ladoDe(id) {
+    const e1 = estado?.equipe1 || [], e2 = estado?.equipe2 || [];
+    return e1.some(c => c.id === id) ? e1 : e2;
+}
+
+// Quem pode ser clicado pra CONFIRMAR uma habilidade armada que não pede alvo (Self / buff em
+// aliados): clicar em si mesmo confirma o buff próprio, clicar num aliado confirma o de aliado.
+// Vazio quando não há habilidade armada, quando ela pede alvo (aí o C# dirige a fase de alvo), ou
+// fora da escolha de ação.
+function alvosDeConfirmacao() {
+    const h = habArmada();
+    if (!h || h.pedeAlvo || nomeDaFase(estado) !== 'EscolhendoAcao') return new Set();
+
+    if (h.escopo === 'Self') return new Set([estado.quemAge]);
+    if (h.escopo === 'Aliados')
+        return new Set(ladoDe(estado.quemAge).filter(c => c.vivo).map(c => c.id));
+    return new Set();
+}
+
 // ---------- desenho ----------
+let confirmarAtuais = new Set();   // ids que podem confirmar a habilidade armada (recalc por quadro)
+
 function desenhar() {
     if (!estado) return;
 
     document.getElementById('turno').textContent = `Turno ${estado.turno}`;
+    confirmarAtuais = alvosDeConfirmacao();
 
     // A mensagem do retrato entra no log (sem repetir a que já está lá). O fim de batalha ganha
     // destaque próprio.
@@ -155,6 +182,8 @@ function atualizarCombatente(el, c) {
     if (c.id === estado.quemAge) el.classList.add('agindo');
     if (c.id === selecionadoId) el.classList.add('selecionado');
     if (escolhendoAlvo && ehAlvoValido) el.classList.add('alvo');
+    // Alvo AMIGO de uma habilidade armada sem passo de alvo (buff próprio/de aliado): clicar confirma.
+    if (confirmarAtuais.has(c.id)) el.classList.add('alvoAmigo');
     animando.forEach(k => el.classList.add(k));
 
     const emoji = document.createElement('div');
@@ -324,6 +353,10 @@ function clicarEmCombatente(id) {
 
     // Com habilidade em curso e alvo legítimo: o clique EXECUTA.
     if (escolhendoAlvo && ehAlvoValido) { mandar('alvo', id); return; }
+
+    // Habilidade armada sem passo de alvo (buff próprio / em aliados): clicar num alvo destacado
+    // CONFIRMA — o equivalente ao 2º clique na habilidade, só que apontando quem recebe.
+    if (confirmarAtuais.has(id)) { mandar('habilidade', habilidadeEscolhida); return; }
 
     // Caso contrário, clicar é só olhar a ficha — inclusive a do inimigo, pra ver os status dele.
     selecionadoId = id;

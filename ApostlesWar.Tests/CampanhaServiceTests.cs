@@ -27,7 +27,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            return (new CampanhaService(arsenal, campeoes, capitulos), capitulos, campeoes);
+            return (new CampanhaService(arsenal, campeoes, capitulos, repo), capitulos, campeoes);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, campeoes, capitulos);
+            var campanha = new CampanhaService(arsenal, campeoes, capitulos, repo);
 
             campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1);
 
@@ -76,6 +76,66 @@ namespace Tests
             Assert.Equal("Arma", item.Nome);
             Assert.Equal("🗡️", item.Simbolo);
             Assert.Empty(arsenal.ObterObtidos());   // preview não dropa (não mexe em obtidos)
+        }
+
+        /// <summary>
+        /// O nome do SLOT e o nome do ITEM que cai nele são a mesma coisa — uma tabela só. O front
+        /// tinha a própria cópia da lista e ela envelheceu (chamava a Fase 4 de "Acessório" enquanto
+        /// o item nasce "Manopla"); este teste é a trava pra não acontecer de novo.
+        /// </summary>
+        [Fact]
+        public void NomeDoSlot_CasaComONomeDoItemQueCaiNele()
+        {
+            var repo = new RepositorioFake();
+            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
+
+            foreach (Fases fase in Enum.GetValues<Fases>())
+                Assert.Equal(ArsenalService.NomeDoSlot(fase), arsenal.PreverItem(Faccao.Reino, fase).Nome);
+        }
+
+        [Fact]
+        public void EquiparItem_PersisteSozinho()
+        {
+            var repo = new RepositorioFake();
+            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
+
+            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase1));
+
+            // Sem ninguém chamar SalvarItens: quem manda no dado decide quando ele é durável.
+            Assert.True(repo.Contem("itens"));
+        }
+
+        /// <summary>
+        /// A posição no mapa (o "último lugar") é PROGRESSÃO, não estado de tela — por isso mora no
+        /// service e some junto com a conta, em vez de o front gravar direto na porta de save.
+        /// </summary>
+        [Fact]
+        public void PosicaoNoMapa_ComecaNoPrimeiro_EPersiste()
+        {
+            var (campanha, _, _) = Montar();
+
+            Assert.Equal(0, campanha.PosicaoNoMapa());
+
+            campanha.SalvarPosicao(3);
+
+            Assert.Equal(3, campanha.PosicaoNoMapa());
+        }
+
+        /// <summary>
+        /// O mapa é a lista de capítulos, na ordem — não "todas as facções menos Humanos", que era
+        /// como o front deduzia (acertava por coincidência da ordem do enum).
+        /// </summary>
+        [Fact]
+        public void FaccoesDaCampanha_SaoOsCapitulos_SemOsHumanos()
+        {
+            var capitulos = new CapitulosService(new RepositorioFake());
+
+            var faccoes = capitulos.FaccoesDaCampanha();
+
+            Assert.Equal(8, faccoes.Count);
+            Assert.DoesNotContain(Faccao.Humanos, faccoes);   // time inicial, não é capítulo
+            Assert.Equal(Faccao.Reino, faccoes[0]);           // a campanha começa no Reino
+            Assert.Equal(Faccao.Apostolos, faccoes[^1]);      // e termina nos Apóstolos
         }
     }
 }

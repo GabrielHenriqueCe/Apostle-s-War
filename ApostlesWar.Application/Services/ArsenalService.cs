@@ -57,20 +57,40 @@ namespace ApostlesWar.Application.Services
         public Item PreverItem(Faccao faccao, Fases fase)
         {
             string simbolo = simbolosPorFaccao[faccao][(int)fase - 1];
-
-            (string nome, TipoStat tipo) = fase switch
-            {
-                Fases.Fase1 => ("Arma", TipoStat.ATKFlat),
-                Fases.Fase2 => ("Elmo", TipoStat.HPFlat),
-                Fases.Fase3 => ("Escudo", TipoStat.DEFFlat),
-                Fases.Fase4 => ("Manopla", TipoStat.TaxaCritPct),
-                Fases.Fase5 => ("Peitoral", TipoStat.HPPct),
-                Fases.Fase6 => ("Calça", TipoStat.DEFPct),
-                Fases.Fase7 => ("Bota", TipoStat.DanoCritPct),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-            return new Item(nome, simbolo, faccao, fase, tipo);
+            return new Item(NomeDoSlot(fase), simbolo, faccao, fase, StatDoSlot(fase));
         }
+
+        /// <summary>
+        /// Como se chama o slot da fase — e, por tabela, o item que cai nela ("Arma", "Elmo"...).
+        /// A tela do boneco precisa nomear os 7 slots mesmo quando estão VAZIOS (não há Item pra
+        /// perguntar), e é por isso que isto é público: sem ele o front mantinha a própria cópia da
+        /// lista, que envelheceu — chamava a Fase 4 de "Acessório" enquanto o item que entra nela
+        /// nasce "Manopla". Uma tabela só, um nome só.
+        /// </summary>
+        public static string NomeDoSlot(Fases fase) => fase switch
+        {
+            Fases.Fase1 => "Arma",
+            Fases.Fase2 => "Elmo",
+            Fases.Fase3 => "Escudo",
+            Fases.Fase4 => "Manopla",
+            Fases.Fase5 => "Peitoral",
+            Fases.Fase6 => "Calça",
+            Fases.Fase7 => "Bota",
+            _ => throw new ArgumentOutOfRangeException(nameof(fase))
+        };
+
+        /// <summary>Que stat o item daquele slot carrega. A magnitude é do Item (CalcularValor).</summary>
+        private static TipoStat StatDoSlot(Fases fase) => fase switch
+        {
+            Fases.Fase1 => TipoStat.ATKFlat,
+            Fases.Fase2 => TipoStat.HPFlat,
+            Fases.Fase3 => TipoStat.DEFFlat,
+            Fases.Fase4 => TipoStat.TaxaCritPct,
+            Fases.Fase5 => TipoStat.HPPct,
+            Fases.Fase6 => TipoStat.DEFPct,
+            Fases.Fase7 => TipoStat.DanoCritPct,
+            _ => throw new ArgumentOutOfRangeException(nameof(fase))
+        };
 
         public ArsenalService(CapitulosService capitulosService, IRepositorioDeSave repo)
         {
@@ -91,11 +111,17 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
-        /// Equipa um item no slot correspondente à sua fase, substituindo o anterior
+        /// Equipa um item no slot correspondente à sua fase, substituindo o anterior — e PERSISTE.
+        ///
+        /// O save vem junto de propósito: "equipou, está equipado da próxima vez que abrir" é regra,
+        /// não escolha de tela. Quando eram duas cascas, cada uma escolheu a sua (uma salvava só ao
+        /// vencer uma fase, a outra na hora) — mesmo dado, duas políticas. Quem manda no dado é quem
+        /// decide quando ele é durável.
         /// </summary>
         public void EquiparItem(Item item)
         {
             equipados[(int)item.Fase - 1] = item;
+            SalvarItens();
         }
 
         /// <summary>

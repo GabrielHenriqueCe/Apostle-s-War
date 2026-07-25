@@ -37,13 +37,6 @@ namespace ApostlesWar.Presentation.Desktop.Front
         // "Janela fechada" desenrola a navegação inteira (mesma ideia do BatalhaAbortada no motor).
         private sealed class JogoEncerrado : Exception { }
 
-        // Chave do save da POSIÇÃO no mapa (último lugar). Ausente = 0 = Reino.
-        private const string ChavePosicao = "campanha";
-
-        // As 8 facções-capítulo, em ordem (Humanos é o time inicial, não é capítulo).
-        private static readonly List<Faccao> FaccoesDaCampanha =
-            Enum.GetValues<Faccao>().Where(f => f != Faccao.Humanos).ToList();
-
         private readonly PonteWebView2 _ponte;
         private readonly CombateService _combate;
         private readonly CampeoesService _campeoes;
@@ -53,11 +46,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
         private readonly CapitulosService _capitulos;
         private readonly ArsenalService _arsenal;
         private readonly PersonagemService _personagens;
-        private readonly IRepositorioDeSave _repositorio;
 
         public FluxoDoFront(PonteWebView2 ponte, CombateService combate, CampeoesService campeoes,
             PerfilService perfil, SessaoDoFront sessao, CampanhaService campanha, CapitulosService capitulos,
-            ArsenalService arsenal, PersonagemService personagens, IRepositorioDeSave repositorio)
+            ArsenalService arsenal, PersonagemService personagens)
         {
             _ponte = ponte;
             _combate = combate;
@@ -68,7 +60,6 @@ namespace ApostlesWar.Presentation.Desktop.Front
             _capitulos = capitulos;
             _arsenal = arsenal;
             _personagens = personagens;
-            _repositorio = repositorio;
         }
 
         public void Rodar()
@@ -134,7 +125,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 {
                     string nome = (msg.Texto ?? "").Trim();
                     if (nome.Length == 0) continue;   // sem nome não cria (o front já barra, mas guardamos)
-                    _perfil.CriarPerfil(nome, AvatarAleatorioHumano());
+                    _perfil.CriarPerfil(nome, _perfil.AvatarInicial());
                     return;
                 }
             }
@@ -296,18 +287,16 @@ namespace ApostlesWar.Presentation.Desktop.Front
         }
 
         /// <summary>
-        /// Editar perfil: troca o nome e escolhe o avatar entre os campeões DESBLOQUEADOS (os
-        /// bloqueados aparecem em cinza na grade). O front devolve o ÍNDICE na lista completa; o
-        /// desbloqueio é decidido AQUI (regra de jogo), o front só pinta o que recebe.
+        /// Editar perfil: troca o nome e escolhe o avatar na grade dos 36 (os bloqueados em cinza).
+        /// O front devolve o ÍNDICE na lista completa; quem diz se aquele campeão VALE é o
+        /// <see cref="PerfilService.PodeUsarAvatar"/> — aqui só se pinta o que ele responde.
         /// </summary>
         private void MostrarEditarPerfil()
         {
             var todos = _campeoes.TodosOsCampeoes();
-            var desbloqueados = _campeoes.ObterDesbloqueados()
-                .Select(p => (p.Faccao, p.Slot)).ToHashSet();
 
             var lista = todos
-                .Select(p => new CampeaoVisto(p.Simbolo, p.Nome, desbloqueados.Contains((p.Faccao, p.Slot))))
+                .Select(p => new CampeaoVisto(p.Simbolo, p.Nome, _perfil.PodeUsarAvatar(p)))
                 .ToList();
 
             Perfil? perfil = _perfil.Carregar();
@@ -326,7 +315,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                     int idx = msg.Valor;
                     if (nome.Length == 0 || idx < 0 || idx >= todos.Count) continue;   // inválido: ignora
                     Personagem escolhido = todos[idx];
-                    if (!desbloqueados.Contains((escolhido.Faccao, escolhido.Slot))) continue;   // bloqueado
+                    if (!_perfil.PodeUsarAvatar(escolhido)) continue;   // bloqueado: não confiamos na tela
                     _perfil.CriarPerfil(nome, escolhido.Simbolo);   // sobrescreve (mesma chave)
                     return;
                 }
@@ -342,12 +331,13 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// </summary>
         private void MostrarCampanha()
         {
-            int posicao = _repositorio.Carregar<int>(ChavePosicao);   // 0 (ausente) = Reino
+            var faccoes = _capitulos.FaccoesDaCampanha();
+            int posicao = _campanha.PosicaoNoMapa();   // 0 (sem save) = o primeiro capítulo
 
             while (true)
             {
                 _ponte.LimparPendentes();
-                _ponte.EnviarMapa(MontarMapa(posicao));
+                _ponte.EnviarMapa(MontarMapa(faccoes, posicao));
 
                 MensagemDoFront msg = _ponte.Esperar();
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
@@ -356,20 +346,20 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 if (msg.Tipo == "selecionarCapitulo")
                 {
                     int idx = msg.Valor;
-                    if (idx < 0 || idx >= FaccoesDaCampanha.Count) continue;
-                    Faccao faccao = FaccoesDaCampanha[idx];
+                    if (idx < 0 || idx >= faccoes.Count) continue;
+                    Faccao faccao = faccoes[idx];
                     if (!_capitulos.EstaCapituloDesbloqueado(faccao)) continue;   // bloqueado: ignora
 
                     posicao = idx;
-                    _repositorio.Salvar(ChavePosicao, posicao);   // último lugar
+                    _campanha.SalvarPosicao(posicao);   // último lugar
                     MostrarFases(faccao);
                 }
             }
         }
 
-        private MapaVista MontarMapa(int posicao)
+        private MapaVista MontarMapa(List<Faccao> faccoes, int posicao)
         {
-            var capitulos = FaccoesDaCampanha.Select(f => new CapituloVista(
+            var capitulos = faccoes.Select(f => new CapituloVista(
                 Faccoes.Simbolo(f), f.Descricao(),
                 _capitulos.EstaCapituloDesbloqueado(f),
                 _capitulos.CapituloConcluido(f))).ToList();
@@ -422,7 +412,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 _capitulos.EstaDesbloqueado(faccao, fase),
                 _capitulos.FaseConcluida(faccao, fase),
                 Inimigos(faccao, dados.Rodada1), Inimigos(faccao, dados.Rodada2),
-                new ItemVista(item.Simbolo, item.Nome, item.NomeStat(), item.ValorFormatado()));
+                new ItemVista(item.Simbolo, item.Nome, NomeDoStat(item.TipoStat), ValorFormatado(item)));
         }
 
         private List<CampeaoVisto> Inimigos(Faccao faccao, List<Slot> slots) => slots
@@ -434,7 +424,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
         {
             var novos = r.NovosCampeoes.Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
             ItemVista? item = r.Item is null ? null
-                : new ItemVista(r.Item.Simbolo, r.Item.Nome, r.Item.NomeStat(), r.Item.ValorFormatado());
+                : new ItemVista(r.Item.Simbolo, r.Item.Nome, NomeDoStat(r.Item.TipoStat), ValorFormatado(r.Item));
             return new RecompensaVista(novos, item);
         }
 
@@ -474,13 +464,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
         // ---------- Arsenal ----------
 
-        // Nomes dos 7 slots (por tipo/fase), na ordem 0..6.
-        private static readonly string[] NomesSlot = { "Arma", "Elmo", "Escudo", "Acessório", "Peitoral", "Calça", "Bota" };
-
         /// <summary>
-        /// Arsenal: o boneco com os 7 slots equipados GLOBALMENTE ("em Mim", valem pra todos os champs) e
-        /// os itens obtidos pra escolher. Ao equipar, persiste NA HORA (o console só salvava ao vencer
-        /// uma fase — aqui é melhor).
+        /// Arsenal: o boneco com os 7 slots equipados GLOBALMENTE ("em Mim", valem pra todos os champs)
+        /// e os itens obtidos pra escolher. Quem grava é o <see cref="ArsenalService.EquiparItem"/>.
         /// </summary>
         private void MostrarArsenal()
         {
@@ -497,7 +483,6 @@ namespace ApostlesWar.Presentation.Desktop.Front
                     var obtidos = _arsenal.ObterObtidos();
                     if (msg.Valor < 0 || msg.Valor >= obtidos.Count) continue;
                     _arsenal.EquiparItem(obtidos[msg.Valor]);
-                    _arsenal.SalvarItens();   // persiste já
                     // o while re-renderiza o arsenal atualizado
                 }
             }
@@ -509,24 +494,48 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
             ItemArsenalVista Ver(Item it, int indice, bool equipado) => new(
                 indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
-                it.NomeStat(), it.ValorFormatado(), it.Valor, equipado);
+                NomeDoStat(it.TipoStat), ValorFormatado(it), it.Valor, equipado);
 
             var obtidos = _arsenal.ObterObtidos().Select((it, i) => Ver(it, i, _arsenal.EstaEquipado(it))).ToList();
 
             var slots = new List<SlotArsenalVista>();
-            for (int s = 0; s < 7; s++)
+            foreach (Fases fase in Enum.GetValues<Fases>())
             {
+                int s = (int)fase - 1;
                 Item? eq = equipados[s];
-                slots.Add(new SlotArsenalVista(s, NomesSlot[s], eq is null ? null : Ver(eq, -1, true)));
+                // O nome do slot vem do ArsenalService: ele nomeia o slot E o item que cai nele, então
+                // um boneco vazio e o item que o preenche não podem discordar (já discordaram).
+                slots.Add(new SlotArsenalVista(s, ArsenalService.NomeDoSlot(fase),
+                    eq is null ? null : Ver(eq, -1, true)));
             }
             return new ArsenalVista(slots, obtidos);
         }
 
-        /// <summary>Avatar placeholder: o emoji de um dos 4 Humanos (o time inicial).</summary>
-        private string AvatarAleatorioHumano()
+        // ---------- Formatação de stat (é PELE) ----------
+        //
+        // Como se ESCREVE um stat na tela — rótulo curto e número com sufixo. Vive aqui, e não no
+        // `Item`, porque "0.05" virar "5%" é decisão de exibição: o modelo guarda o número e o tipo,
+        // e cada tela escolhe como mostrar (uma tela de comparação poderia querer "+5,0%", um
+        // tooltip poderia querer por extenso). O Domain não deve ter opinião sobre casas decimais.
+
+        /// <summary>Rótulo curto do stat, como aparece no card do item.</summary>
+        private static string NomeDoStat(TipoStat stat) => stat switch
         {
-            var humanos = _campeoes.TodosOsCampeoes().Where(p => p.Faccao == Faccao.Humanos).ToList();
-            return humanos[Random.Shared.Next(humanos.Count)].Simbolo;
-        }
+            TipoStat.ATKFlat => "ATK",
+            TipoStat.HPFlat => "HP",
+            TipoStat.DEFFlat => "DEF",
+            TipoStat.HPPct => "HP",
+            TipoStat.DEFPct => "DEF",
+            TipoStat.TaxaCritPct => "Crit",
+            TipoStat.DanoCritPct => "Dano Crit",
+            _ => ""
+        };
+
+        /// <summary>O valor como o jogador lê: inteiro cru nos stats FLAT, porcentagem nos PCT.</summary>
+        private static string ValorFormatado(Item item) => item.TipoStat switch
+        {
+            TipoStat.ATKFlat or TipoStat.HPFlat or TipoStat.DEFFlat => $"{(int)item.Valor}",
+            _ => $"{item.Valor * 100:F0}%"
+        };
     }
 }

@@ -49,31 +49,9 @@
             };
         }
 
-        /// <summary>
-        /// Retorna o valor formatado conforme o tipo de stat
-        /// </summary>
-        public string ValorFormatado()
-        {
-            return TipoStat switch
-            {
-                TipoStat.ATKFlat or TipoStat.HPFlat or TipoStat.DEFFlat
-                    => $"{(int)Valor}",
-                _
-                    => $"{Valor * 100:F0}%"
-            };
-        }
-
-        public string NomeStat() => TipoStat switch
-        {
-            TipoStat.ATKFlat => "ATK",
-            TipoStat.HPFlat => "HP",
-            TipoStat.DEFFlat => "DEF",
-            TipoStat.HPPct => "HP",
-            TipoStat.DEFPct => "DEF",
-            TipoStat.TaxaCritPct => "Crit",
-            TipoStat.DanoCritPct => "Dano Crit",
-            _ => ""
-        };
+        // COMO o valor é ESCRITO na tela ("5%" vs "0,05", o rótulo "Dano Crit") não mora aqui: o Item
+        // guarda o número e o tipo, e cada pele decide a apresentação. Havia um `ValorFormatado()` e um
+        // `NomeStat()` neste arquivo — formatação com `:F0` e sufixo `%` dentro do domínio de regras.
     }
 
     #endregion

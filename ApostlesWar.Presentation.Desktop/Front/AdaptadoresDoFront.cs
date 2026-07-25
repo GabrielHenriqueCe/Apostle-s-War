@@ -45,9 +45,24 @@ namespace ApostlesWar.Presentation.Desktop.Front
             _ponte = ponte;
         }
 
-        public bool AguardarAnimacao(int ms)
+        /// <summary>
+        /// Quanto tempo cada batida da narrativa fica na tela. Hoje todas valem o mesmo — é de
+        /// propósito: o motor sempre esperou 1500ms em todo evento, e mudar o SENTIMENTO da batalha
+        /// não é assunto deste PR. O que mudou é QUEM escolhe. Diferenciar (tick mais rápido que o
+        /// anúncio de uma especial, por exemplo) agora é editar esta tabela, sem tocar no motor.
+        /// </summary>
+        private static int MilissegundosDe(Momento momento) => momento switch
         {
-            Thread.Sleep(ms / _ritmo.Multiplicador);
+            Momento.Tick => 1500,
+            Momento.Narracao => 1500,
+            Momento.Golpe => 1500,
+            Momento.Preparacao => 1500,
+            _ => 1500,
+        };
+
+        public bool AguardarAnimacao(Momento momento)
+        {
+            Thread.Sleep(MilissegundosDe(momento) / _ritmo.Multiplicador);
             return _ponte.SairPedido;   // true = pediram pra sair durante a espera → aborta
         }
     }

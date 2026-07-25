@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
 
 namespace ApostlesWar.Application.Services
@@ -12,16 +13,31 @@ namespace ApostlesWar.Application.Services
     /// </summary>
     public class CampanhaService
     {
+        // Onde o jogador parou no mapa. Mora aqui e não no front porque "último lugar" é PROGRESSÃO,
+        // não estado de tela: some junto com a conta (o PerfilService já apaga esta chave no wipe) e
+        // sobrevive a fechar o jogo. Enquanto o front gravava direto na porta, esta chave tinha dois
+        // donos — um que a escrevia e outro que a apagava.
+        private const string ChavePosicao = "campanha";
+
         private readonly ArsenalService _arsenal;
         private readonly CampeoesService _campeoes;
         private readonly CapitulosService _capitulos;
+        private readonly IRepositorioDeSave _repo;
 
-        public CampanhaService(ArsenalService arsenal, CampeoesService campeoes, CapitulosService capitulos)
+        public CampanhaService(ArsenalService arsenal, CampeoesService campeoes,
+            CapitulosService capitulos, IRepositorioDeSave repo)
         {
             _arsenal = arsenal;
             _campeoes = campeoes;
             _capitulos = capitulos;
+            _repo = repo;
         }
+
+        /// <summary>Em que capítulo o marcador do mapa está. Sem save = 0 = o primeiro.</summary>
+        public int PosicaoNoMapa() => _repo.Carregar<int>(ChavePosicao);
+
+        /// <summary>Guarda o "último lugar" — o marcador reabre onde o jogador deixou.</summary>
+        public void SalvarPosicao(int indice) => _repo.Salvar(ChavePosicao, indice);
 
         /// <summary>
         /// Restaura o progresso na ORDEM que importa: capítulos antes de champs/itens — os dois se

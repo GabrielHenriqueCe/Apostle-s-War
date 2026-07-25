@@ -2,6 +2,7 @@
 using ApostlesWar.Domain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -39,6 +40,17 @@ namespace ApostlesWar.Application.Services
         {
             return capitulos.First(c => c.Faccao == faccao);
         }
+
+        /// <summary>
+        /// As facções que SÃO capítulo, na ordem em que a campanha as percorre — o mapa é isto,
+        /// desenhado. Note que os Humanos não estão: são o time inicial, não um capítulo.
+        ///
+        /// Deriva da lista de capítulos em vez de reafirmar a regra, porque a lista JÁ É a resposta.
+        /// O front tinha a própria versão (`Enum.GetValues&lt;Faccao&gt;().Where(f => f != Humanos)`),
+        /// que acertava por coincidência: bastava um capítulo entrar fora da ordem do enum, ou uma
+        /// facção existir sem ser capítulo, pra o mapa mentir.
+        /// </summary>
+        public List<Faccao> FaccoesDaCampanha() => capitulos.Select(c => c.Faccao).ToList();
 
         public bool EstaCapituloDesbloqueado(Faccao faccao) => ObterCapitulo(faccao).CapDesblock;
 

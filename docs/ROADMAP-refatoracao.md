@@ -452,6 +452,39 @@ funcionava).
 
 ---
 
+## ✅ PROTEÇÃO DE ALIADO — a DEF do protetor abate o redirecionado (jul/2026)
+
+Continuação direta da seção acima: ao perguntar "qual o melhor teste pro `ProtecaoAliado`", a leitura
+achou uma **contradição entre doc e implementação**. O doc da classe dizia que os 30% iam pro aplicador
+*"(sem defesa)"*; mas o redirecionamento viaja como `NaturezasDano.DanoIndireto`, que tem
+`IgnoraDefesa: false` — ou seja, passa pela defesa E pelo escudo do protetor. **Mesmo formato do bug do
+Invencível (#151), onde o doc do buff dizia uma coisa e a impl fazia outra.**
+
+**Decisão do Gabriel: a IMPLEMENTAÇÃO é a certa** — "se o tanque tem def alta ele obviamente defende
+mais". Proteger sai mais barato pra quem aguenta, que é a fantasia do personagem que se põe na frente.
+Corrigido o DOC, fixada a regra em teste, **nenhum número do jogo mudou**. O que o PROTEGIDO desconta
+não muda com isso: são sempre os 30%, não importa quem o protege.
+
+**Por que estava invisível:** todo teste de proteção dava **def 0 ao protetor**. A regra existia e
+ninguém a exercitava.
+
+**Carona — a conta estava duplicada à mão** no `ModificarDanoRecebido` e no `PreverDanoRecebido`
+(`(int)(dano * Valor)` copiado nos dois). Virou um `Redirecionado(dano)` privado compartilhado, pelo
+mesmo motivo que fez o `OrdenarPorMitigacao` nascer no PR acima: duas cópias da mesma fórmula divergem
+caladas e o bot passa a mirar com um número que o golpe real não reproduz.
+
+**+8 testes (127 → 135):** a DEF do protetor nas 3 faixas (0 → paga 300; 500 → 187; 2000, além do cap →
+75); o protetor MORTO (único ramo dos dois métodos que ninguém exercitava — há janela real, o status só
+se autoremove na expiração do turno seguinte); e o round-trip Prever×Aplicar.
+
+**MÉTODO, de novo:** o round-trip passa hoje por construção, então ele foi **verificado sabotando** o
+`Prever` com `Math.Round` — os 4 casos novos falharam e os **outros 7 testes de proteção passaram
+tranquilos**. Isso É o furo que ele fecha: o resto da suíte usa número REDONDO (`1000 × 0,30 = 300`
+exato), então um arredondamento trocado passaria verde. Os casos novos usam parte fracionária ≥ 0,5
+(`999 × 0,30 = 299,7`).
+
+---
+
 ## CADA DECISÃO NA SUA CAMADA (#180, jul/2026)
 
 Com o console fora, uma auditoria do front achou 7 decisões na camada errada. A lição geral: **o

@@ -30,6 +30,17 @@ namespace ApostlesWar.Domain.Skills.Buffs
             return dano - redirecionado;
         }
 
+        /// <summary>
+        /// Mesma conta, SEM o redirecionamento. É o caso que mais justifica a separação: prever
+        /// chamando o Modificar acima causaria dano de verdade no aplicador — a previsão feriria
+        /// o aliado que ela só queria consultar.
+        /// </summary>
+        public int PreverDanoRecebido(Combate portador, int dano)
+        {
+            if (!Aplicador.EstaVivo()) return dano;
+            return dano - (int)(dano * Valor);
+        }
+
         public override void Remover(Combate alvo)
         {
             alvo.StatusAtivos.Remove(this);

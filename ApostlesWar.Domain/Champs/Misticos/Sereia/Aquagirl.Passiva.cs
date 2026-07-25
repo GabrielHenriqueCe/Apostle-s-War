@@ -18,6 +18,10 @@ namespace ApostlesWar.Domain.Champs.Misticos
         public int ModificarDanoRecebido(Combate portador, int dano) =>
             (int)(dano * (1 - PercentualReducao));
 
+        // Já era puro: prever é a mesma conta.
+        public int PreverDanoRecebido(Combate portador, int dano) =>
+            (int)(dano * (1 - PercentualReducao));
+
         public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo) => SemDano();
     }
 }

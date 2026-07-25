@@ -314,34 +314,95 @@ namespace ApostlesWar.Domain
             return true;
         }
 
+        /// <summary>
+        /// A lista unida de "quais status este golpe FURA": golpe ∪ champ (já compostos no Atacar
+        /// via ComporListaIgnorar) ∪ natureza.Ignora. Match por tipo EXATO ou BASE
+        /// (typeof(Buff) = todos os buffs). Extraída pra o Prever e o Receber usarem a MESMA.
+        /// </summary>
+        private static HashSet<Type> ComporIgnorados(NaturezaDano natureza, IEnumerable<Type>? ignorarStatus)
+        {
+            var ignorados = ignorarStatus?.ToHashSet() ?? new HashSet<Type>();
+            ignorados.UnionWith(natureza.Ignora);
+            return ignorados;
+        }
+
+        private bool EIgnorado(HashSet<Type> ignorados, object status)
+            => ignorados.Any(t => t.IsAssignableFrom(((StatusEffect)status).GetType()));
+
+        /// <summary>
+        /// O dano depois da DEFESA — a parte da mitigação que só depende de stats. Pura.
+        /// </summary>
+        private int AplicarDefesa(int dano, NaturezaDano natureza, HashSet<Type> ignorados, double ignorarDefesaPct)
+        {
+            if (natureza.IgnoraDefesa) return dano;
+
+            // Monta a defesa JÁ sem os status ignorados (em vez de somar tudo e descontar depois).
+            // ContribuicaoDefesa já vem com sinal (BuffDefesa +, ReducaoDefesa −), então somar os
+            // não-ignorados = DefesaComStacks + todos − ignorados (idêntico ao getter Defesa).
+            int defesaEfetiva = DefesaComStacks
+                + StatusAtivos.OfType<IContribuiDefesa>()
+                    .Where(c => !EIgnorado(ignorados, c))
+                    .Sum(c => c.ContribuicaoDefesa(this));
+
+            defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
+            defesaEfetiva = Math.Max(0, defesaEfetiva);
+
+            double reducao = Math.Min(
+                (defesaEfetiva / DefesaPorPontoReducao) * ReducaoMaximaPorDefesa,
+                ReducaoMaximaPorDefesa);
+            return (int)(dano * (1 - reducao));
+        }
+
+        /// <summary>
+        /// Quanto dano ENTRARIA no HP se este golpe acontecesse agora — sem que ele aconteça.
+        /// Espelho PURO do <see cref="ReceberDano"/>: mesma defesa, mesma ordem de modificadores
+        /// (passiva-pura antes dos status), mesmo gate de ignorados. Não consome escudo, não
+        /// redireciona pro protetor, não mata ninguém.
+        ///
+        /// Existe pro bot comparar alvos sem alterar a batalha que está avaliando. Se um dia os dois
+        /// divergirem, o bot mira errado em silêncio — por isso há teste amarrando um ao outro.
+        /// </summary>
+        public int PreverDanoRecebido(
+            int ataque, NaturezaDano natureza,
+            IEnumerable<Type>? ignorarStatus = null, double ignorarDefesaPct = 0.0)
+        {
+            var ignorados = ComporIgnorados(natureza, ignorarStatus);
+            int danoFinal = AplicarDefesa(ataque, natureza, ignorados, ignorarDefesaPct);
+
+            foreach (var modificador in Personagem.Habilidades.OfType<IModificaDanoRecebido>())
+                danoFinal = modificador.PreverDanoRecebido(this, danoFinal);
+
+            foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
+            {
+                if (EIgnorado(ignorados, modificador)) continue;
+                danoFinal = modificador.PreverDanoRecebido(this, danoFinal);
+            }
+
+            return danoFinal;
+        }
+
+        /// <summary>
+        /// Quanta VIDA um golpe de `dano` de fato tiraria deste combatente — o dano capado pelo que
+        /// há entre o HP atual e o piso (Invencível e afins, via <see cref="IDefineHPMinimo"/>).
+        ///
+        /// É a métrica que o bot compara, e não o dano cru, porque ela resolve sozinha duas regras
+        /// que pareciam precisar de código próprio: alvo com bloqueio total dá 0 (o Prever já viu o
+        /// modificador) e alvo Invencível dá quase 0 (o piso barra). E o mesmo número diz se MATA:
+        /// `PreverVidaRemovida(d) == HPAtual`.
+        /// </summary>
+        public int PreverVidaRemovida(int dano)
+        {
+            var pisos = StatusAtivos.OfType<IDefineHPMinimo>().Select(s => s.HPMinimo()).ToList();
+            int piso = pisos.Count > 0 ? pisos.Max() : 0;
+            return Math.Clamp(dano, 0, Math.Max(0, HPAtual - piso));
+        }
+
         public (int Efetivo, int AbsorvidoPeloEscudo) ReceberDano(
             int ataque, NaturezaDano natureza, Combate? atacante = null,
             IEnumerable<Type>? ignorarStatus = null, double ignorarDefesaPct = 0.0)
         {
-            // Uma língua só de ignorar: golpe ∪ champ (já compostos no Atacar via ComporListaIgnorar)
-            // ∪ natureza.Ignora. Match por tipo EXATO ou BASE (typeof(Buff) = todos os buffs).
-            var ignorados = ignorarStatus?.ToHashSet() ?? new HashSet<Type>();
-            ignorados.UnionWith(natureza.Ignora);
-            int danoFinal = ataque;
-
-            if (!natureza.IgnoraDefesa)
-            {
-                // Monta a defesa JÁ sem os status ignorados (em vez de somar tudo e descontar depois).
-                // ContribuicaoDefesa já vem com sinal (BuffDefesa +, ReducaoDefesa −), então somar os
-                // não-ignorados = DefesaComStacks + todos − ignorados (idêntico ao getter Defesa).
-                int defesaEfetiva = DefesaComStacks
-                    + StatusAtivos.OfType<IContribuiDefesa>()
-                        .Where(c => !ignorados.Any(t => t.IsAssignableFrom(((StatusEffect)c).GetType())))
-                        .Sum(c => c.ContribuicaoDefesa(this));
-
-                defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
-                defesaEfetiva = Math.Max(0, defesaEfetiva);
-
-                double reducao = Math.Min(
-                    (defesaEfetiva / DefesaPorPontoReducao) * ReducaoMaximaPorDefesa,
-                    ReducaoMaximaPorDefesa);
-                danoFinal = (int)(danoFinal * (1 - reducao));
-            }
+            var ignorados = ComporIgnorados(natureza, ignorarStatus);
+            int danoFinal = AplicarDefesa(ataque, natureza, ignorados, ignorarDefesaPct);
 
             int absorvidoPeloEscudo = 0;
 
@@ -360,7 +421,7 @@ namespace ApostlesWar.Domain
             foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
             {
                 var status = (StatusEffect)modificador;
-                if (ignorados.Any(t => t.IsAssignableFrom(status.GetType()))) continue;   // gate ÚNICO: o dano fura este status?
+                if (EIgnorado(ignorados, modificador)) continue;   // gate ÚNICO: o dano fura este status?
 
                 int antes = danoFinal;
                 danoFinal = modificador.ModificarDanoRecebido(this, danoFinal);
@@ -379,7 +440,7 @@ namespace ApostlesWar.Domain
             // pra "matar através"). Fica FORA da mitigação de dano de propósito: assim o DanoEfetivo segue
             // integral e o lifesteal enxerga o valor real, mesmo com o portador em 1 HP.
             var pisos = StatusAtivos.OfType<IDefineHPMinimo>()
-                .Where(s => !ignorados.Any(t => t.IsAssignableFrom(((StatusEffect)s).GetType())))
+                .Where(s => !EIgnorado(ignorados, s))
                 .Select(s => s.HPMinimo());
             if (pisos.Any())
                 HPAtual = Math.Max(HPAtual, pisos.Max());
@@ -429,6 +490,31 @@ namespace ApostlesWar.Domain
         /// </summary>
         public EventoDano Atacar(Combate alvo, IEnumerable<Type>? ignorarStatus = null)
             => Atacar(alvo, 1.0, ignorarStatus: ignorarStatus);
+
+        /// <summary>
+        /// Quanta VIDA este ataque tiraria do alvo, sem desferi-lo. Espelho puro do
+        /// <see cref="Atacar"/>: mesmo `Ataque × multiplicador`, mesma composição da lista de
+        /// ignorados, e daí a previsão do lado do alvo.
+        ///
+        /// O CRÍTICO entra como VALOR ESPERADO (`1 + TaxaCrit × DanoCrit`), não como sorteio — o bot
+        /// não pode saber o resultado do dado. Entre alvos da MESMA habilidade o crit é um fator
+        /// comum e não muda o ranking; entre HABILIDADES muda, porque a Kunai do Ninja tem
+        /// `forcaCritico` e crita sempre. Ignorá-lo subestimaria justamente as habilidades de crit.
+        /// </summary>
+        public int PreverAtaque(Combate alvo, double multiplicador,
+            double ignorarDefesaPct = 0.0, bool forcaCritico = false,
+            IEnumerable<Type>? ignorarStatus = null,
+            NaturezaDano? natureza = null)
+        {
+            var nat = natureza ?? NaturezasDano.Ataque;
+
+            double fatorCritico = forcaCritico ? 1 + DanoCrit : 1 + (TaxaCrit * DanoCrit);
+            int dano = (int)((int)(Ataque * multiplicador) * fatorCritico);
+
+            var ignorarFinal = ComporListaIgnorar(ignorarStatus);
+            int passaria = alvo.PreverDanoRecebido(dano, nat, ignorarFinal, ignorarDefesaPct);
+            return alvo.PreverVidaRemovida(passaria);
+        }
 
         public bool EstaVivo() => _estado.EstaVivo();
         public void Reviver(int hp) => _estado.Reviver(this, hp);

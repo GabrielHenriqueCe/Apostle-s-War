@@ -13,6 +13,8 @@ namespace ApostlesWar.Domain.Skills.Buffs
 
         public int ModificarDanoRecebido(Combate portador, int dano) => 0;
 
+        public int PreverDanoRecebido(Combate portador, int dano) => 0;
+
         public override void Remover(Combate alvo)
         {
             alvo.StatusAtivos.Remove(this);

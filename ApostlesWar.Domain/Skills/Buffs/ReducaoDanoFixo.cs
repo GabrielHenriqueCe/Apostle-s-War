@@ -25,6 +25,9 @@ namespace ApostlesWar.Domain.Skills.Buffs
             return (int)(dano * (1 - Valor));
         }
 
+        // Já era puro: prever é a mesma conta.
+        public int PreverDanoRecebido(Combate portador, int dano) => (int)(dano * (1 - Valor));
+
         public override void Remover(Combate alvo)
         {
             alvo.StatusAtivos.Remove(this);

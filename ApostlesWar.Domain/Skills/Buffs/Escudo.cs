@@ -28,6 +28,9 @@ namespace ApostlesWar.Domain.Skills.Buffs
             alvo.StatusAtivos.Add(this);
         }
 
+        /// <summary>Sem consumir os pontos: o que sobraria pro HP depois do escudo aparar.</summary>
+        public int PreverDanoRecebido(Combate portador, int dano) => Math.Max(0, dano - PontosRestantes);
+
         public int ModificarDanoRecebido(Combate portador, int dano)
         {
             if (PontosRestantes >= dano)

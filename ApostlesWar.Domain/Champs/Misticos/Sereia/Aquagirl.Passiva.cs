@@ -15,6 +15,11 @@ namespace ApostlesWar.Domain.Champs.Misticos
             "Recebe 15% menos dano.")
         { }
 
+        // Declara por contrato, mas não é o que a coloca na frente: passiva-pura roda fora do laço de
+        // status, antes de todos eles (Combate.ReceberDano). Aqui o valor é a resposta honesta —
+        // reduzir 15% não gasta recurso nenhum.
+        public OrdemDeMitigacao OrdemDeMitigacao => OrdemDeMitigacao.ReduzDeGraca;
+
         public int ModificarDanoRecebido(Combate portador, int dano) =>
             (int)(dano * (1 - PercentualReducao));
 

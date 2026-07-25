@@ -24,6 +24,15 @@
     /// </summary>
     public interface IModificaDanoRecebido
     {
+        /// <summary>
+        /// Em que ORDEM este modificador entra no cálculo — ver <see cref="Domain.OrdemDeMitigacao"/>.
+        ///
+        /// Sem default de propósito, igual aos dois métodos acima: um modificador novo que herdasse
+        /// "de graça" em silêncio desperdiçaria recurso alheio sem ninguém notar. Foi exatamente o
+        /// bug que criou esta propriedade.
+        /// </summary>
+        OrdemDeMitigacao OrdemDeMitigacao { get; }
+
         /// <summary>Aplica a modificação. PODE consumir recurso e ter efeito colateral.</summary>
         int ModificarDanoRecebido(Combate portador, int dano);
 
@@ -32,6 +41,32 @@
         /// ninguém. É o que o bot usa pra comparar alvos sem alterar a batalha que está prevendo.
         /// </summary>
         int PreverDanoRecebido(Combate portador, int dano);
+    }
+
+    /// <summary>
+    /// A ordem em que os modificadores de dano recebido entram no cálculo: quem REDUZ DE GRAÇA antes
+    /// de quem GASTA RECURSO. **A ordem de declaração destes valores É a ordem de execução** — o
+    /// ReceberDano/PreverDanoRecebido ordenam por este enum.
+    ///
+    /// O princípio já existia e estava testado, mas só valia pra passiva-pura (a Sereia roda fora do
+    /// laço de status; `PassivaPura_RodaANTESDosStatus...` prova pelo número). Entre os status a ordem
+    /// era a de APLICAÇÃO — quem tivesse aplicado Escudo antes de Bloqueio Total gastava os pontos do
+    /// escudo num golpe que o bloqueio ia zerar de qualquer jeito. Recurso queimado à toa, e a
+    /// `NaturezaDano` não resolvia: ela declara QUEM participa (`Ignora`), nunca em que ORDEM.
+    ///
+    /// Não confundir com "participa deste golpe?" — isso segue sendo a lista de ignorados, uma língua
+    /// só. Este eixo só decide QUANDO.
+    /// </summary>
+    public enum OrdemDeMitigacao
+    {
+        /// <summary>Reduz sem gastar nada (Bloqueio Total, Couraça). Roda primeiro.</summary>
+        ReduzDeGraca,
+
+        /// <summary>
+        /// Paga pra reduzir: pontos de escudo, HP de um aliado. Roda por último, sobre o dano que
+        /// sobrou — assim nunca paga por dano que outro já ia aparar de graça.
+        /// </summary>
+        ConsomeRecurso
     }
 
     /// <summary>

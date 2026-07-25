@@ -111,6 +111,7 @@ namespace Tests
         private class MetadeDoDano : HabilidadePassiva, IModificaDanoRecebido
         {
             public MetadeDoDano() : base("MetadeFake", "🧪", 0, "corta o dano pela metade") { }
+            public OrdemDeMitigacao OrdemDeMitigacao => OrdemDeMitigacao.ReduzDeGraca;
             public int ModificarDanoRecebido(Combate portador, int dano) => dano / 2;
             public int PreverDanoRecebido(Combate portador, int dano) => dano / 2;   // puro: prever == modificar
         }
@@ -129,6 +130,88 @@ namespace Tests
             Assert.Equal(0, efetivo);
             Assert.Equal(500, absorvido);
             Assert.Equal(100_000, alvo.HPAtual);   // nada entrou no HP
+        }
+
+        // ---------- Etapa 2b: ordem ENTRE os status (quem reduz de graça antes de quem gasta) ----------
+
+        /// <summary>
+        /// O bug que criou a OrdemDeMitigacao (achado em jogo, Rei + Operário): o laço de status
+        /// iterava na ordem de APLICAÇÃO, então aplicar Escudo antes do Bloqueio Total fazia o escudo
+        /// gastar pontos aparando um golpe que o bloqueio ia zerar de graça logo depois.
+        /// </summary>
+        [Fact]
+        public void EscudoAplicadoAntesDoBloqueio_NaoGastaPontos()
+        {
+            var alvo = Novo();
+            var escudo = new Escudo(500, duracao: 2);
+            escudo.Aplicar(alvo);                          // aplicado PRIMEIRO — era o que quebrava
+            new BloqueioTotal(duracao: 1).Aplicar(alvo);
+
+            var (efetivo, absorvido) = alvo.ReceberDano(1000, NaturezasDano.Ataque);
+
+            Assert.Equal(0, efetivo);
+            Assert.Equal(0, absorvido);                    // o escudo não aparou nada...
+            Assert.Equal(500, escudo.PontosRestantes);     // ...porque não precisou: pontos intactos
+            Assert.Contains(escudo, alvo.StatusAtivos);    // e o buff sobreviveu ao turno
+            Assert.Equal(100_000, alvo.HPAtual);
+        }
+
+        /// <summary>
+        /// A ordem inversa (bloqueio aplicado primeiro) já funcionava antes do conserto — este teste
+        /// prova que o resultado agora é o MESMO nos dois sentidos, ou seja, que a ordem de aplicação
+        /// deixou de importar. Sem ele, uma troca de ordem no laço passaria batida.
+        /// </summary>
+        [Fact]
+        public void BloqueioAplicadoAntesDoEscudo_DaOMesmoResultado()
+        {
+            var alvo = Novo();
+            new BloqueioTotal(duracao: 1).Aplicar(alvo);
+            var escudo = new Escudo(500, duracao: 2);
+            escudo.Aplicar(alvo);
+
+            var (efetivo, absorvido) = alvo.ReceberDano(1000, NaturezasDano.Ataque);
+
+            Assert.Equal(0, efetivo);
+            Assert.Equal(0, absorvido);
+            Assert.Equal(500, escudo.PontosRestantes);
+        }
+
+        /// <summary>
+        /// O Prever tem que ordenar igual ao Receber: se divergirem, o bot avalia o alvo com um número
+        /// que o golpe real não vai reproduzir — e mira errado em silêncio.
+        /// </summary>
+        [Fact]
+        public void Prever_UsaAMesmaOrdemDoReceber()
+        {
+            var alvo = Novo();
+            var escudo = new Escudo(500, duracao: 2);
+            escudo.Aplicar(alvo);
+            new BloqueioTotal(duracao: 1).Aplicar(alvo);
+
+            int previsto = alvo.PreverDanoRecebido(1000, NaturezasDano.Ataque);
+            var (efetivo, _) = alvo.ReceberDano(1000, NaturezasDano.Ataque);
+
+            Assert.Equal(0, previsto);
+            Assert.Equal(previsto, efetivo);
+            Assert.Equal(500, escudo.PontosRestantes);   // prever não gasta, receber não precisou
+        }
+
+        /// <summary>
+        /// Mesmo princípio com o outro recurso em jogo: o HP de um aliado. Com o bloqueio rodando
+        /// antes, o protetor recebe o dano JÁ zerado em vez de comer 30% de um golpe que não aconteceu.
+        /// </summary>
+        [Fact]
+        public void ProtecaoAliado_NaoCobraDoProtetor_QuandoOBloqueioJaZerouODano()
+        {
+            var protegido = Novo();
+            var protetor = Novo();
+            new ProtecaoAliado(protetor, duracao: 2).Aplicar(protegido);
+            new BloqueioTotal(duracao: 1).Aplicar(protegido);
+
+            var (efetivo, _) = protegido.ReceberDano(1000, NaturezasDano.Ataque);
+
+            Assert.Equal(0, efetivo);
+            Assert.Equal(100_000, protetor.HPAtual);   // o protetor não pagou por nada
         }
 
         [Fact]

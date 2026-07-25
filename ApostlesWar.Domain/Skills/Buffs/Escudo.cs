@@ -28,6 +28,9 @@ namespace ApostlesWar.Domain.Skills.Buffs
             alvo.StatusAtivos.Add(this);
         }
 
+        // Pontos são recurso: só entram depois de todo mundo que reduz de graça, sobre o que sobrou.
+        public OrdemDeMitigacao OrdemDeMitigacao => OrdemDeMitigacao.ConsomeRecurso;
+
         /// <summary>Sem consumir os pontos: o que sobraria pro HP depois do escudo aparar.</summary>
         public int PreverDanoRecebido(Combate portador, int dano) => Math.Max(0, dano - PontosRestantes);
 

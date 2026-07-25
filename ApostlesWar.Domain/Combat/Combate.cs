@@ -330,6 +330,21 @@ namespace ApostlesWar.Domain
             => ignorados.Any(t => t.IsAssignableFrom(((StatusEffect)status).GetType()));
 
         /// <summary>
+        /// Os modificadores de dano na ordem de MITIGAÇÃO (<see cref="OrdemDeMitigacao"/>), não na de
+        /// aplicação: quem reduz de graça antes de quem gasta recurso. Extraída pra o Prever e o
+        /// Receber usarem a MESMA — se divergirem, o bot mira errado em silêncio.
+        ///
+        /// `OrderBy` do LINQ é ESTÁVEL, então dentro do mesmo balde a ordem de aplicação continua
+        /// valendo: quem gasta escudo × quem gasta HP de aliado não têm ordem "certa" entre si, e não
+        /// é este PR que vai inventar uma. O `ToList` materializa antes do laço porque o Modificar
+        /// pode remover o status de `StatusAtivos` no meio do caminho (o Escudo zerado se remove).
+        /// </summary>
+        private static List<IModificaDanoRecebido> OrdenarPorMitigacao(IEnumerable<StatusEffect> status)
+            => status.OfType<IModificaDanoRecebido>()
+                .OrderBy(m => m.OrdemDeMitigacao)
+                .ToList();
+
+        /// <summary>
         /// O dano depois da DEFESA — a parte da mitigação que só depende de stats. Pura.
         /// </summary>
         private int AplicarDefesa(int dano, NaturezaDano natureza, HashSet<Type> ignorados, double ignorarDefesaPct)
@@ -372,7 +387,7 @@ namespace ApostlesWar.Domain
             foreach (var modificador in Personagem.Habilidades.OfType<IModificaDanoRecebido>())
                 danoFinal = modificador.PreverDanoRecebido(this, danoFinal);
 
-            foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
+            foreach (var modificador in OrdenarPorMitigacao(StatusAtivos))
             {
                 if (EIgnorado(ignorados, modificador)) continue;
                 danoFinal = modificador.PreverDanoRecebido(this, danoFinal);
@@ -418,7 +433,7 @@ namespace ApostlesWar.Domain
                 danoFinal = modificador.ModificarDanoRecebido(this, danoFinal);
             }
 
-            foreach (var modificador in StatusAtivos.OfType<IModificaDanoRecebido>().ToList())
+            foreach (var modificador in OrdenarPorMitigacao(StatusAtivos))
             {
                 var status = (StatusEffect)modificador;
                 if (EIgnorado(ignorados, modificador)) continue;   // gate ÚNICO: o dano fura este status?

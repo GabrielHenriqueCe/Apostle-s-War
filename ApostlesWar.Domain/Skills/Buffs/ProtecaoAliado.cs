@@ -17,6 +17,11 @@ namespace ApostlesWar.Domain.Skills.Buffs
             Aplicador = aplicador;
         }
 
+        // O recurso gasto aqui é o HP do aplicador — então roda depois de quem reduz de graça: com o
+        // Bloqueio Total no portador, o aliado passa a receber o dano JÁ zerado em vez de comer 30%
+        // de um golpe que nem ia acontecer.
+        public OrdemDeMitigacao OrdemDeMitigacao => OrdemDeMitigacao.ConsomeRecurso;
+
         // Só redireciona golpes que provocam reação (ataques/revides). Quem NÃO redireciona
         // (Veneno/Queima/DanoIndireto) lista ProtecaoAliado em NaturezasDano.Ignora — e como o
         // redirecionamento abaixo usa DanoIndireto (que ignora ProtecaoAliado), isso corta o loop

@@ -9,9 +9,9 @@ namespace ApostlesWar.Domain.Skills.Buffs
     /// (Rebalanceamento).
     ///
     /// Se aplicado como buff comum (via StatusAtivos), processa junto dos demais
-    /// IModificaDanoRecebido no ReceberDano — sem a garantia de ordem "primeiro"
-    /// que tinha quando era o buff de contorno da Sereia (essa ordem agora é da
-    /// passiva-pura, ver Combate.ReceberDano).
+    /// IModificaDanoRecebido no ReceberDano — antes de quem gasta recurso (é
+    /// ReduzDeGraca), mas depois da passiva-pura, que roda fora do laço de status
+    /// (ver Combate.ReceberDano).
     /// </summary>
     public class ReducaoDanoFixo : Buff, IModificaDanoRecebido
     {
@@ -19,6 +19,9 @@ namespace ApostlesWar.Domain.Skills.Buffs
             : base("Couraça", "🐚", int.MaxValue, percentual,
                 $"-{percentual * 100:F0}% dano recebido.")
         { }
+
+        // Percentual não custa nada pra quem reduz: entra antes do escudo gastar pontos.
+        public OrdemDeMitigacao OrdemDeMitigacao => OrdemDeMitigacao.ReduzDeGraca;
 
         public int ModificarDanoRecebido(Combate portador, int dano)
         {

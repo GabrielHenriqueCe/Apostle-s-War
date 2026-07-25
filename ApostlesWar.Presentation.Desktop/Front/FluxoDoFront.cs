@@ -507,19 +507,11 @@ namespace ApostlesWar.Presentation.Desktop.Front
         {
             var equipados = _arsenal.ObterEquipados();
 
-            // Item é único por (Faccao, Fase); o equipado casa por isso (após load os objetos não são a
-            // mesma referência dos obtidos).
-            bool EstaEquipado(Item it)
-            {
-                Item? eq = equipados[(int)it.Fase - 1];
-                return eq != null && eq.Faccao == it.Faccao && eq.Fase == it.Fase;
-            }
-
             ItemArsenalVista Ver(Item it, int indice, bool equipado) => new(
                 indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
                 it.NomeStat(), it.ValorFormatado(), it.Valor, equipado);
 
-            var obtidos = _arsenal.ObterObtidos().Select((it, i) => Ver(it, i, EstaEquipado(it))).ToList();
+            var obtidos = _arsenal.ObterObtidos().Select((it, i) => Ver(it, i, _arsenal.EstaEquipado(it))).ToList();
 
             var slots = new List<SlotArsenalVista>();
             for (int s = 0; s < 7; s++)

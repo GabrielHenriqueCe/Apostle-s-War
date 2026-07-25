@@ -104,6 +104,16 @@ namespace ApostlesWar.Application.Services
         public Item?[] ObterEquipados() => equipados;
 
         /// <summary>
+        /// Este item está equipado no slot dele? Item é único por (Faccao, Fase), então casa por isso —
+        /// depois de carregar o save, os objetos equipados não são a MESMA referência dos obtidos.
+        /// </summary>
+        public bool EstaEquipado(Item item)
+        {
+            Item? eq = equipados[(int)item.Fase - 1];
+            return eq != null && eq.Faccao == item.Faccao && eq.Fase == item.Fase;
+        }
+
+        /// <summary>
         /// Retorna todos os itens obtidos
         /// </summary>
         public List<Item> ObterObtidos() => obtidos;

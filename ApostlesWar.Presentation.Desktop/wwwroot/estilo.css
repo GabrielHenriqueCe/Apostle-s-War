@@ -579,6 +579,74 @@ body {
 .recompensaChamps { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .continuarDica { position: absolute; bottom: 40px; font-size: 14px; color: var(--apagado); letter-spacing: 2px; text-transform: uppercase; }
 
+/* ---------- Arsenal (boneco + itens) ---------- */
+#arsenal {
+    position: absolute; inset: 0; z-index: 30;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    padding: 20px; overflow-y: auto;
+    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+}
+#arsenal[hidden] { display: none; }
+#arsenal h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
+
+/* 7 slots num grid 3x3: arma/elmo/escudo · acessório/peitoral/calça · bota (centralizada). */
+#boneco {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    gap: 12px;
+    justify-content: center;
+    grid-template-areas:
+        "arma  elmo   escudo"
+        "acess peito  calca"
+        ".     bota   .     ";
+}
+
+.bonecoSlot {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 12px 6px; cursor: pointer;
+    background: var(--painel); border: 2px solid var(--borda); border-radius: 12px;
+    transition: border-color .12s, transform .1s;
+}
+.bonecoSlot:hover { border-color: var(--ouro); transform: translateY(-2px); }
+.bonecoSlot.selecionado { border-color: var(--ouro); background: #332b1c; box-shadow: 0 0 10px rgba(217,180,91,.4); }
+.bonecoSlot:not(.preenchido) .bsEmoji { opacity: .35; filter: grayscale(1); }
+.bonecoSlot .bsEmoji { font-size: 34px; line-height: 1; }
+.bonecoSlot .bsNome { font-size: 11px; color: var(--apagado); }
+
+#arsenalDetalhe {
+    width: min(560px, 94vw);
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px 16px; border: 1px solid var(--borda); border-radius: 12px; background: rgba(0, 0, 0, .22);
+}
+#arsenalDetalhe[hidden] { display: none; }
+#arsenalSlotNome { font-size: 15px; font-weight: 700; color: var(--ouro); }
+
+#arsenalItens { display: flex; flex-direction: column; gap: 6px; }
+.arsenalVazio { color: var(--apagado); font-size: 13px; font-style: italic; }
+
+.itemCard {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    background: var(--painel); border: 2px solid var(--borda); border-radius: 10px; cursor: pointer;
+    transition: border-color .12s;
+}
+.itemCard:hover:not(.equipado) { border-color: var(--ouro); }
+.itemCard.equipado { border-color: var(--vida); cursor: default; }
+.itemCard .icEmoji { font-size: 26px; }
+.itemCard .icInfo { flex: 1; min-width: 0; }
+.itemCard .icNome { font-size: 13px; font-weight: 600; color: var(--texto); }
+.itemCard .icStat { font-size: 12px; color: var(--ouro); }
+.itemCard .icDiff { font-size: 16px; font-weight: 800; }
+.itemCard .icDiff.sobe { color: var(--vida); }
+.itemCard .icDiff.desce { color: var(--alvo); }
+.itemCard .icTag { font-size: 11px; color: var(--vida); text-transform: uppercase; letter-spacing: 1px; }
+
+#arsenalRodape button {
+    padding: 10px 26px; font-family: inherit; font-size: 16px; font-weight: 600;
+    border-radius: 10px; cursor: pointer; border: 2px solid var(--borda); background: transparent; color: var(--texto);
+    transition: border-color .15s, transform .1s;
+}
+#arsenalVoltar:hover { border-color: var(--apagado); transform: translateY(-1px); }
+
 /* ---------- topo ---------- */
 #topo {
     display: flex;

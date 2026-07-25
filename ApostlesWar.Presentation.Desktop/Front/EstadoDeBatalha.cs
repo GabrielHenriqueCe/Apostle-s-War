@@ -157,4 +157,20 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
     /// <summary>O que o front devolve ao iniciar uma fase: a fase (1..7) e o time como índices dos desbloqueados.</summary>
     internal record FaseConfig(int Fase, int[] Time);
+
+    // ---------- Arsenal ----------
+
+    /// <summary>
+    /// Um item obtido, pra o arsenal. <see cref="Indice"/> = posição na lista de obtidos (é o que o
+    /// clique devolve pra equipar). <see cref="Slot"/> = qual dos 7 slots ele ocupa (0..6 = Fase-1).
+    /// <see cref="ValorNum"/> = valor cru pra a diferença (equipado × novo) ser calculada no front.
+    /// </summary>
+    internal record ItemArsenalVista(int Indice, string Simbolo, string Nome, string Faccao, int Slot,
+        string Stat, string Valor, double ValorNum, bool Equipado);
+
+    /// <summary>Um dos 7 slots do boneco: nome do tipo + o item equipado (null = vazio).</summary>
+    internal record SlotArsenalVista(int Slot, string Nome, ItemArsenalVista? Equipado);
+
+    /// <summary>O arsenal: os 7 slots (equipados) + todos os itens obtidos (pra escolher ao clicar um slot).</summary>
+    internal record ArsenalVista(List<SlotArsenalVista> Slots, List<ItemArsenalVista> Obtidos);
 }

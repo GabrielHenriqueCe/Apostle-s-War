@@ -20,8 +20,9 @@ namespace ApostlesWar.Presentation.Desktop.Front
         // Índices do MENU PRINCIPAL — casam com a ordem enviada em MostrarMenuPrincipal.
         private const int Campanha = 0;
         private const int Arena = 1;
-        private const int Configuracao = 2;
-        private const int Sair = 3;
+        private const int Arsenal = 2;
+        private const int Configuracao = 3;
+        private const int Sair = 4;
 
         // Índices do menu de CONFIGURAÇÃO.
         private const int CfgConta = 2;
@@ -93,6 +94,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
                             MontarArena();
                             break;
 
+                        case Arsenal:
+                            MostrarArsenal();
+                            break;
+
                         case Configuracao:
                             if (MostrarConfiguracao()) GarantirPerfil();   // conta excluída → pede nome de novo
                             break;
@@ -104,8 +109,6 @@ namespace ApostlesWar.Presentation.Desktop.Front
                         case Sair:
                             _ponte.FecharJanela();
                             return;
-
-                        // Campanha vem desabilitada (fatia futura) e não chega aqui.
                     }
                 }
             }
@@ -148,6 +151,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 {
                     new("Campanha",     "🗺️", Habilitado: true),
                     new("Arena",        "⚔️", Habilitado: true),
+                    new("Arsenal",      "🎒", Habilitado: true),
                     new("Configurações", "⚙️", Habilitado: true),
                     new("Sair",         "🚪", Habilitado: true),
                 },
@@ -466,6 +470,64 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
                 if (msg.Tipo == "continuar") return;
             }
+        }
+
+        // ---------- Arsenal ----------
+
+        // Nomes dos 7 slots (por tipo/fase), na ordem 0..6.
+        private static readonly string[] NomesSlot = { "Arma", "Elmo", "Escudo", "Acessório", "Peitoral", "Calça", "Bota" };
+
+        /// <summary>
+        /// Arsenal: o boneco com os 7 slots equipados GLOBALMENTE ("em Mim", valem pra todos os champs) e
+        /// os itens obtidos pra escolher. Ao equipar, persiste NA HORA (o console só salvava ao vencer
+        /// uma fase — aqui é melhor).
+        /// </summary>
+        private void MostrarArsenal()
+        {
+            while (true)
+            {
+                _ponte.LimparPendentes();
+                _ponte.EnviarArsenal(MontarArsenal());
+
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "voltar") return;
+                if (msg.Tipo == "equiparItem")
+                {
+                    var obtidos = _arsenal.ObterObtidos();
+                    if (msg.Valor < 0 || msg.Valor >= obtidos.Count) continue;
+                    _arsenal.EquiparItem(obtidos[msg.Valor]);
+                    _arsenal.SalvarItens();   // persiste já
+                    // o while re-renderiza o arsenal atualizado
+                }
+            }
+        }
+
+        private ArsenalVista MontarArsenal()
+        {
+            var equipados = _arsenal.ObterEquipados();
+
+            // Item é único por (Faccao, Fase); o equipado casa por isso (após load os objetos não são a
+            // mesma referência dos obtidos).
+            bool EstaEquipado(Item it)
+            {
+                Item? eq = equipados[(int)it.Fase - 1];
+                return eq != null && eq.Faccao == it.Faccao && eq.Fase == it.Fase;
+            }
+
+            ItemArsenalVista Ver(Item it, int indice, bool equipado) => new(
+                indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
+                it.NomeStat(), it.ValorFormatado(), it.Valor, equipado);
+
+            var obtidos = _arsenal.ObterObtidos().Select((it, i) => Ver(it, i, EstaEquipado(it))).ToList();
+
+            var slots = new List<SlotArsenalVista>();
+            for (int s = 0; s < 7; s++)
+            {
+                Item? eq = equipados[s];
+                slots.Add(new SlotArsenalVista(s, NomesSlot[s], eq is null ? null : Ver(eq, -1, true)));
+            }
+            return new ArsenalVista(slots, obtidos);
         }
 
         /// <summary>Avatar placeholder: o emoji de um dos 4 Humanos (o time inicial).</summary>

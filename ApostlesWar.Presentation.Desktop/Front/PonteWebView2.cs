@@ -86,6 +86,8 @@ namespace ApostlesWar.Presentation.Desktop.Front
         public void EnviarVitoria(RecompensaVista recompensa) => Enviar("campanhaVitoria", recompensa);
         public void EnviarDerrota() => Enviar("campanhaDerrota", new { });
 
+        public void EnviarArsenal(ArsenalVista arsenal) => Enviar("arsenal", arsenal);
+
         private void Enviar(string tipo, object conteudo)
         {
             string json = JsonSerializer.Serialize(new { tipo, conteudo }, Json);

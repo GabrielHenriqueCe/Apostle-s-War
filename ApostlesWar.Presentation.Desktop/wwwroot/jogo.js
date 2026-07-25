@@ -39,6 +39,7 @@ ponte.addEventListener('message', e => {
     else if (msg.tipo === 'campanhaFases') mostrarFasesCampanha(msg.conteudo);
     else if (msg.tipo === 'campanhaVitoria') mostrarVitoria(msg.conteudo);
     else if (msg.tipo === 'campanhaDerrota') mostrarDerrota();
+    else if (msg.tipo === 'arsenal') mostrarArsenal(msg.conteudo);
 });
 
 // ---------- cenas (menu × combate × criar/editar perfil) ----------
@@ -53,6 +54,7 @@ function mostrarCena(cena) {
     document.getElementById('campanhaFases').hidden = cena !== 'campanhaFases';
     document.getElementById('campanhaVitoria').hidden = cena !== 'campanhaVitoria';
     document.getElementById('campanhaDerrota').hidden = cena !== 'campanhaDerrota';
+    document.getElementById('arsenal').hidden = cena !== 'arsenal';
     document.getElementById('arena').hidden = !emCombate;
     document.getElementById('painel').hidden = !emCombate;
     // Os controles de combate só fazem sentido na batalha.
@@ -594,6 +596,81 @@ function mostrarDerrota() {
 document.getElementById('campanhaVitoria').addEventListener('click', () => mandar('continuar'));
 document.getElementById('campanhaDerrota').addEventListener('click', () => mandar('continuar'));
 
+// ---------- Arsenal ----------
+const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
+const ARSENAL_ICONES = ['🗡️', '⛑️', '🛡️', '📿', '🎽', '👖', '👢'];   // ícone do tipo quando o slot está vazio
+let arsenalDados = null;
+let arsenalSlotSel = -1;
+
+function mostrarArsenal(a) {
+    if (cenaAtual !== 'arsenal') arsenalSlotSel = -1;   // entrada fresca → nenhum slot aberto
+    mostrarCena('arsenal');
+    arsenalDados = a;
+    desenharBoneco();
+    if (arsenalSlotSel >= 0) mostrarItensSlot(arsenalSlotSel);
+    else document.getElementById('arsenalDetalhe').hidden = true;
+}
+
+function desenharBoneco() {
+    document.getElementById('boneco').replaceChildren(...arsenalDados.slots.map(s => {
+        const div = document.createElement('div');
+        div.className = 'bonecoSlot' + (s.slot === arsenalSlotSel ? ' selecionado' : '') + (s.equipado ? ' preenchido' : '');
+        div.style.gridArea = ARSENAL_AREAS[s.slot];
+        const emoji = document.createElement('div'); emoji.className = 'bsEmoji';
+        emoji.textContent = s.equipado ? s.equipado.simbolo : ARSENAL_ICONES[s.slot];
+        const nome = document.createElement('div'); nome.className = 'bsNome'; nome.textContent = s.nome;
+        div.append(emoji, nome);
+        div.addEventListener('click', () => mostrarItensSlot(s.slot));
+        return div;
+    }));
+}
+
+function mostrarItensSlot(slot) {
+    arsenalSlotSel = slot;
+    desenharBoneco();
+    document.getElementById('arsenalDetalhe').hidden = false;
+    document.getElementById('arsenalSlotNome').textContent = arsenalDados.slots[slot].nome;
+
+    const itens = arsenalDados.obtidos.filter(o => o.slot === slot);
+    const equipado = itens.find(o => o.equipado);
+    const cont = document.getElementById('arsenalItens');
+
+    if (!itens.length) {
+        const v = document.createElement('div'); v.className = 'arsenalVazio'; v.textContent = 'Nenhum item deste tipo ainda.';
+        cont.replaceChildren(v);
+        return;
+    }
+
+    cont.replaceChildren(...itens.map(o => {
+        const card = document.createElement('div');
+        card.className = 'itemCard' + (o.equipado ? ' equipado' : '');
+
+        const em = document.createElement('span'); em.className = 'icEmoji'; em.textContent = o.simbolo;
+        const info = document.createElement('div'); info.className = 'icInfo';
+        const nm = document.createElement('div'); nm.className = 'icNome'; nm.textContent = `${o.nome} · ${o.faccao}`;
+        const st = document.createElement('div'); st.className = 'icStat'; st.textContent = `${o.stat} +${o.valor}`;
+        info.append(nm, st);
+        card.append(em, info);
+
+        if (equipado && !o.equipado) {   // seta de diferença vs o equipado
+            const diff = o.valorNum - equipado.valorNum;
+            const d = document.createElement('div');
+            d.className = 'icDiff ' + (diff > 0 ? 'sobe' : diff < 0 ? 'desce' : '');
+            d.textContent = diff > 0 ? '▲' : diff < 0 ? '▼' : '=';
+            card.append(d);
+        }
+        if (o.equipado) {
+            const tag = document.createElement('div'); tag.className = 'icTag'; tag.textContent = 'equipado';
+            card.append(tag);
+        } else {
+            card.addEventListener('click', () => mandar('equiparItem', o.indice));
+        }
+        return card;
+    }));
+}
+
+document.getElementById('arsenalVoltar').addEventListener('click', () => mandar('voltar'));
+
 // ---------- modal de confirmação ----------
 let modalAberto = false;
 let modalAoConfirmar = null;
@@ -989,7 +1066,7 @@ document.addEventListener('keydown', e => {
 
     if (modalAberto) { fecharModal(); return; }
     if (cenaAtual === 'criarPerfil') return;
-    if (['editarPerfil', 'arenaSetup', 'campanhaMapa', 'campanhaFases'].includes(cenaAtual)) { mandar('voltar'); return; }
+    if (['editarPerfil', 'arenaSetup', 'campanhaMapa', 'campanhaFases', 'arsenal'].includes(cenaAtual)) { mandar('voltar'); return; }
 
     if (cenaAtual === 'menu') {
         if (menuRaiz) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));

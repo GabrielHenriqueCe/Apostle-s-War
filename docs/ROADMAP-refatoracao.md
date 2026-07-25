@@ -464,6 +464,20 @@ bancada nunca a chama e nem poderia. Mas o `Definir()` já executou a fábrica e
 habilidades fossem métodos, seria reflection ou uma lista de 144 nomes escrita à mão, que envelheceria
 no primeiro champ novo. **O refactor pra dados pagou por si aqui.**
 
+**Colunas** (pedido do Gabriel na 2ª rodada): além de `Usos`/`Dano`/`Dano por uso`, cada linha por
+habilidade traz **`Dano (4 alvos)`** — a mesma medição com 4 bonecos, que é o que dá voz às habilidades
+de ÁREA (contra alvo único elas ficam indistinguíveis de single-target; agora medem 4,0× exatos,
+enquanto as de alvo único seguem 1,0×) — e **`Cura`**, que exigiu uma condição nova: **o champ começa
+cada turno com 1 de vida.** Sem isso a coluna seria toda zero (cura não cura quem está cheio). De
+quebra é a condição em que aparece quem fica mais FORTE ferido: a Caveira escala `2.0 − HP%` e o
+Ossinho dela mede 638 = 200 × **1,99** × 1,6. O champ carrega a mesma prevenção-de-morte do boneco pra
+não morrer de auto-dano em 1 de HP. **O HP virou IGUAL nos dois lados** (2.000): cura costuma ser % do
+HP máximo, então inflar o champ estouraria a cura pelo mesmo motivo que inflar o boneco estourava o DoT.
+
+**Duas vistas dos mesmos dados:** a tabela agrupada por champ responde "como é o kit deste
+personagem?"; os **rankings** no fim (burst, sustentado com área, cura) respondem "quem está fora da
+curva?" sem obrigar a varrer 144 linhas com o olho.
+
 **Cinco linhas, variando UM fator por vez** (desenho do Gabriel) — é o que torna as subtrações legíveis:
 
 | # | Modo | DEF do alvo | Recebe malefício? | O que a subtração isola |
@@ -518,7 +532,7 @@ revide e passivas de apanhar (Herói, Operário, Zumbi, Troll) medem ZERO. É ba
 de duelo — champ com número baixo pode ser reativo, não fraco. A coluna **Usos** é diagnóstico do BOT:
 habilidade que dispara 0× no champ inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
 
-Roda em ~7s dentro do `dotnet test`.
+Roda em ~37s dentro do `dotnet test`.
 
 ---
 

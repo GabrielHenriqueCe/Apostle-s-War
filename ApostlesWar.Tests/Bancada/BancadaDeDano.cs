@@ -30,13 +30,14 @@ namespace Tests.Bancada
     {
         private const int Turnos = 100;
         private const int Repeticoes = 10;      // média sobre o RNG que sobra (chances, paralisia)
-        // HP do boneco REALISTA (a faixa dos champs), porque o jogo tem efeito percentual sobre o HP
-        // máximo: a Queima tira 5% dele por turno. Um boneco inflado faria o DoT explodir. Ele não
-        // morre porque o controlador o devolve ao HP cheio antes de cada golpe.
-        private const int HPBoneco = 2_000;
-        private const int HPChamp = 1_000_000;  // sobrevive ao auto-dano (Fantasma) sem morrer no meio
+        // HP REALISTA e IGUAL pros dois lados (a faixa dos champs). É condição, não conveniência: o
+        // jogo tem efeito percentual sobre o HP máximo nas DUAS pontas — a Queima tira 5% dele por
+        // turno, e cura costuma ser % do HP máximo do alvo. Inflar qualquer um dos dois faz o número
+        // correspondente explodir e a comparação perder o sentido.
+        private const int HPPadrao = 2_000;
         private const int AtkPadrao = 200;
         private const int DefNoCap = 1000;      // 1000 de DEF = os 75% de redução, o teto da fórmula
+        private const int BonecosEmArea = 4;    // a coluna que dá voz às habilidades de área
 
         private sealed record Linha(string Titulo, string Explica, bool PorHab, int DefBoneco, bool Imune);
 
@@ -70,7 +71,7 @@ namespace Tests.Bancada
         /// </summary>
         private readonly record struct Isolado(int PorUso, int Total);
 
-        private sealed record Medicao(int DanoTotal, int DanoDeTick, int TurnosJogados,
+        private sealed record Medicao(int DanoTotal, int CuraTotal, int DanoDeTick, int TurnosJogados,
             Dictionary<Habilidade, int> Usos, Dictionary<Habilidade, int> DanoPorHab);
 
         // ---------- montagem das peças ----------
@@ -83,9 +84,11 @@ namespace Tests.Bancada
         /// </summary>
         private static Personagem Normalizar(Personagem original, HabilidadeAtiva espera)
         {
-            var habilidades = new List<Habilidade>(original.Habilidades) { espera };
+            // O `NuncaMorre` entra por ÚLTIMO de propósito: o `ConfirmarMorte` usa a primeira
+            // IPrevineMorte disponível, então o Guarda Real de quem o tem continua respondendo antes.
+            var habilidades = new List<Habilidade>(original.Habilidades) { espera, new NuncaMorre() };
             return new Personagem(original.Slot, original.Faccao, original.Nome, original.Simbolo,
-                HPChamp, AtkPadrao, def: 0, habilidades.ToArray());
+                HPPadrao, AtkPadrao, def: 0, habilidades.ToArray());
         }
 
         private static Personagem Boneco(int defesa, bool imune, HabilidadeAtiva espera)
@@ -96,15 +99,18 @@ namespace Tests.Bancada
                 new NuncaMorre(),   // sobrevive a habilidades que matam DENTRO de uma ativação
             };
             if (imune) habilidades.Add(new ImuneAMaleficios());
-            return new Personagem(1, Faccao.Humanos, "Boneco", "🎯", HPBoneco, 0, defesa, habilidades.ToArray());
+            return new Personagem(1, Faccao.Humanos, "Boneco", "🎯", HPPadrao, 0, defesa, habilidades.ToArray());
         }
 
-        private static Medicao Rodar(Personagem original, HabilidadeAtiva? habIsolada, Linha linha)
+        private static Medicao Rodar(Personagem original, HabilidadeAtiva? habIsolada, Linha linha,
+            int quantosBonecos)
         {
             var espera = Espera.Nova();
             var esperaDoBoneco = Espera.Descanso();
             var champ = Normalizar(original, espera);
-            var boneco = Boneco(linha.DefBoneco, linha.Imune, esperaDoBoneco);
+            var bonecos = Enumerable.Range(0, quantosBonecos)
+                .Select(_ => Boneco(linha.DefBoneco, linha.Imune, esperaDoBoneco))
+                .ToList();
 
             var tela = new TelaDeBancada(critMaximo: true);
             var selecao = new SelecaoDeAlvoService();
@@ -125,20 +131,22 @@ namespace Tests.Bancada
                 new SemEspera(), new RelogioDoCombate());
 
             // bot1: false → a equipe1 (o champ) é dirigida pelo controlador da bancada.
-            combate.ExecutarArenaComTimes(new List<Personagem> { champ }, new List<Personagem> { boneco },
+            combate.ExecutarArenaComTimes(new List<Personagem> { champ }, bonecos,
                 bot1: false, bot2: true);
 
-            int total = tela.Bonecos.Count > 0 ? tela.Bonecos[0].DanoRecebido : 0;
-            return new Medicao(total, tela.DanoDeTick, Turnos,
+            // Soma os bonecos TODOS: com 4 no campo, é o que dá voz à habilidade de área.
+            int dano = tela.Bonecos.Sum(b => b.DanoRecebido);
+            return new Medicao(dano, tela.CuraPorHab.Values.Sum(), tela.DanoDeTick, Turnos,
                 controlador.Usos, tela.DanoPorHab);
         }
 
         /// <summary>Média sobre N repetições: mata o resto do RNG (chances de aplicar debuff,
         /// paralisia do Medo) que o crítico cravado não cobre.</summary>
-        private static Medicao Media(Personagem champ, HabilidadeAtiva? hab, Linha linha)
+        private static Medicao Media(Personagem champ, HabilidadeAtiva? hab, Linha linha,
+            int quantosBonecos = 1)
         {
             var corridas = new List<Medicao>();
-            for (int i = 0; i < Repeticoes; i++) corridas.Add(Rodar(champ, hab, linha));
+            for (int i = 0; i < Repeticoes; i++) corridas.Add(Rodar(champ, hab, linha, quantosBonecos));
 
             var usos = new Dictionary<Habilidade, int>();
             var dano = new Dictionary<Habilidade, int>();
@@ -152,6 +160,7 @@ namespace Tests.Bancada
 
             return new Medicao(
                 (int)corridas.Average(c => c.DanoTotal),
+                (int)corridas.Average(c => c.CuraTotal),
                 (int)corridas.Average(c => c.DanoDeTick),
                 Turnos, usos, dano);
         }
@@ -172,32 +181,42 @@ namespace Tests.Bancada
             // poder subtrair a 2 por habilidade.
             var isoladosDaLinha2 = new Dictionary<string, Dictionary<Habilidade, Isolado>>();
 
+            var paraRanking = new List<Registro>();
+
             foreach (var linha in Linhas)
             {
                 md.AppendLine($"## Linha {linha.Titulo}").AppendLine();
                 md.AppendLine(linha.Explica).AppendLine();
 
-                if (linha.PorHab) PorHabilidade(md, todos, linha, isoladosDaLinha2);
+                if (linha.PorHab)
+                    PorHabilidade(md, todos, linha, isoladosDaLinha2,
+                        coletar: linha.Titulo.StartsWith("1") ? paraRanking : null);
                 else PorChamp(md, todos, linha, isoladosDaLinha2);
 
                 md.AppendLine();
             }
 
+            Rankings(md, paraRanking);
+
             File.WriteAllText(CaminhoDoRelatorio(), md.ToString());
         }
 
+        /// <summary>Uma linha da tabela, guardada também pros rankings do fim do relatório.</summary>
+        private sealed record Registro(string Champ, string Hab, int Cooldown, int Usos,
+            int Dano, int DanoPorUso, int DanoEmArea, int Cura);
+
         private static void PorHabilidade(StringBuilder md, List<Personagem> todos, Linha linha,
-            Dictionary<string, Dictionary<Habilidade, Isolado>> memoria)
+            Dictionary<string, Dictionary<Habilidade, Isolado>> memoria, List<Registro>? coletar)
         {
             bool eLinha2 = linha.Titulo.StartsWith("2");
             bool eLinha5 = linha.Titulo.StartsWith("5");
 
             md.AppendLine(eLinha5
-                ? "| Champ | Habilidade | CD | Usos | Dano total | Dano por uso | Tick | Δ vs linha 2 |"
-                : "| Champ | Habilidade | CD | Usos | Dano total | Dano por uso |");
+                ? $"| Champ | Habilidade | CD | Usos | Dano | Dano/uso | Dano ({BonecosEmArea} alvos) | Cura | Tick | Δ vs linha 2 |"
+                : $"| Champ | Habilidade | CD | Usos | Dano | Dano/uso | Dano ({BonecosEmArea} alvos) | Cura |");
             md.AppendLine(eLinha5
-                ? "|---|---|--:|--:|--:|--:|--:|--:|"
-                : "|---|---|--:|--:|--:|--:|");
+                ? "|---|---|--:|--:|--:|--:|--:|--:|--:|--:|"
+                : "|---|---|--:|--:|--:|--:|--:|--:|");
 
             foreach (var champ in todos)
             {
@@ -207,6 +226,7 @@ namespace Tests.Bancada
                 foreach (var hab in ativas)
                 {
                     var m = Media(champ, hab, linha);
+                    var area = Media(champ, hab, linha, BonecosEmArea);
                     int usos = m.Usos.GetValueOrDefault(hab);
                     int porUso = usos > 0 ? m.DanoTotal / usos : 0;
 
@@ -214,8 +234,11 @@ namespace Tests.Bancada
                     // orçamento de turnos, e cada isolado aqui gastou 100 turnos SÓ nesta habilidade.
                     if (eLinha2) memoria[champ.Nome][hab] = new Isolado(porUso, m.DanoTotal);
 
+                    coletar?.Add(new Registro($"{champ.Simbolo} {champ.Nome}", $"{hab.Simbolo} {hab.Nome}",
+                        hab.Cooldown, usos, m.DanoTotal, porUso, area.DanoTotal, m.CuraTotal));
+
                     md.Append($"| {champ.Simbolo} {champ.Nome} | {hab.Simbolo} {hab.Nome} | {hab.Cooldown} " +
-                              $"| {usos} | {m.DanoTotal} | {porUso} ");
+                              $"| {usos} | {m.DanoTotal} | {porUso} | {area.DanoTotal} | {m.CuraTotal} ");
 
                     if (eLinha5)
                     {
@@ -226,6 +249,39 @@ namespace Tests.Bancada
                     md.AppendLine("|");
                 }
             }
+        }
+
+        /// <summary>
+        /// Os rankings. A tabela agrupada por champ acima serve pra ler UM personagem inteiro; esta
+        /// serve pra achar o outlier sem ter que varrer 144 linhas com o olho. Mesmos dados, duas
+        /// perguntas diferentes — por isso as duas vistas convivem em vez de uma substituir a outra.
+        /// </summary>
+        private static void Rankings(StringBuilder md, List<Registro> regs)
+        {
+            md.AppendLine("## Rankings (condições da linha 1: DEF 0, alvo imune)").AppendLine();
+            md.AppendLine("A tabela por champ acima responde \"como é o kit deste personagem?\".");
+            md.AppendLine("Estas respondem \"quem está fora da curva?\".").AppendLine();
+
+            Ranque(md, "Dano por uso — o BURST", regs.Where(r => r.DanoPorUso > 0)
+                .OrderByDescending(r => r.DanoPorUso), r => r.DanoPorUso);
+
+            Ranque(md, $"Dano em {Turnos} turnos, {BonecosEmArea} alvos — o SUSTENTADO com área",
+                regs.Where(r => r.DanoEmArea > 0).OrderByDescending(r => r.DanoEmArea), r => r.DanoEmArea);
+
+            Ranque(md, $"Cura em {Turnos} turnos", regs.Where(r => r.Cura > 0)
+                .OrderByDescending(r => r.Cura), r => r.Cura);
+        }
+
+        private static void Ranque(StringBuilder md, string titulo, IEnumerable<Registro> ordenados,
+            Func<Registro, int> valor)
+        {
+            var lista = ordenados.ToList();
+            md.AppendLine($"### {titulo}").AppendLine();
+            md.AppendLine("| # | Champ | Habilidade | CD | Valor |");
+            md.AppendLine("|--:|---|---|--:|--:|");
+            for (int i = 0; i < lista.Count; i++)
+                md.AppendLine($"| {i + 1} | {lista[i].Champ} | {lista[i].Hab} | {lista[i].Cooldown} | {valor(lista[i])} |");
+            md.AppendLine();
         }
 
         private static void PorChamp(StringBuilder md, List<Personagem> todos, Linha linha,
@@ -272,16 +328,22 @@ namespace Tests.Bancada
             md.AppendLine("> de número vira um `git diff` legível.").AppendLine();
             md.AppendLine("## Condições").AppendLine();
             md.AppendLine($"- **{Turnos} turnos** por medição, média de **{Repeticoes} repetições**.");
-            md.AppendLine($"- Stats IGUAIS pra todos: HP {HPChamp:N0}, ATK {AtkPadrao}, DEF 0. **Crítico 100%**.");
+            md.AppendLine($"- Stats IGUAIS pros dois lados: HP {HPPadrao:N0}, ATK {AtkPadrao}, DEF 0. **Crítico 100%**.");
+            md.AppendLine("- **O champ começa cada turno com 1 de vida.** Sem isso a coluna de cura seria toda zero");
+            md.AppendLine("  (cura não cura quem está cheio), e é também a condição em que aparece quem fica mais");
+            md.AppendLine("  FORTE ferido — a Caveira escala `2.0 − HP%`. Ele não morre: carrega a mesma");
+            md.AppendLine("  prevenção-de-morte do boneco, que o segura quando uma habilidade de auto-dano zeraria.");
+            md.AppendLine($"- A coluna **Dano ({BonecosEmArea} alvos)** repete a medição com {BonecosEmArea} bonecos no campo — é o que");
+            md.AppendLine("  dá voz às habilidades de área, que contra alvo único ficam indistinguíveis de single-target.");
             md.AppendLine("- Na medição por habilidade, o champ usa **só aquela** e **espera** durante o cooldown");
             md.AppendLine("  (não enche o buraco com A1 — se enchesse, o A1 dominaria e todas ficariam iguais).");
             md.AppendLine("- No champ inteiro, quem decide é o **mesmo `ControladorBot`** da Arena e do modo Auto.");
-            md.AppendLine($"- Boneco: HP {HPBoneco:N0}, DEF 0 ou {DefNoCap} (o cap de 75% de redução), e **nunca age**.");
-            md.AppendLine("  O HP é REALISTA de propósito: a Queima tira 5% do HP máximo por turno, então um boneco");
-            md.AppendLine("  inflado faria o DoT explodir. Ele volta ao HP cheio entre turnos e **não morre** —");
-            md.AppendLine("  usa a prevenção-de-morte do Guarda Real, mas restaurando tudo e sem cooldown, o que");
-            md.AppendLine("  também o salva de habilidades que matam DENTRO de uma ativação (o Porradeiro do Troll").AppendLine();
-            md.AppendLine("  dá 6 hits de 480 num alvo de 2.000).").AppendLine();
+            md.AppendLine($"- Boneco: DEF 0 ou {DefNoCap} (o cap de 75% de redução), e **nunca age** — ele se cura.");
+            md.AppendLine("  O HP é REALISTA nos dois lados de propósito: a Queima tira 5% do HP máximo por turno e");
+            md.AppendLine("  cura costuma ser % do HP máximo, então inflar qualquer um dos dois estoura o número.");
+            md.AppendLine("  Ele volta ao HP cheio entre turnos e **não morre** — usa a prevenção-de-morte do Guarda");
+            md.AppendLine("  Real, restaurando tudo e sem cooldown, o que também o salva de habilidades que matam");
+            md.AppendLine("  DENTRO de uma ativação (o Porradeiro do Troll dá 6 hits de 480 num alvo de 2.000).").AppendLine();
             md.AppendLine("### O que este relatório NÃO mede").AppendLine();
             md.AppendLine("O boneco **não revida**. Contra-ataque, espinhos e revide (Herói, Operário, Zumbi)");
             md.AppendLine("medem **zero** aqui: isto é uma bancada de dano CAUSADO, não de duelo. Um champ");

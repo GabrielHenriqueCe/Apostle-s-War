@@ -35,6 +35,7 @@ namespace Tests.Bancada
         public Habilidade? HabEmExecucao { get; set; }
 
         public Dictionary<Habilidade, int> DanoPorHab { get; } = new();
+        public Dictionary<Habilidade, int> CuraPorHab { get; } = new();
         public int DanoDeTick { get; private set; }
 
         public void ExibirInicioArena(List<Combate> equipe1, List<Combate> equipe2)
@@ -63,9 +64,19 @@ namespace Tests.Bancada
             if (Bonecos.Contains(r.Alvo)) DanoDeTick += r.DanoEfetivo;
         }
 
+        /// <summary>
+        /// Cura CREDITADA A QUEM CUROU — e o filtro por curador não é detalhe: o boneco se cura todo
+        /// turno pra não revidar, então contar por ALVO somaria o descanso dele em cima da habilidade
+        /// que estava em execução.
+        /// </summary>
+        public void ExibirCura(EventoCura c)
+        {
+            if (HabEmExecucao is null || !Champs.Contains(c.Curador)) return;
+            CuraPorHab[HabEmExecucao] = CuraPorHab.GetValueOrDefault(HabEmExecucao) + c.Quantidade;
+        }
+
         public void LimparTela() { }
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos) { }
-        public void ExibirCura(EventoCura c) { }
         public void ExibirMensagemPassiva(string mensagem) { }
         public void ExibirPreparacaoAtaque(Combate atacante, List<Combate> defensores) { }
         public void ExibirUsoHabilidade(Combate atacante, Habilidade hab) { }
@@ -195,6 +206,14 @@ namespace Tests.Bancada
             // e o BOT escolheria as habilidades com a régua errada na medição do champ inteiro.
             foreach (Combate boneco in _tela.Bonecos)
                 boneco.RestaurarVida(boneco.HPMaximo);
+
+            // E o CHAMP começa cada turno com 1 de vida. Duas razões, e a segunda foi o Gabriel quem
+            // viu: (a) cura só cura quem está ferido — sem isto, toda habilidade de cura mediria 0 e
+            // a coluna não existiria; (b) há champ que fica MAIS FORTE com pouca vida (a Caveira
+            // escala `2.0 − HP%`), então esta é a condição em que o kit dele aparece.
+            // O champ não morre disto: ele carrega a mesma prevenção-de-morte do boneco, que o
+            // segura quando uma habilidade de auto-dano (o Fantasma) o levaria a zero.
+            atacante.RestaurarVida(1);
 
             HabilidadeAtiva escolhida;
             if (_habIsolada is null)

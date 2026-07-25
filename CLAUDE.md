@@ -10,10 +10,15 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
 - **`docs/ROADMAP-refatoracao.md`** → a seção **FILA DE EXECUÇÃO** é a fila mestra.
 - `git log --oneline -15` → os commits recentes.
 - **Fase atual:** FRONT feito, console REMOVIDO (#179), camadas ajustadas (#180), `PreverDano` (#181),
-  **bot inteligente** (#182), **botão Auto** (#183) e a **ordem do pipeline de dano** (`OrdemDeMitigacao`
-  — fechou o bug do bloqueio × escudo). A seguir: o **REBALANCE (#16)**, que era o motivo de o front vir
-  antes. O instrumento dele é a **bancada de dano** (36 champs × habilidades, DEF 0, crit 100%, stats
-  iguais, 100 turnos por habilidade → `docs/bancada-dano.md`). Aberto: o #15 (faxina de comentários).
+  **bot inteligente** (#182), **botão Auto** (#183), a **ordem do pipeline de dano** (`OrdemDeMitigacao`
+  — fechou o bug do bloqueio × escudo, #185) e a **DEF do protetor** no `ProtecaoAliado` (doc mentia; a
+  impl é a certa — tanque protege mais barato). A seguir: o **REBALANCE (#16)**, que era o motivo de o
+  front vir antes. O instrumento dele é a **bancada de dano** (36 champs × habilidades, crit 100%, stats
+  iguais, HP igual, 100 turnos por habilidade → `docs/bancada-dano.md`), em **TRÊS passadas** (desenho
+  do Gabriel — varia UM fator por vez): **(1) DEF 0 + imune a malefícios · (2) DEF até o cap + imune a
+  malefícios · (3) DEF até o cap, recebendo malefícios.** 1×2 isola o que a DEFESA faz (com DEF 0 quem
+  fura/reduz defesa fica invisível); 2×3 isola o que os MALEFÍCIOS fazem. **Auto-buff é liberado** (se o
+  champ se buffa, é a habilidade dele trabalhando). Aberto: o #15 (faxina de comentários).
 
 ## Como trabalhamos
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar

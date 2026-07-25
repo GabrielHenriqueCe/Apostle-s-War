@@ -214,6 +214,80 @@ namespace Tests
             Assert.Equal(100_000, protetor.HPAtual);   // o protetor não pagou por nada
         }
 
+        /// <summary>
+        /// O aplicar e o prever da proteção fazem a MESMA conta, e nada além deste teste os obriga a
+        /// concordar. Os valores são de propósito QUEBRADOS (parte fracionária ≥ 0,5): com os números
+        /// redondos do resto da suíte — 1000 × 0,30 = 300 exato — trocar o truncamento por
+        /// arredondamento em UM dos dois métodos passaria verde, e o bot mediria o alvo com um número
+        /// que o golpe real não reproduz. Silencioso, que é o pior tipo.
+        /// </summary>
+        [Theory]
+        [InlineData(999, 0.30)]   // 299,7 → 299 truncado (arredondado seria 300)
+        [InlineData(333, 0.30)]   //  99,9 →  99
+        [InlineData(105, 0.15)]   //  15,75 → 15
+        [InlineData(777, 0.35)]   // 271,95 → 271
+        public void ProtecaoAliado_PreverBateComOAplicar_MesmoComNumeroQuebrado(int dano, double percentual)
+        {
+            var protegido = Novo();
+            var protetor = Novo();   // def 0: o protetor recebe o redirecionado inteiro
+            new ProtecaoAliado(protetor, duracao: 2, percentual: percentual).Aplicar(protegido);
+
+            int previsto = protegido.PreverDanoRecebido(dano, NaturezasDano.Ataque);
+            var (efetivo, _) = protegido.ReceberDano(dano, NaturezasDano.Ataque);
+
+            Assert.Equal(previsto, efetivo);
+            Assert.Equal(100_000, protegido.HPAtual + efetivo);
+            // e o que saiu do protegido é EXATAMENTE o que entrou no protetor: nada evapora no meio.
+            Assert.Equal(dano - efetivo, 100_000 - protetor.HPAtual);
+        }
+
+        /// <summary>
+        /// REGRA DECIDIDA (jul/2026): o redirecionamento passa pela defesa do protetor, então tanque
+        /// protege mais barato. O doc da classe dizia "sem defesa" e contradizia a implementação; o
+        /// Gabriel bateu o martelo de que a IMPLEMENTAÇÃO é a certa (DEF alta obviamente defende mais)
+        /// e o doc foi corrigido. Estava invisível porque todo teste de proteção dava def 0 ao protetor.
+        ///
+        /// O que o PROTEGIDO desconta não muda: são sempre os 30%, independente de quem o protege.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 300)]      // sem defesa: paga os 30% cheios
+        [InlineData(500, 187)]    // 37,5% de redução → 300 × 0,625 = 187,5, trunca
+        [InlineData(2000, 75)]    // além do cap: 75% é o teto → 300 × 0,25
+        public void ProtecaoAliado_ADefesaDoProtetorAbateOQueEleRecebe(int defesaDoProtetor, int pagoPeloProtetor)
+        {
+            var protegido = Novo();
+            var protetor = Novo(def: defesaDoProtetor);
+            new ProtecaoAliado(protetor, duracao: 2, percentual: 0.30).Aplicar(protegido);
+
+            var (efetivo, _) = protegido.ReceberDano(1000, NaturezasDano.Ataque);
+
+            Assert.Equal(700, efetivo);                                    // o protegido: sempre 30% a menos
+            Assert.Equal(pagoPeloProtetor, 100_000 - protetor.HPAtual);
+            Assert.Equal(DanoAposDefesa(300, defesaDoProtetor), pagoPeloProtetor);   // é a fórmula de sempre
+        }
+
+        /// <summary>
+        /// Com o protetor MORTO a proteção não age — o portador come o golpe inteiro. É o único ramo
+        /// dos dois métodos que ninguém exercitava, e ele existe porque há uma janela real no jogo:
+        /// o status só se autoremove na expiração natural do próximo turno.
+        /// </summary>
+        [Fact]
+        public void ProtecaoAliado_ComOProtetorMorto_NaoRedirecionaNemPreve()
+        {
+            var protegido = Novo();
+            var protetor = Novo(hp: 100);
+            new ProtecaoAliado(protetor, duracao: 2).Aplicar(protegido);
+            protetor.ReceberDano(100, NaturezasDano.Ataque);   // mata o protetor
+            Assert.False(protetor.EstaVivo());
+
+            int previsto = protegido.PreverDanoRecebido(1000, NaturezasDano.Ataque);
+            var (efetivo, _) = protegido.ReceberDano(1000, NaturezasDano.Ataque);
+
+            Assert.Equal(1000, previsto);   // nada redirecionado: o golpe chega inteiro
+            Assert.Equal(1000, efetivo);
+            Assert.Equal(previsto, efetivo);
+        }
+
         [Fact]
         public void Escudo_AbsorveParcialmente_ERelataOQueAparou()
         {

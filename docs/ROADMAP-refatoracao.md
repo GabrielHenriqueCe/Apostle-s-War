@@ -479,12 +479,27 @@ devolvendo `null` na 101ª chamada (cai no `BatalhaAbortada`); a imunidade do bo
 `IBloqueiaStatus` (o MESMO mecanismo da `CascaDura`); o crítico 100% é um `BuffTaxaCrit` de duração
 infinita; e o `ExibirInicioArena` da porta de tela é o que entrega os `Combate` construídos lá dentro.
 
-**Decisões que os NÚMEROS forçaram (as duas primeiras versões estavam erradas):**
+**Decisões que os NÚMEROS forçaram (as primeiras versões estavam erradas — rodar o instrumento É o
+que o valida):**
 - **Boneco com HP gigante não funciona.** A `Queima` tira **5% do HP máximo** por turno — com 100M de
   HP o tick virava 5 milhões e o boneco se matava (o Mago aparecia com 7 usos em vez de 25). O HP tem
-  que ser REALISTA; o boneco não morre porque o controlador o devolve ao HP cheio entre turnos.
-  Reset em vez de `Invencivel` de propósito: o piso de HP deixaria o alvo em 1 de vida e o
-  `PreverVidaRemovida` devolveria ~0 pra tudo, fazendo o BOT escolher com a régua errada na linha 3/4.
+  que ser REALISTA; o boneco volta ao HP cheio entre turnos.
+- **Reset entre turnos não salva de quem mata DENTRO de uma ativação.** O Porradeiro do Troll dá 6
+  hits de 480 = 2880 num boneco de 2000: matava no 5º e a corrida parava com **1 uso em vez de 25**.
+  Solução do Gabriel: dar ao boneco a **prevenção-de-morte do Guarda Real** (`IPrevineMorte`,
+  consultada pelo `ConfirmarMorte` dentro do funil), com duas mudanças — restaura o HP **cheio** em
+  vez de 1, e **cooldown 0**, que o `SkillCooldown` traduz em sempre-disponível (`Usar()` faz
+  `restante = total = 0`), inclusive entre hits da mesma ativação. **Melhor que pôr `Invencivel`:**
+  com piso de HP o alvo ficaria em 1 de vida e o próprio bot documenta que "evitar Invencível cai
+  sozinho de `PreverVidaRemovida`, que devolve ~0" — ele leria o boneco como inútil de bater. Voltando
+  ao HP cheio, a previsão segue honesta e a regra vale pras CINCO linhas, uniforme.
+- **O boneco não pode nem ATACAR de mentira.** Dar-lhe ataque 0 não basta: um golpe de dano zero ainda
+  dispara `IReageAoSerAtacado`, e a bancada passava a medir a passiva reagindo ao próprio andaime. O
+  Troll terminava 25% mais forte (a Ambição conta as pancadas do saco) e a **Parede de Tijolos do
+  Operário — que não causa dano nenhum — media 235 por uso**, que era 100% contra-ataque. Agora o
+  boneco **se cura** no turno dele (ideia do Gabriel: ação de jogo de verdade em vez de turno oco).
+  Depois disso todo número bate com a conta à mão: Porradeiro 2880 = 6 × (200 × 1,5 × 1,6), Pancada
+  560 = 200 × 1,75 × 1,6, A1 320 = 200 × 1,6.
 - **Sinergia não é "combinado − soma dos isolados".** Cada isolado gastou 100 turnos SÓ naquela
   habilidade; somar N deles e comparar com UMA corrida de 100 turnos é laranja com maçã (dava negativo
   pra todo mundo). O certo é **real − esperado**, com esperado = dano-por-uso isolado × ativações que
@@ -498,12 +513,12 @@ E a história do Mago sai decomposta: Bola de Fogo isolada com alvo imune = 4000
 Piromancer — que só rende quando OUTRA habilidade bate no alvo já queimado, e por isso o isolado nunca
 a veria.
 
-**Limitação declarada no próprio relatório:** o boneco **não revida** (ataque 0), então contra-ataque,
-espinhos e revide (Herói, Operário, Zumbi) medem ZERO. É bancada de dano CAUSADO, não de duelo — champ
-com número baixo pode ser reativo, não fraco. A coluna **Usos** é diagnóstico do BOT: habilidade que
-dispara 0× no champ inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
+**Limitação declarada no próprio relatório:** o boneco **nunca age**, então contra-ataque, espinhos,
+revide e passivas de apanhar (Herói, Operário, Zumbi, Troll) medem ZERO. É bancada de dano CAUSADO, não
+de duelo — champ com número baixo pode ser reativo, não fraco. A coluna **Usos** é diagnóstico do BOT:
+habilidade que dispara 0× no champ inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
 
-Roda em ~35s dentro do `dotnet test`.
+Roda em ~7s dentro do `dotnet test`.
 
 ---
 

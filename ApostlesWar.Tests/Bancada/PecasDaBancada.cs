@@ -95,6 +95,31 @@ namespace Tests.Bancada
     }
 
     /// <summary>
+    /// O boneco não morre: em vez disso volta ao HP CHEIO. É o mecanismo do **Guarda Real**
+    /// (<see cref="IPrevineMorte"/>, consultado pelo `ConfirmarMorte` dentro do funil de dano) com
+    /// duas mudanças — restaura tudo em vez de 1 de HP, e **cooldown 0**, que o `SkillCooldown`
+    /// traduz em "sempre disponível" (`Usar()` faz `restante = total = 0`), inclusive ENTRE os hits
+    /// de uma mesma ativação.
+    ///
+    /// É o que o reset entre turnos não alcançava: o Porradeiro do Troll dá 6 hits de 480 = 2880
+    /// contra um boneco de 2000, matava no 5º, e a corrida parava com **1 uso em vez de 25**.
+    ///
+    /// E é melhor que pôr um piso de HP (`Invencivel`): com piso, o alvo ficaria em 1 de vida e o
+    /// próprio bot documenta que "evitar Invencível cai sozinho de `PreverVidaRemovida`, que devolve
+    /// ~0" — ele leria o boneco como inútil de bater e escolheria com a régua errada. Voltando ao HP
+    /// cheio, a previsão do bot continua honesta, então isto vale pras CINCO linhas, uniforme.
+    /// (Ideia do Gabriel.)
+    /// </summary>
+    internal sealed class NuncaMorre : HabilidadePassiva, IPrevineMorte
+    {
+        public NuncaMorre() : base("Nunca morre (bancada)", "♾️", cooldown: 0,
+            "O boneco volta ao HP cheio em vez de morrer.")
+        { }
+
+        public void Prevenir(Combate combatente) => combatente.RestaurarVida(combatente.HPMaximo);
+    }
+
+    /// <summary>
     /// Guarda o turno enquanto o cooldown roda. Existe porque o contrato do
     /// <see cref="IControladorDeTurno"/> não tem "passar": devolver null ali significa ENCERRAR a
     /// batalha. E o buraco não pode ser preenchido com A1 — se fosse, toda habilidade carregaria ~75
@@ -107,6 +132,18 @@ namespace Tests.Bancada
             "Esperar", "⏳", cooldown: 0, "A bancada segura o turno enquanto o cooldown roda.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, acoes: new List<Acao>());
+
+        /// <summary>
+        /// O turno do BONECO: ele se cura em vez de revidar (ideia do Gabriel). Podia ser a casca
+        /// vazia acima — o efeito na medição é o mesmo, já que o que importa é ele não ENCOSTAR no
+        /// champ — mas uma ação de jogo de verdade é mais honesta que um turno oco, e de quebra
+        /// devolve o alvo ao HP cheio pelo caminho do próprio motor.
+        /// </summary>
+        public static HabilidadeAtiva Descanso() => new(
+            "Descansar", "💤", cooldown: 0, "O boneco se recompõe em vez de revidar.",
+            numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
+            estadoAlvo: EstadoAlvo.Vivos,
+            acoes: new List<Acao> { new Cura(Valor.PorHP(1.0), Escopo.ProprioAtacante) });
     }
 
     /// <summary>
@@ -185,6 +222,25 @@ namespace Tests.Bancada
             => _habIsolada is null
                 ? _bot.EscolherAlvo(disponiveis, aliados, defensores)
                 : disponiveis.FirstOrDefault() ?? defensores.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// O controlador do BONECO: ele nunca age. Não basta dar-lhe ataque 0 — o golpe de dano zero
+    /// AINDA dispara `IReageAoSerAtacado`, e aí a bancada mede a passiva reagindo ao próprio andaime
+    /// em vez da habilidade. Foi o que inflou o Troll: a Ambição dá +5% de ATK por hit recebido até
+    /// +25%, então ele terminava a corrida batendo 25% mais forte porque o saco de pancada balançava.
+    /// </summary>
+    internal sealed class ControladorQueEspera : IControladorDeTurno
+    {
+        private readonly HabilidadeAtiva _espera;
+
+        public ControladorQueEspera(HabilidadeAtiva espera) => _espera = espera;
+
+        public HabilidadeAtiva? EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores)
+            => _espera;
+
+        public Combate? EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores)
+            => disponiveis.FirstOrDefault() ?? aliados.FirstOrDefault();
     }
 
     /// <summary>Save que não sai da memória — o `ArsenalService` exige a porta, a bancada não usa itens.</summary>

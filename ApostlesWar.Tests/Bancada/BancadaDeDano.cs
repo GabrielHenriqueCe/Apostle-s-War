@@ -20,9 +20,11 @@ namespace Tests.Bancada
     ///   isolado rodasse imune e o combinado não, o delta misturaria sinergia com malefício e não
     ///   daria pra saber de quem é o mérito.
     ///
-    /// **Limitação declarada:** o boneco NÃO revida (ataque 0). Então contra-ataque, espinhos e
-    /// revide (Herói, Operário, Zumbi) medem zero aqui — isso é uma bancada de DANO CAUSADO, não de
-    /// duelo. Medir kit reativo pede outro instrumento.
+    /// **Limitação declarada:** o boneco NUNCA AGE. Não basta ataque 0 — um golpe de dano zero ainda
+    /// dispara `IReageAoSerAtacado`, e a bancada passaria a medir a passiva reagindo ao próprio
+    /// andaime (o Troll terminava 25% mais forte porque a Ambição contava as pancadas do saco).
+    /// Consequência: contra-ataque, espinhos, revide e passivas de apanhar medem ZERO aqui. É uma
+    /// bancada de DANO CAUSADO, não de duelo — kit reativo pede outro instrumento.
     /// </summary>
     public class BancadaDeDano
     {
@@ -86,19 +88,23 @@ namespace Tests.Bancada
                 HPChamp, AtkPadrao, def: 0, habilidades.ToArray());
         }
 
-        private static Personagem Boneco(int defesa, bool imune)
+        private static Personagem Boneco(int defesa, bool imune, HabilidadeAtiva espera)
         {
-            var habilidades = new List<Habilidade> { new ApostlesWar.Domain.Skills.Ativas.AtaqueBasico() };
+            var habilidades = new List<Habilidade>
+            {
+                espera,             // ele NUNCA age — ver ControladorQueEspera
+                new NuncaMorre(),   // sobrevive a habilidades que matam DENTRO de uma ativação
+            };
             if (imune) habilidades.Add(new ImuneAMaleficios());
-            // Ataque 0: ele apanha, nunca bate. Ver a limitação declarada no cabeçalho da classe.
             return new Personagem(1, Faccao.Humanos, "Boneco", "🎯", HPBoneco, 0, defesa, habilidades.ToArray());
         }
 
         private static Medicao Rodar(Personagem original, HabilidadeAtiva? habIsolada, Linha linha)
         {
             var espera = Espera.Nova();
+            var esperaDoBoneco = Espera.Descanso();
             var champ = Normalizar(original, espera);
-            var boneco = Boneco(linha.DefBoneco, linha.Imune);
+            var boneco = Boneco(linha.DefBoneco, linha.Imune, esperaDoBoneco);
 
             var tela = new TelaDeBancada(critMaximo: true);
             var selecao = new SelecaoDeAlvoService();
@@ -113,7 +119,9 @@ namespace Tests.Bancada
                 new CampeoesService(personagens, capitulos),
                 personagens, tela, selecao,
                 controladorJogador: controlador,
-                controladorBot: new ControladorBot(selecao),
+                // Só o BONECO cai neste slot: o cérebro do bot que joga pelo champ na medição de
+                // champ-inteiro é uma instância própria, dentro do ControladorDeBancada.
+                controladorBot: new ControladorQueEspera(esperaDoBoneco),
                 new SemEspera(), new RelogioDoCombate());
 
             // bot1: false → a equipe1 (o champ) é dirigida pelo controlador da bancada.
@@ -268,9 +276,12 @@ namespace Tests.Bancada
             md.AppendLine("- Na medição por habilidade, o champ usa **só aquela** e **espera** durante o cooldown");
             md.AppendLine("  (não enche o buraco com A1 — se enchesse, o A1 dominaria e todas ficariam iguais).");
             md.AppendLine("- No champ inteiro, quem decide é o **mesmo `ControladorBot`** da Arena e do modo Auto.");
-            md.AppendLine($"- Boneco: HP {HPBoneco:N0}, **ataque 0**, DEF 0 ou {DefNoCap} (o cap de 75% de redução).");
-            md.AppendLine("  Ele volta ao HP cheio antes de cada golpe — o HP é REALISTA de propósito, porque a");
-            md.AppendLine("  Queima tira 5% do HP máximo por turno e um boneco inflado faria o DoT explodir.").AppendLine();
+            md.AppendLine($"- Boneco: HP {HPBoneco:N0}, DEF 0 ou {DefNoCap} (o cap de 75% de redução), e **nunca age**.");
+            md.AppendLine("  O HP é REALISTA de propósito: a Queima tira 5% do HP máximo por turno, então um boneco");
+            md.AppendLine("  inflado faria o DoT explodir. Ele volta ao HP cheio entre turnos e **não morre** —");
+            md.AppendLine("  usa a prevenção-de-morte do Guarda Real, mas restaurando tudo e sem cooldown, o que");
+            md.AppendLine("  também o salva de habilidades que matam DENTRO de uma ativação (o Porradeiro do Troll").AppendLine();
+            md.AppendLine("  dá 6 hits de 480 num alvo de 2.000).").AppendLine();
             md.AppendLine("### O que este relatório NÃO mede").AppendLine();
             md.AppendLine("O boneco **não revida**. Contra-ataque, espinhos e revide (Herói, Operário, Zumbi)");
             md.AppendLine("medem **zero** aqui: isto é uma bancada de dano CAUSADO, não de duelo. Um champ");

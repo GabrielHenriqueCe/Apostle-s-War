@@ -11,9 +11,13 @@
 - Na medição por habilidade, o champ usa **só aquela** e **espera** durante o cooldown
   (não enche o buraco com A1 — se enchesse, o A1 dominaria e todas ficariam iguais).
 - No champ inteiro, quem decide é o **mesmo `ControladorBot`** da Arena e do modo Auto.
-- Boneco: HP 2.000, **ataque 0**, DEF 0 ou 1000 (o cap de 75% de redução).
-  Ele volta ao HP cheio antes de cada golpe — o HP é REALISTA de propósito, porque a
-  Queima tira 5% do HP máximo por turno e um boneco inflado faria o DoT explodir.
+- Boneco: HP 2.000, DEF 0 ou 1000 (o cap de 75% de redução), e **nunca age**.
+  O HP é REALISTA de propósito: a Queima tira 5% do HP máximo por turno, então um boneco
+  inflado faria o DoT explodir. Ele volta ao HP cheio entre turnos e **não morre** —
+  usa a prevenção-de-morte do Guarda Real, mas restaurando tudo e sem cooldown, o que
+  também o salva de habilidades que matam DENTRO de uma ativação (o Porradeiro do Troll
+
+  dá 6 hits de 480 num alvo de 2.000).
 
 ### O que este relatório NÃO mede
 
@@ -32,9 +36,9 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 
 | Champ | Habilidade | CD | Usos | Dano total | Dano por uso |
 |---|---|--:|--:|--:|--:|
-| 👷 Operário | ⚔️ Atacar | 0 | 100 | 36800 | 368 |
-| 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 4000 | 235 |
-| 👷 Operário | 🔨 Marretada | 3 | 34 | 17240 | 507 |
+| 👷 Operário | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
+| 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 0 | 0 |
+| 👷 Operário | 🔨 Marretada | 3 | 34 | 13600 | 400 |
 | 🕵️ Detetive | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 🕵️ Detetive | 🔎 Espionagem | 4 | 25 | 0 | 0 |
 | 🕵️ Detetive | 🕳️ Furtividade | 4 | 25 | 8000 | 320 |
@@ -89,9 +93,9 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 🤡 Palhaço | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 🤡 Palhaço | 🃏 Coringa | 3 | 34 | 0 | 0 |
 | 🤡 Palhaço | 🎪 Circo | 4 | 25 | 0 | 0 |
-| 🧌 Troll | ⚔️ Atacar | 0 | 100 | 39570 | 395 |
-| 🧌 Troll | 🤜 Pancada | 3 | 34 | 23475 | 690 |
-| 🧌 Troll | 🥊 Porradeiro | 4 | 1 | 2880 | 2880 |
+| 🧌 Troll | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
+| 🧌 Troll | 🤜 Pancada | 3 | 34 | 19040 | 560 |
+| 🧌 Troll | 🥊 Porradeiro | 4 | 25 | 72000 | 2880 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 |
 | 🧞 Gênio | 🔮 Profecia | 3 | 34 | 16320 | 480 |
@@ -103,19 +107,19 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 🧚 Fada | ✨ Pó Mágico | 4 | 25 | 12000 | 480 |
 | 🐲 Dragão | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 21760 | 640 |
-| 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 21440 | 630 |
+| 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 0 | 0 |
 | 💩 Cocô | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 💩 Cocô | 🚽 Descarga | 3 | 34 | 27200 | 800 |
 | 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 16320 | 480 |
-| 🦸 Herói | ⚔️ Atacar | 0 | 100 | 64000 | 640 |
-| 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 32000 | 941 |
-| 🦸 Herói | 💪 Super | 3 | 34 | 64560 | 1898 |
+| 🦸 Herói | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
+| 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 0 | 0 |
+| 🦸 Herói | 💪 Super | 3 | 34 | 27200 | 800 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 21760 | 640 |
 | 🦹 Vilão | 👿 Vilania | 4 | 25 | 48000 | 1920 |
 | 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 |
-| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 45920 | 1350 |
+| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 24480 | 720 |
 | 🦇 Morcego | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 🦇 Morcego | 🦇 Mordida | 3 | 34 | 21760 | 640 |
 | 🦇 Morcego | 🐀 Rato Voador | 4 | 25 | 0 | 0 |
@@ -123,7 +127,7 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 🧛 Vampiro | 🩸 Controle de Sangue | 3 | 34 | 32640 | 960 |
 | 🧛 Vampiro | 🌙 Vampiro Primordial | 4 | 25 | 8000 | 320 |
 | 🧝 Elfo | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
-| 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 21440 | 630 |
+| 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 0 | 0 |
 | 🧝 Elfo | 🌿 Natureza | 3 | 34 | 16320 | 480 |
 | 😈 Diabo | ⚔️ Atacar | 0 | 100 | 32000 | 320 |
 | 😈 Diabo | 🔥 Inferno | 3 | 34 | 0 | 0 |
@@ -147,9 +151,9 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 
 | Champ | Habilidade | CD | Usos | Dano total | Dano por uso |
 |---|---|--:|--:|--:|--:|
-| 👷 Operário | ⚔️ Atacar | 0 | 100 | 9190 | 91 |
-| 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 960 | 56 |
-| 👷 Operário | 🔨 Marretada | 3 | 34 | 4320 | 127 |
+| 👷 Operário | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
+| 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 0 | 0 |
+| 👷 Operário | 🔨 Marretada | 3 | 34 | 3400 | 100 |
 | 🕵️ Detetive | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 🕵️ Detetive | 🔎 Espionagem | 4 | 25 | 0 | 0 |
 | 🕵️ Detetive | 🕳️ Furtividade | 4 | 25 | 2000 | 80 |
@@ -204,9 +208,9 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🤡 Palhaço | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 🤡 Palhaço | 🃏 Coringa | 3 | 34 | 0 | 0 |
 | 🤡 Palhaço | 🎪 Circo | 4 | 25 | 0 | 0 |
-| 🧌 Troll | ⚔️ Atacar | 0 | 100 | 9845 | 98 |
-| 🧌 Troll | 🤜 Pancada | 3 | 34 | 5868 | 172 |
-| 🧌 Troll | 🥊 Porradeiro | 4 | 25 | 22146 | 885 |
+| 🧌 Troll | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
+| 🧌 Troll | 🤜 Pancada | 3 | 34 | 4760 | 140 |
+| 🧌 Troll | 🥊 Porradeiro | 4 | 25 | 18000 | 720 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 |
 | 🧞 Gênio | 🔮 Profecia | 3 | 34 | 4080 | 120 |
@@ -218,19 +222,19 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🧚 Fada | ✨ Pó Mágico | 4 | 25 | 3000 | 120 |
 | 🐲 Dragão | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 5440 | 160 |
-| 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 5360 | 157 |
+| 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 0 | 0 |
 | 💩 Cocô | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 💩 Cocô | 🚽 Descarga | 3 | 34 | 6800 | 200 |
 | 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 4080 | 120 |
-| 🦸 Herói | ⚔️ Atacar | 0 | 100 | 16000 | 160 |
-| 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 8000 | 235 |
-| 🦸 Herói | 💪 Super | 3 | 34 | 16140 | 474 |
+| 🦸 Herói | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
+| 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 0 | 0 |
+| 🦸 Herói | 💪 Super | 3 | 34 | 6800 | 200 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 5440 | 160 |
 | 🦹 Vilão | 👿 Vilania | 4 | 25 | 12000 | 480 |
 | 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 |
-| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 11480 | 337 |
+| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 6120 | 180 |
 | 🦇 Morcego | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 🦇 Morcego | 🦇 Mordida | 3 | 34 | 5440 | 160 |
 | 🦇 Morcego | 🐀 Rato Voador | 4 | 25 | 0 | 0 |
@@ -238,7 +242,7 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🧛 Vampiro | 🩸 Controle de Sangue | 3 | 34 | 20400 | 600 |
 | 🧛 Vampiro | 🌙 Vampiro Primordial | 4 | 25 | 2000 | 80 |
 | 🧝 Elfo | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
-| 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 5360 | 157 |
+| 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 0 | 0 |
 | 🧝 Elfo | 🌿 Natureza | 3 | 34 | 4080 | 120 |
 | 😈 Diabo | ⚔️ Atacar | 0 | 100 | 8000 | 80 |
 | 😈 Diabo | 🔥 Inferno | 3 | 34 | 0 | 0 |
@@ -262,7 +266,7 @@ O champ jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o 
 
 | Champ | Dano total | Esperado (isolado × usos) | Sinergia | Habilidades usadas |
 |---|--:|--:|--:|---|
-| 👷 Operário | 8480 | 9693 | -1213 | Atacar 50×, Parede de Tijolos 17×, Marretada 33× |
+| 👷 Operário | 7300 | 7300 | 0 | Atacar 50×, Parede de Tijolos 17×, Marretada 33× |
 | 🕵️ Detetive | 8000 | 8000 | 0 | Atacar 75×, Espionagem 0×, Furtividade 25× |
 | 👮 Policial | 9000 | 9000 | 0 | Atacar 75×, Tiroteio 25×, Prender 0× |
 | 👲 Sushiman  | 7000 | 6000 | +1000 | Atacar 75×, Sushi 0×, Nigiri 25× |
@@ -276,24 +280,24 @@ O champ jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o 
 | 🧟 Zumbi | 8000 | 8000 | 0 | Atacar 50×, Vômito Tóxico 25×, Putrefação 25× |
 | 👾 Invasor | 17241 | 14801 | +2440 | Atacar 33×, Glitch 33×, Barata 34× |
 | 👽 Alien | 6000 | 6000 | 0 | Atacar 75×, Abduzir 0×, Galáxia 25× |
-| 🤖 Robô | 3235 | 4720 | -1485 | Atacar 59×, Raio-X 21×, Technology 20× |
+| 🤖 Robô | 3184 | 4720 | -1536 | Atacar 59×, Raio-X 21×, Technology 20× |
 | 🧑‍🔬 Cientista | 8000 | 8000 | 0 | Atacar 33×, Química 34×, Física 33× |
 | 👹 Ogro | 10720 | 10720 | 0 | Atacar 66×, Esmagar 0×, Quebrar 34× |
 | 👺 Tengu | 21550 | 21550 | 0 | Atacar 44×, Corte de Vento 34×, Vendaval 22× |
 | 🤡 Palhaço | 5280 | 5280 | 0 | Atacar 66×, Coringa 34×, Circo 0× |
-| 🧌 Troll | 29740 | 29630 | +110 | Atacar 44×, Pancada 34×, Porradeiro 22× |
+| 🧌 Troll | 24120 | 24120 | 0 | Atacar 44×, Pancada 34×, Porradeiro 22× |
 | 🧞 Gênio | 6600 | 6600 | 0 | Atacar 33×, Desejo 34×, Profecia 33× |
 | 🧜 Sereia | 7000 | 6000 | +1000 | Atacar 75×, Canto de Sereia 25×, Atlantis 0× |
 | 🧚 Fada | 13000 | 13000 | 0 | Atacar 50×, Sininho 25×, Pó Mágico 25× |
-| 🐲 Dragão | 13280 | 13258 | +22 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
+| 🐲 Dragão | 7920 | 7920 | 0 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
 | 💩 Cocô | 13320 | 13320 | 0 | Atacar 33×, Descarga 33×, Desentupidor 34× |
-| 🦸 Herói | 19440 | 29151 | -9711 | Atacar 33×, Salvando o Dia 33×, Super 34× |
+| 🦸 Herói | 10100 | 9440 | +660 | Atacar 33×, Salvando o Dia 33×, Super 34× |
 | 🦹 Vilão | 19520 | 19520 | 0 | Atacar 44×, Destruindo o Dia 34×, Vilania 22× |
-| 🦖 T-Rex | 14120 | 14098 | +22 | Atacar 33×, Rugido 33×, Pisada 34× |
+| 🦖 T-Rex | 8760 | 8760 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
 | 🦇 Morcego | 9500 | 8000 | +1500 | Atacar 50×, Mordida 25×, Rato Voador 25× |
 | 🧛 Vampiro | 21000 | 21000 | 0 | Atacar 50×, Controle de Sangue 25×, Vampiro Primordial 25× |
-| 🧝 Elfo | 11960 | 11938 | +22 | Atacar 33×, Árvore do Mundo 34×, Natureza 33× |
-| 😈 Diabo | 7920 | 7920 | 0 | Atacar 99×, Inferno 0×, Anjo Caído 1× |
+| 🧝 Elfo | 6600 | 6600 | 0 | Atacar 33×, Árvore do Mundo 34×, Natureza 33× |
+| 😈 Diabo | 8000 | 8000 | 0 | Atacar 100×, Inferno 0×, Anjo Caído 0× |
 | ⛄ Boneco de Neve | 13000 | 13000 | 0 | Atacar 50×, Bola de Neve 25×, Gelado 25× |
 | 🎭 Mímico | 6500 | 6500 | 0 | Atacar 50×, Imitação 25×, Copiando 25× |
 | 😇 Anjo | 7000 | 6000 | +1000 | Atacar 75×, Celestial 0×, Céu 25× |
@@ -305,7 +309,7 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.**
 
 | Champ | Dano total | Tick | Habilidades usadas |
 |---|--:|--:|---|
-| 👷 Operário | 8390 | 0 | Atacar 50×, Parede de Tijolos 17×, Marretada 33× |
+| 👷 Operário | 7300 | 0 | Atacar 50×, Parede de Tijolos 17×, Marretada 33× |
 | 🕵️ Detetive | 9600 | 0 | Atacar 50×, Espionagem 25×, Furtividade 25× |
 | 👮 Policial | 7000 | 0 | Atacar 50×, Tiroteio 25×, Prender 25× |
 | 👲 Sushiman  | 7000 | 0 | Atacar 75×, Sushi 0×, Nigiri 25× |
@@ -319,24 +323,24 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.**
 | 🧟 Zumbi | 13000 | 2500 | Atacar 50×, Vômito Tóxico 25×, Putrefação 25× |
 | 👾 Invasor | 32760 | 0 | Atacar 33×, Glitch 34×, Barata 33× |
 | 👽 Alien | 4000 | 0 | Atacar 50×, Abduzir 25×, Galáxia 25× |
-| 🤖 Robô | 3196 | 0 | Atacar 59×, Raio-X 21×, Technology 20× |
+| 🤖 Robô | 3265 | 0 | Atacar 59×, Raio-X 21×, Technology 20× |
 | 🧑‍🔬 Cientista | 25495 | 17495 | Atacar 33×, Química 34×, Física 33× |
 | 👹 Ogro | 10720 | 0 | Atacar 66×, Esmagar 0×, Quebrar 34× |
 | 👺 Tengu | 21550 | 0 | Atacar 44×, Corte de Vento 34×, Vendaval 22× |
 | 🤡 Palhaço | 5280 | 0 | Atacar 66×, Coringa 34×, Circo 0× |
-| 🧌 Troll | 29672 | 0 | Atacar 44×, Pancada 34×, Porradeiro 22× |
+| 🧌 Troll | 24120 | 0 | Atacar 44×, Pancada 34×, Porradeiro 22× |
 | 🧞 Gênio | 12540 | 0 | Atacar 33×, Desejo 34×, Profecia 33× |
 | 🧜 Sereia | 7000 | 0 | Atacar 75×, Canto de Sereia 25×, Atlantis 0× |
 | 🧚 Fada | 13000 | 0 | Atacar 50×, Sininho 25×, Pó Mágico 25× |
-| 🐲 Dragão | 23180 | 9900 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
+| 🐲 Dragão | 17820 | 9900 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
 | 💩 Cocô | 23320 | 10000 | Atacar 33×, Descarga 33×, Desentupidor 34× |
-| 🦸 Herói | 19440 | 0 | Atacar 33×, Salvando o Dia 33×, Super 34× |
+| 🦸 Herói | 10100 | 0 | Atacar 33×, Salvando o Dia 33×, Super 34× |
 | 🦹 Vilão | 19520 | 0 | Atacar 44×, Destruindo o Dia 34×, Vilania 22× |
-| 🦖 T-Rex | 16335 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
+| 🦖 T-Rex | 8760 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
 | 🦇 Morcego | 9500 | 0 | Atacar 50×, Mordida 25×, Rato Voador 25× |
 | 🧛 Vampiro | 21000 | 0 | Atacar 50×, Controle de Sangue 25×, Vampiro Primordial 25× |
-| 🧝 Elfo | 15170 | 5850 | Atacar 33×, Árvore do Mundo 34×, Natureza 33× |
-| 😈 Diabo | 11880 | 0 | Atacar 66×, Inferno 33×, Anjo Caído 1× |
+| 🧝 Elfo | 6600 | 0 | Atacar 33×, Árvore do Mundo 34×, Natureza 33× |
+| 😈 Diabo | 12080 | 0 | Atacar 66×, Inferno 34×, Anjo Caído 0× |
 | ⛄ Boneco de Neve | 13000 | 0 | Atacar 50×, Bola de Neve 25×, Gelado 25× |
 | 🎭 Mímico | 6500 | 0 | Atacar 50×, Imitação 25×, Copiando 25× |
 | 😇 Anjo | 7000 | 0 | Atacar 75×, Celestial 0×, Céu 25× |
@@ -348,9 +352,9 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.**
 
 | Champ | Habilidade | CD | Usos | Dano total | Dano por uso | Tick | Δ vs linha 2 |
 |---|---|--:|--:|--:|--:|--:|--:|
-| 👷 Operário | ⚔️ Atacar | 0 | 100 | 9050 | 90 | 0 | -140 |
-| 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 1040 | 61 | 0 | +80 |
-| 👷 Operário | 🔨 Marretada | 3 | 34 | 4310 | 126 | 0 | -10 |
+| 👷 Operário | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
+| 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 0 | 0 | 0 | 0 |
+| 👷 Operário | 🔨 Marretada | 3 | 34 | 3400 | 100 | 0 | 0 |
 | 🕵️ Detetive | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 🕵️ Detetive | 🔎 Espionagem | 4 | 25 | 0 | 0 | 0 | 0 |
 | 🕵️ Detetive | 🕳️ Furtividade | 4 | 25 | 2000 | 80 | 0 | 0 |
@@ -405,9 +409,9 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.**
 | 🤡 Palhaço | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 🤡 Palhaço | 🃏 Coringa | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🤡 Palhaço | 🎪 Circo | 4 | 25 | 0 | 0 | 0 | 0 |
-| 🧌 Troll | ⚔️ Atacar | 0 | 100 | 9845 | 98 | 0 | 0 |
-| 🧌 Troll | 🤜 Pancada | 3 | 34 | 5865 | 172 | 0 | -3 |
-| 🧌 Troll | 🥊 Porradeiro | 4 | 25 | 22146 | 885 | 0 | 0 |
+| 🧌 Troll | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
+| 🧌 Troll | 🤜 Pancada | 3 | 34 | 4760 | 140 | 0 | 0 |
+| 🧌 Troll | 🥊 Porradeiro | 4 | 25 | 18000 | 720 | 0 | 0 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧞 Gênio | 🔮 Profecia | 3 | 34 | 7752 | 228 | 0 | +3672 |
@@ -419,28 +423,28 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.**
 | 🧚 Fada | ✨ Pó Mágico | 4 | 25 | 3000 | 120 | 0 | 0 |
 | 🐲 Dragão | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 15440 | 454 | 10000 | +10000 |
-| 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 5360 | 157 | 0 | 0 |
-| 💩 Cocô | ⚔️ Atacar | 0 | 100 | 17900 | 179 | 9900 | +9900 |
+| 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
+| 💩 Cocô | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 💩 Cocô | 🚽 Descarga | 3 | 34 | 16800 | 494 | 10000 | +10000 |
 | 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 14080 | 414 | 10000 | +10000 |
-| 🦸 Herói | ⚔️ Atacar | 0 | 100 | 16000 | 160 | 0 | 0 |
-| 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 8000 | 235 | 0 | 0 |
-| 🦸 Herói | 💪 Super | 3 | 34 | 16140 | 474 | 0 | 0 |
+| 🦸 Herói | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
+| 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 0 | 0 | 0 | 0 |
+| 🦸 Herói | 💪 Super | 3 | 34 | 6800 | 200 | 0 | 0 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 5440 | 160 | 0 | 0 |
 | 🦹 Vilão | 👿 Vilania | 4 | 25 | 12000 | 480 | 0 | 0 |
-| 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 10880 | 108 | 0 | +2880 |
+| 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 16570 | 487 | 0 | +5090 |
+| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 6120 | 180 | 0 | 0 |
 | 🦇 Morcego | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 🦇 Morcego | 🦇 Mordida | 3 | 34 | 5440 | 160 | 0 | 0 |
 | 🦇 Morcego | 🐀 Rato Voador | 4 | 25 | 0 | 0 | 0 | 0 |
 | 🧛 Vampiro | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 🧛 Vampiro | 🩸 Controle de Sangue | 3 | 34 | 20400 | 600 | 0 | 0 |
 | 🧛 Vampiro | 🌙 Vampiro Primordial | 4 | 25 | 2000 | 80 | 0 | 0 |
-| 🧝 Elfo | ⚔️ Atacar | 0 | 100 | 25400 | 254 | 17400 | +17400 |
-| 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 22760 | 669 | 17400 | +17400 |
-| 🧝 Elfo | 🌿 Natureza | 3 | 34 | 9930 | 292 | 5850 | +5850 |
+| 🧝 Elfo | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
+| 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 0 | 0 | 0 | 0 |
+| 🧝 Elfo | 🌿 Natureza | 3 | 34 | 4080 | 120 | 0 | 0 |
 | 😈 Diabo | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 0 | 0 |
 | 😈 Diabo | 🔥 Inferno | 3 | 34 | 6800 | 200 | 0 | +6800 |
 | 😈 Diabo | 😇 Anjo Caído | 3 | 34 | 0 | 0 | 0 | 0 |

@@ -6,7 +6,7 @@ using ApostlesWar.Application.Services;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace ApostlesWar.Presentation.Desktop.Front
+namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
     /// Sobe o jogo. É o composition root — monta os services e pluga as impls das portas

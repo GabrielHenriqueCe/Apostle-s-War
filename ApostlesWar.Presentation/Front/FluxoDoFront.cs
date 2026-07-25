@@ -4,7 +4,7 @@ using ApostlesWar.Application.Portas;
 using ApostlesWar.Application.Services;
 using ApostlesWar.Domain;
 
-namespace ApostlesWar.Presentation.Desktop.Front
+namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
     /// O "de fora da luta": perfil do jogador, menu principal, campanha, arena, arsenal,

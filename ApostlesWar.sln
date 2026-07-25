@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApostlesWar.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApostlesWar.Tests", "ApostlesWar.Tests\ApostlesWar.Tests.csproj", "{BDC5854A-4E8B-4A53-97FC-C41F72BC966F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApostlesWar.Presentation.Desktop", "ApostlesWar.Presentation.Desktop\ApostlesWar.Presentation.Desktop.csproj", "{02D8702F-710A-4F4E-8449-3DD1893F7BB9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApostlesWar.Presentation", "ApostlesWar.Presentation\ApostlesWar.Presentation.csproj", "{02D8702F-710A-4F4E-8449-3DD1893F7BB9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

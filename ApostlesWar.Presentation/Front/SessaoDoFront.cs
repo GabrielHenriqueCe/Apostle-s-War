@@ -3,7 +3,7 @@ using ApostlesWar.Domain;
 using ApostlesWar.Domain.Skills;
 using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Presentation.Desktop.Front
+namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
     /// O estado que a tela enxerga, num lugar só. Existe porque o retrato da partida é montado por DUAS

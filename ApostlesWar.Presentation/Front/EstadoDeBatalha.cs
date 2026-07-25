@@ -1,6 +1,6 @@
 using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
-namespace ApostlesWar.Presentation.Desktop.Front
+namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
     /// O RETRATO da partida que vai pro JS desenhar. É o coração do contrato da ponte: o front recebe

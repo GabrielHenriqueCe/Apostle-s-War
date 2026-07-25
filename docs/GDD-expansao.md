@@ -21,8 +21,9 @@ A ordem de desenvolvimento planejada é:
 
 1. **Console jogável** — completar habilidades de todas as facções (MVP jogável) ✅
 2. **Back organizacional** — sweep de facções, motor, camadas, seams (ver ROADMAP FILA A) 🔄
-3. **Porte app nativo desktop** — pele webview HTML/CSS/JS, C# nativo atrás, .exe no GitHub
-   Releases (peça principal de portfólio, sem reescrever o motor)
+3. **Porte app nativo desktop** — pele webview HTML/CSS/JS (WebView2), C# nativo atrás, .exe no
+   GitHub Releases (peça principal de portfólio, sem reescrever o motor) ✅ **FEITO** — menu, perfil,
+   arena, campanha e arsenal jogáveis no front (ver ROADMAP §ESTADO ATUAL). Próximo: **REBALANCE #16**.
 4. **[alternativa futura] Unity** — o mesmo domínio C# (reusa motor+seams), se for pra
    mobile/console ou animação pesada
 5. **Expansão (pós-porte)** — tudo que está neste documento

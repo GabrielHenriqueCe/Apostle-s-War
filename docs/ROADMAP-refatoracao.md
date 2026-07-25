@@ -13,6 +13,37 @@
 
 ---
 
+## ESTADO ATUAL (jul/2026) — FRONT CONCLUÍDO, jogável de ponta a ponta
+
+O porte pro **front webview (WebView2)** está FEITO: o jogo é jogável inteiro na pele nova
+(`ApostlesWar.App.exe --front` / perfil "Front (webview)" no VS). Mergeado em sequência de PRs:
+- **Menu principal + Perfil** (#172): menu data-driven, perfil do jogador (nome + avatar; o avatar
+  libera conforme a campanha desbloqueia champs), criar/editar/excluir conta, "sair" confirmado, modal
+  reutilizável.
+- **Arena com seleção de time** (#173): monta os 2 times e escolhe o controle de cada lado
+  (Você×Bot / Bot×Você / hotseat Você×Você / Bot×Bot); fim de batalha por lado.
+- **Campanha** (#174): mapa de facções (trilha + marcador que caminha + pan por arrasto), fases
+  (inimigos por rodada + item que dropa), monta o time, luta, vitória/derrota, e save/unlock/drop
+  reaproveitando o motor do console.
+- **Montagem de time** (#175): clique-na-casa + arrastar-e-soltar (grade→slot substitui, slot→slot
+  troca, slot→fora remove) — compartilhado por Arena e Campanha.
+- **Arsenal** (#176/#177): equipa itens GLOBAIS nos 7 slots (boneco), com comparação de stat.
+
+**Arquitetura (detalhe em §FRONT abaixo):** ponte de mensagens LOCAL in-process (JS↔C# pela webview,
+sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos seams `ITelaDeCombate`/
+`IControladorDeTurno`/`IApresentacao`/`ITelaDeMenu`/`IRepositorioDeSave`. Padrão consolidado: cada modo
+entra por um `Executar...ComTime(s)` (o front pica o time e chama; a tela de console fica de fora), e a
+lógica META (recompensa/save da campanha) mora na Application (`CampanhaService`), nunca no front.
+
+**PRÓXIMO: REBALANCE (#16)** — agora com a interface amigável como instrumento (era o motivo de o front
+vir antes). Fios de combate ainda abertos: ver §OS FIOS QUE FALTAM (sweep de composição por facção,
+turno-resto, passiva-conta-mortos).
+
+> As seções §FRONT §Fatiamento e a FILA B abaixo descreviam o front como PLANO — ficam como registro do
+> desenho, com o estado real marcado ✅.
+
+---
+
 ## Princípios que guiam toda a refatoração
 
 - **Todo método morto na maioria das classes que o herdam vira interface** (ISP).
@@ -201,7 +232,9 @@
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
 
 ### 🔵 FILA B — precisa do porte (sair do console)
-**Porte = APP NATIVO DESKTOP com pele webview (HTML/CSS/JS):**
+**Porte = APP NATIVO DESKTOP com pele webview (HTML/CSS/JS) — ✅ FEITO (ver §ESTADO ATUAL).** A View
+HTML/CSS/JS, o host WebView2, o `SaveLocal` e a distribuição estão de pé; o front cobre menu, perfil,
+arena, campanha e arsenal. O texto abaixo fica como registro do desenho original.
 - **View HTML/CSS/JS** — a UI que substitui `CombateView`/`MenuView`. Os seams
   `IApresentacao`/`IEntrada`/`IControladorDeTurno` viram impls que conversam com a webview por
   uma ponte local (`postMessage`): o clique volta pelo `IEntrada`, o C# nativo faz a lógica, o
@@ -301,9 +334,10 @@ render no JS, SEM tocar no motor.** Sem susto de performance (é por turnos, nã
   - **Carona ainda em aberto (do #14):** com a apresentação agora injetável, o **teste da ordem
     crítica de morte** (Sentença antes de Necromancia) virou possível com uma tela no-op. Não feito
     neste PR (1 PR, 1 tema) — é o próximo candidato.
-- **Fatias seguintes** (na ordem que o Gabriel descreveu): menu principal (novo jogo / continuar /
-  deletar save), opções (som, tela cheia), bastião/hub com portal+arena, mapa de campanha (linear
-  primeiro, bonito depois), picker de times em HTML, falas dos champs, sprites.
+- **Fatias seguintes — ✅ FEITAS** (ver §ESTADO ATUAL no topo): menu principal + perfil (#172),
+  Arena com seleção de time (#173), montagem de time com arrastar-e-soltar (#175), campanha com mapa
+  de facções (#174), arsenal (#176/#177). Configurações (som/tela-cheia) ficaram como placeholder
+  "em breve"; falas dos champs e sprites seguem em aberto (o front emite/renderiza, o motor não muda).
 
 ---
 

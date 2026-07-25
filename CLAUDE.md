@@ -10,10 +10,10 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
 - **`docs/ROADMAP-refatoracao.md`** → a seção **FILA DE EXECUÇÃO** é a fila mestra.
 - `git log --oneline -15` → os commits recentes.
 - **Fase atual:** FRONT feito, console REMOVIDO (#179), camadas ajustadas (#180), `PreverDano` (#181),
-  **bot inteligente** (#182) e **botão Auto**. A seguir: o **REBALANCE (#16)** — que era o motivo de o
-  front vir antes, e que agora tem os instrumentos (interface amigável + Bot×Bot que usa habilidades).
-  Abertos: o #15 (faxina de comentários) e o **bug do bloqueio total × escudo** (ver ROADMAP §BUG
-  ABERTO — adiado pra um refactor da ordem do pipeline de dano).
+  **bot inteligente** (#182), **botão Auto** (#183) e a **ordem do pipeline de dano** (`OrdemDeMitigacao`
+  — fechou o bug do bloqueio × escudo). A seguir: o **REBALANCE (#16)**, que era o motivo de o front vir
+  antes. O instrumento dele é a **bancada de dano** (36 champs × habilidades, DEF 0, crit 100%, stats
+  iguais, 100 turnos por habilidade → `docs/bancada-dano.md`). Aberto: o #15 (faxina de comentários).
 
 ## Como trabalhamos
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar

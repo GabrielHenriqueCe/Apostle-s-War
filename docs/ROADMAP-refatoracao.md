@@ -416,24 +416,39 @@ provar comportamento ("não cura quem está inteiro", "prefere o abate"), não s
 
 ---
 
-## BUG ABERTO — bloqueio total desperdiça o escudo (achado jul/2026, adiado)
+## ✅ ORDEM DO PIPELINE DE DANO — bloqueio total desperdiçava o escudo (achado e CONSERTADO jul/2026)
 
-**Reproduzido em jogo** (Rei + Operário): com `Escudo` e `BloqueioTotal` no mesmo alvo, o escudo é
-CONSUMIDO mesmo com o dano sendo integralmente bloqueado. Depende da ordem de aplicação — se o
-Escudo entrou primeiro em `StatusAtivos`, ele apara (gastando pontos) e só depois o bloqueio zera o
-resto; na ordem inversa, o escudo é preservado. **Mesmo estado de jogo, resultado diferente.** De
-quebra o `absorvidoPeloEscudo` reporta como "absorvido" o que foi bloqueado — a tela mente junto.
+**Era, reproduzido em jogo** (Rei + Operário): com `Escudo` e `BloqueioTotal` no mesmo alvo, o escudo
+era CONSUMIDO mesmo com o dano sendo integralmente bloqueado — e dependia da ordem de APLICAÇÃO (escudo
+aplicado antes gastava pontos; na ordem inversa sobrevivia). **Mesmo estado de jogo, resultado
+diferente.** De quebra o `absorvidoPeloEscudo` reportava como "absorvido" o que foi bloqueado.
 
-A `NaturezaDano` não resolve isso: ela declara **quem participa** (a lista `Ignora`), nunca **em que
-ordem**. O princípio do conserto já existe e está testado (`PassivaPura_RodaANTESDosStatus_EOEscudoVeODanoJaReduzido`
-— a passiva-pura roda antes pra o escudo só gastar pelo dano que sobrou); falta **generalizá-lo**:
-quem REDUZ de graça (bloqueio, redução fixa, passiva) roda antes de quem GASTA recurso (escudo,
-proteção de aliado).
+A `NaturezaDano` não resolvia: ela declara **quem participa** (a lista `Ignora`), nunca **em que
+ordem**. O conserto **generalizou o princípio que já existia e estava testado** pra passiva-pura
+(`PassivaPura_RodaANTESDosStatus_EOEscudoVeODanoJaReduzido`): quem REDUZ de graça roda antes de quem
+GASTA recurso.
 
-**Adiado a pedido do Gabriel** ("depois fazemos um refactor pra corrigir tudo de uma vez"), porque
-mexe em números: escudo+redução também muda (contra 1000 com Escudo 400 e −15%, dá 510 ou 450
-conforme a ordem). É ajuste de balance embutido num bugfix — entra junto do REBALANCE (#16) ou num
-refactor próprio da ordem do pipeline de dano.
+**Feito:** `IModificaDanoRecebido` ganhou **`OrdemDeMitigacao`** (enum `ReduzDeGraca`/`ConsomeRecurso`,
+Combat/) — **sem default**, como os 2 métodos que a interface já tinha: um modificador novo que
+herdasse "de graça" em silêncio desperdiçaria recurso alheio sem ninguém notar. A ordem virou
+CAPACIDADE DECLARADA, não `OfType<Escudo>()` no meio do cálculo (o dispatch por tipo concreto que o #9
+e o #181 tiraram do motor). `ReceberDano` e `PreverDanoRecebido` passaram a ordenar pelo helper
+compartilhado `Combate.OrdenarPorMitigacao` — os dois juntos de propósito: se divergirem, o bot mira
+errado em silêncio. `OrderBy` é **estável**, então dentro do mesmo balde a ordem de aplicação segue
+valendo (Escudo × ProtecaoAliado não têm ordem "certa" entre si, e não foi este PR que inventou uma).
+
+**Classificação:** `BloqueioTotal` + `ReducaoDanoFixo` + `Aquagirl` (passiva) = `ReduzDeGraca`; `Escudo`
+(pontos) + `ProtecaoAliado` (HP do aliado) = `ConsomeRecurso`. **`Invencivel` NÃO entrou**: o #151 já o
+tinha movido pra `IDefineHPMinimo` (piso de HP ≠ mitigação) — o grep pegava só o comentário histórico.
+
+**Carona:** o `ProtecaoAliado` parou de cobrar do protetor quando o bloqueio já zerou o dano (antes o
+aliado comia 30% de um golpe que não ia acontecer).
+
+**Números mudaram, era o esperado** (é o motivo de ter vindo ANTES do rebalance, não junto): escudo +
+redução contra 1000 com Escudo 400 e −15% dá 450, não 510. +4 testes (123 → 127): o par de ordens
+nos dois sentidos provando que a ordem de aplicação deixou de importar, o Prever amarrado ao Receber, e
+o protetor. **Verificados falhando sem o conserto** (3 dos 4 — o 4º é o controle: a ordem que já
+funcionava).
 
 ---
 

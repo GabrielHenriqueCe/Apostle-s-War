@@ -11,6 +11,10 @@ namespace ApostlesWar.Domain.Skills.Buffs
             "Bloqueia todo o dano recebido.")
         { }
 
+        // Zerar o dano não custa nada — então roda antes de quem paga pra reduzir, senão o Escudo
+        // gasta pontos aparando um golpe que este bloqueio ia anular de graça.
+        public OrdemDeMitigacao OrdemDeMitigacao => OrdemDeMitigacao.ReduzDeGraca;
+
         public int ModificarDanoRecebido(Combate portador, int dano) => 0;
 
         public int PreverDanoRecebido(Combate portador, int dano) => 0;

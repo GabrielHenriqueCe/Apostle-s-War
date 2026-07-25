@@ -15,8 +15,9 @@
 
 ## ESTADO ATUAL (jul/2026) — FRONT CONCLUÍDO, jogável de ponta a ponta
 
-O porte pro **front webview (WebView2)** está FEITO: o jogo é jogável inteiro na pele nova
-(`ApostlesWar.App.exe --front` / perfil "Front (webview)" no VS). Mergeado em sequência de PRs:
+O porte pro **front webview (WebView2)** está FEITO: o jogo é jogável inteiro na pele nova, que agora
+é a **ÚNICA** (`ApostlesWar.App.exe` abre a janela direto — o `--front` sumiu com o console).
+Mergeado em sequência de PRs:
 - **Menu principal + Perfil** (#172): menu data-driven, perfil do jogador (nome + avatar; o avatar
   libera conforme a campanha desbloqueia champs), criar/editar/excluir conta, "sair" confirmado, modal
   reutilizável.
@@ -28,12 +29,18 @@ O porte pro **front webview (WebView2)** está FEITO: o jogo é jogável inteiro
 - **Montagem de time** (#175): clique-na-casa + arrastar-e-soltar (grade→slot substitui, slot→slot
   troca, slot→fora remove) — compartilhado por Arena e Campanha.
 - **Arsenal** (#176/#177): equipa itens GLOBAIS nos 7 slots (boneco), com comparação de stat.
+- **Console REMOVIDO** (#179): a pele de console morreu — era o plano desde sempre (§Princípios).
+  Saíram o projeto `ConsoleUI`, o `GerenciadorDeJogoService` (segunda orquestração da meta), as portas
+  `ITelaDeMenu` e `IEntrada` (+`Comando`/`Navegacao`, vocabulário de cursor), as versões sem-time do
+  `ExecutarFase`/`ExecutarArena` e o `ResultadoFase.Cancelou`. −1.645 linhas.
+- **Camadas ajustadas** (#180): auditoria achou 7 decisões na camada errada e as devolveu ao dono —
+  ver §CADA DECISÃO NA SUA CAMADA.
 
 **Arquitetura (detalhe em §FRONT abaixo):** ponte de mensagens LOCAL in-process (JS↔C# pela webview,
 sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos seams `ITelaDeCombate`/
-`IControladorDeTurno`/`IApresentacao`/`ITelaDeMenu`/`IRepositorioDeSave`. Padrão consolidado: cada modo
-entra por um `Executar...ComTime(s)` (o front pica o time e chama; a tela de console fica de fora), e a
-lógica META (recompensa/save da campanha) mora na Application (`CampanhaService`), nunca no front.
+`IControladorDeTurno`/`IApresentacao`/`IRepositorioDeSave`. Padrão consolidado: cada modo entra por um
+`Executar...ComTime(s)` (a casca pica o time e chama), e a lógica META (recompensa/save da campanha)
+mora na Application (`CampanhaService`), nunca no front.
 
 **PRÓXIMO: REBALANCE (#16)** — agora com a interface amigável como instrumento (era o motivo de o front
 vir antes). Fios de combate ainda abertos: ver §OS FIOS QUE FALTAM (sweep de composição por facção,
@@ -338,6 +345,47 @@ render no JS, SEM tocar no motor.** Sem susto de performance (é por turnos, nã
   Arena com seleção de time (#173), montagem de time com arrastar-e-soltar (#175), campanha com mapa
   de facções (#174), arsenal (#176/#177). Configurações (som/tela-cheia) ficaram como placeholder
   "em breve"; falas dos champs e sprites seguem em aberto (o front emite/renderiza, o motor não muda).
+
+---
+
+## CADA DECISÃO NA SUA CAMADA (#180, jul/2026)
+
+Com o console fora, uma auditoria do front achou 7 decisões na camada errada. A lição geral: **o
+vazamento não é teórico — ele APODRECE.** A prova foi o nome do slot do arsenal, duplicado no front
+e no `ArsenalService`, que já tinha divergido (a tela dizia "Acessório", o item que cai nela nasce
+"Manopla"); a tela mostrava um nome que o item não tem.
+
+**Front decidindo regra → devolvido ao service:**
+- `ArsenalService.NomeDoSlot(fase)` — nomeia o slot E o item que cai nele, uma tabela só (a tela
+  precisa nomear slot VAZIO, que é por isso que ela tinha a cópia). Teste trava os dois juntos.
+- `CapitulosService.FaccoesDaCampanha()` — o mapa É a lista de capítulos, na ordem. O front deduzia
+  ("todas as facções menos Humanos") e acertava por coincidência da ordem do enum.
+- `CampanhaService.PosicaoNoMapa()`/`SalvarPosicao()` — o "último lugar" é PROGRESSÃO. O front
+  gravava direto na porta de save (única gravação do jogo fora de um service), enquanto o
+  `PerfilService` já apagava a mesma chave no wipe de conta: dois donos.
+- `ArsenalService.EquiparItem` **persiste sozinho** — quando havia duas cascas, cada uma escolheu
+  sua política de quando salvar. Quem manda no dado decide quando ele é durável.
+- `PerfilService.AvatarInicial()`/`PodeUsarAvatar()` — a cara do jogador é troféu de campanha. O
+  front segue validando o clique, mas como FRONTEIRA, não como fonte da regra.
+
+**Motor decidindo pele → devolvido à tela:**
+- `Item.ValorFormatado()`/`NomeStat()` **saíram do Domain**: `:F0` e sufixo `%` são exibição. O Item
+  guarda `Valor` + `TipoStat`; cada pele escreve do seu jeito.
+- **`IApresentacao.AguardarAnimacao(Momento)`** no lugar de `(int ms)`. O motor mandava `1500` em 10
+  lugares e a pele *dividia* o número pra corrigir — sintoma de quem não devia escolher, escolhendo.
+  Agora o motor diz a BATIDA (`Tick`/`Narracao`/`Golpe`/`Preparacao`) e a pele dá a duração (todas em
+  1500 hoje, de propósito: mudou o dono, não o sentimento). **É o seam do MODO AUTOMÁTICO** — uma
+  pele que devolve ~0 e o motor não sabe de nada.
+
+**NÃO mexido, porque está certo:** a validação duplicada (front valida pra UX, back valida porque não
+confia na tela) e a `SessaoDoFront` inteira (ids, lado esquerdo/direito, o `_mostrado` que segura a
+barra de vida até o número ser narrado) — presentation pura, no lugar certo.
+
+**Dívida registrada, não paga — emoji no Domain.** `Personagem.Simbolo`, `Habilidade.Simbolo`,
+`Item.Simbolo` e `Faccoes.simbolos` são RENDER dentro do domínio de regras. Fica como está: pagar
+isso hoje custa tocar os 36 champs e todas as skills por uma dor que só chega **quando os sprites
+entrarem** — aí o emoji deixa de ser "o visual" e vira "um dos visuais", e o Domain vira o lugar
+errado pra ele. Gatilho nomeado, sem data.
 
 ---
 

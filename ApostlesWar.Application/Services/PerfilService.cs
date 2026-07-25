@@ -1,13 +1,22 @@
+using System;
+using System.Linq;
 using ApostlesWar.Application.Portas;
+using ApostlesWar.Domain;
 
 namespace ApostlesWar.Application.Services
 {
     /// <summary>
-    /// Cria/carrega/apaga o <see cref="Perfil"/> do jogador pela porta de save. O boot do front usa
-    /// <see cref="Existe"/> pra decidir entre pedir o nome (1ª vez) ou cair direto no menu.
+    /// A "conta" do jogador: cria/carrega/apaga o <see cref="Perfil"/> pela porta de save — e é dono
+    /// das REGRAS de quem pode ser o seu avatar. O boot do front usa <see cref="Existe"/> pra decidir
+    /// entre pedir o nome (1ª vez) ou cair direto no menu.
+    ///
+    /// As regras de avatar moravam na tela de edição: ela sabia que o avatar inicial é um Humano e
+    /// que só campeão desbloqueado vale. Isso é progressão (a campanha libera avatar junto com o
+    /// champ), então mora aqui. O front segue validando o clique, mas como FRONTEIRA — não como a
+    /// fonte da regra.
     ///
     /// <see cref="Excluir"/> é o "excluir conta" escondido nas configurações: limpa o perfil E o
-    /// progresso de campanha ("save"/"itens") — o wipe COMPLETO, de propósito difícil de achar.
+    /// progresso de campanha ("save"/"itens"/"campanha") — o wipe COMPLETO, de propósito difícil de achar.
     /// </summary>
     public class PerfilService
     {
@@ -18,8 +27,30 @@ namespace ApostlesWar.Application.Services
         private static readonly string[] ChavesDoProgresso = { "save", "itens", "campanha" };
 
         private readonly IRepositorioDeSave _repositorio;
+        private readonly CampeoesService _campeoes;
 
-        public PerfilService(IRepositorioDeSave repositorio) => _repositorio = repositorio;
+        public PerfilService(IRepositorioDeSave repositorio, CampeoesService campeoes)
+        {
+            _repositorio = repositorio;
+            _campeoes = campeoes;
+        }
+
+        /// <summary>
+        /// O avatar de quem acabou de criar a conta: um dos Humanos, o time com que todo mundo começa.
+        /// Sorteado porque é placeholder — a 1ª tela pede só o nome, e trocar de cara é 2 cliques.
+        /// </summary>
+        public string AvatarInicial()
+        {
+            var iniciais = _campeoes.ObterDesbloqueados().Where(p => p.Faccao == Faccao.Humanos).ToList();
+            return iniciais[Random.Shared.Next(iniciais.Count)].Simbolo;
+        }
+
+        /// <summary>
+        /// Este campeão pode ser o avatar? Só os DESBLOQUEADOS — a cara do jogador é troféu de
+        /// campanha, não catálogo. A grade mostra os 36 (os travados em cinza); quem recusa é isto.
+        /// </summary>
+        public bool PodeUsarAvatar(Personagem campeao)
+            => _campeoes.ObterDesbloqueados().Any(p => p.Faccao == campeao.Faccao && p.Slot == campeao.Slot);
 
         public Perfil? Carregar() => _repositorio.Carregar<Perfil>(ChavePerfil);
 

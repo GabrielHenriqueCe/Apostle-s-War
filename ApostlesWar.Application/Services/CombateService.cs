@@ -51,13 +51,17 @@ namespace ApostlesWar.Application.Services
             => _controladores[_batalha.EquipeDe(combatente)];
 
         /// <summary>
-        /// Espera dramática entre eventos que ESCUTA o Esc: se o jogador pediu pra encerrar e confirmou,
-        /// aborta a batalha (BatalhaAbortada, capturada em ExecutarFase → a fase vira derrota). Todas as
-        /// esperas do combate passam por aqui — é o ponto único do cancelamento.
+        /// Deixa a narrativa respirar entre eventos, e ESCUTA o pedido de sair: se o jogador pediu pra
+        /// encerrar e confirmou, aborta a batalha (BatalhaAbortada, capturada em ExecutarFaseComTime →
+        /// a fase vira derrota). Todas as esperas do combate passam por aqui — é o ponto único do
+        /// cancelamento.
+        ///
+        /// Repare que o motor diz QUAL batida acabou de narrar, nunca quantos milissegundos ela dura:
+        /// tempo de tela é assunto da pele (ver <see cref="Momento"/>).
         /// </summary>
-        private void Aguardar(int ms)
+        private void Aguardar(Momento momento)
         {
-            if (_apresentacao.AguardarAnimacao(ms) && _tela.ConfirmarEncerramento())
+            if (_apresentacao.AguardarAnimacao(momento) && _tela.ConfirmarEncerramento())
                 throw new BatalhaAbortada();
         }
 
@@ -149,7 +153,7 @@ namespace ApostlesWar.Application.Services
             {
                 if (ev is EventoDano d) _tela.ExibirDanoDeStatus(d);
                 else if (ev is EventoCura c) _tela.ExibirCura(c);
-                Aguardar(1500);
+                Aguardar(Momento.Tick);
             }
         }
 
@@ -196,7 +200,7 @@ namespace ApostlesWar.Application.Services
                 _tela.ExibirPartida(aliados, defensores);
                 _tela.ExibirMensagemPassiva(
                     $"{atacante.Personagem.Simbolo} está irritado e ataca {alvoForcado.Personagem.Simbolo} automaticamente!");
-                Aguardar(1500);
+                Aguardar(Momento.Narracao);
 
                 if (VerificarParalisia(atacante)) return;
 
@@ -233,7 +237,7 @@ namespace ApostlesWar.Application.Services
 
             _tela.ExibirMensagemPassiva(
                 $"{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} estava com medo e não conseguiu agir!");
-            Aguardar(1500);
+            Aguardar(Momento.Narracao);
             return true;
         }
 
@@ -293,13 +297,13 @@ namespace ApostlesWar.Application.Services
                 if (ev is EventoCura cura)
                 {
                     _tela.ExibirCura(cura);
-                    Aguardar(1500);
+                    Aguardar(Momento.Golpe);
                     continue;
                 }
 
                 var r = (EventoDano)ev;
                 _tela.ExibirResultadoAtaque(atacante, r.Alvo, r);
-                Aguardar(1500);
+                Aguardar(Momento.Golpe);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r);
                 ProcessarReacoesAtacanteMorte(atacante, r.Alvo, r);
@@ -327,7 +331,7 @@ namespace ApostlesWar.Application.Services
                 else _tela.ExibirResultadoAtaque(atacante, ((EventoDano)ev).Alvo, (EventoDano)ev);
             }
 
-            if (resultados.Count > 0) Aguardar(1500);
+            if (resultados.Count > 0) Aguardar(Momento.Golpe);
 
             var danos = resultados.OfType<EventoDano>().ToList();
             foreach (var r in danos)
@@ -352,7 +356,7 @@ namespace ApostlesWar.Application.Services
             if (ControladorDe(atacante) == _controladorBot && hab is AtaqueBasico)
             {
                 _tela.ExibirPreparacaoAtaque(atacante, defensores);
-                Aguardar(1500);
+                Aguardar(Momento.Preparacao);
             }
 
             // Setup: paralisia (Medo) trigga DEPOIS da escolha (jogador escolhe, vê o medo, perde cooldown)
@@ -369,7 +373,7 @@ namespace ApostlesWar.Application.Services
             if (hab is not AtaqueBasico)
             {
                 _tela.ExibirUsoHabilidade(atacante, hab);
-                Aguardar(1500);
+                Aguardar(Momento.Narracao);
             }
 
             ExecutarAtos(resultados, atacante, hab.TipoAtaque);   // Reação + Morte + Atacante
@@ -417,7 +421,7 @@ namespace ApostlesWar.Application.Services
 
                 var revide = res.Revide.Habilidade.AtivarComNatureza(alvo, res.Revide.Alvo, NaturezasDano.Ataque);
                 _tela.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
-                Aguardar(1500);
+                Aguardar(Momento.Golpe);
                 // No revide, o portador do próximo nível é o revidado; a Batalha resolve a
                 // perspectiva dele sozinha (não precisa mais passar/inverter times na mão).
                 ProcessarReacoesAlvo(res.Revide.Alvo, alvo, revide, profundidade + 1);
@@ -521,7 +525,7 @@ namespace ApostlesWar.Application.Services
                     _tela.ExibirCura(res.Cura);   // mesma view da cura de habilidade
 
                 if (res.Mensagem != "" || res.Dano != null || res.Cura != null)
-                    Aguardar(1500);
+                    Aguardar(Momento.Narracao);
             }
         }
 

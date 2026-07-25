@@ -1,7 +1,7 @@
 # Apostle's War — guia pro Claude
 
-RPG por turnos em C# (`net10.0`, `OutputType Exe`). Console hoje; o próximo grande passo é o **porte
-pra um front amigável (webview)**. Projeto de estudo/portfólio do Gabriel.
+RPG por turnos em C# (`net10.0`, `OutputType Exe`). Roda numa **janela webview** (WebView2), jogável de
+ponta a ponta: menu, perfil, campanha, arena, arsenal. Projeto de estudo/portfólio do Gabriel.
 
 ## Orientação — faça no início da sessão e quando o Gabriel perguntar "onde estamos"
 Não precisa o Gabriel pedir; oriente-se sozinho:
@@ -9,8 +9,10 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   feito, o que vem, decisões). Leia o `project_estado.md` (topo = mais recente).
 - **`docs/ROADMAP-refatoracao.md`** → a seção **FILA DE EXECUÇÃO** é a fila mestra.
 - `git log --oneline -15` → os commits recentes.
-- **Fase atual:** fechar o resto da FILA A → **FRONT (webview)** → **REBALANCE (#16)**. Decisão do Gabriel:
-  o front vem ANTES do rebalance (quer balancear numa interface amigável, não no console).
+- **Fase atual:** o FRONT está FEITO e o console foi REMOVIDO (#179), com as camadas ajustadas (#180).
+  A seguir: **bot inteligente / modo automático** (o `IControladorDeTurno` é o seam; o `ControladorBot`
+  hoje só usa A1) e o **REBALANCE (#16)** — que era o motivo de o front vir antes (balancear numa
+  interface amigável). Falta ainda o #15 (faxina de comentários) da FILA A.
 
 ## Como trabalhamos
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar
@@ -28,8 +30,9 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
 ## Comandos
 - Build: `dotnet build`  ·  Testes: `dotnet test` (xUnit em `ApostlesWar.Tests/`).
 - **Gotcha:** o jogo ABERTO trava o build (lock do `.exe`/`.dll`) — pedir pra fechar antes de buildar/testar.
-- Combate NÃO roda headless (`Console.Clear`/`ReadKey` precisam de TTY) → verificação em jogo é do Gabriel;
-  testo só o que é PURO (motor, capacidades, `Batalha`).
+- Combate NÃO roda headless (o loop chama a tela) → verificação em jogo é do Gabriel; testo só o que é
+  PURO (motor, capacidades, `Batalha`, services). Com `ITelaDeCombate` injetável, uma tela no-op no
+  projeto de Tests destrava testes de FLUXO (candidato: a ordem crítica de morte, #14 do ROADMAP).
 - Distribuição futura: `dotnet publish -c Release -r <rid> --self-contained` → `.exe` no GitHub Releases.
 
 ## Mapa rápido — Clean Architecture, 1 PROJETO por camada (a dependência aponta pra dentro)
@@ -37,14 +40,14 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   TurnoDoPersonagem, RelogioDoCombate, capacidades), `Skills/` (ações/buffs/debuffs/passivas),
   `Champs/<Faccao>/<Champ>/`, `Models/`, `Enum/`.
 - `ApostlesWar.Application/` casos de uso: `Services/` orquestração · `Controllers/` (bot) ·
-  `Portas/` (IEntrada, IApresentacao, ITelaDeCombate, ITelaDeMenu, IControladorDeTurno, IRepositorioDeSave).
+  `Portas/` (IApresentacao+Momento, ITelaDeCombate, IControladorDeTurno, IRepositorioDeSave).
 - `ApostlesWar.Infrastructure/` impl das portas de dados (SaveLocal). Só o Desktop enxerga.
-- **PRESENTATION são DOIS projetos** (duas peles sobre o mesmo motor — é o que o padrão libera):
-  - `ApostlesWar.Presentation.ConsoleUI/` pele console: views + EntradaConsole/ApresentacaoConsole +
-    ControladorJogador. (`ConsoleUI` e não `Console`: o segmento `Console` sombrearia `System.Console`.)
-  - `ApostlesWar.Presentation.Desktop/` casca executável Windows (composition root em `Program.cs`,
-    front webview em `Front/`+`wwwroot/`). O `.exe` continua `ApostlesWar.App.exe` (AssemblyName fixo).
-    No VS, o dropdown do Play tem os perfis **Console** e **Front (webview)** (`--front`).
+- `ApostlesWar.Presentation.Desktop/` a ÚNICA pele: casca executável Windows (composition root real em
+  `Front/AppFront.cs`, front webview em `Front/`+`wwwroot/`). `.exe` = `ApostlesWar.App.exe`
+  (AssemblyName fixo), abre a janela direto — um perfil só no Play do VS.
+  - Houve uma 2ª pele (`Presentation.ConsoleUI`), **removida em #179** quando o front ficou jogável
+    de ponta a ponta. Ela deixou o legado que importa: o motor não sabe desenhar nada. Se um dia
+    nascer outra pele, é só implementar as portas.
 - Convenção: **pasta no disco = nome do projeto** (se divergir, o `dotnet sln add` cria uma pasta-de-solution
   fantasma no VS). Sem dependências externas ao repo — o antigo `GHUtils` foi dissolvido (jul/2026).
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.

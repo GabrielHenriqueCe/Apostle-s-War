@@ -1,13 +1,15 @@
 using ApostlesWar.Application;
 using ApostlesWar.Application.Portas;
 using ApostlesWar.Application.Services;
+using ApostlesWar.Domain;
 
 namespace Tests
 {
     /// <summary>
     /// Testes do <see cref="PerfilService"/> — a "conta" do jogador. É PURO (só delega pra porta de
-    /// save), então roda headless com um repositório fake em memória. Cobre o boot (existe/carrega),
-    /// a criação, e o "excluir conta" que limpa o perfil E o progresso de campanha.
+    /// save e lê os desbloqueados), então roda headless com um repositório fake em memória. Cobre o
+    /// boot (existe/carrega), a criação, o "excluir conta" que limpa o perfil E o progresso, e as
+    /// REGRAS DE AVATAR (quem pode ser a cara do jogador) — que moravam na tela de edição do front.
     /// </summary>
     public class PerfilServiceTests
     {
@@ -24,10 +26,19 @@ namespace Tests
             public bool Contem(string chave) => _dados.ContainsKey(chave);
         }
 
+        // O PerfilService precisa dos desbloqueados pra decidir avatar; o CampeoesService nasce com
+        // os 4 Humanos e é DADO puro (não pede tela), então dá pra montar de verdade.
+        private static PerfilService Montar(IRepositorioDeSave repo)
+        {
+            var capitulos = new CapitulosService(repo);
+            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
+            return new PerfilService(repo, campeoes);
+        }
+
         [Fact]
         public void SemPerfil_NaoExiste_ECarregaNulo()
         {
-            var servico = new PerfilService(new RepositorioFake());
+            var servico = Montar(new RepositorioFake());
 
             Assert.False(servico.Existe());
             Assert.Null(servico.Carregar());
@@ -36,7 +47,7 @@ namespace Tests
         [Fact]
         public void CriarPerfil_PassaAExistir_EGuardaNomeEAvatar()
         {
-            var servico = new PerfilService(new RepositorioFake());
+            var servico = Montar(new RepositorioFake());
 
             servico.CriarPerfil("Gabriel", "🕵️");
 
@@ -51,11 +62,12 @@ namespace Tests
         public void Excluir_ApagaPerfil_EOProgressoDeCampanha()
         {
             var repo = new RepositorioFake();
-            var servico = new PerfilService(repo);
+            var servico = Montar(repo);
 
             servico.CriarPerfil("Gabriel", "🕵️");
             repo.Salvar("save", "progresso qualquer");   // simula uma campanha em andamento
             repo.Salvar("itens", "itens quaisquer");
+            repo.Salvar("campanha", 3);                  // e uma posição no mapa
 
             servico.Excluir();
 
@@ -63,6 +75,52 @@ namespace Tests
             Assert.False(repo.Contem("perfil"));
             Assert.False(repo.Contem("save"));
             Assert.False(repo.Contem("itens"));
+            Assert.False(repo.Contem("campanha"));
+        }
+
+        [Fact]
+        public void AvatarInicial_ESempreDeUmDosHumanos()
+        {
+            var repo = new RepositorioFake();
+            var servico = Montar(repo);
+            var humanos = new PersonagemService();
+
+            var simbolosDosHumanos = Enum.GetValues<Slot>()
+                .Select(s => humanos.ObterPersonagem(Faccao.Humanos, s).Simbolo)
+                .ToHashSet();
+
+            // Sorteado: roda várias vezes pra não passar por sorte.
+            for (int i = 0; i < 20; i++)
+                Assert.Contains(servico.AvatarInicial(), simbolosDosHumanos);
+        }
+
+        [Fact]
+        public void PodeUsarAvatar_SoOsDesbloqueados()
+        {
+            var repo = new RepositorioFake();
+            var servico = Montar(repo);
+            var personagens = new PersonagemService();
+
+            // Começo de jogo: os 4 Humanos liberados, o resto travado.
+            Assert.True(servico.PodeUsarAvatar(personagens.ObterPersonagem(Faccao.Humanos, Slot.Slot1)));
+            Assert.False(servico.PodeUsarAvatar(personagens.ObterPersonagem(Faccao.Apostolos, Slot.Slot4)));
+        }
+
+        [Fact]
+        public void PodeUsarAvatar_LiberaQuandoACampanhaDesbloqueia()
+        {
+            var repo = new RepositorioFake();
+            var capitulos = new CapitulosService(repo);
+            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
+            var servico = new PerfilService(repo, campeoes);
+            var personagens = new PersonagemService();
+
+            Personagem doReino = personagens.ObterPersonagem(Faccao.Reino, Slot.Slot1);
+            Assert.False(servico.PodeUsarAvatar(doReino));
+
+            campeoes.DesbloquearCampeoes(Faccao.Reino, Fases.Fase1);   // venceu a 1ª fase do Reino
+
+            Assert.True(servico.PodeUsarAvatar(doReino));   // a cara do jogador é troféu de campanha
         }
     }
 }

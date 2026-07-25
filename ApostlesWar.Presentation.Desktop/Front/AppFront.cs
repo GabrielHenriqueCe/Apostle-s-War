@@ -105,13 +105,13 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 var apresentacao = new ApresentacaoWebview(ritmo, ponte);
 
                 var repositorio = new SaveLocal();
-                var perfil = new PerfilService(repositorio);
                 var capitulos = new CapitulosService(repositorio);
                 var arsenal = new ArsenalService(capitulos, repositorio);
                 var personagens = new PersonagemService();
                 var selecaoDeAlvo = new SelecaoDeAlvoService();
                 var campeoes = new CampeoesService(personagens, capitulos);
-                var campanha = new CampanhaService(arsenal, campeoes, capitulos);
+                var perfil = new PerfilService(repositorio, campeoes);
+                var campanha = new CampanhaService(arsenal, campeoes, capitulos, repositorio);
 
                 var combate = new CombateService(
                     arsenal, campeoes, personagens, tela, selecaoDeAlvo,
@@ -122,7 +122,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 // Entra pelo MENU (não mais direto na batalha): o fluxo do front cuida do perfil,
                 // mostra o menu principal e roteia a escolha. Ver FluxoDoFront.
                 new FluxoDoFront(ponte, combate, campeoes, perfil, sessao,
-                    campanha, capitulos, arsenal, personagens, repositorio).Rodar();
+                    campanha, capitulos, arsenal, personagens).Rodar();
             }
             catch (Exception ex)
             {

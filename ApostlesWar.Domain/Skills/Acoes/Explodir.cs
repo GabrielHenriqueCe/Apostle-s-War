@@ -20,6 +20,26 @@ namespace ApostlesWar.Domain
         public Explodir(Seletor seletor, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _seletor = seletor;
 
+        public override Utilidade Utilidade => Utilidade.Ferir;
+
+        /// <summary>
+        /// Explodir quem não tem o status detonável não causa nada. Mesmo filtro do Executar
+        /// (IStatusComTick + seletor), pra a pergunta e a execução concordarem.
+        /// </summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.StatusAtivos.Any(s => s is IStatusComTick && _seletor.Filtro(s)));
+
+        /// <summary>
+        /// A soma das detonações que cairiam neste alvo. Mesmo filtro e mesmo `Quantos` do Executar —
+        /// mas sem `Aleatorio`, porque prever qual o sorteio vai pegar é impossível; com os candidatos
+        /// na ordem natural, a estimativa fica estável.
+        /// </summary>
+        public override int PreverVidaRemovida(Combate atacante, Combate alvo)
+            => alvo.StatusAtivos
+                .Where(s => s is IStatusComTick && _seletor.Filtro(s))
+                .Take(_seletor.Quantos)
+                .Sum(s => ((IStatusComTick)s).PreverDetonacao(alvo));
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             IEnumerable<StatusEffect> candidatos = alvo.StatusAtivos

@@ -10,12 +10,16 @@ namespace ApostlesWar.Domain.Skills.Buffs
     /// vem do orçamento do Turno (TentarReagir); antes era por-hit.
     /// Usado pela Espinhos (aplicado permanente via IPassivaInicial).
     /// </summary>
-    public class EspinhosVenenosos : Buff, IReageAoSerAtacado
+    public class EspinhosVenenosos : Buff, IReageAoSerAtacado, IPuneQuemAtaca
     {
         public EspinhosVenenosos(int duracao = int.MaxValue)
             : base("Espinhos", "🌿", duracao, 0,
                 "Atacantes recebem Veneno e Queima.")
         { }
+
+        // O custo de me atacar fica GRUDADO no agressor (dois DoTs), e não depende do golpe ter
+        // machucado: o gate abaixo só olha se o agressor está vivo.
+        public TipoDePunicao Punicao => TipoDePunicao.AplicaStatus;
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {

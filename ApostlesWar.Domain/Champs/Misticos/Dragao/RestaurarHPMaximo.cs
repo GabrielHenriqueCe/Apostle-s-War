@@ -14,6 +14,13 @@ namespace ApostlesWar.Domain.Champs.Misticos
         public RestaurarHPMaximo(double percentualCap, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _percentualCap = percentualCap;
 
+        // Devolve vida perdida — só que do TETO, não do HP atual. Pro avaliador é a mesma família.
+        public override Utilidade Utilidade => Utilidade.Curar;
+
+        /// <summary>Sem teto perdido pra devolver, não há o que restaurar.</summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.HPMaximoReduzidoTotal > 0);
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => alvo.RestaurarHPMaximo((int)(alvo.HPMaximoInicial * _percentualCap));
     }

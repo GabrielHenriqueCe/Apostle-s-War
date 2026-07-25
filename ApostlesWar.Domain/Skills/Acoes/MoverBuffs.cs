@@ -21,6 +21,12 @@ namespace ApostlesWar.Domain
         public MoverBuffs(Seletor seletor, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _seletor = seletor;
 
+        public override Utilidade Utilidade => Utilidade.TirarBuffs;
+
+        /// <summary>Sem buff pra roubar, o roubo não acontece.</summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.StatusAtivos.OfType<Buff>().Any(b => _seletor.Filtro(b)));
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             IEnumerable<Buff> candidatos = alvo.StatusAtivos.OfType<Buff>().Where(b => _seletor.Filtro(b));

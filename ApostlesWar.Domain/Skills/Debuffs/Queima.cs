@@ -78,6 +78,15 @@ namespace ApostlesWar.Domain.Skills.Debuffs
         /// QUEIMA FAZ (dano + redução de HP máximo, respeitando o cap próprio), remove a Queima
         /// e devolve o EventoDano da detonação. Dano = stacks × 5% HPMaximoInicial.
         /// </summary>
+        /// <summary>
+        /// Só a parcela que sai da VIDA. A redução de HP máximo que a detonação também causa não
+        /// entra: ela encolhe o teto, não tira vida agora — e é vida agora que decide o alvo.
+        /// </summary>
+        public int PreverDetonacao(Combate portador)
+            => portador.PreverVidaRemovida(
+                portador.PreverDanoRecebido(
+                    (int)(portador.HPMaximoInicial * DanoPorTurno * Stacks), NaturezasDano.QueimaDano));
+
         public EventoDano Detonar(Combate portador, Combate detonador)
         {
             int bruto = (int)(portador.HPMaximoInicial * DanoPorTurno * Stacks);

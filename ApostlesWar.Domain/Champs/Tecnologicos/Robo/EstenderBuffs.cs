@@ -34,6 +34,12 @@ namespace ApostlesWar.Domain.Champs.Tecnologicos
             _turnos = turnos;
         }
 
+        public override Utilidade Utilidade => Utilidade.Reforcar;
+
+        /// <summary>Sem buff que case com o seletor, não há duração a esticar.</summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.StatusAtivos.OfType<Buff>().Any(b => _seletor.Filtro(b)));
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             IEnumerable<Buff> candidatos = alvo.StatusAtivos.OfType<Buff>().Where(b => _seletor.Filtro(b));

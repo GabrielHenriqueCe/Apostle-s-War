@@ -348,6 +348,82 @@ render no JS, SEM tocar no motor.** Sem susto de performance (é por turnos, nã
 
 ---
 
+## BOT INTELIGENTE + MODO AUTO (jul/2026)
+
+O `ControladorBot` só usava A1, o que deixava o inimigo burro e — pior — fazia o **Bot×Bot não
+exercitar habilidade nenhuma**, cegando a Arena como laboratório do REBALANCE (#16). Decisão do
+Gabriel: **um cérebro só**, o mesmo que joga pelo inimigo joga pelo jogador no **modo Auto
+assistido** (botão na batalha, interruptor lido entre turnos, sem mudar o ritmo — é pra assistir).
+Simular N batalhas e grindar ficaram nomeados e adiados.
+
+### PR-A ✅ — `PreverDano`: a fórmula de dano ganhou um espelho puro (#181)
+
+Pra comparar alvos o bot precisa da fórmula REAL. O plano dizia "extrair a parte pura do
+`ReceberDano`" — **não havia parte pura**: o `Escudo` consome pontos e se remove, e o
+`ProtecaoAliado` chama `Aplicador.ReceberDano(...)`, então prever chamando o modificador **feriria
+um aliado de verdade**. A `IModificaDanoRecebido` passou a ter DOIS métodos (`Modificar` aplica,
+`Prever` é puro), sem default — capacidade nova é obrigada pelo compilador a responder as duas.
+Nasceram `Combate.PreverDanoRecebido`, `PreverAtaque` (crit como VALOR ESPERADO, senão a Kunai com
+`forcaCritico` seria subestimada) e **`PreverVidaRemovida`** = `clamp(dano, 0, HPAtual − pisoDeHP)`,
+que resolve sozinha "evitar bloqueio de dano" e "evitar Invencível" (ambos dão ~0) e ainda sinaliza
+o ABATE (`== HPAtual`). Comportamento idêntico, provado pelos 14 `ReceberDanoTests` intocados.
+
+### PR-B ✅ — o cérebro tático
+
+**A habilidade é DADO, então dá pra lê-la sem executá-la.** Cada `Acao` passou a declarar duas
+coisas sobre si: a `Utilidade` (que bem faz — FATO) e `TemEfeitoUtil` (tem trabalho a fazer agora?).
+O cérebro nunca pergunta `is Dano` — seria reabrir o dispatch por tipo concreto que o #9 fechou.
+
+- **Fila ABSOLUTA** (a única opinião tática, num array só):
+  `Reviver > Curar > LimparDebuffs > Reforcar > TirarBuffs > Enfraquecer > TurnoExtra > Ferir`.
+  Nada de pontuação: o Gabriel citou jogos onde score emergente virou estratégia degenerada.
+  **TurnoExtra fica embaixo de propósito** — com ele no topo, o Copiando do Mímico dispararia sem
+  buff nenhum pra roubar, gastando a habilidade pelo turno extra. A habilidade é julgada pelo RESTO.
+  `Utilidade.Custo` (AutoDano do Fantasma) nunca conta: é preço, não entrega.
+- **Desempates:** área > aleatório > único → mais ações úteis → mais vida removida.
+- **Alvo (lexicográfico):** abate → menor punição → mais vida removida. O abate **não fura a fila**
+  de habilidade.
+- **`IPuneQuemAtaca`** (`Domain/Combat/`) — nova capacidade: `AplicaStatus` (Espinhos) >
+  `ContraAtaca` > `RefleteDano`, na ordem de fuga. Não deu pra reusar `IReageAoSerAtacado` porque
+  **reagir ≠ punir** (a passiva do Ogro reage se buffando, o que não custa nada a quem atacou). Só
+  BUFF conta: passiva é identidade permanente e fugir dela deixaria Herói/Elfo/Zumbi/Cocô
+  inatacáveis.
+- **Achado durante os testes:** um `OfType<Dano>()` no cérebro lia a explosão como inofensiva (o bot
+  preferia o A1 a detonar um alvo envenenado). Virou `Acao.PreverVidaRemovida` virtual, com
+  `IStatusComTick.PreverDetonacao` como espelho puro do `Detonar` — mesmo par do PR-A. O dispatch por
+  tipo concreto **volta a se infiltrar sempre que se pergunta "quanto isto faz?"** de fora da peça.
+
++20 testes headless. **É o primeiro pedaço do JOGO que roda sem tela:** decidir é puro, então dá pra
+provar comportamento ("não cura quem está inteiro", "prefere o abate"), não só mecanismo.
+
+### PR-C — o botão Auto no front (a fazer)
+
+Espelha o Sair: flag `volatile` na ponte, lido entre turnos; `ControladorJogadorWeb` delega ao
+cérebro quando ligado. Clicar de novo devolve o manual na próxima decisão. Ritmo não muda.
+
+---
+
+## BUG ABERTO — bloqueio total desperdiça o escudo (achado jul/2026, adiado)
+
+**Reproduzido em jogo** (Rei + Operário): com `Escudo` e `BloqueioTotal` no mesmo alvo, o escudo é
+CONSUMIDO mesmo com o dano sendo integralmente bloqueado. Depende da ordem de aplicação — se o
+Escudo entrou primeiro em `StatusAtivos`, ele apara (gastando pontos) e só depois o bloqueio zera o
+resto; na ordem inversa, o escudo é preservado. **Mesmo estado de jogo, resultado diferente.** De
+quebra o `absorvidoPeloEscudo` reporta como "absorvido" o que foi bloqueado — a tela mente junto.
+
+A `NaturezaDano` não resolve isso: ela declara **quem participa** (a lista `Ignora`), nunca **em que
+ordem**. O princípio do conserto já existe e está testado (`PassivaPura_RodaANTESDosStatus_EOEscudoVeODanoJaReduzido`
+— a passiva-pura roda antes pra o escudo só gastar pelo dano que sobrou); falta **generalizá-lo**:
+quem REDUZ de graça (bloqueio, redução fixa, passiva) roda antes de quem GASTA recurso (escudo,
+proteção de aliado).
+
+**Adiado a pedido do Gabriel** ("depois fazemos um refactor pra corrigir tudo de uma vez"), porque
+mexe em números: escudo+redução também muda (contra 1000 com Escudo 400 e −15%, dá 510 ou 450
+conforme a ordem). É ajuste de balance embutido num bugfix — entra junto do REBALANCE (#16) ou num
+refactor próprio da ordem do pipeline de dano.
+
+---
+
 ## CADA DECISÃO NA SUA CAMADA (#180, jul/2026)
 
 Com o console fora, uma auditoria do front achou 7 decisões na camada errada. A lição geral: **o
@@ -471,7 +547,11 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
   `Seletor`). Implementados: Dano/Cura/AplicarEscudo/AplicarBuff/AplicarDebuff/Reviver/
   RemoverBuffs/**Explodir** (genérico, `Seletor` + `IStatusComTick.Detonar → EventoDano`;
   1º cliente Putrefação; Inferno no shim até Decaídos)/IStatusComTick/Seletor. Faltam:
-  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra.
+  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra. *(Vocabulário esgotado desde os Apóstolos.)*
+- **Toda `Acao` declara `Utilidade` + `TemEfeitoUtil` + `PreverVidaRemovida`** (jul/2026, PR do bot):
+  o que ela FAZ, se tem trabalho agora e quanto machuca — tudo respondido pela própria ação. É o que
+  permite AVALIAR uma habilidade sem executá-la. `Utilidade` é abstrata: ação nova (inclusive bespoke
+  de champ) é obrigada pelo compilador a se classificar, em vez de o avaliador dar `switch` no tipo.
 - Disciplina: promove no 2º cliente REAL; verificar-antes-de-fundir (o grep mente — **Copiando
   era Balde 3 e é vocabulário puro**; **Atlantis** revelou o boundary de "pipeline / conjunto
   afetado", 1 cliente, registrado sem construir).

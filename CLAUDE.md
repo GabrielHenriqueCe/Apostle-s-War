@@ -9,10 +9,10 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   feito, o que vem, decisões). Leia o `project_estado.md` (topo = mais recente).
 - **`docs/ROADMAP-refatoracao.md`** → a seção **FILA DE EXECUÇÃO** é a fila mestra.
 - `git log --oneline -15` → os commits recentes.
-- **Fase atual:** o FRONT está FEITO e o console foi REMOVIDO (#179), com as camadas ajustadas (#180).
-  A seguir: **bot inteligente / modo automático** (o `IControladorDeTurno` é o seam; o `ControladorBot`
-  hoje só usa A1) e o **REBALANCE (#16)** — que era o motivo de o front vir antes (balancear numa
-  interface amigável). Falta ainda o #15 (faxina de comentários) da FILA A.
+- **Fase atual:** FRONT feito, console REMOVIDO (#179), camadas ajustadas (#180), `PreverDano` (#181)
+  e o **bot inteligente** (PR-B). A seguir: **botão Auto no front** (PR-C) e o **REBALANCE (#16)** —
+  que era o motivo de o front vir antes. Abertos: o #15 (faxina de comentários) e o **bug do bloqueio
+  total × escudo** (ver ROADMAP §BUG ABERTO — adiado pra um refactor da ordem do pipeline de dano).
 
 ## Como trabalhamos
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar

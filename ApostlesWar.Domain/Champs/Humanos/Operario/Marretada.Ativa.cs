@@ -16,7 +16,7 @@ namespace ApostlesWar.Domain.Champs.Humanos
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
 
-        protected override List<Acao> Acoes => new()
+        public override List<Acao> Acoes => new()
         {
             new Dano(Multiplicador),
         };

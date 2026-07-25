@@ -15,6 +15,12 @@ namespace ApostlesWar.Domain
         public RemoverDebuffs(Seletor seletor, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _seletor = seletor;
 
+        public override Utilidade Utilidade => Utilidade.LimparDebuffs;
+
+        /// <summary>Sem debuff que case com o seletor, o cleanse é um turno jogado fora.</summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.StatusAtivos.OfType<Debuff>().Any(d => _seletor.Filtro(d)));
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             IEnumerable<Debuff> candidatos = alvo.StatusAtivos.OfType<Debuff>().Where(d => _seletor.Filtro(d));

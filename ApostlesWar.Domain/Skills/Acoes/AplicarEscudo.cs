@@ -23,6 +23,16 @@ namespace ApostlesWar.Domain
             _duracao = duracao;
         }
 
+        public override Utilidade Utilidade => Utilidade.Reforcar;
+
+        /// <summary>
+        /// Escudo é buff: se todos os alvos bloqueiam buff, não adianta. A sonda usa 1 ponto porque
+        /// só o TIPO importa pro <see cref="Combate.PodeReceber"/> — o valor real depende do
+        /// `eventos` da execução, que aqui ainda não existe.
+        /// </summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.PodeReceber(new ApostlesWar.Domain.Skills.Buffs.Escudo(1, _duracao)));
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => new ApostlesWar.Domain.Skills.Buffs.Escudo(_valor(atacante, alvo, eventos), _duracao).Aplicar(alvo);
     }

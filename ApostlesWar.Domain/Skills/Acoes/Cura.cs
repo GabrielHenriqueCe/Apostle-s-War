@@ -12,6 +12,15 @@ namespace ApostlesWar.Domain
         public Cura(ValorFn valor, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _valor = valor;
 
+        public override Utilidade Utilidade => Utilidade.Curar;
+
+        /// <summary>Abaixo de quanto da vida cheia vale a pena gastar um turno curando.</summary>
+        private const double MargemParaValerCura = 0.10;
+
+        /// <summary>Curar quem está (quase) com a vida cheia joga a cura fora.</summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.HPAtual <= a.HPMaximo * (1 - MargemParaValerCura));
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             int curado = alvo.Curar(_valor(atacante, alvo, eventos));

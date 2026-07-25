@@ -24,6 +24,16 @@ namespace ApostlesWar.Domain
         public AplicarBuff(Func<Combate, Buff> fabricaComAtacante, Escopo escopo = Escopo.AlvosResolvidos, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _fabrica = fabricaComAtacante;
 
+        public override Utilidade Utilidade => Utilidade.Reforcar;
+
+        /// <summary>
+        /// Se TODOS os alvos bloqueiam este buff, a habilidade não faz nada neles. Constrói um buff
+        /// de sonda e pergunta ao próprio alvo (<see cref="Combate.PodeReceber"/>) — a mesma porta que
+        /// o Aplicar usa, então a resposta não diverge. A sonda é descartada.
+        /// </summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.PodeReceber(_fabrica(atacante)));
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => _fabrica(atacante).Aplicar(alvo);
     }

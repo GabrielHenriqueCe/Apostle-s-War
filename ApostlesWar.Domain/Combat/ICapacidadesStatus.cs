@@ -64,5 +64,13 @@
         /// Atos de morte. O detonador entra como Atacante do evento.
         /// </summary>
         EventoDano Detonar(Combate portador, Combate detonador);
+
+        /// <summary>
+        /// Quanta VIDA a detonação tiraria do portador — sem detonar. Espelho puro do
+        /// <see cref="Detonar"/>, mesmo par que o `PreverDanoRecebido` faz com o `ReceberDano`.
+        /// Existe porque quem AVALIA uma explosão antes de usá-la não pode gastar o status pra
+        /// descobrir quanto ela vale.
+        /// </summary>
+        int PreverDetonacao(Combate portador);
     }
 }

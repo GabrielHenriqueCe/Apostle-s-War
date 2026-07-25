@@ -11,6 +11,14 @@ namespace ApostlesWar.Domain
         public ConcederTurnoExtra(Escopo escopo = Escopo.ProprioAtacante, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) { }
 
+        public override Utilidade Utilidade => Utilidade.TurnoExtra;
+
+        /// <summary>
+        /// A flag é booleana: conceder a quem já tem turno extra pendente não acumula nada.
+        /// </summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => !a.TemTurnoExtra);
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => alvo.ConcederTurnoExtra();
     }

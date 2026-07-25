@@ -37,7 +37,26 @@ namespace ApostlesWar.Domain
             _ignorarStatus = ignorarStatus;
         }
 
-        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
+        public override Utilidade Utilidade => Utilidade.Ferir;
+
+        /// <summary>
+        /// Quanta VIDA este dano tiraria do alvo, sem desferi-lo — a métrica que o avaliador compara
+        /// entre candidatos. Passa pelo mesmo multiplicador (incluindo os modificadores do atacante)
+        /// e pela mesma previsão do lado do alvo, então bloqueio e piso de HP já entram no número.
+        /// </summary>
+        public override int PreverVidaRemovida(Combate atacante, Combate alvo)
+        {
+            double mult = MultiplicadorEfetivo(atacante, alvo);
+            return atacante.PreverAtaque(alvo, mult,
+                ignorarDefesaPct: _ignorarDefesaPct, forcaCritico: _forcaCritico, ignorarStatus: _ignorarStatus);
+        }
+
+        /// <summary>
+        /// O multiplicador da habilidade DEPOIS dos modificadores do atacante (Piromancer e futuros).
+        /// Extraído pra o Executar e a previsão usarem a MESMA conta — se divergirem, o avaliador
+        /// mira por um número que o golpe não cumpre.
+        /// </summary>
+        private double MultiplicadorEfetivo(Combate atacante, Combate alvo)
         {
             double mult = _multiplicador(atacante, alvo);
 
@@ -48,7 +67,12 @@ namespace ApostlesWar.Domain
             foreach (var m in atacante.StatusAtivos.OfType<IModificaDanoCausado>())
                 mult *= m.MultiplicadorDeDano(atacante, alvo);
 
-            eventos.Add(atacante.Atacar(alvo, mult,
+            return mult;
+        }
+
+        public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
+        {
+            eventos.Add(atacante.Atacar(alvo, MultiplicadorEfetivo(atacante, alvo),
                 ignorarDefesaPct: _ignorarDefesaPct, forcaCritico: _forcaCritico, ignorarStatus: _ignorarStatus));
         }
     }

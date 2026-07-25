@@ -175,7 +175,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 Habilidades: HabilidadesDoTurno.Select(VerHabilidade).ToList(),
                 AlvosValidos: AlvosValidos.Select(IdDe).ToList(),
                 Mensagem: Mensagem,
-                LadoVencedor: LadoVencedor);
+                LadoVencedor: LadoVencedor,
+                // O botão do automático se desenha do estado, como todo o resto da tela — assim ele
+                // não mente quando o C# desliga o modo por conta própria (batalha nova).
+                Auto: _ponte.AutoLigado);
 
             _ponte.EnviarEstado(estado);
         }

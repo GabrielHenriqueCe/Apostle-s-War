@@ -16,14 +16,22 @@ namespace ApostlesWar.Presentation.Desktop.Front
         private readonly SessaoDoFront _sessao;
         private readonly PonteWebView2 _ponte;
 
+        /// <summary>
+        /// O cérebro que assume quando o jogador liga o automático. É o MESMO que joga pelo inimigo —
+        /// instância própria, só pra o alvo que ele memoriza entre escolher-ação e escolher-alvo não
+        /// se misturar com o do adversário.
+        /// </summary>
+        private readonly ControladorBot _automatico;
+
         // Sair pedido DURANTE a escolha de alvo: lá o null significa "volta pra ação" (não aborta),
         // então marcamos aqui e a próxima EscolherAcao aborta de fato. Ver EscolherAlvo.
         private bool _sairSolicitado;
 
-        public ControladorJogadorWeb(SessaoDoFront sessao, PonteWebView2 ponte)
+        public ControladorJogadorWeb(SessaoDoFront sessao, PonteWebView2 ponte, ControladorBot automatico)
         {
             _sessao = sessao;
             _ponte = ponte;
+            _automatico = automatico;
         }
 
         public HabilidadeAtiva? EscolherAcao(Combate atacante, List<Combate> aliados, List<Combate> defensores)
@@ -33,6 +41,12 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
             // Quem age é humano ⇒ os aliados DELE são o lado esquerdo da tela, por definição.
             _sessao.DefinirLadoDoJogador(aliados, defensores);
+
+            // O interruptor é lido AQUI, no começo de cada decisão — é o que faz ligar e desligar
+            // valerem "entre turnos": o turno que o cérebro já começou vai até o fim, e o controle
+            // volta na próxima pergunta.
+            if (_ponte.AutoLigado)
+                return _automatico.EscolherAcao(atacante, aliados, defensores);
 
             var habilidades = atacante.Personagem.Habilidades.OfType<HabilidadeAtiva>().ToList();
 
@@ -52,6 +66,11 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 // (o motor lança BatalhaAbortada, a Arena captura e volta pro menu).
                 if (msg.Tipo == "encerrar" || msg.Tipo == "sair") return null;
 
+                // Ligou o automático enquanto este turno esperava um clique: a mensagem serviu pra
+                // acordar a espera; quem decide agora é o cérebro.
+                if (msg.Tipo == "auto" && _ponte.AutoLigado)
+                    return _automatico.EscolherAcao(atacante, aliados, defensores);
+
                 if (msg.Tipo == "habilidade")
                 {
                     if (msg.Valor < 0 || msg.Valor >= habilidades.Count) continue;
@@ -68,6 +87,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
 
         public Combate? EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores)
         {
+            // No automático o alvo vem do cérebro, que já o elegeu junto com a habilidade.
+            if (_ponte.AutoLigado)
+                return _automatico.EscolherAlvo(disponiveis, aliados, defensores);
+
             // Antes havia um atalho aqui: alvo único ⇒ escolhia sozinho. Removido — o passo de alvo
             // é também o de CONFIRMAÇÃO (o jogador vê quem vai levar e ainda pode desistir com Esc),
             // e pular isso fazia a habilidade disparar sem direito a mudar de ideia.

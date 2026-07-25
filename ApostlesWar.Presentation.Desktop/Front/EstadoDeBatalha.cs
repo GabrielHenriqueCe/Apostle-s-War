@@ -20,7 +20,8 @@ namespace ApostlesWar.Presentation.Desktop.Front
         List<HabilidadeVista> Habilidades,  // as do QuemAge, quando é a vez de um humano
         List<int> AlvosValidos,             // Ids clicáveis agora (vazio = ninguém)
         string? Mensagem,                   // linha de narração (uso de habilidade, passiva...)
-        int LadoVencedor = 0                // no Fim: 1=esquerda venceu, 2=direita; 0=sem split (campanha)
+        int LadoVencedor = 0,               // no Fim: 1=esquerda venceu, 2=direita; 0=sem split (campanha)
+        bool Auto = false                   // o automático está ligado? (o botão se desenha daqui)
     );
 
     /// <summary>Em que ponto do turno a tela está — o JS usa pra saber o que é clicável.</summary>

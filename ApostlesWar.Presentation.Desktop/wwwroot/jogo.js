@@ -791,6 +791,11 @@ function desenhar() {
     document.getElementById('turno').textContent = `Turno ${estado.turno}`;
     confirmarAtuais = alvosDeConfirmacao();
 
+    // O botão do automático se desenha do estado: é o C# que manda, e ele desliga o modo sozinho a
+    // cada batalha nova. Sem isto o botão continuaria dizendo ON numa luta em que o controle já
+    // voltou pro jogador.
+    if (!!estado.auto !== autoLigado) aplicarAuto(!!estado.auto);
+
     // Fim de batalha: mensagem POR LADO (vitória/derrota) por cima de tudo (clique/Enter/Esc = sair).
     // O "🚪 sair" fica embaixo do overlay — não precisa escondê-lo, qualquer clique cai na tela de fim.
     const acabou = nomeDaFase(estado) === 'Fim';
@@ -1132,6 +1137,30 @@ document.getElementById('velocidade').addEventListener('click', () => {
     velocidade = VELOCIDADES[(VELOCIDADES.indexOf(velocidade) + 1) % VELOCIDADES.length];
     aplicarVelocidade();
 });
+
+// ---------- automático ----------
+// Interruptor: liga e o jogo escolhe as jogadas por você; clica de novo e o controle volta. O C#
+// lê o estado no começo de cada decisão, então desligar no meio de um turno que o cérebro já
+// começou só devolve o controle na PRÓXIMA jogada — igual ao 🚪 sair, que também é lido em ponto
+// de espera e não no meio da animação.
+//
+// O botão NÃO guarda o estado: ele se desenha do `estado.auto` que vem do C# (ver desenhar()). Isso
+// é o que mantém os dois em acordo quando o C# desliga o modo sozinho — o que acontece a cada
+// batalha nova, pra ninguém entrar numa luta sem o controle que achava que tinha.
+let autoLigado = false;
+
+document.getElementById('auto').addEventListener('click', () => {
+    autoLigado = !autoLigado;
+    aplicarAuto(autoLigado);          // pinta na hora: esperar o próximo estado dá sensação de travado
+    mandar('auto', autoLigado ? 1 : 0);
+});
+
+function aplicarAuto(ligado) {
+    autoLigado = ligado;
+    const b = document.getElementById('auto');
+    b.classList.toggle('ligado', ligado);
+    b.textContent = ligado ? '🤖 auto ON' : '🤖 auto';
+}
 
 // ---------- log persistente ----------
 // O log substitui a frase solta no meio da tela. Como tudo fica registrado e rolável, a espera

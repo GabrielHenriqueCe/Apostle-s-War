@@ -396,10 +396,23 @@ O cérebro nunca pergunta `is Dano` — seria reabrir o dispatch por tipo concre
 +20 testes headless. **É o primeiro pedaço do JOGO que roda sem tela:** decidir é puro, então dá pra
 provar comportamento ("não cura quem está inteiro", "prefere o abate"), não só mecanismo.
 
-### PR-C — o botão Auto no front (a fazer)
+### PR-C ✅ — o botão Auto no front
 
-Espelha o Sair: flag `volatile` na ponte, lido entre turnos; `ControladorJogadorWeb` delega ao
-cérebro quando ligado. Clicar de novo devolve o manual na próxima decisão. Ritmo não muda.
+`🤖 auto` na barra da batalha, ao lado da velocidade. Espelha o Sair: flag `volatile` na ponte
+(thread da UI escreve, thread do jogo lê). **Diferença que importa:** o `_sairPedido` é zerado pelo
+`LimparPendentes()` a cada turno porque é um PEDIDO; o auto é ESTADO e tem que atravessar os turnos.
+
+- **Lido no começo de cada decisão** — é isso que faz ligar/desligar valerem "entre turnos": o turno
+  que o cérebro já começou termina, e o controle volta na PRÓXIMA pergunta.
+- **A mensagem `auto` vira flag E entra na fila.** A fila é o que ACORDA um turno humano já parado
+  esperando clique — sem ela, ligar o automático no meio da escolha travaria o jogo pra sempre.
+- **O botão se desenha do `estado.auto`**, como todo o resto da tela. É o que o mantém honesto quando
+  o C# desliga o modo sozinho — o que acontece a cada batalha nova (`DesligarAuto()` ao lado do
+  `SessaoDoFront.Reiniciar()`), pra ninguém entrar numa luta sem o controle que achava que tinha.
+- **Duas instâncias de `ControladorBot`**: o adversário e o automático do jogador. Mesmo cérebro,
+  instâncias separadas — cada um memoriza o próprio alvo entre escolher-ação e escolher-alvo.
+- **Ritmo NÃO muda** (é auto *assistido*, o ponto é ver acontecer) e o **Sair continua funcionando**
+  com o automático ligado: ele é detectado na espera entre eventos, caminho independente do controlador.
 
 ---
 

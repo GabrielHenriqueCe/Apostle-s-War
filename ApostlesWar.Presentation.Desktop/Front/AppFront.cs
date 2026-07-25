@@ -113,9 +113,12 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 var perfil = new PerfilService(repositorio, campeoes);
                 var campanha = new CampanhaService(arsenal, campeoes, capitulos, repositorio);
 
+                // Dois ControladorBot: um é o adversário, o outro assume quando o jogador liga o
+                // automático. Mesmo cérebro, instâncias separadas — cada um memoriza o próprio alvo
+                // entre escolher-ação e escolher-alvo, e misturá-los seria um lado mirar pelo outro.
                 var combate = new CombateService(
                     arsenal, campeoes, personagens, tela, selecaoDeAlvo,
-                    controladorJogador: new ControladorJogadorWeb(sessao, ponte),
+                    controladorJogador: new ControladorJogadorWeb(sessao, ponte, new ControladorBot(selecaoDeAlvo)),
                     controladorBot: new ControladorBot(selecaoDeAlvo),
                     apresentacao, relogio);
 

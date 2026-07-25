@@ -39,6 +39,17 @@ namespace ApostlesWar.Presentation.Desktop.Front
         private volatile bool _sairPedido;
         public bool SairPedido => _sairPedido;
 
+        // Modo AUTOMÁTICO: o cérebro joga no lugar do humano. É um INTERRUPTOR, não um pedido — por
+        // isso, ao contrário do _sairPedido, NÃO é zerado pelo LimparPendentes: ele tem que
+        // atravessar os turnos até o jogador clicar de novo. volatile pelo mesmo motivo (a thread da
+        // UI escreve no clique, a thread do jogo lê ao decidir).
+        private volatile bool _autoLigado;
+        public bool AutoLigado => _autoLigado;
+
+        /// <summary>Devolve o controle ao jogador. Chamado no começo de cada batalha: entrar numa luta
+        /// nova com o automático herdado da anterior seria tirar o controle de quem não pediu.</summary>
+        public void DesligarAuto() => _autoLigado = false;
+
         private static readonly JsonSerializerOptions Json = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -120,6 +131,11 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 // de habilidade/alvo.
                 if (msg.Tipo == "pronto") { _telaPronta.TrySetResult(); return; }
                 if (msg.Tipo == "velocidade") { _ritmo.Definir(msg.Valor); return; }
+
+                // "auto" é flag E entra na fila. A flag porque é estado (vale nos próximos turnos); a
+                // fila porque, se o humano JÁ está parado esperando um clique, é ela que o acorda —
+                // sem isso, ligar o automático no meio da escolha travaria o jogo pra sempre.
+                if (msg.Tipo == "auto") _autoLigado = msg.Valor != 0;
 
                 // "sair" também vira flag: o turno humano lê da fila (EscolherAcao), mas o Bot×Bot /
                 // turno do bot não lê nada — a espera entre eventos observa o flag.

@@ -237,6 +237,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                     var time2 = cfg.Time2.Select(i => pool[i]).ToList();
 
                     _sessao.Reiniciar();       // batalha nova = tela limpa (senão os antigos acumulam)
+                    _ponte.DesligarAuto();     // e controle de volta com o jogador
                     _ponte.LimparPendentes();  // dropa cliques da montagem + zera o "sair"
                     if (_combate.ExecutarArenaComTimes(time1, time2, cfg.Bot1, cfg.Bot2))
                         EsperarVoltarAoMenu();
@@ -381,6 +382,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 if (msg.Tipo == "iniciarFase" && ValidarFase(msg.Texto, faccao, out Fases fase, out var time))
                 {
                     _sessao.Reiniciar();
+                    _ponte.DesligarAuto();
                     _ponte.LimparPendentes();
                     ResultadoFase resultado = _combate.ExecutarFaseComTime(time, faccao, fase);
 

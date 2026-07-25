@@ -132,6 +132,43 @@ namespace Tests
         /// vale muito mais que o A1; foi assim que este teste pegou o bot preferindo bater quando o
         /// veneno era 1 stack num alvo pequeno (ele estava certo, o teste é que pedia a coisa errada).
         /// </summary>
+        /// <summary>
+        /// A pergunta do Gabriel: se a habilidade de explosão faz MAIS coisas, o bot ainda prefere o
+        /// A1? Não — e as duas explosões reais do jogo ganham por motivos diferentes.
+        ///
+        /// Putrefação (Zumbi) = Dano + Explodir + Cura, em ÁREA: mesmo sem veneno no campo (explosão
+        /// prevendo 0) e com o time inteiro (cura sem serventia), ela empata com o A1 em "Ferir" e
+        /// vence no desempate de alcance — área bate alvo único.
+        ///
+        /// Inferno (Diabo) = AplicarDebuff + Explodir: o debuff a coloca em "Enfraquecer", acima de
+        /// "Ferir", então ela nem chega a ser comparada por dano.
+        ///
+        /// Só perderia pro A1 uma explosão SECA de alvo único — forma que não existe no roster.
+        /// </summary>
+        [Fact]
+        public void Explosao_QueFazMaisCoisas_GanhaDoA1_MesmoSemNadaPraDetonar()
+        {
+            var putrefacao = new HabilidadeAtiva("Putrefação", "💀", cooldown: 0, "",
+                numeroDeAlvos: int.MaxValue, TipoAlvo.Explicito, TipoLista.Inimigos, EstadoAlvo.Vivos,
+                new List<Acao> { new Dano(1.0), new Explodir(Seletor.Tipo<Veneno>()) });
+
+            var inferno = new HabilidadeAtiva("Inferno", "🔥", cooldown: 0, "",
+                numeroDeAlvos: int.MaxValue, TipoAlvo.Explicito, TipoLista.Inimigos, EstadoAlvo.Vivos,
+                new List<Acao>
+                {
+                    new AplicarDebuff(() => new Queima(stacks: 2), Escopo.TodosInimigos),
+                    new Explodir(Seletor.Tipo<Queima>(), Escopo.TodosInimigos),
+                });
+
+            var inimigo = Champ(hp: 5000);   // sem veneno e sem queima: as explosões preveem 0
+
+            var comPutrefacao = Champ(habs: putrefacao);
+            Assert.Same(putrefacao, Bot().EscolherAcao(comPutrefacao, new() { comPutrefacao }, new() { inimigo }));
+
+            var comInferno = Champ(habs: inferno);
+            Assert.Same(inferno, Bot().EscolherAcao(comInferno, new() { comInferno }, new() { inimigo }));
+        }
+
         [Fact]
         public void Explode_QuandoADetonacaoTiraMaisVidaQueOAtaque()
         {

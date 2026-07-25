@@ -112,6 +112,7 @@ namespace Tests
         {
             public MetadeDoDano() : base("MetadeFake", "🧪", 0, "corta o dano pela metade") { }
             public int ModificarDanoRecebido(Combate portador, int dano) => dano / 2;
+            public int PreverDanoRecebido(Combate portador, int dano) => dano / 2;   // puro: prever == modificar
         }
 
         [Fact]

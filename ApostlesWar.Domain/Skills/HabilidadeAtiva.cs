@@ -113,8 +113,12 @@ namespace ApostlesWar.Domain
         /// Monta o conjunto de combatentes que uma ação atinge: pega a lista do Escopo dela e
         /// filtra pelo EstadoAlvo dela, avaliado AGORA (não na resolução). Snapshot (ToList) pra
         /// não iterar uma coleção que a própria ação pode alterar (ex: reviver muda quem é vivo).
+        ///
+        /// PÚBLICO porque quem AVALIA a habilidade antes de usá-la (o bot) precisa da mesma resposta
+        /// que o interpretador vai dar — "quem esta ação atinge?" tem que ser uma pergunta só. Uma
+        /// segunda leitura das regras de escopo divergiria da primeira.
         /// </summary>
-        private List<Combate> ResolverEscopo(Acao acao, List<Combate> resolvidos, ContextoCombate ctx)
+        public List<Combate> ResolverEscopo(Acao acao, List<Combate> resolvidos, ContextoCombate ctx)
         {
             IEnumerable<Combate> conjunto = acao.Escopo switch
             {

@@ -27,6 +27,15 @@ namespace ApostlesWar.Domain
             _chance = chance;
         }
 
+        public override Utilidade Utilidade => Utilidade.Enfraquecer;
+
+        /// <summary>
+        /// Se TODOS os alvos bloqueiam este debuff (Abóbora e afins), não há o que fazer neles.
+        /// Mesma sonda do AplicarBuff, pela mesma porta <see cref="Combate.PodeReceber"/>.
+        /// </summary>
+        public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
+            => alvos.Any(a => a.PodeReceber(_fabrica(atacante)));
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             if (_chance < 1.0 && Random.Shared.NextDouble() >= _chance) return;

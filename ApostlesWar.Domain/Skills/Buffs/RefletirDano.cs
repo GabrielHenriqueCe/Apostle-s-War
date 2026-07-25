@@ -11,12 +11,17 @@ namespace ApostlesWar.Domain.Skills.Buffs
     /// bloqueio do atacante, mas NÃO dispara reação (não reflete de volta — loop
     /// quebrado). Reflete qualquer golpe que tenha causado dano recebido.
     /// </summary>
-    public class RefletirDano : Buff, IReageAoReceberDano
+    public class RefletirDano : Buff, IReageAoReceberDano, IPuneQuemAtaca
     {
         public RefletirDano(int duracao = 2, double percentual = 0.15)
             : base("Reflexo", "🥢", duracao, percentual,
                 $"Reflete {percentual * 100:F0}% do dano recebido.")
         { }
+
+        // A punição mais barata das três: proporcional ao dano que REALMENTE passou (IReageAoReceber
+        // Dano). Contra alvo blindado ela nem dispara — atacar quem reflete e está protegido sai de
+        // graça, ao contrário dos espinhos e do contra-ataque, que reagem ao ATO.
+        public TipoDePunicao Punicao => TipoDePunicao.RefleteDano;
 
         public List<ResultadoReacao> AoReceberDano(ContextoReacao ctx)
         {

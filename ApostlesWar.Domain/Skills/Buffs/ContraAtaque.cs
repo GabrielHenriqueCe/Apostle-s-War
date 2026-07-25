@@ -12,12 +12,16 @@ namespace ApostlesWar.Domain.Skills.Buffs
     /// alvo revidado. O loop A↔B é quebrado por profundidade (o executor não
     /// processa Revide de um revide), não pela Natureza do golpe.
     /// </summary>
-    public class ContraAtaque : Buff, IReageAoSerAtacado
+    public class ContraAtaque : Buff, IReageAoSerAtacado, IPuneQuemAtaca
     {
         public ContraAtaque(int duracao = 2)
             : base("Contra-Ataque", "↩️", duracao, 0,
                 "Contra-ataca ao ser atacado (1x por agressor, por turno).")
         { }
+
+        // Custo imediato e único: uma A1 na cara. Note o gate logo abaixo — se o golpe MATA o
+        // portador, o contra-ataque não sai; matar é a forma de não pagar.
+        public TipoDePunicao Punicao => TipoDePunicao.ContraAtaca;
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)
         {

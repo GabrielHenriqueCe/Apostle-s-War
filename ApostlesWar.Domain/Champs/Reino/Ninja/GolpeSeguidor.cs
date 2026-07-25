@@ -24,6 +24,15 @@ namespace ApostlesWar.Domain.Champs.Reino
             _ignorarDefesaPctSeAnteriorCritico = ignorarDefesaPctSeAnteriorCritico;
         }
 
+        public override Utilidade Utilidade => Utilidade.Ferir;
+
+        /// <summary>
+        /// Estima pelo caso SEM o bônus: se o golpe anterior critou é coisa que só se sabe rodando,
+        /// então a previsão fica conservadora — nunca promete um dano que pode não vir.
+        /// </summary>
+        public override int PreverVidaRemovida(Combate atacante, Combate alvo)
+            => atacante.PreverAtaque(alvo, _multiplicador);
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             var anterior = eventos.OfType<EventoDano>().LastOrDefault();

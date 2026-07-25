@@ -43,6 +43,11 @@ namespace ApostlesWar.Domain
             _buffNoRevivido = buffNoRevivido;
         }
 
+        public override Utilidade Utilidade => Utilidade.Reviver;
+
+        // Sem override de TemEfeitoUtil: esta ação mira EstadoAlvo.Mortos, então o Escopo já
+        // entrega só mortos — lista vazia significa, sozinha, "não há quem reviver".
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             alvo.Reviver((int)(alvo.HPMaximo * _percentualHP));

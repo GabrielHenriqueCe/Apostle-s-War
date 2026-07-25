@@ -83,8 +83,13 @@ namespace ApostlesWar.Domain
         /// Ações que a habilidade executa (Balde 1: só aplica uma lista fixa de efeitos).
         /// Na forma-construtor vêm do ctor; subclasses Strangler sobrescrevem (ou sobrescrevem
         /// Ativar direto, se ainda bespoke). Ver ADR-composicao-de-acoes.md.
+        ///
+        /// PÚBLICA porque a habilidade é DADO, e dado se lê: quem precisa raciocinar sobre o que ela
+        /// faz — sem executá-la — lê esta lista. É o que o controlador automático usa pra decidir se
+        /// vale a pena usar a habilidade, perguntando a cada ação o que ela entrega. Uma habilidade
+        /// que só se revela executando não poderia ser avaliada.
         /// </summary>
-        protected virtual List<Acao> Acoes => _acoes;
+        public virtual List<Acao> Acoes => _acoes;
 
         /// <summary>
         /// Interpretador default (o MOTOR — ver ADR-composicao-de-acoes §3): roda cada Acao na
@@ -108,6 +113,20 @@ namespace ApostlesWar.Domain
                     acao.Executar(ctx.Atacante, combatente, eventos);
             return eventos;
         }
+
+        /// <summary>
+        /// Quem esta ação PODERIA atingir, do ponto de vista de quem ainda está DECIDINDO usar a
+        /// habilidade — antes, portanto, de existir um alvo escolhido.
+        ///
+        /// Difere do que roda na ativação em um ponto, e de propósito: onde o `Ativar` usa os alvos
+        /// já resolvidos (o pick + os extras, limitados por `NumeroDeAlvos`), aqui entra a lista
+        /// principal inteira. É a leitura certa pra pergunta "vale a pena?" — uma cura só faz sentido
+        /// se ALGUÉM do lado está ferido, independente de qual deles o pick vai sortear depois.
+        /// O resto do caminho é o mesmo (`FiltrarPorEstado` da habilidade → `ResolverEscopo` da ação),
+        /// então escopo e estado respondem uma vez só, aqui e lá.
+        /// </summary>
+        public List<Combate> AlvosPossiveis(Acao acao, ContextoCombate ctx)
+            => ResolverEscopo(acao, FiltrarPorEstado(ObterListaPrincipal(ctx)), ctx);
 
         /// <summary>
         /// Monta o conjunto de combatentes que uma ação atinge: pega a lista do Escopo dela e

@@ -70,6 +70,10 @@ namespace ApostlesWar.Domain.Skills.Debuffs
         /// IStatusComTick: aplica o dano total imediato, remove o Veneno e devolve o EventoDano
         /// da detonação (o detonador é o Atacante do evento).
         /// </summary>
+        public int PreverDetonacao(Combate portador)
+            => portador.PreverVidaRemovida(
+                portador.PreverDanoRecebido(DanoTotalImediato(portador), NaturezasDano.Veneno));
+
         public EventoDano Detonar(Combate portador, Combate detonador)
         {
             int bruto = DanoTotalImediato(portador);

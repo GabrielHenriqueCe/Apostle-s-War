@@ -21,7 +21,7 @@ namespace ApostlesWar.Domain.Skills.Ativas
         public override TipoLista TipoLista => TipoLista.Inimigos;
         public override EstadoAlvo EstadoAlvo => EstadoAlvo.Vivos;
 
-        protected override List<Acao> Acoes => new()
+        public override List<Acao> Acoes => new()
         {
             new Dano(1.0),
         };

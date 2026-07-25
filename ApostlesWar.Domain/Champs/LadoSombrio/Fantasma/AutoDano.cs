@@ -13,6 +13,9 @@ namespace ApostlesWar.Domain.Champs.LadoSombrio
         public AutoDano(ValorFn valor, Escopo escopo = Escopo.ProprioAtacante, EstadoAlvo estadoAlvo = EstadoAlvo.Vivos)
             : base(escopo, estadoAlvo) => _valor = valor;
 
+        // O Fantasma se machuca PRA usar a habilidade: é o preço, não a entrega. Ver Utilidade.Custo.
+        public override Utilidade Utilidade => Utilidade.Custo;
+
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
             => alvo.ReceberDano(_valor(atacante, alvo, eventos), NaturezasDano.DanoIndireto);
     }

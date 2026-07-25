@@ -15,7 +15,7 @@ namespace ApostlesWar.Application.Services
         private readonly ArsenalService _arsenalService;
         private readonly CampeoesService _campeoesService;
         private readonly PersonagemService _personagemService;
-        private readonly ITelaDeCombate _combateView;
+        private readonly ITelaDeCombate _tela;
         private readonly SelecaoDeAlvoService _selecaoDeAlvoService;
         private readonly IControladorDeTurno _controladorJogador;
         private readonly IControladorDeTurno _controladorBot;
@@ -29,14 +29,14 @@ namespace ApostlesWar.Application.Services
         private Dictionary<Equipe, IControladorDeTurno> _controladores = new();
 
         public CombateService(ArsenalService arsenalService,
-            CampeoesService campeoesService, PersonagemService personagemService, ITelaDeCombate combateView,
+            CampeoesService campeoesService, PersonagemService personagemService, ITelaDeCombate tela,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
             IControladorDeTurno controladorBot, IApresentacao apresentacao, RelogioDoCombate relogio)
         {
             _arsenalService = arsenalService;
             _campeoesService = campeoesService;
             _personagemService = personagemService;
-            _combateView = combateView;
+            _tela = tela;
             _selecaoDeAlvoService = selecaoDeAlvoService;
             _controladorJogador = controladorJogador;
             _controladorBot = controladorBot;
@@ -57,7 +57,7 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         private void Aguardar(int ms)
         {
-            if (_apresentacao.AguardarAnimacao(ms) && _combateView.ConfirmarEncerramento())
+            if (_apresentacao.AguardarAnimacao(ms) && _tela.ConfirmarEncerramento())
                 throw new BatalhaAbortada();
         }
 
@@ -143,12 +143,12 @@ namespace ApostlesWar.Application.Services
         {
             if (ticks.Count == 0) return;
 
-            _combateView.LimparTela();
-            _combateView.ExibirPartida(jogador, inimigo);
+            _tela.LimparTela();
+            _tela.ExibirPartida(jogador, inimigo);
             foreach (var ev in ticks)
             {
-                if (ev is EventoDano d) _combateView.ExibirDanoDeStatus(d);
-                else if (ev is EventoCura c) _combateView.ExibirCura(c);
+                if (ev is EventoDano d) _tela.ExibirDanoDeStatus(d);
+                else if (ev is EventoCura c) _tela.ExibirCura(c);
                 Aguardar(1500);
             }
         }
@@ -186,15 +186,15 @@ namespace ApostlesWar.Application.Services
 
         private void ExecutarTurno(Combate atacante, List<Combate> defensores, List<Combate> aliados)
         {
-            _combateView.LimparTela();
+            _tela.LimparTela();
 
             // Ação forçada (Irritar): o status decide o alvo; o fluxo executa A1 (mas paralisia pode interromper)
             var forcaAcao = atacante.StatusAtivos.OfType<IForcaAcao>().FirstOrDefault();
             if (forcaAcao != null)
             {
                 var alvoForcado = forcaAcao.AlvoForcado();
-                _combateView.ExibirPartida(aliados, defensores);
-                _combateView.ExibirMensagemPassiva(
+                _tela.ExibirPartida(aliados, defensores);
+                _tela.ExibirMensagemPassiva(
                     $"{atacante.Personagem.Simbolo} está irritado e ataca {alvoForcado.Personagem.Simbolo} automaticamente!");
                 Aguardar(1500);
 
@@ -231,7 +231,7 @@ namespace ApostlesWar.Application.Services
             if (paralisia == null) return false;
             if (!paralisia.Paralisa()) return false;
 
-            _combateView.ExibirMensagemPassiva(
+            _tela.ExibirMensagemPassiva(
                 $"{atacante.Personagem.Simbolo} {atacante.Personagem.Nome} estava com medo e não conseguiu agir!");
             Aguardar(1500);
             return true;
@@ -292,13 +292,13 @@ namespace ApostlesWar.Application.Services
                 // Cura é irmã do dano no stream, mas só EXIBE — não dispara reação de dano.
                 if (ev is EventoCura cura)
                 {
-                    _combateView.ExibirCura(cura);
+                    _tela.ExibirCura(cura);
                     Aguardar(1500);
                     continue;
                 }
 
                 var r = (EventoDano)ev;
-                _combateView.ExibirResultadoAtaque(atacante, r.Alvo, r);
+                _tela.ExibirResultadoAtaque(atacante, r.Alvo, r);
                 Aguardar(1500);
 
                 ProcessarReacoesAlvo(r.Alvo, atacante, r);
@@ -323,8 +323,8 @@ namespace ApostlesWar.Application.Services
         {
             foreach (var ev in resultados)
             {
-                if (ev is EventoCura cura) _combateView.ExibirCura(cura);
-                else _combateView.ExibirResultadoAtaque(atacante, ((EventoDano)ev).Alvo, (EventoDano)ev);
+                if (ev is EventoCura cura) _tela.ExibirCura(cura);
+                else _tela.ExibirResultadoAtaque(atacante, ((EventoDano)ev).Alvo, (EventoDano)ev);
             }
 
             if (resultados.Count > 0) Aguardar(1500);
@@ -351,7 +351,7 @@ namespace ApostlesWar.Application.Services
             // por BOT chegando (apresentação segue o CONTROLE, não a classe).
             if (ControladorDe(atacante) == _controladorBot && hab is AtaqueBasico)
             {
-                _combateView.ExibirPreparacaoAtaque(atacante, defensores);
+                _tela.ExibirPreparacaoAtaque(atacante, defensores);
                 Aguardar(1500);
             }
 
@@ -368,7 +368,7 @@ namespace ApostlesWar.Application.Services
             // Nome da habilidade PRIMEIRO — "X usou {hab}!" antes dos resultados (narrativa).
             if (hab is not AtaqueBasico)
             {
-                _combateView.ExibirUsoHabilidade(atacante, hab);
+                _tela.ExibirUsoHabilidade(atacante, hab);
                 Aguardar(1500);
             }
 
@@ -416,7 +416,7 @@ namespace ApostlesWar.Application.Services
                 if (!res.Revide.Alvo.EstaVivo()) continue;
 
                 var revide = res.Revide.Habilidade.AtivarComNatureza(alvo, res.Revide.Alvo, NaturezasDano.Ataque);
-                _combateView.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
+                _tela.ExibirResultadoAtaque(alvo, revide.Alvo, revide);
                 Aguardar(1500);
                 // No revide, o portador do próximo nível é o revidado; a Batalha resolve a
                 // perspectiva dele sozinha (não precisa mais passar/inverter times na mão).
@@ -512,13 +512,13 @@ namespace ApostlesWar.Application.Services
             foreach (var res in resultados)
             {
                 if (!string.IsNullOrEmpty(res.Mensagem))
-                    _combateView.ExibirMensagemPassiva(res.Mensagem);
+                    _tela.ExibirMensagemPassiva(res.Mensagem);
 
                 if (res.Dano != null)
-                    _combateView.ExibirResultadoAtaque(origem, res.Dano.Alvo, res.Dano);
+                    _tela.ExibirResultadoAtaque(origem, res.Dano.Alvo, res.Dano);
 
                 if (res.Cura != null)
-                    _combateView.ExibirCura(res.Cura);   // mesma view da cura de habilidade
+                    _tela.ExibirCura(res.Cura);   // mesma view da cura de habilidade
 
                 if (res.Mensagem != "" || res.Dano != null || res.Cura != null)
                     Aguardar(1500);
@@ -570,21 +570,9 @@ namespace ApostlesWar.Application.Services
         #region Fluxo de fase
 
         /// <summary>
-        /// A fase da campanha COM a seleção de time embutida (tela de console via SelecionarTime). É o
-        /// wrapper do console; o front pica o time por conta própria e chama ExecutarFaseComTime direto —
-        /// mesmo split de ExecutarArena→ExecutarArenaComTimes.
-        /// </summary>
-        public ResultadoFase ExecutarFase(Faccao capitulo, Fases fase)
-        {
-            var time = _campeoesService.SelecionarTime();
-            if (time.Count == 0) return ResultadoFase.Cancelou;   // desistiu na seleção de time — sem derrota
-            return ExecutarFaseComTime(time, capitulo, fase);
-        }
-
-        /// <summary>
         /// A fase da campanha a partir de um time JÁ ESCOLHIDO — quem monta o time é problema de quem
-        /// chama (menu de console ou clique no front). Roda as 2 rodadas com o multiplicador de fase e os
-        /// itens equipados. A recompensa (unlock/drop/save) é DEPOIS, no CampanhaService.
+        /// chama (o clique no front). Roda as 2 rodadas com o multiplicador de fase e os itens
+        /// equipados. A recompensa (unlock/drop/save) é DEPOIS, no CampanhaService.
         /// </summary>
         public ResultadoFase ExecutarFaseComTime(List<Personagem> time, Faccao capitulo, Fases fase)
         {
@@ -609,7 +597,7 @@ namespace ApostlesWar.Application.Services
             {
                 bool venceu = ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)
                            && ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
-                _combateView.ExibirResumoBatalha(jogador);   // resumo (vitória ou derrota; não em abandono)
+                _tela.ExibirResumoBatalha(jogador);   // resumo (vitória ou derrota; não em abandono)
                 return venceu ? ResultadoFase.Venceu : ResultadoFase.Perdeu;
             }
             catch (BatalhaAbortada)
@@ -632,7 +620,7 @@ namespace ApostlesWar.Application.Services
 
             // Mostra o board da rodada ANTES de lutar. No console é um redraw a mais (inofensivo); no
             // front é o que troca o board pros inimigos NOVOS (senão a rodada 2 mostraria os da 1 mortos).
-            _combateView.ExibirPartida(jogador, inimigo);
+            _tela.ExibirPartida(jogador, inimigo);
 
             // Campanha: Equipe1 (jogador) = humano, Equipe2 (inimigos) = bot. No Versus, o ponto de
             // entrada monta este mapa conforme o modo escolhido (J×B / B×J / J×J / B×B).
@@ -646,26 +634,13 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
-        /// Modo ARENA (laboratório de rebalance): duelo Equipe1 × Equipe2 com controle configurável
-        /// (bot1/bot2 = cada equipe é bot?). SEM multiplicador de fase (luta justa, mult 1.0), SEM
-        /// itens (leitura limpa de balance) e SEM recompensa/save. Reusa o mesmo loop de combate — o
-        /// seam Batalha/controlador faz tudo funcionar independente da classe. Ambos os times são
-        /// Jogador (a estrutura, não o tipo, define quem é inimigo de quem). Esc = sai sem drama.
-        /// </summary>
-        public void ExecutarArena(bool bot1, bool bot2)
-        {
-            var time1 = _campeoesService.SelecionarTimeArena();
-            if (time1.Count == 0) return;   // desistiu na seleção
-            var time2 = _campeoesService.SelecionarTimeArena();
-            if (time2.Count == 0) return;
-
-            ExecutarArenaComTimes(time1, time2, bot1, bot2);
-        }
-
-        /// <summary>
-        /// A Arena a partir de times JÁ ESCOLHIDOS — a seleção é problema de quem chama. Existe porque
-        /// o pick de campeões é uma TELA (console hoje, front amanhã) e a luta não deveria depender
-        /// dela: o front entra direto numa batalha com times sorteados, sem passar por menu nenhum.
+        /// Modo ARENA (laboratório de rebalance): duelo Equipe1 × Equipe2 a partir de times JÁ
+        /// ESCOLHIDOS, com controle configurável (bot1/bot2 = cada equipe é bot?). SEM multiplicador
+        /// de fase (luta justa, mult 1.0), SEM itens (leitura limpa de balance) e SEM recompensa/save.
+        /// Reusa o mesmo loop de combate — o seam Batalha/controlador faz tudo funcionar independente
+        /// da classe. Ambos os times são Jogador (a estrutura, não o tipo, define quem é inimigo de
+        /// quem). A seleção é problema de quem chama: o pick de campeões é TELA, e a luta não depende
+        /// dela. Esc = sai sem drama.
         /// </summary>
         /// <returns>true = a batalha terminou naturalmente (resumo na tela); false = foi ABORTADA no
         /// meio (Esc/sair) — quem chama deve voltar ao menu sem esperar a tela de resultado.</returns>
@@ -685,12 +660,12 @@ namespace ApostlesWar.Application.Services
 
             // Arena é PVP: a tela fixa os lados na ordem montada (equipe1=esquerda, equipe2=direita),
             // não importa quem controla. No console é no-op.
-            _combateView.ExibirInicioArena(equipe1.Membros, equipe2.Membros);
+            _tela.ExibirInicioArena(equipe1.Membros, equipe2.Membros);
 
             try
             {
                 bool venceu1 = ExecutarCombate(batalha);
-                _combateView.ExibirResumoArena(equipe1.Membros, equipe2.Membros, venceu1);
+                _tela.ExibirResumoArena(equipe1.Membros, equipe2.Membros, venceu1);
                 return true;
             }
             catch (BatalhaAbortada)

@@ -7,13 +7,13 @@ using ApostlesWar.Domain;
 namespace ApostlesWar.Presentation.Desktop.Front
 {
     /// <summary>
-    /// O "de fora da luta" do front: perfil do jogador, menu principal, configurações — e roteia a
-    /// escolha. É o irmão de menu do que o <see cref="ControladorJogadorWeb"/> é pro combate:
-    /// navegação por CLIQUE, não por cursor (por isso não roda o GerenciadorDeJogoService, que é o
-    /// fluxo de console). Reaproveita os mesmos SERVICES; só a casca de navegação é do front.
+    /// O "de fora da luta": perfil do jogador, menu principal, campanha, arena, arsenal,
+    /// configurações — e roteia a escolha. É o irmão de menu do que o
+    /// <see cref="ControladorJogadorWeb"/> é pro combate. Reaproveita os SERVICES da Application; só
+    /// a casca de navegação mora aqui.
     ///
-    /// FATIA ATUAL: perfil (nome + avatar) → menu principal → Arena / Configurações. Campanha e o
-    /// Novo Jogo/Continuar de progresso entram quando a Campanha existir no front (hoje "em breve").
+    /// Regra da casa: o que é REGRA (o que desbloqueia, o que dropa, quando salvar) fica nos
+    /// services; aqui só entra o que é tela. Ver <see cref="ApostlesWar.Application.Services.CampanhaService"/>.
     /// </summary>
     internal class FluxoDoFront
     {
@@ -397,7 +397,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                     if (resultado == ResultadoFase.Venceu)
                         _ponte.EnviarVitoria(MontarRecompensa(_campanha.ProcessarVitoria(faccao, fase)));
                     else
-                        _ponte.EnviarDerrota();   // Perdeu (Cancelou não acontece — o front pica o time)
+                        _ponte.EnviarDerrota();
 
                     EsperarContinuar();
                     // o while re-renderiza as fases já atualizadas

@@ -1,7 +1,7 @@
 namespace ApostlesWar.Application.Portas
 {
     /// <summary>
-    /// Porta de PERSISTÊNCIA: abstrai onde/como o save é guardado (par dos seams IEntrada/
+    /// Porta de PERSISTÊNCIA: abstrai onde/como o save é guardado (par dos seams ITelaDeCombate/
     /// IApresentacao, do lado de dados). A porta é dona da serialização + do armazenamento +
     /// do tratamento de corrupção — o service entrega/recebe o OBJETO e não toca em arquivo nem JSON.
     /// A implementação mora na Infrastructure (`SaveLocal`, arquivo JSON); no porte Unity, troca-se

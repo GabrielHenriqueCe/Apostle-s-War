@@ -1,15 +1,10 @@
 {
-  // Perfis de execução do VS: o dropdown da setinha ao lado do Play.
-  // O jogo tem duas peles sobre o mesmo motor (ver App/Program.cs): sem argumento
-  // abre o CONSOLE; com --front abre a janela WEBVIEW. Versionado de propósito —
-  // quem clonar o repo já ganha os dois botões.
+  // Perfil de execução do VS: o botão Play.
+  // Já houve dois perfis aqui (Console e Front), de quando o jogo tinha duas peles sobre o mesmo
+  // motor. Sobrou a webview — o .exe abre a janela direto, sem argumento.
   "profiles": {
-    "Console": {
+    "Apostle's War": {
       "commandName": "Project"
-    },
-    "Front (webview)": {
-      "commandName": "Project",
-      "commandLineArgs": "--front"
     }
   }
 }

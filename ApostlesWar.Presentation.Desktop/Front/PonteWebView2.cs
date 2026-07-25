@@ -19,7 +19,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
     /// JS e C# vivem no MESMO processo e trocam bilhetes direto pela webview (ADR do front).
     ///
     /// O PONTO CRÍTICO É A THREAD. A webview exige a thread de UI (STA) e o `Application.Run` toma ela
-    /// pra si. O jogo, por outro lado, é um laço SÍNCRONO que bloqueia esperando input (IEntrada.Ler).
+    /// pra si. O jogo, por outro lado, é um laço SÍNCRONO que bloqueia esperando o input do jogador.
     /// Se rodassem juntos, um congelaria o outro. A solução: a UI fica na thread principal e o jogo roda
     /// numa thread de fundo; a espera do jogo vira `_mensagens.Take()`, que dorme até um clique chegar.
     /// É por isso que NADA do motor precisou virar async — o laço continua exatamente como no console.
@@ -56,7 +56,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
         /// <summary>Espera o JS avisar que carregou. Sem isso, o 1º estado é enviado no vazio.</summary>
         public void EsperarTelaPronta() => _telaPronta.Task.Wait();
 
-        /// <summary>Bloqueia até a tela mandar algo. É o coração do `IEntrada.Ler` no front.</summary>
+        /// <summary>Bloqueia até a tela mandar algo. É a espera por input do jogo inteiro.</summary>
         public MensagemDoFront Esperar() => _mensagens.Take();
 
         /// <summary>Descarta cliques acumulados — evita "clique fantasma" de uma fase anterior. Também
@@ -116,7 +116,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 if (msg is null) return;
 
                 // Mensagens de CONTROLE são atendidas aqui e não entram na fila: a fila é o
-                // `IEntrada.Ler` do jogo, e um clique de velocidade ali seria lido como escolha
+                // espera por input do jogo, e um clique de velocidade ali seria lido como escolha
                 // de habilidade/alvo.
                 if (msg.Tipo == "pronto") { _telaPronta.TrySetResult(); return; }
                 if (msg.Tipo == "velocidade") { _ritmo.Definir(msg.Valor); return; }

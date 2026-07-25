@@ -7,7 +7,7 @@ namespace Tests
     /// <summary>
     /// Testes do <see cref="CampanhaService"/> (a recompensa da vitória: unlock/drop/save) e do
     /// <see cref="ArsenalService.PreverItem"/>. É PURO (sem combate/TTY), então roda headless com um
-    /// repositório fake e um <see cref="ITelaDeMenu"/> no-op (nenhum método de menu é chamado aqui).
+    /// repositório fake — nenhum destes services pede tela.
     /// </summary>
     public class CampanhaServiceTests
     {
@@ -20,30 +20,13 @@ namespace Tests
             public bool Contem(string chave) => _dados.ContainsKey(chave);
         }
 
-        // ITelaDeMenu não é exercitado por ProcessarVitoria — fake no-op só pra construir o CampeoesService.
-        private sealed class MenuNoOp : ITelaDeMenu
-        {
-            public void ExibirMenu(int selecionado) { }
-            public void ExibirMenuArena(int opcao) { }
-            public void ExibirConfirmacaoSaida(int opcao) { }
-            public void MenuCapitulos(int selecionado) { }
-            public void MenuFases(Faccao faccao, int selecionado) { }
-            public void ExibirTelaVitoria(List<Personagem> novosCampeoes, Item? itemDropado) { }
-            public void ExibirTelaDerrota() { }
-            public void ExibirCreditos() { }
-            public void ExibirAviso(string mensagem, int ms) { }
-            public int NavegarBoneco() => 0;
-            public Item? NavegarTrocaItem(int slotEmEdicao, List<Item> itensDoTipo) => null;
-            public List<Personagem> NavegarSelecaoTime(List<Personagem> desbloqueados) => desbloqueados;
-        }
-
         private static (CampanhaService campanha, CapitulosService capitulos, CampeoesService campeoes)
             Montar()
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
-            var campeoes = new CampeoesService(new PersonagemService(), new MenuNoOp(), capitulos);
+            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
             return (new CampanhaService(arsenal, campeoes, capitulos), capitulos, campeoes);
         }
 
@@ -72,7 +55,7 @@ namespace Tests
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
-            var campeoes = new CampeoesService(new PersonagemService(), new MenuNoOp(), capitulos);
+            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
             var campanha = new CampanhaService(arsenal, campeoes, capitulos);
 
             campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1);

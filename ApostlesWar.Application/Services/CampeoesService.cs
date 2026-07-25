@@ -12,7 +12,6 @@ namespace ApostlesWar.Application.Services
         #region Construtor
 
         private readonly PersonagemService _personagemService;
-        private readonly ITelaDeMenu _menuView;
         private readonly CapitulosService _capitulosService;
 
         #endregion
@@ -21,10 +20,9 @@ namespace ApostlesWar.Application.Services
 
         private List<Personagem> desbloqueados = new List<Personagem>();
 
-        public CampeoesService(PersonagemService personagemService, ITelaDeMenu menuService, CapitulosService capitulosService)
+        public CampeoesService(PersonagemService personagemService, CapitulosService capitulosService)
         {
             _personagemService = personagemService;
-            _menuView = menuService;
             _capitulosService = capitulosService;
 
             desbloqueados.Add(_personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot1));
@@ -55,21 +53,9 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
-        /// Solicita ao jogador a escolha de 4 campeões sem repetição e retorna o time selecionado
-        /// </summary>
-        public List<Personagem> SelecionarTime()
-        {
-            return _menuView.NavegarSelecaoTime(ObterDesbloqueados());
-        }
-
-        /// <summary>TODOS os campeões (9 facções × 4 slots) — pool da Arena (laboratório de rebalance:
-        /// qualquer matchup, independente do progresso da campanha). Vazio = jogador desistiu.</summary>
-        public List<Personagem> SelecionarTimeArena() => _menuView.NavegarSelecaoTime(TodosOsCampeoes());
-
-        /// <summary>
-        /// O pool COMPLETO (9 facções × 4 slots), sem passar por tela nenhuma. Separado do
-        /// SelecionarTimeArena porque montar a lista é DADO e escolher dela é TELA: o front sorteia
-        /// daqui pra cair direto numa batalha, sem depender do menu de console.
+        /// O pool COMPLETO (9 facções × 4 slots) — laboratório da Arena: qualquer matchup,
+        /// independente do progresso da campanha. É DADO: quem escolhe dele é a tela, que manda de
+        /// volta o time já montado (`ExecutarArenaComTimes`). O service não pergunta nada a ninguém.
         /// </summary>
         public List<Personagem> TodosOsCampeoes()
         {

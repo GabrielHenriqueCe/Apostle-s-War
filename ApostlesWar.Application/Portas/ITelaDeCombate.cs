@@ -3,23 +3,23 @@ namespace ApostlesWar.Application.Portas
 {
     /// <summary>
     /// Porta de APRESENTAÇÃO DA PARTIDA — o que o fluxo de combate (CombateService) precisa mostrar.
-    /// Irmã do <see cref="IEntrada"/> (entrada) e do <see cref="IApresentacao"/> (espera): junto com
-    /// elas, fecha o isolamento do motor em relação à tela. O console é uma impl
-    /// (<see cref="CombateView"/>); a webview é outra.
+    /// Irmã do <see cref="IApresentacao"/> (a espera): juntas, fecham o isolamento do motor em relação
+    /// à tela. Hoje a webview é a única impl; nasceu com duas (a outra era o console), e é por isso que
+    /// o motor não sabe desenhar nada.
     ///
-    /// O CONTRATO É UM GATILHO, NÃO UM DESENHO. Os nomes são imperativos por herança do console
-    /// ("Exibir..."), mas uma impl não é obrigada a desenhar imperativamente: a do front traduz cada
+    /// O CONTRATO É UM GATILHO, NÃO UM DESENHO. Os nomes são imperativos ("Exibir...") por herança da
+    /// primeira impl, mas nenhuma impl é obrigada a desenhar imperativamente: a do front traduz cada
     /// chamada em (a) um retrato do estado serializado e (b) um evento pra animar. É isso que deixa a
     /// tela declarativa — e que faz trocar emoji por sprite ser mexida só de front, sem tocar no motor.
     ///
-    /// NÃO entram aqui o menu de ação e o menu de alvo (`ExibirAcoes`/`EscolherAlvoNaTela`): esses são
-    /// navegação com CURSOR, formato do console. Quem decide ação/alvo é o
-    /// <see cref="Controllers.IControladorDeTurno"/>, e cada plataforma tem o seu (no front, clique na
-    /// habilidade + clique no alvo). Botar os dois aqui obrigaria a impl web a carregar método morto.
+    /// NÃO entram aqui o menu de ação e o menu de alvo: escolher ação/alvo é decisão, não exibição.
+    /// Quem decide é o <see cref="Controllers.IControladorDeTurno"/>, e cada pele tem o seu (no front,
+    /// clique na habilidade + clique no alvo). Botar os dois aqui obrigaria a impl a carregar método
+    /// morto sempre que a forma de escolher mudasse.
     /// </summary>
     public interface ITelaDeCombate
     {
-        /// <summary>Prepara a tela pro próximo quadro (no console, limpa; no front, pode ser no-op).</summary>
+        /// <summary>Prepara a tela pro próximo quadro. Numa tela que se redesenha do estado, é no-op.</summary>
         void LimparTela();
 
         /// <summary>O retrato dos dois times — é o estado completo da partida.</summary>
@@ -29,7 +29,7 @@ namespace ApostlesWar.Application.Portas
         /// Início da Arena (PVP): a tela recebe os dois times NA ORDEM montada pra fixar os lados
         /// (equipe1=esquerda, equipe2=direita) independente de quem controla — na Arena os lados são
         /// como o jogador montou. A campanha (PVE) não chama isto: segue "o humano à esquerda".
-        /// O console não tem lado fixo → no-op.
+        /// Uma tela sem lado fixo pode ignorar (no-op).
         /// </summary>
         void ExibirInicioArena(List<Combate> equipe1, List<Combate> equipe2);
 

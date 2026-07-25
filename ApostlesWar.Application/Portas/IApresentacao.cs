@@ -2,9 +2,9 @@ namespace ApostlesWar.Application.Portas
 {
     /// <summary>
     /// Seam de apresentação do combate. Encapsula a ESPERA (as pausas dramáticas entre eventos) — e é
-    /// o ponto único onde o cancelamento pluga: a espera ESCUTA o teclado e avisa se o jogador apertou
-    /// Esc pra encerrar a batalha (em vez de dormir cego). Cada Presentation traz seu adaptador
-    /// (`ApresentacaoConsole` no console); o combate não muda. (Forma 1 — espera interrompível.)
+    /// o ponto único onde o cancelamento pluga: a espera ESCUTA o pedido de sair e avisa quem chamou
+    /// (em vez de dormir cega). Cada Presentation traz seu adaptador; o combate não muda.
+    /// (Forma 1 — espera interrompível.)
     /// </summary>
     public interface IApresentacao
     {

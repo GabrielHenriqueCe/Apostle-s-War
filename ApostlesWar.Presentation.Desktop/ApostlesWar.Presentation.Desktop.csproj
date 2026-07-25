@@ -20,7 +20,6 @@
     <ProjectReference Include="..\ApostlesWar.Domain\ApostlesWar.Domain.csproj" />
     <ProjectReference Include="..\ApostlesWar.Application\ApostlesWar.Application.csproj" />
     <ProjectReference Include="..\ApostlesWar.Infrastructure\ApostlesWar.Infrastructure.csproj" />
-    <ProjectReference Include="..\ApostlesWar.Presentation.ConsoleUI\ApostlesWar.Presentation.ConsoleUI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,8 +46,7 @@
     <!-- Semente de save versionada (vem com tudo liberado), que vive na raiz do repo. O jogo
          lê/grava em AppContext.BaseDirectory/Save — que agora é a saída DESTE projeto, por isso
          o Link. PreserveNewest: não sobrescreve progresso já jogado, mas semeia num clone novo. -->
-    <None Include="..\Save\**" Link="Save\%(RecursiveDir)%(Filename)%(Extension)"
-          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\Save\**" Link="Save\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -6,12 +6,10 @@ namespace ApostlesWar.Presentation.Desktop.Front
 {
     /// <summary>
     /// O jogador humano decidindo por CLIQUE. Implementa <see cref="IControladorDeTurno"/> — o mesmo
-    /// seam do ControladorJogador (console) e do ControladorBot —, então o motor não percebe diferença.
+    /// seam do <see cref="ControladorBot"/> —, então o motor não percebe diferença entre humano e IA.
     ///
-    /// Não reaproveita os laços de cursor do console de propósito: lá a navegação é "move ▶, confirma
-    /// com Enter"; aqui é o fluxo que o Gabriel desenhou — clicou na habilidade, clicou no inimigo,
-    /// USOU. Forçar o mesmo código nos dois exigiria o front fingir teclas, o que é pior que ter duas
-    /// implementações pequenas de uma interface que já existe pra isso.
+    /// É esse seam que deixa o MODO AUTOMÁTICO barato: uma terceira impl, trocada no composition
+    /// root, sem o loop de combate saber de nada.
     /// </summary>
     internal class ControladorJogadorWeb : IControladorDeTurno
     {

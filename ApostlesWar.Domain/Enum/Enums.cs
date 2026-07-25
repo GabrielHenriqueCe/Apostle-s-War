@@ -93,11 +93,14 @@ namespace ApostlesWar.Domain
     public enum TipoAtaque { AreaDeEfeito, Sequencial, NaoAtaque }
 
     /// <summary>
-    /// Desfecho de uma tentativa de fase. Distingue os três "não-vitória": Perdeu (batalha perdida
-    /// ou encerrada no meio → derrota) vs Cancelou (jogador desistiu na seleção de time, ANTES da
-    /// luta → sem derrota, volta silencioso). Consumido pelo GerenciadorDeJogo pra decidir a tela.
+    /// Desfecho de uma tentativa de fase: quem chama decide qual tela mostrar. Perdeu cobre tanto a
+    /// batalha perdida quanto a encerrada no meio (as duas viram derrota, sem recompensa).
+    ///
+    /// Houve um terceiro valor, `Cancelou` — "desistiu na seleção de time, ANTES da luta" —, de quando
+    /// o próprio motor abria a tela de pick. Hoje quem monta o time é a casca, que só chama a fase com
+    /// o time pronto: desistir nem chega aqui.
     /// </summary>
-    public enum ResultadoFase { Venceu, Perdeu, Cancelou }
+    public enum ResultadoFase { Venceu, Perdeu }
 
     #endregion
 }

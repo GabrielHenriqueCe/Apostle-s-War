@@ -1,6 +1,5 @@
 using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
-using ApostlesWar.Presentation.ConsoleUI.Views;
 
 namespace ApostlesWar.Presentation.Desktop.Front
 {

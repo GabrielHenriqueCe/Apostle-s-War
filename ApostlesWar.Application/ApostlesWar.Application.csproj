@@ -2,7 +2,7 @@
 
   <!-- APLICAÇÃO: os casos de uso (Services) + as PORTAS (Portas/) que declaram o que a camada
        precisa do mundo externo (tela, entrada, save) sem conhecer quem implementa. Referencia só
-       o Domain — Presentation (ConsoleUI, App/Front) e Infrastructure implementam as portas e
+       o Domain — Presentation (Desktop/Front) e Infrastructure implementam as portas e
        apontam pra cá, nunca o contrário. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>

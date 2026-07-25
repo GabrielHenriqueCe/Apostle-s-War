@@ -3,20 +3,17 @@ using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
 using ApostlesWar.Application.Controllers;
 using ApostlesWar.Application.Services;
-using ApostlesWar.Presentation.ConsoleUI.Views;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
 namespace ApostlesWar.Presentation.Desktop.Front
 {
     /// <summary>
-    /// Sobe o jogo com a pele webview. É o composition root do front — o irmão do Program.cs, trocando
-    /// os adapters de console pelos de tela: <see cref="TelaDeCombateWeb"/> no lugar da CombateView e
-    /// <see cref="ControladorJogadorWeb"/> no lugar do ControladorJogador. O motor é o mesmo, sem um `if`
-    /// sequer sabendo que existe front.
-    ///
-    /// Esta fatia cai DIRETO numa batalha da Arena com times sorteados: o pick de campeões é uma tela
-    /// que ainda não existe no front, e a batalha não deveria esperar por ela pra poder ser testada.
+    /// Sobe o jogo. É o composition root — monta os services e pluga as impls das portas
+    /// (<see cref="TelaDeCombateWeb"/>, <see cref="ControladorJogadorWeb"/>,
+    /// <see cref="ApresentacaoWebview"/>). Houve um irmão deste arquivo no Program.cs, que montava as
+    /// mesmas peças com adapters de console; ele morreu com a pele de console. O motor é o mesmo de
+    /// sempre, sem um `if` sequer sabendo que existe front.
     /// </summary>
     internal static class AppFront
     {
@@ -105,7 +102,6 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 var relogio = new RelogioDoCombate();
                 var sessao = new SessaoDoFront(ponte, relogio);
                 var tela = new TelaDeCombateWeb(sessao, ponte);
-                var entrada = new EntradaWebview(ponte);
                 var apresentacao = new ApresentacaoWebview(ritmo, ponte);
 
                 var repositorio = new SaveLocal();
@@ -114,8 +110,7 @@ namespace ApostlesWar.Presentation.Desktop.Front
                 var arsenal = new ArsenalService(capitulos, repositorio);
                 var personagens = new PersonagemService();
                 var selecaoDeAlvo = new SelecaoDeAlvoService();
-                var menuView = new MenuView(arsenal, capitulos, entrada, apresentacao);
-                var campeoes = new CampeoesService(personagens, menuView, capitulos);
+                var campeoes = new CampeoesService(personagens, capitulos);
                 var campanha = new CampanhaService(arsenal, campeoes, capitulos);
 
                 var combate = new CombateService(

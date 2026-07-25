@@ -452,6 +452,61 @@ funcionava).
 
 ---
 
+## ✅ BANCADA DE DANO — o instrumento do REBALANCE (#16) (jul/2026)
+
+A dor que o Gabriel nomeou: pra saber qual habilidade está quebrada, teria que jogar 36 champs × ~4
+habilidades à mão. A bancada roda isso sozinha e escreve **`docs/bancada-dano.md`**, VERSIONADO — cada
+tweak de número vira um `git diff` legível. A entrega é o RELATÓRIO, não ajustar valores.
+
+**Ela só foi possível porque habilidade é DADO.** O `Detetive.Espionagem()` é uma fábrica PRIVADA — a
+bancada nunca a chama e nem poderia. Mas o `Definir()` já executou a fábrica e guardou a instância em
+`Personagem.Habilidades`, então varrer os 36 champs é um `foreach` sobre `TodosOsCampeoes()`. Se as
+habilidades fossem métodos, seria reflection ou uma lista de 144 nomes escrita à mão, que envelheceria
+no primeiro champ novo. **O refactor pra dados pagou por si aqui.**
+
+**Cinco linhas, variando UM fator por vez** (desenho do Gabriel) — é o que torna as subtrações legíveis:
+
+| # | Modo | DEF do alvo | Recebe malefício? | O que a subtração isola |
+|---|---|---|---|---|
+| 1 | por habilidade | 0 | não | dano cru |
+| 2 | por habilidade | cap | não | **(2)−(1) = o que furar/reduzir DEF vale** |
+| 3 | champ inteiro | cap | não | **real − esperado = a SINERGIA do kit** |
+| 4 | champ inteiro | cap | **sim** | **(4)−(3) = o que os malefícios valem** |
+| 5 | por habilidade | cap | **sim** | **(5)−(2) = de quem é o mérito do malefício** |
+
+**Zero mudança no motor.** Tudo saiu de seam que já existia: o horizonte de 100 turnos é o controlador
+devolvendo `null` na 101ª chamada (cai no `BatalhaAbortada`); a imunidade do boneco é uma passiva
+`IBloqueiaStatus` (o MESMO mecanismo da `CascaDura`); o crítico 100% é um `BuffTaxaCrit` de duração
+infinita; e o `ExibirInicioArena` da porta de tela é o que entrega os `Combate` construídos lá dentro.
+
+**Decisões que os NÚMEROS forçaram (as duas primeiras versões estavam erradas):**
+- **Boneco com HP gigante não funciona.** A `Queima` tira **5% do HP máximo** por turno — com 100M de
+  HP o tick virava 5 milhões e o boneco se matava (o Mago aparecia com 7 usos em vez de 25). O HP tem
+  que ser REALISTA; o boneco não morre porque o controlador o devolve ao HP cheio entre turnos.
+  Reset em vez de `Invencivel` de propósito: o piso de HP deixaria o alvo em 1 de vida e o
+  `PreverVidaRemovida` devolveria ~0 pra tudo, fazendo o BOT escolher com a régua errada na linha 3/4.
+- **Sinergia não é "combinado − soma dos isolados".** Cada isolado gastou 100 turnos SÓ naquela
+  habilidade; somar N deles e comparar com UMA corrida de 100 turnos é laranja com maçã (dava negativo
+  pra todo mundo). O certo é **real − esperado**, com esperado = dano-por-uso isolado × ativações que
+  de fato aconteceram.
+- **Durante o cooldown o champ ESPERA, não usa A1.** Se enchesse o buraco com A1, toda habilidade
+  carregaria ~75 ataques básicos junto e todas ficariam parecidas.
+
+**Validação:** o A1 mede 320 = ATK 200 × 1,60 (o `DanoCritBase`), provando que o crítico está cravado.
+E a história do Mago sai decomposta: Bola de Fogo isolada com alvo imune = 4000; com malefício = 11500
+(7500 são o tick da Queima); o champ inteiro salta de 11000 pra 19750, e o ~1250 que sobra é a passiva
+Piromancer — que só rende quando OUTRA habilidade bate no alvo já queimado, e por isso o isolado nunca
+a veria.
+
+**Limitação declarada no próprio relatório:** o boneco **não revida** (ataque 0), então contra-ataque,
+espinhos e revide (Herói, Operário, Zumbi) medem ZERO. É bancada de dano CAUSADO, não de duelo — champ
+com número baixo pode ser reativo, não fraco. A coluna **Usos** é diagnóstico do BOT: habilidade que
+dispara 0× no champ inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
+
+Roda em ~35s dentro do `dotnet test`.
+
+---
+
 ## ✅ PROTEÇÃO DE ALIADO — a DEF do protetor abate o redirecionado (jul/2026)
 
 Continuação direta da seção acima: ao perguntar "qual o melhor teste pro `ProtecaoAliado`", a leitura

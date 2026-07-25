@@ -42,14 +42,19 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   `Champs/<Faccao>/<Champ>/`, `Models/`, `Enum/`.
 - `ApostlesWar.Application/` casos de uso: `Services/` orquestração · `Controllers/` (bot) ·
   `Portas/` (IApresentacao+Momento, ITelaDeCombate, IControladorDeTurno, IRepositorioDeSave).
-- `ApostlesWar.Infrastructure/` impl das portas de dados (SaveLocal). Só o Desktop enxerga.
-- `ApostlesWar.Presentation.Desktop/` a ÚNICA pele: casca executável Windows (composition root real em
-  `Front/AppFront.cs`, front webview em `Front/`+`wwwroot/`). `.exe` = `ApostlesWar.App.exe`
-  (AssemblyName fixo), abre a janela direto — um perfil só no Play do VS.
-  - Houve uma 2ª pele (`Presentation.ConsoleUI`), **removida em #179** quando o front ficou jogável
-    de ponta a ponta. Ela deixou o legado que importa: o motor não sabe desenhar nada. Se um dia
-    nascer outra pele, é só implementar as portas.
+- `ApostlesWar.Infrastructure/` impl das portas de dados (SaveLocal). Só a Presentation enxerga.
+- `ApostlesWar.Presentation/` a ÚNICA pele: casca executável Windows (`net10.0-windows`, WinForms +
+  WebView2; composition root real em `Front/AppFront.cs`, front webview em `Front/`+`wwwroot/`).
+  `.exe` = `ApostlesWar.App.exe` (AssemblyName fixo), abre a janela direto — um perfil só no Play.
+  - Chamava-se `Presentation.Desktop` enquanto havia uma 2ª pele (`Presentation.ConsoleUI`),
+    **removida em #179** quando o front ficou jogável de ponta a ponta. Ela deixou o legado que
+    importa: o motor não sabe desenhar nada. Se nascer outra pele, é só implementar as portas — e aí
+    o sufixo de plataforma volta a fazer sentido nos dois nomes.
 - Convenção: **pasta no disco = nome do projeto** (se divergir, o `dotnet sln add` cria uma pasta-de-solution
   fantasma no VS). Sem dependências externas ao repo — o antigo `GHUtils` foi dissolvido (jul/2026).
+  **Ao renomear projeto:** editar o `.sln` À MÃO preservando o GUID (o `sln remove`+`add` gera um novo
+  e mata o ponteiro do Play no `.suo`), mover só os arquivos VERSIONADOS (o `bin`/`obj` travado pelo
+  VS faria o `git mv` da pasta inteira falhar no meio) e apagar a pasta velha depois — ela reaparece
+  enquanto o VS estiver com a solução antiga carregada.
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`.

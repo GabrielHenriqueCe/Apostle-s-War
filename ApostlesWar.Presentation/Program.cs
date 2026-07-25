@@ -6,9 +6,9 @@
 /// Já foram DUAS peles sobre o mesmo motor (console e webview, escolhidas por `--front`). O console
 /// morreu quando o front ficou jogável de ponta a ponta — era o plano desde sempre (ROADMAP
 /// §Princípios: "a camada de apresentação do console morre no porte"). O composition root do que
-/// sobrou mora no <see cref="ApostlesWar.Presentation.Desktop.Front.AppFront"/>.
+/// sobrou mora no <see cref="ApostlesWar.Presentation.Front.AppFront"/>.
 /// </summary>
 
-return ApostlesWar.Presentation.Desktop.Front.AppFront.Rodar();
+return ApostlesWar.Presentation.Front.AppFront.Rodar();
 
 #endregion

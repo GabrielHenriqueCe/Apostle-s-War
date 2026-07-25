@@ -1,7 +1,7 @@
 using ApostlesWar.Application.Portas;
 using ApostlesWar.Domain;
 
-namespace ApostlesWar.Presentation.Desktop.Front
+namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
     /// A impl WEB da porta <see cref="ITelaDeCombate"/>. Note o que ela NÃO faz: desenhar. Cada chamada

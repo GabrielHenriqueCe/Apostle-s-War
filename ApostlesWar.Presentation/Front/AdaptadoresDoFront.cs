@@ -1,6 +1,6 @@
 using ApostlesWar.Application.Portas;
 
-namespace ApostlesWar.Presentation.Desktop.Front
+namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
     /// O RITMO da batalha no front, controlado pelo botão de velocidade da tela.

@@ -5,7 +5,7 @@ using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace ApostlesWar.Presentation.Desktop.Front
+namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
     /// Um clique vindo da tela, já com significado (não é "tecla X"). <see cref="Valor"/> = índice

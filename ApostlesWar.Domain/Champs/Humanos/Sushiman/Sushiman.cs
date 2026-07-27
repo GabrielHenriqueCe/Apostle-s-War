@@ -15,7 +15,7 @@ namespace ApostlesWar.Domain.Champs.Humanos
             Sushi(), Nigiri(), new CodigoDoSushi());
 
         static HabilidadeAtiva Sushi() => new(
-            "Sushi", "🍣", cooldown: 4, "Cura todos os aliados em 30% do HP máximo.",
+            "Sushi", "🍣", cooldown: 3, "Cura todos os aliados em 30% do HP máximo.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -24,13 +24,14 @@ namespace ApostlesWar.Domain.Champs.Humanos
             });
 
         static HabilidadeAtiva Nigiri() => new(
-            "Nigiri", "🍙", cooldown: 4, "Revive aliados (50% HP) e +25% ATK em todos por 2 turnos.",
+            "Nigiri", "🍙", cooldown: 3, "Revive aliados com 50% do HP e da um bônus de +50% de ATK em todos por 2 turnos." +
+            "\nEssa habilidade funcionará mesmo se não houver aliados mortos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new Reviver(0.50),                                                    // TodosAliados/Mortos (defaults)
-                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.5),
                     Escopo.TodosAliados, EstadoAlvo.Vivos),                           // pega os revividos
             });
     }

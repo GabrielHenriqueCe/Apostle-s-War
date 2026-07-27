@@ -55,7 +55,12 @@ namespace Tests.Bancada
                 "as habilidades valem mais juntas do que separadas.",
                 PorHab: false, DefBoneco: DefNoCap, Imune: true),
             new("4 — champ inteiro · boneco DEF no cap · RECEBENDO malefícios",
-                "O champ completo. **(4) − (3) = o que os malefícios dele valem.**",
+                "O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia aqui sai " +
+                "do MESMO esperado da linha 2 que a linha 3 usa — é o que mantém as duas colunas " +
+                "comparáveis, já que entre elas varia só a imunidade. Então **sinergia(4) − sinergia(3) " +
+                "= a sinergia que passa por malefício**: raspar DEF (`ReduçãoDefesa`, −30% sobre um " +
+                "boneco no cap) infla o golpe DIRETO e some do `Tick`, e a linha 3 não consegue " +
+                "enxergar isso porque o boneco dela é imune.",
                 PorHab: false, DefBoneco: DefNoCap, Imune: false),
             new("5 — por habilidade · boneco DEF no cap · RECEBENDO malefícios",
                 "**(5) − (2) por habilidade = de quem é o mérito do malefício.** Sem esta linha, o DoT " +
@@ -64,12 +69,17 @@ namespace Tests.Bancada
         };
 
         /// <summary>
-        /// O que a linha 2 guarda de cada habilidade. São DOIS números porque servem a contas
+        /// O que a linha 2 guarda de cada habilidade. São TRÊS números porque servem a contas
         /// diferentes: o POR USO alimenta o esperado da linha 3 (que precisa do mesmo orçamento de
         /// ATIVAÇÕES) e o TOTAL alimenta o Δ da linha 5 (que compara o mesmo horizonte de 100
         /// turnos). Guardar um só foi bug: o Δ saía comparando total contra dano-por-uso.
+        ///
+        /// O POR USO EM ÁREA é o terceiro porque a sinergia de 1 alvo SUBESTIMA o champ de área — e
+        /// não por pouco: o Detetive raspa DEF em área e martela em área, então os malefícios dele
+        /// valem +9.504 contra 1 boneco e +30.888 contra 4, 3,2× mais. Medir isso não custa corrida
+        /// nova: a corrida de área já roda no `PorHabilidade`, só era jogada fora depois de imprimir.
         /// </summary>
-        private readonly record struct Isolado(int PorUso, int Total);
+        private readonly record struct Isolado(int PorUso, int Total, int PorUsoArea);
 
         private sealed record Medicao(int DanoTotal, int CuraTotal, int DanoDeTick, int TurnosJogados,
             Dictionary<Habilidade, int> Usos, Dictionary<Habilidade, int> DanoPorHab);
@@ -229,10 +239,12 @@ namespace Tests.Bancada
                     var area = Media(champ, hab, linha, BonecosEmArea);
                     int usos = m.Usos.GetValueOrDefault(hab);
                     int porUso = usos > 0 ? m.DanoTotal / usos : 0;
+                    int usosArea = area.Usos.GetValueOrDefault(hab);
+                    int porUsoArea = usosArea > 0 ? area.DanoTotal / usosArea : 0;
 
                     // Guarda o dano POR USO, não o total: a linha 3 precisa comparar com o mesmo
                     // orçamento de turnos, e cada isolado aqui gastou 100 turnos SÓ nesta habilidade.
-                    if (eLinha2) memoria[champ.Nome][hab] = new Isolado(porUso, m.DanoTotal);
+                    if (eLinha2) memoria[champ.Nome][hab] = new Isolado(porUso, m.DanoTotal, porUsoArea);
 
                     coletar?.Add(new Registro($"{champ.Simbolo} {champ.Nome}", $"{hab.Simbolo} {hab.Nome}",
                         hab.Cooldown, usos, m.DanoTotal, porUso, area.DanoTotal, m.CuraTotal));
@@ -284,37 +296,45 @@ namespace Tests.Bancada
             md.AppendLine();
         }
 
+        /// <summary>
+        /// As duas linhas de champ inteiro. Elas têm as MESMAS colunas de propósito: entre a 3 e a 4
+        /// varia só a imunidade do boneco, então toda coluna que sobrevive às duas vira uma subtração
+        /// legível — e a Sinergia é a que mais rende, porque o esperado das duas sai da MESMA memória
+        /// (a da linha 2, imune). Baseline diferente por linha faria as duas colunas medirem coisas
+        /// diferentes e a comparação entre elas morreria.
+        /// </summary>
         private static void PorChamp(StringBuilder md, List<Personagem> todos, Linha linha,
             Dictionary<string, Dictionary<Habilidade, Isolado>> memoria)
         {
-            bool eLinha3 = linha.Titulo.StartsWith("3");
-
-            md.AppendLine(eLinha3
-                ? "| Champ | Dano total | Esperado (isolado × usos) | Sinergia | Habilidades usadas |"
-                : "| Champ | Dano total | Tick | Habilidades usadas |");
-            md.AppendLine(eLinha3 ? "|---|--:|--:|--:|---|" : "|---|--:|--:|---|");
+            md.AppendLine("| Champ | Dano | Esperado | Sinergia " +
+                          $"| Dano ({BonecosEmArea} alvos) | Esperado ({BonecosEmArea}) | Sinergia ({BonecosEmArea}) " +
+                          "| Tick | Habilidades usadas |");
+            md.AppendLine("|---|--:|--:|--:|--:|--:|--:|--:|---|");
 
             foreach (var champ in todos)
             {
                 var m = Media(champ, null, linha);
+                var area = Media(champ, null, linha, BonecosEmArea);
                 string usadas = string.Join(", ", champ.Habilidades.OfType<HabilidadeAtiva>()
                     .Select(h => $"{h.Nome} {m.Usos.GetValueOrDefault(h)}×"));
 
-                md.Append($"| {champ.Simbolo} {champ.Nome} | {m.DanoTotal} ");
-                if (eLinha3)
-                {
-                    // Esperado = o que essas MESMAS ativações renderiam se cada habilidade
-                    // entregasse o que entrega sozinha. Comparar com a soma dos totais isolados
-                    // seria laranja com maçã: lá cada uma teve 100 turnos só pra si.
-                    int esperado = 0;
-                    if (memoria.TryGetValue(champ.Nome, out var mapa))
-                        foreach (var (h, iso) in mapa)
-                            esperado += iso.PorUso * m.Usos.GetValueOrDefault(h);
-                    md.Append($"| {esperado} | {Sinal(m.DanoTotal - esperado)} ");
-                }
-                else md.Append($"| {m.DanoDeTick} ");
+                // Esperado = o que essas MESMAS ativações renderiam se cada habilidade entregasse o
+                // que entrega sozinha. Comparar com a soma dos totais isolados seria laranja com
+                // maçã: lá cada uma teve 100 turnos só pra si.
+                // O de área usa os usos da corrida de ÁREA, não os de 1 alvo: com mais gente em campo
+                // o bot escolhe outra fila, e cobrar o esperado pela fila errada inventaria sinergia.
+                int esperado = 0, esperadoArea = 0;
+                if (memoria.TryGetValue(champ.Nome, out var mapa))
+                    foreach (var (h, iso) in mapa)
+                    {
+                        esperado += iso.PorUso * m.Usos.GetValueOrDefault(h);
+                        esperadoArea += iso.PorUsoArea * area.Usos.GetValueOrDefault(h);
+                    }
 
-                md.AppendLine($"| {usadas} |");
+                md.AppendLine($"| {champ.Simbolo} {champ.Nome} " +
+                              $"| {m.DanoTotal} | {esperado} | {Sinal(m.DanoTotal - esperado)} " +
+                              $"| {area.DanoTotal} | {esperadoArea} | {Sinal(area.DanoTotal - esperadoArea)} " +
+                              $"| {m.DanoDeTick} | {usadas} |");
             }
         }
 
@@ -350,6 +370,12 @@ namespace Tests.Bancada
             md.AppendLine("com número baixo pode ser reativo, não fraco — confira o kit antes de mexer.").AppendLine();
             md.AppendLine("A coluna **Usos** é diagnóstico do BOT: se uma habilidade dispara 0× no champ");
             md.AppendLine("inteiro mas tem dano alto isolada, o problema está na fila do bot, não no balanço.").AppendLine();
+            md.AppendLine("Nas linhas de champ inteiro, **`Habilidades usadas` descreve a corrida de 1 alvo**. A de");
+            md.AppendLine($"{BonecosEmArea} alvos é uma simulação à parte — o bot escolhe outra fila com mais gente em campo —");
+            md.AppendLine($"e o `Esperado ({BonecosEmArea})` é cobrado pelos usos DELA, senão a sinergia sairia inventada.").AppendLine();
+            md.AppendLine($"**Por que a `Sinergia ({BonecosEmArea})` existe:** a de 1 alvo subestima o champ de área. Quem raspa");
+            md.AppendLine("DEF em área e martela em área colhe o malefício vezes o número de alvos — a diferença entre");
+            md.AppendLine("as duas colunas é o tamanho real desse composto.").AppendLine();
             md.AppendLine("---").AppendLine();
         }
 

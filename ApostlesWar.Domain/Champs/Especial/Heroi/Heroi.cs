@@ -15,7 +15,7 @@ namespace ApostlesWar.Domain.Champs.Especial
             SalvandoDia(), Super(), new Vigilante());
 
         static HabilidadeAtiva SalvandoDia() => new(
-            "Salvando o Dia", "🦸", cooldown: 3, "Protege e +30% DEF em todos os aliados (2t).",
+            "Salvando o Dia", "🦸", cooldown: 3, "Aplica proteção de aliados e +30% DEF em todos os aliados por 2 turnos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -25,13 +25,13 @@ namespace ApostlesWar.Domain.Champs.Especial
             });
 
         static HabilidadeAtiva Super() => new(
-            "Super", "💪", cooldown: 3, "+25% ATK aos aliados e ataca todos +100% ATK.",
+            "Super", "💪", cooldown: 3, "+50% de ATK aos aliados e ataca todos com 300% do ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.TodosAliados),
-                new Dano(2.0),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.5), Escopo.TodosAliados),
+                new Dano(3.0),
             });
     }
 }

@@ -695,7 +695,11 @@ namespace Tests
         // A semente (o alvo escolhido no menu/bot) TEM que ser um dos candidatos — já filtrada pelo
         // mesmo EstadoAlvo que a habilidade declara. Violar isso colocava a semente inválida no
         // resultado E fazia o IndexOf devolver -1, desalinhando o sorteio dos extras: erro silencioso.
-        // Agora explode. Nenhum champ viola hoje (a suíte inteira verde é parte da prova).
+        // Agora explode.
+        //
+        // O contrato só vale onde existe PICK. Hit-all (NumeroDeAlvos = int.MaxValue) não tem: o
+        // CombateService manda o atacante como placeholder, e cobrar a semente ali explodia todo o
+        // revive-de-todos (hit-all + Mortos → semente viva). Ver o 3º teste.
 
         [Fact]
         public void SementeMorta_NumaHabilidadeDeVivos_Explode()
@@ -727,6 +731,30 @@ namespace Tests
                 lista: TipoLista.Aliados, estado: EstadoAlvo.Mortos);
 
             Assert.Throws<InvalidOperationException>(() => hab.Ativar(ctx, aliadoVivo));
+        }
+
+        [Fact]
+        public void HitAllDeMortos_ComSementeViva_NaoExplode_ReviveTodos()
+        {
+            // O caso REAL do Robô (Technology) e irmãos: hit-all + Mortos. Como PedeAlvoDoJogador é
+            // false pro aliado hit-all, o CombateService manda o próprio ATACANTE (vivo) como
+            // semente. Não é violação de contrato — é ausência de pick.
+            var atacante = Novo();
+            var morto1 = Novo(); Matar(morto1);
+            var morto2 = Novo(); Matar(morto2);
+            var ctx = new ContextoCombate(atacante,
+                new List<Combate> { atacante, morto1, morto2 },
+                new List<Combate> { Novo() });
+
+            // Escopo.AlvosResolvidos de propósito: é o que prova que a RESOLUÇÃO pegou os mortos
+            // (os champs de hoje usam TodosAliados e nem leriam a lista).
+            var hab = Hab(new() { new Reviver(0.5, Escopo.AlvosResolvidos) }, alvos: int.MaxValue,
+                lista: TipoLista.Aliados, estado: EstadoAlvo.Mortos);
+
+            hab.Ativar(ctx, atacante);
+
+            Assert.True(morto1.EstaVivo());
+            Assert.True(morto2.EstaVivo());
         }
 
         [Fact]

@@ -13,7 +13,7 @@ namespace ApostlesWar.Domain.Champs.Especial
             DestruindoDia(), Vilania(), new Sentenca());
 
         static HabilidadeAtiva DestruindoDia() => new(
-            "Destruindo o Dia", "🦹", cooldown: 3, "Limpa maleficios dos aliados e ataca todos +100% ATK.",
+            "Destruindo o Dia", "🦹", cooldown: 3, "Limpa maleficios dos aliados e ataca todos com 325% do ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -23,12 +23,12 @@ namespace ApostlesWar.Domain.Champs.Especial
             });
 
         static HabilidadeAtiva Vilania() => new(
-            "Vilania", "👿", cooldown: 4, "2 ataques aleatórios +200% ATK.",
+            "Vilania", "👿", cooldown: 3, "2 ataques aleatórios com 250% ATK.",
             numeroDeAlvos: 2, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new Dano(3.0),
+                new Dano(2.5),
             });
     }
 }

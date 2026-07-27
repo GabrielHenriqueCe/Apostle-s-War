@@ -17,16 +17,16 @@ namespace ApostlesWar.Domain.Champs.Tecnologicos
             Abduzir(), Galaxia(), new CarapacaAlienigena());
 
         static HabilidadeAtiva Abduzir() => new(
-            "Abduzir", "🛸", cooldown: 4, "Incapacita 2 inimigos aleatórios por 1 turno.",
+            "Abduzir", "🛸", cooldown: 3, "Incapacita 2 inimigos aleatórios por 2 turno.",
             numeroDeAlvos: 2, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarDebuff(() => new Preso(duracao: 1)),
+                new AplicarDebuff(() => new Preso(duracao: 2)),
             });
 
         static HabilidadeAtiva Galaxia() => new(
-            "Galáxia", "🌌", cooldown: 4, "+30% DEF em todos. Outros aliados ficam protegidos pelo Alien.",
+            "Galáxia", "🌌", cooldown: 3, "+30% DEF em todos os aliados. Também aplica proteção de aliados nos aliados.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()

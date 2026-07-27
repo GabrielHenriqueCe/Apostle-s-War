@@ -20,7 +20,7 @@ namespace ApostlesWar.Domain.Champs.LadoSombrio
             DocesOuTravessuras(), DocesDeAbobora(), new CascaDura());
 
         static HabilidadeAtiva DocesOuTravessuras() => new(
-            "Doces ou Travessuras", "🍬", cooldown: 4, "Remove benefícios dos inimigos e bloqueia novos por 2 turnos.",
+            "Doces ou Travessuras", "🍬", cooldown: 3, "Remove benefícios dos inimigos e bloqueia novos por 2 turnos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -33,7 +33,7 @@ namespace ApostlesWar.Domain.Champs.LadoSombrio
         // (1 morto, Aleatorio = selecionado + extras sorteados se N crescer) e a ação herda os
         // AlvosResolvidos — mesma seleção de qualquer habilidade, sem contador na ação.
         static HabilidadeAtiva DocesDeAbobora() => new(
-            "Doces de Abóbora", "🍭", cooldown: 4, "Revive 1 aliado (HP cheio) e aplica Reflexo de dano em todos os aliados.",
+            "Doces de Abóbora", "🍭", cooldown: 3, "Revive 1 aliado com a vida cheia e aplica Reflexo de dano em todos os aliados.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Mortos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()

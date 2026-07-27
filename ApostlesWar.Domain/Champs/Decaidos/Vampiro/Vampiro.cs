@@ -16,22 +16,23 @@ namespace ApostlesWar.Domain.Champs.Decaidos
             ControleDeSangue(), VampiroPrimordial(), new Drenagem());
 
         static HabilidadeAtiva ControleDeSangue() => new(
-            "Controle de Sangue", "🩸", cooldown: 3, "+200% ATK ignorando 50% DEF.",
+            "Controle de Sangue", "🩸", cooldown: 3, "Ataca com 350% do ATK ignorando 50% DEF.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new Dano(3.0, ignorarDefesaPct: 0.50),
+                new Dano(3.5, ignorarDefesaPct: 0.50),
             });
 
         static HabilidadeAtiva VampiroPrimordial() => new(
-            "Vampiro Primordial", "🌙", cooldown: 4, "Invencível em todos os aliados (2t) e ataque crítico em 1 inimigo.",
+            "Vampiro Primordial", "🌙", cooldown: 3, "Aplica Invencível em todos os aliados por 2 turnos." +
+            "\nDepois ataca 1 inimigo com 450% do ATK, esse ataque é sempre crítico.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
                 new AplicarBuff(() => new Invencivel(duracao: 2), Escopo.TodosAliados),
-                new Dano(1.0, forcaCritico: true),
+                new Dano(4.5, forcaCritico: true),
             });
     }
 }

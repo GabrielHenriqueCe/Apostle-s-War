@@ -15,7 +15,8 @@ namespace ApostlesWar.Domain.Champs.Especial
             Rugido(), Pisada(), new PeleGrossa());
 
         static HabilidadeAtiva Rugido() => new(
-            "Rugido", "🦖", cooldown: 3, "Provocar + Refletir Dano em si (2t) e Medo nos inimigos (1t).",
+            "Rugido", "🦖", cooldown: 3, "Aplica Provocar e Refletir Dano em si por 2 turnos." +
+            "\nEntão aplica Medo nos inimigos por 1 turno.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Self,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -26,13 +27,13 @@ namespace ApostlesWar.Domain.Champs.Especial
             });
 
         static HabilidadeAtiva Pisada() => new(
-            "Pisada", "🦶", cooldown: 3, "Contra-ataque em si (2t) e ataca todos +125% ATK.",
+            "Pisada", "🦶", cooldown: 3, "Aplica Contra-ataque em si por 2 turnos e ataca todos com 325% do ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
                 new AplicarBuff(() => new ContraAtaque(duracao: 2), Escopo.ProprioAtacante),
-                new Dano(2.25),
+                new Dano(3.25),
             });
     }
 }

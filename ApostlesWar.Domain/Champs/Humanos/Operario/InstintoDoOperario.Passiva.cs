@@ -11,10 +11,10 @@ namespace ApostlesWar.Domain.Champs.Humanos
     /// </summary>
     public class InstintoDoOperario : HabilidadePassiva, IReageAoSerAtacado
     {
-        private const double Chance = 0.10;
+        private const double Chance = 0.25;
 
         public InstintoDoOperario() : base("Instinto do Operário", "🛠️", 0,
-            "10% de chance de contra-atacar com Marretada ao ser atacado.")
+            "25% de chance de contra-atacar com Marretada ao ser atacado.")
         { }
 
         public List<ResultadoReacao> AoSerAtacado(ContextoReacao ctx)

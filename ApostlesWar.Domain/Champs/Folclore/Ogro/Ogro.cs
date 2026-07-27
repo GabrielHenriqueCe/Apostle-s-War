@@ -16,22 +16,23 @@ namespace ApostlesWar.Domain.Champs.Folclore
             Esmagar(), Quebrar(), new Intimidador());
 
         static HabilidadeAtiva Esmagar() => new(
-            "Esmagar", "👊", cooldown: 3, "Cura 50% HP em si e protege os aliados (2t).",
+            "Esmagar", "👊", cooldown: 3, "Se cura com 25% HP e protege os aliados por 2 turnos.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Self,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new Cura(Valor.PorHP(0.50), Escopo.ProprioAtacante),
+                new Cura(Valor.PorHP(0.25), Escopo.ProprioAtacante),
                 new AplicarBuff(atk => new ProtecaoAliado(atk, duracao: 2, percentual: 0.30), Escopo.OutrosAliados),
             });
 
         static HabilidadeAtiva Quebrar() => new(
-            "Quebrar", "💥", cooldown: 3, "Ataca todos +100% ATK, Irritar 1t e ganha Escudo de 30% do dano.",
+            "Quebrar", "💥", cooldown: 3, "Ataca todos com 300% do ATK e aplica Irritar de 1 turno" +
+            "\nEntão ganha Escudo com 30% do dano causado.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new Dano(2.0),
+                new Dano(3.0),
                 new AplicarDebuff(atk => new Irritar(atk, duracao: 1)),
                 new AplicarEscudo(Valor.PorDanoCausado(0.30), duracao: 2, Escopo.ProprioAtacante),
             });

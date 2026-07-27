@@ -27,14 +27,15 @@ namespace ApostlesWar.Domain.Champs.Decaidos
             });
 
         static HabilidadeAtiva RatoVoador() => new(
-            "Rato Voador", "🐀", cooldown: 4, "Medo 1t em todos os inimigos, +25% ATK e +25% Crit em si (2t) e ganha turno extra.",
+            "Rato Voador", "🐀", cooldown: 4, "Aplica Medo em todos os inimigos por 1 turno." +
+            "\nTambpem aplica +50% ATK e +50% Crit em si por 2 turnos, então ganha um turno extra.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new AplicarDebuff(() => new Medo(duracao: 1), Escopo.TodosInimigos),
-                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.ProprioAtacante),
-                new AplicarBuff(() => new BuffTaxaCrit(duracao: 2, valor: 0.25), Escopo.ProprioAtacante),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.50), Escopo.ProprioAtacante),
+                new AplicarBuff(() => new BuffTaxaCrit(duracao: 2, valor: 0.50), Escopo.ProprioAtacante),
                 new ConcederTurnoExtra(),
             });
     }

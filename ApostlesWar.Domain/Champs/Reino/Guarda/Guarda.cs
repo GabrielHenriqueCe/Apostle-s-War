@@ -15,7 +15,7 @@ namespace ApostlesWar.Domain.Champs.Reino
             Protetor(), Esgrima(), new GuardaReal());
 
         static HabilidadeAtiva Protetor() => new(
-            "Protetor", "🛡️", cooldown: 4, "Aplica Provocar (2t) e Bloqueio Total (1t) em si mesmo.",
+            "Protetor", "🛡️", cooldown: 3, "Aplica Provocar (2t) e Bloqueio Total (1t) em si mesmo.",
             numeroDeAlvos: 0, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Self,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -25,12 +25,12 @@ namespace ApostlesWar.Domain.Champs.Reino
             });
 
         static HabilidadeAtiva Esgrima() => new(
-            "Esgrima", "🤺", cooldown: 3, "Ataca 2 inimigos aleatórios com +50% ATK.",
+            "Esgrima", "🤺", cooldown: 3, "Ataca 2 inimigos aleatórios com 350% do ATK.",
             numeroDeAlvos: 2, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new Dano(1.5),
+                new Dano(3.5),
             });
     }
 }

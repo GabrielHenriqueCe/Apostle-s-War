@@ -22,22 +22,23 @@ namespace ApostlesWar.Domain.Champs.LadoSombrio
                 EscopoMortos.AmbosOsTimes, porMorto: 0.10, v => new BuffAtaque(duracao: 2, percentual: v)));
 
         static HabilidadeAtiva VomitoToxico() => new(
-            "Vômito Tóxico", "🤢", cooldown: 4, "Ataca todos e aplica Veneno (5% HP/turno por stack).",
+            "Vômito Tóxico", "🤢", cooldown: 3, "Ataca todos 300% ATK e aplica 2 Venenos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new Dano(1.0),
-                new AplicarDebuff(() => new Veneno(stacks: 1)),
+                new Dano(3.0),
+                new AplicarDebuff(() => new Veneno(stacks: 2)),
             });
 
         static HabilidadeAtiva Putridao() => new(
-            "Putrefação", "💀", cooldown: 4, "Ataca todos. Explode os Venenos causando o dano imediato. Cura 20% do dano causado.",
+            "Putrefação", "💀", cooldown: 3, "Ataca todos 300% ATK. Explode os Venenos causando o dano imediato." +
+            "\nCura 20% do dano causado.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new Dano(1.0),
+                new Dano(3.0),
                 new Explodir(Seletor.Tipo<Veneno>()),
                 new Cura(Valor.PorDanoCausado(0.20), Escopo.ProprioAtacante),
             });

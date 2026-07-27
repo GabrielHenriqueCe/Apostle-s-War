@@ -8,9 +8,9 @@ namespace ApostlesWar.Domain.Champs.Humanos
     /// </summary>
     public class Marretada : HabilidadeAtiva, IAtivavelComNatureza
     {
-        private const double Multiplicador = 1.25;
+        private const double Multiplicador = 2.5;
 
-        public Marretada() : base("Marretada", "🔨", 3, "Causa 125% do ATK em 1 inimigo.") { }
+        public Marretada() : base("Marretada", "🔨", 2, "Causa 250% do ATK em 1 inimigo.") { }
         public override int NumeroDeAlvos => 1;
         public override TipoAlvo TipoAlvo => TipoAlvo.Explicito;
         public override TipoLista TipoLista => TipoLista.Inimigos;

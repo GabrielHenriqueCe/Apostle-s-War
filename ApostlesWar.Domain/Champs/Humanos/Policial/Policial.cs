@@ -11,21 +11,21 @@ namespace ApostlesWar.Domain.Champs.Humanos
             Tiroteio(), Prender(), new AlgemasReforcadas());
 
         static HabilidadeAtiva Tiroteio() => new(
-            "Tiroteio", "🔫", cooldown: 4, "Ataca 2 inimigos aleatórios com 75% ATK. Pode acertar o mesmo alvo duas vezes.",
+            "Tiroteio", "🔫", cooldown: 3, "Ataca 2 inimigos aleatórios com 350% do ATK. Pode acertar o mesmo alvo duas vezes.",
             numeroDeAlvos: 2, tipoAlvo: TipoAlvo.Aleatorio, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new Dano(0.75),
+                new Dano(3.5),
             });
 
         static HabilidadeAtiva Prender() => new(
-            "Prender", "⛓️", cooldown: 4, "Inimigo pula os próximos 2 turnos.",
-            numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
+            "Prender", "⛓️", cooldown: 3, "Prende todos os inimigos por 1 turno.",
+            numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
-                new AplicarDebuff(() => new Preso(duracao: 2)),
+                new AplicarDebuff(() => new Preso(duracao: 1)),
             });
     }
 }

@@ -16,7 +16,7 @@ namespace ApostlesWar.Domain.Champs.Misticos
             CantoDeSereia(), Atlantis(), new Aquagirl());
 
         static HabilidadeAtiva CantoDeSereia() => new(
-            "Canto de Sereia", "🧜‍♀️", cooldown: 4, "Imunidade a malefícios e +25% ATK em todos os aliados (2t).",
+            "Canto de Sereia", "🧜‍♀️", cooldown: 3, "Imunidade a malefícios e +50% de ATK em todos os aliados por 2 turnos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -26,9 +26,9 @@ namespace ApostlesWar.Domain.Champs.Misticos
             });
 
         static HabilidadeAtiva Atlantis() => new(
-            "Atlantis", "🌊", cooldown: 4, "Revive aliados mortos (50% HP) e aplica Intocável nos revividos.",
+            "Atlantis", "🌊", cooldown: 3, "Revive aliados mortos com 50% de HP e aplica Intocável nos revividos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
-            estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
+            estadoAlvo: EstadoAlvo.Mortos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new Reviver(0.50, buffNoRevivido: () => new Intocavel(duracao: 2)),

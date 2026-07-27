@@ -17,19 +17,22 @@ namespace ApostlesWar.Domain.Champs.Decaidos
             Inferno(), AnjoCaido(), new CresceComDor());
 
         static HabilidadeAtiva Inferno() => new(
-            "Inferno", "🔥", cooldown: 3, "Aplica 2 stacks de Queima em todos os inimigos e explode imediatamente.",
+            "Inferno", "🔥", cooldown: 3, "Aplica 2 Queima em todos os inimigos e explode imediatamente." +
+            "\nEntão ataca todos os inimigos com 300% do ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new AplicarDebuff(() => new Queima(stacks: 2), Escopo.TodosInimigos),
                 new Explodir(Seletor.Tipo<Queima>(), Escopo.TodosInimigos),
+                new Dano(3.0),
             });
 
         static HabilidadeAtiva AnjoCaido() => new(
-            "Anjo Caído", "😇", cooldown: 3, "Revive aliados (50% HP, quebra a Sentença) e cura todos (30% HP).",
+            "Anjo Caído", "😇", cooldown: 3, "Revive aliados com 50% de HP e cura todos com 30% HP." +
+            "\nImpedir Ressurreição não impede o Diabo de tirar alguém do Inferno!",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
-            estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
+            estadoAlvo: EstadoAlvo.Mortos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new RemoverDebuffs(Seletor.Tipo<ImpedirRessurreicao>(), Escopo.TodosAliados, EstadoAlvo.Mortos),

@@ -16,24 +16,25 @@ namespace ApostlesWar.Domain.Champs.Apostolos
             SacoDePresente(), FabricaDePresente(), new Surpresa());
 
         static HabilidadeAtiva SacoDePresente() => new(
-            "Saco de Presente", "🎅", cooldown: 3, "Ataca todos +75% ATK + Medo. +25% ATK aliados (2t).",
+            "Saco de Presente", "🎅", cooldown: 3, "Aplica +55% ATK nos aliados por 2 turnos." +
+            "\nAplica Medo em todos os inimigos e depois ataca com 325% do ATK",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
                 new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.TodosAliados),
-                new Dano(1.75),
+                new Dano(3.25),
                 new AplicarDebuff(() => new Medo(duracao: 1)),
             });
 
         static HabilidadeAtiva FabricaDePresente() => new(
-            "Fábrica de Presente", "🏭", cooldown: 3, "Reduz DEF dos inimigos e ataca todos +75% ATK.",
+            "Fábrica de Presente", "🏭", cooldown: 3, "Aplica -30% DEF nos inimigos e ataca todos com 375% do ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
                 new AplicarDebuff(() => new ReducaoDefesa(duracao: 2)),
-                new Dano(1.75),
+                new Dano(3.75),
             });
     }
 }

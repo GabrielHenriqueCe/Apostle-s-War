@@ -16,22 +16,22 @@ namespace ApostlesWar.Domain.Champs.Reino
             BolaDeFogo(), Incendio(), new Piromancer());
 
         static HabilidadeAtiva BolaDeFogo() => new(
-            "Bola de Fogo", "🔥", cooldown: 4, "Causa +100% ATK em 1 inimigo e aplica Queima (2t).",
-            numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
+            "Bola de Fogo", "🔥", cooldown: 3, "Causa 300% ATK em todos os inimigo e aplica 2 Queima.",
+            numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new Dano(2.0),   // +25% vs alvo com Queima é aplicado pela passiva (IModificaDanoCausado)
+                new Dano(3.0),   // +25% vs alvo com Queima é aplicado pela passiva (IModificaDanoCausado)
                 new AplicarDebuff(() => new Queima(2)),
             });
 
         static HabilidadeAtiva Incendio() => new(
-            "Incêndio", "🌋", cooldown: 4, "Ataca todos os inimigos com +50% ATK.",
+            "Incêndio", "🌋", cooldown: 3, "Ataca todos os inimigos com 350% ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new Dano(1.5),   // idem: o bônus da Queima vem da passiva, não fiado na hab
+                new Dano(3.5),   // idem: o bônus da Queima vem da passiva, não fiado na hab
             });
     }
 }

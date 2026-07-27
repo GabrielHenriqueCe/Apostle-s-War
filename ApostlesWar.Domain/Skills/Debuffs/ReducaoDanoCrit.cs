@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Skills.Debuffs
     /// </summary>
     public class ReducaoDanoCrit : Debuff, IContribuiDanoCrit
     {
-        public ReducaoDanoCrit(int duracao = 2, double valor = 0.25)
+        public ReducaoDanoCrit(int duracao = 2, double valor = 0.50)
             : base("Redução Dano Crit", "💥", duracao, valor, $"-{valor * 100:F0}% Dano Crítico.") { }
 
         public override void Aplicar(Combate alvo)

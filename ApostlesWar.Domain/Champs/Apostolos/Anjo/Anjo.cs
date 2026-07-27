@@ -26,13 +26,14 @@ namespace ApostlesWar.Domain.Champs.Apostolos
             });
 
         static HabilidadeAtiva Ceu() => new(
-            "Céu", "☁️", cooldown: 4, "Revive aliados (50% HP), +25% ATK e Bloqueio Total (2t).",
+            "Céu", "☁️", cooldown: 3, "Revive aliados com 50% do HP." +
+            "\nDepois aplica +50% ATK e Bloqueio Total por 2 turnos em todos os alaiados.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
-            estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
+            estadoAlvo: EstadoAlvo.Mortos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new Reviver(0.50),
-                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.TodosAliados),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.5), Escopo.TodosAliados),
                 new AplicarBuff(() => new BloqueioTotal(duracao: 2), Escopo.TodosAliados),
             });
     }

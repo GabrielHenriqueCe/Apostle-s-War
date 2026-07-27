@@ -12,22 +12,23 @@ namespace ApostlesWar.Domain.Champs.Humanos
             Espionagem(), Furtividade(), new OlhoClinico());
 
         static HabilidadeAtiva Espionagem() => new(
-            "Espionagem", "🔎", cooldown: 4, "-30% DEF em todos os inimigos por 2 turnos.",
+            "Espionagem", "🔎", cooldown: 3, "-30% DEF em todos os inimigos por 2 turnos e ganha um turno extra",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new AplicarDebuff(() => new ReducaoDefesa(duracao: 2)),
+                new ConcederTurnoExtra(),
             });
 
         static HabilidadeAtiva Furtividade() => new(
-            "Furtividade", "🕳️", cooldown: 4, "Intocável por 2 turnos. Ataca todos os inimigos com 100% ATK.",
+            "Furtividade", "🕳️", cooldown: 3, "Intocável por 2 turnos. Ataca todos os inimigos com 300% do ATK.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
                 new AplicarBuff(() => new Intocavel(duracao: 2), Escopo.ProprioAtacante),
-                new Dano(1.0),
+                new Dano(3.0),
             });
     }
 }

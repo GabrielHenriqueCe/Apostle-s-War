@@ -18,24 +18,25 @@ namespace ApostlesWar.Domain.Champs.Tecnologicos
             Glitch(), Barata(), new Virus());
 
         static HabilidadeAtiva Glitch() => new(
-            "Glitch", "📺", cooldown: 3, "+25% ATK em si, -30% DEF no alvo, ataca com +50% ATK.",
+            "Glitch", "📺", cooldown: 3, "+50% ATK em si, -30% DEF no alvo, ataca 1 inimigo com 400% do ATK.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.25), Escopo.ProprioAtacante),
+                new AplicarBuff(() => new BuffAtaque(duracao: 2, percentual: 0.50), Escopo.ProprioAtacante),
                 new AplicarDebuff(() => new ReducaoDefesa(duracao: 2)),
-                new Dano(1.5),
+                new Dano(4.0),
             });
 
         static HabilidadeAtiva Barata() => new(
-            "Barata", "🪳", cooldown: 3, "Intocável 2t, ataca com +100% ATK. Matou? Não pode reviver.",
+            "Barata", "🪳", cooldown: 3, "Aplica intocável em si mesmo por 2 turnos, então ataca 1 inimigo com 400% ATK." +
+            "\nInimigos mortos por essa habilidade não podem reviver.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
                 new AplicarBuff(() => new Intocavel(duracao: 2), Escopo.ProprioAtacante),
-                new Dano(2.0),
+                new Dano(4.0),
                 new AplicarDebuff(() => new ImpedirRessurreicao(), Escopo.AlvosResolvidos, EstadoAlvo.Mortos),
             });
     }

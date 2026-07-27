@@ -27,9 +27,9 @@ namespace ApostlesWar.Domain.Champs.Folclore
             });
 
         static HabilidadeAtiva Circo() => new(
-            "Circo", "🎪", cooldown: 4, "Revive aliados (50% HP) e dá Intocável aos revividos.",
+            "Circo", "🎪", cooldown: 3, "Revive aliados com 50% do HP e dá Intocável aos revividos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
-            estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
+            estadoAlvo: EstadoAlvo.Mortos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
             {
                 new Reviver(0.50, buffNoRevivido: () => new Intocavel(duracao: 2)),

@@ -16,7 +16,7 @@ namespace ApostlesWar.Domain.Champs.Decaidos
             ArvoreDoMundo(), Natureza(), new EspinhosCorrompidos());
 
         static HabilidadeAtiva ArvoreDoMundo() => new(
-            "Árvore do Mundo", "🌳", cooldown: 3, "Provocar + Refletir Dano + Contra-Ataque em si mesmo (2t).",
+            "Árvore do Mundo", "🌳", cooldown: 3, "Aplica Provocar, Refletir Dano e Contra-Ataque em si mesmo por 2 turnos.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Self,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()
@@ -27,13 +27,13 @@ namespace ApostlesWar.Domain.Champs.Decaidos
             });
 
         static HabilidadeAtiva Natureza() => new(
-            "Natureza", "🌿", cooldown: 3, "Ataca 1 inimigo com +50% ATK e aplica Preso por 1 turno.",
+            "Natureza", "🌿", cooldown: 3, "Ataca 1 inimigo com 400% ATK e aplica Preso por 2 turno.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new Dano(1.5),
-                new AplicarDebuff(() => new Preso(duracao: 1)),
+                new Dano(4.0),
+                new AplicarDebuff(() => new Preso(duracao: 2)),
             });
     }
 }

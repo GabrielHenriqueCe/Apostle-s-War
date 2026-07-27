@@ -16,7 +16,7 @@ namespace ApostlesWar.Domain.Champs.Folclore
             CorteDeVento(), Vendaval(), new Ventania());
 
         static HabilidadeAtiva CorteDeVento() => new(
-            "Corte de Vento", "🌬️", cooldown: 3, "Ataca todos ignorando Escudo. Dano aumenta com escudo do alvo.",
+            "Corte de Vento", "🌬️", cooldown: 3, "Ataca todos com 325% do ATK ignorando Escudo. O dano aumenta conforme o escudo do alvo.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
@@ -25,23 +25,23 @@ namespace ApostlesWar.Domain.Champs.Folclore
             });
 
         static HabilidadeAtiva Vendaval() => new(
-            "Vendaval", "🌪️", cooldown: 4, "+150% ATK ignorando Proteção, BuffDefesa e 50% DEF.",
+            "Vendaval", "🌪️", cooldown: 3, "Ataca 1 inimgigo com 350% do ATK ignorando Proteção de Aliados, BuffDefesa e 50% da DEF.",
             numeroDeAlvos: 1, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos,
             acoes: new()
             {
-                new Dano(2.5, ignorarDefesaPct: 0.50,
+                new Dano(3.5, ignorarDefesaPct: 0.50,
                     ignorarStatus: new[] { typeof(ProtecaoAliado), typeof(BuffDefesa) }),
             });
 
-        // Multiplicador do Corte de Vento: 1.0 + proporção do escudo do alvo sobre o HP máx
-        // inicial (cap +100%). O golpe IGNORA o Escudo (não consome), mas usa o tamanho dele
+        // Multiplicador do Corte de Vento: 3.25 + proporção do escudo do alvo sobre o HP máx
+        // inicial (cap +100% > teto 4.25). O golpe IGNORA o Escudo (não consome), mas usa o tamanho dele
         // pra escalar o dano — anti-tanque.
         static double MultPorEscudoDoAlvo(Combate atacante, Combate alvo)
         {
             int escudo = alvo.StatusAtivos.OfType<Escudo>().Sum(e => e.PontosRestantes);
             double proporcao = escudo > 0 ? Math.Min((double)escudo / alvo.HPMaximoInicial, 1.0) : 0.0;
-            return 1.0 + proporcao;
+            return 3.25 + proporcao;
         }
     }
 }

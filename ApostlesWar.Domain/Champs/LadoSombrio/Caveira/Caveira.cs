@@ -15,16 +15,16 @@ namespace ApostlesWar.Domain.Champs.LadoSombrio
             Ossinho(), OssoDuroDeRoer(), new Necromancia());
 
         static HabilidadeAtiva Ossinho() => new(
-            "Ossinho", "🦴", cooldown: 3, "Ataca todos os inimigos. Dano aumenta conforme o HP da Caveira diminui (até 2x).",
+            "Ossinho", "🦴", cooldown: 3, "Ataca todos os inimigos com 300% ATK. Dano aumenta conforme o HP diminui (até 2x).",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new Dano((atk, alvo) => 2.0 - (double)atk.HPAtual / atk.HPMaximo),
+                new Dano((atk, alvo) => 3.0 - (double)atk.HPAtual / atk.HPMaximo),
             });
 
         static HabilidadeAtiva OssoDuroDeRoer() => new(
-            "Osso Duro de Roer", "🦴", cooldown: 3, "Protege aliados (30% do dano vai pra Caveira) e ganha Escudo de 30% HP.",
+            "Osso Duro de Roer", "🦴", cooldown: 3, "Aplica proteção de aliados e ganha Escudo de 30% HP.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Aliados,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.NaoAtaque,
             acoes: new()

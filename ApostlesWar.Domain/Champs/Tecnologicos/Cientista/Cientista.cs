@@ -15,22 +15,22 @@ namespace ApostlesWar.Domain.Champs.Tecnologicos
             Quimica(), Fisica(), new AnaliseCritica());
 
         static HabilidadeAtiva Quimica() => new(
-            "Química", "🧪", cooldown: 3, "Ataca todos e aplica Veneno (5% HP/turno por stack).",
+            "Química", "🧪", cooldown: 3, "Ataca todos com 300% do atk e aplica 2 Venenos.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new Dano(1.0),
+                new Dano(3.0),
                 new AplicarDebuff(() => new Veneno(stacks: 2)),
             });
 
         static HabilidadeAtiva Fisica() => new(
-            "Física", "⚛️", cooldown: 3, "Ataca todos e aplica Queima 2t.",
+            "Física", "⚛️", cooldown: 3, "Ataca todos 300% do ATK e aplica 2 Queima.",
             numeroDeAlvos: int.MaxValue, tipoAlvo: TipoAlvo.Explicito, tipoLista: TipoLista.Inimigos,
             estadoAlvo: EstadoAlvo.Vivos, tipoAtaque: TipoAtaque.AreaDeEfeito,
             acoes: new()
             {
-                new Dano(1.0),
+                new Dano(3.0),
                 new AplicarDebuff(() => new Queima(2)),
             });
     }

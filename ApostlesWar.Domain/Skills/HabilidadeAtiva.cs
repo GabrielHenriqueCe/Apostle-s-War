@@ -190,6 +190,14 @@ namespace ApostlesWar.Domain
         /// estado pedido" é caso LEGÍTIMO (Doces de Abóbora sem nenhum aliado morto — o
         /// CombateService manda o próprio atacante como semente e conta com o vazio aqui, ver
         /// CombateService.ResolverAlvoInicial). Vazio = habilidade sem alvo, não é violação.
+        ///
+        /// E vem DEPOIS do hit-all pelo mesmo motivo: onde não há PICK, não há semente pra validar.
+        /// Numa habilidade de todos os alvos o CombateService nem pergunta (PedeAlvoDoJogador é
+        /// false pro aliado hit-all) — ele manda o próprio atacante como placeholder, e a semente
+        /// é ficção. O contrato acima existe pra manter o `IndexOf` alinhado com o sorteio dos
+        /// EXTRAS; sem extras a sortear, não há o que proteger. Cobrar a semente aqui explodia os
+        /// revive-de-todos (Technology, Atlantis, Céu, Circo, Anjo Caído: hit-all + Mortos, semente
+        /// = atacante vivo) justamente quando havia alguém pra reviver.
         /// </summary>
         protected List<Combate> ResolverAlvos(Combate alvoSelecionado, List<Combate> lista)
         {
@@ -197,6 +205,9 @@ namespace ApostlesWar.Domain
             var resultado = new List<Combate>();
 
             if (candidatos.Count == 0) return resultado;
+
+            // Hit-all: o conjunto É a lista de candidatos, na ordem do tabuleiro. Sem pick, sem extras.
+            if (NumeroDeAlvos == int.MaxValue) return candidatos;
 
             if (!candidatos.Contains(alvoSelecionado))
                 throw new InvalidOperationException(
@@ -206,9 +217,7 @@ namespace ApostlesWar.Domain
 
             resultado.Add(alvoSelecionado);
 
-            int extras = NumeroDeAlvos == int.MaxValue
-                ? candidatos.Count - 1
-                : NumeroDeAlvos - 1;
+            int extras = NumeroDeAlvos - 1;   // hit-all já saiu acima
 
             if (extras <= 0) return resultado;
 

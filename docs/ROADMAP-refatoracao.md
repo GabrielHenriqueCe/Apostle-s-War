@@ -1370,6 +1370,15 @@ re-checa EstaVivo — a Guarda reverter a morte e os posteriores não dispararem
    atacante vivo), o vivo entra nos resolvidos e `IndexOf` devolve -1. VERIFICADO: nenhum champ
    ativa esse caminho hoje (só DocesDeAbobora usa `Mortos`, com pick real que trata o vazio). Não é
    bug vivo — é contrato sem guarda. Guard de 1 linha + teste que o documente.
+   - **EPÍLOGO (jul/2026): o "nenhum champ ativa" ENVELHECEU e o guard virou crash.** O sweep dos
+     champs pra forma-construtor trouxe 5 revive-de-todos com exatamente essa forma (hit-all +
+     `Mortos`): Robô/Technology, Sereia/Atlantis, Anjo/Céu, Palhaço/Circo, Diabo/Anjo Caído. Todos
+     explodiam ao reviver — só quando havia alguém morto pra reviver (sem mortos, o early-return
+     de candidatos vazios salvava antes). **Correção:** o guard só vale onde existe PICK; hit-all
+     (`NumeroDeAlvos == int.MaxValue`) não tem — a semente é placeholder do `CombateService`, e o
+     `ResolverAlvos` agora devolve os candidatos inteiros antes de cobrá-la. Lição de doc: um
+     "VERIFICADO: nenhum champ faz isso" é foto, não regra — quem adiciona champs não lê o
+     ROADMAP. O que faz a regra valer é o teste (`HitAllDeMortos_ComSementeViva_...`).
 3. **Constantes de balance espalhadas (→ item 16 passo 0).**
 4. **Contrato traiçoeiro no `ColetarPassivasReativas`:** consome o cooldown AO COLETAR, antes de
    saber se a passiva vai agir. Hoje inofensivo (reativas têm cooldown 0). **REGRA ao criar passiva

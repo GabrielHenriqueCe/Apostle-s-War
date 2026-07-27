@@ -99,6 +99,13 @@ namespace ApostlesWar.Presentation.Front
 
         public void EnviarArsenal(ArsenalVista arsenal) => Enviar("arsenal", arsenal);
 
+        // ---------- Compêndio ----------
+        // Duas telas, duas mensagens: a grade e a ficha. Poderiam ser uma só (mandar o catálogo com
+        // as fichas dentro e deixar o JS navegar), mas aí o C# perderia de vista em que tela o
+        // jogador está — e é ele quem responde o Esc/Sair. Mesma divisão do mapa × fases da campanha.
+        public void EnviarCompendio(CompendioVista compendio) => Enviar("compendio", compendio);
+        public void EnviarChampDetalhe(ChampDetalheVista champ) => Enviar("compendioChamp", champ);
+
         private void Enviar(string tipo, object conteudo)
         {
             string json = JsonSerializer.Serialize(new { tipo, conteudo }, Json);

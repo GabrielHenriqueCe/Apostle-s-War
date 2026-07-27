@@ -40,6 +40,8 @@ ponte.addEventListener('message', e => {
     else if (msg.tipo === 'campanhaVitoria') mostrarVitoria(msg.conteudo);
     else if (msg.tipo === 'campanhaDerrota') mostrarDerrota();
     else if (msg.tipo === 'arsenal') mostrarArsenal(msg.conteudo);
+    else if (msg.tipo === 'compendio') mostrarCompendio(msg.conteudo);
+    else if (msg.tipo === 'compendioChamp') mostrarChampDetalhe(msg.conteudo);
 });
 
 // ---------- cenas (menu × combate × criar/editar perfil) ----------
@@ -55,6 +57,8 @@ function mostrarCena(cena) {
     document.getElementById('campanhaVitoria').hidden = cena !== 'campanhaVitoria';
     document.getElementById('campanhaDerrota').hidden = cena !== 'campanhaDerrota';
     document.getElementById('arsenal').hidden = cena !== 'arsenal';
+    document.getElementById('compendio').hidden = cena !== 'compendio';
+    document.getElementById('compendioChamp').hidden = cena !== 'compendioChamp';
     document.getElementById('arena').hidden = !emCombate;
     document.getElementById('painel').hidden = !emCombate;
     // Os controles de combate só fazem sentido na batalha.
@@ -62,6 +66,7 @@ function mostrarCena(cena) {
     document.getElementById('turno').style.visibility = emCombate ? 'visible' : 'hidden';
     // O overlay de fim só existe em combate; ao trocar de cena garante que sumiu.
     if (!emCombate) document.getElementById('fimBatalha').hidden = true;
+    atualizarBotaoSair();
 }
 
 function aplicarMenu(m) {
@@ -182,7 +187,6 @@ function salvarEdicao() {
 }
 
 document.getElementById('salvarEditar').addEventListener('click', salvarEdicao);
-document.getElementById('voltarEditar').addEventListener('click', () => mandar('voltar'));
 document.getElementById('nomeEditar').addEventListener('keydown', e => {
     if (e.key === 'Enter') salvarEdicao();
 });
@@ -352,7 +356,6 @@ function aplicarToggleArena(lado, tipo) {
 document.querySelectorAll('.setupSortear').forEach(b => b.addEventListener('click', () => sortearLadoArena(b.dataset.lado)));
 document.querySelectorAll('.setupJog').forEach(b => b.addEventListener('click', () => aplicarToggleArena(b.dataset.lado, 'jogador')));
 document.querySelectorAll('.setupBot').forEach(b => b.addEventListener('click', () => aplicarToggleArena(b.dataset.lado, 'bot')));
-document.getElementById('setupVoltar').addEventListener('click', () => mandar('voltar'));
 document.getElementById('setupLutar').addEventListener('click', () => {
     const time1 = arenaTimes.esq.filter(v => v != null);
     const time2 = arenaTimes.dir.filter(v => v != null);
@@ -444,7 +447,6 @@ let mapaArrastando = false, mapaStartX = 0, mapaOffset = 0, mapaOffsetBase = 0, 
     });
 })();
 
-document.getElementById('mapaVoltar').addEventListener('click', () => mandar('voltar'));
 
 // ---------- Campanha: fases ----------
 let campFases = null, campFaseSel = null, campSlotSel = null;
@@ -551,7 +553,6 @@ function atualizarLutarFase() {
     document.getElementById('fasesLutar').disabled = !(campFaseSel && temTime);
 }
 
-document.getElementById('fasesVoltar').addEventListener('click', () => mandar('voltar'));
 document.getElementById('fasesLutar').addEventListener('click', () => {
     if (!campFaseSel) return;
     const time = campTime.filter(v => v != null);
@@ -669,7 +670,123 @@ function mostrarItensSlot(slot) {
     }));
 }
 
-document.getElementById('arsenalVoltar').addEventListener('click', () => mandar('voltar'));
+// ---------- compêndio ----------
+// Catálogo, só leitura: nenhum clique daqui muda progresso. Por isso o champ TRAVADO é clicável
+// igual ao liberado — o cadeado diz "ainda não é seu", não "não é da sua conta". Quem decide o que
+// está travado é o C# (CampeoesService.EstaDesbloqueado); aqui só se pinta a resposta.
+function mostrarCompendio(c) {
+    mostrarCena('compendio');
+
+    document.getElementById('compendioFaccoes').replaceChildren(...c.faccoes.map(f => {
+        const bloco = document.createElement('section');
+        bloco.className = 'compFaccao';
+
+        const titulo = document.createElement('h2');
+        titulo.className = 'compFaccaoNome';
+        titulo.textContent = `${f.simbolo} ${f.nome}`;
+
+        const grade = document.createElement('div');
+        grade.className = 'compGrade';
+        grade.replaceChildren(...f.champs.map(ch => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'compChamp' + (ch.desbloqueado ? '' : ' travado');
+
+            const em = document.createElement('span');
+            em.className = 'ccEmoji';
+            em.textContent = ch.simbolo;
+
+            const nm = document.createElement('span');
+            nm.className = 'ccNome';
+            nm.textContent = ch.nome;
+
+            card.append(em, nm);
+            if (!ch.desbloqueado) {
+                const cad = document.createElement('span');
+                cad.className = 'ccCadeado';
+                cad.textContent = '🔒';
+                card.appendChild(cad);
+            }
+
+            // O índice é GLOBAL (posição na lista completa), não o da facção: a ponte carrega um int
+            // só por clique, e mandar (facção, slot) exigiria dois.
+            card.addEventListener('click', () => mandar('verChamp', ch.indice));
+            return card;
+        }));
+
+        bloco.append(titulo, grade);
+        return bloco;
+    }));
+}
+
+function mostrarChampDetalhe(c) {
+    mostrarCena('compendioChamp');
+
+    // Hoje o emoji gigante; o #champArte é o SLOT que recebe a arte do personagem inteiro depois.
+    document.getElementById('champArte').textContent = c.simbolo;
+    document.getElementById('champNome').textContent = c.nome;
+    document.getElementById('champFaccao').textContent =
+        c.desbloqueado ? c.faccao : `${c.faccao} · 🔒 ainda não conquistado`;
+
+    // Números de BASE: catálogo, não simulador — arsenal, itens e buffs não entram aqui.
+    const stats = [
+        ['❤️', 'HP', c.hp],
+        ['⚔️', 'Ataque', c.ataque],
+        ['🛡️', 'Defesa', c.defesa],
+        ['🎯', 'Taxa de crítico', `${c.taxaCritPct}%`],
+        ['💥', 'Dano crítico', `${c.danoCritPct}%`],
+    ];
+
+    const painelStats = document.getElementById('champStats');
+    const tituloStats = document.createElement('h2');
+    tituloStats.className = 'champSecao';
+    tituloStats.textContent = 'Estatísticas';
+
+    painelStats.replaceChildren(tituloStats, ...stats.map(([icone, rotulo, valor]) => {
+        const linha = document.createElement('div');
+        linha.className = 'champStat';
+
+        const ic = document.createElement('span'); ic.className = 'csIcone'; ic.textContent = icone;
+        const rot = document.createElement('span'); rot.className = 'csRotulo'; rot.textContent = rotulo;
+        const val = document.createElement('span'); val.className = 'csValor'; val.textContent = valor;
+
+        linha.append(ic, rot, val);
+        return linha;
+    }));
+
+    const painelHabs = document.getElementById('champHabilidades');
+    const tituloHabs = document.createElement('h2');
+    tituloHabs.className = 'champSecao';
+    tituloHabs.textContent = 'Habilidades';
+
+    painelHabs.replaceChildren(tituloHabs, ...c.habilidades.map(h => {
+        const card = document.createElement('div');
+        card.className = 'champHab' + (h.passiva ? ' passiva' : '');
+
+        const topo = document.createElement('div');
+        topo.className = 'chTopo';
+
+        const nome = document.createElement('span');
+        nome.className = 'chNome';
+        nome.textContent = `${h.simbolo} ${h.nome}`;
+
+        // A passiva não se usa: dizer isso evita o jogador procurar o botão dela. As ativas mostram a
+        // cadência DECLARADA — fora da luta não há turno correndo, e é a cadência que se compara.
+        const marca = document.createElement('span');
+        marca.className = 'chMarca';
+        marca.textContent = h.passiva ? 'passiva' : `${h.cooldown} turnos`;
+
+        topo.append(nome, marca);
+
+        const desc = document.createElement('p');
+        desc.className = 'chDesc';
+        desc.textContent = h.descricao;
+
+        card.append(topo, desc);
+        return card;
+    }));
+}
+
 
 // ---------- modal de confirmação ----------
 let modalAberto = false;
@@ -1079,29 +1196,24 @@ function desarmar() {
 const acharCombatente = id => id == null ? null
     : [...(estado?.equipe1 || []), ...(estado?.equipe2 || [])].find(c => c.id === id) || null;
 
-// Esc muda de sentido conforme a cena:
-//  - modal aberto → cancela o modal
-//  - criar perfil → ignora (nada de sair no meio de digitar o nome)
-//  - menu raiz → confirma sair do jogo; submenu → volta um nível
-//  - batalha → desarma alvo/habilidade; sem nada armado, confirma sair da batalha
-document.addEventListener('keydown', e => {
-    // Fim de batalha: Enter OU Esc saem pro menu (o clique no overlay também).
-    if (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim') {
-        if (e.key === 'Enter' || e.key === 'Escape') mandar('voltarMenu');
-        return;
-    }
-
-    // Vitória/derrota da campanha: Enter OU Esc continuam (o clique também).
-    if (cenaAtual === 'campanhaVitoria' || cenaAtual === 'campanhaDerrota') {
-        if (e.key === 'Enter' || e.key === 'Escape') mandar('continuar');
-        return;
-    }
-
-    if (e.key !== 'Escape') return;
-
+// ---------- sair da tela ----------
+// UMA função pra "voltar um nível", e os dois gestos que a disparam: a tecla Esc e o botão 🚪 Sair
+// do canto superior direito. Antes cada tela tinha o próprio "Voltar" no rodapé, cada um num lugar
+// diferente, e a tecla era a única coisa consistente — agora o botão é o espelho VISÍVEL dela.
+//
+// O que "um nível" quer dizer muda com a cena, e é aqui que a tabela mora:
+//  - modal aberto → cancela o modal (ele é o nível mais raso)
+//  - criar perfil → nada (não se sai no meio de digitar o nome; o botão fica escondido)
+//  - fim de batalha / vitória / derrota → segue pro menu
+//  - submenu e telas de conteúdo → 'voltar' (o C# desempilha; ver LerEscolha)
+//  - menu raiz → confirma sair do JOGO, que é o único nível acima
+//  - batalha → desarma o que estiver armado; sem nada armado, confirma sair da luta
+function sairDaTela() {
     if (modalAberto) { fecharModal(); return; }
     if (cenaAtual === 'criarPerfil') return;
-    if (['editarPerfil', 'arenaSetup', 'campanhaMapa', 'campanhaFases', 'arsenal'].includes(cenaAtual)) { mandar('voltar'); return; }
+
+    if (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim') { mandar('voltarMenu'); return; }
+    if (cenaAtual === 'campanhaVitoria' || cenaAtual === 'campanhaDerrota') { mandar('continuar'); return; }
 
     if (cenaAtual === 'menu') {
         if (menuRaiz) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));
@@ -1109,9 +1221,26 @@ document.addEventListener('keydown', e => {
         return;
     }
 
-    // cena de combate (não-Fim): com algo armado, o Esc desarma; sem nada armado, ele sai da batalha.
+    if (cenaAtual !== 'combate') { mandar('voltar'); return; }
+
     if (desarmar()) { desenhar(); return; }
     confirmar('Sair da batalha? O progresso desta luta será perdido.', () => mandar('sair'));
+}
+
+// O botão só some onde sair não é opção (criar perfil). Nas demais ele existe SEMPRE no mesmo pixel —
+// é isso que o torna aprendível.
+function atualizarBotaoSair() {
+    document.getElementById('sairTela').hidden = cenaAtual === 'criarPerfil';
+}
+
+document.getElementById('sairTela').addEventListener('click', sairDaTela);
+
+document.addEventListener('keydown', e => {
+    // Nas telas de desfecho o Enter também segue em frente (é o gesto natural de "ok, continuar").
+    const desfecho = (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim')
+        || cenaAtual === 'campanhaVitoria' || cenaAtual === 'campanhaDerrota';
+
+    if (e.key === 'Escape' || (desfecho && e.key === 'Enter')) sairDaTela();
 });
 
 // Clique no VAZIO da arena (fora de qualquer combatente) — o outro "clicar em outro lugar". Sem
@@ -1125,11 +1254,6 @@ document.getElementById('alternarEstatisticas').addEventListener('click', e => {
     mostrarEstatisticas = !mostrarEstatisticas;
     e.currentTarget.classList.toggle('ativo', mostrarEstatisticas);
     desenhar();
-});
-
-// Sair da batalha: confirma antes (o C# aborta a partida e volta pro menu ao receber 'sair').
-document.getElementById('sairBatalha').addEventListener('click', () => {
-    confirmar('Sair da batalha? O progresso desta luta será perdido.', () => mandar('sair'));
 });
 
 // ---------- mostrar/esconder o log ----------

@@ -51,6 +51,18 @@ namespace ApostlesWar.Application.Services
 
         public List<Personagem> ObterDesbloqueados() => desbloqueados;
 
+        /// <summary>
+        /// Este champ já foi conquistado? Casa por (Faccao, Slot) e não por referência: depois de um
+        /// carregamento, os objetos da lista não são necessariamente os mesmos que o
+        /// <see cref="PersonagemService"/> devolve.
+        ///
+        /// Público porque DOIS lugares fazem a mesma pergunta — o picker de avatar e o compêndio — e
+        /// a resposta é uma só. Estava escrita só dentro do <see cref="PerfilService.PodeUsarAvatar"/>,
+        /// onde o nome falava de avatar e escondia que a regra era de progressão.
+        /// </summary>
+        public bool EstaDesbloqueado(Personagem campeao)
+            => desbloqueados.Any(p => p.Faccao == campeao.Faccao && p.Slot == campeao.Slot);
+
         public void DesbloquearCampeoes(Faccao faccao, Fases fase)
         {
             Fase fas = Campanha.ObterFase((int)fase);

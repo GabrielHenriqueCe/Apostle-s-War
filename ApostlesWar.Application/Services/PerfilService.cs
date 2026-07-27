@@ -48,8 +48,7 @@ namespace ApostlesWar.Application.Services
         /// Este campeão pode ser o avatar? Só os DESBLOQUEADOS — a cara do jogador é troféu de
         /// campanha, não catálogo. A grade mostra os 36 (os travados em cinza); quem recusa é isto.
         /// </summary>
-        public bool PodeUsarAvatar(Personagem campeao)
-            => _campeoes.ObterDesbloqueados().Any(p => p.Faccao == campeao.Faccao && p.Slot == campeao.Slot);
+        public bool PodeUsarAvatar(Personagem campeao) => _campeoes.EstaDesbloqueado(campeao);
 
         public Perfil? Carregar() => _repositorio.Carregar<Perfil>(ChavePerfil);
 

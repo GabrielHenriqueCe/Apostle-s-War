@@ -159,6 +159,46 @@ namespace ApostlesWar.Presentation.Front
     /// <summary>O que o front devolve ao iniciar uma fase: a fase (1..7) e o time como índices dos desbloqueados.</summary>
     internal record FaseConfig(int Fase, int[] Time);
 
+    // ---------- Compêndio ----------
+
+    /// <summary>
+    /// Uma habilidade como o COMPÊNDIO a mostra — só o que se lê fora da luta. Não reusa a
+    /// <see cref="HabilidadeVista"/> de propósito: aquela existe pra ser CLICADA (índice, cooldown
+    /// restante, disponível, pede alvo) e nada disso faz sentido num catálogo, onde não há turno nem
+    /// dono. Metade dos campos viriam vazios e alguém, um dia, tentaria preenchê-los.
+    ///
+    /// <see cref="Passiva"/> separa a passiva das duas ativas: ela não se usa, e a tela precisa dizer
+    /// isso em vez de deixar o jogador procurando o botão.
+    /// </summary>
+    internal record HabilidadeDoChampVista(string Nome, string Simbolo, string Descricao,
+        int Cooldown, bool Passiva);
+
+    /// <summary>
+    /// Um champ na grade do compêndio. <see cref="Indice"/> é a posição na lista COMPLETA (a mesma
+    /// ordem do TodosOsCampeoes) — é o que o clique devolve, e é global às facções justamente pra
+    /// não precisar mandar (facção, slot) de volta pela ponte, que carrega um int só.
+    /// </summary>
+    internal record CompendioChampVista(int Indice, string Simbolo, string Nome, bool Desbloqueado);
+
+    /// <summary>Uma facção com os 4 champs dela, na ordem dos slots. É como o catálogo se agrupa.</summary>
+    internal record CompendioFaccaoVista(string Nome, string Simbolo, List<CompendioChampVista> Champs);
+
+    /// <summary>O catálogo inteiro: as 9 facções, cada uma com seus 4 — travados incluídos.</summary>
+    internal record CompendioVista(List<CompendioFaccaoVista> Faccoes);
+
+    /// <summary>
+    /// A FICHA de um champ. Os números são os de BASE (o que ele é antes de arsenal, buff ou item):
+    /// o compêndio é catálogo, não simulador — quem quer saber o efeito do equipamento olha o
+    /// Arsenal. Crit não vem do <see cref="Personagem"/> porque lá ele não existe por champ: é o
+    /// <c>TaxaCritBase</c>/<c>DanoCritBase</c>, global a todo mundo.
+    ///
+    /// <see cref="Desbloqueado"/> só pinta a moldura — a ficha é COMPLETA mesmo travada, porque um
+    /// catálogo que esconde o que você ainda não tem não serve pra planejar a campanha.
+    /// </summary>
+    internal record ChampDetalheVista(string Nome, string Simbolo, string Faccao, bool Desbloqueado,
+        int HP, int Ataque, int Defesa, int TaxaCritPct, int DanoCritPct,
+        List<HabilidadeDoChampVista> Habilidades);
+
     // ---------- Arsenal ----------
 
     /// <summary>

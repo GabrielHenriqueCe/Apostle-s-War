@@ -37,7 +37,6 @@
         <p id="editarDica">Escolha seu personagem</p>
         <div id="avatarGrade"></div>
         <div id="editarBotoes">
-            <button id="voltarEditar" type="button">Voltar</button>
             <button id="salvarEditar" type="button">Salvar</button>
         </div>
     </section>
@@ -74,7 +73,6 @@
         <div id="setupPicker"></div>
 
         <div id="setupRodape">
-            <button id="setupVoltar" type="button">Voltar</button>
             <button id="setupLutar" type="button" disabled>⚔️ Lutar</button>
         </div>
     </section>
@@ -87,7 +85,6 @@
                 <!-- nós de facção inseridos pelo JS -->
             </div>
         </div>
-        <div id="mapaRodape"><button id="mapaVoltar" type="button">Voltar</button></div>
     </section>
 
     <!-- Cena das FASES de uma facção. -->
@@ -102,7 +99,6 @@
             <div id="fasePicker"></div>
         </div>
         <div id="fasesRodape">
-            <button id="fasesVoltar" type="button">Voltar</button>
             <button id="fasesLutar" type="button" disabled>⚔️ Lutar</button>
         </div>
     </section>
@@ -127,7 +123,28 @@
             <div id="arsenalSlotNome"></div>
             <div id="arsenalItens"></div>
         </div>
-        <div id="arsenalRodape"><button id="arsenalVoltar" type="button">Voltar</button></div>
+    </section>
+
+    <!-- Cena do COMPÊNDIO: o catálogo dos 36, por facção. Os travados aparecem (com cadeado) e são
+         clicáveis — é planejando contra o que ainda não se tem que a campanha vira escolha. -->
+    <section id="compendio" hidden>
+        <h1>📖 Compêndio</h1>
+        <div id="compendioFaccoes"></div>
+    </section>
+
+    <!-- Cena da FICHA de um champ: arte grande no meio, números à esquerda, habilidades à direita.
+         O #champArte é um SLOT: hoje mostra o emoji gigante, amanhã recebe o personagem inteiro sem
+         a página mudar de forma (o Gabriel nomeou esse futuro). -->
+    <section id="compendioChamp" hidden>
+        <div id="champCorpo">
+            <aside id="champStats"></aside>
+            <div id="champCentro">
+                <div id="champArte"></div>
+                <div id="champNome"></div>
+                <div id="champFaccao"></div>
+            </div>
+            <aside id="champHabilidades"></aside>
+        </div>
     </section>
 
     <!-- MODAL de confirmação reutilizável: sobrepõe qualquer cena (sair, excluir conta, ...). -->
@@ -152,9 +169,13 @@
             <button id="alternarEstatisticas" type="button" title="Mostrar/esconder as estatísticas (ATK, DEF, crit)">
                 📊 estatísticas
             </button>
-            <button id="sairBatalha" type="button" title="Sair da batalha">🚪 sair</button>
         </div>
     </header>
+
+    <!-- O ÚNICO botão de sair do jogo inteiro, fixo no canto superior direito, por cima de qualquer
+         cena. Faz exatamente o que a tecla Esc faz ali (ver sairDaTela) — é o espelho visível dela.
+         Antes cada tela tinha o próprio "Voltar" no rodapé, cada um num lugar diferente. -->
+    <button id="sairTela" type="button" title="Sair desta tela (Esc)">🚪 Sair</button>
 
     <main id="arena">
         <section class="lado" id="ladoEsquerdo" aria-label="Seu time"></section>

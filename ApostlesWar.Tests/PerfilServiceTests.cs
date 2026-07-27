@@ -27,12 +27,19 @@ namespace Tests
         }
 
         // O PerfilService precisa dos desbloqueados pra decidir avatar; o CampeoesService nasce com
-        // os 4 Humanos e é DADO puro (não pede tela), então dá pra montar de verdade.
+        // os 4 Humanos e é DADO puro (não pede tela), então dá pra montar de verdade. Idem o
+        // CampanhaService, que é quem o "excluir conta" chama pra zerar o progresso.
         private static PerfilService Montar(IRepositorioDeSave repo)
+            => MontarCompleto(repo).Perfil;
+
+        private static (PerfilService Perfil, CapitulosService Capitulos, CampeoesService Campeoes,
+            ArsenalService Arsenal, CampanhaService Campanha) MontarCompleto(IRepositorioDeSave repo)
         {
             var capitulos = new CapitulosService(repo);
+            var arsenal = new ArsenalService(capitulos, repo);
             var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            return new PerfilService(repo, campeoes);
+            var campanha = new CampanhaService(arsenal, campeoes, capitulos, repo);
+            return (new PerfilService(repo, campeoes, campanha), capitulos, campeoes, arsenal, campanha);
         }
 
         [Fact]
@@ -78,6 +85,55 @@ namespace Tests
             Assert.False(repo.Contem("campanha"));
         }
 
+        // O bug que estes dois fixam: "excluir conta" apagava o DISCO e deixava a MEMÓRIA intacta.
+        // Como o CarregarProgresso/CarregarItensEquipados só sobrescrevem quando a porta devolve
+        // não-nulo, um save ausente PRESERVA o que já está carregado — então o jogador excluía a
+        // conta, criava perfil novo e continuava com os 36 champs e o loot, que voltavam pro disco
+        // na primeira fase vencida.
+
+        [Fact]
+        public void Excluir_ZeraOProgressoEmMemoria_NaoSoNoDisco()
+        {
+            var repo = new RepositorioFake();
+            var (servico, capitulos, campeoes, arsenal, _) = MontarCompleto(repo);
+
+            // Uma campanha em andamento: venceu a 1ª do Reino, liberou os champs e pegou o item.
+            servico.CriarPerfil("Gabriel", "🕵️");
+            capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1);
+            capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1);
+            campeoes.DesbloquearCampeoes(Faccao.Reino, Fases.Fase1);
+            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase1));
+            Assert.True(campeoes.ObterDesbloqueados().Count > 4);
+
+            servico.Excluir();
+
+            Assert.Equal(4, campeoes.ObterDesbloqueados().Count);   // só os Humanos de volta
+            Assert.All(campeoes.ObterDesbloqueados(), p => Assert.Equal(Faccao.Humanos, p.Faccao));
+            Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));
+            Assert.False(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2));
+            Assert.Empty(arsenal.ObterObtidos());
+            Assert.All(arsenal.ObterEquipados(), item => Assert.Null(item));
+        }
+
+        [Fact]
+        public void Excluir_ERecarregar_NaoRessuscitaOProgresso()
+        {
+            var repo = new RepositorioFake();
+            var (servico, capitulos, campeoes, arsenal, campanha) = MontarCompleto(repo);
+
+            servico.CriarPerfil("Gabriel", "🕵️");
+            capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1);
+            capitulos.SalvarProgresso();
+            campanha.CarregarSaves();
+
+            servico.Excluir();
+            campanha.CarregarSaves();   // o boot seguinte, com o save já apagado
+
+            Assert.Equal(4, campeoes.ObterDesbloqueados().Count);
+            Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));
+            Assert.Empty(arsenal.ObterObtidos());
+        }
+
         [Fact]
         public void AvatarInicial_ESempreDeUmDosHumanos()
         {
@@ -110,9 +166,7 @@ namespace Tests
         public void PodeUsarAvatar_LiberaQuandoACampanhaDesbloqueia()
         {
             var repo = new RepositorioFake();
-            var capitulos = new CapitulosService(repo);
-            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            var servico = new PerfilService(repo, campeoes);
+            var (servico, _, campeoes, _, _) = MontarCompleto(repo);
             var personagens = new PersonagemService();
 
             Personagem doReino = personagens.ObterPersonagem(Faccao.Reino, Slot.Slot1);

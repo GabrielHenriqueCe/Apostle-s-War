@@ -42,11 +42,13 @@
     <None Update="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Semente de save versionada (vem com tudo liberado), que vive na raiz do repo. O jogo
-         lê/grava em AppContext.BaseDirectory/Save — que agora é a saída DESTE projeto, por isso
-         o Link. PreserveNewest: não sobrescreve progresso já jogado, mas semeia num clone novo. -->
-    <None Include="..\Save\**" Link="Save\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+  <!-- NÃO existe semente de save. Houve uma (`..\Save\**` copiada pra saída), versionada e "com tudo
+       liberado" pra encurtar o teste — e ela QUEBRAVA o excluir conta: o wipe apagava os arquivos da
+       saída e o build seguinte repunha `save.txt`/`itens.txt` do repo, então o jogador recomeçava com
+       os 36 champs e os itens de volta. Removida em jul/2026.
+
+       O jogo boota liso sem arquivo nenhum: a porta devolve default e cada service fica no estado
+       inicial (Reino fase 1, os 4 Humanos, slots vazios). "Jogo novo" é a AUSÊNCIA de save, não um
+       save especial — e é essa a única definição que o excluir conta consegue reproduzir. -->
 
 </Project>

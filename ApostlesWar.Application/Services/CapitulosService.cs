@@ -12,7 +12,17 @@ namespace ApostlesWar.Application.Services
     {
         #region Capitulos
 
-        List<Capitulo> capitulos = new List<Capitulo>
+        // O slot de save deste service. Const porque agora TRÊS operações o citam (salvar, carregar
+        // e o wipe do Resetar) — e um wipe que erra a string apaga nada, calado.
+        private const string ChaveProgresso = "save";
+
+        /// <summary>
+        /// O jogo NOVO: só o Reino aberto, e nele só a fase 1. É fábrica (e não um campo inicializado
+        /// na declaração) porque o <see cref="Resetar"/> precisa de uma cópia FRESCA — os
+        /// <see cref="Capitulo"/> são mutáveis, então reusar as mesmas instâncias devolveria o
+        /// progresso junto.
+        /// </summary>
+        private static List<Capitulo> EstadoInicial() => new List<Capitulo>
         {
             new Capitulo(Faccao.Reino, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, true),
@@ -32,9 +42,24 @@ namespace ApostlesWar.Application.Services
             new List<bool> { false, false, false, false, false, false, false }, false),
         };
 
+        List<Capitulo> capitulos = EstadoInicial();
+
         private readonly IRepositorioDeSave _repo;
 
         public CapitulosService(IRepositorioDeSave repo) => _repo = repo;
+
+        /// <summary>
+        /// Devolve o progresso ao estado de jogo novo — disco E memória, nesta ordem de importância:
+        /// só apagar o arquivo NÃO reseta nada, porque o <see cref="CarregarProgresso"/> mantém o que
+        /// já está em memória quando a porta devolve null. Era esse o buraco do "excluir conta": o
+        /// wipe limpava o disco, o jogador criava um perfil novo e seguia com os 36 champs liberados,
+        /// que voltavam pro disco na primeira fase vencida.
+        /// </summary>
+        public void Resetar()
+        {
+            _repo.Excluir(ChaveProgresso);
+            capitulos = EstadoInicial();
+        }
 
         Capitulo ObterCapitulo(Faccao faccao)
         {
@@ -83,7 +108,7 @@ namespace ApostlesWar.Application.Services
             }
         }
 
-        public void SalvarProgresso() => _repo.Salvar("save", capitulos);
+        public void SalvarProgresso() => _repo.Salvar(ChaveProgresso, capitulos);
 
         public List<Capitulo> ObterTodos() => capitulos;
 
@@ -99,7 +124,7 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         public void CarregarProgresso()
         {
-            var lista = _repo.Carregar<List<Capitulo>>("save");
+            var lista = _repo.Carregar<List<Capitulo>>(ChaveProgresso);
             if (lista != null)
             {
                 capitulos.Clear();

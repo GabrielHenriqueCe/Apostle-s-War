@@ -22,17 +22,16 @@ namespace ApostlesWar.Application.Services
     {
         private const string ChavePerfil = "perfil";
 
-        // O que "excluir conta" apaga além do perfil: todo o progresso de campanha (capítulos, itens e
-        // a posição no mapa).
-        private static readonly string[] ChavesDoProgresso = { "save", "itens", "campanha" };
-
         private readonly IRepositorioDeSave _repositorio;
         private readonly CampeoesService _campeoes;
+        private readonly CampanhaService _campanha;
 
-        public PerfilService(IRepositorioDeSave repositorio, CampeoesService campeoes)
+        public PerfilService(IRepositorioDeSave repositorio, CampeoesService campeoes,
+            CampanhaService campanha)
         {
             _repositorio = repositorio;
             _campeoes = campeoes;
+            _campanha = campanha;
         }
 
         /// <summary>
@@ -59,10 +58,15 @@ namespace ApostlesWar.Application.Services
         public void CriarPerfil(string nome, string avatar)
             => _repositorio.Salvar(ChavePerfil, new Perfil(nome, avatar));
 
+        /// <summary>
+        /// O wipe COMPLETO: o perfil é desta casa, o progresso é do
+        /// <see cref="CampanhaService.ResetarProgresso"/>. Depois disto o jogo tem que estar
+        /// indistinguível de uma instalação nova — inclusive em MEMÓRIA, que é o que faltava.
+        /// </summary>
         public void Excluir()
         {
             _repositorio.Excluir(ChavePerfil);
-            foreach (string chave in ChavesDoProgresso) _repositorio.Excluir(chave);
+            _campanha.ResetarProgresso();
         }
     }
 }

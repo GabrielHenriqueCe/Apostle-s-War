@@ -23,7 +23,6 @@ namespace ApostlesWar.Presentation.Front
         private const int Arsenal = 2;
         private const int Compendio = 3;
         private const int Configuracao = 4;
-        private const int Sair = 5;
 
         // Índices do menu de CONFIGURAÇÃO.
         private const int CfgConta = 2;
@@ -101,10 +100,6 @@ namespace ApostlesWar.Presentation.Front
                         case EditarPerfil:
                             MostrarEditarPerfil();
                             break;
-
-                        case Sair:
-                            _ponte.FecharJanela();
-                            return;
                     }
                 }
             }
@@ -150,9 +145,9 @@ namespace ApostlesWar.Presentation.Front
                     new("Arsenal",      "🎒", Habilitado: true),
                     new("Compêndio",    "📖", Habilitado: true),
                     new("Configurações", "⚙️", Habilitado: true),
-                    // Confirma como o Esc na raiz já confirmava: fechar o jogo é irreversível, e os
-                    // dois caminhos pra mesma porta não podem discordar sobre pedir certeza.
-                    new("Sair",         "🚪", Habilitado: true, Confirmar: "Sair do jogo?"),
+                    // Não há opção "Sair" na lista: quem sai do jogo é o 🚪 do canto superior direito,
+                    // o mesmo botão de todas as outras telas. Duas portas pro mesmo lugar, uma delas
+                    // só no menu, era exatamente o que a padronização veio desfazer.
                 },
                 Raiz: true,
                 Avatar: perfil?.Avatar,

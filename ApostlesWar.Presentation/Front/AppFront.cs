@@ -110,8 +110,9 @@ namespace ApostlesWar.Presentation.Front
                 var personagens = new PersonagemService();
                 var selecaoDeAlvo = new SelecaoDeAlvoService();
                 var campeoes = new CampeoesService(personagens, capitulos);
-                var perfil = new PerfilService(repositorio, campeoes);
+                // A campanha nasce ANTES do perfil: "excluir conta" delega o wipe do progresso pra ela.
                 var campanha = new CampanhaService(arsenal, campeoes, capitulos, repositorio);
+                var perfil = new PerfilService(repositorio, campeoes, campanha);
 
                 // Dois ControladorBot: um é o adversário, o outro assume quando o jogador liga o
                 // automático. Mesmo cérebro, instâncias separadas — cada um memoriza o próprio alvo

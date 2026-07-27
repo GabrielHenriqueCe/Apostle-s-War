@@ -313,7 +313,6 @@ body {
     color: var(--texto);
     transition: border-color .15s, background .15s, transform .1s;
 }
-#voltarEditar:hover { border-color: var(--apagado); transform: translateY(-1px); }
 #salvarEditar { border: none; background: var(--ouro); color: var(--fundo); }
 #salvarEditar:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
@@ -441,7 +440,6 @@ body {
     background: transparent; color: var(--texto);
     transition: border-color .15s, background .15s, transform .1s;
 }
-#setupVoltar:hover { border-color: var(--apagado); transform: translateY(-1px); }
 #setupLutar { border: none; background: var(--ouro); color: var(--fundo); }
 #setupLutar:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
 #setupLutar:disabled { opacity: .4; cursor: not-allowed; }
@@ -495,8 +493,6 @@ body {
     transition: left 1.4s cubic-bezier(.4, 0, .2, 1);
     filter: drop-shadow(0 2px 3px #000);
 }
-
-#mapaRodape { padding: 14px 20px; }
 
 /* ---------- Campanha: fases ---------- */
 #campanhaFases {
@@ -552,12 +548,11 @@ body {
 #fasePicker .avatarCelula { width: 68px; }
 
 #fasesRodape { display: flex; gap: 12px; }
-#mapaRodape button, #fasesRodape button {
+#fasesRodape button {
     padding: 10px 26px; font-family: inherit; font-size: 16px; font-weight: 600;
     border-radius: 10px; cursor: pointer; border: 2px solid var(--borda);
     background: transparent; color: var(--texto); transition: border-color .15s, background .15s, transform .1s;
 }
-#mapaVoltar:hover, #fasesVoltar:hover { border-color: var(--apagado); transform: translateY(-1px); }
 #fasesLutar { border: none; background: var(--ouro); color: var(--fundo); }
 #fasesLutar:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
 #fasesLutar:disabled { opacity: .4; cursor: not-allowed; }
@@ -640,12 +635,123 @@ body {
 .itemCard .icDiff.desce { color: var(--alvo); }
 .itemCard .icTag { font-size: 11px; color: var(--vida); text-transform: uppercase; letter-spacing: 1px; }
 
-#arsenalRodape button {
-    padding: 10px 26px; font-family: inherit; font-size: 16px; font-weight: 600;
-    border-radius: 10px; cursor: pointer; border: 2px solid var(--borda); background: transparent; color: var(--texto);
+/* ---------- Compêndio (catálogo dos 36, por facção) ---------- */
+#compendio {
+    position: absolute; inset: 0; z-index: 30;
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+    padding: 20px 20px 40px; overflow-y: auto;
+    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+}
+#compendio[hidden] { display: none; }
+#compendio h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
+
+#compendioFaccoes {
+    width: min(1000px, 96vw);
+    display: flex; flex-direction: column; gap: 18px;
+}
+
+.compFaccao { display: flex; flex-direction: column; gap: 8px; }
+.compFaccaoNome {
+    margin: 0; font-size: 15px; font-weight: 700; color: var(--ouro);
+    letter-spacing: 1px; text-transform: uppercase;
+    border-bottom: 1px solid var(--borda); padding-bottom: 5px;
+}
+
+/* auto-fit: 4 por linha numa janela larga, e reflui sozinho quando ela encolhe. */
+.compGrade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.compChamp {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px; cursor: pointer; font-family: inherit; color: var(--texto);
+    background: var(--painel); border: 2px solid var(--borda); border-radius: 12px;
+    transition: border-color .12s, transform .1s;
+}
+.compChamp:hover { border-color: var(--ouro); transform: translateY(-2px); }
+.compChamp .ccEmoji { font-size: 40px; line-height: 1; }
+.compChamp .ccNome { font-size: 13px; font-weight: 600; }
+
+/* Travado é MAIS APAGADO, não indisponível: continua clicável (a ficha é completa de qualquer jeito). */
+.compChamp.travado .ccEmoji { filter: grayscale(1); opacity: .45; }
+.compChamp.travado .ccNome { color: var(--apagado); }
+.compChamp .ccCadeado { position: absolute; top: 6px; right: 8px; font-size: 13px; }
+
+/* ---------- Compêndio: a ficha de um champ ---------- */
+#compendioChamp {
+    position: absolute; inset: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; overflow-y: auto;
+    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+}
+#compendioChamp[hidden] { display: none; }
+
+/* Três colunas: números | arte | habilidades. O centro é 1fr pra a arte ficar com a maior fatia —
+   é o slot que vai receber o personagem inteiro no lugar do emoji. */
+#champCorpo {
+    width: min(1100px, 96vw);
+    display: grid; grid-template-columns: 260px 1fr 320px; gap: 22px; align-items: start;
+}
+
+#champCentro { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+#champArte {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; min-height: 260px; font-size: 150px; line-height: 1;
+    background: rgba(0, 0, 0, .22); border: 1px solid var(--borda); border-radius: 16px;
+}
+#champNome { font-size: 26px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
+#champFaccao { font-size: 13px; color: var(--apagado); }
+
+#champStats, #champHabilidades {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 14px 16px; background: rgba(0, 0, 0, .22);
+    border: 1px solid var(--borda); border-radius: 14px;
+}
+
+.champSecao {
+    margin: 0 0 4px; font-size: 13px; font-weight: 700; color: var(--ouro);
+    letter-spacing: 1px; text-transform: uppercase;
+}
+
+.champStat { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.champStat .csIcone { font-size: 16px; }
+.champStat .csRotulo { flex: 1; color: var(--apagado); }
+.champStat .csValor { font-weight: 700; color: var(--texto); }
+
+.champHab {
+    display: flex; flex-direction: column; gap: 4px; padding: 10px 12px;
+    background: var(--painel); border: 2px solid var(--borda); border-radius: 10px;
+}
+.champHab.passiva { border-style: dashed; }
+.champHab .chTopo { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.champHab .chNome { font-size: 14px; font-weight: 700; }
+.champHab .chMarca { font-size: 11px; color: var(--ouro); white-space: nowrap; }
+/* pre-line pelo mesmo motivo do .hDesc do combate: as descrições trazem \n do domínio. */
+.champHab .chDesc { margin: 0; font-size: 12px; color: var(--apagado); line-height: 1.45; white-space: pre-line; }
+
+/* Estreitou: as colunas viram linhas e a arte encolhe, em vez de espremer os três painéis. */
+@media (max-width: 900px) {
+    #champCorpo { grid-template-columns: 1fr; }
+    #champArte { min-height: 170px; font-size: 100px; }
+}
+
+/* ---------- o botão SAIR global ---------- */
+/* Um só pro jogo inteiro, sempre no mesmo pixel, por cima de qualquer cena (z acima dos overlays de
+   tela, abaixo do modal). Faz o que o Esc faz ali — ver sairDaTela no jogo.js. */
+#sairTela {
+    /* z 45: por cima dos overlays de cena (30/40), por baixo do modal (50) — quando o modal abre,
+       o Sair não pode boiar sobre ele. */
+    position: fixed; top: 12px; right: 14px; z-index: 45;
+    padding: 8px 18px; font-family: inherit; font-size: 14px; font-weight: 600;
+    border-radius: 10px; cursor: pointer;
+    border: 2px solid var(--borda); background: rgba(20, 18, 26, .85); color: var(--texto);
     transition: border-color .15s, transform .1s;
 }
-#arsenalVoltar:hover { border-color: var(--apagado); transform: translateY(-1px); }
+#sairTela:hover { border-color: var(--ouro); transform: translateY(-1px); }
+#sairTela[hidden] { display: none; }
 
 /* ---------- topo ---------- */
 #topo {
@@ -661,7 +767,7 @@ body {
 
 #botoesTopo { display: flex; gap: 8px; }
 
-#alternarEstatisticas, #velocidade, #alternarLog, #sairBatalha, #auto {
+#alternarEstatisticas, #velocidade, #alternarLog, #auto {
     background: transparent;
     color: var(--apagado);
     border: 1px solid var(--borda);
@@ -673,10 +779,6 @@ body {
 }
 #alternarEstatisticas:hover, #velocidade:hover, #alternarLog:hover, #auto:hover { color: var(--texto); border-color: var(--apagado); }
 #alternarEstatisticas.ativo, #alternarLog.ativo { color: var(--ouro); border-color: var(--ouro); }
-
-/* Sair da batalha: destaque discreto de "saída" (avermelhado no hover), some no fim (aí é o 🏠 menu). */
-#sairBatalha:hover { color: var(--alvo); border-color: var(--alvo); }
-#sairBatalha[hidden] { display: none; }
 
 /* Acelerado fica aceso: dá pra saber que a batalha está correndo sem clicar pra conferir. */
 #velocidade.rapido { color: var(--ouro); border-color: var(--ouro); }
@@ -961,7 +1063,9 @@ body {
 .habilidade:hover:not(:disabled) { border-color: var(--ouro); }
 .habilidade:disabled { opacity: .4; cursor: not-allowed; }
 .habilidade .hNome { font-size: 13px; font-weight: 600; }
-.habilidade .hDesc { font-size: 11px; color: var(--apagado); }
+/* `pre-line`: honra o \n que a descrição traz do domínio (Nigiri tem 2 linhas) e ainda
+   colapsa/quebra o resto normal — as descrições sem \n não mudam em nada. */
+.habilidade .hDesc { font-size: 11px; color: var(--apagado); white-space: pre-line; }
 .habilidade.escolhida { border-color: var(--ouro); background: #332b1c; }
 
 /* Armada esperando confirmação: pulsa devagar pra ficar claro que o turno ainda NÃO foi gasto. */

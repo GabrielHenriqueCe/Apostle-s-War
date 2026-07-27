@@ -52,6 +52,23 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
+        /// O oposto do <see cref="CarregarSaves"/>: devolve TODO o progresso ao estado de jogo novo.
+        /// Chamado pelo "excluir conta" (<see cref="PerfilService.Excluir"/>).
+        ///
+        /// Fica aqui, e não no PerfilService, pelo mesmo motivo que o CarregarSaves fica: quem sabe
+        /// quais são as peças do progresso é este service. E cada peça apaga a PRÓPRIA chave — antes,
+        /// o PerfilService carregava uma lista `{ "save", "itens", "campanha" }` de strings que
+        /// pertenciam a outros três services, e nada obrigava as duas pontas a concordarem.
+        /// </summary>
+        public void ResetarProgresso()
+        {
+            _repo.Excluir(ChavePosicao);
+            _capitulos.Resetar();
+            _campeoes.Resetar();
+            _arsenal.Resetar();
+        }
+
+        /// <summary>
         /// Tudo que acontece ao VENCER uma fase: desbloqueia a próxima, marca concluída, libera os champs
         /// daquela fase, dropa o item, libera a próxima facção (se completou todas) e salva os dois saves.
         /// A ORDEM é load-bearing (snapshot ANTES pra o diff dos novos). Devolve os champs novos + o item.

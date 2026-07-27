@@ -25,13 +25,43 @@ namespace ApostlesWar.Application.Services
             _personagemService = personagemService;
             _capitulosService = capitulosService;
 
-            desbloqueados.Add(_personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot1));
-            desbloqueados.Add(_personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot2));
-            desbloqueados.Add(_personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot3));
-            desbloqueados.Add(_personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot4));
+            Resetar();
+        }
+
+        /// <summary>
+        /// Devolve o roster ao estado de jogo novo: só os 4 Humanos, o time com que todo mundo começa.
+        ///
+        /// Não apaga slot de save nenhum porque este service não TEM um — o roster é derivado do
+        /// FaseConcluida dos capítulos (ver <see cref="CarregarCampeoes"/>). Mas precisa do reset
+        /// mesmo assim: sem ele, "excluir conta" deixava os 36 champs liberados em memória, prontos
+        /// pra reaparecer no picker de avatar e na montagem de time da campanha.
+        ///
+        /// É o mesmo caminho do construtor de propósito — "como começa" tem que ser uma resposta só.
+        /// </summary>
+        public void Resetar()
+        {
+            desbloqueados = new List<Personagem>
+            {
+                _personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot1),
+                _personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot2),
+                _personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot3),
+                _personagemService.ObterPersonagem(Faccao.Humanos, Slot.Slot4),
+            };
         }
 
         public List<Personagem> ObterDesbloqueados() => desbloqueados;
+
+        /// <summary>
+        /// Este champ já foi conquistado? Casa por (Faccao, Slot) e não por referência: depois de um
+        /// carregamento, os objetos da lista não são necessariamente os mesmos que o
+        /// <see cref="PersonagemService"/> devolve.
+        ///
+        /// Público porque DOIS lugares fazem a mesma pergunta — o picker de avatar e o compêndio — e
+        /// a resposta é uma só. Estava escrita só dentro do <see cref="PerfilService.PodeUsarAvatar"/>,
+        /// onde o nome falava de avatar e escondia que a regra era de progressão.
+        /// </summary>
+        public bool EstaDesbloqueado(Personagem campeao)
+            => desbloqueados.Any(p => p.Faccao == campeao.Faccao && p.Slot == campeao.Slot);
 
         public void DesbloquearCampeoes(Faccao faccao, Fases fase)
         {

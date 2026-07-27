@@ -21,8 +21,8 @@ namespace ApostlesWar.Presentation.Front
         private const int Campanha = 0;
         private const int Arena = 1;
         private const int Arsenal = 2;
-        private const int Configuracao = 3;
-        private const int Sair = 4;
+        private const int Compendio = 3;
+        private const int Configuracao = 4;
 
         // Índices do menu de CONFIGURAÇÃO.
         private const int CfgConta = 2;
@@ -89,6 +89,10 @@ namespace ApostlesWar.Presentation.Front
                             MostrarArsenal();
                             break;
 
+                        case Compendio:
+                            MostrarCompendio();
+                            break;
+
                         case Configuracao:
                             if (MostrarConfiguracao()) GarantirPerfil();   // conta excluída → pede nome de novo
                             break;
@@ -96,10 +100,6 @@ namespace ApostlesWar.Presentation.Front
                         case EditarPerfil:
                             MostrarEditarPerfil();
                             break;
-
-                        case Sair:
-                            _ponte.FecharJanela();
-                            return;
                     }
                 }
             }
@@ -143,8 +143,11 @@ namespace ApostlesWar.Presentation.Front
                     new("Campanha",     "🗺️", Habilitado: true),
                     new("Arena",        "⚔️", Habilitado: true),
                     new("Arsenal",      "🎒", Habilitado: true),
+                    new("Compêndio",    "📖", Habilitado: true),
                     new("Configurações", "⚙️", Habilitado: true),
-                    new("Sair",         "🚪", Habilitado: true),
+                    // Não há opção "Sair" na lista: quem sai do jogo é o 🚪 do canto superior direito,
+                    // o mesmo botão de todas as outras telas. Duas portas pro mesmo lugar, uma delas
+                    // só no menu, era exatamente o que a padronização veio desfazer.
                 },
                 Raiz: true,
                 Avatar: perfil?.Avatar,
@@ -463,6 +466,92 @@ namespace ApostlesWar.Presentation.Front
                 if (msg.Tipo == "continuar") return;
             }
         }
+
+        // ---------- Compêndio ----------
+
+        /// <summary>
+        /// Compêndio: o catálogo dos 36, agrupado por facção, TRAVADOS INCLUÍDOS — e a ficha completa
+        /// de qualquer um deles. Só lê; nada aqui muda progresso.
+        ///
+        /// Mostrar champ travado é a decisão que dá sentido à tela: é planejando contra o que ainda
+        /// não se tem que a campanha vira escolha. O cadeado diz "ainda não é seu", não "não é da sua
+        /// conta" — e é por isso que a ficha não esconde nada.
+        ///
+        /// Duas telas em UM loop (grade → ficha → grade) pelo mesmo motivo do mapa × fases: quem
+        /// responde o Esc/Sair é o C#, então ele precisa saber em qual das duas o jogador está.
+        /// </summary>
+        private void MostrarCompendio()
+        {
+            var todos = _campeoes.TodosOsCampeoes();
+
+            while (true)
+            {
+                _ponte.LimparPendentes();
+                _ponte.EnviarCompendio(MontarCompendio(todos));
+
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "voltar") return;   // volta pro menu principal
+
+                if (msg.Tipo == "verChamp")
+                {
+                    int idx = msg.Valor;
+                    if (idx < 0 || idx >= todos.Count) continue;
+                    MostrarChampDetalhe(todos[idx]);
+                    // o while redesenha a grade
+                }
+            }
+        }
+
+        /// <summary>A ficha de um champ. Sai no Esc/Sair — não há mais nada a fazer nela.</summary>
+        private void MostrarChampDetalhe(Personagem champ)
+        {
+            _ponte.LimparPendentes();
+            _ponte.EnviarChampDetalhe(MontarDetalhe(champ));
+
+            while (true)
+            {
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "voltar") return;
+            }
+        }
+
+        /// <summary>
+        /// Agrupa a lista COMPLETA por facção preservando o índice global de cada champ — é ele que o
+        /// clique devolve. Agrupar por `GroupBy` em vez de varrer os enums de novo mantém uma ordem
+        /// só: a que o <see cref="CampeoesService.TodosOsCampeoes"/> definiu.
+        /// </summary>
+        private CompendioVista MontarCompendio(List<Personagem> todos)
+        {
+            var faccoes = todos
+                .Select((p, indice) => (Personagem: p, Indice: indice))
+                .GroupBy(x => x.Personagem.Faccao)
+                .Select(g => new CompendioFaccaoVista(
+                    g.Key.Descricao(),
+                    Faccoes.Simbolo(g.Key),
+                    g.Select(x => new CompendioChampVista(
+                        x.Indice, x.Personagem.Simbolo, x.Personagem.Nome,
+                        _campeoes.EstaDesbloqueado(x.Personagem))).ToList()))
+                .ToList();
+
+            return new CompendioVista(faccoes);
+        }
+
+        private ChampDetalheVista MontarDetalhe(Personagem champ) => new(
+            champ.Nome, champ.Simbolo, champ.Faccao.Descricao(),
+            _campeoes.EstaDesbloqueado(champ),
+            champ.HP, champ.Ataque, champ.Defesa,
+            // Crit é global (não vive no champ): vem das constantes-base do Personagem.
+            (int)(Personagem.TaxaCritBase * 100), (int)(Personagem.DanoCritBase * 100),
+            champ.Habilidades.Select(VerHabilidadeDoChamp).ToList());
+
+        /// <summary>
+        /// A habilidade no catálogo. O cooldown é o DECLARADO (não o restante): fora da luta não há
+        /// turno correndo, e o que o jogador quer comparar entre champs é a cadência da habilidade.
+        /// </summary>
+        private static HabilidadeDoChampVista VerHabilidadeDoChamp(Habilidade h) => new(
+            h.Nome, h.Simbolo, h.Descricao, h.Cooldown, Passiva: h is HabilidadePassiva);
 
         // ---------- Arsenal ----------
 

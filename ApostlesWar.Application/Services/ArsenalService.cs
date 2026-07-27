@@ -14,6 +14,9 @@ namespace ApostlesWar.Application.Services
         private readonly CapitulosService _capitulosService;
         private readonly IRepositorioDeSave _repo;
 
+        // O slot de save deste service. Const porque salvar, carregar e o wipe do Resetar o citam.
+        private const string ChaveItens = "itens";
+
         // 7 slots de equipamento (um por fase), null = vazio
         private Item?[] equipados = new Item?[7];
 
@@ -104,7 +107,7 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         public void CarregarItensEquipados()
         {
-            var lista = _repo.Carregar<Item?[]>("itens");
+            var lista = _repo.Carregar<Item?[]>(ChaveItens);
             if (lista != null)
                 for (int i = 0; i < lista.Length && i < equipados.Length; i++)
                     equipados[i] = lista[i];
@@ -176,7 +179,22 @@ namespace ApostlesWar.Application.Services
         /// <summary>
         /// Persiste os itens equipados para restauração futura.
         /// </summary>
-        public void SalvarItens() => _repo.Salvar("itens", equipados);
+        public void SalvarItens() => _repo.Salvar(ChaveItens, equipados);
+
+        /// <summary>
+        /// Devolve o arsenal ao estado de jogo novo — disco E memória (ver
+        /// <see cref="CapitulosService.Resetar"/> pra o porquê dos dois).
+        ///
+        /// Os OBTIDOS entram no wipe mesmo não tendo save próprio: eles são DERIVADOS do
+        /// FaseConcluida dos capítulos (ver <see cref="CarregarItens"/>), então deixá-los na memória
+        /// faria o Arsenal continuar mostrando o loot de uma campanha que não existe mais.
+        /// </summary>
+        public void Resetar()
+        {
+            _repo.Excluir(ChaveItens);
+            equipados = new Item?[7];
+            obtidos.Clear();
+        }
 
         #endregion
     }

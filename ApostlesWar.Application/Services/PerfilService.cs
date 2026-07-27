@@ -22,17 +22,16 @@ namespace ApostlesWar.Application.Services
     {
         private const string ChavePerfil = "perfil";
 
-        // O que "excluir conta" apaga além do perfil: todo o progresso de campanha (capítulos, itens e
-        // a posição no mapa).
-        private static readonly string[] ChavesDoProgresso = { "save", "itens", "campanha" };
-
         private readonly IRepositorioDeSave _repositorio;
         private readonly CampeoesService _campeoes;
+        private readonly CampanhaService _campanha;
 
-        public PerfilService(IRepositorioDeSave repositorio, CampeoesService campeoes)
+        public PerfilService(IRepositorioDeSave repositorio, CampeoesService campeoes,
+            CampanhaService campanha)
         {
             _repositorio = repositorio;
             _campeoes = campeoes;
+            _campanha = campanha;
         }
 
         /// <summary>
@@ -49,8 +48,7 @@ namespace ApostlesWar.Application.Services
         /// Este campeão pode ser o avatar? Só os DESBLOQUEADOS — a cara do jogador é troféu de
         /// campanha, não catálogo. A grade mostra os 36 (os travados em cinza); quem recusa é isto.
         /// </summary>
-        public bool PodeUsarAvatar(Personagem campeao)
-            => _campeoes.ObterDesbloqueados().Any(p => p.Faccao == campeao.Faccao && p.Slot == campeao.Slot);
+        public bool PodeUsarAvatar(Personagem campeao) => _campeoes.EstaDesbloqueado(campeao);
 
         public Perfil? Carregar() => _repositorio.Carregar<Perfil>(ChavePerfil);
 
@@ -59,10 +57,15 @@ namespace ApostlesWar.Application.Services
         public void CriarPerfil(string nome, string avatar)
             => _repositorio.Salvar(ChavePerfil, new Perfil(nome, avatar));
 
+        /// <summary>
+        /// O wipe COMPLETO: o perfil é desta casa, o progresso é do
+        /// <see cref="CampanhaService.ResetarProgresso"/>. Depois disto o jogo tem que estar
+        /// indistinguível de uma instalação nova — inclusive em MEMÓRIA, que é o que faltava.
+        /// </summary>
         public void Excluir()
         {
             _repositorio.Excluir(ChavePerfil);
-            foreach (string chave in ChavesDoProgresso) _repositorio.Excluir(chave);
+            _campanha.ResetarProgresso();
         }
     }
 }

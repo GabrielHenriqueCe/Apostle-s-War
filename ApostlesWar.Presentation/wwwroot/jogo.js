@@ -777,8 +777,11 @@ function alvosDeConfirmacao() {
     if (!h || h.pedeAlvo || nomeDaFase(estado) !== 'EscolhendoAcao') return new Set();
 
     if (h.escopo === 'Self') return new Set([estado.quemAge]);
+    // Sem filtro de vivo/morto: o clique aqui não ESCOLHE alvo (o C# já resolve sozinho quem é
+    // atingido, ver PedeAlvoDoJogador), só confirma o disparo — então qualquer um do time serve,
+    // vivo ou morto (ex.: Robô mirando Mortos pro revive-de-todos).
     if (h.escopo === 'Aliados')
-        return new Set(ladoDe(estado.quemAge).filter(c => c.vivo).map(c => c.id));
+        return new Set(ladoDe(estado.quemAge).map(c => c.id));
     return new Set();
 }
 
@@ -994,7 +997,9 @@ function desenharHabilidades(c) {
 
         const desc = document.createElement('span');
         desc.className = 'hDesc';
-        desc.textContent = aguardandoConfirmar ? 'clique de novo pra usar · Esc cancela' : h.descricao;
+        desc.textContent = aguardandoConfirmar
+            ? 'clique de novo ou num alvo pra usar · Esc/fora cancela'
+            : h.descricao;
 
         b.append(nome, desc);
         b.addEventListener('click', () => escolherHabilidade(h));
@@ -1041,9 +1046,34 @@ function clicarEmCombatente(id) {
     // CONFIRMA — o equivalente ao 2º clique na habilidade, só que apontando quem recebe.
     if (confirmarAtuais.has(id)) { mandar('habilidade', habilidadeEscolhida); return; }
 
-    // Caso contrário, clicar é só olhar a ficha — inclusive a do inimigo, pra ver os status dele.
+    // Clique fora de qualquer alvo válido: DESARMA (a mesma coisa que o Esc) e mostra a ficha.
+    desarmar();
     selecionadoId = id;
     desenhar();
+}
+
+// Desfaz a habilidade em curso, seja qual for o lado que a está segurando. É o corpo do Esc, extraído
+// porque agora o CLIQUE FORA faz o mesmo — uma regra só pros dois gestos.
+//
+// Existir foi correção, não gosto: sem isto, clicar noutro combatente com uma habilidade armada
+// deixava `habilidadeEscolhida` setada e o painel de habilidades some (ele só desenha pra quem está
+// agindo). A habilidade ficava ARMADA E INVISÍVEL, e só o Esc — que ninguém tinha motivo pra apertar,
+// já que nada na tela dizia que havia algo armado — desfazia.
+//
+// Os dois lados desarmam diferente de propósito: no EscolhendoAlvo quem segura o estado é o C# (a
+// thread do combate está parada esperando alvo), então precisa do 'cancelar'; no EscolhendoAcao a
+// arma é só da tela, o C# nem soube dela — some sozinha.
+function desarmar() {
+    if (nomeDaFase(estado) === 'EscolhendoAlvo') {
+        habilidadeEscolhida = null;
+        mandar('cancelar');
+        return true;
+    }
+    if (habilidadeEscolhida !== null) {
+        habilidadeEscolhida = null;
+        return true;
+    }
+    return false;
 }
 
 const acharCombatente = id => id == null ? null
@@ -1079,17 +1109,16 @@ document.addEventListener('keydown', e => {
         return;
     }
 
-    // cena de combate (não-Fim)
-    const fase = nomeDaFase(estado || {});
-    if (fase === 'EscolhendoAlvo') {
-        habilidadeEscolhida = null;
-        mandar('cancelar');
-    } else if (fase === 'EscolhendoAcao' && habilidadeEscolhida !== null) {
-        habilidadeEscolhida = null;   // só desarma a habilidade — o C# nem soube dela ainda
-        desenhar();
-    } else {
-        confirmar('Sair da batalha? O progresso desta luta será perdido.', () => mandar('sair'));
-    }
+    // cena de combate (não-Fim): com algo armado, o Esc desarma; sem nada armado, ele sai da batalha.
+    if (desarmar()) { desenhar(); return; }
+    confirmar('Sair da batalha? O progresso desta luta será perdido.', () => mandar('sair'));
+});
+
+// Clique no VAZIO da arena (fora de qualquer combatente) — o outro "clicar em outro lugar". Sem
+// isto, só o clique em cima de outro personagem desarmava, e o espaço entre os times não fazia nada.
+document.getElementById('arena').addEventListener('click', e => {
+    if (e.target.closest('.combatente')) return;   // esse clique já tem dono (clicarEmCombatente)
+    if (desarmar()) desenhar();
 });
 
 document.getElementById('alternarEstatisticas').addEventListener('click', e => {

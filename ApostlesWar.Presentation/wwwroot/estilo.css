@@ -961,7 +961,9 @@ body {
 .habilidade:hover:not(:disabled) { border-color: var(--ouro); }
 .habilidade:disabled { opacity: .4; cursor: not-allowed; }
 .habilidade .hNome { font-size: 13px; font-weight: 600; }
-.habilidade .hDesc { font-size: 11px; color: var(--apagado); }
+/* `pre-line`: honra o \n que a descrição traz do domínio (Nigiri tem 2 linhas) e ainda
+   colapsa/quebra o resto normal — as descrições sem \n não mudam em nada. */
+.habilidade .hDesc { font-size: 11px; color: var(--apagado); white-space: pre-line; }
 .habilidade.escolhida { border-color: var(--ouro); background: #332b1c; }
 
 /* Armada esperando confirmação: pulsa devagar pra ficar claro que o turno ainda NÃO foi gasto. */

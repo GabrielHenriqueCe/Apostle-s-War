@@ -114,8 +114,14 @@ namespace ApostlesWar.Presentation.Front
     /// Uma opção clicável. `Habilitado: false` = aparece apagada com "em breve" (fatia futura).
     /// <see cref="Confirmar"/> != null = ação destrutiva: o clique abre um modal com esse texto e só
     /// dispara a escolha se o jogador confirmar (ex.: excluir conta).
+    ///
+    /// <see cref="Marcado"/> != null = a opção é um INTERRUPTOR e este é o estado dele (a tela põe
+    /// um ✓ quando ligado). É `bool?` e não `bool` porque a maioria das opções não é interruptor
+    /// nenhum — "Campanha" não está ligada nem desligada, e um `false` mudo desenharia um interruptor
+    /// apagado em toda linha do menu.
     /// </summary>
-    internal record OpcaoMenuVista(string Rotulo, string Icone, bool Habilitado, string? Confirmar = null);
+    internal record OpcaoMenuVista(string Rotulo, string Icone, bool Habilitado,
+        string? Confirmar = null, bool? Marcado = null);
 
     /// <summary>Um campeão na grade de escolha de avatar. `Desbloqueado: false` = aparece em cinza,
     /// não clicável (ainda não conquistado na campanha).</summary>
@@ -212,6 +218,17 @@ namespace ApostlesWar.Presentation.Front
     /// <summary>Um dos 7 slots do boneco: nome do tipo + o item equipado (null = vazio).</summary>
     internal record SlotArsenalVista(int Slot, string Nome, ItemArsenalVista? Equipado);
 
-    /// <summary>O arsenal: os 7 slots (equipados) + todos os itens obtidos (pra escolher ao clicar um slot).</summary>
-    internal record ArsenalVista(List<SlotArsenalVista> Slots, List<ItemArsenalVista> Obtidos);
+    /// <summary>
+    /// Uma linha do painel de totais: o que o conjunto equipado dá naquele stat, já escrito
+    /// (<c>"ATK"</c> / <c>"+240"</c>). Quem soma é o <see cref="ArsenalService.TotaisEquipados"/>;
+    /// aqui só chega o número virado texto.
+    /// </summary>
+    internal record BonusVista(string Stat, string Valor);
+
+    /// <summary>
+    /// O arsenal: os 7 slots (equipados), o TOTAL que eles dão e todos os itens obtidos (pra escolher
+    /// ao clicar um slot).
+    /// </summary>
+    internal record ArsenalVista(List<SlotArsenalVista> Slots, List<BonusVista> Totais,
+        List<ItemArsenalVista> Obtidos);
 }

@@ -30,18 +30,65 @@ namespace ApostlesWar.Presentation.Front
             return codigo;
         }
 
+        /// <summary>Largura da janela quando ela NÃO está em tela cheia. A altura não é fixa: ver
+        /// <see cref="AplicarModoDeTela"/>.</summary>
+        private const int LarguraDaJanela = 1280;
+
+        /// <summary>
+        /// Como a janela fica em cada modo — uma resposta só, usada no boot E no botão das
+        /// configurações (via <see cref="PonteWebView2.DefinirTelaCheia"/>). Duas respostas seria a
+        /// janela abrir de um jeito e voltar de outro ao alternar.
+        ///
+        /// TELA CHEIA = sem borda, cobrindo o monitor inteiro (barra de tarefas incluída) — é como
+        /// jogo abre, e é o padrão.
+        /// JANELA = a mesma largura de sempre, mas ESTICADA de cima a baixo até as bordas da área
+        /// útil (pedido do Gabriel). O jogo é largo por natureza — dois times e o log no meio —, e o
+        /// que faltava era altura; espremer a largura junto não ajudaria em nada.
+        /// </summary>
+        internal static void AplicarModoDeTela(Form janela, bool telaCheia)
+        {
+            // No BOOT a janela ainda não tem handle (o Screen.FromControl não teria o que consultar),
+            // então cai no monitor onde está o mouse — que é onde o jogador está olhando. Depois de
+            // aberta, segue o monitor em que ela mora, pra alternar não a teleportar de tela.
+            Screen monitor = janela.IsHandleCreated
+                ? Screen.FromControl(janela)
+                : Screen.FromPoint(Cursor.Position);
+
+            janela.WindowState = FormWindowState.Normal;   // Maximized brigaria com o Bounds explícito
+
+            if (telaCheia)
+            {
+                janela.FormBorderStyle = FormBorderStyle.None;
+                janela.Bounds = monitor.Bounds;             // Bounds, não WorkingArea: cobre a barra de tarefas
+                return;
+            }
+
+            janela.FormBorderStyle = FormBorderStyle.Sizable;
+
+            // Área ÚTIL (sem a barra de tarefas): em janela, a barra continua sendo do sistema.
+            Rectangle util = monitor.WorkingArea;
+            int largura = Math.Min(LarguraDaJanela, util.Width);
+            janela.Bounds = new Rectangle(util.X + (util.Width - largura) / 2, util.Y, largura, util.Height);
+        }
+
         private static int RodarJanela()
         {
             ApplicationConfiguration.Initialize();
 
+            // A preferência de tela é lida ANTES da janela existir, senão ela abriria num modo e
+            // pularia pro outro à vista do jogador. O mesmo repositório é passado adiante pro
+            // composition root da thread do jogo — uma instância, uma verdade.
+            var repositorio = new SaveLocal();
+            var configuracao = new ConfiguracaoService(repositorio);
+
             var janela = new Form
             {
                 Text = "Apostle's War",
-                Width = 1280,
-                Height = 820,
-                StartPosition = FormStartPosition.CenterScreen,
+                StartPosition = FormStartPosition.Manual,
                 BackColor = System.Drawing.Color.FromArgb(20, 18, 26),
             };
+            AplicarModoDeTela(janela, configuracao.Carregar().TelaCheia);
+
             var webview = new WebView2 { Dock = DockStyle.Fill };
             janela.Controls.Add(webview);
 
@@ -62,10 +109,17 @@ namespace ApostlesWar.Presentation.Front
                     return;
                 }
 
+                // F5/Ctrl+R MATARIAM a partida: recarregar zera o JS, mas a thread do jogo continua
+                // parada no `Take()` esperando um clique que nunca vem — a tela voltaria vazia e o
+                // C# ficaria falando sozinho. Não há reconstrução barata do estado de uma batalha em
+                // curso, então o certo é não deixar recarregar. Isto também leva o F12 junto; as
+                // ferramentas seguem alcançáveis pelo menu do botão direito (AreDevToolsEnabled).
+                webview.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
+
                 ponte.Conectar(webview.CoreWebView2);
                 webview.CoreWebView2.Navigate(CaminhoDaTela());
 
-                jogo = new Thread(() => RodarJogo(ponte, ritmo)) { IsBackground = true };
+                jogo = new Thread(() => RodarJogo(ponte, ritmo, repositorio, configuracao)) { IsBackground = true };
                 jogo.Start();
             };
 
@@ -93,7 +147,8 @@ namespace ApostlesWar.Presentation.Front
         /// A thread do JOGO: monta os services (composition root do front) e entra na batalha. Roda o
         /// laço síncrono de sempre — as esperas por input viram esperas por clique.
         /// </summary>
-        private static void RodarJogo(PonteWebView2 ponte, RitmoDoFront ritmo)
+        private static void RodarJogo(PonteWebView2 ponte, RitmoDoFront ritmo,
+            IRepositorioDeSave repositorio, ConfiguracaoService configuracao)
         {
             try
             {
@@ -104,7 +159,8 @@ namespace ApostlesWar.Presentation.Front
                 var tela = new TelaDeCombateWeb(sessao, ponte);
                 var apresentacao = new ApresentacaoWebview(ritmo, ponte);
 
-                var repositorio = new SaveLocal();
+                // O repositório e as configurações vêm de fora: a janela já precisou deles pra abrir
+                // no modo certo (ver RodarJanela), e duas instâncias seriam duas verdades.
                 var capitulos = new CapitulosService(repositorio);
                 var arsenal = new ArsenalService(capitulos, repositorio);
                 var personagens = new PersonagemService();
@@ -126,7 +182,7 @@ namespace ApostlesWar.Presentation.Front
                 // Entra pelo MENU (não mais direto na batalha): o fluxo do front cuida do perfil,
                 // mostra o menu principal e roteia a escolha. Ver FluxoDoFront.
                 new FluxoDoFront(ponte, combate, campeoes, perfil, sessao,
-                    campanha, capitulos, arsenal, personagens).Rodar();
+                    campanha, capitulos, arsenal, personagens, configuracao).Rodar();
             }
             catch (Exception ex)
             {

@@ -25,6 +25,7 @@ namespace ApostlesWar.Presentation.Front
         private const int Configuracao = 4;
 
         // Índices do menu de CONFIGURAÇÃO.
+        private const int CfgTelaCheia = 1;
         private const int CfgConta = 2;
 
         // Índices do menu de CONTA.
@@ -46,10 +47,11 @@ namespace ApostlesWar.Presentation.Front
         private readonly CapitulosService _capitulos;
         private readonly ArsenalService _arsenal;
         private readonly PersonagemService _personagens;
+        private readonly ConfiguracaoService _configuracao;
 
         public FluxoDoFront(PonteWebView2 ponte, CombateService combate, CampeoesService campeoes,
             PerfilService perfil, SessaoDoFront sessao, CampanhaService campanha, CapitulosService capitulos,
-            ArsenalService arsenal, PersonagemService personagens)
+            ArsenalService arsenal, PersonagemService personagens, ConfiguracaoService configuracao)
         {
             _ponte = ponte;
             _combate = combate;
@@ -60,6 +62,7 @@ namespace ApostlesWar.Presentation.Front
             _capitulos = capitulos;
             _arsenal = arsenal;
             _personagens = personagens;
+            _configuracao = configuracao;
         }
 
         public void Rodar()
@@ -167,13 +170,21 @@ namespace ApostlesWar.Presentation.Front
                     new List<OpcaoMenuVista>
                     {
                         new("Som",        "🔊", Habilitado: false),   // fatia futura
-                        new("Tela cheia", "🖥️", Habilitado: false),   // fatia futura
+                        new("Tela cheia", "🖥️", Habilitado: true,
+                            Marcado: _configuracao.Carregar().TelaCheia),
                         new("Conta",      "👤", Habilitado: true),
                         new("Voltar",     "⬅️", Habilitado: true),
                     }));
 
                 int escolha = LerEscolha();
-                if (escolha == CfgConta)
+
+                if (escolha == CfgTelaCheia)
+                {
+                    // Grava e aplica na hora: a preferência é o que manda, e a janela obedece. O
+                    // `while` redesenha o menu, então o ✓ acompanha sem ninguém avisar a tela.
+                    _ponte.DefinirTelaCheia(_configuracao.AlternarTelaCheia());
+                }
+                else if (escolha == CfgConta)
                 {
                     if (MostrarConta()) return true;   // excluiu → sobe o sinal
                     // não excluiu: volta a mostrar as configurações
@@ -599,8 +610,30 @@ namespace ApostlesWar.Presentation.Front
                 slots.Add(new SlotArsenalVista(s, ArsenalService.NomeDoSlot(fase),
                     eq is null ? null : Ver(eq, -1, true)));
             }
-            return new ArsenalVista(slots, obtidos);
+
+            var totais = _arsenal.TotaisEquipados()
+                .OrderBy(b => Array.IndexOf(OrdemDeLeituraDosStats, b.Stat))
+                .Select(b => new BonusVista(NomeDoStat(b.Stat), $"+{ValorFormatado(b.Stat, b.Valor)}"))
+                .ToList();
+
+            return new ArsenalVista(slots, totais, obtidos);
         }
+
+        /// <summary>
+        /// A ordem em que os totais são LIDOS — e é por isso que ela mora aqui e não no service.
+        ///
+        /// Não é a ordem do enum nem a dos slots: HP vem de DOIS slots (o plano e o percentual) e DEF
+        /// também, e o <see cref="NomeDoStat"/> chama os dois de "HP" e "DEF" — como deve, é o mesmo
+        /// stat. Longe uma da outra, as duas linhas parecem repetição; lado a lado, leem-se como uma
+        /// coisa só ("HP +300, HP +15%"), que é o que elas são.
+        /// </summary>
+        private static readonly TipoStat[] OrdemDeLeituraDosStats =
+        {
+            TipoStat.ATKFlat,
+            TipoStat.HPFlat, TipoStat.HPPct,
+            TipoStat.DEFFlat, TipoStat.DEFPct,
+            TipoStat.TaxaCritPct, TipoStat.DanoCritPct,
+        };
 
         // ---------- Formatação de stat (é PELE) ----------
         //
@@ -623,10 +656,17 @@ namespace ApostlesWar.Presentation.Front
         };
 
         /// <summary>O valor como o jogador lê: inteiro cru nos stats FLAT, porcentagem nos PCT.</summary>
-        private static string ValorFormatado(Item item) => item.TipoStat switch
+        private static string ValorFormatado(Item item) => ValorFormatado(item.TipoStat, item.Valor);
+
+        /// <summary>
+        /// O mesmo, a partir do par solto (stat, valor) — é o que o painel de TOTAIS tem em mãos,
+        /// porque uma soma de itens não é um item. A sobrecarga acima delega pra cá, pra o card do
+        /// item e a linha do total nunca escreverem o mesmo número de dois jeitos.
+        /// </summary>
+        private static string ValorFormatado(TipoStat stat, double valor) => stat switch
         {
-            TipoStat.ATKFlat or TipoStat.HPFlat or TipoStat.DEFFlat => $"{(int)item.Valor}",
-            _ => $"{item.Valor * 100:F0}%"
+            TipoStat.ATKFlat or TipoStat.HPFlat or TipoStat.DEFFlat => $"{(int)valor}",
+            _ => $"{valor * 100:F0}%"
         };
     }
 }

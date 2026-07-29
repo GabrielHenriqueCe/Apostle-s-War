@@ -115,10 +115,15 @@
         <div class="continuarDica">clique ou Enter pra continuar</div>
     </section>
 
-    <!-- Cena do ARSENAL: boneco com os 7 slots equipados (global) + itens obtidos pra equipar. -->
+    <!-- Cena do ARSENAL: boneco com os 7 slots equipados (global), o que o conjunto dá SOMADO, e os
+         itens obtidos pra equipar. O #arsenalTotais responde "no total, quanto eu ganho com isso?" —
+         antes só dava pra montar de cabeça abrindo os 7 slots um a um. -->
     <section id="arsenal" hidden>
         <h1>🎒 Arsenal</h1>
-        <div id="boneco"></div>
+        <div id="arsenalCorpo">
+            <div id="boneco"></div>
+            <aside id="arsenalTotais"></aside>
+        </div>
         <div id="arsenalDetalhe" hidden>
             <div id="arsenalSlotNome"></div>
             <div id="arsenalItens"></div>
@@ -174,7 +179,11 @@
 
     <!-- O ÚNICO botão de sair do jogo inteiro, fixo no canto superior direito, por cima de qualquer
          cena. Faz exatamente o que a tecla Esc faz ali (ver sairDaTela) — é o espelho visível dela.
-         Antes cada tela tinha o próprio "Voltar" no rodapé, cada um num lugar diferente. -->
+         Antes cada tela tinha o próprio "Voltar" no rodapé, cada um num lugar diferente.
+
+         Ele fica SEMPRE no mesmo pixel — é isso que o torna aprendível —, então quem chega perto
+         daquele canto é que se afasta: o CSS reserva a faixa na var `--canto-sair`. Tela nova que
+         encoste no topo direito reserva também. -->
     <button id="sairTela" type="button" title="Sair desta tela (Esc)">🚪 Sair</button>
 
     <main id="arena">

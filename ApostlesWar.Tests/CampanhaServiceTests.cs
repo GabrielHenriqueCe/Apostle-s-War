@@ -105,6 +105,76 @@ namespace Tests
             Assert.True(repo.Contem("itens"));
         }
 
+        [Fact]
+        public void TotaisEquipados_SemNada_NaoInventaLinhaDeZero()
+        {
+            var repo = new RepositorioFake();
+            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
+
+            Assert.Empty(arsenal.TotaisEquipados());
+        }
+
+        [Fact]
+        public void TotaisEquipados_UmaLinhaPorStatEquipado()
+        {
+            var repo = new RepositorioFake();
+            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
+
+            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase1));   // Arma → ATK 120
+            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase2));   // Elmo → HP 550
+
+            var totais = arsenal.TotaisEquipados();
+
+            Assert.Equal(2, totais.Count);
+            Assert.Equal(120, totais.Single(b => b.Stat == TipoStat.ATKFlat).Valor);
+            Assert.Equal(550, totais.Single(b => b.Stat == TipoStat.HPFlat).Valor);
+        }
+
+        /// <summary>
+        /// O total é uma SOMA, não uma re-listagem dos slots. Hoje cada slot carrega um stat
+        /// diferente, então a distinção não aparece jogando — é por isso que o teste força o caso:
+        /// dois slots dando o MESMO stat têm que virar uma linha só, com os dois valores somados.
+        /// Sem isto, uma implementação que só percorre os 7 slots passaria igual e quebraria calada
+        /// no dia em que o segundo item de ATK existir.
+        /// </summary>
+        [Fact]
+        public void TotaisEquipados_DoisItensDoMesmoStat_SomamNumaLinhaSo()
+        {
+            var repo = new RepositorioFake();
+            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
+
+            // Fases (= slots) diferentes, mesmo TipoStat. Reino = cap 1 → 120; Lado Sombrio = cap 2 → 240.
+            arsenal.EquiparItem(new Item("A", "🗡️", Faccao.Reino, Fases.Fase1, TipoStat.ATKFlat));
+            arsenal.EquiparItem(new Item("B", "🏹", Faccao.LadoSombrio, Fases.Fase2, TipoStat.ATKFlat));
+
+            var totais = arsenal.TotaisEquipados();
+
+            Assert.Single(totais);
+            Assert.Equal(TipoStat.ATKFlat, totais[0].Stat);
+            Assert.Equal(360, totais[0].Valor);
+        }
+
+        /// <summary>
+        /// FLAT e PCT do mesmo stat NÃO se fundem: "+550 de HP" e "+5% de HP" são coisas diferentes
+        /// até haver um champ pra aplicar o percentual (o `AplicarItem` usa o HP BASE dele). O
+        /// arsenal informa o que o equipamento dá; quem soma isso a alguém é a luta.
+        /// </summary>
+        [Fact]
+        public void TotaisEquipados_FlatEPercentualDoMesmoStat_SeguemSeparados()
+        {
+            var repo = new RepositorioFake();
+            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
+
+            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase2));   // Elmo     → HP  550
+            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase5));   // Peitoral → HP% 0,05
+
+            var totais = arsenal.TotaisEquipados();
+
+            Assert.Equal(2, totais.Count);
+            Assert.Equal(550, totais.Single(b => b.Stat == TipoStat.HPFlat).Valor);
+            Assert.Equal(0.05, totais.Single(b => b.Stat == TipoStat.HPPct).Valor, 3);
+        }
+
         /// <summary>
         /// A posição no mapa (o "último lugar") é PROGRESSÃO, não estado de tela — por isso mora no
         /// service e some junto com a conta, em vez de o front gravar direto na porta de save.

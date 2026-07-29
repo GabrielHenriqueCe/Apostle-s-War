@@ -165,6 +165,31 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
+        /// O que o conjunto equipado dá, somado POR STAT — a resposta à pergunta "no total, quanto
+        /// meus itens estão me dando?", que antes só dava pra montar de cabeça olhando os 7 slots.
+        ///
+        /// Some em vez de listar porque a pergunta é sobre o CONJUNTO: hoje cada slot carrega um stat
+        /// diferente (ver <see cref="StatDoSlot"/>) e a soma é de uma parcela só, mas o dia em que dois
+        /// slots derem ATK a conta já está no lugar certo — e não espalhada por quem desenha.
+        ///
+        /// FLAT e PCT continuam SEPARADOS de propósito: "+300 de HP" e "+15% de HP" não viram um
+        /// número só sem escolher um champ, porque o percentual é sobre o HP base DELE (ver
+        /// <see cref="Combate.AplicarItem"/>). O arsenal informa o que o equipamento dá; quem soma
+        /// isso a um personagem é a luta.
+        ///
+        /// Só devolve o que tem valor: slot vazio não vira uma linha de zero. Em que ORDEM se lê é da
+        /// tela — aqui a lista sai por stat só pra ser determinística.
+        /// </summary>
+        public List<BonusDoArsenal> TotaisEquipados()
+            => equipados
+                .Where(item => item != null)
+                .GroupBy(item => item!.TipoStat)
+                .Select(g => new BonusDoArsenal(g.Key, g.Sum(item => item!.Valor)))
+                .Where(b => b.Valor != 0)
+                .OrderBy(b => b.Stat)
+                .ToList();
+
+        /// <summary>
         /// Aplica os stats dos itens equipados ao combatente informado
         /// </summary>
         public void AplicarItens(Combate combate)
@@ -198,4 +223,7 @@ namespace ApostlesWar.Application.Services
 
         #endregion
     }
+
+    /// <summary>Um stat e quanto o arsenal equipado dá dele. Como se ESCREVE isso é da tela.</summary>
+    public record BonusDoArsenal(TipoStat Stat, double Valor);
 }

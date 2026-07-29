@@ -98,6 +98,14 @@ function aplicarMenu(m) {
             const em = document.createElement('span'); em.className = 'opEmBreve'; em.textContent = 'em breve';
             b.appendChild(em);
         }
+        // Opção-INTERRUPTOR (marcado != null): mostra em que estado ela está. O C# manda o estado e
+        // redesenha o menu depois de alternar — a tela não guarda nada, como o botão do auto.
+        if (o.marcado != null) {
+            const marca = document.createElement('span');
+            marca.className = 'opMarca' + (o.marcado ? ' ligado' : '');
+            marca.textContent = o.marcado ? '✓' : '—';
+            b.appendChild(marca);
+        }
 
         // Opção destrutiva (ex: excluir conta): confirma no modal ANTES de mandar a escolha.
         b.addEventListener('click', () => o.confirmar
@@ -608,8 +616,35 @@ function mostrarArsenal(a) {
     mostrarCena('arsenal');
     arsenalDados = a;
     desenharBoneco();
+    desenharTotais();
     if (arsenalSlotSel >= 0) mostrarItensSlot(arsenalSlotSel);
     else document.getElementById('arsenalDetalhe').hidden = true;
+}
+
+// O que o conjunto equipado dá, somado. Quem soma e quem escreve o número é o C#
+// (ArsenalService.TotaisEquipados + ValorFormatado) — aqui só chega texto pronto, pelo mesmo motivo
+// de sempre: "0.05" virar "5%" é exibição, mas QUANTO é regra de item.
+function desenharTotais() {
+    const cont = document.getElementById('arsenalTotais');
+    const titulo = document.createElement('div');
+    titulo.className = 'atTitulo';
+    titulo.textContent = 'Bônus do arsenal';
+
+    if (!arsenalDados.totais.length) {
+        const v = document.createElement('div');
+        v.className = 'atVazio';
+        v.textContent = 'Nada equipado ainda.';
+        cont.replaceChildren(titulo, v);
+        return;
+    }
+
+    cont.replaceChildren(titulo, ...arsenalDados.totais.map(b => {
+        const linha = document.createElement('div'); linha.className = 'atLinha';
+        const rot = document.createElement('span'); rot.className = 'atStat'; rot.textContent = b.stat;
+        const val = document.createElement('span'); val.className = 'atValor'; val.textContent = b.valor;
+        linha.append(rot, val);
+        return linha;
+    }));
 }
 
 function desenharBoneco() {
@@ -1236,6 +1271,15 @@ function atualizarBotaoSair() {
 document.getElementById('sairTela').addEventListener('click', sairDaTela);
 
 document.addEventListener('keydown', e => {
+    // Recarregar a página MATA a partida: o JS volta do zero, mas a thread do jogo no C# continua
+    // parada esperando um clique que nunca vem. O WebView2 já está com os atalhos de navegador
+    // desligados (ver AppFront); isto aqui é o cinto além do suspensório — a tecla não pode passar
+    // por caminho nenhum.
+    if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R'))) {
+        e.preventDefault();
+        return;
+    }
+
     // Nas telas de desfecho o Enter também segue em frente (é o gesto natural de "ok, continuar").
     const desfecho = (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim')
         || cenaAtual === 'campanhaVitoria' || cenaAtual === 'campanhaDerrota';

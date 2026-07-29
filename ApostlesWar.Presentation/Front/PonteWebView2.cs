@@ -50,6 +50,19 @@ namespace ApostlesWar.Presentation.Front
         /// nova com o automático herdado da anterior seria tirar o controle de quem não pediu.</summary>
         public void DesligarAuto() => _autoLigado = false;
 
+        // FOCO: o inimigo que o jogador APONTOU no modo automático — o cérebro passa a mirar nele.
+        // Mesmo molde do _autoLigado (interruptor, não pedido; volatile porque a thread da UI escreve
+        // no clique e a do jogo lê ao decidir), e pelo mesmo motivo NÃO entra no LimparPendentes: é
+        // uma ordem que vale até ser desfeita, não um clique a ser consumido.
+        //
+        // Guarda o ID e não o Combate: quem sabe traduzir id↔combatente é a SessaoDoFront, e a ponte
+        // não conhece o domínio. 0 = ninguém.
+        private volatile int _focoId;
+        public int FocoDoJogador => _focoId;
+
+        /// <summary>Batalha nova começa sem alvo apontado — o inimigo de antes nem existe mais.</summary>
+        public void LimparFoco() => _focoId = 0;
+
         private static readonly JsonSerializerOptions Json = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -138,6 +151,12 @@ namespace ApostlesWar.Presentation.Front
                 // de habilidade/alvo.
                 if (msg.Tipo == "pronto") { _telaPronta.TrySetResult(); return; }
                 if (msg.Tipo == "velocidade") { _ritmo.Definir(msg.Valor); return; }
+
+                // "foco" é só flag, e NÃO entra na fila: ao contrário do "auto", ele não muda quem
+                // decide — muda em quem o cérebro bate. Não há turno humano parado esperando isso,
+                // então não há ninguém pra acordar; e enfileirá-lo faria o clique ser lido como
+                // escolha de alvo no turno seguinte.
+                if (msg.Tipo == "foco") { _focoId = msg.Valor; return; }
 
                 // "auto" é flag E entra na fila. A flag porque é estado (vale nos próximos turnos); a
                 // fila porque, se o humano JÁ está parado esperando um clique, é ela que o acorda —

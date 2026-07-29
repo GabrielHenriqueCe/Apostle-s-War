@@ -75,6 +75,20 @@ namespace ApostlesWar.Application.Controllers
         /// </summary>
         private Combate? _alvoEscolhido;
 
+        /// <summary>
+        /// O inimigo que o JOGADOR apontou (o foco do modo automático). Quando setado, ele passa na
+        /// frente na escolha de alvo — inclusive do abate, que é a melhor jogada automática que este
+        /// arquivo conhece. É de propósito: ordem explícita de quem está jogando vale mais que
+        /// heurística, senão o botão não seria um comando, seria uma sugestão.
+        ///
+        /// O que ele NÃO muda é a fila de <see cref="Prioridade"/>: foco diz em QUEM bater, não O QUE
+        /// usar. Com o time inteiro convergindo, curar continua vindo antes de ferir.
+        ///
+        /// Só a instância que joga pelo humano recebe isto (ver ControladorJogadorWeb); a que joga
+        /// pelo inimigo nunca — senão o jogador miraria pelos dois lados.
+        /// </summary>
+        public Combate? AlvoPreferido { get; set; }
+
         public ControladorBot(SelecaoDeAlvoService selecaoDeAlvoService)
             => _selecaoDeAlvoService = selecaoDeAlvoService;
 
@@ -159,6 +173,11 @@ namespace ApostlesWar.Application.Controllers
         /// Duas regras que pareciam precisar de código não aparecem aqui, e é de propósito: "evitar
         /// alvo com bloqueio de dano" e "evitar Invencível" caem sozinhas de `PreverVidaRemovida`,
         /// que devolve ~0 para os dois. Quem prevê honestamente não precisa desviar à mão.
+        ///
+        /// O <see cref="AlvoPreferido"/> entra ANTES de tudo: é o jogador apontando, não uma
+        /// heurística. E não precisa de nenhum cuidado extra pra quando ele morre ou fica intocável —
+        /// nesses casos ele simplesmente não está na lista, e a ordenação segue como se nunca tivesse
+        /// sido pedido.
         /// </summary>
         private Combate? MelhorAlvoPara(HabilidadeAtiva hab, ContextoCombate ctx, List<Combate> candidatos)
         {
@@ -168,7 +187,8 @@ namespace ApostlesWar.Application.Controllers
             if (vivos.Count == 0) return null;
 
             return vivos
-                .OrderByDescending(alvo => Mata(hab, ctx.Atacante, alvo))
+                .OrderByDescending(alvo => alvo == AlvoPreferido)
+                .ThenByDescending(alvo => Mata(hab, ctx.Atacante, alvo))
                 .ThenByDescending(alvo => LiberdadeDe(alvo))
                 .ThenByDescending(alvo => VidaRemovidaPor(hab, ctx.Atacante, alvo))
                 .First();

@@ -273,6 +273,73 @@ namespace Tests
 
         // ---------- Passo 2: a escolha do alvo ----------
 
+        // ---------- O FOCO: o jogador apontando, no modo automático ----------
+
+        /// <summary>
+        /// O foco passa na frente do ABATE — que é a melhor jogada que este cérebro conhece sozinho.
+        /// É de propósito: quem apontou foi o jogador, e ordem explícita tem que valer mais que
+        /// heurística, senão o botão vira sugestão em vez de comando.
+        ///
+        /// O teste monta exatamente o conflito: um inimigo que MORRE neste golpe e outro, inteiro,
+        /// apontado. Sem o foco, o bot escolhe o que morre (é o teste logo abaixo).
+        /// </summary>
+        [Fact]
+        public void Alvo_ComFoco_MiraOApontado_MesmoComAbateNaMesa()
+        {
+            var bot = Champ(atk: 300);
+            var quaseMorto = Champ(hp: 1000); Ferir(quaseMorto, 900);   // 100 de vida: MORRE
+            var apontado = Champ(hp: 5000);                              // inteiro, mas foi escolhido
+            var inimigos = new List<Combate> { quaseMorto, apontado };
+
+            var controlador = Bot();
+            controlador.AlvoPreferido = apontado;
+            controlador.EscolherAcao(bot, new() { bot }, inimigos);
+            var alvo = controlador.EscolherAlvo(inimigos, new() { bot }, inimigos);
+
+            Assert.Same(apontado, alvo);
+        }
+
+        /// <summary>
+        /// Foco morto não trava o cérebro: ele nem chega à ordenação (a lista já vem só de vivos), e
+        /// a escolha volta a ser a de sempre. Não precisou de código pra isso — precisou de teste.
+        /// </summary>
+        [Fact]
+        public void Alvo_ComFocoMorto_VoltaAEscolherSozinho()
+        {
+            var bot = Champ(atk: 300);
+            var apontado = Champ(); Matar(apontado);
+            var quaseMorto = Champ(hp: 1000); Ferir(quaseMorto, 900);
+            var gordo = Champ(hp: 5000);
+            var inimigos = new List<Combate> { gordo, quaseMorto, apontado };
+
+            var controlador = Bot();
+            controlador.AlvoPreferido = apontado;
+            controlador.EscolherAcao(bot, new() { bot }, inimigos);
+            var alvo = controlador.EscolherAlvo(inimigos, new() { bot }, inimigos);
+
+            Assert.Same(quaseMorto, alvo);   // o abate de sempre
+        }
+
+        /// <summary>
+        /// Foco diz em QUEM bater, não O QUE usar: com um aliado ferido na mesa, o cérebro continua
+        /// curando antes de ferir, mesmo com um inimigo apontado. Se o foco vazasse pra a fila de
+        /// prioridade, o time inteiro largaria a cura pra socar o alvo marcado.
+        /// </summary>
+        [Fact]
+        public void Foco_NaoMudaAFilaDeHabilidade()
+        {
+            var curar = HabAliada("Curar", EstadoAlvo.Vivos, new Cura(Valor.Fixo(300)));
+            var bot = Champ(habs: curar);
+            var ferido = Champ(); Ferir(ferido, 500);
+            var apontado = Champ();
+
+            var controlador = Bot();
+            controlador.AlvoPreferido = apontado;
+            var escolha = controlador.EscolherAcao(bot, new() { bot, ferido }, new() { apontado });
+
+            Assert.Same(curar, escolha);
+        }
+
         [Fact]
         public void Alvo_PrefereQuemMorre_AQuemPerderiaMaisVida()
         {

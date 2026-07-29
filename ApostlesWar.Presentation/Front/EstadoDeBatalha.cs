@@ -21,7 +21,8 @@ namespace ApostlesWar.Presentation.Front
         List<int> AlvosValidos,             // Ids clicáveis agora (vazio = ninguém)
         string? Mensagem,                   // linha de narração (uso de habilidade, passiva...)
         int LadoVencedor = 0,               // no Fim: 1=esquerda venceu, 2=direita; 0=sem split (campanha)
-        bool Auto = false                   // o automático está ligado? (o botão se desenha daqui)
+        bool Auto = false,                  // o automático está ligado? (o botão se desenha daqui)
+        int FocoId = 0                      // inimigo apontado no automático (0 = nenhum)
     );
 
     /// <summary>Em que ponto do turno a tela está — o JS usa pra saber o que é clicável.</summary>
@@ -50,7 +51,18 @@ namespace ApostlesWar.Presentation.Front
         int TaxaCritPct,
         int DanoCritPct,
         bool Vivo,
-        List<StatusVisto> Status
+        List<StatusVisto> Status,
+        /// <summary>
+        /// O kit dele, pra LER — de qualquer um no campo, inimigo incluído. Decisão do Gabriel:
+        /// esconder o cooldown do inimigo não protege ninguém, porque quem joga bem decora mesmo;
+        /// só torna a informação um imposto de memória em vez de uma leitura.
+        ///
+        /// Vem em TODO combatente e em todo quadro, não só em quem age — é o que permite clicar num
+        /// inimigo no meio da luta e ver quantos turnos faltam pro golpe dele voltar. O
+        /// <see cref="HabilidadeVista"/> continua existindo à parte porque aquele é pra CLICAR
+        /// (índice, disponível, pede alvo) e só faz sentido pra quem está com o turno na mão.
+        /// </summary>
+        List<HabilidadeDoChampVista> Habilidades
     );
 
     internal record StatusVisto(string Nome, string Simbolo, int DuracaoRestante, bool EhBuff);
@@ -168,16 +180,41 @@ namespace ApostlesWar.Presentation.Front
     // ---------- Compêndio ----------
 
     /// <summary>
-    /// Uma habilidade como o COMPÊNDIO a mostra — só o que se lê fora da luta. Não reusa a
-    /// <see cref="HabilidadeVista"/> de propósito: aquela existe pra ser CLICADA (índice, cooldown
-    /// restante, disponível, pede alvo) e nada disso faz sentido num catálogo, onde não há turno nem
-    /// dono. Metade dos campos viriam vazios e alguém, um dia, tentaria preenchê-los.
+    /// Uma habilidade pra LER. Não reusa a <see cref="HabilidadeVista"/> de propósito: aquela existe
+    /// pra ser CLICADA (índice, disponível, pede alvo, escopo) e nada disso faz sentido em quem não
+    /// está com o turno na mão — metade dos campos viria vazia e alguém, um dia, tentaria preenchê-los.
     ///
-    /// <see cref="Passiva"/> separa a passiva das duas ativas: ela não se usa, e a tela precisa dizer
-    /// isso em vez de deixar o jogador procurando o botão.
+    /// Dois clientes, e a diferença entre eles é só o <see cref="CooldownRestante"/>:
+    /// - o COMPÊNDIO, onde não há turno correndo, então o restante é 0 e o que importa é a cadência
+    ///   DECLARADA (é ela que se compara entre champs);
+    /// - o painel da BATALHA, onde clicar em qualquer combatente mostra o kit dele com o cooldown
+    ///   andando de verdade.
+    ///
+    /// <see cref="Passiva"/> separa a passiva das ativas: ela não se usa, e a tela precisa dizer isso
+    /// em vez de deixar o jogador procurando o botão.
     /// </summary>
     internal record HabilidadeDoChampVista(string Nome, string Simbolo, string Descricao,
-        int Cooldown, bool Passiva);
+        int Cooldown, bool Passiva, int CooldownRestante = 0);
+
+    /// <summary>
+    /// O ÚNICO lugar que traduz uma <see cref="Habilidade"/> do domínio pra leitura na tela. Existe
+    /// porque os dois clientes (compêndio e painel de batalha) mapeiam os mesmos cinco campos, e
+    /// mapeamento duplicado envelhece torto — foi assim que o nome do slot 4 chegou a ser "Acessório"
+    /// no front e "Manopla" no back.
+    /// </summary>
+    internal static class VistaDeHabilidade
+    {
+        /// <summary>
+        /// <paramref name="dono"/> null = fora da luta (compêndio): não há turno correndo, então o
+        /// cooldown restante é 0 e o que vale é a cadência declarada. Com dono, o restante é o DELE —
+        /// cooldown é do combatente, não do champ: o mesmo Ninja nos dois lados da Arena tem
+        /// contagens independentes.
+        /// </summary>
+        public static HabilidadeDoChampVista De(Habilidade h, Combate? dono = null) => new(
+            h.Nome, h.Simbolo, h.Descricao, h.Cooldown,
+            Passiva: h is HabilidadePassiva,
+            CooldownRestante: dono?.Cooldowns.GetValueOrDefault(h)?.CooldownRestante ?? 0);
+    }
 
     /// <summary>
     /// Um champ na grade do compêndio. <see cref="Indice"/> é a posição na lista COMPLETA (a mesma

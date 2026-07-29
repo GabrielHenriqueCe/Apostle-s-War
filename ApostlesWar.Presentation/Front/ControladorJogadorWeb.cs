@@ -46,7 +46,10 @@ namespace ApostlesWar.Presentation.Front
             // valerem "entre turnos": o turno que o cérebro já começou vai até o fim, e o controle
             // volta na próxima pergunta.
             if (_ponte.AutoLigado)
+            {
+                EntregarFocoAoCerebro();
                 return _automatico.EscolherAcao(atacante, aliados, defensores);
+            }
 
             var habilidades = atacante.Personagem.Habilidades.OfType<HabilidadeAtiva>().ToList();
 
@@ -69,7 +72,10 @@ namespace ApostlesWar.Presentation.Front
                 // Ligou o automático enquanto este turno esperava um clique: a mensagem serviu pra
                 // acordar a espera; quem decide agora é o cérebro.
                 if (msg.Tipo == "auto" && _ponte.AutoLigado)
+                {
+                    EntregarFocoAoCerebro();
                     return _automatico.EscolherAcao(atacante, aliados, defensores);
+                }
 
                 if (msg.Tipo == "habilidade")
                 {
@@ -84,6 +90,18 @@ namespace ApostlesWar.Presentation.Front
                 }
             }
         }
+
+        /// <summary>
+        /// Traduz o FOCO (o inimigo que o jogador apontou) de id pra combatente e o entrega ao
+        /// cérebro, no instante em que ele vai decidir.
+        ///
+        /// Esta tradução mora AQUI porque é o único ponto que enxerga os dois lados: a ponte guarda
+        /// um int (não conhece o domínio) e o <see cref="ControladorBot"/> vive na Application, que
+        /// não pode enxergar a Presentation. Ler a cada decisão, e não uma vez, é o que faz o jogador
+        /// poder trocar de alvo no meio da luta — mesma regra do interruptor do automático.
+        /// </summary>
+        private void EntregarFocoAoCerebro()
+            => _automatico.AlvoPreferido = _sessao.PorId(_ponte.FocoDoJogador);
 
         public Combate? EscolherAlvo(List<Combate> disponiveis, List<Combate> aliados, List<Combate> defensores)
         {

@@ -555,14 +555,9 @@ namespace ApostlesWar.Presentation.Front
             champ.HP, champ.Ataque, champ.Defesa,
             // Crit é global (não vive no champ): vem das constantes-base do Personagem.
             (int)(Personagem.TaxaCritBase * 100), (int)(Personagem.DanoCritBase * 100),
-            champ.Habilidades.Select(VerHabilidadeDoChamp).ToList());
-
-        /// <summary>
-        /// A habilidade no catálogo. O cooldown é o DECLARADO (não o restante): fora da luta não há
-        /// turno correndo, e o que o jogador quer comparar entre champs é a cadência da habilidade.
-        /// </summary>
-        private static HabilidadeDoChampVista VerHabilidadeDoChamp(Habilidade h) => new(
-            h.Nome, h.Simbolo, h.Descricao, h.Cooldown, Passiva: h is HabilidadePassiva);
+            // Sem dono: fora da luta não há turno correndo, então o cooldown é o DECLARADO — que é
+            // justamente o que se compara entre champs num catálogo. Ver VistaDeHabilidade.
+            champ.Habilidades.Select(h => VistaDeHabilidade.De(h)).ToList());
 
         // ---------- Arsenal ----------
 

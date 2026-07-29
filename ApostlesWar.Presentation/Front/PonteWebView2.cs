@@ -160,6 +160,20 @@ namespace ApostlesWar.Presentation.Front
         }
 
         /// <summary>
+        /// Alterna entre tela cheia e janela. Vem da thread do JOGO (o clique nas configurações é
+        /// atendido lá), e mexer em janela é coisa da thread de UI — daí o Invoke, o mesmo caminho
+        /// do <see cref="FecharJanela"/>. Quem sabe COMO cada modo fica é o
+        /// <see cref="AppFront.AplicarModoDeTela"/>: uma resposta só pro boot e pra troca.
+        /// </summary>
+        public void DefinirTelaCheia(bool telaCheia)
+        {
+            if (_janela.IsDisposed) return;
+            try { _janela.Invoke(() => AppFront.AplicarModoDeTela(_janela, telaCheia)); }
+            catch (ObjectDisposedException) { }
+            catch (InvalidOperationException) { }
+        }
+
+        /// <summary>
         /// O JOGO pediu pra sair (opção Sair / Esc no menu): fecha a janela na thread de UI. O
         /// FormClosing dispara o <see cref="Encerrar"/> em seguida — este só faz a janela ir embora.
         /// </summary>

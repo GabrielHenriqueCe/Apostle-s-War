@@ -114,8 +114,14 @@ namespace ApostlesWar.Presentation.Front
     /// Uma opção clicável. `Habilitado: false` = aparece apagada com "em breve" (fatia futura).
     /// <see cref="Confirmar"/> != null = ação destrutiva: o clique abre um modal com esse texto e só
     /// dispara a escolha se o jogador confirmar (ex.: excluir conta).
+    ///
+    /// <see cref="Marcado"/> != null = a opção é um INTERRUPTOR e este é o estado dele (a tela põe
+    /// um ✓ quando ligado). É `bool?` e não `bool` porque a maioria das opções não é interruptor
+    /// nenhum — "Campanha" não está ligada nem desligada, e um `false` mudo desenharia um interruptor
+    /// apagado em toda linha do menu.
     /// </summary>
-    internal record OpcaoMenuVista(string Rotulo, string Icone, bool Habilitado, string? Confirmar = null);
+    internal record OpcaoMenuVista(string Rotulo, string Icone, bool Habilitado,
+        string? Confirmar = null, bool? Marcado = null);
 
     /// <summary>Um campeão na grade de escolha de avatar. `Desbloqueado: false` = aparece em cinza,
     /// não clicável (ainda não conquistado na campanha).</summary>

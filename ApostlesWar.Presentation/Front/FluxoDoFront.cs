@@ -25,6 +25,7 @@ namespace ApostlesWar.Presentation.Front
         private const int Configuracao = 4;
 
         // Índices do menu de CONFIGURAÇÃO.
+        private const int CfgTelaCheia = 1;
         private const int CfgConta = 2;
 
         // Índices do menu de CONTA.
@@ -46,10 +47,11 @@ namespace ApostlesWar.Presentation.Front
         private readonly CapitulosService _capitulos;
         private readonly ArsenalService _arsenal;
         private readonly PersonagemService _personagens;
+        private readonly ConfiguracaoService _configuracao;
 
         public FluxoDoFront(PonteWebView2 ponte, CombateService combate, CampeoesService campeoes,
             PerfilService perfil, SessaoDoFront sessao, CampanhaService campanha, CapitulosService capitulos,
-            ArsenalService arsenal, PersonagemService personagens)
+            ArsenalService arsenal, PersonagemService personagens, ConfiguracaoService configuracao)
         {
             _ponte = ponte;
             _combate = combate;
@@ -60,6 +62,7 @@ namespace ApostlesWar.Presentation.Front
             _capitulos = capitulos;
             _arsenal = arsenal;
             _personagens = personagens;
+            _configuracao = configuracao;
         }
 
         public void Rodar()
@@ -167,13 +170,21 @@ namespace ApostlesWar.Presentation.Front
                     new List<OpcaoMenuVista>
                     {
                         new("Som",        "🔊", Habilitado: false),   // fatia futura
-                        new("Tela cheia", "🖥️", Habilitado: false),   // fatia futura
+                        new("Tela cheia", "🖥️", Habilitado: true,
+                            Marcado: _configuracao.Carregar().TelaCheia),
                         new("Conta",      "👤", Habilitado: true),
                         new("Voltar",     "⬅️", Habilitado: true),
                     }));
 
                 int escolha = LerEscolha();
-                if (escolha == CfgConta)
+
+                if (escolha == CfgTelaCheia)
+                {
+                    // Grava e aplica na hora: a preferência é o que manda, e a janela obedece. O
+                    // `while` redesenha o menu, então o ✓ acompanha sem ninguém avisar a tela.
+                    _ponte.DefinirTelaCheia(_configuracao.AlternarTelaCheia());
+                }
+                else if (escolha == CfgConta)
                 {
                     if (MostrarConta()) return true;   // excluiu → sobe o sinal
                     // não excluiu: volta a mostrar as configurações

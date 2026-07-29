@@ -114,6 +114,14 @@ body {
 .opcaoMenu .opRotulo { flex: 1; text-align: left; }
 .opcaoMenu .opEmBreve { font-size: 11px; color: var(--apagado); letter-spacing: 1px; text-transform: uppercase; }
 
+/* Opção-interruptor (hoje só a tela cheia): o estado fica à direita, na mesma coluna do "em breve".
+   Desligado é um traço e não um ✗ — a opção não está errada, só está desligada. */
+.opcaoMenu .opMarca {
+    min-width: 22px; text-align: center;
+    font-size: 17px; font-weight: 800; color: var(--apagado);
+}
+.opcaoMenu .opMarca.ligado { color: var(--vida); }
+
 
 /* ---------- criar perfil (overlay, 1ª vez) ---------- */
 #criarPerfil {

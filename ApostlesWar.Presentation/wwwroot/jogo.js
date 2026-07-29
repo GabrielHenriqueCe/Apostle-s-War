@@ -98,6 +98,14 @@ function aplicarMenu(m) {
             const em = document.createElement('span'); em.className = 'opEmBreve'; em.textContent = 'em breve';
             b.appendChild(em);
         }
+        // Opção-INTERRUPTOR (marcado != null): mostra em que estado ela está. O C# manda o estado e
+        // redesenha o menu depois de alternar — a tela não guarda nada, como o botão do auto.
+        if (o.marcado != null) {
+            const marca = document.createElement('span');
+            marca.className = 'opMarca' + (o.marcado ? ' ligado' : '');
+            marca.textContent = o.marcado ? '✓' : '—';
+            b.appendChild(marca);
+        }
 
         // Opção destrutiva (ex: excluir conta): confirma no modal ANTES de mandar a escolha.
         b.addEventListener('click', () => o.confirmar
@@ -1263,6 +1271,15 @@ function atualizarBotaoSair() {
 document.getElementById('sairTela').addEventListener('click', sairDaTela);
 
 document.addEventListener('keydown', e => {
+    // Recarregar a página MATA a partida: o JS volta do zero, mas a thread do jogo no C# continua
+    // parada esperando um clique que nunca vem. O WebView2 já está com os atalhos de navegador
+    // desligados (ver AppFront); isto aqui é o cinto além do suspensório — a tecla não pode passar
+    // por caminho nenhum.
+    if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R'))) {
+        e.preventDefault();
+        return;
+    }
+
     // Nas telas de desfecho o Enter também segue em frente (é o gesto natural de "ok, continuar").
     const desfecho = (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim')
         || cenaAtual === 'campanhaVitoria' || cenaAtual === 'campanhaDerrota';

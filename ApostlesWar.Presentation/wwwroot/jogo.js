@@ -37,8 +37,8 @@ ponte.addEventListener('message', e => {
     else if (msg.tipo === 'montagemArena') mostrarMontagemArena(msg.conteudo.campeoes);
     else if (msg.tipo === 'campanhaMapa') mostrarMapa(msg.conteudo);
     else if (msg.tipo === 'campanhaFases') mostrarFasesCampanha(msg.conteudo);
-    else if (msg.tipo === 'campanhaVitoria') mostrarVitoria(msg.conteudo);
-    else if (msg.tipo === 'campanhaDerrota') mostrarDerrota();
+    else if (msg.tipo === 'fimDeFase') mostrarFimDeFase(msg.conteudo);
+    else if (msg.tipo === 'conquista') mostrarConquista(msg.conteudo);
     else if (msg.tipo === 'arsenal') mostrarArsenal(msg.conteudo);
     else if (msg.tipo === 'compendio') mostrarCompendio(msg.conteudo);
     else if (msg.tipo === 'compendioChamp') mostrarChampDetalhe(msg.conteudo);
@@ -54,11 +54,13 @@ function mostrarCena(cena) {
     document.getElementById('arenaSetup').hidden = cena !== 'arenaSetup';
     document.getElementById('campanhaMapa').hidden = cena !== 'campanhaMapa';
     document.getElementById('campanhaFases').hidden = cena !== 'campanhaFases';
-    document.getElementById('campanhaVitoria').hidden = cena !== 'campanhaVitoria';
-    document.getElementById('campanhaDerrota').hidden = cena !== 'campanhaDerrota';
+    document.getElementById('fimDeFase').hidden = cena !== 'fimDeFase';
+    document.getElementById('conquista').hidden = cena !== 'conquista';
     document.getElementById('arsenal').hidden = cena !== 'arsenal';
     document.getElementById('compendio').hidden = cena !== 'compendio';
-    document.getElementById('compendioChamp').hidden = cena !== 'compendioChamp';
+    // A ficha do champ tem UMA seção e dois donos: o compêndio e a conquista (o champ recém-ganho
+    // termina na própria ficha). Copiar o HTML pra ter duas telas iguais seria duas telas pra manter.
+    document.getElementById('compendioChamp').hidden = !['compendioChamp', 'conquistaChamp'].includes(cena);
     document.getElementById('arena').hidden = !emCombate;
     document.getElementById('painel').hidden = !emCombate;
     // Os controles de combate só fazem sentido na batalha.
@@ -344,13 +346,21 @@ function escolherCampeaoArena(idx) {
     desenharSlotsArena();
 }
 
-function sortearLadoArena(lado) {
-    const ids = [...arenaCampeoes.keys()];
+// Quatro índices DISTINTOS de um pool — o time sorteado. Embaralho de Fisher-Yates e corta em 4;
+// com menos de 4 no pool, as casas que sobram ficam vazias em vez de repetir alguém.
+function sortearTime(total) {
+    const ids = [...Array(total).keys()];
     for (let k = ids.length - 1; k > 0; k--) {
         const j = Math.floor(Math.random() * (k + 1));
         [ids[k], ids[j]] = [ids[j], ids[k]];
     }
-    arenaTimes[lado] = ids.slice(0, 4);
+    const time = ids.slice(0, 4);
+    while (time.length < 4) time.push(null);
+    return time;
+}
+
+function sortearLadoArena(lado) {
+    arenaTimes[lado] = sortearTime(arenaCampeoes.length);
     if (arenaSlotSel && arenaSlotSel.lado === lado) arenaSlotSel = null;
     desenharSlotsArena();
 }
@@ -465,10 +475,17 @@ function mostrarFasesCampanha(f) {
     campFases = f;
     campFaseSel = null;
     campSlotSel = null;
+
+    // O time volta MONTADO da última vez (o C# manda os índices; quem guarda identidade é o save).
+    // Sem isto, repetir uma fase custava quatro cliques de remontagem antes de qualquer coisa.
     campTime = [null, null, null, null];
+    (f.timeMontado || []).slice(0, 4).forEach((idx, i) => { campTime[i] = idx; });
+
     document.getElementById('fasesTitulo').textContent = `${f.capituloSimbolo} ${f.capituloNome}`;
     document.getElementById('faseDetalhe').hidden = true;
     document.getElementById('fasesLutar').disabled = true;
+
+    let botaoDaSelecionada = null, faseDaSelecionada = null;
 
     document.getElementById('fasesLista').replaceChildren(...f.fases.map(fase => {
         const b = document.createElement('button');
@@ -479,11 +496,18 @@ function mostrarFasesCampanha(f) {
         st.textContent = !fase.desbloqueado ? '🔒' : fase.concluido ? '✅' : '⚔️';
         const nm = document.createElement('span'); nm.className = 'faseNome'; nm.textContent = `${fase.numero}. ${fase.nome}`;
         b.append(st, nm);
-        if (fase.desbloqueado) b.addEventListener('click', () => selecionarFaseCampanha(fase, b));
+        if (fase.desbloqueado) {
+            b.addEventListener('click', () => selecionarFaseCampanha(fase, b));
+            if (fase.numero === f.faseSelecionada) { botaoDaSelecionada = b; faseDaSelecionada = fase; }
+        }
         return b;
     }));
 
     montarPickerFase();
+
+    // SEMPRE há uma fase selecionada: a última visitada, ou a 1. Quem decide é o C# (a memória é
+    // progressão, não estado de tela) — aqui só se abre o detalhe dela.
+    if (botaoDaSelecionada) selecionarFaseCampanha(faseDaSelecionada, botaoDaSelecionada);
 }
 
 function selecionarFaseCampanha(fase, btn) {
@@ -568,13 +592,53 @@ document.getElementById('fasesLutar').addEventListener('click', () => {
     mandar('iniciarFase', 0, JSON.stringify({ fase: campFaseSel.numero, time }));
 });
 
-// ---------- Campanha: vitória / derrota ----------
-function mostrarVitoria(r) {
-    mostrarCena('campanhaVitoria');
-    const cont = document.getElementById('vitoriaConteudo');
+document.getElementById('faseSortear').addEventListener('click', () => {
+    if (!campFases) return;
+    campTime = sortearTime(campFases.meusCampeoes.length);
+    campSlotSel = null;
+    desenharSlotsFase();
+});
+
+// ---------- Campanha: fim de fase ----------
+// Uma tela pros dois desfechos. Em dois momentos: sem opções (é a passagem da recompensa, um clique
+// segue pras conquistas) e com opções (é a hora de decidir). Mesma tela nos dois pra o jogador não
+// sentir que mudou de lugar entre ganhar o item e escolher o que fazer.
+let fimComOpcoes = false;
+
+function mostrarFimDeFase(f) {
+    mostrarCena('fimDeFase');
+    fimComOpcoes = !!f.comOpcoes;
+
+    document.getElementById('fimFaseTitulo').textContent = f.venceu ? '🏆 Fase concluída!' : '🕯️ Derrota';
+
+    const cont = document.getElementById('fimFaseConteudo');
     cont.replaceChildren();
 
-    if (r.novos && r.novos.length) {
+    if (!f.venceu) {
+        const p = document.createElement('div');
+        p.className = 'fimFaseTexto';
+        p.textContent = 'A Deusa observa em silêncio. Levante e tente de novo.';
+        cont.append(p);
+    }
+
+    const r = f.recompensa;
+    if (r && r.item) {
+        // O item ganha CARD, não uma linha de texto: é a recompensa que o jogador veio buscar, e
+        // antes ela passava despercebida no meio da tela.
+        const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
+        const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Novo item';
+
+        const card = document.createElement('div'); card.className = 'itemPremio';
+        const em = document.createElement('span'); em.className = 'ipEmoji'; em.textContent = r.item.simbolo;
+        const info = document.createElement('div'); info.className = 'ipInfo';
+        const nm = document.createElement('div'); nm.className = 'ipNome'; nm.textContent = r.item.nome;
+        const st = document.createElement('div'); st.className = 'ipStat'; st.textContent = `${r.item.stat} +${r.item.valor}`;
+        info.append(nm, st);
+        card.append(em, info);
+
+        bloco.append(t, card); cont.append(bloco);
+    }
+    if (r && r.novos && r.novos.length) {
         const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
         const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Novos campeões';
         const cs = document.createElement('div'); cs.className = 'recompensaChamps';
@@ -586,24 +650,67 @@ function mostrarVitoria(r) {
         }));
         bloco.append(t, cs); cont.append(bloco);
     }
-    if (r.item) {
-        const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
-        const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Novo item';
-        const linha = document.createElement('div'); linha.style.fontSize = '16px';
-        linha.textContent = `${r.item.simbolo} ${r.item.nome} · ${r.item.stat} ${r.item.valor}`;
-        bloco.append(t, linha); cont.append(bloco);
-    }
-    if (!cont.children.length) {
-        const p = document.createElement('div'); p.textContent = 'Fase vencida!'; cont.append(p);
-    }
+
+    document.getElementById('fimFaseOpcoes').hidden = !fimComOpcoes;
+    document.getElementById('fimFaseDica').hidden = fimComOpcoes;
+
+    // Depois da fase 7 o "continuar" atravessa pro capítulo seguinte — e o botão diz isso. Prometer
+    // "Próxima Fase" quando o que vem é outro capítulo esconderia do jogador que ele mudou de lugar.
+    const proximo = document.getElementById('fimProximaFase');
+    proximo.hidden = !f.podeProxima;
+    proximo.textContent = f.proximoECapitulo ? 'Próximo Capítulo »' : 'Próxima Fase »';
 }
 
-function mostrarDerrota() {
-    mostrarCena('campanhaDerrota');
+// Índices casados com o enum DecisaoDeFim do C# — a ponte carrega um int, então a ordem é contrato.
+const DECISAO = { jogarNovamente: 0, editarEquipe: 1, proximaFase: 2 };
+
+document.getElementById('fimJogarNovamente').addEventListener('click', () => mandar('fimDeFase', DECISAO.jogarNovamente));
+document.getElementById('fimEditarEquipe').addEventListener('click', () => mandar('fimDeFase', DECISAO.editarEquipe));
+document.getElementById('fimProximaFase').addEventListener('click', () => mandar('fimDeFase', DECISAO.proximaFase));
+
+// Clicar na tela só serve na passagem da recompensa. Com as opções à mostra, o clique no vazio não
+// pode escolher por ninguém — cada botão diz o que faz.
+document.getElementById('fimDeFase').addEventListener('click', e => {
+    if (fimComOpcoes || e.target.closest('#fimFaseOpcoes')) return;
+    mandar('continuar');
+});
+
+// ---------- Campanha: a conquista de um champ ----------
+// Ele vem do fundo, pequeno e fora de foco, e cresce até o centro; ao chegar, brilha e some o
+// brilho. Terminada a animação a tela vira a FICHA dele — a mesma seção do compêndio. Dois cliques
+// pulam pro fim (quem já viu não precisa ver de novo).
+let conquistaEmCurso = null;   // o champ que está chegando (guardado pra virar ficha no fim)
+
+function mostrarConquista(champ) {
+    mostrarCena('conquista');
+    conquistaEmCurso = champ;
+
+    document.getElementById('conquistaEmoji').textContent = champ.simbolo;
+    document.getElementById('conquistaNome').textContent = champ.nome;
+    document.getElementById('conquistaFaccao').textContent = champ.faccao;
+
+    const corpo = document.getElementById('conquistaCorpo');
+    corpo.classList.remove('chegando');
+    void corpo.offsetWidth;         // reinicia a animação mesmo com dois champs seguidos
+    corpo.classList.add('chegando');
+
+    corpo.addEventListener('animationend', abrirFichaDaConquista, { once: true });
 }
 
-document.getElementById('campanhaVitoria').addEventListener('click', () => mandar('continuar'));
-document.getElementById('campanhaDerrota').addEventListener('click', () => mandar('continuar'));
+// Fim da animação (ou pulo): a mesma cena vira a ficha do champ. O C# continua achando que estamos
+// na conquista — o que ele espera é um "continuar", e é o Esc/Sair daqui que vai mandá-lo.
+function abrirFichaDaConquista() {
+    if (!conquistaEmCurso) return;
+    mostrarChampDetalhe(conquistaEmCurso);
+    mostrarCena('conquistaChamp');
+    conquistaEmCurso = null;
+}
+
+document.getElementById('conquista').addEventListener('dblclick', abrirFichaDaConquista);
+
+// A ficha do champ sai por CLIQUE ou Enter, além do Esc/X — vale nos dois donos da seção (o
+// compêndio e a conquista), porque é a mesma tela e não deve ter dois jeitos de fechar.
+document.getElementById('compendioChamp').addEventListener('click', sairDaTela);
 
 // ---------- Arsenal ----------
 const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
@@ -950,6 +1057,10 @@ function desenhar() {
     document.getElementById('turno').textContent = `Turno ${estado.turno}`;
     confirmarAtuais = alvosDeConfirmacao();
 
+    // De novo aqui, e não só no mostrarCena: o rótulo do 🚪 depende do MODO, que vem no estado — e o
+    // mostrarCena roda antes de `estado` receber o quadro novo, então lá ele ainda leria o anterior.
+    atualizarBotaoSair();
+
     // O botão do automático se desenha do estado: é o C# que manda, e ele desliga o modo sozinho a
     // cada batalha nova. Sem isto o botão continuaria dizendo ON numa luta em que o controle já
     // voltou pro jogador.
@@ -1292,7 +1403,14 @@ function sairDaTela() {
     if (cenaAtual === 'criarPerfil') return;
 
     if (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim') { mandar('voltarMenu'); return; }
-    if (cenaAtual === 'campanhaVitoria' || cenaAtual === 'campanhaDerrota') { mandar('continuar'); return; }
+
+    // Fim de fase: com as opções à mostra, sair é a decisão "Sair" (que faz o mesmo que Editar
+    // Equipe — sair desta tela É voltar pra montagem). Na passagem da recompensa, sair é seguir.
+    if (cenaAtual === 'fimDeFase') { mandar(fimComOpcoes ? 'voltar' : 'continuar'); return; }
+
+    // A conquista e a ficha dela: sair fecha o champ e devolve o comando ao C#, que segue pro
+    // próximo champ novo ou pra tela de vitória.
+    if (cenaAtual === 'conquista' || cenaAtual === 'conquistaChamp') { mandar('continuar'); return; }
 
     if (cenaAtual === 'menu') {
         if (menuRaiz) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));
@@ -1303,13 +1421,28 @@ function sairDaTela() {
     if (cenaAtual !== 'combate') { mandar('voltar'); return; }
 
     if (desarmar()) { desenhar(); return; }
-    confirmar('Sair da batalha? O progresso desta luta será perdido.', () => mandar('sair'));
+
+    // Na campanha, desistir NÃO é sair do jogo: conta derrota e cai na tela de fim de fase, de onde
+    // dá pra tentar de novo. Na Arena não há desfecho nenhum, então sair é sair. O rótulo e o texto
+    // seguem a consequência — duas coisas diferentes não podem ter o mesmo nome.
+    if (estado?.modo === 'campanha')
+        confirmar('Encerrar a batalha? Conta como DERROTA nesta fase.', () => mandar('sair'));
+    else
+        confirmar('Sair da batalha? O progresso desta luta será perdido.', () => mandar('sair'));
 }
 
 // O botão só some onde sair não é opção (criar perfil). Nas demais ele existe SEMPRE no mesmo pixel —
 // é isso que o torna aprendível.
+// O X é sempre o mesmo desenho no mesmo pixel — o que muda é o que ele PROMETE, e isso vive no
+// title (e no texto do modal). Na batalha da campanha ele encerra a luta em derrota e a tela de fim
+// aparece: o jogo continua, então "sair" seria mentira.
 function atualizarBotaoSair() {
-    document.getElementById('sairTela').hidden = cenaAtual === 'criarPerfil';
+    const b = document.getElementById('sairTela');
+    b.hidden = cenaAtual === 'criarPerfil';
+
+    const encerrando = cenaAtual === 'combate' && estado?.modo === 'campanha'
+        && nomeDaFase(estado) !== 'Fim';
+    b.title = encerrando ? 'Encerrar a batalha (Esc)' : 'Sair desta tela (Esc)';
 }
 
 document.getElementById('sairTela').addEventListener('click', sairDaTela);
@@ -1324,11 +1457,15 @@ document.addEventListener('keydown', e => {
         return;
     }
 
-    // Nas telas de desfecho o Enter também segue em frente (é o gesto natural de "ok, continuar").
-    const desfecho = (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim')
-        || cenaAtual === 'campanhaVitoria' || cenaAtual === 'campanhaDerrota';
+    // Nas telas de PASSAGEM o Enter também segue em frente (é o gesto natural de "ok, continuar").
+    // A tela de fim de fase COM opções fica de fora de propósito: ali cada botão faz uma coisa
+    // diferente, e o Enter escolheria uma delas por conta própria.
+    const passagem = (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim')
+        || (cenaAtual === 'fimDeFase' && !fimComOpcoes)
+        || cenaAtual === 'conquista' || cenaAtual === 'conquistaChamp'
+        || cenaAtual === 'compendioChamp';
 
-    if (e.key === 'Escape' || (desfecho && e.key === 'Enter')) sairDaTela();
+    if (e.key === 'Escape' || (passagem && e.key === 'Enter')) sairDaTela();
 });
 
 // Clique no VAZIO da arena (fora de qualquer combatente) — o outro "clicar em outro lugar". Sem

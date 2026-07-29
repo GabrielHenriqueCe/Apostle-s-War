@@ -18,13 +18,13 @@
     --agindo: #7ee081;
     --alvo: #e0574f;
 
-    /* O canto superior direito da janela TEM DONO: é do 🚪 Sair, que é `position: fixed` e mora por
-       cima de todas as cenas. Qualquer coisa que encoste naquele canto tem que reservar esta faixa,
-       senão o botão passa a boiar sobre ela — foi exatamente o que aconteceu com os controles do
-       topo da batalha (▶▶ / 🤖 auto / 📜 log / 📊 estatísticas), que ficaram debaixo dele.
-       Reservar em vez de empurrar o botão: o 🚪 vale mais parado no MESMO pixel em toda tela do que
+    /* O canto superior direito da janela TEM DONO: é do X de sair, que é `position: fixed` e mora
+       por cima de todas as cenas. Qualquer coisa que encoste naquele canto tem que reservar esta
+       faixa, senão o botão passa a boiar sobre ela — foi exatamente o que aconteceu com os controles
+       do topo da batalha (▶▶ / 🤖 auto / 📜 log / 📊 estatísticas), que ficaram debaixo dele.
+       Reservar em vez de empurrar o botão: ele vale mais parado no MESMO pixel em toda tela do que
        ajustado caso a caso — é isso que o torna aprendível. */
-    --canto-sair: 122px;
+    --canto-sair: 66px;
 }
 
 /* ---------- rolagem ----------
@@ -541,6 +541,16 @@ body {
 #fasesTitulo { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
 
 #fasesLista { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+/* A dica do time e o 🎲 na mesma linha: sortear é uma alternativa a montar, não um passo depois. */
+.faseLinhaTime { display: flex; align-items: center; gap: 12px; }
+#faseSortear {
+    padding: 5px 12px; font-family: inherit; font-size: 13px; cursor: pointer;
+    border: 1px solid var(--borda); border-radius: 8px;
+    background: transparent; color: var(--apagado);
+    transition: border-color .15s, color .15s;
+}
+#faseSortear:hover { border-color: var(--ouro); color: var(--texto); }
 .faseBtn {
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     min-width: 84px; padding: 8px 12px; font-family: inherit; cursor: pointer;
@@ -593,22 +603,95 @@ body {
 #fasesLutar:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
 #fasesLutar:disabled { opacity: .4; cursor: not-allowed; }
 
-/* ---------- Campanha: vitória / derrota ---------- */
-#campanhaVitoria, #campanhaDerrota {
+/* ---------- Campanha: fim de fase (vitória E derrota, mesma tela) ---------- */
+#fimDeFase {
     position: absolute; inset: 0; z-index: 40;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-    padding: 24px; cursor: pointer;
+    padding: 24px;
     background: rgba(0, 0, 0, .72);
 }
-#campanhaVitoria[hidden], #campanhaDerrota[hidden] { display: none; }
-#campanhaVitoria h1 { margin: 0; font-size: 44px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 16px rgba(217,180,91,.4), 0 3px 4px #000; }
-#campanhaDerrota h1 { margin: 0; font-size: 44px; font-weight: 800; color: var(--alvo); text-shadow: 0 2px 12px rgba(192,57,43,.4), 0 3px 4px #000; }
-#derrotaTexto { color: var(--apagado); font-size: 15px; max-width: 420px; text-align: center; }
-#vitoriaConteudo { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+#fimDeFase[hidden] { display: none; }
+#fimFaseTitulo {
+    margin: 0; font-size: 44px; font-weight: 800; color: var(--ouro);
+    text-shadow: 0 2px 16px rgba(217,180,91,.4), 0 3px 4px #000;
+}
+.fimFaseTexto { color: var(--apagado); font-size: 15px; max-width: 420px; text-align: center; }
+#fimFaseConteudo { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
 .recompensaBloco { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .recompensaTitulo { font-size: 13px; color: var(--apagado); text-transform: uppercase; letter-spacing: 1px; }
 .recompensaChamps { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* O item ganho: CARD, não uma linha de texto. É a recompensa que o jogador veio buscar e antes
+   passava despercebida no meio da tela. */
+.itemPremio {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 22px;
+    background: var(--painel); border: 2px solid var(--ouro); border-radius: 14px;
+    box-shadow: 0 0 20px rgba(217,180,91,.25);
+}
+.itemPremio .ipEmoji { font-size: 40px; line-height: 1; }
+.itemPremio .ipNome { font-size: 18px; font-weight: 700; color: var(--texto); }
+.itemPremio .ipStat { font-size: 15px; font-weight: 700; color: var(--vida); }
+
+/* As opções ficam embaixo à DIREITA (pedido do Gabriel): a leitura da tela desce pelo desfecho e
+   pelas recompensas e termina onde se decide. */
+#fimFaseOpcoes { position: absolute; right: 36px; bottom: 34px; display: flex; gap: 10px; }
+#fimFaseOpcoes[hidden] { display: none; }
+#fimFaseOpcoes button {
+    padding: 10px 20px; font-family: inherit; font-size: 15px; font-weight: 600;
+    border-radius: 10px; cursor: pointer;
+    border: 2px solid var(--borda); background: var(--painel); color: var(--texto);
+    transition: border-color .15s, transform .1s, background .15s;
+}
+#fimFaseOpcoes button:hover { border-color: var(--ouro); background: #262030; transform: translateY(-2px); }
+/* A continuação é a ação ESPERADA depois de vencer: destacada, e a única em ouro. */
+#fimProximaFase { border-color: var(--ouro); color: var(--ouro); }
+#fimProximaFase[hidden] { display: none; }
+
 .continuarDica { position: absolute; bottom: 40px; font-size: 14px; color: var(--apagado); letter-spacing: 2px; text-transform: uppercase; }
+.continuarDica[hidden] { display: none; }
+
+/* ---------- Campanha: a conquista de um champ ---------- */
+#conquista {
+    position: absolute; inset: 0; z-index: 41;   /* acima do fim de fase, que fica atrás */
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #241d33 0%, #0a0810 75%);
+    overflow: hidden; cursor: pointer;
+}
+#conquista[hidden] { display: none; }
+
+/* Raios atrás do champ, girando devagar: dão movimento ao fundo sem competir com ele. */
+#conquistaFundo {
+    position: absolute; width: 160vmax; height: 160vmax;
+    background: conic-gradient(from 0deg, transparent 0 6deg, rgba(217,180,91,.10) 6deg 12deg);
+    animation: girarRaios 24s linear infinite;
+    pointer-events: none;
+}
+@keyframes girarRaios { to { transform: rotate(360deg); } }
+
+#conquistaCorpo {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+#conquistaEmoji { font-size: 190px; line-height: 1; }
+#conquistaNome { font-size: 34px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 4px #000; }
+#conquistaFaccao { font-size: 15px; color: var(--apagado); letter-spacing: 2px; text-transform: uppercase; }
+
+/* Vem do FUNDO: começa minúsculo, borrado e quase transparente, e cresce até o centro. O brilho
+   entra só na CHEGADA e sai — se ficasse, deixaria de ser chegada e viraria decoração.
+   A aproximação é rápida (ela só leva o olho até o centro); é o brilho que precisa de tempo, porque
+   ele é a parte que se OLHA. Daí a metade final da linha do tempo ser só ele nascendo e morrendo. */
+#conquistaCorpo.chegando { animation: chegarDoFundo 2.8s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes chegarDoFundo {
+    0%   { transform: scale(.12); opacity: 0; filter: blur(14px) drop-shadow(0 0 0 rgba(217,180,91,0)); }
+    32%  { opacity: 1; filter: blur(2px) drop-shadow(0 0 0 rgba(217,180,91,0)); }
+    50%  { transform: scale(1.12); filter: blur(0) drop-shadow(0 0 30px rgba(217,180,91,.7)); }
+    68%  { transform: scale(1.05); filter: blur(0) drop-shadow(0 0 60px rgba(217,180,91,1)); }
+    100% { transform: scale(1); filter: blur(0) drop-shadow(0 0 10px rgba(217,180,91,.2)); }
+}
+
+#conquistaDica { color: var(--ouro); }
 
 /* ---------- Arsenal (boneco + itens) ---------- */
 #arsenal {
@@ -813,16 +896,27 @@ body {
 /* ---------- o botão SAIR global ---------- */
 /* Um só pro jogo inteiro, sempre no mesmo pixel, por cima de qualquer cena (z acima dos overlays de
    tela, abaixo do modal). Faz o que o Esc faz ali — ver sairDaTela no jogo.js. */
+/* Colado no canto: uma cunha arredondada que OCUPA o vértice superior direito, com um X dentro.
+   Sem rótulo — "fechar" é o gesto mais padronizado que existe numa tela, e um X no canto não
+   precisa de legenda. Quem carrega o significado quando ele muda (encerrar × sair) é o title e o
+   texto do modal, não o botão.
+
+   z 45: por cima dos overlays de cena (30/40/41), por baixo do modal (50) — quando o modal abre, o
+   X não pode boiar sobre ele. */
 #sairTela {
-    /* z 45: por cima dos overlays de cena (30/40), por baixo do modal (50) — quando o modal abre,
-       o Sair não pode boiar sobre ele. */
-    position: fixed; top: 12px; right: 14px; z-index: 45;
-    padding: 8px 18px; font-family: inherit; font-size: 14px; font-weight: 600;
-    border-radius: 10px; cursor: pointer;
-    border: 2px solid var(--borda); background: rgba(20, 18, 26, .85); color: var(--texto);
-    transition: border-color .15s, transform .1s;
+    position: fixed; top: 0; right: 0; z-index: 45;
+    width: 58px; height: 58px;
+    padding: 0 0 8px 8px;         /* empurra o X pro lado do vértice, longe da diagonal */
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit; font-size: 22px; font-weight: 700; line-height: 1;
+    cursor: pointer;
+    border: none;
+    border-bottom-left-radius: 100%;   /* a diagonal: o arco que "pega" o canto */
+    background: rgba(58, 52, 70, .85);
+    color: var(--texto);
+    transition: background .15s, color .15s;
 }
-#sairTela:hover { border-color: var(--ouro); transform: translateY(-1px); }
+#sairTela:hover { background: var(--alvo); color: #fff; }
 #sairTela[hidden] { display: none; }
 
 /* ---------- topo ---------- */

@@ -94,7 +94,10 @@
         <div id="faseDetalhe" hidden>
             <div id="faseInimigos"></div>
             <div id="faseItem"></div>
-            <p class="faseDica">Monte seu time (até 4)</p>
+            <div class="faseLinhaTime">
+                <p class="faseDica">Monte seu time (até 4)</p>
+                <button id="faseSortear" type="button" title="Sortear entre os seus campeões">🎲 sortear</button>
+            </div>
             <div id="faseSlots"></div>
             <div id="fasePicker"></div>
         </div>
@@ -103,16 +106,32 @@
         </div>
     </section>
 
-    <!-- Vitória / Derrota da campanha (clique ou Enter continua). -->
-    <section id="campanhaVitoria" hidden>
-        <h1>🏆 Fase concluída!</h1>
-        <div id="vitoriaConteudo"></div>
-        <div class="continuarDica">clique ou Enter pra continuar</div>
+    <!-- FIM DE FASE: vitória e derrota na MESMA tela, porque a pergunta depois das duas é a mesma —
+         e agora? Antes eram duas telas que só sabiam dizer "clique pra continuar", e continuar
+         significava voltar pra lista de fases mesmo quando o jogador só queria tentar de novo.
+         Os botões ficam embaixo à direita; o Esc equivale a Editar Equipe. -->
+    <section id="fimDeFase" hidden>
+        <h1 id="fimFaseTitulo"></h1>
+        <div id="fimFaseConteudo"></div>
+        <div class="continuarDica" id="fimFaseDica">clique ou Enter pra continuar</div>
+        <div id="fimFaseOpcoes" hidden>
+            <button id="fimJogarNovamente" type="button">↻ Jogar Novamente</button>
+            <button id="fimEditarEquipe" type="button">👥 Editar Equipe</button>
+            <button id="fimProximaFase" type="button">Próxima Fase »</button>
+        </div>
     </section>
-    <section id="campanhaDerrota" hidden>
-        <h1>🕯️ Derrota</h1>
-        <p id="derrotaTexto">A Deusa observa em silêncio. Levante e tente de novo.</p>
-        <div class="continuarDica">clique ou Enter pra continuar</div>
+
+    <!-- CONQUISTA: um champ recém-desbloqueado, um por tela. Ele vem do fundo crescendo até o centro
+         e brilha ao chegar; dois cliques pulam a animação. Terminada, a MESMA cena vira a ficha dele
+         (reusa a seção do compêndio, ver mostrarCena) e sair volta pra tela de vitória. -->
+    <section id="conquista" hidden>
+        <div id="conquistaFundo"></div>
+        <div id="conquistaCorpo">
+            <div id="conquistaEmoji"></div>
+            <div id="conquistaNome"></div>
+            <div id="conquistaFaccao"></div>
+        </div>
+        <div class="continuarDica" id="conquistaDica">novo campeão! · 2 cliques pulam</div>
     </section>
 
     <!-- Cena do ARSENAL: boneco com os 7 slots equipados (global), o que o conjunto dá SOMADO, e os
@@ -150,6 +169,7 @@
             </div>
             <aside id="champHabilidades"></aside>
         </div>
+        <div class="continuarDica">clique ou Enter pra voltar</div>
     </section>
 
     <!-- MODAL de confirmação reutilizável: sobrepõe qualquer cena (sair, excluir conta, ...). -->
@@ -184,7 +204,7 @@
          Ele fica SEMPRE no mesmo pixel — é isso que o torna aprendível —, então quem chega perto
          daquele canto é que se afasta: o CSS reserva a faixa na var `--canto-sair`. Tela nova que
          encoste no topo direito reserva também. -->
-    <button id="sairTela" type="button" title="Sair desta tela (Esc)">🚪 Sair</button>
+    <button id="sairTela" type="button" title="Sair desta tela (Esc)">✕</button>
 
     <main id="arena">
         <section class="lado" id="ladoEsquerdo" aria-label="Seu time"></section>

@@ -27,7 +27,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            return (new CampanhaService(arsenal, campeoes, capitulos, repo), capitulos, campeoes);
+            return (new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo), capitulos, campeoes);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, campeoes, capitulos, repo);
+            var campanha = new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo);
 
             campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1);
 
@@ -189,6 +189,105 @@ namespace Tests
             campanha.SalvarPosicao(3);
 
             Assert.Equal(3, campanha.PosicaoNoMapa());
+        }
+
+        // ---------- Onde o jogador parou: fase e time ----------
+
+        [Fact]
+        public void UltimaFase_SemSave_ComecaNaPrimeira()
+        {
+            var (campanha, _, _) = Montar();
+
+            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.Reino));
+        }
+
+        /// <summary>
+        /// A memória é POR CAPÍTULO: o jogador vai e volta entre eles, e cada um tem a própria
+        /// história. Uma memória global faria voltar pro Reino na fase em que ele parou no Lado
+        /// Sombrio.
+        /// </summary>
+        [Fact]
+        public void UltimaFase_EPorCapitulo()
+        {
+            var (campanha, capitulos, _) = Montar();
+            capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1);   // libera a 2
+
+            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase2, new List<Personagem>());
+
+            Assert.Equal(Fases.Fase2, campanha.UltimaFaseDe(Faccao.Reino));
+            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.LadoSombrio));   // intocado
+        }
+
+        /// <summary>
+        /// Lembra a fase em que ENTROU, não a que venceu: quem apanhou quer voltar naquela fase, não
+        /// na seguinte. Aqui a fase 2 nunca foi vencida (segue travada) — e por isso a memória dela
+        /// não vale: cai na 1, em vez de abrir numa fase que o jogador não pode jogar.
+        /// </summary>
+        [Fact]
+        public void UltimaFase_SeATravaram_CaiNaPrimeira()
+        {
+            var (campanha, _, _) = Montar();
+
+            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase2, new List<Personagem>());
+
+            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.Reino));
+        }
+
+        [Fact]
+        public void UltimoTime_VoltaOsMesmosChamps()
+        {
+            var (campanha, _, campeoes) = Montar();
+            var time = campeoes.ObterDesbloqueados().Take(2).ToList();
+
+            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, time);
+
+            var voltou = campanha.UltimoTime();
+            Assert.Equal(2, voltou.Count);
+            Assert.Equal(time.Select(p => p.Nome), voltou.Select(p => p.Nome));
+        }
+
+        /// <summary>
+        /// O time atravessa o fechar do jogo: um service NOVO lendo o mesmo save encontra o que o
+        /// anterior deixou. É a diferença entre lembrar e só não ter esquecido ainda.
+        /// </summary>
+        [Fact]
+        public void UltimoTime_SobreviveAoServiceQueOEscreveu()
+        {
+            var repo = new RepositorioFake();
+            var capitulos = new CapitulosService(repo);
+            var arsenal = new ArsenalService(capitulos, repo);
+            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
+            var time = campeoes.ObterDesbloqueados().Take(3).ToList();
+
+            new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo)
+                .SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, time);
+
+            var outro = new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo);
+            Assert.Equal(time.Select(p => p.Nome), outro.UltimoTime().Select(p => p.Nome));
+        }
+
+        /// <summary>
+        /// Champ que não está liberado não volta pro time. O estrago seria a tela de fases montar um
+        /// slot com alguém que o jogador não tem, e o back recusar o "Lutar" sem explicar.
+        ///
+        /// O teste salva um time MISTO de propósito — um Humano (liberado desde sempre) e o Guarda
+        /// (que só entra ao vencer o Reino 1) — porque o wipe não serviria de cenário: ele apaga o
+        /// save junto, e aí o vazio provaria só que o save sumiu, não que o filtro existe.
+        /// </summary>
+        [Fact]
+        public void UltimoTime_IgnoraQuemNaoEstaLiberado()
+        {
+            var (campanha, _, campeoes) = Montar();
+            var personagens = new PersonagemService();
+            Personagem humano = campeoes.ObterDesbloqueados().First();
+            Personagem trancado = personagens.ObterPersonagem(Faccao.Reino, Slot.Slot1);
+
+            Assert.False(campeoes.EstaDesbloqueado(trancado));   // a premissa do teste
+
+            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, new List<Personagem> { humano, trancado });
+
+            Personagem sobrou = Assert.Single(campanha.UltimoTime());
+            Assert.Equal(humano.Nome, sobrou.Nome);
         }
 
         /// <summary>

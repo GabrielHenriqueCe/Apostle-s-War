@@ -69,7 +69,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, campeoes, capitulos, repo);
+            var campanha = new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo);
             var perfil = new PerfilService(repo, campeoes, campanha);
             var config = new ConfiguracaoService(repo);
 

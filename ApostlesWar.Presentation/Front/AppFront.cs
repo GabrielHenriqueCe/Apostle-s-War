@@ -167,7 +167,7 @@ namespace ApostlesWar.Presentation.Front
                 var selecaoDeAlvo = new SelecaoDeAlvoService();
                 var campeoes = new CampeoesService(personagens, capitulos);
                 // A campanha nasce ANTES do perfil: "excluir conta" delega o wipe do progresso pra ela.
-                var campanha = new CampanhaService(arsenal, campeoes, capitulos, repositorio);
+                var campanha = new CampanhaService(arsenal, campeoes, capitulos, personagens, repositorio);
                 var perfil = new PerfilService(repositorio, campeoes, campanha);
 
                 // Dois ControladorBot: um é o adversário, o outro assume quando o jogador liga o

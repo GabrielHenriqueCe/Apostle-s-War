@@ -893,6 +893,105 @@ body {
     #champArte { min-height: 170px; font-size: 100px; }
 }
 
+/* ==========================================================================
+   TEMAS DE CENÁRIO — a pele do campo de batalha, por capítulo
+   ==========================================================================
+   O C# manda o capítulo no estado, o JS põe em `body[data-tema]`, e daqui pra baixo é só CSS. A
+   ESTRUTURA da luta não muda em nada: os dois lados, o log no meio, o painel de baixo e todas as
+   animações continuam sendo as mesmas. Trocar de tema é trocar de roupa, não de tela — que é o que
+   torna o 2º capítulo temático um bloco de CSS, sem `if` no JS e sem cena duplicada.
+
+   Um capítulo sem bloco aqui simplesmente luta no visual padrão. */
+
+/* O ar do cenário: atrás de tudo. z -1 pinta acima do fundo da página e abaixo de todo o conteúdo,
+   então o #topo e o #painel (que têm fundo opaco) o escondem, e ele só aparece na arena. */
+#particulas {
+    position: fixed; inset: 0; z-index: -1;
+    width: 100%; height: 100%;
+    pointer-events: none;
+}
+#particulas[hidden] { display: none; }
+
+/* ---------- 👑 REINO — o salão do trono ----------
+   Azul-real no lugar do roxo, ouro no lugar do lilás, e o chão de pedra pegando a luz das tochas.
+   Tudo em gradiente e sombra: nenhuma imagem, nada pra carregar, e escala em qualquer resolução. */
+body[data-tema="reino"] {
+    --fundo: #0d1226;
+    --painel: #161d3a;
+    --borda: #2f3c6b;
+    --apagado: #97a2c9;
+}
+
+/* O SALÃO. Quatro camadas, de cima pra baixo:
+   1. a vinheta de tocha, que escurece os cantos e concentra o olho no meio;
+   2. as colunas do fundo (faixas verticais claras/escuras, mais apertadas na borda = perspectiva);
+   3. o brasão de damasco, discreto o bastante pra ler como textura e não como desenho;
+   4. o chão quente lá embaixo, contra a parede fria em cima. */
+body[data-tema="reino"] #arena {
+    /* `relative` ancora os estandartes; `isolate` cria o contexto de empilhamento que os deixa
+       ficar ATRÁS do time (z -1) sem sumir atrás do próprio fundo do salão. Sem ele, o `::after`
+       — que é o último filho — pintaria POR CIMA dos combatentes da direita. */
+    position: relative;
+    isolation: isolate;
+    background:
+        radial-gradient(ellipse 120% 90% at 50% 42%, transparent 35%, rgba(4, 6, 18, .82) 100%),
+        repeating-linear-gradient(90deg,
+            rgba(255, 255, 255, .028) 0 2px,
+            transparent 2px 5px,
+            rgba(0, 0, 0, .22) 5px 8px,
+            transparent 8px 78px),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23d9b45b' stroke-opacity='.09' stroke-width='1.6'%3E%3Cpath d='M60 16c9 12 20 18 20 30S69 76 60 88C51 76 40 58 40 46S51 28 60 16z'/%3E%3Ccircle cx='60' cy='46' r='6'/%3E%3Cpath d='M60 88v16M46 104h28'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(180deg, #131a38 0%, #0d1226 58%, #221a12 88%, #3a2a16 100%);
+    background-size: cover, cover, 120px 120px, cover;
+}
+
+/* Estandartes pendurados: dois panos caindo do teto, um de cada lado, atrás dos times. Ficam no
+   `::before`/`::after` da arena porque são CENÁRIO — não entram no fluxo nem empurram combatente. */
+body[data-tema="reino"] #arena::before,
+body[data-tema="reino"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 92px; height: 46%;
+    background:
+        linear-gradient(180deg, #7d1122 0%, #5c0d1a 78%, transparent 100%),
+        repeating-linear-gradient(180deg, transparent 0 26px, rgba(0, 0, 0, .18) 26px 28px);
+    border-left: 2px solid rgba(217, 180, 91, .35);
+    border-right: 2px solid rgba(217, 180, 91, .35);
+    /* a ponta em V do pano */
+    clip-path: polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%);
+    opacity: .55;
+    pointer-events: none;
+    z-index: -1;   /* parede, não plateia: fica atrás dos combatentes (ver isolation acima) */
+}
+body[data-tema="reino"] #arena::before { left: 4%; }
+body[data-tema="reino"] #arena::after { right: 4%; }
+
+/* A moldura de ouro: filete no alto e no pé do salão, separando parede/piso das barras de UI. */
+body[data-tema="reino"] #topo { border-bottom: 2px solid rgba(217, 180, 91, .5); }
+body[data-tema="reino"] #painel { border-top: 2px solid rgba(217, 180, 91, .5); }
+body[data-tema="reino"] #topo,
+body[data-tema="reino"] #painel {
+    background:
+        linear-gradient(180deg, rgba(217, 180, 91, .07) 0%, transparent 60%),
+        var(--painel);
+}
+
+/* Os combatentes ganham o brasão do salão: caixa mais quente e uma sombra que os separa do fundo.
+   O tamanho NÃO muda — os dois lados são espelhos, e mexer nisso quebraria a regra da arena. */
+body[data-tema="reino"] .combatente {
+    background: linear-gradient(180deg, rgba(40, 50, 96, .82), rgba(18, 24, 52, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+}
+
+/* O log vira pergaminho: escuro e quente em vez de escuro e frio, com fio dourado. */
+body[data-tema="reino"] #log {
+    background: linear-gradient(180deg, rgba(30, 24, 14, .55), rgba(18, 15, 10, .55));
+    border-color: rgba(217, 180, 91, .28);
+}
+
+/* Turno e barras de vida seguem legíveis: só o que era lilás vira dourado. */
+body[data-tema="reino"] .selo.buff { border-color: rgba(217, 180, 91, .45); }
+
 /* ---------- o botão SAIR global ---------- */
 /* Um só pro jogo inteiro, sempre no mesmo pixel, por cima de qualquer cena (z acima dos overlays de
    tela, abaixo do modal). Faz o que o Esc faz ali — ver sairDaTela no jogo.js. */

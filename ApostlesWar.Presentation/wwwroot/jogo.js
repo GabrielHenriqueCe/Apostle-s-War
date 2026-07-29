@@ -68,6 +68,9 @@ function mostrarCena(cena) {
     document.getElementById('turno').style.visibility = emCombate ? 'visible' : 'hidden';
     // O overlay de fim só existe em combate; ao trocar de cena garante que sumiu.
     if (!emCombate) document.getElementById('fimBatalha').hidden = true;
+    // O tema é do CAMPO DE BATALHA: fora dele, nenhum. Quem o LIGA é o desenhar (precisa do estado
+    // novo); aqui só se garante que ele não vaze pras telas de menu.
+    if (!emCombate) aplicarTema('');
     atualizarBotaoSair();
 }
 
@@ -1060,6 +1063,7 @@ function desenhar() {
     // De novo aqui, e não só no mostrarCena: o rótulo do 🚪 depende do MODO, que vem no estado — e o
     // mostrarCena roda antes de `estado` receber o quadro novo, então lá ele ainda leria o anterior.
     atualizarBotaoSair();
+    aplicarTema(estado.tema || '');   // idem: o cenário também vem no estado
 
     // O botão do automático se desenha do estado: é o C# que manda, e ele desliga o modo sozinho a
     // cada batalha nova. Sem isto o botão continuaria dizendo ON numa luta em que o controle já
@@ -1642,6 +1646,90 @@ function flutuar(el, texto, classe) {
 
     el.appendChild(n);
     setTimeout(() => n.remove(), 1250);
+}
+
+// ---------- tema do campo de batalha ----------
+// Cada capítulo pode ter o próprio cenário. O tema entra como `data-tema` no <body> e o CSS faz o
+// resto — a ESTRUTURA da luta não muda, só a pele. É o mesmo princípio do painel de habilidades:
+// uma tela, uma forma; o que varia é a roupa.
+//
+// Aqui em cima mora só o que o CSS não sabe fazer: as partículas do ar. Um capítulo sem entrada
+// nesta tabela fica sem partículas e ainda assim ganha a pele do CSS, se ela existir — as duas
+// metades do tema são independentes de propósito, pra nenhuma delas exigir a outra.
+const PARTICULAS_DO_TEMA = {
+    // Poeira dourada subindo na luz das tochas do salão do trono.
+    reino: { cor: '217, 180, 91', quantas: 46, subida: [4, 14], raio: [0.6, 2.2], opacidade: [.12, .5] },
+};
+
+let temaAtual = '';
+
+function aplicarTema(tema) {
+    if (tema === temaAtual) return;   // o estado chega dezenas de vezes por turno; só reage à TROCA
+    temaAtual = tema;
+
+    if (tema) document.body.dataset.tema = tema;
+    else document.body.removeAttribute('data-tema');
+
+    iniciarParticulas(PARTICULAS_DO_TEMA[tema]);
+}
+
+// ---------- partículas do cenário ----------
+// Canvas atrás de tudo (z -1), rodando SÓ enquanto há tema com partículas. Sem tema o laço é
+// cancelado e o canvas limpo: cenário nenhum não pode custar quadro nenhum.
+let particulas = [];
+let particulasFrame = null;
+
+function iniciarParticulas(config) {
+    const canvas = document.getElementById('particulas');
+
+    if (particulasFrame !== null) { cancelAnimationFrame(particulasFrame); particulasFrame = null; }
+    canvas.hidden = !config;
+    if (!config) { particulas = []; return; }
+
+    const ctx = canvas.getContext('2d');
+    const entre = ([min, max]) => min + Math.random() * (max - min);
+
+    const dimensionar = () => { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; };
+    dimensionar();
+
+    // Nasce espalhada pela tela inteira, e não na borda de baixo: senão a primeira leva do ar
+    // aparece toda junta subindo, e o efeito começa parecendo um enxame.
+    const nova = (yInicial) => ({
+        x: Math.random() * canvas.width,
+        y: yInicial ?? canvas.height + 10,
+        r: entre(config.raio),
+        vy: entre(config.subida),
+        deriva: (Math.random() - .5) * 12,   // vai e vem horizontal, pra não subir em linha reta
+        fase: Math.random() * Math.PI * 2,
+        alfa: entre(config.opacidade),
+    });
+
+    particulas = Array.from({ length: config.quantas }, () => nova(Math.random() * canvas.height));
+
+    let anterior = performance.now();
+    const quadro = (agora) => {
+        const dt = Math.min((agora - anterior) / 1000, .05);   // aba escondida não deve dar um salto
+        anterior = agora;
+
+        if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) dimensionar();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < particulas.length; i++) {
+            const p = particulas[i];
+            p.y -= p.vy * dt;
+            p.fase += dt;
+            if (p.y < -10) particulas[i] = nova();   // saiu por cima: volta por baixo
+
+            const x = p.x + Math.sin(p.fase) * p.deriva;
+            ctx.beginPath();
+            ctx.arc(x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${config.cor}, ${p.alfa})`;
+            ctx.fill();
+        }
+
+        particulasFrame = requestAnimationFrame(quadro);
+    };
+    particulasFrame = requestAnimationFrame(quadro);
 }
 
 // ---------- partida ----------

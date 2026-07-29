@@ -53,6 +53,12 @@ namespace ApostlesWar.Presentation.Front
         public string Modo { get; set; } = ModoDeBatalha.Arena;
 
         /// <summary>
+        /// O tema do cenário desta luta (o capítulo, na campanha). Vazio = visual padrão. Escrito
+        /// pelo FluxoDoFront junto do <see cref="Modo"/>, no mesmo gesto de começar a batalha.
+        /// </summary>
+        public string Tema { get; set; } = "";
+
+        /// <summary>
         /// Zera o estado pra uma batalha NOVA. A sessão vive o boot inteiro (não é recriada por luta),
         /// e os mapas de combatente casam por REFERÊNCIA — sem limpar, o Publicar mandaria os
         /// combatentes das batalhas anteriores junto (bug do "time antigo acumulando na tela"). Chamado
@@ -192,7 +198,8 @@ namespace ApostlesWar.Presentation.Front
                 // não mente quando o C# desliga o modo por conta própria (batalha nova).
                 Auto: _ponte.AutoLigado,
                 FocoId: FocoVisivel(todos),
-                Modo: Modo);
+                Modo: Modo,
+                Tema: Tema);
 
             _ponte.EnviarEstado(estado);
         }

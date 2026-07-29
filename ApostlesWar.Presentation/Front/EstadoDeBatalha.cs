@@ -29,7 +29,16 @@ namespace ApostlesWar.Presentation.Front
         /// caminho já era esse — `sair` vira `BatalhaAbortada` e a fase vira Perdeu); na ARENA sair é
         /// sair mesmo, sem desfecho. Duas consequências diferentes não podem ter o mesmo rótulo.
         /// </summary>
-        string Modo = ModoDeBatalha.Arena
+        string Modo = ModoDeBatalha.Arena,
+        /// <summary>
+        /// A PELE do campo de batalha — o front põe num `data-tema` e o CSS decide o resto. É um
+        /// seam, não uma tela nova: a estrutura da luta (os dois lados, o log, o painel) continua
+        /// sendo UMA, e o capítulo só troca cenário, cores e molduras. Assim o 2º tema é CSS, sem
+        /// `if` no JS nem cena duplicada — e capítulo sem tema próprio cai no visual padrão sozinho.
+        ///
+        /// Vazio na Arena: lá não se luta em lugar nenhum, é laboratório.
+        /// </summary>
+        string Tema = ""
     );
 
     /// <summary>Os modos que o front distingue. String porque é o que atravessa a ponte.</summary>

@@ -992,6 +992,73 @@ body[data-tema="reino"] #log {
 /* Turno e barras de vida seguem legíveis: só o que era lilás vira dourado. */
 body[data-tema="reino"] .selo.buff { border-color: rgba(217, 180, 91, .45); }
 
+/* ---------- 🌑 LADO SOMBRIO — o cemitério sob a lua ----------
+   O oposto do Reino em tudo que importa: lá o ar SOBE na luz das tochas e o chão é quente; aqui a
+   cinza CAI, a única luz é fria e vem de cima, e o chão é névoa. Mesmo esqueleto de camadas — é o
+   que prova que o tema é roupa. */
+body[data-tema="ladosombrio"] {
+    --fundo: #090f0d;
+    --painel: #131b18;
+    --borda: #2b3a33;
+    --apagado: #8ea79c;
+}
+
+body[data-tema="ladosombrio"] #arena {
+    position: relative;
+    isolation: isolate;
+    background:
+        /* 1. vinheta, bem mais fechada que a do Reino: aqui não se enxerga longe */
+        radial-gradient(ellipse 100% 80% at 50% 34%, transparent 22%, rgba(2, 5, 4, .9) 100%),
+        /* 2. a LUA: um disco pálido no alto, com halo */
+        radial-gradient(circle 26px at 50% 15%, rgba(226, 240, 230, .92) 0 62%, transparent 66%),
+        radial-gradient(circle 190px at 50% 15%, rgba(150, 200, 170, .16), transparent 70%),
+        /* 3. a linha de árvores mortas e lápides contra o céu */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='150' viewBox='0 0 260 150'%3E%3Cg fill='%23050a08'%3E%3Cpath d='M20 150V78l-9-13 9 6V52l-12-16 12 9V28h5v26l13-12-13 18v21l8-6-8 11v64z'/%3E%3Cpath d='M96 150v-40h30v40zM104 96h14v14h-14z'/%3E%3Cpath d='M182 150V88l-11-15 11 7V60l-14-18 14 10V34h6v30l15-13-15 20v23l10-7-10 13v50z'/%3E%3Cpath d='M232 150v-28a12 12 0 0124 0v28z'/%3E%3C/g%3E%3C/svg%3E"),
+        /* 4. bancos de névoa presos ao chão */
+        linear-gradient(0deg, rgba(150, 190, 170, .16) 0 8%, transparent 26%),
+        linear-gradient(0deg, rgba(150, 190, 170, .10) 0 16%, transparent 40%),
+        /* 5. o céu */
+        linear-gradient(180deg, #0c1a18 0%, #091210 55%, #070d0b 100%);
+    background-size: cover, cover, cover, 260px 150px, cover, cover, cover;
+    background-repeat: no-repeat, no-repeat, no-repeat, repeat-x, no-repeat, no-repeat, no-repeat;
+    background-position: center, center, center, bottom, bottom, bottom, center;
+}
+
+/* Teias nos cantos de cima — onde o Reino pendura estandartes. Mesmo gancho, outra história. */
+body[data-tema="ladosombrio"] #arena::before,
+body[data-tema="ladosombrio"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 150px; height: 150px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Cg fill='none' stroke='%23cfe3d8' stroke-opacity='.5' stroke-width='1.1'%3E%3Cpath d='M0 0L150 60M0 0L120 105M0 0L60 150M0 0L18 150M0 0L150 18'/%3E%3Cpath d='M34 4Q22 22 4 34M62 8Q40 40 8 62M92 14Q58 58 14 92M120 22Q78 78 22 120M146 32Q92 92 32 146'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    opacity: .3;
+    pointer-events: none;
+    z-index: -1;
+}
+body[data-tema="ladosombrio"] #arena::before { left: 0; }
+/* Espelhada: a teia do outro canto é a mesma arte virada, não um segundo desenho pra manter. */
+body[data-tema="ladosombrio"] #arena::after { right: 0; transform: scaleX(-1); }
+
+body[data-tema="ladosombrio"] #topo { border-bottom: 2px solid rgba(150, 200, 170, .38); }
+body[data-tema="ladosombrio"] #painel { border-top: 2px solid rgba(150, 200, 170, .38); }
+body[data-tema="ladosombrio"] #topo,
+body[data-tema="ladosombrio"] #painel {
+    background:
+        linear-gradient(180deg, rgba(150, 200, 170, .06) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="ladosombrio"] .combatente {
+    background: linear-gradient(180deg, rgba(28, 42, 36, .82), rgba(12, 20, 17, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .55);
+}
+
+/* O log vira grimório: papel esverdeado de mofo, fio de limo. */
+body[data-tema="ladosombrio"] #log {
+    background: linear-gradient(180deg, rgba(18, 30, 24, .6), rgba(9, 16, 13, .6));
+    border-color: rgba(150, 200, 170, .24);
+}
+
 /* ---------- o botão SAIR global ---------- */
 /* Um só pro jogo inteiro, sempre no mesmo pixel, por cima de qualquer cena (z acima dos overlays de
    tela, abaixo do modal). Faz o que o Esc faz ali — ver sairDaTela no jogo.js. */

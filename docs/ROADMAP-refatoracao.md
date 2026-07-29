@@ -56,6 +56,33 @@ Mergeado em sequência de PRs:
   habilidade**, igual ao Esc: ela ficava armada E invisível (o painel só desenha pra quem age).
   (c) **Compêndio**: o catálogo dos 36 por facção, travados incluídos e clicáveis — é planejando
   contra o que ainda não se tem que a campanha vira escolha.
+- **Casca, arsenal e janela** (#191): `--canto-sair` reserva o vértice superior direito (o botão de
+  sair estava POR CIMA dos controles do topo na batalha); um idioma único de barra de rolagem pra
+  tudo que rola; lista de itens rolável + **totais do arsenal** somados no `ArsenalService`;
+  **tela cheia como PADRÃO** (`ConfiguracaoService`, chave `config`, FORA do wipe do excluir-conta —
+  apagar a conta zera o progresso, não a preferência); e o **F5 desarmado**, que matava a partida em
+  silêncio (o JS recarregava e a thread do jogo seguia parada no `Take()`).
+- **Duração permanente** (#192): `AumentarDuracao` estourava o int quando a duração era
+  `int.MaxValue`, e `Expirou` lia o negativo como acabado — o Raio-X do Robô, que promete ESTENDER
+  benefícios, APAGAVA o permanente (o Intocável do Fantasma). Nasceu `StatusEffect.Permanente`
+  (= `int.MaxValue / 2`): "permanente" precisa aguentar que alguém some turnos nele. **Achado pela
+  bancada**, por um número esquisito — o Robô media em múltiplos de 30 entre corridas, que é a
+  diferença entre um A1 crítico e um não-crítico ali; o crit cravado do instrumento é um buff
+  permanente, e ele se apagava sozinho no 1º Raio-X.
+- **Batalha: ler e mandar** (#193): o kit de QUALQUER combatente (inimigo incluído) no painel, com o
+  cooldown ao vivo — e no MESMO molde do botão de habilidade, não num card de outra tela; e o **foco
+  de alvo no automático** (clica no inimigo, o time converge nele), que entra na frente do abate
+  porque ordem explícita vale mais que heurística.
+- **Ciclo da campanha** (#194): fase pré-selecionada + último time salvo por IDENTIDADE (facção+slot,
+  nunca índice), 🎲 na campanha, **tela única de fim de fase** (Jogar Novamente / Editar Equipe /
+  Próxima) com o Esc da batalha virando ENCERRAR (derrota + essa tela), continuação atravessando pro
+  capítulo seguinte depois da fase 7 — mas **nunca dando a volta**, porque trocar de dificuldade é
+  decisão do jogador —, e a **conquista do champ** animada terminando na ficha dele.
+- **Tema de cenário por capítulo** (branch `feature/tema-do-reino`): o `EstadoDeBatalha` carrega um
+  `Tema`, o JS põe em `body[data-tema]` e daí pra baixo é só CSS — a ESTRUTURA da luta não muda, só a
+  pele. Estreou com o **Reino** (salão do trono) e o **Lado Sombrio** (cemitério sob a lua). A
+  alavanca é sobrescrever as VARIÁVEIS de cor no escopo do tema: tudo que já as usava acompanha de
+  graça. Capítulo sem bloco de CSS luta no visual padrão; a Arena não tem tema.
 
 **Arquitetura (detalhe em §FRONT abaixo):** ponte de mensagens LOCAL in-process (JS↔C# pela webview,
 sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos seams `ITelaDeCombate`/

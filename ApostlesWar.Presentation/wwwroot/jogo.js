@@ -1656,9 +1656,13 @@ function flutuar(el, texto, classe) {
 // Aqui em cima mora só o que o CSS não sabe fazer: as partículas do ar. Um capítulo sem entrada
 // nesta tabela fica sem partículas e ainda assim ganha a pele do CSS, se ela existir — as duas
 // metades do tema são independentes de propósito, pra nenhuma delas exigir a outra.
+// `subida` em px/s: positivo SOBE, negativo CAI. Um número, não um par de campos — a direção é uma
+// propriedade do movimento, não uma configuração à parte que se pode esquecer de casar com ele.
 const PARTICULAS_DO_TEMA = {
     // Poeira dourada subindo na luz das tochas do salão do trono.
     reino: { cor: '217, 180, 91', quantas: 46, subida: [4, 14], raio: [0.6, 2.2], opacidade: [.12, .5] },
+    // Cinza caindo devagar no cemitério — pálida e mais rala, pra o ar ficar parado em vez de vivo.
+    ladosombrio: { cor: '178, 205, 186', quantas: 38, subida: [-9, -3], raio: [0.5, 2.0], opacidade: [.08, .34] },
 };
 
 let temaAtual = '';
@@ -1692,14 +1696,20 @@ function iniciarParticulas(config) {
     const dimensionar = () => { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; };
     dimensionar();
 
-    // Nasce espalhada pela tela inteira, e não na borda de baixo: senão a primeira leva do ar
-    // aparece toda junta subindo, e o efeito começa parecendo um enxame.
+    // Sobe ou cai? Sai do SINAL da velocidade, e daí saem também a borda em que a partícula nasce e
+    // aquela em que ela é reciclada — três coisas que teriam que concordar se fossem configuradas
+    // separado, e que assim não têm como discordar.
+    const sobe = config.subida[1] > 0;
+    const bordaDeEntrada = () => sobe ? canvas.height + 10 : -10;
+
+    // Na PRIMEIRA leva ela nasce espalhada pela tela inteira, e não na borda: senão o ar começa
+    // parecendo um enxame entrando de uma vez.
     const nova = (yInicial) => ({
         x: Math.random() * canvas.width,
-        y: yInicial ?? canvas.height + 10,
+        y: yInicial ?? bordaDeEntrada(),
         r: entre(config.raio),
         vy: entre(config.subida),
-        deriva: (Math.random() - .5) * 12,   // vai e vem horizontal, pra não subir em linha reta
+        deriva: (Math.random() - .5) * 12,   // vai e vem horizontal, pra não andar em linha reta
         fase: Math.random() * Math.PI * 2,
         alfa: entre(config.opacidade),
     });
@@ -1718,7 +1728,8 @@ function iniciarParticulas(config) {
             const p = particulas[i];
             p.y -= p.vy * dt;
             p.fase += dt;
-            if (p.y < -10) particulas[i] = nova();   // saiu por cima: volta por baixo
+            // Saiu pela borda de saída: volta pela de entrada.
+            if (sobe ? p.y < -10 : p.y > canvas.height + 10) particulas[i] = nova();
 
             const x = p.x + Math.sin(p.fase) * p.deriva;
             ctx.beginPath();

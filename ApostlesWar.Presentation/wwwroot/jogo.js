@@ -1674,15 +1674,30 @@ function flutuar(el, texto, classe) {
 //   névoa   · manchas grandes e translúcidas passeando devagar, coladas no chão.
 //   voadores· bichos atravessando a tela, com asas.
 const AR_DO_TEMA = {
-    // Salão do trono: poeira dourada subindo na luz das tochas, e a batalha que corre lá fora.
+    // A cidade murada sob cerco: a muralha e o castelo ao fundo, os dois exércitos trocando tiro nas
+    // bordas, e a poeira dourada das tochas subindo.
     reino: {
+        // A PAISAGEM é a coisa mais distante — por isso é a primeira do fundo (ver iniciarAr): os
+        // exércitos atiram na frente dela, não por cima.
+        castelo: {
+            pedra: '#bcc2d2', sombra: '#8e95ad', telhado: '#b0453c', telhadoAlt: '#3f6ea8',
+            grama: '#5d8c46', gramaSombra: '#4a7539', janela: '#2c3452', bandeira: '#d9b45b',
+            morro: '#7fa4a8', nuvem: '255, 255, 255',
+            muro: .3, torre: .46, casas: 11, nuvens: 6, vento: 5,
+        },
         po: { cor: '217, 180, 91', quantas: 46, subida: [4, 14], raio: [0.6, 2.2], opacidade: [.12, .5] },
         exercitos: {
-            silhueta: '#080b1c', flecha: '230, 218, 184',
+            // De dia a silhueta preta não serve mais: contra o céu claro ela lia como recorte de
+            // papel. Agora cada coisa tem o MATERIAL dela — o aço reflete (por isso é gradiente,
+            // não cor chapada), a madeira é fosca, o couro é escuro e o bronze é o detalhe caro.
+            aco: '#dfe6f2', acoSombra: '#7c8aa6', madeira: '#7a5231', couro: '#3c2a1c',
+            bronze: '#c9a227', flecha: '230, 218, 184',
             espada: 168, escudo: 96, escudos: 3, lanca: 196, lancas: 4, tamanhoFlecha: 2,
             // O 2º número: magia. Mesma coreografia (gesto → voo → defesa), outro vocabulário.
             cajado: 176, bola: 30, esfera: 230, explosao: .85,
-            fogo: '255, 168, 66', brasa: '255, 242, 208', magia: '132, 196, 255',
+            // A esfera era AZUL-CLARA e sumia contra o céu de dia — agora o tema é diurno, e violeta
+            // é a cor que mais se afasta de um céu azul sem virar outra coisa.
+            fogo: '255, 168, 66', brasa: '255, 242, 208', magia: '198, 130, 255',
             arco: .6,                               // altura do voo, em fração da tela
             volei: [5, 8], voo: 1.75, intervalo: .09,
             espera: [2.4, 5.2], gesto: .9, guarda: .6, recolher: .9,
@@ -1692,7 +1707,13 @@ const AR_DO_TEMA = {
     ladosombrio: {
         po: { cor: '178, 205, 186', quantas: 34, subida: [-9, -3], raio: [0.5, 2.0], opacidade: [.08, .3] },
         nevoa: { cor: '150, 190, 170', quantas: 7, deriva: [6, 20], raio: [140, 320], opacidade: [.03, .08] },
-        voadores: { cor: '#04100b', quantos: 4, velocidade: [110, 210], tamanho: [11, 20], intervalo: [1, 11] },
+        // Fantasmas, e não morcegos: eles PASSEIAM em vez de cruzar — daí a velocidade cair pela
+        // metade e o intervalo encurtar (assombração rala não assombra). O morcego fica guardado
+        // pros 🔱 Decaídos, que é onde ele pertence.
+        voadores: {
+            forma: 'fantasma', cor: '208, 238, 222', quantos: 3,
+            velocidade: [34, 68], tamanho: [20, 32], intervalo: [1, 8],
+        },
         // As corujas nas árvores. `poleiros` são posições DENTRO do ladrilho da mata, em fração —
         // assim elas seguem o ladrilho quando ele muda de tamanho, e cada árvore desenhada no SVG
         // ganha a sua sem ninguém recontar pixel. `lado` encosta a coruja num flanco do tronco: uma
@@ -1704,9 +1725,60 @@ const AR_DO_TEMA = {
         corujas: {
             corpo: '#060f0b', olho: '236, 246, 205', tamanho: 11,
             ladrilho: ['--mata-passo', '--mata-altura'],
-            pontos: [{ x: .145, y: .115, lado: -1 }, { x: .550, y: .310, lado: 1 }],
+            // Tirados do próprio SVG da mata (ladrilho 320×190): o tronco grande fica em x≈47 e o
+            // menor em x≈234, daí .148 e .733. Antes eram valores ajustados a olho, que estavam
+            // compensando o ladrilho ancorado no centro — com a âncora consertada, a conta fecha.
+            pontos: [{ x: .148, y: .24, lado: -1 }, { x: .733, y: .30, lado: 1 }],
             aceso: 1.7, apagado: [5, 17], acordar: [0, 13],
         },
+        // Os espantalhos fincados no meio das lápides. Mesmo motor das corujas — posição vinda do
+        // ladrilho — só que SEM relógio: eles não piscam, estão sempre lá. É a ausência de `aceso`
+        // que diz isso; nenhuma configuração extra foi precisa.
+        espantalhos: {
+            // O pano é PANO, não sombra: um marrom-ferrugem gasto. Estava quase preto e sumia contra
+            // o mato — e um espantalho que não se vê não assusta ninguém. Ele e a abóbora são as
+            // únicas coisas quentes do cemitério, e conversam entre si sem competir: o pano é escuro
+            // e terroso, a cabeça é clara e acesa.
+            poste: '#050b08', pano: '#5c3623', tamanho: 40,
+            // A abóbora é o único ponto de COR do cemitério inteiro. Baixa saturação de propósito:
+            // laranja aceso aqui brigaria com a lua e roubaria a cena.
+            abobora: '148, 84, 32', cara: '255, 172, 66',
+            ladrilho: ['--mata-passo', '--mata-altura'],
+            // UM por ladrilho, fincado no chão (y ≈ .95 é quase o rodapé), no vão entre a cruz e a
+            // árvore menor (x≈196) — onde o SVG não desenhou nada. Dois por ladrilho enchiam demais:
+            // espantalho é figura solitária, e repetido de perto vira plantação.
+            pontos: [{ x: .613, y: .95 }],
+        },
+    },
+    // A clareira ao anoitecer. 👺 Tengu manda nos corvos e no vento; 🤡 Palhaço acende o varal da
+    // tenda; 👹 Ogro e 🧌 Troll estão no horizonte (caverna e ponte), desenhados no CSS.
+    folclore: {
+        nevoa: { cor: '198, 180, 232', quantas: 6, deriva: [8, 22], raio: [130, 300], opacidade: [.03, .07] },
+        // Vaga-lumes, e não poeira: sobem devagar e são POUCOS e grandes, pra cada um ser um bicho
+        // e não um grão. Cor quente, do mesmo âmbar da fogueira e do varal.
+        po: { cor: '255, 198, 120', quantas: 22, subida: [6, 18], raio: [1, 2.6], opacidade: [.2, .8] },
+        voadores: {
+            forma: 'corvo', cor: '#080513',
+            quantos: 4, velocidade: [90, 170], tamanho: [11, 18], intervalo: [1, 9],
+        },
+        // A GRUTA: estamos DENTRO dela, olhando a vila lá fora. A rocha deixa de ser um objeto no
+        // canto e vira MOLDURA — parede dos dois lados, teto em cima —, com lanternas penduradas.
+        // É a moldura que dá a leitura: sem ela, rocha na borda lê como pedra no canto da tela;
+        // com ela, o que se vê no meio passa a ser "lá fora".
+        // A VILA lá fora, no canvas de FUNDO — e é aqui que os pássaros e o céu vivem.
+        vila: {
+            madeira: '#120a1c', lona: '#5e2a3e', lonaClara: '#241628', ferro: '#0e0a1e',
+            mata: '#0c0a1e', dentro: '#080410', sorriso: '#f4ead6', bochecha: '#c0392b',
+            luz: '255, 196, 120',
+            // O sorriso aparece de vez em quando e some. Raro e curto de propósito: o susto mora na
+            // dúvida de ter visto, e um sorriso permanente vira mascote.
+            sorrisoCada: 7, sorrisoDura: 1.6,
+            torii: [.3, .7], roda: .24, tenda: .3,
+            giro: .06, lampadas: 9, aceso: 2.6, apagado: [.4, 3.2],
+        },
+        // Sem moldura em primeiro plano. Houve uma gruta de pedra e um pórtico de templo tentando
+        // enquadrar a cena; os dois atrapalhavam mais do que ajudavam. A vila se sustenta sozinha, e
+        // o céu aberto deixa os corvos terem a tela inteira — que é o que o Tengu pede.
     },
     // A noite da invasão, montada em cima de quem luta aqui: 👽/👾 nos discos que cruzam o céu
     // varrendo o chão com o feixe, 🧑‍🔬 nas bobinas do laboratório soltando faísca, 🤖 nas fagulhas
@@ -1718,6 +1790,7 @@ const AR_DO_TEMA = {
             forma: 'disco', cor: '#0a1622', luz: '126, 255, 190',
             quantos: 2, velocidade: [26, 52], tamanho: [26, 40], intervalo: [3, 14],
         },
+
         // As bobinas de Tesla do horizonte. Mesmo motor das corujas — posição vinda do ladrilho,
         // relógio próprio, muito tempo apagada — só que o que acende é um raio, não um olho.
         bobinas: {
@@ -1730,7 +1803,10 @@ const AR_DO_TEMA = {
         // ladrilho da cidade porque desastre não se repete a cada 340px — repetido, ele viraria
         // padrão de papel de parede em vez de acontecimento.
         ruina: {
-            silhueta: '#050b14', fogo: '255, 146, 56', brasa: '255, 236, 190', veneno: '138, 255, 150',
+            silhueta: '#050b14', fogo: '255, 146, 56', brasa: '255, 236, 190',
+            // O veneno tem os DOIS tons pelo mesmo motivo que o fogo tem: um claro pro núcleo e um
+            // saturado pro corpo. É o par que faz a coisa parecer luminosa em vez de pintada.
+            veneno: '138, 255, 150', venenoClaro: '226, 255, 228',
             largura: 230, altura: 128, labaredas: 7,
         },
     },
@@ -1775,11 +1851,18 @@ function iniciarAr(config) {
     dimensionar();
 
     // Cada camada declara em QUE MUNDO ela vive, não em que canvas — o roteamento é consequência.
+    // A ORDEM É A PROFUNDIDADE. A paisagem vem primeiro por ser a coisa mais distante: o que
+    // ACONTECE (bichos, incêndio, os exércitos atirando) passa na frente dela, nunca por baixo — foi
+    // o que o Gabriel pediu com "a paisagem deve ficar entre as animações". E a névoa fecha a fila,
+    // porque ela é ar: some tudo que está atrás dela, um pouco.
     const noFundo = [
-        config.exercitos && criarExercitos(config.exercitos, fundo),
-        config.ruina && criarRuina(config.ruina, fundo),
+        config.castelo && criarCastelo(config.castelo, fundo),
+        config.vila && criarVila(config.vila, fundo),
         config.corujas && criarCorujas(config.corujas, fundo),
+        config.espantalhos && criarEspantalhos(config.espantalhos, fundo),
         config.bobinas && criarBobinas(config.bobinas, fundo),
+        config.ruina && criarRuina(config.ruina, fundo),
+        config.exercitos && criarExercitos(config.exercitos, fundo),
         config.nevoa && criarNevoa(config.nevoa, fundo),
     ].filter(Boolean);
 
@@ -1907,11 +1990,11 @@ function criarVoadores(cfg, canvas) {
             const saiu = m.vx > 0 ? m.x > canvas.width + 60 : m.x < -60;
             if (saiu) { bando[i] = novo(false); continue; }
 
-            // A forma é do TEMA: o mesmo voo carrega o morcego do cemitério e o disco da invasão.
-            // O que muda é o desenho e — no disco — o feixe que ele varre no chão.
+            // A FORMA é do tema: um motor de voo só, e o desenho é que muda. O fantasma do
+            // cemitério, o disco da invasão e o morcego (guardado pros 🔱 Decaídos) atravessam a
+            // tela pela mesma conta.
             const y = m.y + Math.sin(m.fase) * m.bobo;
-            if (cfg.forma === 'disco') desenharDisco(ctx, m.x, y, m.tamanho, m.asa, canvas, cfg);
-            else desenharMorcego(ctx, m.x, y, m.tamanho, m.asa, m.paraDireita, cfg.cor);
+            VOADORES[cfg.forma ?? 'morcego'](ctx, m.x, y, m.tamanho, m.asa, m.paraDireita, canvas, cfg);
         }
     };
 }
@@ -2091,14 +2174,25 @@ function desenharEspada(ctx, borda, chao, lado, subida, cfg) {
     ctx.translate(borda + lado * h * .38, chao + h * (1 - subida));
     ctx.rotate(lado * INCLINACAO);
     ctx.scale(lado, 1);
-    ctx.fillStyle = cfg.silhueta;
 
-    ctx.fillRect(-h * .035, -h, h * .07, h * .78);          // lâmina
+    // A LÂMINA em gradiente: aço não é uma cor, é um reflexo. Claro na aresta que pega o sol e
+    // escuro na outra metade — é o degradê ATRAVESSADO que faz um retângulo virar metal.
+    const lamina = ctx.createLinearGradient(-h * .035, 0, h * .035, 0);
+    lamina.addColorStop(0, cfg.acoSombra);
+    lamina.addColorStop(.42, cfg.aco);
+    lamina.addColorStop(.55, '#ffffff');
+    lamina.addColorStop(1, cfg.acoSombra);
+    ctx.fillStyle = lamina;
+    ctx.fillRect(-h * .035, -h, h * .07, h * .78);
     ctx.beginPath();                                         // ponta
     ctx.moveTo(-h * .035, -h); ctx.lineTo(0, -h * 1.09); ctx.lineTo(h * .035, -h);
     ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = cfg.bronze;
     ctx.fillRect(-h * .17, -h * .24, h * .34, h * .055);    // guarda
+    ctx.fillStyle = cfg.couro;
     ctx.fillRect(-h * .028, -h * .19, h * .056, h * .17);   // punho
+    ctx.fillStyle = cfg.bronze;
     ctx.beginPath();                                         // pomo
     ctx.arc(0, -h * .015, h * .045, 0, Math.PI * 2);
     ctx.fill();
@@ -2119,16 +2213,16 @@ function desenharDefesa(ctx, borda, chao, lado, subida, cfg) {
     // entra na borda, meio saindo de cena, que é onde o resto do exército estaria.
     const hl = cfg.lanca;
     for (let i = 0; i < cfg.lancas; i++) {
-        ctx.globalAlpha = .82 - i * .08;
         desenharLanca(ctx, borda + lado * (hl * -.1 + i * hl * .3), chao + hl * (1 - naVez(i)),
             hl, lado, i, cfg);
     }
 
     const he = cfg.escudo;
     for (let i = 0; i < cfg.escudos; i++) {
-        ctx.globalAlpha = 1 - i * .1;
+        // Sem `globalAlpha` aqui: escudo de metal semitransparente parece vidro. A profundidade da
+        // fileira vem do escalonamento e da sobreposição, não de apagar os de trás.
         desenharEscudo(ctx, borda + lado * (he * .38 + i * he * .62), chao + he * (1 - naVez(i)),
-            he, cfg.silhueta);
+            he, cfg);
     }
 
     ctx.globalAlpha = 1;
@@ -2140,44 +2234,77 @@ function desenharLanca(ctx, x, base, h, lado, indice, cfg) {
     ctx.save();
     ctx.translate(x, base);
     ctx.rotate(lado * (INCLINACAO + (indice - 1.5) * .035));
-    ctx.fillStyle = cfg.silhueta;
 
-    ctx.fillRect(-h * .013, -h, h * .026, h);   // haste
+    // haste de MADEIRA: fosca, com um fio mais claro de um lado só (a luz batendo no cilindro)
+    ctx.fillStyle = cfg.madeira;
+    ctx.fillRect(-h * .013, -h, h * .026, h);
+    ctx.fillStyle = 'rgba(255, 226, 180, .22)';
+    ctx.fillRect(-h * .013, -h, h * .008, h);
 
-    ctx.beginPath();                             // ponta em folha
+    // ponta de AÇO
+    const ponta = ctx.createLinearGradient(-h * .05, 0, h * .05, 0);
+    ponta.addColorStop(0, cfg.acoSombra);
+    ponta.addColorStop(.5, cfg.aco);
+    ponta.addColorStop(1, cfg.acoSombra);
+    ctx.fillStyle = ponta;
+    ctx.beginPath();
     ctx.moveTo(0, -h * 1.11);
     ctx.quadraticCurveTo(h * .05, -h * 1.0, 0, -h * .93);
     ctx.quadraticCurveTo(-h * .05, -h * 1.0, 0, -h * 1.11);
     ctx.fill();
 
+    // o anel de bronze que prende a ponta na haste
+    ctx.fillStyle = cfg.bronze;
+    ctx.fillRect(-h * .019, -h * .95, h * .038, h * .022);
+
     ctx.restore();
 }
 
-/// Um escudo tipo "gota": reto em cima, afinando até a ponta embaixo. O umbo no meio é o que
-/// impede a silhueta de virar um pentágono qualquer.
-function desenharEscudo(ctx, x, base, h, cor) {
+/// Um escudo tipo "gota", em METAL: reto em cima, afinando até a ponta embaixo.
+///
+/// Era silhueta com o umbo e a travessa RECORTADOS em `destination-out` — e recorte apaga pixel, ou
+/// seja, abria buracos de verdade no escudo. Era essa a "transparência" que aparecia em jogo. Agora
+/// os detalhes são PINTADOS por cima, e o corpo ganhou o mesmo degradê atravessado da espada.
+function desenharEscudo(ctx, x, base, h, cfg) {
     const l = h * .74;
 
     ctx.save();
     ctx.translate(x, base);
-    ctx.fillStyle = cor;
 
-    ctx.beginPath();
-    ctx.moveTo(-l / 2, -h);
-    ctx.lineTo(l / 2, -h);
-    ctx.lineTo(l / 2, -h * .42);
-    ctx.quadraticCurveTo(l / 2, -h * .06, 0, 0);
-    ctx.quadraticCurveTo(-l / 2, -h * .06, -l / 2, -h * .42);
-    ctx.closePath();
+    const contorno = () => {
+        ctx.beginPath();
+        ctx.moveTo(-l / 2, -h);
+        ctx.lineTo(l / 2, -h);
+        ctx.lineTo(l / 2, -h * .42);
+        ctx.quadraticCurveTo(l / 2, -h * .06, 0, 0);
+        ctx.quadraticCurveTo(-l / 2, -h * .06, -l / 2, -h * .42);
+        ctx.closePath();
+    };
+
+    const face = ctx.createLinearGradient(-l / 2, -h, l / 2, 0);
+    face.addColorStop(0, cfg.aco);
+    face.addColorStop(.45, cfg.acoSombra);
+    face.addColorStop(1, '#4c5872');
+    ctx.fillStyle = face;
+    contorno();
     ctx.fill();
 
-    // umbo + travessa, recortados em vazado pra aparecerem contra a silhueta
-    ctx.globalCompositeOperation = 'destination-out';
+    // a borda rebitada
+    ctx.strokeStyle = cfg.bronze;
+    ctx.lineWidth = h * .045;
+    contorno();
+    ctx.stroke();
+
+    // travessa e umbo, PINTADOS (não recortados)
+    ctx.fillStyle = cfg.bronze;
+    ctx.fillRect(-l * .46, -h * .8, l * .92, h * .05);
     ctx.beginPath();
-    ctx.arc(0, -h * .58, h * .1, 0, Math.PI * 2);
+    ctx.arc(0, -h * .56, h * .11, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillRect(-l / 2, -h * .78, l, h * .045);
-    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = cfg.aco;
+    ctx.beginPath();
+    ctx.arc(-h * .025, -h * .585, h * .05, 0, Math.PI * 2);   // o brilho no alto do umbo
+    ctx.fill();
 
     ctx.restore();
 }
@@ -2193,8 +2320,12 @@ function desenharCajado(ctx, borda, chao, lado, subida, cfg) {
     ctx.rotate(lado * INCLINACAO);
     ctx.scale(lado, 1);
 
-    ctx.fillStyle = cfg.silhueta;
-    ctx.fillRect(-h * .022, -h * .92, h * .044, h * .92);        // vara
+    // vara de madeira, com o mesmo fio de luz da lança
+    ctx.fillStyle = cfg.madeira;
+    ctx.fillRect(-h * .022, -h * .92, h * .044, h * .92);
+    ctx.fillStyle = 'rgba(255, 226, 180, .2)';
+    ctx.fillRect(-h * .022, -h * .92, h * .014, h * .92);
+    ctx.fillStyle = cfg.bronze;
 
     // as garras que seguram a pedra
     ctx.beginPath();
@@ -2477,42 +2608,86 @@ function criarRuina(cfg, canvas) {
             ctx.stroke();
         }
 
-        // --- o VENENO escorrendo e empoçando: verde, e a única luz fria da ruína
-        const poca = ctx.createRadialGradient(cx, base, 0, cx, base, l * .85);
-        poca.addColorStop(0, `rgba(${cfg.veneno}, ${.34 + Math.sin(t * 1.6) * .06})`);
-        poca.addColorStop(.5, `rgba(${cfg.veneno}, .12)`);
-        poca.addColorStop(1, `rgba(${cfg.veneno}, 0)`);
-        ctx.fillStyle = poca;
+        // --- o BRILHO do chão, subindo. Não há poça desenhada: o veneno se acumulou fora de quadro,
+        //     abaixo da borda, e o que se vê daqui é só a luz dele batendo no ar.
+        //
+        //     Meia elipse (de Math.PI a 0) por isso mesmo — a metade de baixo não existe, ela está
+        //     além do rodapé. Uma poça desenhada obrigava a decidir a forma dela, o reflexo, a
+        //     borda; o brilho diz a mesma coisa e não tem forma pra errar.
+        const subindo = ctx.createRadialGradient(cx, base, 0, cx, base, l * .95);
+        subindo.addColorStop(0, `rgba(${cfg.veneno}, ${.3 + Math.sin(t * 1.3) * .05})`);
+        subindo.addColorStop(.4, `rgba(${cfg.veneno}, .11)`);
+        subindo.addColorStop(1, `rgba(${cfg.veneno}, 0)`);
+        ctx.fillStyle = subindo;
         ctx.beginPath();
-        ctx.ellipse(cx, base, l * .85, h * .16, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, base, l * .95, h * .62, 0, Math.PI, 0);
         ctx.fill();
 
-        // os fios de veneno descendo pela parede, cada um no seu tempo
-        ctx.strokeStyle = `rgba(${cfg.veneno}, .55)`;
-        ctx.lineWidth = 2.6;
-        ctx.lineCap = 'round';
-        for (let i = 0; i < 4; i++) {
-            const x = cx - l * .34 + i * l * .22;
-            const escorre = (t * .18 + i * .27) % 1;      // desce e recomeça
-            const y0 = base - h * (.42 - i * .03);
-            ctx.globalAlpha = .8 * (1 - escorre * .5);
+        // --- o veneno escorrendo: uma BARRA que desce e cai no buraco.
+        //
+        // A primeira versão crescia de cima pra baixo e apagava no ar. A segunda descia inteira e
+        // ficava pendurada. Esta é a que o Gabriel descreveu, e é a que tem física: a CABEÇA desce
+        // primeiro (o jorro saindo), depois a fonte fecha e a CAUDA desce atrás — a barra encurta
+        // por cima até sumir dentro da poça. Nada aparece nem some no meio do ar.
+        // Desenhado como as CHAMAS logo acima — gradiente que apaga nas pontas, e não um traço de
+        // caneta. O risco opaco de contorno fixo lia como cabo pendurado; o gradiente lê como
+        // líquido, que é o mesmo vocabulário do resto da ruína. E some a bola da ponta: gota
+        // redonda só existe quando o líquido se solta, e este não se solta — ele escorre.
+        // Cada fio sai de um ponto PRÓPRIO da parede rasgada — alturas embaralhadas, não uma escada
+        // regular. Era `.42 - i * .03`, que dava quatro origens em degrau e denunciava a fórmula;
+        // com alturas diferentes de verdade, os fios acabam de escorrer em momentos diferentes e a
+        // parede parece furada em vários lugares, que é o que ela é.
+        const fios = [
+            { x: -.34, y: .5 }, { x: -.12, y: .36 }, { x: .13, y: .63 }, { x: .33, y: .44 },
+        ];
+        for (let i = 0; i < fios.length; i++) {
+            const x = cx + l * fios[i].x;
+            const y0 = base - h * fios[i].y;
+            const queda = base - y0;
+
+            const ciclo = 3.6 + i * .8;                     // cada fio no seu tempo
+            const fase = ((t + i * 1.9) % ciclo) / ciclo;
+
+            // 45% do ciclo a cabeça descendo, 45% a cauda alcançando, 10% de pausa seca
+            const cabeca = Math.min(1, fase / .45);
+            const cauda = Math.max(0, Math.min(1, (fase - .45) / .45));
+            if (cauda >= 1) continue;                        // já caiu inteiro: nada a desenhar
+
+            const yCauda = y0 + queda * cauda;
+            const yCabeca = y0 + queda * cabeca;
+            const larg = l * .012;
+
+            const fio = ctx.createLinearGradient(x, yCauda, x, yCabeca);
+            fio.addColorStop(0, `rgba(${cfg.veneno}, 0)`);
+            fio.addColorStop(.3, `rgba(${cfg.veneno}, .38)`);
+            fio.addColorStop(1, `rgba(${cfg.venenoClaro}, .72)`);
+            ctx.fillStyle = fio;
+
+            // afina pra cima e engrossa na frente, como um fio de líquido escorrendo de verdade
             ctx.beginPath();
-            ctx.moveTo(x, y0);
-            ctx.lineTo(x, y0 + (base - y0) * escorre);
-            ctx.stroke();
+            ctx.moveTo(x - larg * .45, yCauda);
+            ctx.quadraticCurveTo(x - larg, (yCauda + yCabeca) / 2, x - larg * .9, yCabeca - larg);
+            ctx.quadraticCurveTo(x, yCabeca + larg * .8, x + larg * .9, yCabeca - larg);
+            ctx.quadraticCurveTo(x + larg, (yCauda + yCabeca) / 2, x + larg * .45, yCauda);
+            ctx.closePath();
+            ctx.fill();
         }
-        ctx.globalAlpha = 1;
 
         ctx.restore();
     };
 }
 
-/// O MOTOR delas — e das bobinas do laboratório, que são a mesma coisa com outra fantasia: coisas
-/// PRESAS NO HORIZONTE que acendem de vez em quando, cada uma no seu tempo. Duplicar estas 40 linhas
-/// pro segundo cliente seria abrir a porta pra as duas divergirem em silêncio.
+/// O MOTOR de tudo que fica PRESO NO HORIZONTE: as corujas da mata, as bobinas do laboratório, os
+/// espantalhos entre as lápides. Duplicar estas 40 linhas por cliente seria abrir a porta pra eles
+/// divergirem em silêncio.
 ///
 /// O que cada tema traz é só: de que ladrilho ler a posição, onde estão os pontos, e o que desenhar.
-function criarPiscantes(cfg, canvas, desenhar) {
+///
+/// O RELÓGIO é opcional: quem declara `aceso` pisca (coruja, bobina), quem não declara está sempre
+/// aceso (espantalho). É a ausência do campo que decide — assim "não pisca" não precisou de
+/// configuração nenhuma, e não há um `piscando: false` pra alguém esquecer de casar com o resto.
+function criarNoHorizonte(cfg, canvas, desenhar) {
+    const pisca = cfg.aceso !== undefined;
     const arena = document.getElementById('arena');
     let pontos = [];
     let assinatura = '';
@@ -2538,9 +2713,10 @@ function criarPiscantes(cfg, canvas, desenhar) {
                     x: tile * passo + p.x * passo + (p.lado ?? 0) * cfg.tamanho * .78,
                     y: baseY + p.y * altura,
                     lado: p.lado ?? 1,
-                    // Chega dormindo: a primeira vez demora, e cada uma demora o seu.
-                    aceso: false,
-                    resta: entre(cfg.acordar),
+                    // Quem pisca chega dormindo (a primeira vez demora, e cada um demora o seu);
+                    // quem não pisca já nasce à vista.
+                    aceso: !pisca,
+                    resta: pisca ? entre(cfg.acordar) : Infinity,
                 });
             }
         }
@@ -2556,22 +2732,674 @@ function criarPiscantes(cfg, canvas, desenhar) {
         if (conferir <= 0) { conferir = 1; remontar(); }
 
         for (const c of pontos) {
-            c.resta -= dt;
-            if (c.resta <= 0) {
-                c.aceso = !c.aceso;
-                // Aceso: sempre o mesmo tempo. Apagado: sorteado, e é daqui que vem o desencontro.
-                c.resta = c.aceso ? cfg.aceso : entre(cfg.apagado);
+            if (pisca) {
+                c.resta -= dt;
+                if (c.resta <= 0) {
+                    c.aceso = !c.aceso;
+                    // Aceso: sempre o mesmo tempo. Apagado: sorteado, e é daqui que vem o desencontro.
+                    c.resta = c.aceso ? cfg.aceso : entre(cfg.apagado);
+                }
             }
             desenhar(ctx, c, cfg);
         }
     };
 }
 
-const criarCorujas = (cfg, canvas) => criarPiscantes(cfg, canvas,
+const criarCorujas = (cfg, canvas) => criarNoHorizonte(cfg, canvas,
     (ctx, c, k) => desenharCoruja(ctx, c.x, c.y, k.tamanho, c.lado, c.aceso, k));
 
-const criarBobinas = (cfg, canvas) => criarPiscantes(cfg, canvas,
+const criarBobinas = (cfg, canvas) => criarNoHorizonte(cfg, canvas,
     (ctx, c, k) => c.aceso && desenharRaio(ctx, c.x, c.y, k.tamanho, k));
+
+const criarEspantalhos = (cfg, canvas) => criarNoHorizonte(cfg, canvas,
+    (ctx, c, k) => desenharEspantalho(ctx, c.x, c.y, k.tamanho, k));
+
+/// A CIDADE MURADA do Reino: a muralha atravessando a tela, torres com telhado cônico e bandeira, o
+/// castelo no meio e as casas apinhadas ATRÁS do muro — só telhado e janela acesa aparecendo por
+/// cima dele, que é como se vê uma cidade murada de fora. Casa inteira à vista significaria que não
+/// há muro nenhum.
+///
+/// Tudo estático: aqui o que se move são os exércitos, e cenário que também mexe brigaria com eles.
+/// A vida vem das JANELAS ACESAS, que são muitas e irregulares.
+function criarCastelo(cfg, canvas) {
+    // Sorteados UMA vez: telhado e tamanho de casa sorteados por quadro fariam a cidade inteira
+    // tremeluzir. E as nuvens guardam a própria posição porque ela ANDA.
+    let cena = null;
+
+    const montar = (l) => ({
+        l,
+        casas: Array.from({ length: cfg.casas }, (_, i) => ({
+            x: (i + .5) / cfg.casas,
+            alt: .5 + Math.random() * .5,
+            larg: .55 + Math.random() * .5,
+            azul: Math.random() < .4,
+        })),
+        nuvens: Array.from({ length: cfg.nuvens }, () => ({
+            x: Math.random() * l,
+            y: .06 + Math.random() * .3,
+            r: .04 + Math.random() * .05,
+            v: .6 + Math.random() * .8,
+        })),
+    });
+
+    return (ctx, dt) => {
+        const l = canvas.width, base = canvas.height, h = canvas.height;
+        const hMuro = h * cfg.muro;
+        const hTorre = h * cfg.torre;
+        const ameia = hMuro * .17;
+
+        if (!cena || cena.l !== l) cena = montar(l);
+
+        ctx.save();
+
+        // --- as nuvens, andando devagar lá em cima
+        for (const n of cena.nuvens) {
+            n.x += cfg.vento * n.v * dt;
+            if (n.x - h * n.r * 3 > l) n.x = -h * n.r * 3;
+            desenharNuvem(ctx, n.x, h * n.y, h * n.r, cfg);
+        }
+
+        // --- os morros ao longe, azulados pela distância
+        ctx.fillStyle = cfg.morro;
+        ctx.beginPath();
+        ctx.moveTo(0, base - hMuro * .9);
+        for (let i = 0; i <= 6; i++) {
+            const x = (i / 6) * l;
+            const alt = hMuro * (.9 + Math.sin(i * 1.7) * .34);
+            ctx.quadraticCurveTo(x - l / 12, base - alt - hMuro * .3, x, base - alt);
+        }
+        ctx.lineTo(l, base); ctx.lineTo(0, base);
+        ctx.closePath();
+        ctx.fill();
+
+        // --- as casas, ATRÁS do muro: telhado + parede, e só o alto aparecendo
+        for (const c of cena.casas) {
+            const cx = c.x * l, cl = hMuro * .34 * c.larg, ct = hMuro * .5 * c.alt;
+            const teto = base - hMuro * .82 - ct;
+
+            ctx.fillStyle = cfg.sombra;
+            ctx.fillRect(cx - cl * .8, teto + ct * .5, cl * 1.6, ct);
+
+            ctx.fillStyle = c.azul ? cfg.telhadoAlt : cfg.telhado;
+            ctx.beginPath();
+            ctx.moveTo(cx - cl, teto + ct * .5);
+            ctx.lineTo(cx, teto);
+            ctx.lineTo(cx + cl, teto + ct * .5);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = cfg.janela;
+            ctx.fillRect(cx - cl * .16, teto + ct * .74, cl * .32, ct * .3);
+        }
+
+        // --- a muralha: pedra clara, com uma faixa de sombra embaixo pra ela ter espessura
+        ctx.fillStyle = cfg.pedra;
+        ctx.fillRect(0, base - hMuro, l, hMuro);
+        ctx.fillStyle = cfg.sombra;
+        ctx.fillRect(0, base - hMuro * .22, l, hMuro * .22);
+        ctx.fillStyle = cfg.pedra;
+        for (let x = 0; x < l; x += ameia * 2) ctx.fillRect(x, base - hMuro - ameia * .8, ameia, ameia * .8);
+
+        // as juntas da pedra, em duas fileiras — o que impede o muro de ler como bloco chapado
+        ctx.strokeStyle = 'rgba(0, 0, 0, .1)';
+        ctx.lineWidth = 1;
+        for (const f of [.34, .66]) {
+            ctx.beginPath();
+            ctx.moveTo(0, base - hMuro * f); ctx.lineTo(l, base - hMuro * f);
+            ctx.stroke();
+        }
+
+        for (const f of [.1, .28, .72, .9]) desenharTorre(ctx, f * l, base, hTorre * .74, cfg);
+
+        // --- o castelo no meio
+        const cx = l * .5, cl = hTorre * .62;
+        ctx.fillStyle = cfg.pedra;
+        ctx.fillRect(cx - cl, base - hTorre, cl * 2, hTorre);
+        ctx.fillStyle = cfg.sombra;
+        ctx.fillRect(cx + cl * .62, base - hTorre, cl * .38, hTorre);   // a face que não pega sol
+        ctx.fillStyle = cfg.pedra;
+        for (let x = cx - cl; x < cx + cl; x += ameia * 2) ctx.fillRect(x, base - hTorre - ameia * .8, ameia, ameia * .8);
+
+        ctx.fillStyle = cfg.janela;
+        for (let fila = 0; fila < 3; fila++) {
+            for (let j = -2; j <= 2; j++) {
+                ctx.fillRect(cx + j * cl * .34 - cl * .05, base - hTorre * (.82 - fila * .22), cl * .1, hTorre * .1);
+            }
+        }
+
+        // o portão, com o arco de pedra em volta
+        ctx.fillStyle = cfg.sombra;
+        ctx.beginPath();
+        ctx.moveTo(cx - cl * .3, base);
+        ctx.lineTo(cx - cl * .3, base - hMuro * .56);
+        ctx.quadraticCurveTo(cx, base - hMuro * .92, cx + cl * .3, base - hMuro * .56);
+        ctx.lineTo(cx + cl * .3, base);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#2a2036';
+        ctx.beginPath();
+        ctx.moveTo(cx - cl * .22, base);
+        ctx.lineTo(cx - cl * .22, base - hMuro * .5);
+        ctx.quadraticCurveTo(cx, base - hMuro * .82, cx + cl * .22, base - hMuro * .5);
+        ctx.lineTo(cx + cl * .22, base);
+        ctx.closePath();
+        ctx.fill();
+
+        desenharTorre(ctx, cx - cl, base, hTorre * 1.12, cfg);
+        desenharTorre(ctx, cx + cl, base, hTorre * 1.12, cfg);
+
+        // --- a grama do campo, na frente de tudo: é onde os exércitos pisam
+        ctx.fillStyle = cfg.grama;
+        ctx.fillRect(0, base - h * .06, l, h * .06);
+        ctx.fillStyle = cfg.gramaSombra;
+        ctx.fillRect(0, base - h * .06, l, h * .012);
+
+        ctx.restore();
+    };
+}
+
+/// Uma nuvem: três bolhas sobrepostas com a base achatada. Achatar embaixo é o que a faz flutuar em
+/// vez de boiar — nuvem de dia tem fundo reto.
+function desenharNuvem(ctx, x, y, r, cfg) {
+    ctx.save();
+    ctx.fillStyle = `rgba(${cfg.nuvem}, .82)`;
+    ctx.beginPath();
+    ctx.ellipse(x - r, y, r * .9, r * .6, 0, Math.PI, 0);
+    ctx.ellipse(x, y, r * 1.3, r * .95, 0, Math.PI, 0);
+    ctx.ellipse(x + r * 1.1, y, r * .8, r * .55, 0, Math.PI, 0);
+    ctx.fillRect(x - r * 1.9, y - 1, r * 3.8, 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/// Uma torre: fuste, ameias, telhado cônico e a bandeira. O cone e a bandeira são o que separam
+/// "torre de castelo" de "cilindro em pé".
+function desenharTorre(ctx, x, base, h, cfg) {
+    const l = h * .26;
+
+    ctx.save();
+    ctx.fillStyle = cfg.pedra;
+    ctx.fillRect(x - l * .5, base - h, l, h);
+    ctx.fillStyle = cfg.sombra;
+    ctx.fillRect(x + l * .18, base - h, l * .32, h);   // o lado sem sol, que dá volume ao cilindro
+
+    // ameias
+    const ameia = l * .3;
+    ctx.fillStyle = cfg.pedra;
+    for (let k = 0; k < 3; k++) ctx.fillRect(x - l * .5 + k * ameia * 1.6, base - h - ameia * .7, ameia, ameia * .7);
+
+    // telhado cônico
+    ctx.fillStyle = cfg.telhado;
+    ctx.beginPath();
+    ctx.moveTo(x - l * .72, base - h - ameia * .7);
+    ctx.lineTo(x, base - h - l * 1.5);
+    ctx.lineTo(x + l * .72, base - h - ameia * .7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(0, 0, 0, .16)';
+    ctx.beginPath();
+    ctx.moveTo(x, base - h - l * 1.5);
+    ctx.lineTo(x + l * .72, base - h - ameia * .7);
+    ctx.lineTo(x, base - h - ameia * .7);
+    ctx.closePath();
+    ctx.fill();
+
+    // mastro e bandeira
+    ctx.fillStyle = cfg.sombra;
+    ctx.fillRect(x - l * .035, base - h - l * 2.1, l * .07, l * .62);
+    ctx.fillStyle = cfg.bandeira;
+    ctx.beginPath();
+    ctx.moveTo(x + l * .035, base - h - l * 2.1);
+    ctx.lineTo(x + l * .62, base - h - l * 1.9);
+    ctx.lineTo(x + l * .035, base - h - l * 1.7);
+    ctx.closePath();
+    ctx.fill();
+
+    // a fresta de tiro
+    ctx.fillStyle = cfg.janela;
+    ctx.fillRect(x - l * .07, base - h * .78, l * .14, h * .12);
+
+    ctx.restore();
+}
+
+/// A CLAREIRA do folclore, inteira no canvas: caverna nas duas bordas, torii entre elas e o circo no
+/// meio, com a roda gigante girando atrás da tenda.
+///
+/// Por que aqui o horizonte não é ladrilho de CSS como nos outros três: lá ele é uma PAISAGEM (mata,
+/// cidade), e paisagem repete sem mentir. Aqui a composição é NOMEADA — "caverna na borda", "circo
+/// no meio" — e nome não sobrevive a ladrilho, porque o que é "a borda" muda com a largura da tela.
+/// Esticar uma imagem só resolveria a posição e estragaria a forma (o torii engorda). Em fração da
+/// largura, cada peça cai no lugar certo em qualquer janela.
+///
+/// As lâmpadas do varal moram AQUI, e não no `criarNoHorizonte` como as corujas, porque estão presas
+/// a uma estrutura que esta camada desenha — passá-las pelo motor compartilhado obrigaria a
+/// geometria da tenda a existir em dois lugares.
+function criarVila(cfg, canvas) {
+    let giro = 0;
+    let tempo = 0;
+    let lampadas = null;
+    let mata = null;
+
+    return (ctx, dt) => {
+        const l = canvas.width, base = canvas.height, h = canvas.height;
+        giro += dt * cfg.giro;
+        tempo += dt;
+
+        // A mata e as casas dos cantos: sorteadas uma vez, senão a vila tremeluziria.
+        if (!mata || mata.l !== l) {
+            mata = {
+                l,
+                arvores: Array.from({ length: 14 }, (_, i) => ({
+                    x: (i % 7) / 7 * .26 + (i < 7 ? .02 : .72),
+                    alt: .13 + Math.random() * .1,
+                    larg: .5 + Math.random() * .5,
+                })),
+                casas: [
+                    { x: .17, alt: .1, larg: 1 }, { x: .23, alt: .075, larg: .8 },
+                    { x: .79, alt: .09, larg: .9 },
+                ],
+            };
+        }
+
+        // --- a mata dos dois lados, preenchendo o que era vazio entre a borda e o torii
+        ctx.fillStyle = cfg.mata;
+        for (const a of mata.arvores) {
+            const ax = a.x * l, ah = h * a.alt, al = ah * .38 * a.larg;
+            ctx.fillRect(ax - ah * .022, base - ah * .34, ah * .044, ah * .34);
+            ctx.beginPath();
+            ctx.moveTo(ax - al, base - ah * .3);
+            ctx.lineTo(ax, base - ah);
+            ctx.lineTo(ax + al, base - ah * .3);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // --- as casinhas da vila, entre as árvores
+        for (const c of mata.casas) {
+            const cx = c.x * l, ch = h * c.alt, cl = ch * .8 * c.larg;
+            ctx.fillStyle = cfg.mata;
+            ctx.fillRect(cx - cl * .5, base - ch * .62, cl, ch * .62);
+            ctx.beginPath();
+            ctx.moveTo(cx - cl * .64, base - ch * .62);
+            ctx.lineTo(cx, base - ch);
+            ctx.lineTo(cx + cl * .64, base - ch * .62);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = `rgba(${cfg.luz}, .6)`;
+            ctx.fillRect(cx - cl * .14, base - ch * .46, cl * .28, ch * .2);
+        }
+
+        // --- o circo no meio
+        const rodaR = h * cfg.roda;
+        desenharRodaGigante(ctx, l * .5, base - rodaR - h * .1, rodaR, base, giro, cfg);
+
+        const tendaL = h * cfg.tenda;
+        desenharTenda(ctx, l * .5, base, tendaL, cfg, tempo);
+
+        if (!lampadas) {
+            lampadas = Array.from({ length: cfg.lampadas }, () => ({
+                aceso: Math.random() < .7,
+                resta: Math.random() * cfg.aceso,
+            }));
+        }
+        desenharVaral(ctx, l * .5, base, tendaL, lampadas, dt, cfg);
+
+        // --- os torii, entre a vila e as bordas
+        for (const t of cfg.torii) desenharTorii(ctx, l * t, base, h * .28, cfg);
+    };
+}
+
+/// A roda gigante: aro, raios, cabines e as luzes do aro. Gira devagar — roda gigante que corre
+/// vira ventilador. As cabines PENDURAM (ficam sempre com o assento pra baixo enquanto o aro roda),
+/// que é a única coisa que separa uma roda gigante de uma estrela girando.
+function desenharRodaGigante(ctx, x, y, r, base, giro, cfg) {
+    ctx.save();
+
+    // as pernas, descendo até o chão
+    ctx.strokeStyle = cfg.ferro;
+    ctx.lineWidth = r * .07;
+    ctx.beginPath();
+    ctx.moveTo(x - r * .5, base); ctx.lineTo(x, y);
+    ctx.moveTo(x + r * .5, base); ctx.lineTo(x, y);
+    ctx.stroke();
+
+    // raios
+    ctx.lineWidth = r * .025;
+    ctx.beginPath();
+    for (let i = 0; i < 12; i++) {
+        const a = giro + i * (Math.PI / 6);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+    }
+    ctx.stroke();
+
+    // aro (duplo, pra ter espessura sem virar disco)
+    ctx.lineWidth = r * .045;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = r * .02;
+    ctx.beginPath(); ctx.arc(x, y, r * .86, 0, Math.PI * 2); ctx.stroke();
+
+    // cabines + a luz de cada uma no aro
+    for (let i = 0; i < 12; i++) {
+        const a = giro + i * (Math.PI / 6);
+        const cx = x + Math.cos(a) * r, cy = y + Math.sin(a) * r;
+
+        ctx.fillStyle = cfg.ferro;
+        ctx.beginPath();
+        // a cabine pende SEMPRE pra baixo, não importa onde o aro esteja
+        ctx.roundRect(cx - r * .06, cy + r * .02, r * .12, r * .1, r * .03);
+        ctx.fill();
+
+        const luz = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * .12);
+        luz.addColorStop(0, `rgba(${cfg.luz}, .9)`);
+        luz.addColorStop(1, `rgba(${cfg.luz}, 0)`);
+        ctx.fillStyle = luz;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * .12, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/// A TENDA DO CIRCO. As duas partes são CÔNCAVAS, e é essa concavidade contínua que faz a lona
+/// parecer pendurada em vez de esticada num cone:
+///   TELHADO — cai do mastro afundando pra DENTRO, como pano puxado pelo próprio peso;
+///   PAREDE  — desce da barra de arcos, também pra dentro, até o chão.
+///
+/// A frente fica ABERTA, e lá dentro está escuro. De tempos em tempos um sorriso aparece no escuro e
+/// some. Raro e curto de propósito: o susto mora na dúvida de ter visto.
+function desenharTenda(ctx, x, base, l, cfg, t) {
+    const alt = l * 1.15;          // altura total
+    const beiral = alt * .46;      // onde o telhado acaba e a parede começa
+    const arcos = 7;
+
+    ctx.save();
+
+    // ---------- o contorno inteiro, usado como recorte pras listras ----------
+    const contorno = () => {
+        ctx.beginPath();
+        ctx.moveTo(x - l, base);
+        // parede esquerda, côncava (ponto de controle puxado pra dentro)
+        ctx.quadraticCurveTo(x - l * .82, base - beiral * .5, x - l * .92, base - beiral);
+        // telhado esquerdo, TAMBÉM côncavo: o controle fica ABAIXO da reta mastro→beiral, então a
+        // lona afunda no meio do vão em vez de estufar. É o que separa "pano pendurado" de "cone".
+        ctx.quadraticCurveTo(x - l * .38, base - beiral - (alt - beiral) * .34, x, base - alt);
+        ctx.quadraticCurveTo(x + l * .38, base - beiral - (alt - beiral) * .34, x + l * .92, base - beiral);
+        // parede direita
+        ctx.quadraticCurveTo(x + l * .82, base - beiral * .5, x + l, base);
+        ctx.closePath();
+    };
+
+    contorno();
+    ctx.fillStyle = cfg.lonaClara;
+    ctx.fill();
+
+    // ---------- as listras, em leque a partir do topo, recortadas pelo contorno ----------
+    ctx.save();
+    contorno();
+    ctx.clip();
+    ctx.fillStyle = cfg.lona;
+    for (let i = -4; i <= 4; i += 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, base - alt);
+        ctx.lineTo(x + l * (i / 4.5), base + 4);
+        ctx.lineTo(x + l * ((i + 1) / 4.5), base + 4);
+        ctx.closePath();
+        ctx.fill();
+    }
+    ctx.restore();
+
+    // ---------- a BARRA DE ARCOS onde o telhado termina ----------
+    // Uma fita de meias-luas mordendo a lona, todas na MESMA altura. Antes elas seguiam a curva do
+    // beiral e ficavam desalinhadas — o que só chamava atenção pro desalinho. Fita é fita: reta.
+    const largura = l * 1.84 / arcos;
+    ctx.fillStyle = cfg.lona;
+    for (let i = 0; i < arcos; i++) {
+        ctx.beginPath();
+        ctx.arc(x - l * .92 + largura * (i + .5), base - beiral, largura * .5, 0, Math.PI);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // ---------- a ENTRADA aberta ----------
+    // Ela repete a SILHUETA da tenda em miniatura — bico em cima, laterais côncavas —, porque uma
+    // porta de tenda é a própria lona aberta, não um arco recortado nela.
+    const el = l * .28, eh = alt * .56;
+    ctx.fillStyle = cfg.dentro;
+    ctx.beginPath();
+    ctx.moveTo(x - el, base);
+    ctx.quadraticCurveTo(x - el * .82, base - eh * .5, x, base - eh);
+    ctx.quadraticCurveTo(x + el * .82, base - eh * .5, x + el, base);
+    ctx.closePath();
+    ctx.fill();
+
+    // as abas abertas pros lados: a lona que foi puxada pra trás. Elas repetem a mesma curva, o que
+    // faz parecer o MESMO pano dobrado, e é o que diz "está aberta" em vez de "tem um buraco".
+    ctx.fillStyle = cfg.lona;
+    for (const lado of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(x + lado * el, base);
+        ctx.quadraticCurveTo(x + lado * el * .84, base - eh * .5, x + lado * el * .06, base - eh * .96);
+        ctx.quadraticCurveTo(x + lado * el * 1.3, base - eh * .58, x + lado * el * 1.34, base);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // ---------- o SORRISO no escuro ----------
+    const ciclo = t % cfg.sorrisoCada;
+    if (ciclo < cfg.sorrisoDura) {
+        // entra e sai suave: aparecer de estalo lê como falha de desenho, não como aparição
+        const p = ciclo / cfg.sorrisoDura;
+        const alfa = Math.sin(p * Math.PI);
+        desenharSorriso(ctx, x, base - eh * .48, el * .42, alfa, cfg);
+    }
+
+    // ---------- mastro e bandeirinha ----------
+    ctx.fillStyle = cfg.ferro;
+    ctx.fillRect(x - l * .02, base - alt - l * .3, l * .04, l * .32);
+    ctx.fillStyle = cfg.lona;
+    ctx.beginPath();
+    ctx.moveTo(x + l * .02, base - alt - l * .3);
+    ctx.lineTo(x + l * .28, base - alt - l * .21);
+    ctx.lineTo(x + l * .02, base - alt - l * .12);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/// O sorriso do palhaço no escuro da tenda: a boca e as duas bolinhas vermelhas das bochechas.
+///
+/// Sem olhos nem rosto, de propósito: o que a cabeça completa a partir de uma boca solta no escuro é
+/// pior que qualquer palhaço que eu desenhasse ali. As bochechas são o que amarra a leitura — boca
+/// sozinha pode ser qualquer coisa; boca com duas manchas vermelhas nos cantos é palhaço.
+function desenharSorriso(ctx, x, y, r, alfa, cfg) {
+    ctx.save();
+    ctx.globalAlpha = alfa;
+
+    // o vão da boca: arco de baixo bem aberto, arco de cima quase reto
+    ctx.beginPath();
+    ctx.moveTo(x - r, y - r * .16);
+    ctx.quadraticCurveTo(x, y + r * .08, x + r, y - r * .16);
+    ctx.quadraticCurveTo(x, y + r * .9, x - r, y - r * .16);
+    ctx.closePath();
+    ctx.fillStyle = cfg.sorriso;
+    ctx.fill();
+
+    // os dentes: riscos escuros cortando a boca, mais curtos nas pontas
+    ctx.strokeStyle = cfg.dentro;
+    ctx.lineWidth = Math.max(1, r * .09);
+    for (let i = -1; i <= 1; i++) {
+        const dx = x + i * r * .42;
+        ctx.beginPath();
+        ctx.moveTo(dx, y - r * .1 + Math.abs(i) * r * .08);
+        ctx.lineTo(dx, y + r * .6 - Math.abs(i) * r * .2);
+        ctx.stroke();
+    }
+
+    // as bochechas: acima dos cantos da boca, e um pouco pra fora
+    ctx.fillStyle = cfg.bochecha;
+    for (const lado of [-1, 1]) {
+        ctx.beginPath();
+        ctx.arc(x + lado * r * 1.28, y - r * .58, r * .3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/// O varal: dois fios saindo do mastro e caindo até o chão dos lados, com as lâmpadas penduradas.
+///
+/// Apagada, a lâmpada NÃO some — continua ali, escura, pendurada. É ver o bulbo morto no meio dos
+/// acesos que faz o varal parecer um varal velho de parque em vez de um efeito. E cada uma tem o
+/// próprio relógio: todas juntas seria pisca-pisca de Natal, e o 🤡 não é Natal.
+function desenharVaral(ctx, x, base, l, lampadas, dt, cfg) {
+    const topo = base - l * 1.05 - l * .24;
+    const vao = l * 1.9;
+    const n = lampadas.length;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 220, 180, .18)';
+    ctx.lineWidth = 1.2;
+
+    for (const lado of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(x, topo);
+        ctx.quadraticCurveTo(x + lado * vao * .55, base - l * .1, x + lado * vao, base - l * .02);
+        ctx.stroke();
+    }
+
+    for (let i = 0; i < n; i++) {
+        const lamp = lampadas[i];
+        lamp.resta -= dt;
+        if (lamp.resta <= 0) {
+            lamp.aceso = !lamp.aceso;
+            lamp.resta = lamp.aceso ? cfg.aceso : entre(cfg.apagado);
+        }
+
+        // metade das lâmpadas em cada fio, distribuídas ao longo da curva
+        const lado = i < n / 2 ? -1 : 1;
+        const t = ((i % Math.ceil(n / 2)) + 1) / (Math.ceil(n / 2) + 1);
+        const px = x + lado * vao * t;
+        // a mesma quadrática do fio, avaliada em t
+        const py = (1 - t) * (1 - t) * topo + 2 * (1 - t) * t * (base - l * .1) + t * t * (base - l * .02);
+
+        if (lamp.aceso) {
+            const halo = ctx.createRadialGradient(px, py, 0, px, py, l * .1);
+            halo.addColorStop(0, `rgba(${cfg.luz}, .8)`);
+            halo.addColorStop(.25, `rgba(${cfg.luz}, .28)`);
+            halo.addColorStop(1, `rgba(${cfg.luz}, 0)`);
+            ctx.fillStyle = halo;
+            ctx.beginPath();
+            ctx.arc(px, py, l * .1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.fillStyle = lamp.aceso ? `rgba(${cfg.luz}, .95)` : 'rgba(24, 16, 40, .95)';
+        ctx.beginPath();
+        ctx.arc(px, py, l * .022, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/// O TORII: dois pilares, a viga curva em cima e a travessa embaixo. A curva da viga (as pontas
+/// subindo) é o que distingue um torii de um portal qualquer.
+function desenharTorii(ctx, x, base, h, cfg) {
+    const l = h * .62;
+
+    ctx.save();
+    ctx.fillStyle = cfg.madeira;
+
+    ctx.fillRect(x - l * .5, base - h, h * .075, h);
+    ctx.fillRect(x + l * .5 - h * .075, base - h, h * .075, h);
+    ctx.fillRect(x - l * .58, base - h * .74, l * 1.16, h * .05);   // travessa
+
+    // viga de cima, com as pontas viradas pra cima
+    ctx.beginPath();
+    ctx.moveTo(x - l * .78, base - h * .9);
+    ctx.quadraticCurveTo(x, base - h * .99, x + l * .78, base - h * .9);
+    ctx.lineTo(x + l * .78, base - h * .82);
+    ctx.quadraticCurveTo(x, base - h * .91, x - l * .78, base - h * .82);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/// Um espantalho: cruz de madeira, pano esfarrapado pendurado e cabeça de abóbora.
+///
+/// A abóbora é o ÚNICO ponto de cor do cemitério inteiro, e por isso é de baixa saturação — laranja
+/// aceso aqui brigaria com a lua e roubaria a cena. A cara fica um tom acima, como se houvesse uma
+/// vela dentro: é a diferença entre os dois laranjas que faz ler como abóbora entalhada, e não como
+/// uma bola laranja espetada num poste.
+function desenharEspantalho(ctx, x, base, s, cfg) {
+    ctx.save();
+    ctx.translate(x, base);
+    ctx.scale(s, s);
+
+    // a cruz
+    ctx.fillStyle = cfg.poste;
+    ctx.fillRect(-.05, -1.5, .1, 1.5);
+    ctx.fillRect(-.62, -1.12, 1.24, .085);
+
+    // o pano: ombros caídos e barra rasgada em dentes
+    ctx.fillStyle = cfg.pano;
+    ctx.beginPath();
+    ctx.moveTo(-.58, -1.1);
+    ctx.quadraticCurveTo(0, -1.22, .58, -1.1);
+    ctx.lineTo(.44, -.36);
+    ctx.lineTo(.3, -.52); ctx.lineTo(.16, -.3);
+    ctx.lineTo(.02, -.5); ctx.lineTo(-.14, -.28);
+    ctx.lineTo(-.3, -.48); ctx.lineTo(-.44, -.34);
+    ctx.closePath();
+    ctx.fill();
+
+    // trapos esvoaçando nas pontas dos braços
+    ctx.beginPath();
+    ctx.moveTo(-.62, -1.14); ctx.lineTo(-.78, -.98); ctx.lineTo(-.58, -1.0);
+    ctx.moveTo(.62, -1.14); ctx.lineTo(.78, -.98); ctx.lineTo(.58, -1.0);
+    ctx.fill();
+
+    // a abóbora
+    const cy = -1.42, r = .3;
+    ctx.fillStyle = `rgb(${cfg.abobora})`;
+    ctx.beginPath();
+    ctx.ellipse(0, cy, r, r * .92, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // os gomos, escurecidos por cima da própria cor
+    ctx.strokeStyle = 'rgba(0, 0, 0, .28)';
+    ctx.lineWidth = .028;
+    for (const g of [-.16, 0, .16]) {
+        ctx.beginPath();
+        ctx.ellipse(g, cy, Math.abs(g) === 0 ? r * .34 : r * .2, r * .9, 0, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // o cabinho
+    ctx.fillStyle = cfg.poste;
+    ctx.fillRect(-.035, cy - r * .96 - .1, .07, .12);
+
+    // a cara acesa: dois olhos e a boca de dentes
+    ctx.fillStyle = `rgb(${cfg.cara})`;
+    ctx.beginPath();
+    ctx.moveTo(-.16, cy - .04); ctx.lineTo(-.05, cy - .04); ctx.lineTo(-.105, cy - .14);
+    ctx.moveTo(.16, cy - .04); ctx.lineTo(.05, cy - .04); ctx.lineTo(.105, cy - .14);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-.17, cy + .08);
+    ctx.lineTo(-.09, cy + .16); ctx.lineTo(-.03, cy + .08);
+    ctx.lineTo(.03, cy + .16); ctx.lineTo(.09, cy + .08);
+    ctx.lineTo(.17, cy + .16);
+    ctx.lineTo(.12, cy + .2); ctx.lineTo(-.12, cy + .2);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
 
 /// A descarga da bobina de Tesla: uma coroa de raios saindo da bola, com o traço quebrando em
 /// ziguezague. É redesenhada a cada quadro com ângulos NOVOS de propósito — raio parado no ar não
@@ -2658,6 +3486,108 @@ function desenharCoruja(ctx, x, y, s, lado, aceso, cfg) {
         ctx.arc(ox, oy, .62, 0, Math.PI * 2);
         ctx.fill();
     }
+
+    ctx.restore();
+}
+
+/// Quem pode atravessar o céu. Assinatura única de propósito — cada um usa o que precisa e ignora o
+/// resto —, porque o motor de voo não tem que saber o que está carregando.
+const VOADORES = {
+    morcego: (ctx, x, y, s, fase, paraDireita, canvas, cfg) =>
+        desenharMorcego(ctx, x, y, s, fase, paraDireita, cfg.cor),
+    disco: (ctx, x, y, s, fase, paraDireita, canvas, cfg) =>
+        desenharDisco(ctx, x, y, s, fase, canvas, cfg),
+    fantasma: (ctx, x, y, s, fase, paraDireita, canvas, cfg) =>
+        desenharFantasma(ctx, x, y, s, fase, paraDireita, cfg),
+    corvo: (ctx, x, y, s, fase, paraDireita, canvas, cfg) =>
+        desenharCorvo(ctx, x, y, s, fase, paraDireita, cfg.cor),
+};
+
+/// Um CORVO — o bicho do 👺 Tengu. Diferente do morcego no que importa: a asa dele é um ARCO
+/// contínuo (o do morcego tem festões de membrana), e a batida é mais lenta e mais ampla, com
+/// planeio no fim de cada ciclo. É o ritmo que distingue os dois de longe, mais que o desenho.
+function desenharCorvo(ctx, x, y, s, faseDaAsa, paraDireita, cor) {
+    // `Math.pow` achata o fundo do seno: a asa sobe rápido e DESCE devagar, que é o planeio.
+    const bruto = Math.sin(faseDaAsa * .62);
+    const bate = Math.sign(bruto) * Math.pow(Math.abs(bruto), .6);
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(paraDireita ? s : -s, s);
+    ctx.fillStyle = cor;
+
+    // corpo alongado + cauda em cunha
+    ctx.beginPath();
+    ctx.ellipse(0, 0, .46, .19, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-.4, -.08); ctx.lineTo(-.92, -.16); ctx.lineTo(-.9, .04); ctx.lineTo(-.4, .1);
+    ctx.closePath();
+    ctx.fill();
+
+    // cabeça e bico
+    ctx.beginPath();
+    ctx.arc(.44, -.08, .16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(.56, -.12); ctx.lineTo(.86, -.05); ctx.lineTo(.56, .02);
+    ctx.closePath();
+    ctx.fill();
+
+    // as asas: um arco só, aberto pra cima ou pra baixo conforme a batida
+    for (const lado of [1, -1]) {
+        const ponta = -.2 - bate * 1.05;
+        ctx.beginPath();
+        ctx.moveTo(lado * .06, -.1);
+        ctx.quadraticCurveTo(lado * .72, ponta * .9, lado * 1.5, ponta);
+        ctx.quadraticCurveTo(lado * .78, ponta * .42 + .16, lado * .1, .12);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/// Um FANTASMA: manto arredondado em cima, barra ondulando embaixo, dois vazios no lugar dos olhos.
+///
+/// Ele é translúcido e tem halo — sem isso viraria um pinguim branco. E a barra ONDULA pelo tempo,
+/// não pela posição: é o que faz o manto parecer flutuar mesmo quando ele está quase parado.
+function desenharFantasma(ctx, x, y, s, fase, paraDireita, cfg) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(paraDireita ? s : -s, s);
+
+    // o halo — a assombração acende o ar em volta
+    const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.5);
+    halo.addColorStop(0, `rgba(${cfg.cor}, .16)`);
+    halo.addColorStop(1, `rgba(${cfg.cor}, 0)`);
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(0, 0, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // o manto: cúpula em cima, três badalos ondulando embaixo
+    ctx.fillStyle = `rgba(${cfg.cor}, .5)`;
+    ctx.beginPath();
+    ctx.arc(0, -.1, .62, Math.PI, 0);
+    ctx.lineTo(.62, .42);
+    for (let i = 0; i < 3; i++) {
+        const largura = 1.24 / 3;
+        const x0 = .62 - i * largura;
+        const balanco = Math.sin(fase * .9 + i * 1.3) * .13;
+        ctx.quadraticCurveTo(x0 - largura * .5, .78 + balanco, x0 - largura, .42 + balanco * .4);
+    }
+    ctx.lineTo(-.62, -.1);
+    ctx.closePath();
+    ctx.fill();
+
+    // os olhos: VAZIOS recortados, não pintados de preto — assim eles são o fundo aparecendo
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.ellipse(-.22, -.16, .12, .17, 0, 0, Math.PI * 2);
+    ctx.ellipse(.22, -.16, .12, .17, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
 
     ctx.restore();
 }

@@ -661,14 +661,59 @@ body {
 }
 #conquista[hidden] { display: none; }
 
-/* Raios atrás do champ, girando devagar: dão movimento ao fundo sem competir com ele. */
+/* Raios de luz atrás do champ. Eram faixas de 6° girando em 24s — o que numa tela inteira dava
+   MOIRÉ e lia como cata-vento, não como luz. Agora são poucos feixes LARGOS, borrados, apagando nas
+   bordas por máscara, e girando devagar demais pra o olho seguir: o que sobra é a sensação de luz
+   se movendo, que era o ponto. */
 #conquistaFundo {
-    position: absolute; width: 160vmax; height: 160vmax;
-    background: conic-gradient(from 0deg, transparent 0 6deg, rgba(217,180,91,.10) 6deg 12deg);
-    animation: girarRaios 24s linear infinite;
+    position: absolute; width: 200vmax; height: 200vmax;
+    background: conic-gradient(from 0deg,
+        transparent 0 26deg, rgba(217,180,91,.13) 34deg 56deg, transparent 64deg 90deg,
+        transparent 90deg 116deg, rgba(217,180,91,.09) 124deg 146deg, transparent 154deg 180deg,
+        transparent 180deg 206deg, rgba(217,180,91,.13) 214deg 236deg, transparent 244deg 270deg,
+        transparent 270deg 296deg, rgba(217,180,91,.09) 304deg 326deg, transparent 334deg 360deg);
+    filter: blur(26px);
+    /* sem a máscara os feixes batem na borda da tela e viram um losango girando */
+    -webkit-mask-image: radial-gradient(circle at center, #000 6%, rgba(0,0,0,.55) 34%, transparent 62%);
+            mask-image: radial-gradient(circle at center, #000 6%, rgba(0,0,0,.55) 34%, transparent 62%);
+    animation: girarRaios 90s linear infinite;
     pointer-events: none;
 }
 @keyframes girarRaios { to { transform: rotate(360deg); } }
+
+/* A AURA cresce junto com o champ — é a luz que ele traz, não uma luz onde ele cai. */
+#conquistaAura {
+    position: absolute; width: 62vmin; height: 62vmin;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,180,91,.42) 0%, rgba(217,180,91,.14) 38%, transparent 68%);
+    pointer-events: none;
+    opacity: 0;
+}
+#conquista.chegando #conquistaAura { animation: acenderAura 2.8s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes acenderAura {
+    0%   { transform: scale(.1);  opacity: 0; }
+    32%  { transform: scale(.7);  opacity: .35; }
+    68%  { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1);   opacity: .5; }
+}
+
+/* Os ANÉIS: dois pulsos que saem do champ no instante da chegada e morrem. É o que dá o "baque" —
+   antes a animação crescia e simplesmente parava, e o fim ficava sem acontecimento. */
+#conquista.chegando #conquistaAura::before,
+#conquista.chegando #conquistaAura::after {
+    content: '';
+    position: absolute; inset: 0;
+    border: 2px solid rgba(217,180,91,.75);
+    border-radius: 50%;
+    animation: ondaDeChegada 1.5s cubic-bezier(.16, .8, .3, 1) both;
+    animation-delay: 1.75s;   /* casa com o pico do brilho na linha do tempo da chegada */
+}
+#conquista.chegando #conquistaAura::after { animation-delay: 2.05s; }
+@keyframes ondaDeChegada {
+    0%   { transform: scale(.55); opacity: 0; }
+    18%  { opacity: .85; }
+    100% { transform: scale(1.9); opacity: 0; border-width: 1px; }
+}
 
 #conquistaCorpo {
     position: relative; z-index: 2;
@@ -682,7 +727,7 @@ body {
    entra só na CHEGADA e sai — se ficasse, deixaria de ser chegada e viraria decoração.
    A aproximação é rápida (ela só leva o olho até o centro); é o brilho que precisa de tempo, porque
    ele é a parte que se OLHA. Daí a metade final da linha do tempo ser só ele nascendo e morrendo. */
-#conquistaCorpo.chegando { animation: chegarDoFundo 2.8s cubic-bezier(.22, 1, .36, 1) both; }
+#conquista.chegando #conquistaCorpo { animation: chegarDoFundo 2.8s cubic-bezier(.22, 1, .36, 1) both; }
 @keyframes chegarDoFundo {
     0%   { transform: scale(.12); opacity: 0; filter: blur(14px) drop-shadow(0 0 0 rgba(217,180,91,0)); }
     32%  { opacity: 1; filter: blur(2px) drop-shadow(0 0 0 rgba(217,180,91,0)); }
@@ -903,14 +948,28 @@ body {
 
    Um capítulo sem bloco aqui simplesmente luta no visual padrão. */
 
-/* O ar do cenário: atrás de tudo. z -1 pinta acima do fundo da página e abaixo de todo o conteúdo,
-   então o #topo e o #painel (que têm fundo opaco) o escondem, e ele só aparece na arena. */
-#particulas {
-    position: fixed; inset: 0; z-index: -1;
+/* O ar do cenário, preenchendo a arena. Ele é FILHO dela (ver index.html), então já nasce do
+   tamanho certo, é recortado pelo `overflow: hidden` dela e some junto com a luta.
+
+   z 3 é o que o põe NA FRENTE dos combatentes: poeira e morcegos passam entre o jogador e o campo,
+   que é o que dá profundidade — atrás deles, o efeito sumiria contra o fundo.
+
+   Já esteve `position: fixed` com z-index -1, cobrindo a janela. Não aparecia NUNCA: naquela
+   posição ele pinta antes do fundo do <body>, que é opaco. O canvas ficava perfeito e invisível. */
+#particulasFundo, #particulas {
+    position: absolute; inset: 0;
+    /* O `width/height: 100%` NÃO é redundante com o `inset: 0`. <canvas> é elemento SUBSTITUÍDO, e
+       nesses o `width: auto` vale o tamanho INTRÍNSECO (300×150) em vez de esticar entre as bordas —
+       o `right`/`bottom` são simplesmente ignorados. Sem estas duas linhas o cenário inteiro cabe
+       num quadradinho no canto superior esquerdo, que foi exatamente o que aconteceu. */
     width: 100%; height: 100%;
     pointer-events: none;
 }
-#particulas[hidden] { display: none; }
+/* z 0 = acima do fundo do cenário (e dos estandartes, em -1), abaixo dos combatentes.
+   z 3 = na frente de todo mundo. Ver o comentário das duas telas no index.html. */
+#particulasFundo { z-index: 0; }
+#particulas { z-index: 3; }
+#particulasFundo[hidden], #particulas[hidden] { display: none; }
 
 /* ---------- 👑 REINO — o salão do trono ----------
    Azul-real no lugar do roxo, ouro no lugar do lilás, e o chão de pedra pegando a luz das tochas.
@@ -1006,20 +1065,28 @@ body[data-tema="ladosombrio"] {
 body[data-tema="ladosombrio"] #arena {
     position: relative;
     isolation: isolate;
+
+    /* O tamanho do ladrilho da mata é declarado AQUI e lido pelo JS (getComputedStyle) pra ancorar
+       os olhos das corujas nos troncos. Uma fonte só: mexer no ladrilho leva os olhos junto, em vez
+       de deixar duas cópias do número pra divergirem. */
+    --mata-passo: 320px;
+    --mata-altura: 190px;
+
     background:
         /* 1. vinheta, bem mais fechada que a do Reino: aqui não se enxerga longe */
         radial-gradient(ellipse 100% 80% at 50% 34%, transparent 22%, rgba(2, 5, 4, .9) 100%),
         /* 2. a LUA: um disco pálido no alto, com halo */
         radial-gradient(circle 26px at 50% 15%, rgba(226, 240, 230, .92) 0 62%, transparent 66%),
         radial-gradient(circle 190px at 50% 15%, rgba(150, 200, 170, .16), transparent 70%),
-        /* 3. a linha de árvores mortas e lápides contra o céu */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='150' viewBox='0 0 260 150'%3E%3Cg fill='%23050a08'%3E%3Cpath d='M20 150V78l-9-13 9 6V52l-12-16 12 9V28h5v26l13-12-13 18v21l8-6-8 11v64z'/%3E%3Cpath d='M96 150v-40h30v40zM104 96h14v14h-14z'/%3E%3Cpath d='M182 150V88l-11-15 11 7V60l-14-18 14 10V34h6v30l15-13-15 20v23l10-7-10 13v50z'/%3E%3Cpath d='M232 150v-28a12 12 0 0124 0v28z'/%3E%3C/g%3E%3C/svg%3E"),
+        /* 3. a MATA: uma árvore grande, uma menor, cruz, lápide e grade. Duas alturas de galho e um
+              tronco que afina dão silhueta em vez de rabisco. */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='190' viewBox='0 0 320 190'%3E%3Cg fill='%23040a07'%3E%3Cpath d='M44 190v-74l-19-22 19 11V78L14 50l30 18V38L26 18l18 12V4h7v34l22-20-22 30v22l16-11-16 20v14l24-16-24 24v58z'/%3E%3Cpath d='M46 116l-13 8 13-3zM51 62l11-6-11 11z'/%3E%3Cpath d='M232 190v-58l-14-16 14 8V88l-20-19 20 12V56l-13-15 13 9V28h5v20l16-13-16 22v16l12-8-12 16v93z'/%3E%3Cpath d='M126 190v-34h26v34zM134 142h10v14h-10z'/%3E%3Cpath d='M164 190v-30h9v30zM156 168h25v7h-25z'/%3E%3Cpath d='M280 190v-22a11 11 0 0122 0v22z'/%3E%3Cpath d='M96 190v-18h3v18zM106 190v-18h3v18zM116 190v-18h3v18zM92 172h31v3H92z'/%3E%3C/g%3E%3C/svg%3E"),
         /* 4. bancos de névoa presos ao chão */
         linear-gradient(0deg, rgba(150, 190, 170, .16) 0 8%, transparent 26%),
         linear-gradient(0deg, rgba(150, 190, 170, .10) 0 16%, transparent 40%),
         /* 5. o céu */
         linear-gradient(180deg, #0c1a18 0%, #091210 55%, #070d0b 100%);
-    background-size: cover, cover, cover, 260px 150px, cover, cover, cover;
+    background-size: cover, cover, cover, var(--mata-passo) var(--mata-altura), cover, cover, cover;
     background-repeat: no-repeat, no-repeat, no-repeat, repeat-x, no-repeat, no-repeat, no-repeat;
     background-position: center, center, center, bottom, bottom, bottom, center;
 }
@@ -1146,6 +1213,7 @@ body[data-tema="ladosombrio"] #log {
    times se posicionam em relação ao CENTRO da tela e não ao canto: esconder o log não empurra
    mais ninguém pro meio. */
 #arena {
+    position: relative;   /* âncora do #particulas e dos cenários (ver §TEMAS) */
     display: grid;
     grid-template-columns: 1fr 280px 1fr;
     gap: 12px;

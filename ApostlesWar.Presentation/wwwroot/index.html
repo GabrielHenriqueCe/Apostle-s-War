@@ -125,7 +125,11 @@
          e brilha ao chegar; dois cliques pulam a animação. Terminada, a MESMA cena vira a ficha dele
          (reusa a seção do compêndio, ver mostrarCena) e sair volta pra tela de vitória. -->
     <section id="conquista" hidden>
+        <!-- O cenário da chegada, em três peças separadas de propósito: os RAIOS giram devagar e
+             sempre; a AURA cresce junto com o champ; e os ANÉIS disparam no instante em que ele
+             chega. Juntas num elemento só, elas teriam que compartilhar uma linha do tempo. -->
         <div id="conquistaFundo"></div>
+        <div id="conquistaAura"></div>
         <div id="conquistaCorpo">
             <div id="conquistaEmoji"></div>
             <div id="conquistaNome"></div>
@@ -183,11 +187,6 @@
         </div>
     </section>
 
-    <!-- O ar do cenário (poeira, brasas, faíscas): canvas atrás de TUDO, ligado só quando o capítulo
-         em que se está lutando tem partículas. Fica fora das cenas de propósito — é fundo da janela,
-         não conteúdo de nenhuma tela. Ver PARTICULAS_DO_TEMA no jogo.js. -->
-    <canvas id="particulas" hidden></canvas>
-
     <header id="topo">
         <span id="turno">Turno 1</span>
         <div id="botoesTopo">
@@ -212,6 +211,17 @@
     <button id="sairTela" type="button" title="Sair desta tela (Esc)">✕</button>
 
     <main id="arena">
+        <!-- O AR do cenário, em DUAS telas, e a divisão não é técnica: é o que cada coisa É.
+             O que pertence ao MUNDO (a névoa no chão, as corujas na mata, os exércitos trocando
+             flechas ao longe) fica ATRÁS dos combatentes. O que está no ar ENTRE você e o mundo
+             (poeira, morcegos passando) fica na frente — é isso que dá profundidade.
+
+             As duas moram DENTRO da arena de propósito: o ar é do campo de batalha, não da janela;
+             assim nascem já recortadas no tamanho certo, somem junto com a luta e nunca passam por
+             cima do topo ou do painel. Ligadas só quando o capítulo tem ar (ver AR_DO_TEMA). -->
+        <canvas id="particulasFundo" hidden></canvas>
+        <canvas id="particulas" hidden></canvas>
+
         <section class="lado" id="ladoEsquerdo" aria-label="Seu time"></section>
 
         <!-- O log é PERSISTENTE e rolável: a batalha inteira fica registrada, então a mensagem não

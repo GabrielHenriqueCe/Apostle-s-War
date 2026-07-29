@@ -971,37 +971,42 @@ body {
 #particulas { z-index: 3; }
 #particulasFundo[hidden], #particulas[hidden] { display: none; }
 
-/* ---------- 👑 REINO — o salão do trono ----------
-   Azul-real no lugar do roxo, ouro no lugar do lilás, e o chão de pedra pegando a luz das tochas.
-   Tudo em gradiente e sombra: nenhuma imagem, nada pra carregar, e escala em qualquer resolução. */
+/* ---------- 👑 REINO — a cidade murada, de dia ----------
+   Era o salão do trono (colunas, damasco, chão de pedra). Virou CAMPO ABERTO diante do castelo, e a
+   troca vale por duas razões: os exércitos que atiram das bordas passaram a fazer sentido — isto é
+   um cerco, não uma sala — e o tema entrou na mesma língua dos outros, que são todos paisagem.
+
+   E é o único tema DE DIA. Os outros quatro são noite (salão de tocha, cemitério, invasão, clareira
+   ao anoitecer), então o Reino ser claro não é só variedade: é o contraste que faz o resto parecer
+   escuro de propósito. Aqui a paleta pode ter COR de verdade — telhado vermelho, bandeira, grama —
+   porque de dia a cor não precisa competir com fonte de luz nenhuma.
+
+   A muralha, as torres e as casas são desenhadas no canvas (ver `castelo` no jogo.js) pelo mesmo
+   motivo da clareira do Folclore: a composição é NOMEADA (castelo no meio, muro pros dois lados) e
+   nome não sobrevive a ladrilho que repete. O CSS aqui fica só com o céu. */
 body[data-tema="reino"] {
-    --fundo: #0d1226;
-    --painel: #161d3a;
-    --borda: #2f3c6b;
-    --apagado: #97a2c9;
+    --fundo: #6d9dc8;
+    --painel: #1b2440;
+    --borda: #46557f;
+    --apagado: #9aa6c4;
 }
 
-/* O SALÃO. Quatro camadas, de cima pra baixo:
-   1. a vinheta de tocha, que escurece os cantos e concentra o olho no meio;
-   2. as colunas do fundo (faixas verticais claras/escuras, mais apertadas na borda = perspectiva);
-   3. o brasão de damasco, discreto o bastante pra ler como textura e não como desenho;
-   4. o chão quente lá embaixo, contra a parede fria em cima. */
 body[data-tema="reino"] #arena {
     /* `relative` ancora os estandartes; `isolate` cria o contexto de empilhamento que os deixa
-       ficar ATRÁS do time (z -1) sem sumir atrás do próprio fundo do salão. Sem ele, o `::after`
-       — que é o último filho — pintaria POR CIMA dos combatentes da direita. */
+       ficar ATRÁS do time (z -1) sem sumir atrás do próprio fundo. Sem ele, o `::after` — que é o
+       último filho — pintaria POR CIMA dos combatentes da direita. */
     position: relative;
     isolation: isolate;
     background:
-        radial-gradient(ellipse 120% 90% at 50% 42%, transparent 35%, rgba(4, 6, 18, .82) 100%),
-        repeating-linear-gradient(90deg,
-            rgba(255, 255, 255, .028) 0 2px,
-            transparent 2px 5px,
-            rgba(0, 0, 0, .22) 5px 8px,
-            transparent 8px 78px),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23d9b45b' stroke-opacity='.09' stroke-width='1.6'%3E%3Cpath d='M60 16c9 12 20 18 20 30S69 76 60 88C51 76 40 58 40 46S51 28 60 16z'/%3E%3Ccircle cx='60' cy='46' r='6'/%3E%3Cpath d='M60 88v16M46 104h28'/%3E%3C/g%3E%3C/svg%3E"),
-        linear-gradient(180deg, #131a38 0%, #0d1226 58%, #221a12 88%, #3a2a16 100%);
-    background-size: cover, cover, 120px 120px, cover;
+        /* 1. vinheta LEVE: de dia ela só assenta os cantos, não pode escurecer a cena */
+        radial-gradient(ellipse 125% 95% at 50% 45%, transparent 52%, rgba(28, 44, 82, .34) 100%),
+        /* 2. o sol, alto à direita */
+        radial-gradient(circle 90px at 76% 13%, rgba(255, 250, 214, .95), rgba(255, 244, 190, .35) 42%, transparent 70%),
+        /* 3. o céu de dia: azul forte em cima, clareando até a bruma do horizonte */
+        linear-gradient(180deg, #3f77bd 0%, #6ba2d6 44%, #a9cbe4 76%, #d3e3e8 100%);
+    background-size: cover, cover, cover;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-position: center, center, center;
 }
 
 /* Estandartes pendurados: dois panos caindo do teto, um de cada lado, atrás dos times. Ficam no
@@ -1099,9 +1104,12 @@ body[data-tema="ladosombrio"] #arena::before,
 body[data-tema="ladosombrio"] #arena::after {
     content: '';
     position: absolute; top: 0;
-    width: 150px; height: 150px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Cg fill='none' stroke='%23cfe3d8' stroke-opacity='.5' stroke-width='1.1'%3E%3Cpath d='M0 0L150 60M0 0L120 105M0 0L60 150M0 0L18 150M0 0L150 18'/%3E%3Cpath d='M34 4Q22 22 4 34M62 8Q40 40 8 62M92 14Q58 58 14 92M120 22Q78 78 22 120M146 32Q92 92 32 146'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
-    opacity: .3;
+    width: 210px; height: 210px;
+    /* A teia é feita de ARCOS DE CÍRCULO centrados no canto, não de curvas soltas: os fios que
+       ligam os raios de uma teia real acompanham o mesmo raio. A versão anterior usava quadráticas
+       com pontas tortas e lia como um monte de riscos. `A r r 0 0 1 x y` = arco circular. */
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='210' height='210' viewBox='0 0 210 210'%3E%3Cg fill='none' stroke='%23cfe3d8' stroke-opacity='.55' stroke-width='1.1'%3E%3Cpath d='M0 0L210 26M0 0L210 78M0 0L168 147M0 0L105 210M0 0L46 210M0 0L14 210'/%3E%3Cpath d='M40 0A40 40 0 0 1 0 40'/%3E%3Cpath d='M76 0A76 76 0 0 1 0 76'/%3E%3Cpath d='M118 0A118 118 0 0 1 0 118'/%3E%3Cpath d='M162 0A162 162 0 0 1 0 162'/%3E%3Cpath d='M206 0A206 206 0 0 1 0 206'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    opacity: .34;
     pointer-events: none;
     z-index: -1;
 }
@@ -1127,6 +1135,81 @@ body[data-tema="ladosombrio"] .combatente {
 body[data-tema="ladosombrio"] #log {
     background: linear-gradient(180deg, rgba(18, 30, 24, .6), rgba(9, 16, 13, .6));
     border-color: rgba(150, 200, 170, .24);
+}
+
+/* ---------- 🪬 FOLCLORE — a clareira ao anoitecer ----------
+   Quatro criaturas que não moram no mesmo lugar, num lugar só: 👺 Tengu nos pinheiros e no torii da
+   montanha (e nos corvos que cruzam o céu), 🧌 Troll embaixo da ponte de pedra, 👹 Ogro na boca da
+   caverna com a fogueira acesa, e 🤡 Palhaço na tenda de circo com o varal de lâmpadas.
+
+   É o único tema com luz QUENTE no horizonte: os outros são frios (tocha dourada num salão fechado,
+   lua, neon). Aqui o sol acabou de se pôr e ainda há âmbar atrás da montanha — o que dá o ar de
+   história contada à noite, que é o que folclore é. */
+body[data-tema="folclore"] {
+    --fundo: #0d0a1b;
+    --painel: #191330;
+    --borda: #3a2d5c;
+    --apagado: #b0a2cc;
+
+    /* Sem `--folk-passo`/`--folk-altura`: este tema não tem ladrilho de horizonte. A clareira é
+       desenhada no canvas, em fração da largura da tela (ver `clareira` no jogo.js). */
+}
+
+body[data-tema="folclore"] #arena {
+    position: relative;
+    isolation: isolate;
+    background:
+        /* 1. vinheta */
+        radial-gradient(ellipse 110% 88% at 50% 42%, transparent 28%, rgba(4, 2, 12, .86) 100%),
+        /* 2. o âmbar do sol que acabou de sumir atrás do horizonte */
+        radial-gradient(ellipse 70% 30% at 50% 100%, rgba(255, 166, 92, .2), transparent 72%),
+        /* 3. névoa presa na clareira */
+        linear-gradient(0deg, rgba(196, 178, 230, .13) 0 10%, transparent 32%),
+        /* 4. o céu de anoitecer, roxo em cima e quente embaixo. O HORIZONTE deste tema não está aqui:
+              é desenhado no canvas (ver `clareira` no jogo.js).
+
+              Nos outros três o horizonte é um ladrilho que REPETE, e isso serve porque ali ele é uma
+              paisagem — mata, cidade. Aqui a composição é NOMEADA: caverna nas duas bordas, circo no
+              meio, torii entre eles. Posição nomeada não sobrevive a ladrilho (o que é "a borda"
+              muda com a largura da tela) nem a esticar uma imagem só (o torii engorda). No canvas
+              cada peça é uma fração da largura e cai no lugar certo em qualquer janela. */
+        linear-gradient(180deg, #140e2a 0%, #0d0a1b 54%, #16102a 82%, #2a1a2e 100%);
+    background-size: cover, cover, cover, cover;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+    background-position: center, bottom, bottom, center;
+}
+
+/* Galhos entrando pelos cantos de cima — o gancho que no Reino é estandarte e no cemitério é teia. */
+body[data-tema="folclore"] #arena::before,
+body[data-tema="folclore"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 190px; height: 32%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='150' viewBox='0 0 190 150' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%230a0716' stroke-width='7' stroke-linecap='round'%3E%3Cpath d='M-6 8q60 10 96 44t72 30'/%3E%3Cpath d='M40 20q10 26 34 30M96 40q4 26 24 34M140 58q2 18 16 24'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    opacity: .85;
+    pointer-events: none;
+    z-index: -1;
+}
+body[data-tema="folclore"] #arena::before { left: 0; }
+body[data-tema="folclore"] #arena::after { right: 0; transform: scaleX(-1); }
+
+body[data-tema="folclore"] #topo { border-bottom: 2px solid rgba(255, 180, 110, .4); }
+body[data-tema="folclore"] #painel { border-top: 2px solid rgba(255, 180, 110, .4); }
+body[data-tema="folclore"] #topo,
+body[data-tema="folclore"] #painel {
+    background:
+        linear-gradient(180deg, rgba(255, 180, 110, .06) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="folclore"] .combatente {
+    background: linear-gradient(180deg, rgba(44, 34, 74, .82), rgba(18, 13, 36, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+}
+
+body[data-tema="folclore"] #log {
+    background: linear-gradient(180deg, rgba(28, 20, 50, .62), rgba(13, 9, 26, .62));
+    border-color: rgba(255, 180, 110, .26);
 }
 
 /* ---------- ⚙️ TECNOLÓGICOS — a noite da invasão ----------
@@ -1334,6 +1417,13 @@ body[data-tema="tecnologicos"] #log {
     min-width: 230px;
     max-width: 300px;
     min-height: 0;              /* ver #arena: sem isto o log estica a arena */
+
+    /* O log é UI, não mundo: fica acima das DUAS telas de cenário (a de fundo, z 0, e a do ar, z 3).
+       Sem isto o castelo, o laboratório e o circo passavam POR CIMA dele — não por causa do z-index,
+       mas porque elemento posicionado pinta depois de elemento em fluxo normal, e o log não era
+       posicionado. Os combatentes escapavam por acaso: eles já têm `position: relative`. */
+    position: relative;
+    z-index: 4;
 }
 
 /* Log escondido: só a caixa some. A COLUNA continua ocupando o mesmo espaço, senão os times

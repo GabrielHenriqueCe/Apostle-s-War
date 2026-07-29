@@ -1227,8 +1227,17 @@ body[data-tema="tecnologicos"] {
 
     /* Lido pelo JS pra ancorar as faíscas nas PONTAS das bobinas do horizonte (mesma ideia das
        corujas do cemitério: uma fonte só pro ladrilho). */
-    --lab-passo: 340px;
-    --lab-altura: 190px;
+    /* 1.87× o tamanho original (era 340×190), nos DOIS eixos: 635/355 dá 1.7887 contra os 1.7895 do
+       original — a mesma proporção a menos de 0.04%, e é isso que impede a cidade de esticar.
+       Ladrilho maior = prédios maiores e menos repetições na largura da tela, que é o que tira a
+       leitura de papel de parede.
+
+       Têm de continuar em PX CRUS. O JS lê estes dois com `parseFloat(getPropertyValue(...))` pra
+       ancorar as bobinas, e propriedade customizada NÃO é resolvida pra px pelo getComputedStyle —
+       ela volta como o texto que está escrito aqui. Um `min(266px, 60vh)` voltaria a string inteira,
+       o parseFloat daria NaN e as bobinas cairiam no valor de emergência, silenciosamente. */
+    --lab-passo: 635px;
+    --lab-altura: 355px;
 }
 
 body[data-tema="tecnologicos"] #arena {

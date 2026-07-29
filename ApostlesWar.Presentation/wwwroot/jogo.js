@@ -1703,8 +1703,35 @@ const AR_DO_TEMA = {
         // uma abre: o tempo apagado é sorteado a cada ciclo, então elas nunca casam.
         corujas: {
             corpo: '#060f0b', olho: '236, 246, 205', tamanho: 11,
-            poleiros: [{ x: .145, y: .115, lado: -1 }, { x: .550, y: .310, lado: 1 }],
+            ladrilho: ['--mata-passo', '--mata-altura'],
+            pontos: [{ x: .145, y: .115, lado: -1 }, { x: .550, y: .310, lado: 1 }],
             aceso: 1.7, apagado: [5, 17], acordar: [0, 13],
+        },
+    },
+    // A noite da invasão, montada em cima de quem luta aqui: 👽/👾 nos discos que cruzam o céu
+    // varrendo o chão com o feixe, 🧑‍🔬 nas bobinas do laboratório soltando faísca, 🤖 nas fagulhas
+    // de solda subindo. Nenhuma peça é mecanismo novo — são as MESMAS camadas dos outros dois com
+    // outro vocabulário, que era o teste de verdade do seam.
+    tecnologicos: {
+        po: { cor: '126, 255, 190', quantas: 38, subida: [12, 34], raio: [0.5, 1.7], opacidade: [.14, .55] },
+        voadores: {
+            forma: 'disco', cor: '#0a1622', luz: '126, 255, 190',
+            quantos: 2, velocidade: [26, 52], tamanho: [26, 40], intervalo: [3, 14],
+        },
+        // As bobinas de Tesla do horizonte. Mesmo motor das corujas — posição vinda do ladrilho,
+        // relógio próprio, muito tempo apagada — só que o que acende é um raio, não um olho.
+        bobinas: {
+            cor: '170, 245, 255', tamanho: 15,
+            ladrilho: ['--lab-passo', '--lab-altura'],
+            pontos: [{ x: .115, y: .22 }, { x: .858, y: .315 }],
+            aceso: .5, apagado: [3, 11], acordar: [0, 7],
+        },
+        // O reator estourado no meio da cidade, queimando e vazando. Fica no canvas e NÃO no
+        // ladrilho da cidade porque desastre não se repete a cada 340px — repetido, ele viraria
+        // padrão de papel de parede em vez de acontecimento.
+        ruina: {
+            silhueta: '#050b14', fogo: '255, 146, 56', brasa: '255, 236, 190', veneno: '138, 255, 150',
+            largura: 230, altura: 128, labaredas: 7,
         },
     },
 };
@@ -1750,7 +1777,9 @@ function iniciarAr(config) {
     // Cada camada declara em QUE MUNDO ela vive, não em que canvas — o roteamento é consequência.
     const noFundo = [
         config.exercitos && criarExercitos(config.exercitos, fundo),
+        config.ruina && criarRuina(config.ruina, fundo),
         config.corujas && criarCorujas(config.corujas, fundo),
+        config.bobinas && criarBobinas(config.bobinas, fundo),
         config.nevoa && criarNevoa(config.nevoa, fundo),
     ].filter(Boolean);
 
@@ -1878,8 +1907,11 @@ function criarVoadores(cfg, canvas) {
             const saiu = m.vx > 0 ? m.x > canvas.width + 60 : m.x < -60;
             if (saiu) { bando[i] = novo(false); continue; }
 
-            desenharMorcego(ctx, m.x, m.y + Math.sin(m.fase) * m.bobo, m.tamanho,
-                m.asa, m.paraDireita, cfg.cor);
+            // A forma é do TEMA: o mesmo voo carrega o morcego do cemitério e o disco da invasão.
+            // O que muda é o desenho e — no disco — o feixe que ele varre no chão.
+            const y = m.y + Math.sin(m.fase) * m.bobo;
+            if (cfg.forma === 'disco') desenharDisco(ctx, m.x, y, m.tamanho, m.asa, canvas, cfg);
+            else desenharMorcego(ctx, m.x, y, m.tamanho, m.asa, m.paraDireita, cfg.cor);
         }
     };
 }
@@ -2358,33 +2390,155 @@ function desenharFlecha(ctx, x, y, angulo, cfg) {
 ///
 /// As contas são em coordenadas do CANVAS, que É a arena (ele é filho dela e a preenche): a mata
 /// fica ancorada no rodapé, então o topo do ladrilho é `altura do canvas − altura do ladrilho`.
-function criarCorujas(cfg, canvas) {
+/// A RUÍNA: o reator estourado no meio da cidade, queimando e vazando veneno. Uma só, no centro.
+///
+/// O fogo é feito de labaredas independentes, cada uma com o próprio ritmo e a própria altura — é a
+/// dessincronia que faz chama parecer chama. Um brilho pulsando sozinho leria como lâmpada.
+function criarRuina(cfg, canvas) {
+    const labaredas = Array.from({ length: cfg.labaredas }, (_, i) => ({
+        // Espalhadas pela boca do reator, as do meio mais altas (o miolo é onde queima mais).
+        posicao: (i + .5) / cfg.labaredas,
+        ritmo: 2.4 + Math.random() * 2.6,
+        fase: Math.random() * Math.PI * 2,
+        alturaBase: .55 + Math.random() * .45,
+    }));
+
+    let t = 0;
+
+    return (ctx, dt) => {
+        t += dt;
+
+        const l = cfg.largura, h = cfg.altura;
+        const cx = canvas.width / 2;
+        const base = canvas.height;
+
+        ctx.save();
+
+        // --- o clarão do incêndio, atrás de tudo: é ele que põe a ruína no meio de uma cidade
+        //     escura, em vez de deixá-la como um recorte preto sobre o fundo.
+        const pulso = .82 + Math.sin(t * 3.1) * .1 + Math.sin(t * 7.7) * .05;
+        const clarao = ctx.createRadialGradient(cx, base - h * .6, 0, cx, base - h * .6, l * 1.5 * pulso);
+        clarao.addColorStop(0, `rgba(${cfg.fogo}, .3)`);
+        clarao.addColorStop(.45, `rgba(${cfg.fogo}, .1)`);
+        clarao.addColorStop(1, `rgba(${cfg.fogo}, 0)`);
+        ctx.fillStyle = clarao;
+        ctx.beginPath();
+        ctx.arc(cx, base - h * .6, l * 1.5 * pulso, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- as labaredas, saindo da boca rasgada do reator
+        for (const f of labaredas) {
+            const x = cx - l * .3 + l * .6 * f.posicao;
+            // duas ondas de frequências diferentes: uma só daria um pulsar regular demais
+            const viva = .6 + Math.sin(t * f.ritmo + f.fase) * .25 + Math.sin(t * f.ritmo * 2.3) * .15;
+            const alt = h * .62 * f.alturaBase * viva;
+            const larg = l * .07 * (.8 + viva * .4);
+
+            const chama = ctx.createLinearGradient(x, base - h * .52, x, base - h * .52 - alt);
+            chama.addColorStop(0, `rgba(${cfg.brasa}, .85)`);
+            chama.addColorStop(.35, `rgba(${cfg.fogo}, .6)`);
+            chama.addColorStop(1, `rgba(${cfg.fogo}, 0)`);
+            ctx.fillStyle = chama;
+
+            ctx.beginPath();
+            ctx.moveTo(x - larg, base - h * .52);
+            // a ponta balança pro lado: fogo não sobe reto
+            ctx.quadraticCurveTo(x - larg * .5, base - h * .52 - alt * .6,
+                x + Math.sin(t * f.ritmo * .8 + f.fase) * larg * 1.2, base - h * .52 - alt);
+            ctx.quadraticCurveTo(x + larg * .5, base - h * .52 - alt * .6, x + larg, base - h * .52);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // --- a carcaça: parede rasgada, cúpula desabada e vergalhão torto
+        ctx.fillStyle = cfg.silhueta;
+        ctx.beginPath();
+        ctx.moveTo(cx - l * .5, base);
+        ctx.lineTo(cx - l * .5, base - h * .46);
+        ctx.lineTo(cx - l * .38, base - h * .62);
+        ctx.lineTo(cx - l * .3, base - h * .5);      // o rasgo por onde o fogo sai
+        ctx.lineTo(cx - l * .18, base - h * .58);
+        ctx.lineTo(cx - l * .05, base - h * .44);
+        ctx.lineTo(cx + l * .08, base - h * .6);
+        ctx.lineTo(cx + l * .2, base - h * .47);
+        ctx.lineTo(cx + l * .3, base - h * .78);     // o pedaço que ficou de pé
+        ctx.lineTo(cx + l * .42, base - h * .72);
+        ctx.lineTo(cx + l * .5, base - h * .9);
+        ctx.lineTo(cx + l * .5, base);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = cfg.silhueta;
+        ctx.lineWidth = 2.4;
+        for (const v of [[-.34, .66, -.4, .86], [-.1, .5, -.02, .72], [.16, .52, .24, .74]]) {
+            ctx.beginPath();
+            ctx.moveTo(cx + l * v[0], base - h * v[1]);
+            ctx.quadraticCurveTo(cx + l * v[2], base - h * (v[3] + .06), cx + l * v[2], base - h * v[3]);
+            ctx.stroke();
+        }
+
+        // --- o VENENO escorrendo e empoçando: verde, e a única luz fria da ruína
+        const poca = ctx.createRadialGradient(cx, base, 0, cx, base, l * .85);
+        poca.addColorStop(0, `rgba(${cfg.veneno}, ${.34 + Math.sin(t * 1.6) * .06})`);
+        poca.addColorStop(.5, `rgba(${cfg.veneno}, .12)`);
+        poca.addColorStop(1, `rgba(${cfg.veneno}, 0)`);
+        ctx.fillStyle = poca;
+        ctx.beginPath();
+        ctx.ellipse(cx, base, l * .85, h * .16, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // os fios de veneno descendo pela parede, cada um no seu tempo
+        ctx.strokeStyle = `rgba(${cfg.veneno}, .55)`;
+        ctx.lineWidth = 2.6;
+        ctx.lineCap = 'round';
+        for (let i = 0; i < 4; i++) {
+            const x = cx - l * .34 + i * l * .22;
+            const escorre = (t * .18 + i * .27) % 1;      // desce e recomeça
+            const y0 = base - h * (.42 - i * .03);
+            ctx.globalAlpha = .8 * (1 - escorre * .5);
+            ctx.beginPath();
+            ctx.moveTo(x, y0);
+            ctx.lineTo(x, y0 + (base - y0) * escorre);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.restore();
+    };
+}
+
+/// O MOTOR delas — e das bobinas do laboratório, que são a mesma coisa com outra fantasia: coisas
+/// PRESAS NO HORIZONTE que acendem de vez em quando, cada uma no seu tempo. Duplicar estas 40 linhas
+/// pro segundo cliente seria abrir a porta pra as duas divergirem em silêncio.
+///
+/// O que cada tema traz é só: de que ladrilho ler a posição, onde estão os pontos, e o que desenhar.
+function criarPiscantes(cfg, canvas, desenhar) {
     const arena = document.getElementById('arena');
-    let poleiros = [];
+    let pontos = [];
     let assinatura = '';
 
     const remontar = () => {
         const estilo = getComputedStyle(arena);
-        const passo = parseFloat(estilo.getPropertyValue('--mata-passo')) || 320;
-        const altura = parseFloat(estilo.getPropertyValue('--mata-altura')) || 190;
+        const passo = parseFloat(estilo.getPropertyValue(cfg.ladrilho[0])) || 320;
+        const altura = parseFloat(estilo.getPropertyValue(cfg.ladrilho[1])) || 190;
 
-        // Só refaz quando a GEOMETRIA muda. Refazer sempre destruiria o relógio de cada olho a cada
+        // Só refaz quando a GEOMETRIA muda. Refazer sempre destruiria o relógio de cada um a cada
         // conferida, e aí nenhum chegaria a acender — piscariam do zero pra sempre.
         const agora = `${canvas.width}|${canvas.height}|${passo}|${altura}`;
         if (agora === assinatura) return;
         assinatura = agora;
 
-        const baseY = canvas.height - altura;   // o ladrilho da mata é ancorado no rodapé
+        const baseY = canvas.height - altura;   // o ladrilho do horizonte é ancorado no rodapé
 
-        poleiros = [];
+        pontos = [];
         for (let tile = 0; tile * passo < canvas.width; tile++) {
-            for (const p of cfg.poleiros) {
-                poleiros.push({
-                    // O `lado` encosta a coruja no flanco do tronco em vez de a espetar no meio dele.
-                    x: tile * passo + p.x * passo + p.lado * cfg.tamanho * .78,
+            for (const p of cfg.pontos) {
+                pontos.push({
+                    // `lado` (quando existe) encosta a figura no flanco em vez de a espetar no meio.
+                    x: tile * passo + p.x * passo + (p.lado ?? 0) * cfg.tamanho * .78,
                     y: baseY + p.y * altura,
-                    lado: p.lado,
-                    // Ela chega dormindo: a primeira abertura demora, e cada uma demora o seu.
+                    lado: p.lado ?? 1,
+                    // Chega dormindo: a primeira vez demora, e cada uma demora o seu.
                     aceso: false,
                     resta: entre(cfg.acordar),
                 });
@@ -2401,16 +2555,61 @@ function criarCorujas(cfg, canvas) {
         conferir -= dt;
         if (conferir <= 0) { conferir = 1; remontar(); }
 
-        for (const c of poleiros) {
+        for (const c of pontos) {
             c.resta -= dt;
             if (c.resta <= 0) {
                 c.aceso = !c.aceso;
                 // Aceso: sempre o mesmo tempo. Apagado: sorteado, e é daqui que vem o desencontro.
                 c.resta = c.aceso ? cfg.aceso : entre(cfg.apagado);
             }
-            desenharCoruja(ctx, c.x, c.y, cfg.tamanho, c.lado, c.aceso, cfg);
+            desenhar(ctx, c, cfg);
         }
     };
+}
+
+const criarCorujas = (cfg, canvas) => criarPiscantes(cfg, canvas,
+    (ctx, c, k) => desenharCoruja(ctx, c.x, c.y, k.tamanho, c.lado, c.aceso, k));
+
+const criarBobinas = (cfg, canvas) => criarPiscantes(cfg, canvas,
+    (ctx, c, k) => c.aceso && desenharRaio(ctx, c.x, c.y, k.tamanho, k));
+
+/// A descarga da bobina de Tesla: uma coroa de raios saindo da bola, com o traço quebrando em
+/// ziguezague. É redesenhada a cada quadro com ângulos NOVOS de propósito — raio parado no ar não
+/// existe, e é o tremer que faz a faísca parecer elétrica em vez de desenhada.
+function desenharRaio(ctx, x, y, tamanho, cfg) {
+    ctx.save();
+
+    // o halo da bola acesa
+    const halo = ctx.createRadialGradient(x, y, 0, x, y, tamanho * 1.6);
+    halo.addColorStop(0, `rgba(${cfg.cor}, .9)`);
+    halo.addColorStop(.3, `rgba(${cfg.cor}, .35)`);
+    halo.addColorStop(1, `rgba(${cfg.cor}, 0)`);
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(x, y, tamanho * 1.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = `rgba(${cfg.cor}, .85)`;
+    ctx.lineWidth = 1.3;
+    ctx.lineCap = 'round';
+
+    for (let r = 0; r < 4; r++) {
+        const angulo = -Math.PI / 2 + (Math.random() - .5) * 2.4;
+        const alcance = tamanho * (1.4 + Math.random() * 1.6);
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        // Três quebras: menos que isso vira risco reto, mais vira novelo.
+        for (let k = 1; k <= 3; k++) {
+            const d = alcance * (k / 3);
+            const desvio = (Math.random() - .5) * tamanho * .7;
+            ctx.lineTo(x + Math.cos(angulo) * d - Math.sin(angulo) * desvio,
+                       y + Math.sin(angulo) * d + Math.cos(angulo) * desvio);
+        }
+        ctx.stroke();
+    }
+
+    ctx.restore();
 }
 
 /// Uma coruja empoleirada: silhueta parada, olhos que acendem. O corpo fica SEMPRE visível — ela
@@ -2457,6 +2656,66 @@ function desenharCoruja(ctx, x, y, s, lado, aceso, cfg) {
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(ox, oy, .62, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/// O DISCO VOADOR do 👽 e do 👾: casco em silhueta, cúpula, luzes girando na barriga e o FEIXE
+/// varrendo o chão. O feixe é o que faz o disco pertencer à cena em vez de ser um adesivo colado no
+/// céu — ele toca o campo, então há uma nave ali de verdade.
+///
+/// `fase` é a mesma variável que bate a asa do morcego. Aqui ela gira as luzes: um motor de voo só,
+/// dois bichos.
+function desenharDisco(ctx, x, y, s, fase, canvas, cfg) {
+    ctx.save();
+
+    // O feixe primeiro, pra o casco pousar por cima dele.
+    const alcanceY = canvas.height - y;
+    const feixe = ctx.createLinearGradient(x, y, x, canvas.height);
+    feixe.addColorStop(0, `rgba(${cfg.luz}, .3)`);
+    feixe.addColorStop(.55, `rgba(${cfg.luz}, .08)`);
+    feixe.addColorStop(1, `rgba(${cfg.luz}, 0)`);
+    ctx.fillStyle = feixe;
+    ctx.beginPath();
+    ctx.moveTo(x - s * .5, y);
+    ctx.lineTo(x + s * .5, y);
+    ctx.lineTo(x + s * .5 + alcanceY * .16, canvas.height);
+    ctx.lineTo(x - s * .5 - alcanceY * .16, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.translate(x, y);
+    ctx.fillStyle = cfg.cor;
+
+    // casco: elipse achatada
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s, s * .3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // cúpula
+    ctx.beginPath();
+    ctx.ellipse(0, -s * .16, s * .42, s * .34, 0, Math.PI, 0);
+    ctx.fill();
+
+    // o brilho da cúpula — o único ponto claro, e o que diz "tem alguém pilotando"
+    const vidro = ctx.createRadialGradient(0, -s * .3, 0, 0, -s * .3, s * .38);
+    vidro.addColorStop(0, `rgba(${cfg.luz}, .75)`);
+    vidro.addColorStop(1, `rgba(${cfg.luz}, 0)`);
+    ctx.fillStyle = vidro;
+    ctx.beginPath();
+    ctx.arc(0, -s * .3, s * .38, 0, Math.PI * 2);
+    ctx.fill();
+
+    // as luzes da barriga, girando: a mais próxima da frente é a mais acesa
+    for (let i = 0; i < 5; i++) {
+        const a = fase * .7 + i * (Math.PI * 2 / 5);
+        const lx = Math.cos(a) * s * .68;
+        const brilho = (Math.sin(a) + 1) / 2;   // some ao passar por trás do casco
+        ctx.fillStyle = `rgba(${cfg.luz}, ${.15 + brilho * .75})`;
+        ctx.beginPath();
+        ctx.arc(lx, s * .16, s * .075, 0, Math.PI * 2);
         ctx.fill();
     }
 

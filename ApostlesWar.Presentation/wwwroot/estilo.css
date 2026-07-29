@@ -1088,7 +1088,10 @@ body[data-tema="ladosombrio"] #arena {
         linear-gradient(180deg, #0c1a18 0%, #091210 55%, #070d0b 100%);
     background-size: cover, cover, cover, var(--mata-passo) var(--mata-altura), cover, cover, cover;
     background-repeat: no-repeat, no-repeat, no-repeat, repeat-x, no-repeat, no-repeat, no-repeat;
-    background-position: center, center, center, bottom, bottom, bottom, center;
+    /* `left bottom` na MATA, e não `bottom`: `bottom` sozinho vale `50% 100%`, ou seja, os ladrilhos
+       são ancorados no CENTRO da tela. O JS que posiciona as corujas conta os ladrilhos a partir do
+       x=0 — com a âncora no centro, as duas contas discordam e os olhos caem fora das árvores. */
+    background-position: center, center, center, left bottom, bottom, bottom, center;
 }
 
 /* Teias nos cantos de cima — onde o Reino pendura estandartes. Mesmo gancho, outra história. */
@@ -1124,6 +1127,84 @@ body[data-tema="ladosombrio"] .combatente {
 body[data-tema="ladosombrio"] #log {
     background: linear-gradient(180deg, rgba(18, 30, 24, .6), rgba(9, 16, 13, .6));
     border-color: rgba(150, 200, 170, .24);
+}
+
+/* ---------- ⚙️ TECNOLÓGICOS — a noite da invasão ----------
+   O terceiro, e o que fecha o argumento do seam: mesmo esqueleto de camadas dos outros dois
+   (paleta, textura, horizonte, vinheta), vocabulário completamente outro.
+
+   O cenário conta quem luta aqui: 👽 Alien e 👾 Invasor descendo num céu estrelado (os discos e o
+   feixe vêm no canvas), 🧑‍🔬 Cientista no laboratório do horizonte com as bobinas soltando faísca, e
+   🤖 Robô no metal e no neon de tudo. Um "hangar" genérico não diria nada sobre eles. */
+body[data-tema="tecnologicos"] {
+    --fundo: #05080f;
+    --painel: #0e1626;
+    --borda: #263c5c;
+    --apagado: #93aed0;
+
+    /* Lido pelo JS pra ancorar as faíscas nas PONTAS das bobinas do horizonte (mesma ideia das
+       corujas do cemitério: uma fonte só pro ladrilho). */
+    --lab-passo: 340px;
+    --lab-altura: 190px;
+}
+
+body[data-tema="tecnologicos"] #arena {
+    position: relative;
+    isolation: isolate;
+    background:
+        /* 1. vinheta fria */
+        radial-gradient(ellipse 110% 85% at 50% 38%, transparent 26%, rgba(1, 3, 8, .9) 100%),
+        /* 2. o clarão VERDE da nave, alto no céu — a cor do 👽, e o que faz o céu não ser só noite */
+        radial-gradient(ellipse 46% 34% at 50% 6%, rgba(126, 255, 190, .13), transparent 72%),
+        /* 3. estrelas */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='%23dff2ff'%3E%3Ccircle cx='24' cy='38' r='1.3' fill-opacity='.85'/%3E%3Ccircle cx='96' cy='16' r='.9' fill-opacity='.6'/%3E%3Ccircle cx='150' cy='62' r='1.5' fill-opacity='.9'/%3E%3Ccircle cx='212' cy='28' r='1' fill-opacity='.55'/%3E%3Ccircle cx='58' cy='104' r='1.1' fill-opacity='.7'/%3E%3Ccircle cx='188' cy='120' r='.9' fill-opacity='.5'/%3E%3Ccircle cx='240' cy='90' r='1.3' fill-opacity='.8'/%3E%3Ccircle cx='120' cy='150' r='1' fill-opacity='.6'/%3E%3Ccircle cx='32' cy='188' r='1.2' fill-opacity='.7'/%3E%3Ccircle cx='206' cy='196' r='.9' fill-opacity='.5'/%3E%3Ccircle cx='142' cy='226' r='1.1' fill-opacity='.65'/%3E%3Ccircle cx='76' cy='244' r='.8' fill-opacity='.45'/%3E%3C/g%3E%3C/svg%3E"),
+        /* 4. a CIDADE no horizonte: duas bobinas de Tesla (as bolas são de onde a faísca sai), os
+              prédios com as janelas acesas, chaminés e tanques. A ruína que pega fogo NÃO está aqui
+              — ela é desenhada uma vez só no canvas, senão o desastre se repetiria a cada ladrilho
+              e viraria padrão de papel de parede em vez de acontecimento. */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='190' viewBox='0 0 340 190'%3E%3Cg fill='%23060d18'%3E%3Cpath d='M34 190V54h10v136zM28 62h22v6H28z'/%3E%3Ccircle cx='39' cy='42' r='11'/%3E%3Cpath d='M62 190v-76h44v76zM118 190v-52h30v52z'/%3E%3Cpath d='M158 190v-64h10v64zM172 190v-48h8v48z'/%3E%3Cpath d='M196 190V92h58v98zM262 190v-58h22v58z'/%3E%3Cpath d='M288 190V70h8v120zM282 78h20v5h-20z'/%3E%3Ccircle cx='292' cy='60' r='9'/%3E%3Cpath d='M306 190v-40a13 13 0 0126 0v40z'/%3E%3C/g%3E%3Cg fill='%237effbe' fill-opacity='.5'%3E%3Crect x='70' y='126' width='10' height='6'/%3E%3Crect x='88' y='126' width='10' height='6'/%3E%3Crect x='70' y='144' width='10' height='6'/%3E%3Crect x='126' y='150' width='8' height='6'/%3E%3Crect x='206' y='104' width='11' height='7'/%3E%3Crect x='226' y='104' width='11' height='7'/%3E%3Crect x='206' y='124' width='11' height='7'/%3E%3Crect x='226' y='124' width='11' height='7'/%3E%3Crect x='206' y='144' width='11' height='7'/%3E%3Crect x='268' y='144' width='12' height='6'/%3E%3Crect x='268' y='160' width='12' height='6'/%3E%3C/g%3E%3C/svg%3E"),
+        /* 5. o solo, pegando o verde da nave */
+        linear-gradient(180deg, #070c18 0%, #05080f 60%, #071420 86%, #0c2230 100%);
+    background-size: cover, cover, 260px 260px, var(--lab-passo) var(--lab-altura), cover;
+    background-repeat: no-repeat, no-repeat, repeat, repeat-x, no-repeat;
+    /* `left bottom` na cidade pelo mesmo motivo da mata do cemitério: o JS conta os ladrilhos a
+       partir do x=0, e `bottom` sozinho os ancoraria no centro da tela. */
+    background-position: center, top, top, left bottom, center;
+}
+
+/* Cabos e dutos descendo dos cantos de cima — onde o Reino pendura estandartes e o cemitério tem
+   teias. Mesmo gancho, terceira história. */
+body[data-tema="tecnologicos"] #arena::before,
+body[data-tema="tecnologicos"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 120px; height: 38%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='200' viewBox='0 0 120 200' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%230a1420' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M18 0v54q0 40 26 62t22 62'/%3E%3Cpath d='M52 0v30q0 46 34 70'/%3E%3C/g%3E%3Cg fill='none' stroke='%237effbe' stroke-opacity='.2' stroke-width='1.6'%3E%3Cpath d='M18 0v54q0 40 26 62t22 62'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    opacity: .8;
+    pointer-events: none;
+    z-index: -1;
+}
+body[data-tema="tecnologicos"] #arena::before { left: 0; }
+body[data-tema="tecnologicos"] #arena::after { right: 0; transform: scaleX(-1); }
+
+body[data-tema="tecnologicos"] #topo { border-bottom: 2px solid rgba(126, 255, 190, .42); }
+body[data-tema="tecnologicos"] #painel { border-top: 2px solid rgba(126, 255, 190, .42); }
+body[data-tema="tecnologicos"] #topo,
+body[data-tema="tecnologicos"] #painel {
+    background:
+        linear-gradient(180deg, rgba(126, 255, 190, .06) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="tecnologicos"] .combatente {
+    background: linear-gradient(180deg, rgba(22, 40, 62, .82), rgba(8, 16, 28, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+}
+
+/* O log vira terminal: fundo quase preto e fio de neon. */
+body[data-tema="tecnologicos"] #log {
+    background: linear-gradient(180deg, rgba(7, 18, 28, .68), rgba(3, 8, 15, .68));
+    border-color: rgba(126, 255, 190, .28);
 }
 
 /* ---------- o botão SAIR global ---------- */

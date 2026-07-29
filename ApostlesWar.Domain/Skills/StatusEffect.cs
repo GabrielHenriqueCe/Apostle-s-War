@@ -13,6 +13,22 @@ namespace ApostlesWar.Domain
     /// </summary>
     public abstract class StatusEffect : ElementoDeJogo
     {
+        /// <summary>
+        /// A duração de um status que NÃO ACABA (o Intocável do Fantasma, a Sentença do Vilão, a
+        /// Couraça). Vale METADE do int.MaxValue, e a metade é o ponto: "permanente" precisa aguentar
+        /// que alguém SOME turnos nela.
+        ///
+        /// Era `int.MaxValue` cru, e aí o <see cref="AumentarDuracao"/> — que o Raio-X do Robô chama
+        /// pra ESTENDER benefícios — estourava o int e caía em negativo, o que o
+        /// <see cref="Expirou"/> lê como acabado. A habilidade que promete prolongar o buff o APAGAVA,
+        /// e só o permanente, que é justamente o que mais dói perder. Com folga de um bilhão de
+        /// turnos, somar 1 é somar 1.
+        ///
+        /// O front mostra "∞" acima de um limiar bem menor (ver `duracaoTexto` no jogo.js), então a
+        /// troca não muda nada na tela.
+        /// </summary>
+        public const int Permanente = int.MaxValue / 2;
+
         public double Valor { get; }
         public int DuracaoRestante { get; protected set; }
         public bool AcabouDeAplicar { get; private set; }

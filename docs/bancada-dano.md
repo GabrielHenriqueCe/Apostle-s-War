@@ -180,7 +180,7 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20925 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20920 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 8160 | 240 | 32640 | 0 |
@@ -284,7 +284,7 @@ O champ jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o 
 | 👮 Policial | 24320 | 24320 | 0 | 24320 | 24320 | 0 | 0 | Atacar 66×, Tiroteio 34×, Prender 0× |
 | 👲 Sushiman  | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
 | 💂 Guarda | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 57726 | 57387 | +339 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 57725 | 57387 | +338 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
 | 🧙 Mago | 20080 | 20080 | 0 | 72400 | 72400 | 0 | 0 | Atacar 33×, Bola de Fogo 33×, Incêndio 34× |
 | 🫅 Rei | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
 | 💀 Caveira | 10527 | 10527 | 0 | 34188 | 34188 | 0 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
@@ -293,7 +293,7 @@ O champ jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o 
 | 🧟 Zumbi | 18720 | 18720 | 0 | 66960 | 66960 | 0 | 0 | Atacar 33×, Vômito Tóxico 33×, Putrefação 34× |
 | 👾 Invasor | 41548 | 33680 | +7868 | 41548 | 33680 | +7868 | 0 | Atacar 33×, Glitch 34×, Barata 33× |
 | 👽 Alien | 5280 | 5280 | 0 | 5280 | 5280 | 0 | 0 | Atacar 66×, Abduzir 0×, Galáxia 34× |
-| 🤖 Robô | 1779 | 2640 | -861 | 1788 | 2640 | -852 | 0 | Atacar 33×, Raio-X 34×, Technology 33× |
+| 🤖 Robô | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Raio-X 34×, Technology 33× |
 | 🧑‍🔬 Cientista | 18720 | 18720 | 0 | 66960 | 66960 | 0 | 0 | Atacar 33×, Química 34×, Física 33× |
 | 👹 Ogro | 10560 | 10560 | 0 | 34320 | 34320 | 0 | 0 | Atacar 33×, Esmagar 34×, Quebrar 33× |
 | 👺 Tengu | 51870 | 51870 | 0 | 91650 | 91650 | 0 | 0 | Atacar 33×, Corte de Vento 34×, Vendaval 33× |
@@ -327,7 +327,7 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia 
 | 👮 Policial | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Tiroteio 33×, Prender 34× |
 | 👲 Sushiman  | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
 | 💂 Guarda | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 57721 | 57387 | +334 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 57724 | 57387 | +337 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
 | 🧙 Mago | 33010 | 20040 | +12970 | 122140 | 72240 | +49900 | 10000 | Atacar 33×, Bola de Fogo 34×, Incêndio 33× |
 | 🫅 Rei | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
 | 💀 Caveira | 10527 | 10527 | 0 | 34188 | 34188 | 0 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
@@ -336,7 +336,7 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia 
 | 🧟 Zumbi | 31920 | 18720 | +13200 | 119760 | 66960 | +52800 | 6600 | Atacar 33×, Vômito Tóxico 33×, Putrefação 34× |
 | 👾 Invasor | 78935 | 33680 | +45255 | 78935 | 33680 | +45255 | 0 | Atacar 33×, Glitch 34×, Barata 33× |
 | 👽 Alien | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Abduzir 33×, Galáxia 34× |
-| 🤖 Robô | 1791 | 2640 | -849 | 1785 | 2640 | -855 | 0 | Atacar 33×, Raio-X 34×, Technology 33× |
+| 🤖 Robô | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Raio-X 34×, Technology 33× |
 | 🧑‍🔬 Cientista | 36215 | 18720 | +17495 | 136940 | 66960 | +69980 | 17495 | Atacar 33×, Química 34×, Física 33× |
 | 👹 Ogro | 10560 | 10560 | 0 | 34320 | 34320 | 0 | 0 | Atacar 33×, Esmagar 34×, Quebrar 33× |
 | 👺 Tengu | 51870 | 51870 | 0 | 91650 | 91650 | 0 | 0 | Atacar 33×, Corte de Vento 34×, Vendaval 33× |
@@ -381,7 +381,7 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia 
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 | 0 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 | 0 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20924 | 0 | 0 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20921 | 0 | 0 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 | 0 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |

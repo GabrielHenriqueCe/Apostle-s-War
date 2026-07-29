@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Skills.Buffs
     /// </summary>
     public class EspinhosVenenosos : Buff, IReageAoSerAtacado, IPuneQuemAtaca
     {
-        public EspinhosVenenosos(int duracao = int.MaxValue)
+        public EspinhosVenenosos(int duracao = Permanente)
             : base("Espinhos", "🌿", duracao, 0,
                 "Atacantes recebem Veneno e Queima.")
         { }

@@ -17,7 +17,7 @@ namespace ApostlesWar.Domain.Skills.Debuffs
     public class ImpedirRessurreicao : Debuff
     {
         public ImpedirRessurreicao()
-            : base("Sentença", "⚰️", int.MaxValue, 0, "Não pode ser ressuscitado.")
+            : base("Sentença", "⚰️", Permanente, 0, "Não pode ser ressuscitado.")
         { }
 
         public override void Remover(Combate alvo)

@@ -16,7 +16,7 @@ namespace ApostlesWar.Domain.Skills.Buffs
     public class ReducaoDanoFixo : Buff, IModificaDanoRecebido
     {
         public ReducaoDanoFixo(double percentual = 0.15)
-            : base("Couraça", "🐚", int.MaxValue, percentual,
+            : base("Couraça", "🐚", Permanente, percentual,
                 $"-{percentual * 100:F0}% dano recebido.")
         { }
 

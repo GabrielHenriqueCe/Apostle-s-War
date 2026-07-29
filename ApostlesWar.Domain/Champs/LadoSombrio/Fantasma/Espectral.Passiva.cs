@@ -15,7 +15,7 @@ namespace ApostlesWar.Domain.Champs.LadoSombrio
 
         public void AplicarInicial(Combate portador)
         {
-            new Intocavel(duracao: int.MaxValue, removivel: false).Aplicar(portador);
+            new Intocavel(duracao: StatusEffect.Permanente, removivel: false).Aplicar(portador);
         }
 
         public override List<EventoCombate> Ativar(ContextoCombate ctx, Combate alvo)

@@ -50,7 +50,7 @@ namespace Tests.Bancada
             // TaxaCritBase vem do Personagem, que não aceita crit no construtor.
             if (!_critMaximo) return;
             foreach (Combate c in equipe1)
-                new BuffTaxaCrit(duracao: int.MaxValue, valor: 1.0).Aplicar(c);
+                new BuffTaxaCrit(duracao: StatusEffect.Permanente, valor: 1.0).Aplicar(c);
         }
 
         public void ExibirResultadoAtaque(Combate atacante, Combate alvo, EventoDano r)

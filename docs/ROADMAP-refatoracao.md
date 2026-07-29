@@ -35,6 +35,27 @@ Mergeado em sequência de PRs:
   `ExecutarFase`/`ExecutarArena` e o `ResultadoFase.Cancelou`. −1.645 linhas.
 - **Camadas ajustadas** (#180): auditoria achou 7 decisões na camada errada e as devolveu ao dono —
   ver §CADA DECISÃO NA SUA CAMADA.
+- **Rebalanceamento, 1ª passada** (#189): o primeiro ajuste feito **com número na mão** em vez de
+  intuição, lendo a bancada (§BANCADA DE DANO). Dois eixos: **cooldown padronizado em 3** (os de 4
+  turnos eram penalidade escondida — a habilidade boa aparecia menos, e a coluna `Usos` denunciava) e
+  **multiplicadores de dano subindo de faixa** (a maioria de 1.5–3.0 pra 3.0–4.5, porque o boneco com
+  DEF no cap engolia os golpes baixos: eles apareciam como se não existissem nas linhas 2 e 5). 36
+  champs tocados. De carona vieram o **bug do hit-all** — o guard do `ResolverAlvos` cobrava a
+  semente, e como hit-all não tem pick o `CombateService` manda o próprio atacante de placeholder;
+  os 5 revive-de-todos (Robô, Sereia, Anjo, Palhaço, Diabo) explodiam com `InvalidOperationException`
+  justamente quando havia alguém pra reviver, e sem mortos o early-return salvava antes (por isso
+  passava) — e as **colunas de área** nas duas linhas de champ inteiro da bancada: medir contra 1
+  boneco SUBESTIMA o champ de área (os malefícios do Detetive valem +9.504 contra 1 alvo e +30.888
+  contra 4; com uma coluna só, o instrumento dizia que ele era médio).
+- **Save, compêndio e navegação** (#190): (a) **"excluir conta" virou wipe de verdade** — duas causas
+  independentes. A semente versionada (`Save/**` copiado pro build "com tudo liberado") repunha o save
+  a cada build, e o wipe só limpava o DISCO enquanto o progresso vivia em memória desde o boot, com o
+  `CarregarProgresso` só sobrescrevendo quando a porta devolve não-nulo — então save ausente
+  PRESERVAVA o que já estava carregado. Cada service ganhou `Resetar()` e virou dono da PRÓPRIA chave
+  (const), com o `CampanhaService.ResetarProgresso()` orquestrando. (b) **Clicar fora desarma a
+  habilidade**, igual ao Esc: ela ficava armada E invisível (o painel só desenha pra quem age).
+  (c) **Compêndio**: o catálogo dos 36 por facção, travados incluídos e clicáveis — é planejando
+  contra o que ainda não se tem que a campanha vira escolha.
 
 **Arquitetura (detalhe em §FRONT abaixo):** ponte de mensagens LOCAL in-process (JS↔C# pela webview,
 sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos seams `ITelaDeCombate`/
@@ -42,9 +63,10 @@ sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos sea
 `Executar...ComTime(s)` (a casca pica o time e chama), e a lógica META (recompensa/save da campanha)
 mora na Application (`CampanhaService`), nunca no front.
 
-**PRÓXIMO: REBALANCE (#16)** — agora com a interface amigável como instrumento (era o motivo de o front
-vir antes). Fios de combate ainda abertos: ver §OS FIOS QUE FALTAM (sweep de composição por facção,
-turno-resto, passiva-conta-mortos).
+**REBALANCE (#16): EM ITERAÇÃO, não fechado.** A bancada é o instrumento e a 1ª passada (#189) já
+entrou; o trabalho agora é o laço `editar número → dotnet test → git diff docs/bancada-dano.md`,
+quantas voltas o Gabriel achar que precisa. Fios de combate ainda abertos: ver §OS FIOS QUE FALTAM
+(sweep de composição por facção, turno-resto, passiva-conta-mortos).
 
 > As seções §FRONT §Fatiamento e a FILA B abaixo descreviam o front como PLANO — ficam como registro do
 > desenho, com o estado real marcado ✅.
@@ -229,11 +251,14 @@ turno-resto, passiva-conta-mortos).
       tornar a apresentação injetável — evita desenhar 2× o seam que o front vai redesenhar.
       Até lá a ordem é guardada pelo comentário no `ProcessarReacoesAoMorrer` + ADR.
 15. **Faxina de comentários** — bisturi. Penúltimo.
-16. **REBALANCEAMENTO** — fase própria, o FIM. Números em playtest. **Passo 0 (auditoria):**
-    reunir as constantes de balance num lugar só — a fórmula do `MultiplicadorFase`
-    (0.5×capítulo + 0.1×fase, repetida 3× no CombateService) e
+16. 🔄 **REBALANCEAMENTO — EM ITERAÇÃO** (1ª passada mergeada no #189). Não é um item que "termina":
+    a bancada (§BANCADA DE DANO) é o instrumento, e cada volta é ler os números e mexer numa
+    alavanca. A passada 1 padronizou o cooldown em 3 e subiu os multiplicadores de faixa.
+    **Passo 0 (auditoria) — AINDA ABERTO:** reunir as constantes de balance num lugar só — a fórmula
+    do `MultiplicadorFase` (0.5×capítulo + 0.1×fase, repetida 3× no CombateService) e
     `DefesaPorPontoReducao`/`ReducaoMaximaPorDefesa` (Combate.cs) — senão mexer em alavanca
-    vira caça ao tesouro.
+    vira caça ao tesouro. *(A fórmula do MultiplicadorFase sai daqui no PR de DIFICULDADE, que
+    precisa dela centralizada pra acrescentar o eixo da dificuldade.)*
 
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.

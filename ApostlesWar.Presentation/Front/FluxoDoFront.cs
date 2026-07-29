@@ -252,6 +252,7 @@ namespace ApostlesWar.Presentation.Front
 
                     _sessao.Reiniciar();       // batalha nova = tela limpa (senão os antigos acumulam)
                     _sessao.Modo = ModoDeBatalha.Arena;   // aqui sair é sair mesmo, sem desfecho
+                    _sessao.Tema = "";                    // laboratório não tem cenário
                     _ponte.DesligarAuto();     // e controle de volta com o jogador
                     _ponte.LimparPendentes();  // dropa cliques da montagem + zera o "sair"
                     if (_combate.ExecutarArenaComTimes(time1, time2, cfg.Bot1, cfg.Bot2))
@@ -425,6 +426,9 @@ namespace ApostlesWar.Presentation.Front
 
                 _sessao.Reiniciar();
                 _sessao.Modo = ModoDeBatalha.Campanha;   // aqui desistir é DERROTA, não saída
+                // O capítulo dá o cenário da luta. O nome do enum É a chave do CSS: um capítulo sem
+                // pele própria simplesmente cai no visual padrão, então acrescentar tema é só CSS.
+                _sessao.Tema = faccao.ToString().ToLowerInvariant();
                 _ponte.DesligarAuto();
                 _ponte.LimparPendentes();
                 bool venceu = _combate.ExecutarFaseComTime(time, faccao, fase) == ResultadoFase.Venceu;

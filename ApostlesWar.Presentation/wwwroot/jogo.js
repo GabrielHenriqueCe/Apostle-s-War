@@ -68,6 +68,9 @@ function mostrarCena(cena) {
     document.getElementById('turno').style.visibility = emCombate ? 'visible' : 'hidden';
     // O overlay de fim só existe em combate; ao trocar de cena garante que sumiu.
     if (!emCombate) document.getElementById('fimBatalha').hidden = true;
+    // O tema é do CAMPO DE BATALHA: fora dele, nenhum. Quem o LIGA é o desenhar (precisa do estado
+    // novo); aqui só se garante que ele não vaze pras telas de menu.
+    if (!emCombate) aplicarTema('');
     atualizarBotaoSair();
 }
 
@@ -689,12 +692,23 @@ function mostrarConquista(champ) {
     document.getElementById('conquistaNome').textContent = champ.nome;
     document.getElementById('conquistaFaccao').textContent = champ.faccao;
 
-    const corpo = document.getElementById('conquistaCorpo');
-    corpo.classList.remove('chegando');
-    void corpo.offsetWidth;         // reinicia a animação mesmo com dois champs seguidos
-    corpo.classList.add('chegando');
+    // UMA classe rege a cena inteira (champ, aura, anéis, raios) — assim as peças compartilham a
+    // mesma linha do tempo sem cada uma precisar ser ligada à mão.
+    const cena = document.getElementById('conquista');
+    cena.classList.remove('chegando');
+    void cena.offsetWidth;          // reinicia a animação mesmo com dois champs seguidos
+    cena.classList.add('chegando');
 
-    corpo.addEventListener('animationend', abrirFichaDaConquista, { once: true });
+    // Quem manda abrir a ficha é o fim da animação DO CORPO, não de qualquer uma da cena: o
+    // `animationend` borbulha, e as outras peças terminam em tempos diferentes. Sem `once`, porque
+    // `once` somado a um filtro se auto-desarma no primeiro evento ALHEIO — e aí a ficha nunca abre.
+    const corpo = document.getElementById('conquistaCorpo');
+    const aoTerminar = e => {
+        if (e.target !== corpo) return;
+        corpo.removeEventListener('animationend', aoTerminar);
+        abrirFichaDaConquista();
+    };
+    corpo.addEventListener('animationend', aoTerminar);
 }
 
 // Fim da animação (ou pulo): a mesma cena vira a ficha do champ. O C# continua achando que estamos
@@ -1060,6 +1074,7 @@ function desenhar() {
     // De novo aqui, e não só no mostrarCena: o rótulo do 🚪 depende do MODO, que vem no estado — e o
     // mostrarCena roda antes de `estado` receber o quadro novo, então lá ele ainda leria o anterior.
     atualizarBotaoSair();
+    aplicarTema(estado.tema || '');   // idem: o cenário também vem no estado
 
     // O botão do automático se desenha do estado: é o C# que manda, e ele desliga o modo sozinho a
     // cada batalha nova. Sem isto o botão continuaria dizendo ON numa luta em que o controle já
@@ -1642,6 +1657,1105 @@ function flutuar(el, texto, classe) {
 
     el.appendChild(n);
     setTimeout(() => n.remove(), 1250);
+}
+
+// ---------- tema do campo de batalha ----------
+// Cada capítulo pode ter o próprio cenário. O tema entra como `data-tema` no <body> e o CSS faz o
+// resto — a ESTRUTURA da luta não muda, só a pele. É o mesmo princípio do painel de habilidades:
+// uma tela, uma forma; o que varia é a roupa.
+//
+// Aqui em cima mora só o que o CSS não sabe fazer: as partículas do ar. Um capítulo sem entrada
+// nesta tabela fica sem partículas e ainda assim ganha a pele do CSS, se ela existir — as duas
+// metades do tema são independentes de propósito, pra nenhuma delas exigir a outra.
+// O AR de cada cenário, em três camadas OPCIONAIS e independentes — um tema usa as que fizerem
+// sentido pra ele e ignora o resto:
+//   pó      · partículas pequenas. `subida` em px/s: positivo SOBE, negativo CAI. A direção é o
+//             SINAL da velocidade, não um campo à parte que se pode esquecer de casar com ela.
+//   névoa   · manchas grandes e translúcidas passeando devagar, coladas no chão.
+//   voadores· bichos atravessando a tela, com asas.
+const AR_DO_TEMA = {
+    // Salão do trono: poeira dourada subindo na luz das tochas, e a batalha que corre lá fora.
+    reino: {
+        po: { cor: '217, 180, 91', quantas: 46, subida: [4, 14], raio: [0.6, 2.2], opacidade: [.12, .5] },
+        exercitos: {
+            silhueta: '#080b1c', flecha: '230, 218, 184',
+            espada: 168, escudo: 96, escudos: 3, lanca: 196, lancas: 4, tamanhoFlecha: 2,
+            // O 2º número: magia. Mesma coreografia (gesto → voo → defesa), outro vocabulário.
+            cajado: 176, bola: 30, esfera: 230, explosao: .85,
+            fogo: '255, 168, 66', brasa: '255, 242, 208', magia: '132, 196, 255',
+            arco: .6,                               // altura do voo, em fração da tela
+            volei: [5, 8], voo: 1.75, intervalo: .09,
+            espera: [2.4, 5.2], gesto: .9, guarda: .6, recolher: .9,
+        },
+    },
+    // Cemitério: cinza caindo, névoa no chão, morcegos cruzando o céu e corujas nas árvores.
+    ladosombrio: {
+        po: { cor: '178, 205, 186', quantas: 34, subida: [-9, -3], raio: [0.5, 2.0], opacidade: [.08, .3] },
+        nevoa: { cor: '150, 190, 170', quantas: 7, deriva: [6, 20], raio: [140, 320], opacidade: [.03, .08] },
+        voadores: { cor: '#04100b', quantos: 4, velocidade: [110, 210], tamanho: [11, 20], intervalo: [1, 11] },
+        // As corujas nas árvores. `poleiros` são posições DENTRO do ladrilho da mata, em fração —
+        // assim elas seguem o ladrilho quando ele muda de tamanho, e cada árvore desenhada no SVG
+        // ganha a sua sem ninguém recontar pixel. `lado` encosta a coruja num flanco do tronco: uma
+        // à esquerda, a outra à direita, pra as duas árvores não ficarem iguais.
+        //
+        // O olho fica APAGADO a maior parte do tempo, e o tempo ACESO é sempre o mesmo — é o que faz
+        // parecer bicho olhando de vez em quando, e não lâmpada piscando. O que varia é QUANDO cada
+        // uma abre: o tempo apagado é sorteado a cada ciclo, então elas nunca casam.
+        corujas: {
+            corpo: '#060f0b', olho: '236, 246, 205', tamanho: 11,
+            ladrilho: ['--mata-passo', '--mata-altura'],
+            pontos: [{ x: .145, y: .115, lado: -1 }, { x: .550, y: .310, lado: 1 }],
+            aceso: 1.7, apagado: [5, 17], acordar: [0, 13],
+        },
+    },
+    // A noite da invasão, montada em cima de quem luta aqui: 👽/👾 nos discos que cruzam o céu
+    // varrendo o chão com o feixe, 🧑‍🔬 nas bobinas do laboratório soltando faísca, 🤖 nas fagulhas
+    // de solda subindo. Nenhuma peça é mecanismo novo — são as MESMAS camadas dos outros dois com
+    // outro vocabulário, que era o teste de verdade do seam.
+    tecnologicos: {
+        po: { cor: '126, 255, 190', quantas: 38, subida: [12, 34], raio: [0.5, 1.7], opacidade: [.14, .55] },
+        voadores: {
+            forma: 'disco', cor: '#0a1622', luz: '126, 255, 190',
+            quantos: 2, velocidade: [26, 52], tamanho: [26, 40], intervalo: [3, 14],
+        },
+        // As bobinas de Tesla do horizonte. Mesmo motor das corujas — posição vinda do ladrilho,
+        // relógio próprio, muito tempo apagada — só que o que acende é um raio, não um olho.
+        bobinas: {
+            cor: '170, 245, 255', tamanho: 15,
+            ladrilho: ['--lab-passo', '--lab-altura'],
+            pontos: [{ x: .115, y: .22 }, { x: .858, y: .315 }],
+            aceso: .5, apagado: [3, 11], acordar: [0, 7],
+        },
+        // O reator estourado no meio da cidade, queimando e vazando. Fica no canvas e NÃO no
+        // ladrilho da cidade porque desastre não se repete a cada 340px — repetido, ele viraria
+        // padrão de papel de parede em vez de acontecimento.
+        ruina: {
+            silhueta: '#050b14', fogo: '255, 146, 56', brasa: '255, 236, 190', veneno: '138, 255, 150',
+            largura: 230, altura: 128, labaredas: 7,
+        },
+    },
+};
+
+let temaAtual = '';
+
+function aplicarTema(tema) {
+    if (tema === temaAtual) return;   // o estado chega dezenas de vezes por turno; só reage à TROCA
+    temaAtual = tema;
+
+    if (tema) document.body.dataset.tema = tema;
+    else document.body.removeAttribute('data-tema');
+
+    iniciarAr(AR_DO_TEMA[tema]);
+}
+
+// ---------- o ar do cenário (canvas) ----------
+// Canvas atrás de tudo (z -1), rodando SÓ enquanto há tema com ar. Sem tema o laço é cancelado e o
+// canvas escondido: cenário nenhum não pode custar quadro nenhum.
+//
+// Tudo aqui anda por DELTA DE TEMPO (`* dt`), nunca por quadro — assim a cena tem a mesma velocidade
+// num monitor de 60Hz e num de 144Hz.
+let arFrame = null;
+
+const entre = ([min, max]) => min + Math.random() * (max - min);
+
+function iniciarAr(config) {
+    const telas = [document.getElementById('particulasFundo'), document.getElementById('particulas')];
+
+    if (arFrame !== null) { cancelAnimationFrame(arFrame); arFrame = null; }
+    for (const t of telas) t.hidden = !config;
+    if (!config) return;
+
+    const [fundo, frente] = telas;
+    const ctxFundo = fundo.getContext('2d');
+    const ctxFrente = frente.getContext('2d');
+
+    const dimensionar = () => {
+        for (const t of telas) { t.width = t.clientWidth; t.height = t.clientHeight; }
+    };
+    dimensionar();
+
+    // Cada camada declara em QUE MUNDO ela vive, não em que canvas — o roteamento é consequência.
+    const noFundo = [
+        config.exercitos && criarExercitos(config.exercitos, fundo),
+        config.ruina && criarRuina(config.ruina, fundo),
+        config.corujas && criarCorujas(config.corujas, fundo),
+        config.bobinas && criarBobinas(config.bobinas, fundo),
+        config.nevoa && criarNevoa(config.nevoa, fundo),
+    ].filter(Boolean);
+
+    const naFrente = [
+        config.po && criarPo(config.po, frente),
+        config.voadores && criarVoadores(config.voadores, frente),
+    ].filter(Boolean);
+
+    let anterior = performance.now();
+    const quadro = (agora) => {
+        const dt = Math.min((agora - anterior) / 1000, .05);   // janela minimizada não deve dar salto
+        anterior = agora;
+
+        if (fundo.width !== fundo.clientWidth || fundo.height !== fundo.clientHeight) dimensionar();
+        ctxFundo.clearRect(0, 0, fundo.width, fundo.height);
+        ctxFrente.clearRect(0, 0, frente.width, frente.height);
+
+        for (const camada of noFundo) camada(ctxFundo, dt);
+        for (const camada of naFrente) camada(ctxFrente, dt);
+
+        arFrame = requestAnimationFrame(quadro);
+    };
+    arFrame = requestAnimationFrame(quadro);
+}
+
+/// Partículas pequenas subindo ou caindo, com vaivém horizontal pra não andarem em linha reta.
+function criarPo(cfg, canvas) {
+    // Sobe ou cai? Sai do SINAL da velocidade, e daí saem também a borda em que a partícula nasce e
+    // aquela em que ela é reciclada — três coisas que teriam que concordar se fossem configuradas
+    // separado, e que assim não têm como discordar.
+    const sobe = cfg.subida[1] > 0;
+
+    const nova = (yInicial) => ({
+        x: Math.random() * canvas.width,
+        y: yInicial ?? (sobe ? canvas.height + 10 : -10),
+        r: entre(cfg.raio),
+        vy: entre(cfg.subida),
+        deriva: (Math.random() - .5) * 12,
+        fase: Math.random() * Math.PI * 2,
+        alfa: entre(cfg.opacidade),
+    });
+
+    // Na PRIMEIRA leva nasce espalhada pela tela inteira, e não na borda: senão o ar começa
+    // parecendo um enxame entrando de uma vez.
+    let grãos = Array.from({ length: cfg.quantas }, () => nova(Math.random() * canvas.height));
+
+    return (ctx, dt) => {
+        for (let i = 0; i < grãos.length; i++) {
+            const p = grãos[i];
+            p.y -= p.vy * dt;
+            p.fase += dt;
+            if (sobe ? p.y < -10 : p.y > canvas.height + 10) grãos[i] = nova();
+
+            ctx.beginPath();
+            ctx.arc(p.x + Math.sin(p.fase) * p.deriva, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${cfg.cor}, ${p.alfa})`;
+            ctx.fill();
+        }
+    };
+}
+
+/// Manchas grandes e translúcidas passeando de lado, agarradas ao chão. São poucas e enormes de
+/// propósito: névoa é uma massa que se move, não um monte de bolinhas.
+function criarNevoa(cfg, canvas) {
+    const nova = (xInicial) => ({
+        x: xInicial ?? -entre(cfg.raio),
+        y: canvas.height * (0.72 + Math.random() * 0.3),   // rente ao chão
+        r: entre(cfg.raio),
+        vx: entre(cfg.deriva),
+        alfa: entre(cfg.opacidade),
+    });
+
+    let bancos = Array.from({ length: cfg.quantas }, () => nova(Math.random() * canvas.width));
+
+    return (ctx, dt) => {
+        for (let i = 0; i < bancos.length; i++) {
+            const n = bancos[i];
+            n.x += n.vx * dt;
+            if (n.x - n.r > canvas.width) bancos[i] = nova();
+
+            const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+            g.addColorStop(0, `rgba(${cfg.cor}, ${n.alfa})`);
+            g.addColorStop(1, `rgba(${cfg.cor}, 0)`);
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            // achatada: névoa se espalha no chão, não sobe em bola
+            ctx.ellipse(n.x, n.y, n.r, n.r * 0.42, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    };
+}
+
+/// Bichos atravessando a tela. Aparecem em levas, não em fila: cada um espera um tempo sorteado
+/// antes de entrar, e sorteia de novo ao sair — é o que faz parecer que passou um bando, em vez de
+/// uma esteira de morcegos saindo de um cano.
+function criarVoadores(cfg, canvas) {
+    const novo = (primeiraVez) => {
+        const paraDireita = Math.random() < .5;
+        return {
+            paraDireita,
+            x: paraDireita ? -60 : canvas.width + 60,
+            y: canvas.height * (0.08 + Math.random() * 0.42),   // voam na parte de cima
+            vx: entre(cfg.velocidade) * (paraDireita ? 1 : -1),
+            tamanho: entre(cfg.tamanho),
+            bobo: entre([14, 34]),                 // amplitude do sobe-e-desce
+            fase: Math.random() * Math.PI * 2,
+            asa: Math.random() * Math.PI * 2,
+            velocidadeDaAsa: entre([9, 15]),
+            // A primeira leva espera pouco, pra a cena não começar vazia por 10 segundos.
+            espera: primeiraVez ? Math.random() * 3 : entre(cfg.intervalo),
+        };
+    };
+
+    let bando = Array.from({ length: cfg.quantos }, () => novo(true));
+
+    return (ctx, dt) => {
+        for (let i = 0; i < bando.length; i++) {
+            const m = bando[i];
+            if (m.espera > 0) { m.espera -= dt; continue; }
+
+            m.x += m.vx * dt;
+            m.fase += dt * 2.2;
+            m.asa += dt * m.velocidadeDaAsa;
+
+            const saiu = m.vx > 0 ? m.x > canvas.width + 60 : m.x < -60;
+            if (saiu) { bando[i] = novo(false); continue; }
+
+            // A forma é do TEMA: o mesmo voo carrega o morcego do cemitério e o disco da invasão.
+            // O que muda é o desenho e — no disco — o feixe que ele varre no chão.
+            const y = m.y + Math.sin(m.fase) * m.bobo;
+            if (cfg.forma === 'disco') desenharDisco(ctx, m.x, y, m.tamanho, m.asa, canvas, cfg);
+            else desenharMorcego(ctx, m.x, y, m.tamanho, m.asa, m.paraDireita, cfg.cor);
+        }
+    };
+}
+
+/// Os DOIS EXÉRCITOS ao longe, trocando rajadas de flecha por cima do campo.
+///
+/// A cena é um DIRETOR com uma fase por vez, e um lado atacando por vez (ideia do Gabriel: "não
+/// precisa necessariamente jogar as flechas ao mesmo tempo"). Alternar sai de graça e é o que dá a
+/// leitura de conversa — ação e resposta — em vez de dois efeitos rodando lado a lado:
+///
+///   espera → o líder do atacante ERGUE A ESPADA → solta a rajada → o defensor LEVANTA OS ESCUDOS
+///   pouco antes de as flechas chegarem → elas batem e caem → escudos abaixam → troca o lado.
+///
+/// Nenhuma fase tem duração adivinhada: cada uma termina quando a anterior acabou de fato (a
+/// última flecha bater, por exemplo). Cronometrar "mais ou menos" daria dessincronizar em máquina
+/// lenta — e o escudo subiria depois da flecha chegar.
+function criarExercitos(cfg, canvas) {
+    // 1 = a esquerda ataca; -1 = a direita ataca. Quem defende é sempre o outro.
+    let atacante = Math.random() < .5 ? 1 : -1;
+
+    // O NÚMERO desta rodada: 'aço' (espada → flechas → escudos e lanças) ou 'magia' (cajado → bola
+    // de fogo → esfera). A coreografia é a MESMA — gesto, voo, defesa; o que troca é o vocabulário
+    // desenhado em cada momento. Foi por isso que o 2º ataque não pediu um segundo diretor: as
+    // fases já falavam de "o gesto" e "a defesa", não de espada e escudo.
+    let numero = Math.random() < .5 ? 'aço' : 'magia';
+    let fase = 'espera';
+    // A PRIMEIRA espera é curta e fixa, não sorteada: a batalha tem que abrir mostrando a cena
+    // inteira — espada, flecha, escudo, nessa ordem. Com a espera normal (até 5s), quem entrasse na
+    // luta veria um campo parado e só depois entenderia que há algo acontecendo ali.
+    let relogio = .5;
+    let flechas = [];
+    let explosoes = [];
+
+    // Onde o voo ACABA. A flecha some além da borda (some no meio do exército que não se vê); a bola
+    // de fogo para ANTES, em cima da esfera — ela tem que estourar onde o defensor está, não fora da
+    // tela. É por isso que "bateu" é um flag e não `p >= 1`: cada número bate num lugar.
+    const impacto = () => numero === 'magia' ? .93 : 1;
+
+    // 0..1, o quanto cada gesto está completo. Ficam FORA da fase pra poderem descer suavemente
+    // enquanto a fase seguinte já corre — é o que evita o gesto "sumir" no corte.
+    let espada = 0, escudo = 0;
+
+    const chao = () => canvas.height + 4;                       // um fio abaixo da borda
+    const bordaDe = (lado) => lado > 0 ? 0 : canvas.width;      // de que lado da tela o exército está
+
+    // A parábola: sai de FORA da tela, sobe até `arco` da altura no meio do caminho, e cai fora da
+    // tela do outro lado. Começar e terminar além da borda é o que faz parecer que há um exército
+    // ali, em vez de flecha nascendo do nada num ponto visível.
+    const posicao = (p) => {
+        const x0 = bordaDe(atacante) - atacante * 40;
+        const x1 = bordaDe(-atacante) + atacante * 40;
+        const y0 = canvas.height * .82;
+        const altura = canvas.height * cfg.arco;
+        return {
+            x: x0 + (x1 - x0) * p,
+            y: y0 - altura * 4 * p * (1 - p),
+        };
+    };
+
+    const soltarRajada = () => {
+        // MAGIA é um tiro só, grande e lento; FLECHA é uma nuvem deles. A diferença de contagem é o
+        // que separa os dois números sem precisar de dois diretores.
+        const quantas = numero === 'magia' ? 1 : Math.round(entre(cfg.volei));
+        flechas = Array.from({ length: quantas }, (_, i) => ({
+            atraso: i * cfg.intervalo,
+            p: 0,
+            desvio: numero === 'magia' ? 0 : (Math.random() - .5) * 26,   // nenhuma flecha sai igual
+            ritmo: numero === 'magia' ? .72 : 1 + (Math.random() - .5) * .12,
+        }));
+    };
+
+    /// Quanto falta pra a PRIMEIRA flecha chegar. É o que diz a hora de levantar o escudo — o
+    /// defensor reage ao que vê, não a um cronômetro paralelo.
+    const faltaPraChegar = () => {
+        let menor = Infinity;
+        for (const f of flechas) {
+            if (f.bateu) continue;
+            menor = Math.min(menor, f.atraso + (impacto() - f.p) * cfg.voo / f.ritmo);
+        }
+        return menor;
+    };
+
+    return (ctx, dt) => {
+        relogio -= dt;
+
+        switch (fase) {
+            case 'espera':
+                if (relogio <= 0) { fase = 'espada'; relogio = cfg.gesto; }
+                break;
+
+            case 'espada':
+                espada = Math.min(1, espada + dt / (cfg.gesto * .5));
+                if (relogio <= 0) { soltarRajada(); fase = 'voo'; }
+                break;
+
+            case 'voo':
+                espada = Math.max(0, espada - dt / (cfg.gesto * .5));   // a espada baixa junto do disparo
+                if (faltaPraChegar() < cfg.guarda) escudo = Math.min(1, escudo + dt / (cfg.guarda * .7));
+                if (flechas.every(f => f.bateu)) { fase = 'recolher'; relogio = cfg.recolher; }
+                break;
+
+            case 'recolher':
+                if (relogio <= 0) {
+                    escudo = Math.max(0, escudo - dt / (cfg.recolher * .5));
+                    if (escudo === 0) {
+                        atacante = -atacante;
+                        numero = Math.random() < .5 ? 'aço' : 'magia';   // cada troca sorteia o seu
+                        fase = 'espera';
+                        relogio = entre(cfg.espera);
+                    }
+                }
+                break;
+        }
+
+        // --- o que está voando ---
+        for (const f of flechas) {
+            if (f.atraso > 0) { f.atraso -= dt; continue; }
+            if (f.bateu) continue;
+
+            const fim = impacto();
+            f.p = Math.min(fim, f.p + dt / cfg.voo * f.ritmo);
+
+            const aqui = posicao(f.p);
+            const y = aqui.y + f.desvio * (1 - Math.abs(f.p - .5) * 2);
+
+            if (f.p >= fim) {
+                f.bateu = true;
+                // A bola de fogo não some: ela vira a explosão, no ponto exato em que parou.
+                if (numero === 'magia') explosoes.push(criarExplosao(aqui.x, y));
+                continue;
+            }
+
+            if (numero === 'magia') {
+                desenharBolaDeFogo(ctx, aqui.x, y, f.p, posicao, cfg);
+            } else {
+                // A inclinação sai da própria trajetória (olha um passo à frente), então a flecha
+                // aponta pra onde vai: sobe de bico pra cima, desce de bico pra baixo.
+                const adiante = posicao(Math.min(1, f.p + .02));
+                desenharFlecha(ctx, aqui.x, y,
+                    Math.atan2(adiante.y - aqui.y, adiante.x - aqui.x), cfg);
+            }
+        }
+
+        // --- o estouro ---
+        // Vive fora do laço das flechas de propósito: ele COMEÇA quando uma acaba, e precisa seguir
+        // queimando enquanto a esfera já está baixando.
+        for (const e of explosoes) e.t += dt / cfg.explosao;
+        explosoes = explosoes.filter(e => e.t < 1);
+        for (const e of explosoes) desenharExplosao(ctx, e, cfg);
+
+        // --- o gesto de cada lado, entrando pela borda ---
+        // Ninguém aparece: o que se vê é só o que ENTRA em cena, como se o exército estivesse logo
+        // fora do quadro. Desenhar soldados obrigaria a desenhá-los bem, e um boneco mal resolvido
+        // no canto rouba mais atenção do que uma silhueta que sugere.
+        if (espada > 0) {
+            const erguer = numero === 'magia' ? desenharCajado : desenharEspada;
+            erguer(ctx, bordaDe(atacante), chao(), atacante, espada, cfg);
+        }
+        if (escudo > 0) {
+            const defender = numero === 'magia' ? desenharEsfera : desenharDefesa;
+            defender(ctx, bordaDe(-atacante), chao(), -atacante, escudo, cfg);
+        }
+    };
+}
+
+/// A inclinação de tudo que é erguido: espada e lanças partilham este ângulo, e é o que faz os dois
+/// lados parecerem o mesmo exército em vez de dois efeitos separados.
+const INCLINACAO = .22;
+
+/// A espada erguida pelo atacante: sobe da borda de baixo, inclinada pra dentro do campo. `subida`
+/// vai de 0 a 1 e é o quanto dela já entrou em cena.
+function desenharEspada(ctx, borda, chao, lado, subida, cfg) {
+    const h = cfg.espada;
+
+    ctx.save();
+    // Entra POR BAIXO da borda: em subida 0 ela está inteira fora, em 1 está no alto.
+    ctx.translate(borda + lado * h * .38, chao + h * (1 - subida));
+    ctx.rotate(lado * INCLINACAO);
+    ctx.scale(lado, 1);
+    ctx.fillStyle = cfg.silhueta;
+
+    ctx.fillRect(-h * .035, -h, h * .07, h * .78);          // lâmina
+    ctx.beginPath();                                         // ponta
+    ctx.moveTo(-h * .035, -h); ctx.lineTo(0, -h * 1.09); ctx.lineTo(h * .035, -h);
+    ctx.closePath(); ctx.fill();
+    ctx.fillRect(-h * .17, -h * .24, h * .34, h * .055);    // guarda
+    ctx.fillRect(-h * .028, -h * .19, h * .056, h * .17);   // punho
+    ctx.beginPath();                                         // pomo
+    ctx.arc(0, -h * .015, h * .045, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/// A DEFESA do outro lado: as lanças sobem primeiro (elas são o fundo) e os escudos por cima,
+/// tapando o pé delas — é a ordem de desenho que monta a falange, sem ninguém precisar existir.
+///
+/// Cada peça começa a subir um tiquinho depois da anterior, então a fileira levanta em ONDA e não
+/// em bloco: é o escalonamento que faz ler como vários, e não como uma parede só.
+function desenharDefesa(ctx, borda, chao, lado, subida, cfg) {
+    // Um escalonamento só pros dois, pra a lança e o escudo da mesma posição subirem juntos.
+    const naVez = (i) => Math.max(0, Math.min(1, subida * 1.3 - i * .13));
+
+    // O `-.1` (era `.2`) tira a lança mais de DENTRO e joga a fileira um passo pra trás — a nova
+    // entra na borda, meio saindo de cena, que é onde o resto do exército estaria.
+    const hl = cfg.lanca;
+    for (let i = 0; i < cfg.lancas; i++) {
+        ctx.globalAlpha = .82 - i * .08;
+        desenharLanca(ctx, borda + lado * (hl * -.1 + i * hl * .3), chao + hl * (1 - naVez(i)),
+            hl, lado, i, cfg);
+    }
+
+    const he = cfg.escudo;
+    for (let i = 0; i < cfg.escudos; i++) {
+        ctx.globalAlpha = 1 - i * .1;
+        desenharEscudo(ctx, borda + lado * (he * .38 + i * he * .62), chao + he * (1 - naVez(i)),
+            he, cfg.silhueta);
+    }
+
+    ctx.globalAlpha = 1;
+}
+
+/// Uma lança: haste comprida e ponta em folha, na MESMA inclinação da espada — com uma variação
+/// mínima por lança, senão as quatro viram uma listra só.
+function desenharLanca(ctx, x, base, h, lado, indice, cfg) {
+    ctx.save();
+    ctx.translate(x, base);
+    ctx.rotate(lado * (INCLINACAO + (indice - 1.5) * .035));
+    ctx.fillStyle = cfg.silhueta;
+
+    ctx.fillRect(-h * .013, -h, h * .026, h);   // haste
+
+    ctx.beginPath();                             // ponta em folha
+    ctx.moveTo(0, -h * 1.11);
+    ctx.quadraticCurveTo(h * .05, -h * 1.0, 0, -h * .93);
+    ctx.quadraticCurveTo(-h * .05, -h * 1.0, 0, -h * 1.11);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/// Um escudo tipo "gota": reto em cima, afinando até a ponta embaixo. O umbo no meio é o que
+/// impede a silhueta de virar um pentágono qualquer.
+function desenharEscudo(ctx, x, base, h, cor) {
+    const l = h * .74;
+
+    ctx.save();
+    ctx.translate(x, base);
+    ctx.fillStyle = cor;
+
+    ctx.beginPath();
+    ctx.moveTo(-l / 2, -h);
+    ctx.lineTo(l / 2, -h);
+    ctx.lineTo(l / 2, -h * .42);
+    ctx.quadraticCurveTo(l / 2, -h * .06, 0, 0);
+    ctx.quadraticCurveTo(-l / 2, -h * .06, -l / 2, -h * .42);
+    ctx.closePath();
+    ctx.fill();
+
+    // umbo + travessa, recortados em vazado pra aparecerem contra a silhueta
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(0, -h * .58, h * .1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(-l / 2, -h * .78, l, h * .045);
+    ctx.globalCompositeOperation = 'source-over';
+
+    ctx.restore();
+}
+
+/// O cajado do conjurador: sobe da borda como a espada, na mesma inclinação, mas termina numa pedra
+/// acesa em vez de numa lâmina. É o gesto que anuncia a magia — o mesmo papel da espada, e por isso
+/// a mesma entrada: o exército é um só, o que muda é quem está na frente hoje.
+function desenharCajado(ctx, borda, chao, lado, subida, cfg) {
+    const h = cfg.cajado;
+
+    ctx.save();
+    ctx.translate(borda + lado * h * .38, chao + h * (1 - subida));
+    ctx.rotate(lado * INCLINACAO);
+    ctx.scale(lado, 1);
+
+    ctx.fillStyle = cfg.silhueta;
+    ctx.fillRect(-h * .022, -h * .92, h * .044, h * .92);        // vara
+
+    // as garras que seguram a pedra
+    ctx.beginPath();
+    ctx.moveTo(-h * .07, -h * .88); ctx.lineTo(0, -h * 1.0); ctx.lineTo(h * .07, -h * .88);
+    ctx.lineTo(h * .04, -h * .84); ctx.lineTo(-h * .04, -h * .84);
+    ctx.closePath();
+    ctx.fill();
+
+    // A pedra acesa: o único ponto de luz da silhueta, e o que diz "magia" sem escrever nada.
+    const raio = h * .1;
+    const luz = ctx.createRadialGradient(0, -h * 1.02, 0, 0, -h * 1.02, raio * 3);
+    luz.addColorStop(0, `rgba(${cfg.brasa}, 1)`);
+    luz.addColorStop(.28, `rgba(${cfg.magia}, .85)`);
+    luz.addColorStop(1, `rgba(${cfg.magia}, 0)`);
+    ctx.fillStyle = luz;
+    ctx.beginPath();
+    ctx.arc(0, -h * 1.02, raio * 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/// A ESFERA DE MAGIA: a defesa do outro número. Sobe da borda como os escudos, mas é uma cúpula
+/// translúcida — o golpe não é aparado, é contido. Anéis concêntricos dão a leitura de campo de
+/// força; um disco chapado leria como bolha de sabão.
+function desenharEsfera(ctx, borda, chao, lado, subida, cfg) {
+    const r = cfg.esfera;
+    // Ancorada NO CANTO, como o ✕ da saída: o centro fica quase em cima do vértice, e o que se vê é
+    // o arco invadindo o campo. Uma bola inteira no meio da tela leria como objeto flutuando; um
+    // arco saindo do canto lê como algo grande que está ali fora, protegendo.
+    const cx = borda - lado * r * .08;   // centro JÁ do lado de fora: só o arco entra
+    const cy = chao - r * subida * .22;
+
+    ctx.save();
+
+    const corpo = ctx.createRadialGradient(cx, cy, r * .1, cx, cy, r);
+    corpo.addColorStop(0, `rgba(${cfg.magia}, .07)`);
+    corpo.addColorStop(.72, `rgba(${cfg.magia}, .2)`);
+    corpo.addColorStop(.93, `rgba(${cfg.magia}, .55)`);
+    corpo.addColorStop(1, `rgba(${cfg.magia}, 0)`);
+    ctx.fillStyle = corpo;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = `rgba(${cfg.magia}, .5)`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * .97, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = `rgba(${cfg.magia}, .22)`;
+    ctx.lineWidth = 1.2;
+    for (const fatia of [.72, .46]) {
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, r * fatia, r * .96, 0, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/// A BOLA DE FOGO: núcleo claro, corpo alaranjado e um rastro que sai da própria trajetória — as
+/// posições de trás vêm de amostrar a mesma parábola em `p` menores, então o rastro acompanha a
+/// curva de verdade em vez de ser uma linha reta pendurada atrás.
+function desenharBolaDeFogo(ctx, x, y, p, posicao, cfg) {
+    const r = cfg.bola;
+
+    ctx.save();
+
+    for (let k = 6; k >= 1; k--) {
+        const atras = posicao(Math.max(0, p - k * .016));
+        const escala = 1 - k * .11;
+        const alfa = .16 * (1 - k / 7);
+        const g = ctx.createRadialGradient(atras.x, atras.y, 0, atras.x, atras.y, r * escala);
+        g.addColorStop(0, `rgba(${cfg.fogo}, ${alfa * 3})`);
+        g.addColorStop(1, `rgba(${cfg.fogo}, 0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(atras.x, atras.y, r * escala, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    const bola = ctx.createRadialGradient(x, y, 0, x, y, r);
+    bola.addColorStop(0, `rgba(${cfg.brasa}, 1)`);
+    bola.addColorStop(.3, `rgba(${cfg.fogo}, .95)`);
+    bola.addColorStop(.62, `rgba(${cfg.fogo}, .45)`);
+    bola.addColorStop(1, `rgba(${cfg.fogo}, 0)`);
+    ctx.fillStyle = bola;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/// O estouro da bola de fogo contra a esfera. As brasas são sorteadas UMA VEZ, no nascimento, e não
+/// a cada quadro: sorteadas por quadro elas piscariam em lugares diferentes em vez de voar.
+function criarExplosao(x, y) {
+    return {
+        x, y, t: 0,
+        brasas: Array.from({ length: 11 }, () => ({
+            angulo: Math.random() * Math.PI * 2,
+            alcance: .7 + Math.random() * .9,
+            tamanho: 1.4 + Math.random() * 2.4,
+        })),
+    };
+}
+
+/// Três coisas ao mesmo tempo, e é a soma que lê como explosão: um CLARÃO que nasce grande e morre
+/// rápido, um ANEL de choque que abre e afina, e BRASAS cuspidas pra fora. Só o clarão seria um
+/// borrão; só o anel seria um efeito de interface.
+function desenharExplosao(ctx, e, cfg) {
+    const t = e.t;
+    const restante = 1 - t;
+    const r = cfg.bola * (1 + t * 4.2);
+
+    ctx.save();
+
+    // clarão — desaparece mais rápido que o resto (curva ao quadrado)
+    const clarao = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, r);
+    clarao.addColorStop(0, `rgba(${cfg.brasa}, ${restante * restante})`);
+    clarao.addColorStop(.3, `rgba(${cfg.fogo}, ${restante * restante * .85})`);
+    clarao.addColorStop(1, `rgba(${cfg.fogo}, 0)`);
+    ctx.fillStyle = clarao;
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // anel de choque
+    ctx.strokeStyle = `rgba(${cfg.brasa}, ${restante * .8})`;
+    ctx.lineWidth = Math.max(.6, 6 * restante);
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, r * .88, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // brasas
+    ctx.fillStyle = `rgba(${cfg.fogo}, ${restante})`;
+    for (const b of e.brasas) {
+        const d = r * 1.15 * b.alcance;
+        ctx.beginPath();
+        ctx.arc(e.x + Math.cos(b.angulo) * d,
+                e.y + Math.sin(b.angulo) * d + t * t * 26,   // a gravidade puxando as brasas
+                b.tamanho * restante, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/// Uma flecha: haste, ponta e penas, deitada na direção do voo.
+function desenharFlecha(ctx, x, y, angulo, cfg) {
+    const s = cfg.tamanhoFlecha;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angulo);
+    ctx.scale(s, s);
+
+    ctx.strokeStyle = `rgba(${cfg.flecha}, .85)`;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(-9, 0); ctx.lineTo(5, 0);
+    ctx.stroke();
+
+    ctx.fillStyle = `rgba(${cfg.flecha}, .95)`;
+    ctx.beginPath();
+    ctx.moveTo(9, 0); ctx.lineTo(4, -2.2); ctx.lineTo(4, 2.2);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-9, 0); ctx.lineTo(-12, -2.4); ctx.lineTo(-7, 0); ctx.lineTo(-12, 2.4);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/// As corujas empoleiradas nos troncos da mata, cada uma com o PRÓPRIO relógio.
+///
+/// Fora de sincronia é o ponto (ideia do Gabriel). Um piscar coletivo denunciaria que é um efeito
+/// só; relógios independentes fazem parecer que há bichos ali, cada um na sua.
+///
+/// O olho fica APAGADO a maior parte do tempo, e o tempo ACESO é fixo. Essa assimetria é o que
+/// separa "bicho que abre o olho de vez em quando" de "lâmpada piscando": o que se sorteia é a
+/// ESPERA, nunca a duração do olhar. Como o sorteio se repete a cada ciclo, duas corujas que por
+/// acaso acendam juntas se desencontram na volta seguinte.
+///
+/// A posição sai do ladrilho REAL da mata (as vars `--mata-*` do CSS, lidas do #arena), então os
+/// olhos caem em cima das árvores desenhadas e acompanham qualquer mudança no ladrilho — em vez de
+/// haver duas cópias do número pra divergirem.
+///
+/// As contas são em coordenadas do CANVAS, que É a arena (ele é filho dela e a preenche): a mata
+/// fica ancorada no rodapé, então o topo do ladrilho é `altura do canvas − altura do ladrilho`.
+/// A RUÍNA: o reator estourado no meio da cidade, queimando e vazando veneno. Uma só, no centro.
+///
+/// O fogo é feito de labaredas independentes, cada uma com o próprio ritmo e a própria altura — é a
+/// dessincronia que faz chama parecer chama. Um brilho pulsando sozinho leria como lâmpada.
+function criarRuina(cfg, canvas) {
+    const labaredas = Array.from({ length: cfg.labaredas }, (_, i) => ({
+        // Espalhadas pela boca do reator, as do meio mais altas (o miolo é onde queima mais).
+        posicao: (i + .5) / cfg.labaredas,
+        ritmo: 2.4 + Math.random() * 2.6,
+        fase: Math.random() * Math.PI * 2,
+        alturaBase: .55 + Math.random() * .45,
+    }));
+
+    let t = 0;
+
+    return (ctx, dt) => {
+        t += dt;
+
+        const l = cfg.largura, h = cfg.altura;
+        const cx = canvas.width / 2;
+        const base = canvas.height;
+
+        ctx.save();
+
+        // --- o clarão do incêndio, atrás de tudo: é ele que põe a ruína no meio de uma cidade
+        //     escura, em vez de deixá-la como um recorte preto sobre o fundo.
+        const pulso = .82 + Math.sin(t * 3.1) * .1 + Math.sin(t * 7.7) * .05;
+        const clarao = ctx.createRadialGradient(cx, base - h * .6, 0, cx, base - h * .6, l * 1.5 * pulso);
+        clarao.addColorStop(0, `rgba(${cfg.fogo}, .3)`);
+        clarao.addColorStop(.45, `rgba(${cfg.fogo}, .1)`);
+        clarao.addColorStop(1, `rgba(${cfg.fogo}, 0)`);
+        ctx.fillStyle = clarao;
+        ctx.beginPath();
+        ctx.arc(cx, base - h * .6, l * 1.5 * pulso, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- as labaredas, saindo da boca rasgada do reator
+        for (const f of labaredas) {
+            const x = cx - l * .3 + l * .6 * f.posicao;
+            // duas ondas de frequências diferentes: uma só daria um pulsar regular demais
+            const viva = .6 + Math.sin(t * f.ritmo + f.fase) * .25 + Math.sin(t * f.ritmo * 2.3) * .15;
+            const alt = h * .62 * f.alturaBase * viva;
+            const larg = l * .07 * (.8 + viva * .4);
+
+            const chama = ctx.createLinearGradient(x, base - h * .52, x, base - h * .52 - alt);
+            chama.addColorStop(0, `rgba(${cfg.brasa}, .85)`);
+            chama.addColorStop(.35, `rgba(${cfg.fogo}, .6)`);
+            chama.addColorStop(1, `rgba(${cfg.fogo}, 0)`);
+            ctx.fillStyle = chama;
+
+            ctx.beginPath();
+            ctx.moveTo(x - larg, base - h * .52);
+            // a ponta balança pro lado: fogo não sobe reto
+            ctx.quadraticCurveTo(x - larg * .5, base - h * .52 - alt * .6,
+                x + Math.sin(t * f.ritmo * .8 + f.fase) * larg * 1.2, base - h * .52 - alt);
+            ctx.quadraticCurveTo(x + larg * .5, base - h * .52 - alt * .6, x + larg, base - h * .52);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // --- a carcaça: parede rasgada, cúpula desabada e vergalhão torto
+        ctx.fillStyle = cfg.silhueta;
+        ctx.beginPath();
+        ctx.moveTo(cx - l * .5, base);
+        ctx.lineTo(cx - l * .5, base - h * .46);
+        ctx.lineTo(cx - l * .38, base - h * .62);
+        ctx.lineTo(cx - l * .3, base - h * .5);      // o rasgo por onde o fogo sai
+        ctx.lineTo(cx - l * .18, base - h * .58);
+        ctx.lineTo(cx - l * .05, base - h * .44);
+        ctx.lineTo(cx + l * .08, base - h * .6);
+        ctx.lineTo(cx + l * .2, base - h * .47);
+        ctx.lineTo(cx + l * .3, base - h * .78);     // o pedaço que ficou de pé
+        ctx.lineTo(cx + l * .42, base - h * .72);
+        ctx.lineTo(cx + l * .5, base - h * .9);
+        ctx.lineTo(cx + l * .5, base);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = cfg.silhueta;
+        ctx.lineWidth = 2.4;
+        for (const v of [[-.34, .66, -.4, .86], [-.1, .5, -.02, .72], [.16, .52, .24, .74]]) {
+            ctx.beginPath();
+            ctx.moveTo(cx + l * v[0], base - h * v[1]);
+            ctx.quadraticCurveTo(cx + l * v[2], base - h * (v[3] + .06), cx + l * v[2], base - h * v[3]);
+            ctx.stroke();
+        }
+
+        // --- o VENENO escorrendo e empoçando: verde, e a única luz fria da ruína
+        const poca = ctx.createRadialGradient(cx, base, 0, cx, base, l * .85);
+        poca.addColorStop(0, `rgba(${cfg.veneno}, ${.34 + Math.sin(t * 1.6) * .06})`);
+        poca.addColorStop(.5, `rgba(${cfg.veneno}, .12)`);
+        poca.addColorStop(1, `rgba(${cfg.veneno}, 0)`);
+        ctx.fillStyle = poca;
+        ctx.beginPath();
+        ctx.ellipse(cx, base, l * .85, h * .16, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // os fios de veneno descendo pela parede, cada um no seu tempo
+        ctx.strokeStyle = `rgba(${cfg.veneno}, .55)`;
+        ctx.lineWidth = 2.6;
+        ctx.lineCap = 'round';
+        for (let i = 0; i < 4; i++) {
+            const x = cx - l * .34 + i * l * .22;
+            const escorre = (t * .18 + i * .27) % 1;      // desce e recomeça
+            const y0 = base - h * (.42 - i * .03);
+            ctx.globalAlpha = .8 * (1 - escorre * .5);
+            ctx.beginPath();
+            ctx.moveTo(x, y0);
+            ctx.lineTo(x, y0 + (base - y0) * escorre);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.restore();
+    };
+}
+
+/// O MOTOR delas — e das bobinas do laboratório, que são a mesma coisa com outra fantasia: coisas
+/// PRESAS NO HORIZONTE que acendem de vez em quando, cada uma no seu tempo. Duplicar estas 40 linhas
+/// pro segundo cliente seria abrir a porta pra as duas divergirem em silêncio.
+///
+/// O que cada tema traz é só: de que ladrilho ler a posição, onde estão os pontos, e o que desenhar.
+function criarPiscantes(cfg, canvas, desenhar) {
+    const arena = document.getElementById('arena');
+    let pontos = [];
+    let assinatura = '';
+
+    const remontar = () => {
+        const estilo = getComputedStyle(arena);
+        const passo = parseFloat(estilo.getPropertyValue(cfg.ladrilho[0])) || 320;
+        const altura = parseFloat(estilo.getPropertyValue(cfg.ladrilho[1])) || 190;
+
+        // Só refaz quando a GEOMETRIA muda. Refazer sempre destruiria o relógio de cada um a cada
+        // conferida, e aí nenhum chegaria a acender — piscariam do zero pra sempre.
+        const agora = `${canvas.width}|${canvas.height}|${passo}|${altura}`;
+        if (agora === assinatura) return;
+        assinatura = agora;
+
+        const baseY = canvas.height - altura;   // o ladrilho do horizonte é ancorado no rodapé
+
+        pontos = [];
+        for (let tile = 0; tile * passo < canvas.width; tile++) {
+            for (const p of cfg.pontos) {
+                pontos.push({
+                    // `lado` (quando existe) encosta a figura no flanco em vez de a espetar no meio.
+                    x: tile * passo + p.x * passo + (p.lado ?? 0) * cfg.tamanho * .78,
+                    y: baseY + p.y * altura,
+                    lado: p.lado ?? 1,
+                    // Chega dormindo: a primeira vez demora, e cada uma demora o seu.
+                    aceso: false,
+                    resta: entre(cfg.acordar),
+                });
+            }
+        }
+    };
+
+    remontar();
+    let conferir = 0;
+
+    return (ctx, dt) => {
+        // A arena muda de tamanho com a janela. Confere de vez em quando, e não a cada quadro,
+        // porque getComputedStyle força layout — e o remontar só refaz de fato se algo mudou.
+        conferir -= dt;
+        if (conferir <= 0) { conferir = 1; remontar(); }
+
+        for (const c of pontos) {
+            c.resta -= dt;
+            if (c.resta <= 0) {
+                c.aceso = !c.aceso;
+                // Aceso: sempre o mesmo tempo. Apagado: sorteado, e é daqui que vem o desencontro.
+                c.resta = c.aceso ? cfg.aceso : entre(cfg.apagado);
+            }
+            desenhar(ctx, c, cfg);
+        }
+    };
+}
+
+const criarCorujas = (cfg, canvas) => criarPiscantes(cfg, canvas,
+    (ctx, c, k) => desenharCoruja(ctx, c.x, c.y, k.tamanho, c.lado, c.aceso, k));
+
+const criarBobinas = (cfg, canvas) => criarPiscantes(cfg, canvas,
+    (ctx, c, k) => c.aceso && desenharRaio(ctx, c.x, c.y, k.tamanho, k));
+
+/// A descarga da bobina de Tesla: uma coroa de raios saindo da bola, com o traço quebrando em
+/// ziguezague. É redesenhada a cada quadro com ângulos NOVOS de propósito — raio parado no ar não
+/// existe, e é o tremer que faz a faísca parecer elétrica em vez de desenhada.
+function desenharRaio(ctx, x, y, tamanho, cfg) {
+    ctx.save();
+
+    // o halo da bola acesa
+    const halo = ctx.createRadialGradient(x, y, 0, x, y, tamanho * 1.6);
+    halo.addColorStop(0, `rgba(${cfg.cor}, .9)`);
+    halo.addColorStop(.3, `rgba(${cfg.cor}, .35)`);
+    halo.addColorStop(1, `rgba(${cfg.cor}, 0)`);
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(x, y, tamanho * 1.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = `rgba(${cfg.cor}, .85)`;
+    ctx.lineWidth = 1.3;
+    ctx.lineCap = 'round';
+
+    for (let r = 0; r < 4; r++) {
+        const angulo = -Math.PI / 2 + (Math.random() - .5) * 2.4;
+        const alcance = tamanho * (1.4 + Math.random() * 1.6);
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        // Três quebras: menos que isso vira risco reto, mais vira novelo.
+        for (let k = 1; k <= 3; k++) {
+            const d = alcance * (k / 3);
+            const desvio = (Math.random() - .5) * tamanho * .7;
+            ctx.lineTo(x + Math.cos(angulo) * d - Math.sin(angulo) * desvio,
+                       y + Math.sin(angulo) * d + Math.cos(angulo) * desvio);
+        }
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/// Uma coruja empoleirada: silhueta parada, olhos que acendem. O corpo fica SEMPRE visível — ela
+/// está ali o tempo todo, e é isso que faz o olho acender ser um bicho olhando, em vez de duas luzes
+/// surgindo do nada no meio do mato.
+///
+/// `lado` vira a cabeça pro lado de fora da árvore (ela está na beirada do tronco, olhando pro
+/// campo), o que de quebra faz as duas corujas do ladrilho não serem a mesma figura repetida.
+function desenharCoruja(ctx, x, y, s, lado, aceso, cfg) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    ctx.fillStyle = cfg.corpo;
+
+    // Corpo em gota: cabeça larga sem pescoço, que é o que faz uma silhueta ler como coruja.
+    ctx.beginPath();
+    ctx.moveTo(0, -1);
+    ctx.bezierCurveTo(.92, -.98, 1.06, .2, .68, .98);
+    ctx.quadraticCurveTo(0, 1.18, -.68, .98);
+    ctx.bezierCurveTo(-1.06, .2, -.92, -.98, 0, -1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Tufos de orelha — dois espetinhos, e é o detalhe que descarta "passarinho qualquer".
+    ctx.beginPath();
+    ctx.moveTo(-.62, -.72); ctx.lineTo(-.78, -1.32); ctx.lineTo(-.24, -.94);
+    ctx.moveTo(.62, -.72); ctx.lineTo(.78, -1.32); ctx.lineTo(.24, -.94);
+    ctx.fill();
+
+    // Um pé de galho sob ela, pra não parecer flutuando colada no tronco.
+    ctx.fillRect(-.5, .96, 1, .16);
+
+    if (!aceso) { ctx.restore(); return; }
+
+    // Os olhos, com halo: o halo é o que faz ler como brilho no escuro em vez de dois pixels acesos.
+    // Levemente deslocados pro lado de fora — a cabeça está virada pro campo.
+    for (const olho of [-1, 1]) {
+        const ox = olho * .32 + lado * .1;
+        const oy = -.38;
+        const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, .62);
+        g.addColorStop(0, `rgba(${cfg.olho}, .98)`);
+        g.addColorStop(.3, `rgba(${cfg.olho}, .5)`);
+        g.addColorStop(1, `rgba(${cfg.olho}, 0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(ox, oy, .62, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/// O DISCO VOADOR do 👽 e do 👾: casco em silhueta, cúpula, luzes girando na barriga e o FEIXE
+/// varrendo o chão. O feixe é o que faz o disco pertencer à cena em vez de ser um adesivo colado no
+/// céu — ele toca o campo, então há uma nave ali de verdade.
+///
+/// `fase` é a mesma variável que bate a asa do morcego. Aqui ela gira as luzes: um motor de voo só,
+/// dois bichos.
+function desenharDisco(ctx, x, y, s, fase, canvas, cfg) {
+    ctx.save();
+
+    // O feixe primeiro, pra o casco pousar por cima dele.
+    const alcanceY = canvas.height - y;
+    const feixe = ctx.createLinearGradient(x, y, x, canvas.height);
+    feixe.addColorStop(0, `rgba(${cfg.luz}, .3)`);
+    feixe.addColorStop(.55, `rgba(${cfg.luz}, .08)`);
+    feixe.addColorStop(1, `rgba(${cfg.luz}, 0)`);
+    ctx.fillStyle = feixe;
+    ctx.beginPath();
+    ctx.moveTo(x - s * .5, y);
+    ctx.lineTo(x + s * .5, y);
+    ctx.lineTo(x + s * .5 + alcanceY * .16, canvas.height);
+    ctx.lineTo(x - s * .5 - alcanceY * .16, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.translate(x, y);
+    ctx.fillStyle = cfg.cor;
+
+    // casco: elipse achatada
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s, s * .3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // cúpula
+    ctx.beginPath();
+    ctx.ellipse(0, -s * .16, s * .42, s * .34, 0, Math.PI, 0);
+    ctx.fill();
+
+    // o brilho da cúpula — o único ponto claro, e o que diz "tem alguém pilotando"
+    const vidro = ctx.createRadialGradient(0, -s * .3, 0, 0, -s * .3, s * .38);
+    vidro.addColorStop(0, `rgba(${cfg.luz}, .75)`);
+    vidro.addColorStop(1, `rgba(${cfg.luz}, 0)`);
+    ctx.fillStyle = vidro;
+    ctx.beginPath();
+    ctx.arc(0, -s * .3, s * .38, 0, Math.PI * 2);
+    ctx.fill();
+
+    // as luzes da barriga, girando: a mais próxima da frente é a mais acesa
+    for (let i = 0; i < 5; i++) {
+        const a = fase * .7 + i * (Math.PI * 2 / 5);
+        const lx = Math.cos(a) * s * .68;
+        const brilho = (Math.sin(a) + 1) / 2;   // some ao passar por trás do casco
+        ctx.fillStyle = `rgba(${cfg.luz}, ${.15 + brilho * .75})`;
+        ctx.beginPath();
+        ctx.arc(lx, s * .16, s * .075, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/// Um morcego, em curvas. O bater de asa é o seno abrindo e fechando a PONTA (o corpo fica parado) —
+/// é o que dá vida com duas linhas em vez de uma folha de sprites.
+function desenharMorcego(ctx, x, y, s, faseDaAsa, paraDireita, cor) {
+    const bate = Math.sin(faseDaAsa);           // -1 asa embaixo, +1 asa em cima
+    const alto = -0.55 - bate * 0.75;           // altura da ponta da asa
+    const meio = 0.10 - bate * 0.28;            // o "cotovelo", que segue a ponta com atraso
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(paraDireita ? s : -s, s);         // espelha inteiro pra virar de lado
+    ctx.fillStyle = cor;
+
+    // corpo + orelhas
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 0.24, 0.36, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-0.14, -0.28); ctx.lineTo(-0.2, -0.6); ctx.lineTo(-0.02, -0.34);
+    ctx.moveTo(0.14, -0.28); ctx.lineTo(0.2, -0.6); ctx.lineTo(0.02, -0.34);
+    ctx.fill();
+
+    // as duas asas, uma o espelho da outra
+    for (const lado of [1, -1]) {
+        ctx.beginPath();
+        ctx.moveTo(lado * 0.12, -0.12);
+        ctx.quadraticCurveTo(lado * 0.9, alto, lado * 1.75, alto * 0.55);   // borda de cima até a ponta
+        ctx.quadraticCurveTo(lado * 1.25, meio + 0.30, lado * 1.02, meio);  // 1º festão
+        ctx.quadraticCurveTo(lado * 0.82, meio + 0.34, lado * 0.6, meio - 0.04);
+        ctx.quadraticCurveTo(lado * 0.42, meio + 0.30, lado * 0.16, 0.16);  // volta ao corpo
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    ctx.restore();
 }
 
 // ---------- partida ----------

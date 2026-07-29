@@ -61,6 +61,11 @@ namespace ApostlesWar.Presentation.Front
             _proximoId = 1;
             _ladoDoJogadorDefinido = false;
 
+            // O foco vive na ponte, mas é um ID — e a numeração recomeça do 1 aqui. Sem limpar, um
+            // foco antigo de id 3 passaria a apontar pro combatente 3 da batalha NOVA, que é outra
+            // pessoa. Quem reinicia o espaço de ids é quem tem que invalidar quem os guardou.
+            _ponte.LimparFoco();
+
             Fase = FaseDaTela.Assistindo;
             QuemAge = null;
             HabilidadesDoTurno = new();
@@ -178,9 +183,26 @@ namespace ApostlesWar.Presentation.Front
                 LadoVencedor: LadoVencedor,
                 // O botão do automático se desenha do estado, como todo o resto da tela — assim ele
                 // não mente quando o C# desliga o modo por conta própria (batalha nova).
-                Auto: _ponte.AutoLigado);
+                Auto: _ponte.AutoLigado,
+                FocoId: FocoVisivel(todos));
 
             _ponte.EnviarEstado(estado);
+        }
+
+        /// <summary>
+        /// O foco, mas só enquanto houver alguém pra apontar: se o alvo morreu ou saiu do board (a
+        /// rodada 2 da campanha troca os inimigos), a marca vermelha some.
+        ///
+        /// Filtrar aqui e não guardar estado: o cérebro já ignora sozinho um foco morto (ele nem
+        /// aparece entre os candidatos vivos), então limpar a ponte seria um segundo dono da mesma
+        /// verdade. A tela pergunta "tem alguém apontado AGORA?" e a resposta se deriva do tabuleiro.
+        /// </summary>
+        private int FocoVisivel(List<Combate> board)
+        {
+            Combate? foco = PorId(_ponte.FocoDoJogador);
+            return foco is not null && board.Contains(foco) && Mostrado(foco).Vivo
+                ? _ponte.FocoDoJogador
+                : 0;
         }
 
         private CombatenteVisto Ver(Combate c) => new(
@@ -198,7 +220,10 @@ namespace ApostlesWar.Presentation.Front
             Vivo: Mostrado(c).Vivo,   // idem: quem morreu só "apaga" quando o golpe for narrado
             Status: c.StatusAtivos
                 .Select(s => new StatusVisto(s.Nome, s.Simbolo, s.DuracaoRestante, s is Buff))
-                .ToList());
+                .ToList(),
+            // O kit dele pra LER, com o cooldown andando. `Personagem.Habilidades` já traz a passiva
+            // junto — ela é identidade do champ e o jogador quer vê-la ao inspecionar.
+            Habilidades: c.Personagem.Habilidades.Select(h => VistaDeHabilidade.De(h, c)).ToList());
 
         private HabilidadeVista VerHabilidade(HabilidadeAtiva h)
         {

@@ -1016,6 +1016,19 @@ body {
     50% { box-shadow: 0 0 12px rgba(126,224,129,.4); }
 }
 
+/* FOCO do automático: o inimigo que você mandou o time inteiro atacar.
+   Vermelho como o `.alvo`, mas com brilho CONSTANTE em vez de só no hover — o `.alvo` é uma oferta
+   que dura um clique, o foco é uma ordem que fica de pé até você desfazer. Sem animação de propósito:
+   ela roubaria a atenção das que contam alguma coisa (o golpe, o buff que entrou). */
+.combatente.foco {
+    border-color: var(--alvo);
+    box-shadow: 0 0 14px rgba(224,87,79,.5);
+}
+.combatente.foco .nome::after {
+    content: ' 🎯';
+    font-size: 11px;   /* a cor não pode ser o único sinal */
+}
+
 /* selecionado no painel de baixo */
 .combatente.selecionado { border-color: var(--ouro); }
 
@@ -1142,6 +1155,16 @@ body {
    colapsa/quebra o resto normal — as descrições sem \n não mudam em nada. */
 .habilidade .hDesc { font-size: 11px; color: var(--apagado); white-space: pre-line; }
 .habilidade.escolhida { border-color: var(--ouro); background: #332b1c; }
+
+/* INERTE: o kit de quem você está só OLHANDO (aliado parado, inimigo). Mesma caixa do turno — o
+   jogador não deveria reaprender a ler a mesma informação porque mudou de quem está olhando.
+   Desfaz o `:disabled` cru, que serve pra outra coisa: lá o botão está apagado porque a habilidade
+   está em cooldown ("não dá pra usar AGORA"); aqui não há nada pra usar, então nem apaga nem
+   promete clique. */
+.habilidade.inerte:disabled { opacity: 1; cursor: default; background: transparent; }
+.habilidade.inerte .hNome { color: var(--apagado); }
+/* Tracejado = passiva, a mesma linguagem do compêndio. */
+.habilidade.inerte.passiva { border-style: dashed; }
 
 /* Armada esperando confirmação: pulsa devagar pra ficar claro que o turno ainda NÃO foi gasto. */
 .habilidade.confirmar { animation: pulsarConfirmar 1s ease-in-out infinite; }

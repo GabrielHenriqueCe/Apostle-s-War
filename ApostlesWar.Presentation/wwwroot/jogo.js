@@ -920,6 +920,10 @@ function ladoDe(id) {
     return e1.some(c => c.id === id) ? e1 : e2;
 }
 
+// A equipe1 é SEMPRE o seu lado — quem garante isso é o C# (ver SessaoDoFront.LadoDe), então a tela
+// pode perguntar "é inimigo?" olhando só de que lista o id veio.
+const ehInimigo = id => (estado?.equipe2 || []).some(c => c.id === id);
+
 // Quem pode ser clicado pra CONFIRMAR uma habilidade armada que não pede alvo (Self / buff em
 // aliados): clicar em si mesmo confirma o buff próprio, clicar num aliado confirma o de aliado.
 // Vazio quando não há habilidade armada, quando ela pede alvo (aí o C# dirige a fase de alvo), ou
@@ -967,7 +971,8 @@ function desenhar() {
     desenharPainel();
 }
 
-// Classes de animação em curso — precisam SOBREVIVER a um redesenho (ver desenharLado).
+// Classes de animação em curso — precisam SOBREVIVER a um redesenho (ver desenharLado). O `foco`
+// NÃO entra aqui: ele não é animação, é estado, e vem do retrato a cada quadro.
 const ANIMACOES = ['batendo', 'ferido', 'curado', 'ganhouEscudo', 'ganhouBuff', 'ganhouDebuff'];
 
 // O redesenho REAPROVEITA as caixas existentes (casadas por id) em vez de recriá-las.
@@ -1022,6 +1027,8 @@ function atualizarCombatente(el, c) {
     if (escolhendoAlvo && ehAlvoValido) el.classList.add('alvo');
     // Alvo AMIGO de uma habilidade armada sem passo de alvo (buff próprio/de aliado): clicar confirma.
     if (confirmarAtuais.has(c.id)) el.classList.add('alvoAmigo');
+    // O inimigo que você apontou no automático.
+    if (c.id === estado.focoId) el.classList.add('foco');
     animando.forEach(k => el.classList.add(k));
 
     const emoji = document.createElement('div');
@@ -1124,39 +1131,71 @@ function desenharPainel() {
     desenharHabilidades(c);
 }
 
+// O painel de habilidades tem UM molde só — o botão `.habilidade` de sempre. O que muda entre "é seu
+// turno" e "só estou olhando" é se ele RESPONDE ao clique, não a cara dele: o jogador não deveria ter
+// que reaprender a ler a mesma informação porque mudou de quem está olhando.
 function desenharHabilidades(c) {
     const caixa = document.getElementById('habilidades');
 
-    // As habilidades só existem pra quem está agindo E sendo controlado por você.
+    // Clicável só pra quem está agindo E sob seu controle. Todo o resto — aliado parado, inimigo,
+    // qualquer um — mostra o mesmo painel, inerte. Esconder o cooldown do inimigo não protegeria
+    // nada (quem joga bem decora), só viraria imposto de memória.
     const podeAgir = c.id === estado.quemAge
         && ['EscolhendoAcao', 'EscolhendoAlvo'].includes(nomeDaFase(estado));
 
-    if (!podeAgir) { caixa.replaceChildren(); return; }
+    if (!podeAgir) {
+        caixa.replaceChildren(...(c.habilidades || []).map(criarBotaoInerte));
+        return;
+    }
 
     caixa.replaceChildren(...estado.habilidades.map(h => {
         const armada = habilidadeEscolhida === h.indice;
         // Armada e sem passo de alvo: falta o clique de confirmação — a tela precisa dizer isso.
         const aguardandoConfirmar = armada && !h.pedeAlvo;
 
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'habilidade' + (armada ? ' escolhida' : '') + (aguardandoConfirmar ? ' confirmar' : '');
+        const b = criarBotaoHabilidade(h, aguardandoConfirmar
+            ? 'clique de novo ou num alvo pra usar · Esc/fora cancela'
+            : h.descricao);
+        if (armada) b.classList.add('escolhida');
+        if (aguardandoConfirmar) b.classList.add('confirmar');
         b.disabled = !h.disponivel;
 
-        const nome = document.createElement('span');
-        nome.className = 'hNome';
-        nome.textContent = `${h.simbolo} ${h.nome}` + (h.cooldownRestante > 0 ? ` (${h.cooldownRestante})` : '');
-
-        const desc = document.createElement('span');
-        desc.className = 'hDesc';
-        desc.textContent = aguardandoConfirmar
-            ? 'clique de novo ou num alvo pra usar · Esc/fora cancela'
-            : h.descricao;
-
-        b.append(nome, desc);
         b.addEventListener('click', () => escolherHabilidade(h));
         return b;
     }));
+}
+
+// A caixa de uma habilidade no painel. Os dois chamadores mandam formatos diferentes de dado
+// (HabilidadeVista pra clicar, HabilidadeDoChampVista pra ler), mas o que a tela desenha vem só do
+// que os dois têm em comum: símbolo, nome, cooldown restante e descrição.
+function criarBotaoHabilidade(h, descricao) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'habilidade';
+
+    const nome = document.createElement('span');
+    nome.className = 'hNome';
+    nome.textContent = `${h.simbolo} ${h.nome}` + (h.cooldownRestante > 0 ? ` (${h.cooldownRestante})` : '');
+
+    const desc = document.createElement('span');
+    desc.className = 'hDesc';
+    desc.textContent = descricao;
+
+    b.append(nome, desc);
+    return b;
+}
+
+// Mesma caixa, sem clique: é o kit de quem você está OLHANDO. A passiva entra junto — ela é parte do
+// que se precisa saber sobre o inimigo — marcada como passiva, porque botão de passiva não existe.
+function criarBotaoInerte(h) {
+    const b = criarBotaoHabilidade(h, h.descricao);
+    b.classList.add('inerte');
+    if (h.passiva) {
+        b.classList.add('passiva');
+        b.querySelector('.hNome').textContent = `${h.simbolo} ${h.nome} · passiva`;
+    }
+    b.disabled = true;   // inerte de verdade: nem foca pelo teclado
+    return b;
 }
 
 // ---------- interação ----------
@@ -1193,6 +1232,11 @@ function clicarEmCombatente(id) {
 
     // Com habilidade em curso e alvo legítimo: o clique EXECUTA.
     if (escolhendoAlvo && ehAlvoValido) { mandar('alvo', id); return; }
+
+    // No AUTOMÁTICO, clicar num inimigo o aponta: o cérebro passa a mirar nele. Clicar no mesmo de
+    // novo desfaz. Só faz sentido com o auto ligado — fora dele quem escolhe alvo é você, no passo
+    // de alvo. E não substitui a inspeção: a ficha dele abre igual, logo abaixo.
+    if (autoLigado && ehInimigo(id)) mandar('foco', estado.focoId === id ? 0 : id);
 
     // Habilidade armada sem passo de alvo (buff próprio / em aliados): clicar num alvo destacado
     // CONFIRMA — o equivalente ao 2º clique na habilidade, só que apontando quem recebe.

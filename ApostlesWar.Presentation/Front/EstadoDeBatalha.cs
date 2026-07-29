@@ -212,6 +212,17 @@ namespace ApostlesWar.Presentation.Front
     /// <summary>Um dos 7 slots do boneco: nome do tipo + o item equipado (null = vazio).</summary>
     internal record SlotArsenalVista(int Slot, string Nome, ItemArsenalVista? Equipado);
 
-    /// <summary>O arsenal: os 7 slots (equipados) + todos os itens obtidos (pra escolher ao clicar um slot).</summary>
-    internal record ArsenalVista(List<SlotArsenalVista> Slots, List<ItemArsenalVista> Obtidos);
+    /// <summary>
+    /// Uma linha do painel de totais: o que o conjunto equipado dá naquele stat, já escrito
+    /// (<c>"ATK"</c> / <c>"+240"</c>). Quem soma é o <see cref="ArsenalService.TotaisEquipados"/>;
+    /// aqui só chega o número virado texto.
+    /// </summary>
+    internal record BonusVista(string Stat, string Valor);
+
+    /// <summary>
+    /// O arsenal: os 7 slots (equipados), o TOTAL que eles dão e todos os itens obtidos (pra escolher
+    /// ao clicar um slot).
+    /// </summary>
+    internal record ArsenalVista(List<SlotArsenalVista> Slots, List<BonusVista> Totais,
+        List<ItemArsenalVista> Obtidos);
 }

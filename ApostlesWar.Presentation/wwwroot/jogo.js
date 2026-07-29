@@ -608,8 +608,35 @@ function mostrarArsenal(a) {
     mostrarCena('arsenal');
     arsenalDados = a;
     desenharBoneco();
+    desenharTotais();
     if (arsenalSlotSel >= 0) mostrarItensSlot(arsenalSlotSel);
     else document.getElementById('arsenalDetalhe').hidden = true;
+}
+
+// O que o conjunto equipado dá, somado. Quem soma e quem escreve o número é o C#
+// (ArsenalService.TotaisEquipados + ValorFormatado) — aqui só chega texto pronto, pelo mesmo motivo
+// de sempre: "0.05" virar "5%" é exibição, mas QUANTO é regra de item.
+function desenharTotais() {
+    const cont = document.getElementById('arsenalTotais');
+    const titulo = document.createElement('div');
+    titulo.className = 'atTitulo';
+    titulo.textContent = 'Bônus do arsenal';
+
+    if (!arsenalDados.totais.length) {
+        const v = document.createElement('div');
+        v.className = 'atVazio';
+        v.textContent = 'Nada equipado ainda.';
+        cont.replaceChildren(titulo, v);
+        return;
+    }
+
+    cont.replaceChildren(titulo, ...arsenalDados.totais.map(b => {
+        const linha = document.createElement('div'); linha.className = 'atLinha';
+        const rot = document.createElement('span'); rot.className = 'atStat'; rot.textContent = b.stat;
+        const val = document.createElement('span'); val.className = 'atValor'; val.textContent = b.valor;
+        linha.append(rot, val);
+        return linha;
+    }));
 }
 
 function desenharBoneco() {

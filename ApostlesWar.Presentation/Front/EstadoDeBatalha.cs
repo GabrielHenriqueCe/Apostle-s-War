@@ -22,8 +22,22 @@ namespace ApostlesWar.Presentation.Front
         string? Mensagem,                   // linha de narração (uso de habilidade, passiva...)
         int LadoVencedor = 0,               // no Fim: 1=esquerda venceu, 2=direita; 0=sem split (campanha)
         bool Auto = false,                  // o automático está ligado? (o botão se desenha daqui)
-        int FocoId = 0                      // inimigo apontado no automático (0 = nenhum)
+        int FocoId = 0,                     // inimigo apontado no automático (0 = nenhum)
+        /// <summary>
+        /// Em que modo esta batalha está rolando. A tela usa pra dizer a verdade no botão de saída:
+        /// na CAMPANHA desistir não sai do jogo, conta DERROTA e cai na tela de fim de fase (o
+        /// caminho já era esse — `sair` vira `BatalhaAbortada` e a fase vira Perdeu); na ARENA sair é
+        /// sair mesmo, sem desfecho. Duas consequências diferentes não podem ter o mesmo rótulo.
+        /// </summary>
+        string Modo = ModoDeBatalha.Arena
     );
+
+    /// <summary>Os modos que o front distingue. String porque é o que atravessa a ponte.</summary>
+    internal static class ModoDeBatalha
+    {
+        public const string Arena = "arena";
+        public const string Campanha = "campanha";
+    }
 
     /// <summary>Em que ponto do turno a tela está — o JS usa pra saber o que é clicável.</summary>
     internal enum FaseDaTela
@@ -167,12 +181,50 @@ namespace ApostlesWar.Presentation.Front
     internal record FaseVista(int Numero, string Nome, bool Desbloqueado, bool Concluido,
         List<CampeaoVisto> Rodada1, List<CampeaoVisto> Rodada2, ItemVista Item);
 
-    /// <summary>A tela de fases de uma facção: as 7 fases + o pool de champs desbloqueados pra montar o time.</summary>
+    /// <summary>
+    /// A tela de fases de uma facção: as 7 fases + o pool de champs desbloqueados pra montar o time.
+    ///
+    /// <see cref="FaseSelecionada"/> e <see cref="TimeMontado"/> são a MEMÓRIA: a tela abre já na
+    /// última fase visitada e com o último time nos slots, em vez de exigir que o jogador remonte
+    /// tudo a cada visita. O time vem como índices em <see cref="MeusCampeoes"/> porque é isso que o
+    /// clique devolve; o save guarda identidade (ver CampanhaService.UltimoTime).
+    /// </summary>
     internal record FasesVista(string CapituloNome, string CapituloSimbolo, List<FaseVista> Fases,
-        List<CampeaoVisto> MeusCampeoes);
+        List<CampeaoVisto> MeusCampeoes, int FaseSelecionada, List<int> TimeMontado);
 
     /// <summary>Recompensa da vitória: os champs novos desbloqueados + o item dropado (null se já tinha).</summary>
     internal record RecompensaVista(List<CampeaoVisto> Novos, ItemVista? Item);
+
+    /// <summary>
+    /// O fim de uma fase — vitória e derrota na MESMA tela, porque a pergunta que vem depois das duas
+    /// é a mesma: e agora? Antes eram duas telas que só sabiam dizer "clique pra continuar", e
+    /// continuar significava voltar pra lista de fases mesmo quando o jogador só queria tentar de
+    /// novo com o mesmo time.
+    ///
+    /// <see cref="ComOpcoes"/> false = é a passagem da recompensa (o item em destaque, os champs
+    /// novos a caminho), que pede um clique e segue pras conquistas; true = é a tela de decisão.
+    /// A mesma tela nos dois momentos, pra o jogador não sentir que mudou de lugar.
+    ///
+    /// <see cref="PodeProxima"/> decide se o botão de continuar existe — falso na derrota (a fase
+    /// seguinte não foi liberada) e no fim do último capítulo, sem que a tela precise saber por quê.
+    /// <see cref="ProximoECapitulo"/> diz só como CHAMÁ-LO: depois da fase 7 o "continuar" atravessa
+    /// pro capítulo seguinte, e prometer "Próxima Fase" quando o que vem é outro capítulo seria
+    /// esconder do jogador que ele está mudando de lugar.
+    /// </summary>
+    internal record FimDeFaseVista(bool Venceu, RecompensaVista? Recompensa, bool PodeProxima,
+        bool ProximoECapitulo, bool ComOpcoes);
+
+    /// <summary>
+    /// O que o jogador escolheu na tela de fim de fase. Os valores viajam como índice pela ponte, que
+    /// carrega um int — então a ORDEM aqui é contrato com o JS.
+    /// </summary>
+    internal enum DecisaoDeFim
+    {
+        JogarNovamente = 0,
+        EditarEquipe = 1,
+        ProximaFase = 2,
+        Sair = 3,          // Esc: só o C# produz, o JS nunca manda
+    }
 
     /// <summary>O que o front devolve ao iniciar uma fase: a fase (1..7) e o time como índices dos desbloqueados.</summary>
     internal record FaseConfig(int Fase, int[] Time);

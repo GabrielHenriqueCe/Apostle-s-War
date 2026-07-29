@@ -251,6 +251,7 @@ namespace ApostlesWar.Presentation.Front
                     var time2 = cfg.Time2.Select(i => pool[i]).ToList();
 
                     _sessao.Reiniciar();       // batalha nova = tela limpa (senão os antigos acumulam)
+                    _sessao.Modo = ModoDeBatalha.Arena;   // aqui sair é sair mesmo, sem desfecho
                     _ponte.DesligarAuto();     // e controle de volta com o jogador
                     _ponte.LimparPendentes();  // dropa cliques da montagem + zera o "sair"
                     if (_combate.ExecutarArenaComTimes(time1, time2, cfg.Bot1, cfg.Bot2))
@@ -395,28 +396,159 @@ namespace ApostlesWar.Presentation.Front
 
                 if (msg.Tipo == "iniciarFase" && ValidarFase(msg.Texto, faccao, out Fases fase, out var time))
                 {
-                    _sessao.Reiniciar();
-                    _ponte.DesligarAuto();
-                    _ponte.LimparPendentes();
-                    ResultadoFase resultado = _combate.ExecutarFaseComTime(time, faccao, fase);
-
-                    if (resultado == ResultadoFase.Venceu)
-                        _ponte.EnviarVitoria(MontarRecompensa(_campanha.ProcessarVitoria(faccao, fase)));
-                    else
-                        _ponte.EnviarDerrota();
-
-                    EsperarContinuar();
-                    // o while re-renderiza as fases já atualizadas
+                    // O "Próxima" pode ter atravessado pro capítulo seguinte, então o laço continua
+                    // ONDE O JOGADOR PAROU — e não onde ele entrou. Sem isto, quem virasse de
+                    // capítulo lutando cairia de volta na lista de fases do capítulo antigo.
+                    faccao = JogarFase(faccao, fase, time);
                 }
             }
         }
 
+        /// <summary>
+        /// Uma fase, e o que vem DEPOIS dela. É um laço porque o fim de fase não é mais um beco:
+        /// "Jogar Novamente" e "Próxima Fase" voltam pra cá com o mesmo time, sem passar pela
+        /// montagem — que era o pedido (ninguém quer remontar quatro slots pra repetir uma fase).
+        /// "Editar Equipe" e o Esc saem, e aí o chamador redesenha a tela de fases.
+        ///
+        /// Vitória e derrota terminam na MESMA tela, com as mesmas opções. A diferença é o que ela
+        /// mostra em cima (troféu e recompensas × vela) e se o "Próxima" existe.
+        /// </summary>
+        /// <returns>O capítulo em que o jogador parou — pode não ser o que ele entrou, porque
+        /// continuar depois da fase 7 atravessa pro capítulo seguinte.</returns>
+        private Faccao JogarFase(Faccao faccao, Fases fase, List<Personagem> time)
+        {
+            while (true)
+            {
+                // Antes de lutar, não depois: se o jogo fechar no meio da luta, o jogador volta na
+                // fase em que estava e com o time que montou.
+                _campanha.SalvarEntradaNaFase(faccao, fase, time);
+
+                _sessao.Reiniciar();
+                _sessao.Modo = ModoDeBatalha.Campanha;   // aqui desistir é DERROTA, não saída
+                _ponte.DesligarAuto();
+                _ponte.LimparPendentes();
+                bool venceu = _combate.ExecutarFaseComTime(time, faccao, fase) == ResultadoFase.Venceu;
+
+                // A recompensa é processada ANTES de montar a tela: é ela que desbloqueia a fase
+                // seguinte, e é isso que decide se o botão "Próxima Fase" existe.
+                var novos = new List<Personagem>();
+                RecompensaVista? recompensa = null;
+                if (venceu)
+                {
+                    RecompensaDaFase r = _campanha.ProcessarVitoria(faccao, fase);
+                    novos = r.NovosCampeoes;
+                    recompensa = MontarRecompensa(r);
+                }
+
+                MostrarConquistas(venceu, recompensa, faccao, fase, novos);
+
+                _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, comOpcoes: true));
+                switch (EsperarDecisao())
+                {
+                    case DecisaoDeFim.JogarNovamente:
+                        continue;
+
+                    case DecisaoDeFim.ProximaFase:
+                        // Não confiamos na tela: ela só desenha o botão quando dá, mas quem responde
+                        // "a próxima existe e está liberada?" é o back, aqui, de novo.
+                        var proxima = ProximaEtapa(faccao, fase);
+                        if (proxima is null) return faccao;
+
+                        // Virou o capítulo: o marcador do mapa vai junto, senão sair depois cairia
+                        // num lugar do mapa que não é onde o jogador está.
+                        if (proxima.Value.Faccao != faccao)
+                            _campanha.SalvarPosicao(_capitulos.FaccoesDaCampanha().IndexOf(proxima.Value.Faccao));
+
+                        faccao = proxima.Value.Faccao;
+                        fase = proxima.Value.Fase;
+                        continue;
+
+                    default:
+                        return faccao;   // Editar Equipe / Esc
+                }
+            }
+        }
+
+        /// <summary>
+        /// A celebração do champ conquistado, quando há algum. Ordem pedida pelo Gabriel: primeiro a
+        /// tela de vitória com o item em destaque, e só depois cada champ novo — um por vez, cada um
+        /// com a própria tela. Sem champ novo isto não faz nada, e a tela de decisão aparece direto.
+        ///
+        /// O C# conduz a sequência (manda um, espera o "continuar") em vez de despejar a lista e
+        /// deixar o JS navegar, pelo mesmo motivo do compêndio: quem responde o Esc/Sair é ele, então
+        /// precisa saber em qual tela o jogador está.
+        /// </summary>
+        private void MostrarConquistas(bool venceu, RecompensaVista? recompensa, Faccao faccao,
+            Fases fase, List<Personagem> novos)
+        {
+            if (novos.Count == 0) return;
+
+            _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, comOpcoes: false));
+            EsperarContinuar();
+
+            foreach (Personagem novo in novos)
+            {
+                _ponte.EnviarConquista(MontarDetalhe(novo));
+                EsperarContinuar();
+            }
+        }
+
+        private FimDeFaseVista MontarFimDeFase(bool venceu, RecompensaVista? recompensa, Faccao faccao,
+            Fases fase, bool comOpcoes)
+        {
+            var proxima = ProximaEtapa(faccao, fase);
+            return new FimDeFaseVista(venceu, recompensa,
+                PodeProxima: proxima is not null,
+                ProximoECapitulo: proxima is not null && proxima.Value.Faccao != faccao,
+                comOpcoes);
+        }
+
+        /// <summary>
+        /// Pra onde o "continuar" leva, ou null se não há pra onde ir. Uma pergunta só, e é dela que
+        /// caem TODOS os casos em que o botão some: derrota (a fase seguinte não foi desbloqueada) e
+        /// fim do último capítulo.
+        ///
+        /// Depois da fase 7 ele ATRAVESSA pro capítulo seguinte, na fase 1 — jogar a campanha inteira
+        /// não deveria exigir voltar ao mapa a cada sete fases. O que ele nunca faz é dar a volta:
+        /// terminada a fase 7 do último capítulo, acabou, e o jogador escolhe o que fazer. Isso vai
+        /// importar mais quando a DIFICULDADE existir — passar de Fácil pra Normal é decisão dele,
+        /// não consequência de um clique em "continuar".
+        /// </summary>
+        private (Faccao Faccao, Fases Fase)? ProximaEtapa(Faccao faccao, Fases fase)
+        {
+            if (fase != Enum.GetValues<Fases>().Last())
+                return _capitulos.EstaDesbloqueado(faccao, Proxima(fase))
+                    ? (faccao, Proxima(fase))
+                    : null;
+
+            var capitulos = _capitulos.FaccoesDaCampanha();
+            int proximo = capitulos.IndexOf(faccao) + 1;
+            if (proximo <= 0 || proximo >= capitulos.Count) return null;   // era o último
+
+            return _capitulos.EstaDesbloqueado(capitulos[proximo], Fases.Fase1)
+                ? (capitulos[proximo], Fases.Fase1)
+                : null;
+        }
+
+        private static Fases Proxima(Fases fase) => (Fases)((int)fase + 1);
+
         private FasesVista MontarFases(Faccao faccao)
         {
             var fases = Enum.GetValues<Fases>().Select(f => MontarFase(faccao, f)).ToList();
-            var meus = _campeoes.ObterDesbloqueados()
+            var desbloqueados = _campeoes.ObterDesbloqueados();
+            var meus = desbloqueados
                 .Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
-            return new FasesVista(faccao.Descricao(), Faccoes.Simbolo(faccao), fases, meus);
+
+            // O time salvo volta como ÍNDICES nesta lista, porque é isso que o clique devolve. A
+            // tradução identidade→índice é do C#: o save guarda quem é o champ (ver
+            // CampanhaService.UltimoTime), e a posição na lista é só o endereço de hoje.
+            var time = _campanha.UltimoTime()
+                .Select(p => desbloqueados.FindIndex(d => d.Faccao == p.Faccao && d.Slot == p.Slot))
+                .Where(i => i >= 0)
+                .ToList();
+
+            return new FasesVista(faccao.Descricao(), Faccoes.Simbolo(faccao), fases, meus,
+                (int)_campanha.UltimaFaseDe(faccao), time);
         }
 
         private FaseVista MontarFase(Faccao faccao, Fases fase)
@@ -467,7 +599,7 @@ namespace ApostlesWar.Presentation.Front
             return true;
         }
 
-        /// <summary>Segura a tela de vitória/derrota até o jogador clicar pra continuar.</summary>
+        /// <summary>Segura uma tela de passagem (recompensa, conquista) até o jogador seguir em frente.</summary>
         private void EsperarContinuar()
         {
             while (true)
@@ -475,6 +607,24 @@ namespace ApostlesWar.Presentation.Front
                 MensagemDoFront msg = _ponte.Esperar();
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
                 if (msg.Tipo == "continuar") return;
+            }
+        }
+
+        /// <summary>
+        /// Segura a tela de fim de fase até o jogador escolher o que fazer. O Esc chega como "voltar"
+        /// e vale <see cref="DecisaoDeFim.Sair"/> — que faz o mesmo que "Editar Equipe", porque sair
+        /// desta tela É voltar pra montagem. Ter os dois nomes é honesto: um é gesto de teclado, o
+        /// outro é um botão com um propósito escrito nele.
+        /// </summary>
+        private DecisaoDeFim EsperarDecisao()
+        {
+            while (true)
+            {
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "voltar") return DecisaoDeFim.Sair;
+                if (msg.Tipo == "fimDeFase" && Enum.IsDefined(typeof(DecisaoDeFim), msg.Valor))
+                    return (DecisaoDeFim)msg.Valor;
             }
         }
 

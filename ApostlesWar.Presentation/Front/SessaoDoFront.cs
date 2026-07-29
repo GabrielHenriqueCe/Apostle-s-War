@@ -46,6 +46,13 @@ namespace ApostlesWar.Presentation.Front
         public int LadoVencedor { get; set; }   // no Fim: 1=esquerda venceu, 2=direita; 0=sem split
 
         /// <summary>
+        /// Campanha ou Arena. Quem escreve é o FluxoDoFront, antes de cada luta — ele é quem sabe por
+        /// qual porta a batalha entrou. Sobrevive ao <see cref="Reiniciar"/> porque é setado logo
+        /// depois dele, no mesmo gesto de começar a batalha.
+        /// </summary>
+        public string Modo { get; set; } = ModoDeBatalha.Arena;
+
+        /// <summary>
         /// Zera o estado pra uma batalha NOVA. A sessão vive o boot inteiro (não é recriada por luta),
         /// e os mapas de combatente casam por REFERÊNCIA — sem limpar, o Publicar mandaria os
         /// combatentes das batalhas anteriores junto (bug do "time antigo acumulando na tela"). Chamado
@@ -184,7 +191,8 @@ namespace ApostlesWar.Presentation.Front
                 // O botão do automático se desenha do estado, como todo o resto da tela — assim ele
                 // não mente quando o C# desliga o modo por conta própria (batalha nova).
                 Auto: _ponte.AutoLigado,
-                FocoId: FocoVisivel(todos));
+                FocoId: FocoVisivel(todos),
+                Modo: Modo);
 
             _ponte.EnviarEstado(estado);
         }

@@ -107,8 +107,11 @@ namespace ApostlesWar.Presentation.Front
         // ---------- Campanha ----------
         public void EnviarMapa(MapaVista mapa) => Enviar("campanhaMapa", mapa);
         public void EnviarFases(FasesVista fases) => Enviar("campanhaFases", fases);
-        public void EnviarVitoria(RecompensaVista recompensa) => Enviar("campanhaVitoria", recompensa);
-        public void EnviarDerrota() => Enviar("campanhaDerrota", new { });
+        /// <summary>Vitória e derrota, na mesma tela. A resposta volta como "fimDeFase" (ou "voltar", no Esc).</summary>
+        public void EnviarFimDeFase(FimDeFaseVista fim) => Enviar("fimDeFase", fim);
+
+        /// <summary>A tela de um champ recém-conquistado. A resposta volta como "continuar".</summary>
+        public void EnviarConquista(ChampDetalheVista champ) => Enviar("conquista", champ);
 
         public void EnviarArsenal(ArsenalVista arsenal) => Enviar("arsenal", arsenal);
 

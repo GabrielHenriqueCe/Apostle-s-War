@@ -1686,6 +1686,28 @@ const AR_DO_TEMA = {
             muro: .3, torre: .46, casas: 11, nuvens: 6, vento: 5,
         },
         po: { cor: '217, 180, 91', quantas: 46, subida: [4, 14], raio: [0.6, 2.2], opacidade: [.12, .5] },
+        // O 🥷 correndo pelos telhados. O corpo NÃO é preto: contra o céu de dia o preto chapado lê
+        // como recorte de papel (a mesma lição que tirou o preto dos exércitos). Este azul quase
+        // preto lê como preto e ainda fica dentro do quadro.
+        ninja: {
+            corpo: '#1a1f33', faixa: '26, 31, 51', fumaca: '240, 244, 250',
+            // Em FRAÇÃO da altura da arena, e não em px: o castelo inteiro escala com ela, e ele
+            // precisa escalar junto ou deixa de caber em cima da torre. Ver o `remontar`.
+            tamanho: .025, velocidade: 1, arco: .11, fumacaRaio: .062,
+            // Ele passa MUITO mais tempo FORA do que em cena — cerca de três por um. É o que o
+            // mantém sendo uma aparição: um ninja sempre visível correndo no telhado vira mascote
+            // do castelo, e o castelo é o cenário, não ele. `emCena` é quanto ele dura por visita
+            // (quando zera, some na primeira borda que encontrar); `fora` é o tempo sumido.
+            emCena: [4, 9], sumir: .28, fora: [12, 26], surgir: .3,
+            // Com que frequência a visita termina em FUGA pela lateral (o resto termina na bomba de
+            // fumaça). Metade e metade: as duas saídas são boas, e alternar impede que qualquer uma
+            // vire tique. A entrada é sempre pela fumaça — chegar tem que ter um só jeito.
+            sairPelaBorda: .5,
+            // Com ele menor e mais rápido, o RASTRO passa a ser o que se lê de longe — é ele que
+            // ocupa a tela, não o boneco. Por isso ficou longo e grosso: a leitura agora é "uma
+            // sombra correndo no telhado", e a figura só confirma de perto.
+            rastro: 18, bolhas: 9, fumacaDura: .9,
+        },
         exercitos: {
             // De dia a silhueta preta não serve mais: contra o céu claro ela lia como recorte de
             // papel. Agora cada coisa tem o MATERIAL dela — o aço reflete (por isso é gradiente,
@@ -1707,13 +1729,11 @@ const AR_DO_TEMA = {
     ladosombrio: {
         po: { cor: '178, 205, 186', quantas: 34, subida: [-9, -3], raio: [0.5, 2.0], opacidade: [.08, .3] },
         nevoa: { cor: '150, 190, 170', quantas: 7, deriva: [6, 20], raio: [140, 320], opacidade: [.03, .08] },
-        // Fantasmas, e não morcegos: eles PASSEIAM em vez de cruzar — daí a velocidade cair pela
-        // metade e o intervalo encurtar (assombração rala não assombra). O morcego fica guardado
-        // pros 🔱 Decaídos, que é onde ele pertence.
-        voadores: {
-            forma: 'fantasma', cor: '208, 238, 222', quantos: 3,
-            velocidade: [34, 68], tamanho: [20, 32], intervalo: [1, 8],
-        },
+        // Aqui NÃO há `voadores`. Os fantasmas do cemitério passeiam pela tela como sempre, mas
+        // agora eles NASCEM do caixão em vez de entrarem pela borda — ver `caixao` mais abaixo.
+        // Entrar pela borda dizia que vinham de fora; saindo da cova, o cemitério passa a ter uma
+        // origem, e a peça do meio deixa de ser um enfeite pra virar a causa do resto.
+        // (O morcego segue guardado pros 🔱 Decaídos, que é onde ele pertence.)
         // As corujas nas árvores. `poleiros` são posições DENTRO do ladrilho da mata, em fração —
         // assim elas seguem o ladrilho quando ele muda de tamanho, e cada árvore desenhada no SVG
         // ganha a sua sem ninguém recontar pixel. `lado` encosta a coruja num flanco do tronco: uma
@@ -1748,6 +1768,58 @@ const AR_DO_TEMA = {
             // árvore menor (x≈196) — onde o SVG não desenhou nada. Dois por ladrilho enchiam demais:
             // espantalho é figura solitária, e repetido de perto vira plantação.
             pontos: [{ x: .613, y: .95 }],
+        },
+        // O 💀 saindo da cova, no meio do cemitério — a única peça do tema que ACONTECE em vez de só
+        // estar lá. O que sai dele são fantasmas; ver o doc do `criarCaixao`.
+        caixao: {
+            madeira: '#2a1d16', ferro: '#12100e', dentro: '#040706', terra: '#0b120e',
+            // O mesmo verde espectral do pó, da névoa e dos fantasmas que já cruzam o céu: a luz
+            // nova tinha que pertencer ao cemitério que já existe, não trazer uma paleta própria.
+            brilho: '178, 255, 214',
+            // `cor` (e não um nome próprio) porque é o que o `desenharFantasma` já espera receber —
+            // é o mesmo desenho dos voadores, reusado inteiro.
+            cor: '208, 238, 222',
+            // Fração da altura da arena. Encolheu (era .72) pra abrir espaço pros fantasmas: com o
+            // caixão menor, o que ocupa a cena passa a ser o que SAI dele, que é o ponto.
+            // Metade do que era (.30 × .54). Com os fantasmas passeando pela tela o tempo todo, o
+            // caixão não precisa mais carregar a cena sozinho — ele virou a FONTE deles, e fonte
+            // grande demais rouba a atenção do que sai dela.
+            largura: .15, altura: .27, canto: 4,
+            // Os caixõezinhos em volta: `x` em múltiplos da largura do grande, `y` em fração da
+            // altura dele, `giro` em radianos e `atraso` no quanto cada um demora a romper o chão.
+            // Tortos e em alturas diferentes de propósito — enfileirados e retos, virariam cerca.
+            menorTamanho: .095,
+            menores: [
+                { x: -2.6, y: .06, giro: -.38, atraso: .5 },
+                { x: -1.5, y: .10, giro: .26, atraso: 0 },
+                { x: 1.6, y: .09, giro: -.3, atraso: .25 },
+                { x: 2.7, y: .05, giro: .44, atraso: .7 },
+            ],
+            // O raio do clarão, em MÚLTIPLOS da largura do caixão. É a única alavanca do quanto a
+            // luz vaza pelos lados do log (~300px de coluna): com o caixão menor, `2.4` deixava a
+            // luz morrer justo na borda dele. Aumentar isto é o ajuste se ainda parecer escondido.
+            clarao: 5.5,
+            espera: [10, 20], revirar: .8, subir: 2.4, abrir: 1.1,
+            fechar: .9, descer: 2.2, assentar: 1.3,
+            // A leva. `subida` e `tamanho` são fração da altura da arena, como todo o resto.
+            // A LEVA. Três por abertura, e cada fantasma dura DOIS ciclos do caixão: a leva 1 sai, a
+            // leva 2 sai (seis na tela), e quando a 3 vem a 1 já está se apagando. É o rodízio que
+            // segura o teto em 6 sem ninguém contar nada — o `maximo` é só rede de segurança.
+            porLeva: 3, maximo: 6, intervalo: .5,
+            acender: .6, apagar: 2.2,
+            // `subida` e `deriva` são FAIXAS e não valores únicos: fantasmas todos na mesma
+            // velocidade leem como um efeito só. `assumir` é em quanto tempo a deriva lateral toma
+            // o lugar do impulso de saída — é o que liga "saiu do caixão" a "passeia pela tela".
+            subida: [.05, .11], deriva: [.02, .05], assumir: 2.4, tamanho: .058,
+            // A faixa de altitude que eles percorrem, em fração da altura da arena: de quase
+            // encostado no topo (.06) até a metade de baixo (.66). `mudarAltura` é de quanto em
+            // quanto tempo cada um escolhe outra, e `buscarAltura` o quanto ele demora a chegar lá
+            // — lento de propósito, senão a troca vira teleporte vertical em vez de voo.
+            //
+            // `altitude`, e NÃO `altura`: esta config já tem uma `altura`, que é a do caixão. Chamar
+            // as duas de `altura` no mesmo objeto não dá erro nenhum em JS — a segunda simplesmente
+            // apaga a primeira, e o caixão inteiro vira NaN.
+            altitude: [.06, .66], mudarAltura: [4, 10], buscarAltura: 5,
         },
     },
     // A clareira ao anoitecer. 👺 Tengu manda nos corvos e no vento; 🤡 Palhaço acende o varal da
@@ -1807,7 +1879,33 @@ const AR_DO_TEMA = {
             // O veneno tem os DOIS tons pelo mesmo motivo que o fogo tem: um claro pro núcleo e um
             // saturado pro corpo. É o par que faz a coisa parecer luminosa em vez de pintada.
             veneno: '138, 255, 150', venenoClaro: '226, 255, 228',
-            largura: 230, altura: 128, labaredas: 7,
+            // Em FRAÇÃO da altura da arena, não mais em px fixos (era 230×128). Passou a ser fração
+            // pelo mesmo motivo do caixão e do ninja: crescendo, ela deixa de ser baixa o bastante
+            // pra escapar — 218px fixos numa arena de 260 seriam quase a tela inteira.
+            //
+            // Cresceu SÓ EM ALTURA — a largura até ENCOLHEU um pouco (era .548 em fração). A
+            // proporção foi de 1.80 pra 0.94, e é ela que importa aqui: o reator estava lendo como
+            // entulho espalhado no chão, e o que conserta isso é ele ficar de pé, não ficar grande.
+            // Alargar junto foi um erro — largo e alto ao mesmo tempo, ele virou um paredão.
+            largura: .35, altura: .5, labaredas: 7,
+        },
+        // O 👽/👾 INVASOR baixando do céu. Roxo, que é a cor dele — e é a única coisa fora do verde
+        // num tema que até aqui era todo verde. O contraste é o ponto: quando ele desce, a cena troca
+        // de cor, e isso anuncia a chegada antes de qualquer forma ficar legível.
+        tentaculos: {
+            corpo: '#2e1145', corpoClaro: '#4d2073', escuro: '30, 8, 46',
+            brilho: '198, 130, 255',
+            // Nove braços cobrindo 78% da largura, o do meio o mais longo e o mais grosso. `talo` é
+            // fração da LARGURA (a grossura na raiz) e `alcance` fração da ALTURA (até onde a ponta
+            // desce). Os dois em fração pelo mesmo motivo do resto: a cena escala com a janela.
+            quantos: 9, largura: .78, alcance: .66, talo: .022,
+            // O quanto da altura o véu escuro do topo cobre. É o corpo — o único jeito em que ele
+            // aparece, e sem forma nenhuma de propósito (ver o desenho).
+            sombra: .3,
+            // `atraso` é o quanto do evento os braços das PONTAS esperam antes de começar a descer.
+            // Zero faria os nove entrarem em bloco, que lê como cortina em vez de bicho.
+            espera: [16, 30], descer: 4.5, pairar: [4, 8], subir: 3.6, atraso: .38,
+            ondular: [.6, 1.3], onda: [12, 30],
         },
     },
 };
@@ -1857,11 +1955,19 @@ function iniciarAr(config) {
     // porque ela é ar: some tudo que está atrás dela, um pouco.
     const noFundo = [
         config.castelo && criarCastelo(config.castelo, fundo),
+        // O ninja vem logo DEPOIS do castelo: ele anda em cima dos telhados que o castelo acabou de
+        // desenhar, e é do castelo que ele tira a geometria — por isso recebe as duas configurações.
+        config.ninja && config.castelo && criarNinja(config.ninja, fundo, config.castelo),
         config.vila && criarVila(config.vila, fundo),
         config.corujas && criarCorujas(config.corujas, fundo),
         config.espantalhos && criarEspantalhos(config.espantalhos, fundo),
+        config.caixao && criarCaixao(config.caixao, fundo),
         config.bobinas && criarBobinas(config.bobinas, fundo),
         config.ruina && criarRuina(config.ruina, fundo),
+        // O Invasor vem DEPOIS da ruína e da cidade: ele desce por cima delas, que é o lugar certo
+        // — chegou depois. E fica no fundo, atrás dos combatentes, porque um bicho desse tamanho na
+        // tela da frente taparia a luta.
+        config.tentaculos && criarTentaculos(config.tentaculos, fundo),
         config.exercitos && criarExercitos(config.exercitos, fundo),
         config.nevoa && criarNevoa(config.nevoa, fundo),
     ].filter(Boolean);
@@ -2521,6 +2627,490 @@ function desenharFlecha(ctx, x, y, angulo, cfg) {
 ///
 /// As contas são em coordenadas do CANVAS, que É a arena (ele é filho dela e a preenche): a mata
 /// fica ancorada no rodapé, então o topo do ladrilho é `altura do canvas − altura do ladrilho`.
+
+/// O CAIXÃO que sobe no meio do cemitério — a referência do 💀 no cenário dele.
+///
+/// Fica no CENTRO, como a ruína dos Tecnológicos e o castelo do Reino: coisa única e nomeada mora no
+/// meio, e o log (uma coluna de ~300px em z 4) passa na frente dela nos três casos sem que isso tenha
+/// atrapalhado nenhum. O que resolve não é fugir do log — é o CLARÃO, que tem raio bem maior que a
+/// peça e vaza pelos dois lados dele. A luz é o que anuncia o acontecimento; a silhueta só confirma.
+///
+/// EM PÉ, e não deitado: caixão deitado visto de frente é um retângulo, e o que sobe do chão precisa
+/// ter uma direção.
+///
+/// O que sai de dentro são FANTASMAS, e não uma caveira. A caveira falhava por escala — a 70px o
+/// crânio já é quase só silhueta, e detalhe nessa medida lê como borrão (a mesma lição da caverna do
+/// Folclore). Os fantasmas resolvem os dois problemas de uma vez: não dependem de detalhe (são vulto
+/// e halo), o desenho JÁ EXISTE (`desenharFantasma`, o mesmo dos que cruzam o céu), e eles dão à cena
+/// um ANTES e um DEPOIS — o caixão passa a ser de onde a assombração vem, e não um objeto que abre.
+///
+/// A TAMPA abre em DUAS METADES, cada uma girando pra fora na dobradiça do próprio lado. Uma folha
+/// só, girando pra um lado, jogava o peso da figura pro outro e brigava com uma peça que é simétrica
+/// em tudo mais. Com duas, o vão nasce no meio — que é justamente de onde os fantasmas saem.
+///
+/// Diretor de uma fase por vez, como os exércitos e o ninja:
+///   enterrado → terra → subindo → abrindo → soltando → fechando → descendo → assentando → enterrado
+///
+/// A TERRA é a primeira a aparecer e a última a sumir, das três opções possíveis (sempre visível,
+/// nunca, ou acompanhando). Ela revirar ANTES de qualquer coisa aparecer é o que transforma a subida
+/// em consequência: o chão racha, e só então sai o que estava embaixo. Deixá-la fixa faria dela mais
+/// uma lápide do cenário — perderia a antecipação, que é a parte barata e mais eficaz do susto.
+///
+/// Só a ESPERA enterrado é sorteada. Os gestos têm duração fixa: sortear quanto tempo uma tampa leva
+/// pra abrir faria a mesma tampa parecer pesada numa vez e leve na outra.
+function criarCaixao(cfg, canvas) {
+    let fase = 'enterrado';
+    let relogio = entre(cfg.espera) * .35;   // a primeira espera é curta: a cena não pode abrir vazia
+    let terra = 0;       // 0 = chão intacto, 1 = monte revirado
+    let emerso = 0;      // 0 = enterrado, 1 = fora
+    let abertura = 0;    // 0 = fechado, 1 = tampa escancarada
+    let aSoltar = 0;     // quantos fantasmas ainda faltam sair nesta leva
+    let proximo = 0;     // relógio até o próximo sair
+    let leva = 0;        // quantas aberturas já houve — é o relógio de vida dos fantasmas
+    let fantasmas = [];
+    let t = 0;
+
+    // Os caixões PEQUENOS em volta, sorteados uma vez: eles não têm ciclo nenhum, só acompanham o
+    // grande subindo e descendo. Sorteados por quadro, tremeriam.
+    const menores = cfg.menores.map(m => ({ ...m, ondula: Math.random() * Math.PI * 2 }));
+
+    return (ctx, dt) => {
+        t += dt;
+        relogio -= dt;
+
+        const l = canvas.height * cfg.largura, h = canvas.height * cfg.altura;
+        const cx = canvas.width / 2;
+        const base = canvas.height;
+        // O pé do caixão fica sempre ABAIXO da borda: ele sai do chão, não desliza de uma fresta.
+        const topo = base - h * emerso;
+        // A BOCA: de onde os fantasmas saem. É o vão que se abre no meio, no alto do caixão.
+        const bocaY = topo + h * .22;
+
+        switch (fase) {
+            case 'enterrado':
+                if (relogio <= 0) fase = 'terra';
+                break;
+            case 'terra':
+                terra = Math.min(1, terra + dt / cfg.revirar);
+                if (terra === 1) {
+                    fase = 'subindo';
+                    // A LEVA vira aqui, no instante em que o chão termina de revirar — e é aqui que
+                    // os fantasmas velhos recebem a ordem de apagar. Eles duram DOIS ciclos: a leva
+                    // 1 sai, a leva 2 sai (seis na tela), e quando a 3 vem a 1 já está se apagando.
+                    //
+                    // Marcar AQUI, e não quando a tampa abre, é o que faz a conta fechar: daqui até
+                    // o primeiro fantasma novo há a subida inteira mais a abertura (~3,5s), e a
+                    // fade leva 2,2s. Marcando mais tarde, os velhos ainda estariam se apagando na
+                    // hora de os novos saírem, e o teto de 6 barraria a leva nova pela metade —
+                    // o caixão abriria pra soltar dois. Também é melhor de ver: eles se dissolvem
+                    // ENQUANTO o caixão sobe, então a troca de guarda tem o gesto certo.
+                    leva++;
+                    for (const f of fantasmas) if (f.leva <= leva - 2) f.apagando = true;
+                }
+                break;
+            case 'subindo':
+                emerso = Math.min(1, emerso + dt / cfg.subir);
+                if (emerso === 1) fase = 'abrindo';
+                break;
+            case 'abrindo':
+                abertura = Math.min(1, abertura + dt / cfg.abrir);
+                if (abertura === 1) { fase = 'soltando'; aSoltar = cfg.porLeva; proximo = 0; }
+                break;
+            case 'soltando':
+                proximo -= dt;
+                if (aSoltar > 0 && proximo <= 0) {
+                    // O teto é rede de segurança, não a regra: com o rodízio das levas a conta já
+                    // fecha em 6. Ele existe pra o caso de um ciclo atropelar o outro.
+                    if (fantasmas.length < cfg.maximo) {
+                        fantasmas.push({
+                            leva,
+                            x: cx + (Math.random() - .5) * l * .5,
+                            y: bocaY,
+                            // Nasce SUBINDO e sem deriva; a deriva entra depois (ver o passeio). Sair
+                            // já andando de lado leria como "passava por ali", não como "saiu daí".
+                            vy: -entre(cfg.subida) * canvas.height,
+                            vx: 0,
+                            deriva: (Math.random() < .5 ? -1 : 1) * entre(cfg.deriva) * canvas.width,
+                            // A ALTITUDE que ele persegue, e quando vai trocar por outra. É isto que
+                            // espalha o bando pela tela inteira: sem alvo, todos ficariam na faixa
+                            // em que o impulso de saída os largou.
+                            alvoY: canvas.height * entre(cfg.altitude),
+                            trocar: entre(cfg.mudarAltura),
+                            s: entre([.72, 1.25]),
+                            bobo: entre([14, 34]),
+                            fase: Math.random() * Math.PI * 2,
+                            asa: Math.random() * Math.PI * 2,
+                            paraDireita: Math.random() < .5,
+                            t: 0,
+                            alfa: 0,
+                        });
+                    }
+                    aSoltar--;
+                    proximo = cfg.intervalo;
+                }
+                // Fecha logo depois do ÚLTIMO SAIR — e não depois de ele sumir. Os fantasmas agora
+                // vivem dois ciclos inteiros passeando pela tela; esperar o fim deles deixaria o
+                // caixão escancarado o tempo todo, e ele voltou a ser um acontecimento breve.
+                if (aSoltar <= 0) fase = 'fechando';
+                break;
+            case 'fechando':
+                abertura = Math.max(0, abertura - dt / cfg.fechar);
+                if (abertura === 0) fase = 'descendo';
+                break;
+            case 'descendo':
+                emerso = Math.max(0, emerso - dt / cfg.descer);
+                if (emerso === 0) fase = 'assentando';
+                break;
+            case 'assentando':
+                terra = Math.max(0, terra - dt / cfg.assentar);
+                if (terra === 0) { fase = 'enterrado'; relogio = entre(cfg.espera); }
+                break;
+        }
+
+        // --- o PASSEIO dos fantasmas, fora da máquina de fases: eles vivem dois ciclos do caixão, e
+        //     têm que seguir andando enquanto a tampa fecha, o caixão desce e o próximo sobe.
+        for (let k = fantasmas.length - 1; k >= 0; k--) {
+            const f = fantasmas[k];
+            f.t += dt;
+
+            // Sai de dentro subindo e vai TROCANDO o impulso vertical pela deriva lateral: é essa
+            // troca que transforma "saiu do caixão" em "está passeando pela tela", sem os dois
+            // momentos precisarem de dois sistemas.
+            f.vy *= .988;
+            f.vx += (f.deriva - f.vx) * Math.min(1, dt / cfg.assumir);
+            f.x += f.vx * dt;
+            f.y += f.vy * dt;
+
+            // Troca de altitude de vez em quando, cada um no seu tempo. A perseguição do alvo está
+            // SEMPRE ligada, mas é lenta: enquanto o impulso de saída é forte ela mal se nota, e
+            // quando ele se esgota é ela que passa a mandar. Um só mecanismo cobre os dois momentos.
+            f.trocar -= dt;
+            if (f.trocar <= 0) {
+                f.alvoY = canvas.height * entre(cfg.altitude);
+                f.trocar = entre(cfg.mudarAltura);
+            }
+            f.y += (f.alvoY - f.y) * Math.min(1, dt / cfg.buscarAltura);
+
+            f.fase += dt * 1.6;
+            f.asa += dt * 2.2;
+            f.paraDireita = f.vx >= 0;
+
+            // Dá a volta pelas bordas em vez de morrer nelas: são eles que povoam a tela entre uma
+            // abertura e outra, e um fantasma que some ao encostar na borda deixaria o cemitério
+            // vazio na metade do ciclo.
+            const folga = canvas.height * cfg.tamanho * 2;
+            if (f.x < -folga) f.x = canvas.width + folga;
+            else if (f.x > canvas.width + folga) f.x = -folga;
+            if (f.y < -folga) f.y = -folga;
+
+            // Acende ao sair e apaga só quando MANDAM apagar (a leva dele venceu). Nada de morrer
+            // por cronômetro próprio: quem manda no fim deles é o caixão.
+            const alvo = f.apagando ? 0 : 1;
+            const passo = dt / (f.apagando ? cfg.apagar : cfg.acender);
+            f.alfa += Math.sign(alvo - f.alfa) * Math.min(passo, Math.abs(alvo - f.alfa));
+            if (f.apagando && f.alfa <= 0) fantasmas.splice(k, 1);
+        }
+
+        if (terra <= 0 && emerso <= 0 && fantasmas.length === 0) return;
+
+        ctx.save();
+
+        // --- o clarão, ATADO À ABERTURA: com a tampa fechada não há luz nenhuma, e é isso que faz a
+        //     abertura ser um acontecimento em vez de um objeto sempre aceso.
+        if (abertura > 0) {
+            const pulso = .8 + Math.sin(t * 2.6) * .12 + Math.sin(t * 6.3) * .06;
+            const raio = l * cfg.clarao * abertura * pulso;
+            const clarao = ctx.createRadialGradient(cx, bocaY, 0, cx, bocaY, raio);
+            clarao.addColorStop(0, `rgba(${cfg.brilho}, ${.3 * abertura})`);
+            clarao.addColorStop(.45, `rgba(${cfg.brilho}, ${.12 * abertura})`);
+            clarao.addColorStop(1, `rgba(${cfg.brilho}, 0)`);
+            ctx.fillStyle = clarao;
+            ctx.beginPath();
+            ctx.arc(cx, bocaY, raio, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // --- os caixões PEQUENOS, em diagonal, brotando na terra em volta. São enfeite: não abrem,
+        //     não soltam nada, só acompanham o grande. Ficam ANTES dele no desenho porque são a
+        //     companhia, não o assunto — o grande passa na frente quando se cruzam.
+        for (const m of menores) {
+            const mh = canvas.height * cfg.menorTamanho;
+            const ml = mh * .42;
+            // Brotam um pouco atrasados em relação ao grande (`emerso` elevado), como se a terra os
+            // empurrasse junto. O expoente é o atraso: sem ele, todos rompem o chão no mesmo quadro.
+            const brota = Math.pow(emerso, 1.5 + m.atraso);
+            if (brota <= .01) continue;
+
+            ctx.save();
+            ctx.translate(cx + l * m.x, base - h * m.y * brota);
+            ctx.rotate(m.giro);
+            ctx.globalAlpha = Math.min(1, brota * 1.4);
+            ctx.fillStyle = cfg.madeira;
+            contornoDoCaixao(ctx, 0, -mh * brota, 0, ml, mh, cfg.canto * .5);
+            ctx.fill();
+            // uma cruz só, bem simples: nessa escala é o que separa "caixão" de "tábua espetada"
+            ctx.fillStyle = cfg.ferro;
+            ctx.fillRect(-ml * .06, -mh * brota * .78, ml * .12, mh * brota * .4);
+            ctx.fillRect(-ml * .22, -mh * brota * .68, ml * .44, mh * brota * .1);
+            ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+
+        if (emerso > 0) {
+            // --- a MADEIRA inteira, fechada. A tampa não é desenhada em peças: é este corpo, e o
+            //     que abre é um VÃO cavado nele (logo abaixo).
+            ctx.fillStyle = cfg.madeira;
+            contornoDoCaixao(ctx, cx, topo, base + 8, l, h, cfg.canto);
+            ctx.fill();
+
+            // as tábuas e a cruz de ferro, na madeira fechada
+            ctx.strokeStyle = 'rgba(0, 0, 0, .32)';
+            ctx.lineWidth = 1.5;
+            for (const lado of [-1, 1]) {
+                ctx.beginPath();
+                ctx.moveTo(cx + lado * l * .22, topo + h * .06);
+                ctx.lineTo(cx + lado * l * .12, base);
+                ctx.stroke();
+            }
+            ctx.fillStyle = cfg.ferro;
+            ctx.fillRect(cx - l * .05, topo + h * .1, l * .1, h * .38);
+            ctx.fillRect(cx - l * .2, topo + h * .19, l * .4, h * .09);
+
+            // --- a ABERTURA: um vão escuro que cresce do MEIO pra fora, recortado no contorno do
+            //     caixão. É a tampa partindo ao meio e as duas metades sumindo pros lados.
+            //
+            //     Era duas folhas transformadas por `scale` em direção às dobradiças. Aquilo não
+            //     funcionava: cada folha carregava o contorno INTEIRO do caixão espremido, então o
+            //     que se via eram dois caixõezinhos deformados nas laterais em vez de duas metades
+            //     de tampa — e nas aberturas parciais elas se sobrepunham no meio. Cavar o vão é o
+            //     inverso e não tem como errar: o que não é vão É tampa, e o meio abre primeiro
+            //     porque o vão nasce no eixo.
+            if (abertura > 0) {
+                ctx.save();
+                contornoDoCaixao(ctx, cx, topo, base + 8, l, h, cfg.canto);
+                ctx.clip();
+                ctx.fillStyle = cfg.dentro;
+                const meio = l * .5 * abertura;
+                ctx.fillRect(cx - meio, topo - 2, meio * 2, h + 12);
+                ctx.restore();
+            }
+        }
+
+        // --- o MONTE DE TERRA revirada. Vem DEPOIS do caixão pra cobrir a junta com o chão, e tem
+        //     vida própria: sobe antes de tudo e assenta depois de tudo.
+        if (terra > 0) {
+            ctx.fillStyle = cfg.terra;
+            ctx.beginPath();
+            ctx.ellipse(cx, base - 2, l * (1.9 + emerso * .8) * terra, h * .14 * terra, 0, Math.PI, 0);
+            ctx.fill();
+        }
+
+        // --- os fantasmas por ÚLTIMO: eles saem de dentro e passam na frente da madeira.
+        for (const f of fantasmas) {
+            ctx.globalAlpha = f.alfa;
+            desenharFantasma(ctx, f.x, f.y + Math.sin(f.fase) * f.bobo,
+                canvas.height * cfg.tamanho * f.s, f.asa, f.paraDireita, cfg);
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.restore();
+    };
+}
+
+/// A silhueta hexagonal do caixão, com os cantos LEVEMENTE arredondados — madeira velha não tem
+/// quina viva, e o arredondado é o que tira a leitura de "polígono desenhado".
+///
+/// São os OMBROS (o ponto mais largo, a 26% do topo) que fazem a forma ler como caixão; sem eles é
+/// uma caixa comprida. O `pe` é a altura do PÉ e vem de fora: o caixão grande passa da borda de
+/// baixo (caixão saindo do chão não tem fundo à vista), e os pequenos, que são desenhados girados
+/// em volta do próprio centro, terminam no zero.
+function contornoDoCaixao(ctx, cx, topo, pe, l, h, canto) {
+    const pontos = [
+        [cx - l * .30, topo],
+        [cx + l * .30, topo],
+        [cx + l * .50, topo + h * .26],
+        [cx + l * .22, pe],
+        [cx - l * .22, pe],
+        [cx - l * .50, topo + h * .26],
+    ];
+    const meio = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+
+    // O idioma do polígono arredondado: começa no MEIO de um lado (pra o primeiro arcTo ter de onde
+    // partir) e vai ligando meio-de-lado a meio-de-lado, curvando em cada vértice.
+    ctx.beginPath();
+    const inicio = meio(pontos[0], pontos[1]);
+    ctx.moveTo(inicio[0], inicio[1]);
+    for (let k = 1; k <= pontos.length; k++) {
+        const v = pontos[k % pontos.length];
+        const seguinte = meio(v, pontos[(k + 1) % pontos.length]);
+        ctx.arcTo(v[0], v[1], seguinte[0], seguinte[1], canto);
+    }
+    ctx.closePath();
+}
+
+/// O INVASOR descendo do céu — e dele só se vê o que ENTRA na tela: tentáculos roxos baixando do
+/// alto, o do meio maior. É o 👽/👾 chegando de verdade; os discos já cruzavam o céu, mas quem os
+/// mandava nunca aparecia.
+///
+/// O corpo NÃO é desenhado. Nem cortado pela moldura, nem sugerido em silhueta: ele simplesmente não
+/// está lá. O que existe é uma escuridão roxa sangrando pela borda de cima e as partes que descem
+/// dela. Desenhar a massa entregaria o tamanho do bicho, e o tamanho é justamente o que não deve ser
+/// resolvido — o que a cabeça monta a partir de sete braços vindos do escuro é maior que qualquer
+/// monstro que eu desenhasse ali. Foi a mesma escolha do sorriso do palhaço, que também não tem rosto.
+///
+/// Vive no canvas de FUNDO (z 0), atrás dos combatentes: um bicho desse tamanho na tela da frente
+/// taparia a luta, e cenário nenhum vale atrapalhar o jogo. Passa por cima da cidade e do reator,
+/// que é o lugar certo — ele chegou depois.
+///
+/// O EVENTO tem uma fase por vez, como os exércitos, o ninja e o caixão:
+///   escondido → descendo → pairando → subindo → escondido
+///
+/// Mas cada braço tem o seu ATRASO dentro do evento, então eles não descem nem sobem em bloco: quando
+/// os primeiros já estão pairando, os últimos ainda estão entrando. Descendo juntos, sete tentáculos
+/// leriam como uma cortina — o desencontro é o que faz parecer um bicho se mexendo.
+///
+/// E cada um tem RITMO e AMPLITUDE próprios, com a ondulação crescendo do talo pra ponta.
+function criarTentaculos(cfg, canvas) {
+    let fase = 'escondido';
+    let relogio = entre(cfg.espera) * .4;   // a primeira espera é curta: a cena não pode abrir vazia
+    let descido = 0;                        // o avanço do EVENTO; cada braço lê isto pelo seu atraso
+    let t = 0;
+
+    // Sorteados UMA vez: ritmo e amplitude por quadro fariam os tentáculos tremerem em vez de ondular.
+    const bracos = Array.from({ length: cfg.quantos }, (_, i) => {
+        const u = cfg.quantos === 1 ? 0 : (i / (cfg.quantos - 1)) * 2 - 1;   // -1 .. 1, 0 no centro
+        return {
+            u,
+            // O do CENTRO é o mais longo e o mais grosso, e a queda pras pontas é suave. É isso que
+            // dá a leitura de UM bicho com um corpo lá em cima, e não de N tentáculos enfileirados.
+            comprimento: 1 - Math.abs(u) * .52,
+            grossura: 1 - Math.abs(u) * .4,
+            // Os do meio chegam primeiro e os das pontas por último — o bicho desce de bruços, não
+            // de lado. Sorteio um pouco em cima disso pra a fileira não ficar simétrica demais.
+            atraso: Math.abs(u) * cfg.atraso + Math.random() * cfg.atraso * .35,
+            fase: Math.random() * Math.PI * 2,
+            ritmo: entre(cfg.ondular),
+            onda: entre(cfg.onda),
+        };
+    });
+
+    return (ctx, dt) => {
+        t += dt;
+        relogio -= dt;
+
+        switch (fase) {
+            case 'escondido':
+                if (relogio <= 0) fase = 'descendo';
+                break;
+            case 'descendo':
+                descido = Math.min(1, descido + dt / cfg.descer);
+                if (descido === 1) { fase = 'pairando'; relogio = entre(cfg.pairar); }
+                break;
+            case 'pairando':
+                if (relogio <= 0) fase = 'subindo';
+                break;
+            case 'subindo':
+                descido = Math.max(0, descido - dt / cfg.subir);
+                if (descido === 0) { fase = 'escondido'; relogio = entre(cfg.espera); }
+                break;
+        }
+
+        if (descido <= 0) return;
+
+        const cx = canvas.width / 2;
+        const meia = canvas.width * cfg.largura * .5;
+
+        ctx.save();
+
+        // --- a ESCURIDÃO no alto: um roxo sangrando da borda de cima pra baixo. É a única coisa que
+        //     representa o corpo, e ela não tem forma nenhuma de propósito — dar contorno a isso
+        //     seria desenhar o monstro. Serve pra os tentáculos não parecerem recortes colados no
+        //     céu: eles saem de ALGUMA coisa, e essa coisa é só mais escura que a noite.
+        const alturaSombra = canvas.height * cfg.sombra * descido;
+        const veu = ctx.createLinearGradient(0, -10, 0, alturaSombra);
+        veu.addColorStop(0, `rgba(${cfg.escuro}, ${.85 * descido})`);
+        veu.addColorStop(.55, `rgba(${cfg.escuro}, ${.4 * descido})`);
+        veu.addColorStop(1, `rgba(${cfg.escuro}, 0)`);
+        ctx.fillStyle = veu;
+        ctx.fillRect(0, -10, canvas.width, alturaSombra + 10);
+
+        // um brilho fraco no meio dessa escuridão, na direção de onde vem o braço maior
+        const halo = ctx.createRadialGradient(cx, 0, 0, cx, 0, meia);
+        halo.addColorStop(0, `rgba(${cfg.brilho}, ${.13 * descido})`);
+        halo.addColorStop(1, `rgba(${cfg.brilho}, 0)`);
+        ctx.fillStyle = halo;
+        ctx.fillRect(cx - meia, -10, meia * 2, meia);
+
+        // --- os braços
+        for (const b of bracos) {
+            // O atraso dele consumido do avanço do evento: 0 até o evento passar do seu atraso, e
+            // daí em diante 0..1 no que restou. É isto que escalona a entrada e a saída.
+            const d = Math.max(0, (descido - b.atraso) / (1 - b.atraso));
+            if (d <= .01) continue;
+
+            const x0 = cx + b.u * meia;
+            desenharTentaculo(ctx,
+                x0, -8,
+                canvas.height * cfg.alcance * b.comprimento * d,
+                canvas.width * cfg.talo * b.grossura,
+                b, t, cfg);
+        }
+
+        ctx.restore();
+    };
+}
+
+/// Um tentáculo: fita que afina do talo até a ponta, com uma ONDA VIAJANDO pra baixo.
+///
+/// A onda viaja porque a fase desconta a distância percorrida (`- p * 3.4`): sem esse desconto, o
+/// tentáculo inteiro iria pro mesmo lado ao mesmo tempo e pareceria um limpador de parabrisa. E a
+/// amplitude é multiplicada por `p * p`, então a raiz quase não sai do lugar e a ponta chicoteia —
+/// é assim que corda pendurada se move.
+function desenharTentaculo(ctx, x0, y0, comprimento, talo, b, t, cfg) {
+    const passos = 16;
+    const esq = [], dir = [];
+
+    for (let k = 0; k <= passos; k++) {
+        const p = k / passos;
+        const x = x0 + Math.sin(b.fase + t * b.ritmo * 2.1 - p * 3.4) * b.onda * p * p;
+        const y = y0 + comprimento * p;
+        const w = talo * Math.pow(1 - p, .75);
+        esq.push([x - w, y]);
+        dir.push([x + w, y]);
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(esq[0][0], esq[0][1]);
+    for (const q of esq) ctx.lineTo(q[0], q[1]);
+    for (let k = dir.length - 1; k >= 0; k--) ctx.lineTo(dir[k][0], dir[k][1]);
+    ctx.closePath();
+    ctx.fillStyle = cfg.corpo;
+    ctx.fill();
+
+    // A nervura clara, só nos dois terços de cima: ela dá volume ao tubo, e para antes da ponta
+    // porque lá a fita já é fina demais pra caber duas cores — insistir viraria serrilhado.
+    const ate = Math.floor(passos * .66);
+    ctx.beginPath();
+    ctx.moveTo(esq[0][0] + (dir[0][0] - esq[0][0]) * .34, esq[0][1]);
+    for (let k = 0; k <= ate; k++) ctx.lineTo(esq[k][0] + (dir[k][0] - esq[k][0]) * .34, esq[k][1]);
+    for (let k = ate; k >= 0; k--) ctx.lineTo(esq[k][0] + (dir[k][0] - esq[k][0]) * .62, esq[k][1]);
+    ctx.closePath();
+    ctx.fillStyle = cfg.corpoClaro;
+    ctx.fill();
+
+    // as VENTOSAS: uma fileira de pontos acesos descendo pelo braço, sumindo junto com a fita. São
+    // o único detalhe, e existem porque sem elas o tentáculo é um tubo — com elas, é bicho.
+    for (let k = 2; k <= passos - 2; k += 2) {
+        const p = k / passos;
+        const w = talo * Math.pow(1 - p, .75);
+        if (w < 2) break;
+        ctx.fillStyle = `rgba(${cfg.brilho}, ${.55 * (1 - p * .7)})`;
+        ctx.beginPath();
+        ctx.arc(esq[k][0] + w, esq[k][1], Math.max(1, w * .26), 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
 /// A RUÍNA: o reator estourado no meio da cidade, queimando e vazando veneno. Uma só, no centro.
 ///
 /// O fogo é feito de labaredas independentes, cada uma com o próprio ritmo e a própria altura — é a
@@ -2539,7 +3129,7 @@ function criarRuina(cfg, canvas) {
     return (ctx, dt) => {
         t += dt;
 
-        const l = cfg.largura, h = cfg.altura;
+        const l = canvas.height * cfg.largura, h = canvas.height * cfg.altura;
         const cx = canvas.width / 2;
         const base = canvas.height;
 
@@ -2754,6 +3344,342 @@ const criarBobinas = (cfg, canvas) => criarNoHorizonte(cfg, canvas,
 const criarEspantalhos = (cfg, canvas) => criarNoHorizonte(cfg, canvas,
     (ctx, c, k) => desenharEspantalho(ctx, c.x, c.y, k.tamanho, k));
 
+/// A LINHA DO HORIZONTE do Reino: os topos por onde se anda, da esquerda pra direita.
+///
+/// Ela existe separada porque ganhou um SEGUNDO cliente. Enquanto só o castelo usava essas frações,
+/// elas podiam morar soltas dentro dele; agora o ninja pula de um telhado pro outro e precisa das
+/// mesmas — e repetir `.74`, `1.12` e `.62` nos dois lugares seria garantir que um dia discordassem.
+///
+/// O topo em que se PISA é o do fuste (entre as ameias, não em cima delas), e a largura de pouso é a
+/// do fuste: as duas saem do mesmo `alt` que o `desenharTorre` usa, então não há como divergirem.
+function telhadosDoReino(cfg, l, h) {
+    const hTorre = h * cfg.torre;
+    const cl = hTorre * .62;
+    const cx = l * .5;
+
+    const torre = (x, alt, doCastelo = false) => ({ torre: true, doCastelo, x, alt, larg: alt * .26, y: h - alt });
+
+    return [
+        torre(l * .10, hTorre * .74),
+        torre(l * .28, hTorre * .74),
+        torre(cx - cl, hTorre * 1.12, true),
+        // O telhado do castelo: a corrida LARGA no meio do skyline. Encolhido nas pontas (`cl * 1.44`
+        // em vez de `cl * 2`) pra o ninja não acabar pisando dentro das duas torres que o ladeiam —
+        // elas ficam nas QUINAS do telhado, então a corrida tem que parar antes do fuste de cada uma.
+        // O fator sai da conta: a torre ocupa até `cl - alt * .13`, e `.72` fecha com folga.
+        //
+        // Esta entrada carrega junto as medidas do CORPO do castelo (`cl`, `alt`), porque o telhado é
+        // literalmente o topo dele. É o que deixa o `criarCastelo` desenhar a fachada sem reescrever
+        // o `.62` — a fração continua existindo num lugar só.
+        { torre: false, doCastelo: false, x: cx, larg: cl * 1.44, cl, alt: hTorre, y: h - hTorre },
+        torre(cx + cl, hTorre * 1.12, true),
+        torre(l * .72, hTorre * .74),
+        torre(l * .90, hTorre * .74),
+    ].sort((a, b) => a.x - b.x);
+}
+
+/// O NINJA nos telhados — a referência do 🥷 no cenário dele.
+///
+/// A ESCALA mandou no traço, como sempre. A torre tem ~9% da altura da tela de largura, então o ninja
+/// cabe em ~22px, e anatomia nesse tamanho vira sujeira (foi o que as duas tentativas de "melhorar" a
+/// caverna do Folclore já cobraram). Só que silhueta preta CHAPADA também não servia: contra o céu
+/// claro ela leria como recorte de papel — exatamente o motivo de os exércitos terem deixado de ser
+/// pretos e ganhado material. A saída é o meio: quatro formas (cabeça, corpo, duas pernas em tesoura,
+/// sem braços — braço a 22px é ruído) num azul quase preto, que lê como preto mas fica DENTRO do
+/// quadro em vez de virar buraco. É a mesma correção que o pano do espantalho levou.
+///
+/// A FAIXA esvoaçando atrás é o que diz "ninja" e "velocidade" ao mesmo tempo, e ela funciona nesse
+/// tamanho porque é forma em MOVIMENTO, não anatomia. É também o rastro de sombra pedido — só que
+/// preso nele em vez de solto no telhado.
+///
+/// E a BOMBA DE FUMAÇA é a estrela, não o boneco: sumir num lugar e brotar noutro é o que conta a
+/// história, e esse evento é legível mesmo quando a figura não é. Fumaça branca contra céu de dia
+/// se lê de longe — é a peça que menos depende da escala.
+///
+/// Diretor de uma fase por vez, como os exércitos:
+///   correndo → pulando → correndo → … → fumaça → oculto → surgindo em OUTRO telhado → correndo
+/// O que se sorteia é a ESPERA até o próximo teleporte, nunca a duração de um gesto.
+function criarNinja(base, canvas, castelo) {
+    let telhados = [];
+    let assinatura = '';
+
+    // As medidas dele chegam em FRAÇÃO da altura da tela e viram px aqui, uma vez por
+    // redimensionamento. Em px fixos o ninja seria a única coisa da cena que não escala com o
+    // castelo: numa janela baixa a torre tem 23px de largura e ele não caberia em cima dela; numa
+    // alta ele viraria um grão. Resolver pra dentro do mesmo nome deixa o resto do código igual.
+    let cfg = base;
+
+    let i = 0;                  // em que telhado ele está
+    let destino = 0;            // pra qual ele está pulando
+    let dir = Math.random() < .5 ? 1 : -1;
+    let x = 0, y = 0;
+    // Ele COMEÇA FORA, e invisível. A batalha abre num castelo vazio, e ele chega depois — chegar é
+    // um acontecimento, estar ali desde sempre não é. A primeira espera é a metade de uma normal só
+    // pra a primeira aparição não demorar meia partida.
+    let fase = 'oculto';
+    let alfa = 0;
+    let perna = 0;
+    let salto = null;
+    let relogio = entre(cfg.fora) * .5;
+    let emCena = 0;
+    let saida = 'fumaca';       // como esta visita vai terminar; sorteado na entrada (ver `naBorda`)
+    let rastro = [];
+    let fumacas = [];
+
+    const remontar = () => {
+        const agora = `${canvas.width}|${canvas.height}`;
+        if (agora === assinatura) return;
+        assinatura = agora;
+
+        const esc = canvas.height;
+        cfg = {
+            ...base,
+            tamanho: esc * base.tamanho,
+            velocidade: esc * base.velocidade,
+            arco: esc * base.arco,
+            fumacaRaio: esc * base.fumacaRaio,
+        };
+
+        telhados = telhadosDoReino(castelo, canvas.width, canvas.height);
+        i = Math.min(i, telhados.length - 1);
+        destino = Math.min(destino, telhados.length - 1);
+
+        // A janela mudou de tamanho debaixo dele: recoloca em cima do telhado atual em vez de
+        // deixá-lo andando no ar. O rastro é jogado fora porque ele descreve posições que já não
+        // existem — mantê-lo desenharia uma fita ligando o ninja a um lugar que sumiu.
+        const t = telhados[i];
+        x = Math.min(Math.max(x, t.x - t.larg * .5), t.x + t.larg * .5);
+        y = t.y;
+        rastro = [];
+        if (fase === 'pulando') fase = 'correndo';
+    };
+
+    const soltarFumaca = (fx, fy) => fumacas.push({
+        x: fx, y: fy, t: 0,
+        bolhas: Array.from({ length: cfg.bolhas }, () => ({
+            ang: Math.random() * Math.PI * 2,
+            dist: entre([.25, 1]),
+            r: entre([.5, 1]),
+            giro: (Math.random() - .5) * 1.5,
+        })),
+    });
+
+    const pularPara = (k) => {
+        const alvo = telhados[k];
+        // Ele pousa logo DENTRO da borda de chegada, não em cima dela: pousar na quina faz o passo
+        // seguinte já sair da plataforma, e o ninja pisca entre correr e pular.
+        const x1 = dir > 0 ? alvo.x - alvo.larg * .5 + cfg.tamanho * .4
+                           : alvo.x + alvo.larg * .5 - cfg.tamanho * .4;
+        destino = k;
+        salto = {
+            x0: x, y0: y, x1, y1: alvo.y, p: 0,
+            arco: cfg.arco,
+            // A duração sai da DISTÂNCIA, não de um número fixo: pulo curto entre torres vizinhas e
+            // pulo longo pro castelo têm que parecer o mesmo salto, e não o mesmo tempo.
+            dura: Math.max(.42, Math.abs(x1 - x) / cfg.velocidade * .78),
+        };
+        fase = 'pulando';
+    };
+
+    /// O salto que NÃO tem pouso: ele se joga da última torre e sai da tela. Pode passar por cima do
+    /// muro e sumir no canto — não há nada além da borda que precise dar conta dele.
+    const sairDaTela = () => {
+        const alvo = dir > 0 ? canvas.width + cfg.tamanho * 6 : -cfg.tamanho * 6;
+        salto = {
+            x0: x, y0: y, x1: alvo, y1: y + canvas.height * .2, p: 0,
+            arco: cfg.arco * 2.4,               // pulo de saída é o mais alto: é uma fuga, não um passo
+            dura: Math.max(.55, Math.abs(alvo - x) / cfg.velocidade * .85),
+        };
+        fase = 'saindo';
+    };
+
+    /// Chegou na ponta do telhado. Quem manda é o RELÓGIO DE CENA: enquanto não zera, ele segue
+    /// pulando (e dá meia-volta se acabou o skyline). Quando zera, ele vai embora — e COMO ele vai
+    /// embora foi sorteado lá atrás, na hora em que entrou (ver `surgindo`):
+    ///
+    ///   'fumaca' — solta a bomba na primeira borda que encontrar e some ali mesmo.
+    ///   'borda'  — ignora as bordas do meio, segue pulando até a PONTA do skyline e se joga de lá,
+    ///              passando por cima do muro e sumindo fora da tela.
+    ///
+    /// Sortear o modo na ENTRADA, e não na hora de sair, é o que faz a saída pela ponta acontecer de
+    /// verdade: decidindo só ao chegar numa borda, ele quase sempre estaria no meio quando o tempo
+    /// zerasse, e a fuga pela lateral viraria acidente raro em vez de metade das saídas.
+    const naBorda = () => {
+        const k = i + dir;
+        const naPonta = k < 0 || k >= telhados.length;
+
+        if (emCena <= 0) {
+            if (naPonta) { sairDaTela(); return; }
+            if (saida === 'fumaca') { soltarFumaca(x, y - cfg.tamanho * .45); fase = 'fumaca'; return; }
+            pularPara(k);       // 'borda': segue caminho até a ponta
+            return;
+        }
+        if (naPonta) { dir = -dir; return; }
+        pularPara(k);
+    };
+
+    remontar();
+    let conferir = 0;
+
+    return (ctx, dt) => {
+        // Mesma razão do criarNoHorizonte: medir a cada quadro forçaria layout à toa, e o remontar
+        // só refaz de fato quando a geometria mudou.
+        conferir -= dt;
+        if (conferir <= 0) { conferir = 1; remontar(); }
+        if (!telhados.length) return;
+
+        emCena -= dt;
+        relogio -= dt;
+
+        switch (fase) {
+            case 'correndo': {
+                const t = telhados[i];
+                x += cfg.velocidade * dir * dt;
+                perna += dt * 15;
+                y = t.y;
+
+                const esq = t.x - t.larg * .5, dirLim = t.x + t.larg * .5;
+                if (dir > 0 && x >= dirLim - cfg.tamanho * .3) { x = dirLim - cfg.tamanho * .3; naBorda(); }
+                else if (dir < 0 && x <= esq + cfg.tamanho * .3) { x = esq + cfg.tamanho * .3; naBorda(); }
+                break;
+            }
+
+            // As duas parábolas são a MESMA conta: o pulo entre telhados e o salto de saída só
+            // diferem no alvo e na altura do arco, e os dois vêm prontos dentro do `salto`.
+            case 'pulando':
+            case 'saindo': {
+                salto.p = Math.min(1, salto.p + dt / salto.dura);
+                const p = salto.p;
+                x = salto.x0 + (salto.x1 - salto.x0) * p;
+                // Parábola por cima da reta que liga os dois topos — assim o arco é o mesmo subindo
+                // pra uma torre alta ou descendo pra uma baixa.
+                y = salto.y0 + (salto.y1 - salto.y0) * p - salto.arco * 4 * p * (1 - p);
+                perna += dt * 4;                            // pernas quase paradas no ar
+                if (p >= 1) {
+                    if (fase === 'saindo') { fase = 'oculto'; relogio = entre(cfg.fora); alfa = 0; rastro = []; }
+                    else { i = destino; y = telhados[i].y; fase = 'correndo'; }
+                }
+                break;
+            }
+
+            case 'fumaca':
+                alfa = Math.max(0, alfa - dt / cfg.sumir);
+                if (alfa === 0) { fase = 'oculto'; relogio = entre(cfg.fora); rastro = []; }
+                break;
+
+            case 'oculto':
+                if (relogio <= 0) {
+                    // Brota em QUALQUER outro telhado, nunca no mesmo: reaparecer onde sumiu não é
+                    // teleporte, é o ninja piscando.
+                    let k = i;
+                    if (telhados.length > 1) while (k === i) k = Math.floor(Math.random() * telhados.length);
+                    i = k;
+                    const t = telhados[i];
+                    dir = Math.random() < .5 ? 1 : -1;
+                    x = t.x + (Math.random() - .5) * t.larg * .5;
+                    y = t.y;
+                    soltarFumaca(x, y - cfg.tamanho * .45);
+                    fase = 'surgindo';
+                }
+                break;
+
+            case 'surgindo':
+                alfa = Math.min(1, alfa + dt / cfg.surgir);
+                if (alfa === 1) {
+                    fase = 'correndo';
+                    emCena = entre(cfg.emCena);
+                    saida = Math.random() < cfg.sairPelaBorda ? 'borda' : 'fumaca';
+                }
+                break;
+        }
+
+        // --- a fumaça, viva por conta própria: ela tem que continuar abrindo DEPOIS de o ninja
+        //     sumir e ANTES de ele aparecer, então não pode morar dentro de nenhuma fase.
+        for (let k = fumacas.length - 1; k >= 0; k--) {
+            const f = fumacas[k];
+            f.t += dt;
+            const p = f.t / cfg.fumacaDura;
+            if (p >= 1) { fumacas.splice(k, 1); continue; }
+
+            const abre = 1 - Math.pow(1 - p, 2.2);      // estoura rápido e desacelera
+            const opaco = (1 - p) * (1 - p) * .5;
+            for (const b of f.bolhas) {
+                const d = cfg.fumacaRaio * b.dist * abre;
+                ctx.fillStyle = `rgba(${cfg.fumaca}, ${opaco})`;
+                ctx.beginPath();
+                ctx.arc(f.x + Math.cos(b.ang + b.giro * abre) * d,
+                    f.y + Math.sin(b.ang + b.giro * abre) * d * .78 - cfg.fumacaRaio * abre * .32,
+                    cfg.fumacaRaio * b.r * (.3 + abre * .5), 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        if (alfa <= 0) return;
+
+        if (fase === 'correndo' || fase === 'pulando' || fase === 'saindo') {
+            rastro.push({ x, y });
+            if (rastro.length > cfg.rastro) rastro.shift();
+        }
+
+        desenharNinja(ctx, x, y, perna, alfa, fase === 'pulando' || fase === 'saindo', rastro, cfg);
+    };
+}
+
+/// O ninja em quatro formas mais a faixa. Tudo em fração de `t` (a altura dele), pra ele encolher
+/// junto com a janela sem nenhuma conta solta.
+function desenharNinja(ctx, x, y, perna, alfa, noAr, rastro, cfg) {
+    const t = cfg.tamanho;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    // --- a SOMBRA: as últimas posições viram um rastro que afina até sumir.
+    //
+    // Ela tem a ALTURA INTEIRA do ninja (`lineWidth` vai até `t`) e é centrada no meio do corpo
+    // (`y - .5t`), então a faixa cobre exatamente dos pés à cabeça. Era uma fita fina saindo da nuca
+    // — lia como cachecol. Do tamanho dele, lê como o que é: a sombra do corpo ficando pra trás.
+    // Com o boneco menor, é ela que carrega a cena, e a figura só confirma de perto.
+    for (let k = 1; k < rastro.length -1; k++) {
+        const q = k / rastro.length;
+        ctx.globalAlpha = alfa * q * q * .8;
+        ctx.strokeStyle = `rgba(${cfg.faixa}, 1)`;
+        ctx.lineWidth = t * q;
+        ctx.beginPath();
+        ctx.moveTo(rastro[k - 1].x, rastro[k - 1].y - t * .62);
+        ctx.lineTo(rastro[k].x, rastro[k].y - t * .62);
+        ctx.stroke();
+    }
+
+    ctx.globalAlpha = alfa;
+    ctx.fillStyle = cfg.corpo;
+    ctx.strokeStyle = cfg.corpo;
+
+    // --- as pernas em tesoura. No ar elas se recolhem: o passo vira um agachamento, que é o que
+    //     separa "pulando" de "correndo no vazio".
+    const passo = noAr ? t * .16 : Math.sin(perna) * t * .3;
+    ctx.lineWidth = t * .13;
+    ctx.beginPath();
+    ctx.moveTo(x, y - t * .34); ctx.lineTo(x + passo, y - (noAr ? t * .16 : 0));
+    ctx.moveTo(x, y - t * .34); ctx.lineTo(x - passo, y - (noAr ? t * .2 : 0));
+    ctx.stroke();
+
+    // --- o corpo, afunilado do quadril pro ombro
+    ctx.beginPath();
+    ctx.moveTo(x - t * .17, y - t * .3);
+    ctx.lineTo(x + t * .17, y - t * .3);
+    ctx.lineTo(x + t * .12, y - t * .66);
+    ctx.lineTo(x - t * .12, y - t * .66);
+    ctx.closePath();
+    ctx.fill();
+
+    // --- a cabeça
+    ctx.beginPath();
+    ctx.arc(x, y - t * .78, t * .15, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
 /// A CIDADE MURADA do Reino: a muralha atravessando a tela, torres com telhado cônico e bandeira, o
 /// castelo no meio e as casas apinhadas ATRÁS do muro — só telhado e janela acesa aparecendo por
 /// cima dele, que é como se vê uma cidade murada de fora. Casa inteira à vista significaria que não
@@ -2849,10 +3775,15 @@ function criarCastelo(cfg, canvas) {
             ctx.stroke();
         }
 
-        for (const f of [.1, .28, .72, .9]) desenharTorre(ctx, f * l, base, hTorre * .74, cfg);
+        // As torres da muralha. As posições e alturas vêm do `telhadosDoReino` — o mesmo lugar de
+        // onde o ninja tira por onde pular, então não há como o telhado desenhado e o telhado
+        // pisado discordarem. As do CASTELO ficam pra depois: elas pintam por cima da fachada.
+        const telhados = telhadosDoReino(cfg, l, h);
+        for (const t of telhados) if (t.torre && !t.doCastelo) desenharTorre(ctx, t.x, base, t.alt, cfg);
 
         // --- o castelo no meio
-        const cx = l * .5, cl = hTorre * .62;
+        const topoDoCastelo = telhados.find(t => !t.torre);
+        const cx = topoDoCastelo.x, cl = topoDoCastelo.cl;
         ctx.fillStyle = cfg.pedra;
         ctx.fillRect(cx - cl, base - hTorre, cl * 2, hTorre);
         ctx.fillStyle = cfg.sombra;
@@ -2885,8 +3816,7 @@ function criarCastelo(cfg, canvas) {
         ctx.closePath();
         ctx.fill();
 
-        desenharTorre(ctx, cx - cl, base, hTorre * 1.12, cfg);
-        desenharTorre(ctx, cx + cl, base, hTorre * 1.12, cfg);
+        for (const t of telhados) if (t.doCastelo) desenharTorre(ctx, t.x, base, t.alt, cfg);
 
         // --- a grama do campo, na frente de tudo: é onde os exércitos pisam
         ctx.fillStyle = cfg.grama;
@@ -3192,7 +4122,10 @@ function desenharTenda(ctx, x, base, l, cfg, t) {
         // entra e sai suave: aparecer de estalo lê como falha de desenho, não como aparição
         const p = ciclo / cfg.sorrisoDura;
         const alfa = Math.sin(p * Math.PI);
-        desenharSorriso(ctx, x, base - eh * .48, el * .42, alfa, cfg);
+        // Metade do tamanho que já teve (era `el * .42`), no MESMO lugar: grande demais, o sorriso
+        // preenchia a boca da tenda e virava o assunto da cena. Pequeno, ele volta a ser uma coisa
+        // entrevista lá no fundo — que é o susto que ele deveria dar.
+        desenharSorriso(ctx, x, base - eh * .48, el * .21, alfa, cfg);
     }
 
     // ---------- mastro e bandeirinha ----------
@@ -3209,14 +4142,38 @@ function desenharTenda(ctx, x, base, l, cfg, t) {
     ctx.restore();
 }
 
-/// O sorriso do palhaço no escuro da tenda: a boca e as duas bolinhas vermelhas das bochechas.
+/// O sorriso do palhaço no escuro da tenda: a boca, os olhos e as duas bolinhas das bochechas.
 ///
-/// Sem olhos nem rosto, de propósito: o que a cabeça completa a partir de uma boca solta no escuro é
-/// pior que qualquer palhaço que eu desenhasse ali. As bochechas são o que amarra a leitura — boca
-/// sozinha pode ser qualquer coisa; boca com duas manchas vermelhas nos cantos é palhaço.
+/// Nada de rosto — o que a cabeça completa a partir de umas poucas peças soltas no escuro é pior que
+/// qualquer palhaço que eu desenhasse ali. As bochechas amarram a leitura: boca sozinha pode ser
+/// qualquer coisa; boca com duas manchas vermelhas nos cantos é palhaço.
+///
+/// Os OLHOS abrem junto com a boca, e é o `alfa` que faz as duas coisas — ele já era a aparição, e
+/// agora é também a ABERTURA (a altura da pálpebra sai dele). Um relógio só pras duas partes: com
+/// dois, elas dessincronizariam e o rosto pareceria montado de pedaços.
+///
+/// Eles ficam pequenos e MUITO acima da boca de propósito. Perto dela, viram um emoji; distantes, a
+/// cara que se monta no escuro é grande — e é o tamanho imaginado que assusta, não o desenhado.
 function desenharSorriso(ctx, x, y, r, alfa, cfg) {
     ctx.save();
     ctx.globalAlpha = alfa;
+
+    // Abrem um pouco à frente do fade (`* 1.4`), senão a pálpebra ainda estaria subindo quando a
+    // aparição já está no auge — e o que se veria seria um olho permanentemente meio fechado.
+    const abre = Math.min(1, alfa * 1.4);
+    for (const lado of [-1, 1]) {
+        ctx.fillStyle = cfg.sorriso;
+        ctx.beginPath();
+        ctx.ellipse(x + lado * r * .52, y - r * 1.15, r * .27, r * .34 * abre, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // a pupila, e só ela: um ponto escuro no meio já dá a direção do olhar. Íris, brilho e
+        // pálpebra nessa escala virariam borrão — a mesma conta da caveira que não foi.
+        ctx.fillStyle = cfg.dentro;
+        ctx.beginPath();
+        ctx.ellipse(x + lado * r * .52, y - r * 1.13, r * .12, r * .17 * abre, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
     // o vão da boca: arco de baixo bem aberto, arco de cima quase reto
     ctx.beginPath();

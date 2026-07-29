@@ -78,11 +78,9 @@ Mergeado em sequência de PRs:
   Próxima) com o Esc da batalha virando ENCERRAR (derrota + essa tela), continuação atravessando pro
   capítulo seguinte depois da fase 7 — mas **nunca dando a volta**, porque trocar de dificuldade é
   decisão do jogador —, e a **conquista do champ** animada terminando na ficha dele.
-- **Tema de cenário por capítulo** (branch `feature/tema-do-reino`): o `EstadoDeBatalha` carrega um
-  `Tema`, o JS põe em `body[data-tema]` e daí pra baixo é só CSS — a ESTRUTURA da luta não muda, só a
-  pele. Estreou com o **Reino** (salão do trono) e o **Lado Sombrio** (cemitério sob a lua). A
-  alavanca é sobrescrever as VARIÁVEIS de cor no escopo do tema: tudo que já as usava acompanha de
-  graça. Capítulo sem bloco de CSS luta no visual padrão; a Arena não tem tema.
+- **Cenário por capítulo** (branch `feature/tema-do-reino`): o `EstadoDeBatalha` carrega um `Tema`, o
+  JS põe em `body[data-tema]` e a batalha ganha um lugar. A ESTRUTURA da luta não muda em nada — os
+  dois lados, o log, o painel, as animações e os tamanhos seguem os mesmos. Ver §CENÁRIO POR CAPÍTULO.
 
 **Arquitetura (detalhe em §FRONT abaixo):** ponte de mensagens LOCAL in-process (JS↔C# pela webview,
 sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos seams `ITelaDeCombate`/
@@ -97,6 +95,59 @@ quantas voltas o Gabriel achar que precisa. Fios de combate ainda abertos: ver �
 
 > As seções §FRONT §Fatiamento e a FILA B abaixo descreviam o front como PLANO — ficam como registro do
 > desenho, com o estado real marcado ✅.
+
+---
+
+## CENÁRIO POR CAPÍTULO (jul/2026) — como um tema é feito
+
+O capítulo em que se luta dá o LUGAR da batalha. `EstadoDeBatalha.Tema` → `body[data-tema]` → CSS +
+canvas. Capítulo sem tema luta no visual padrão; a Arena nunca tem tema (é laboratório, não lugar).
+
+**As três camadas, e o que decide em qual entrar:**
+1. **CSS** — o céu, a paleta e as texturas que REPETEM. A alavanca que barateia tudo é sobrescrever
+   as VARIÁVEIS de cor (`--fundo`/`--painel`/`--borda`/`--apagado`) no escopo do tema: tudo que já
+   as usava acompanha de graça, sem tocar em regra nenhuma.
+2. **Canvas de FUNDO** (`#particulasFundo`, z 0) — o que é MUNDO: paisagem, névoa, bichos no
+   horizonte, os exércitos. Fica atrás dos combatentes.
+3. **Canvas da FRENTE** (`#particulas`, z 3) — o que está no ar ENTRE o jogador e o mundo: poeira,
+   voadores. É essa separação que dá profundidade.
+
+**Ladrilho ou canvas?** Horizonte que é PAISAGEM (mata, cidade) pode ser ladrilho de CSS, porque
+paisagem repete sem mentir. Composição NOMEADA ("castelo no meio", "caverna na borda") tem que ser
+canvas: nome não sobrevive a ladrilho — o que é "a borda" muda com a largura da tela — e esticar uma
+imagem única resolveria a posição estragando a forma.
+
+**Armadilhas que já custaram tempo aqui:**
+- `background-position: bottom` vale `50% 100%` — ancora o ladrilho no CENTRO. O JS que posiciona
+  coisas no horizonte conta a partir do x=0; use `left bottom` ou as duas contas discordam, e o erro
+  muda com a largura da janela.
+- `<canvas>` é elemento SUBSTITUÍDO: `inset: 0` NÃO o estica (o `width: auto` vale o tamanho
+  intrínseco, 300×150). Precisa de `width/height: 100%`.
+- Ordem de pintura: elemento posicionado pinta depois de elemento em fluxo normal, sempre. Foi por
+  isso que o cenário passava por cima do log — a solução foi posicionar o `#meio` (z 4), não mexer
+  no z do canvas.
+- `destination-out` APAGA pixel. Usado pra "detalhe vazado" num escudo, abre buraco de verdade nele.
+
+**Motores compartilhados** (extraídos quando apareceu o 2º cliente, não antes):
+- `criarNoHorizonte` — coisa presa no ladrilho do horizonte, com relógio OPCIONAL: quem declara
+  `aceso` pisca (corujas, bobinas de Tesla), quem não declara está sempre à vista (espantalhos).
+- `criarVoadores` + a tabela `VOADORES` — um motor de voo, quatro bichos (morcego, disco, fantasma,
+  corvo). A `forma` é do tema.
+- `criarPo` / `criarNevoa` — partículas e manchas, com a DIREÇÃO saindo do sinal da velocidade.
+
+**Lições de desenho que valeram mais que código:**
+- A DISTÂNCIA manda no traço: longe, silhueta quebrada; perto, volume e curva.
+- Dessincronia é o que dá vida — corujas, labaredas, lâmpadas e fios de veneno têm cada um o seu
+  relógio. Tudo junto denuncia que é um efeito só.
+- O que se sorteia é a ESPERA, nunca a duração do gesto: é o que separa "bicho que abre o olho de vez
+  em quando" de "lâmpada piscando".
+- Detalhe demais na escala errada lê como confusão. Duas tentativas de "melhorar" a caverna com boca
+  recortada e estalactites ficaram piores que a silhueta simples com uma luz fraca dentro.
+
+**Peles prontas:** 👑 Reino (cidade murada, de DIA — o único claro, e é o contraste dele que faz os
+outros parecerem escuros de propósito), 🌑 Lado Sombrio (cemitério sob a lua), ⚙️ Tecnológicos (a
+noite da invasão), 🪬 Folclore (a vila e o circo). Faltam 5 facções, e cada uma agora é um bloco de
+CSS mais um punhado de configuração.
 
 ---
 

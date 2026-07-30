@@ -70,8 +70,9 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`.
 
-## Fazer o CENÁRIO de uma facção (o próximo é ⭐ Especial) — leia nesta ordem
-Cinco peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos), faltam 4.
+## Fazer o CENÁRIO de uma facção (faltam 🔱 Decaídos · ✝️ Apóstolos · Humanos) — leia nesta ordem
+Seis peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos · ⭐ Especial),
+faltam 3.
 **Não invente processo: já existe manual, e ele é caro — cada linha dele custou uma rodada de "ficou
 ruim" em jogo.**
 1. **`docs/ROADMAP-refatoracao.md` → §CENÁRIO POR CAPÍTULO.** É O manual: as três camadas e o que
@@ -80,9 +81,11 @@ ruim" em jogo.**
    LIÇÕES DE DESENHO. Se for contra alguma delas, seja de propósito e diga por quê.
 2. **Uma pele pronta INTEIRA, das duas pontas:** o bloco `body[data-tema="misticos"]` no `estilo.css`
    e a entrada `misticos` do `AR_DO_TEMA` no `jogo.js` (a mais completa: mar, dragão em três
-   distâncias, lâmpada, aparições, moldura em canvas). O Folclore é a segunda melhor referência.
-3. **`git log --oneline` dos PRs de cenário** (#195, #197, #198, #199, #200) — as mensagens contam o
-   que foi tentado e MORREU, que é a parte que o código não mostra.
+   distâncias, lâmpada, aparições, moldura em canvas). O ⭐ Especial é a segunda melhor referência, e
+   a única com INTERIOR, com peças que se ocultam entre si (porta × sentado, anel × cocô) e com o
+   `comListras` — o padrão de "monta o caminho UMA vez, usa pra preencher E recortar".
+3. **`git log --oneline` dos PRs de cenário** (#195, #197, #198, #199, #200, #201) — as mensagens
+   contam o que foi tentado e MORREU, que é a parte que o código não mostra.
 
 **A receita, em uma linha:** o tema é `faccao.ToString().ToLowerInvariant()` → `body[data-tema]`, e
 custa **zero C#** — um bloco de CSS mais uma entrada de configuração. Tema sem CSS e sem entrada no
@@ -99,6 +102,12 @@ custa **zero C#** — um bloco de CSS mais uma entrada de configuração. Tema s
   ela ou ao maestro.
 - **Verificação:** `node --check jogo.js`, chaves do `estilo.css` batendo, todo builder do
   `noFundo`/`naFrente` com definição, nenhuma chave de config sem uso, e `dotnet build` limpo. Raio
-  negativo num `arc`/`ellipse` LANÇA e mata o `requestAnimationFrame` — a cena congela em silêncio, e
-  é o defeito mais caro de achar depois. **A conferência em jogo é do Gabriel**, sempre: quase todo
-  acerto deste front veio de ele olhar rodando e apontar o defeito exato.
+  negativo num `arc`/`ellipse` LANÇA e mata o `requestAnimationFrame` — a cena congela em silêncio.
+  **Pior ainda: NaN em coordenada NÃO lança**, só não desenha (`Math.pow(negativo, fracionário)` é a
+  fonte clássica). Vale montar a **bancada headless** do tema — extrair os builders com `eval` + um
+  `ctx` de mentira que VALIDA cada argumento (raio ≥ 0, tudo finito, `save`/`restore` batendo) e
+  rodar ~900s de `dt` fixo. Ela já pegou bug fatal em três peles seguidas.
+- **A conferência em jogo é do Gabriel**, sempre: quase todo acerto deste front veio de ele olhar
+  rodando e apontar o defeito exato. E **quando ele descreve um MECANISMO, implementar LITERALMENTE**
+  — no ⭐ Especial eu interpretei quatro vezes e errei as quatro; o desenho dele estava certo desde a
+  primeira frase.

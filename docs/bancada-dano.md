@@ -23,6 +23,12 @@
   Ele volta ao HP cheio entre turnos e **não morre** — usa a prevenção-de-morte do Guarda
   Real, restaurando tudo e sem cooldown, o que também o salva de habilidades que matam
   DENTRO de uma ativação (o Porradeiro do Troll dá 6 hits de 480 num alvo de 2.000).
+- **O 🥷 Ninja oscila ±1 entre rodadas, e isso é esperado — não é regressão.** A Shuriken
+  é `TipoAlvo.Aleatorio` com 2 alvos: o sorteio cai diferente a cada corrida, e com o
+  `ignorarDefesaPctSeAnteriorCritico` acoplando hit a hit, a média das repetições fecha
+  num centésimo diferente. Ele é o único champ do relatório que faz isso, então um
+  `git diff` que mexe SÓ na linha dele (em ~58.000, com 10 repetições) é ruído do
+  sorteio — dá pra descartar sem investigar. Qualquer OUTRO champ mudando é sinal.
 
 ### O que este relatório NÃO mede
 
@@ -180,7 +186,7 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20920 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20931 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 8160 | 240 | 32640 | 0 |
@@ -381,7 +387,7 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia 
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 | 0 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 | 0 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20921 | 0 | 0 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20934 | 0 | 0 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 | 0 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |

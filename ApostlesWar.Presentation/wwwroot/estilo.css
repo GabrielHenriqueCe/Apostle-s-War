@@ -976,14 +976,14 @@ body {
    troca vale por duas razões: os exércitos que atiram das bordas passaram a fazer sentido — isto é
    um cerco, não uma sala — e o tema entrou na mesma língua dos outros, que são todos paisagem.
 
-   E é o único tema DE DIA. Os outros quatro são noite (salão de tocha, cemitério, invasão, clareira
-   ao anoitecer), então o Reino ser claro não é só variedade: é o contraste que faz o resto parecer
-   escuro de propósito. Aqui a paleta pode ter COR de verdade — telhado vermelho, bandeira, grama —
-   porque de dia a cor não precisa competir com fonte de luz nenhuma.
+   E é o único tema DE DIA. Os outros dois são noite (cemitério, invasão), então o Reino ser claro
+   não é só variedade: é o contraste que faz o resto parecer escuro de propósito. Aqui a paleta pode
+   ter COR de verdade — telhado vermelho, bandeira, grama — porque de dia a cor não precisa competir
+   com fonte de luz nenhuma.
 
-   A muralha, as torres e as casas são desenhadas no canvas (ver `castelo` no jogo.js) pelo mesmo
-   motivo da clareira do Folclore: a composição é NOMEADA (castelo no meio, muro pros dois lados) e
-   nome não sobrevive a ladrilho que repete. O CSS aqui fica só com o céu. */
+   A muralha, as torres e as casas são desenhadas no canvas (ver `castelo` no jogo.js) porque a
+   composição é NOMEADA (castelo no meio, muro pros dois lados) e nome não sobrevive a ladrilho que
+   repete. O CSS aqui fica só com o céu. */
 body[data-tema="reino"] {
     --fundo: #6d9dc8;
     --painel: #1b2440;
@@ -1135,81 +1135,6 @@ body[data-tema="ladosombrio"] .combatente {
 body[data-tema="ladosombrio"] #log {
     background: linear-gradient(180deg, rgba(18, 30, 24, .6), rgba(9, 16, 13, .6));
     border-color: rgba(150, 200, 170, .24);
-}
-
-/* ---------- 🪬 FOLCLORE — a clareira ao anoitecer ----------
-   Quatro criaturas que não moram no mesmo lugar, num lugar só: 👺 Tengu nos pinheiros e no torii da
-   montanha (e nos corvos que cruzam o céu), 🧌 Troll embaixo da ponte de pedra, 👹 Ogro na boca da
-   caverna com a fogueira acesa, e 🤡 Palhaço na tenda de circo com o varal de lâmpadas.
-
-   É o único tema com luz QUENTE no horizonte: os outros são frios (tocha dourada num salão fechado,
-   lua, neon). Aqui o sol acabou de se pôr e ainda há âmbar atrás da montanha — o que dá o ar de
-   história contada à noite, que é o que folclore é. */
-body[data-tema="folclore"] {
-    --fundo: #0d0a1b;
-    --painel: #191330;
-    --borda: #3a2d5c;
-    --apagado: #b0a2cc;
-
-    /* Sem `--folk-passo`/`--folk-altura`: este tema não tem ladrilho de horizonte. A clareira é
-       desenhada no canvas, em fração da largura da tela (ver `clareira` no jogo.js). */
-}
-
-body[data-tema="folclore"] #arena {
-    position: relative;
-    isolation: isolate;
-    background:
-        /* 1. vinheta */
-        radial-gradient(ellipse 110% 88% at 50% 42%, transparent 28%, rgba(4, 2, 12, .86) 100%),
-        /* 2. o âmbar do sol que acabou de sumir atrás do horizonte */
-        radial-gradient(ellipse 70% 30% at 50% 100%, rgba(255, 166, 92, .2), transparent 72%),
-        /* 3. névoa presa na clareira */
-        linear-gradient(0deg, rgba(196, 178, 230, .13) 0 10%, transparent 32%),
-        /* 4. o céu de anoitecer, roxo em cima e quente embaixo. O HORIZONTE deste tema não está aqui:
-              é desenhado no canvas (ver `clareira` no jogo.js).
-
-              Nos outros três o horizonte é um ladrilho que REPETE, e isso serve porque ali ele é uma
-              paisagem — mata, cidade. Aqui a composição é NOMEADA: caverna nas duas bordas, circo no
-              meio, torii entre eles. Posição nomeada não sobrevive a ladrilho (o que é "a borda"
-              muda com a largura da tela) nem a esticar uma imagem só (o torii engorda). No canvas
-              cada peça é uma fração da largura e cai no lugar certo em qualquer janela. */
-        linear-gradient(180deg, #140e2a 0%, #0d0a1b 54%, #16102a 82%, #2a1a2e 100%);
-    background-size: cover, cover, cover, cover;
-    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-    background-position: center, bottom, bottom, center;
-}
-
-/* Galhos entrando pelos cantos de cima — o gancho que no Reino é estandarte e no cemitério é teia. */
-body[data-tema="folclore"] #arena::before,
-body[data-tema="folclore"] #arena::after {
-    content: '';
-    position: absolute; top: 0;
-    width: 190px; height: 32%;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='150' viewBox='0 0 190 150' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%230a0716' stroke-width='7' stroke-linecap='round'%3E%3Cpath d='M-6 8q60 10 96 44t72 30'/%3E%3Cpath d='M40 20q10 26 34 30M96 40q4 26 24 34M140 58q2 18 16 24'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
-    opacity: .85;
-    pointer-events: none;
-    z-index: -1;
-}
-body[data-tema="folclore"] #arena::before { left: 0; }
-body[data-tema="folclore"] #arena::after { right: 0; transform: scaleX(-1); }
-
-body[data-tema="folclore"] #topo { border-bottom: 2px solid rgba(255, 180, 110, .4); }
-body[data-tema="folclore"] #painel { border-top: 2px solid rgba(255, 180, 110, .4); }
-body[data-tema="folclore"] #topo,
-body[data-tema="folclore"] #painel {
-    background:
-        linear-gradient(180deg, rgba(255, 180, 110, .06) 0%, transparent 60%),
-        var(--painel);
-}
-
-body[data-tema="folclore"] .combatente {
-    background: linear-gradient(180deg, rgba(44, 34, 74, .82), rgba(18, 13, 36, .82));
-    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
-}
-
-body[data-tema="folclore"] #log {
-    background: linear-gradient(180deg, rgba(28, 20, 50, .62), rgba(13, 9, 26, .62));
-    border-color: rgba(255, 180, 110, .26);
 }
 
 /* ---------- ⚙️ TECNOLÓGICOS — a noite da invasão ----------

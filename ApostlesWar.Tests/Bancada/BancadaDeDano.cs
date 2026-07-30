@@ -363,7 +363,13 @@ namespace Tests.Bancada
             md.AppendLine("  cura costuma ser % do HP máximo, então inflar qualquer um dos dois estoura o número.");
             md.AppendLine("  Ele volta ao HP cheio entre turnos e **não morre** — usa a prevenção-de-morte do Guarda");
             md.AppendLine("  Real, restaurando tudo e sem cooldown, o que também o salva de habilidades que matam");
-            md.AppendLine("  DENTRO de uma ativação (o Porradeiro do Troll dá 6 hits de 480 num alvo de 2.000).").AppendLine();
+            md.AppendLine("  DENTRO de uma ativação (o Porradeiro do Troll dá 6 hits de 480 num alvo de 2.000).");
+            md.AppendLine("- **O 🥷 Ninja oscila ±1 entre rodadas, e isso é esperado — não é regressão.** A Shuriken");
+            md.AppendLine("  é `TipoAlvo.Aleatorio` com 2 alvos: o sorteio cai diferente a cada corrida, e com o");
+            md.AppendLine("  `ignorarDefesaPctSeAnteriorCritico` acoplando hit a hit, a média das repetições fecha");
+            md.AppendLine("  num centésimo diferente. Ele é o único champ do relatório que faz isso, então um");
+            md.AppendLine($"  `git diff` que mexe SÓ na linha dele (em ~58.000, com {Repeticoes} repetições) é ruído do");
+            md.AppendLine("  sorteio — dá pra descartar sem investigar. Qualquer OUTRO champ mudando é sinal.").AppendLine();
             md.AppendLine("### O que este relatório NÃO mede").AppendLine();
             md.AppendLine("O boneco **não revida**. Contra-ataque, espinhos e revide (Herói, Operário, Zumbi)");
             md.AppendLine("medem **zero** aqui: isto é uma bancada de dano CAUSADO, não de duelo. Um champ");

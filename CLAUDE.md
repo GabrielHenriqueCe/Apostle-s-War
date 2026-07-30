@@ -22,8 +22,11 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar
   o próprio caminho — ANTES de codar. A execução é delegada só DEPOIS do desenho aprovado. Ele martela numa
   dúvida até entender de verdade; isso é aprendizado, não resistência.
-- **Git flow:** eu crio a branch, implemento, `dotnet build` + `dotnet test`, commito, dou push. O Gabriel
-  abre e mergeia o PR no GitHub web (não há `gh` CLI na máquina). Depois eu limpo:
+- **Git flow:** eu crio a branch, implemento, `dotnet build` + `dotnet test`, e **PARO** — mostro o diff
+  e espero o Gabriel APROVAR antes de commitar. Push só depois do ok. O commit é o ponto em que ele
+  revisa o trabalho; commitar antes tira dele a etapa que é a dele. O Gabriel abre e mergeia o PR no
+  GitHub web (não há `gh` CLI na máquina — e o *"Create a pull request by visiting…"* que aparece no
+  output do push é texto do GitHub, não um PR criado). Depois eu limpo:
   `git checkout main && git pull && git branch -d <branch> && git fetch --prune`.
 - **1 PR, 1 tema.** Mergeado antes do próximo começar.
 - **Nomes:** domínio em PORTUGUÊS (`Combate`, `Habilidade`, `Batalha`), andaime em INGLÊS

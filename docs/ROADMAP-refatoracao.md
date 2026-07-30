@@ -113,7 +113,7 @@ canvas. Capítulo sem tema luta no visual padrão; a Arena nunca tem tema (é la
    voadores. É essa separação que dá profundidade.
 
 **Ladrilho ou canvas?** Horizonte que é PAISAGEM (mata, cidade) pode ser ladrilho de CSS, porque
-paisagem repete sem mentir. Composição NOMEADA ("castelo no meio", "caverna na borda") tem que ser
+paisagem repete sem mentir. Composição NOMEADA ("castelo no meio", "o reator estourado") tem que ser
 canvas: nome não sobrevive a ladrilho — o que é "a borda" muda com a largura da tela — e esticar uma
 imagem única resolveria a posição estragando a forma.
 
@@ -131,8 +131,8 @@ imagem única resolveria a posição estragando a forma.
 **Motores compartilhados** (extraídos quando apareceu o 2º cliente, não antes):
 - `criarNoHorizonte` — coisa presa no ladrilho do horizonte, com relógio OPCIONAL: quem declara
   `aceso` pisca (corujas, bobinas de Tesla), quem não declara está sempre à vista (espantalhos).
-- `criarVoadores` + a tabela `VOADORES` — um motor de voo, quatro bichos (morcego, disco, fantasma,
-  corvo). A `forma` é do tema.
+- `criarVoadores` + a tabela `VOADORES` — um motor de voo, três bichos (morcego, disco, fantasma).
+  A `forma` é do tema.
 - `criarPo` / `criarNevoa` — partículas e manchas, com a DIREÇÃO saindo do sinal da velocidade.
 
 **Lições de desenho que valeram mais que código:**
@@ -146,8 +146,14 @@ imagem única resolveria a posição estragando a forma.
 
 **Peles prontas:** 👑 Reino (cidade murada, de DIA — o único claro, e é o contraste dele que faz os
 outros parecerem escuros de propósito), 🌑 Lado Sombrio (cemitério sob a lua), ⚙️ Tecnológicos (a
-noite da invasão), 🪬 Folclore (a vila e o circo). Faltam 5 facções, e cada uma agora é um bloco de
-CSS mais um punhado de configuração.
+noite da invasão). Faltam 6 facções, e cada uma agora é um bloco de CSS mais um punhado de
+configuração.
+
+Houve uma quarta: 🪬 Folclore (a vila com o circo, a roda gigante e o torii), **removida por inteiro**
+— CSS, configuração e os seis desenhos que só ela usava. O capítulo do Folclore cai no visual padrão,
+sem tocar em C# nenhum: o `FluxoDoFront` manda o nome da facção como tema, e tema sem CSS e sem
+entrada no `AR_DO_TEMA` simplesmente não tem pele. Foi o seam pagando a conta na direção contrária —
+tirar uma pele é tão barato quanto pôr.
 
 ---
 

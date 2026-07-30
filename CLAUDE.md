@@ -17,6 +17,11 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   linhas variando UM fator por vez — por-habilidade e champ-inteiro × alvo imune/não-imune a malefícios
   × DEF 0/no cap. Zero mudança no motor. A seguir: **LER os números e rebalancear (#16)** — a bancada é
   o instrumento, o ajuste é o trabalho. Aberto: o #15 (faxina de comentários).
+- **Frente aberta em paralelo (jul/2026): os CENÁRIOS por capítulo.** Cinco peles prontas, faltam 4, e
+  a próxima é a ⭐ Especial — ver a seção "Fazer o CENÁRIO de uma facção" no fim deste arquivo. Custa
+  zero C#. Anotada no ROADMAP como **dívida prevista**: o `jogo.js` passou de 7 mil linhas e o cenário
+  é ~70% delas, com a fronteira (`aplicarTema`) já pronta pra virar arquivo por tema — quando o
+  Gabriel decidir pagar.
 
 ## Como trabalhamos
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar
@@ -64,3 +69,36 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   enquanto o VS estiver com a solução antiga carregada.
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`.
+
+## Fazer o CENÁRIO de uma facção (o próximo é ⭐ Especial) — leia nesta ordem
+Cinco peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos), faltam 4.
+**Não invente processo: já existe manual, e ele é caro — cada linha dele custou uma rodada de "ficou
+ruim" em jogo.**
+1. **`docs/ROADMAP-refatoracao.md` → §CENÁRIO POR CAPÍTULO.** É O manual: as três camadas e o que
+   decide em qual entrar, ladrilho × canvas × endereço, o MAESTRO (dado compartilhado), os motores
+   já extraídos, a lista de ARMADILHAS (cada uma já custou tempo — leia todas antes de desenhar) e as
+   LIÇÕES DE DESENHO. Se for contra alguma delas, seja de propósito e diga por quê.
+2. **Uma pele pronta INTEIRA, das duas pontas:** o bloco `body[data-tema="misticos"]` no `estilo.css`
+   e a entrada `misticos` do `AR_DO_TEMA` no `jogo.js` (a mais completa: mar, dragão em três
+   distâncias, lâmpada, aparições, moldura em canvas). O Folclore é a segunda melhor referência.
+3. **`git log --oneline` dos PRs de cenário** (#195, #197, #198, #199, #200) — as mensagens contam o
+   que foi tentado e MORREU, que é a parte que o código não mostra.
+
+**A receita, em uma linha:** o tema é `faccao.ToString().ToLowerInvariant()` → `body[data-tema]`, e
+custa **zero C#** — um bloco de CSS mais uma entrada de configuração. Tema sem CSS e sem entrada no
+`AR_DO_TEMA` simplesmente luta no visual padrão (foi assim que o Folclore saiu inteiro no #199).
+
+**As decisões que vêm ANTES de desenhar qualquer coisa:**
+- **Que assinatura sobrou.** Dia claro é do Reino, lua do cemitério, estrelas da invasão, âmbar do
+  fogo, crepúsculo da praia. Escolha o que SOBROU antes de escolher o que é bonito — é o que faz o
+  capítulo ser reconhecível de relance.
+- **Os 4 champs entram pelo SINAL, não pela figura.** Nada de corpo humano (fica esquisito em canvas);
+  o gênio é a lâmpada, a sereia é a cauda, a fada é o vaga-lume maior. E o gesto tem que ser do sinal:
+  cauda sozinha fazendo salto de golfinho lê como pedaço arremessado.
+- **Uma peça CENTRAL, uma fonte de luz.** Fogueira, lâmpada. E o que mais acontece na cena responde a
+  ela ou ao maestro.
+- **Verificação:** `node --check jogo.js`, chaves do `estilo.css` batendo, todo builder do
+  `noFundo`/`naFrente` com definição, nenhuma chave de config sem uso, e `dotnet build` limpo. Raio
+  negativo num `arc`/`ellipse` LANÇA e mata o `requestAnimationFrame` — a cena congela em silêncio, e
+  é o defeito mais caro de achar depois. **A conferência em jogo é do Gabriel**, sempre: quase todo
+  acerto deste front veio de ele olhar rodando e apontar o defeito exato.

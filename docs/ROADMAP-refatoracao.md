@@ -131,6 +131,11 @@ ninguém sabe quem mais lê, e a camada que ignora o maestro continua correta (�
 temas fazem: sem redemoinho, `forca` fica 0 pra sempre e todas as contas viram `+= 0`). Os dois
 objetos nascem SEMPRE, no `iniciarAr`, pra quem lê não precisar de dois caminhos.
 
+O **segundo cliente** chegou nos 🐉 Místicos e é a prova de que o maestro não era um enfeite do
+Folclore: lá quem sopra é um redemoinho, aqui é o DRAGÃO na passagem de perto — e quem lê (palmeiras,
+vapor da lâmpada, vaga-lumes, pólen) não sabe que a fonte mudou. Foi uma linha de escrita num builder
+novo, sem tocar em nada do que já lia.
+
 **Armadilhas que já custaram tempo aqui:**
 - `background-position: bottom` vale `50% 100%` — ancora o ladrilho no CENTRO. O JS que posiciona
   coisas no horizonte conta a partir do x=0; use `left bottom` ou as duas contas discordam, e o erro
@@ -141,19 +146,59 @@ objetos nascem SEMPRE, no `iniciarAr`, pra quem lê não precisar de dois caminh
   isso que o cenário passava por cima do log — a solução foi posicionar o `#meio` (z 4), não mexer
   no z do canvas.
 - `destination-out` APAGA pixel. Usado pra "detalhe vazado" num escudo, abre buraco de verdade nele.
+- **RAIO NEGATIVO LANÇA, e a exceção mata a cena inteira** (jul/2026, custou o primeiro teste em jogo
+  dos Místicos). `arc`/`ellipse` com raio < 0 jogam `IndexSizeError`; como o `requestAnimationFrame`
+  só é reagendado no FIM do `quadro`, uma exceção lá dentro para o laço pra sempre. O que se vê não é
+  um erro: é a cena congelando no meio, com tudo que seria pintado depois da camada que estourou
+  simplesmente ausente — e nada no console do jogo. O padrão que produz isso é sempre o mesmo:
+  **filtrar a lista ANTES de avançar o relógio** das partículas, e aí desenhar a que já morreu com
+  `vida`/`1 − q` negativo. A ordem certa é avançar, desenhar com o valor CLAMPADO, e só então
+  descartar. Espelhar coisa com raio negativo (`r * lado`) é a outra fonte — espelho é deslocamento e
+  giro, nunca raio.
+- **Girar ~180° inverte os DOIS eixos.** Quem desenha em coordenada local (`translate` + `rotate` no
+  ângulo de marcha) sai de cabeça pra baixo quando a criatura atravessa pra esquerda — foi o que pôs
+  os chifres do dragão pra baixo e as patas dele no dorso. A correção é um espelho vertical
+  (`if (Math.cos(ang) < 0) ctx.scale(1, -1)`), a mesma do golfinho. **Quem parte da NORMAL não sofre
+  disso**, porque ela é forçada pra cima — e essa é a divisória: crista, crina e barriga nunca
+  quebraram; cabeça, patas e escamas quebraram. Arco medido a partir do ângulo de marcha cai no dorso
+  num sentido e na BARRIGA no outro; medido a partir da normal, cai sempre no lugar.
+- **Cor tem que ser CSS de verdade.** `strokeStyle = '110, 214, 176'` (a tripla crua que serve dentro
+  de um `rgba(...)`) é INVÁLIDO: o navegador ignora a atribuição em silêncio e segue pintando com a
+  cor anterior. As duas convenções convivem no mesmo objeto de config — hex pra quem vira
+  `fillStyle`/`strokeStyle` direto, tripla pra quem entra num `rgba()` com alfa variável — e trocar
+  uma pela outra não avisa nada.
+- **Velocidade, nunca duração fixa, pra quem atravessa a tela.** A travessia do dragão era em segundos,
+  mas o percurso inclui a largura da janela: em tela mais larga ele passava MAIS RÁPIDO, e o mesmo
+  bicho virava outro dependendo do tamanho da janela. Medindo em alturas de arena por segundo, a
+  duração se ajusta sozinha. (E a velocidade é POR DISTÂNCIA: o que passa perto atravessa a vista mais
+  depressa — é a paralaxe que faz o poste voar e a montanha não.)
+- **Medida na unidade do MUNDO faz "a mesma coisa" precisar de números diferentes.** A ondulação do
+  dragão era contada contra o percurso e contra a altura da arena — duas coisas que mudam de tamanho
+  junto com ele —, então cada distância exigia um valor próprio e as três acabaram ondulando
+  DIFERENTE sem ninguém ter decidido isso. Medida no corpo dele (ondas por comprimento, amplitude em
+  fração do comprimento de onda), um número só serve às três. Quando a mesma intenção precisa de
+  números diferentes em cada contexto, quase sempre a unidade está errada — não o desenho.
+- **Evento é lista; estado é variável.** A espuma da praia era "quanto tempo faz que a última onda
+  chegou", e como a lavagem dura mais que o intervalo entre ondas, cada chegada REINICIAVA a conta: a
+  espuma que ainda recuava sumia de uma vez. Uma lista de lavagens vivas resolve sem ajustar tempo
+  nenhum, e as gerações se sobrepõem na areia como a água faz.
 - Ladrilho de horizonte em px CRUS não encolhe com a janela — e isso QUEBRA: numa arena baixa o
   ladrilho fica mais alto que ela, o `baseY` (`altura do canvas − altura do ladrilho`) vira NEGATIVO e
   o que devia estar no horizonte sobe pra perto do topo. A saída NÃO é `min()`/`clamp()`/`vh`: o JS lê
   esses valores com `parseFloat(getComputedStyle(...))` e propriedade customizada não é resolvida pra
   px — voltaria a string inteira, o `parseFloat` daria NaN e o padrão de emergência assumiria EM
   SILÊNCIO, ancorando tudo no lugar errado sem quebrar nada. Quem encolhe é uma escada de
-  `@media (max-height)` em px crus, no fim da seção de temas do `estilo.css`.
+  `@media (max-height)` em px crus, no fim da seção de temas do `estilo.css`. **Medida que é FRAÇÃO da
+  arena não tem esse problema** — as linhas do mar e da areia dos Místicos são números puros usados
+  via `calc(var(--mar-linha) * 1%)`, escalam sozinhas e por isso o tema não entra na escada. Quando
+  der pra escolher, a fração é a medida barata; ladrilho é imagem e tem tamanho próprio a defender.
 
 **Motores compartilhados** (extraídos quando apareceu o 2º cliente, não antes):
 - `criarNoHorizonte` — coisa presa no ladrilho do horizonte, com relógio OPCIONAL: quem declara
   `aceso` pisca (corujas, bobinas de Tesla), quem não declara está sempre à vista (espantalhos).
-- `medirLadrilho` — lê do CSS o passo e a altura do ladrilho do horizonte. Existe pra a armadilha do
-  `parseFloat` (acima) estar documentada num lugar só, em vez de inline no meio de uma máquina de fases.
+- `medirDoTema` / `medirLadrilho` — leem do CSS um número que o tema declarou (o par de um ladrilho,
+  ou uma linha solta como `--mar-linha`). Existem pra a armadilha do `parseFloat` (acima) estar
+  documentada num lugar só, em vez de inline no meio de uma máquina de fases.
 - `criarVoadores` + a tabela `VOADORES` — um motor de voo, quatro bichos (morcego, disco, fantasma,
   corvo). A `forma` é do tema. Quem declara `revoada` voa em BANDO — formação, rumo comum e o susto
   que abre o bando quando o vento passa por baixo; quem não declara atravessa sozinho, como antes.
@@ -179,13 +224,101 @@ objetos nascem SEMPRE, no `iniciarAr`, pra quem lê não precisar de dois caminh
 - O AVISO é a parte barata do susto, e a mais eficaz: a moita treme ANTES de a coisa subir (como a
   terra revirando antes de o caixão abrir), e a subida vira consequência. Sem ele, a figura só aparece.
 - Uma fonte de luz SÓ por cena. No Folclore não há lua de propósito: lua e fogueira brigariam pelo
-  mesmo trabalho e a que perdesse viraria enfeite.
+  mesmo trabalho e a que perdesse viraria enfeite. Nos Místicos a mesma regra aparece INVERTIDA: cena
+  fria e aberta, com um único ponto morno (a lâmpada) — e é ser a única coisa quente que a põe no
+  centro, não a posição dela na tela.
+- **Não repetir a assinatura de ninguém.** Cada tema tem uma coisa que é só dele — o dia claro do
+  Reino, a lua do cemitério, as estrelas da invasão, o âmbar do fogo —, e a pele nova escolhe o que
+  SOBROU antes de escolher o que é bonito. Foi assim que os Místicos viraram crepúsculo, e é a regra
+  que manda os vaga-lumes deles morarem numa faixa baixa: soltos no céu, virariam estrelas.
+- **A DISTÂNCIA pode virar configuração.** O dragão passa três vezes (perto, médio, longe) e o que
+  muda entre elas não é só a escala: é o `detalhe` (silhueta chapada · corpo com volume · o bicho
+  inteiro com crina, chifres, bigodes, patas e pérola), a `opacidade`, e a COR — de longe ele é da
+  `bruma`, azulada, quase a do céu, porque bicho distante não tem a cor dele, tem a cor do ar que está
+  no meio do caminho. Desenhar tudo sempre e só escalar dá sujeira ilegível de longe e um bicho de
+  papel de perto. O corpo também ESTICA com a distância (`alongar`): longe, comprido e fino lê melhor.
+- **Corpo comprido é FITA, nunca fila de elipses.** A primeira versão do dragão empilhava uma elipse
+  por anel; como o raio afina até a ponta e o espaço entre os anéis é constante, a metade de trás
+  virava linha pontilhada e o bicho lia como duro e picado. Fita (as duas margens pela normal de cada
+  anel, um preenchimento só — a mesma técnica do tentáculo) não tem esse problema em resolução
+  nenhuma, e é o que libera alongar o bicho à vontade. A normal é forçada pra CIMA, senão o dorso e a
+  barriga trocam de lado quando a onda passa da horizontal.
+- **Uma frequência é metrônomo; amplitude uniforme é bloco.** O que fez a ondulação virar cobra foram
+  duas coisas juntas: somar DUAS senoides fora de compasso, e fazer a amplitude CRESCER em direção à
+  cauda. A raiz do movimento é a cabeça, que quase não sai da linha; quem chicoteia é a ponta.
+- **Foco é tirar dos outros, não dar ao alvo.** Na passagem de perto o cenário inteiro escurece um
+  pouco atrás do dragão, e o olho vai nele sem que nada precise piscar. O efeito nasce e morre com a
+  passagem, então não há estado pra alguém esquecer de desligar.
+- **A ordem é dramaturgia; o lado é continuidade.** Ele COMEÇA na frente e some, em vez de chegar aos
+  poucos com o auge no fim. A DISTÂNCIA da próxima passagem é sorteada entre as três (só não repete a
+  mesma duas vezes seguidas — duas idênticas em fila leem como loop), mas o LADO alterna sempre: ele
+  reentra por onde saiu, porque deu meia-volta lá fora. Sortear os dois faria ele sumir à direita e
+  reaparecer à esquerda, que é a única coisa capaz de quebrar a ilusão de ser um bicho só.
+- **Aura feita da própria silhueta MENTE sobre o tamanho.** O halo do dragão era a fita do corpo 1,9×
+  mais larga, translúcida — e ele custou três rodadas de "diminui o tamanho" que não resolviam nada,
+  porque o halo encolhia junto e o que o olho media continuava sendo ele. Vale como regra geral: se um
+  enfeite escala junto com a peça, ajustar a peça nunca conserta o enfeite. Destacar se faz TIRANDO
+  dos outros (o véu), não somando volume ao alvo.
+- **Contorno é detalhe de escala pequena.** O fio escuro na barriga tinha espessura proporcional ao
+  bicho: correto num dragão de 26px, e uma faixa de 40px de verde num de 536. Quando a peça cresce, o
+  contorno cresce junto e deixa de ser contorno pra virar mancha. Ou é espessura fixa, ou não existe.
+- **A cabeça usa as cores do CORPO.** Ela tinha degradê próprio e era a única parte com luz própria —
+  lia como peça de outro bicho encaixada no pescoço. Crânio no tom do dorso, mandíbula no tom da
+  barriga, os mesmos dois do resto.
+- **A junta cabeça-pescoço é uma CONTA, não um ajuste a olho.** O tamanho da cabeça e a altura da nuca
+  andam amarrados (nuca = 1/k do tamanho): assim a nuca vale exatamente o raio do primeiro anel e o
+  encaixe é exato. E o pescoço tem que ficar FINO enquanto o crânio o cobre — o corpo engrossava cedo
+  demais e ultrapassava a nuca antes de a cabeça acabar, que era o degrau que aparecia atrás do rosto.
+- **Folha é SUPERFÍCIE, não fio.** As da palmeira eram nervura + dois riscos por folíolo, e a copa lia
+  como um punhado de arames. Lâmina preenchida e serrilhada nas bordas resolve — o serrilhado dá os
+  folíolos sem desenhar um a um, porque o que conta é a silhueta e não a contagem.
+- **Moldura de cena fica no FUNDO.** As duas tentativas de moldura em primeiro plano (a gruta e o
+  pórtico do #197) morreram: coisa grande e perto obriga a acertar o traço, e traço errado em cima da
+  luta é pior que cenário nenhum. As palmeiras dos Místicos emolduram de trás dos combatentes — e são
+  canvas, e não o `::before`/`::after` do CSS, porque precisam VERGAR quando o dragão passa. Foi o
+  cenário pedindo a camada, e não a camada procurando serviço.
 
 **Peles prontas:** 👑 Reino (cidade murada, de DIA — o único claro, e é o contraste dele que faz os
 outros parecerem escuros de propósito), 🌑 Lado Sombrio (cemitério sob a lua), ⚙️ Tecnológicos (a
-noite da invasão) e 🪬 Folclore (a clareira com a fogueira, na noite QUENTE — o âmbar era a paleta que
-sobrava, e cai bem porque aqui a fonte de luz é fogo). Faltam 5 facções, e cada uma agora é um bloco
-de CSS mais um punhado de configuração.
+noite da invasão), 🪬 Folclore (a clareira com a fogueira, na noite QUENTE — o âmbar era a paleta que
+sobrava, e cai bem porque aqui a fonte de luz é fogo) e 🐉 Místicos (a praia no CREPÚSCULO, com a
+lâmpada na areia e o dragão dando as voltas dele). Faltam 4 facções, e cada uma agora é um bloco de
+CSS mais um punhado de configuração.
+
+**O que os 🐉 Místicos ensinaram** (jul/2026), além do que já subiu nas listas acima: três dos quatro
+champs da facção têm CORPO HUMANO (gênio, sereia, fada), e figura humana pequena em canvas fica
+esquisita — o Ninja é a única do front inteiro e só passa porque é preta, distante e em movimento. A
+regra "mostrar o sinal, não a figura" deixou de ser economia e virou a única saída: o gênio é a
+LÂMPADA e o vapor que sai dela, a sereia é uma CAUDA que rompe a água no meio dos golfinhos, e a fada
+é o vaga-lume que é maior que os outros e deixa rastro. Nenhum dos três foi desenhado. E o contraste é
+o que faz a sereia funcionar: os golfinhos precisam existir ANTES dela — coisa diferente no meio de um
+padrão estabelecido lê como acontecimento; sozinha, ela seria só um desenho.
+
+Corolário que só apareceu em jogo: **tirar o corpo também tira os gestos que dependiam dele.** A
+sereia começou fazendo o mesmo salto do golfinho e ficou errada na hora (o Gabriel: "ela tá pulando
+sem corpo") — sem torso pra explicar o impulso, o arco denuncia o que falta e a cauda lê como pedaço
+solto sendo arremessado. O gesto certo é o que a cauda consegue justificar sozinha: a ponta rompe a
+água, abana e afunda no mesmo lugar, com o que está abaixo da linha d'água RECORTADO (é o recorte que
+dá superfície ao mar). Quando se mostra só o sinal, o movimento tem que ser do sinal — não do corpo
+que não está lá.
+
+E o RECORTE na linha d'água acabou valendo pros dois: o golfinho também começa e termina o arco
+ABAIXO da superfície, e sai da água em partes — focinho, dorso, cauda — em vez de aparecer inteiro do
+nada em cima dela. O respingo passou a sair do CRUZAMENTO da linha, e não do começo e do fim do
+relógio do salto: é quase a mesma coisa, e erra justamente onde se está olhando.
+
+Uma técnica que vale reaproveitar: **o corpo do dragão é a cabeça no PASSADO**. Cada anel avalia a
+mesma curva num ponto anterior do percurso (`progresso − i * passo`), então a ondulação viaja da
+cabeça pra cauda sozinha — sem histórico de posições, sem buffer, e sem depender do `dt` (guardar
+posição por quadro quebra quando o framerate varia). É a onda que desce no tentáculo, aplicada a um
+corpo que anda.
+
+E o **mar** virou a terceira peça-tipo do front, ao lado do ladrilho de horizonte e da aparição: três
+camadas com trabalhos que não se substituem — as ILHAS dão profundidade (são a única referência de
+tamanho no fundo), as ONDAS dão movimento (rolando do horizonte pro raso com o avanço em `u²`, que é
+perspectiva de graça num expoente), e a ESPUMA dá a BEIRA, que costura o mar ao chão onde a luta
+acontece. Sem a terceira, a praia são dois retângulos empilhados. A espuma é DISPARADA pela onda que
+encosta — mais um caso de "consequência, não coincidência", como a fogueira que o redemoinho apaga.
 
 **O Folclore foi e VOLTOU**, e a ida e volta é o registro que interessa. A primeira versão (a vila com
 o circo, a roda gigante e o torii) saiu por inteiro no #199 — CSS, configuração e os seis desenhos que
@@ -195,6 +328,33 @@ padrão. Foi o seam pagando a conta na direção contrária: tirar uma pele é t
 volta custou o mesmo, também sem C#. A volta não é a vila melhorada, é outra IDEIA: folclore não é
 paisagem, é o que se conta, e o que se conta aqui é a clareira em volta do fogo.
 
+### 🔴 DÍVIDA ANOTADA — um arquivo por cenário (dor PREVISTA, jul/2026)
+
+Registrada pela regra de "dor prevista se anota e se avisa" (ver §Princípios). **Não está feita, e a
+decisão de quando fazer é do Gabriel.**
+
+O `jogo.js` tem ~5.900 linhas e o cenário já é **~70% delas** — o assunto principal do arquivo virou o
+que ele não se propunha a ser (menus, batalha, arsenal e campanha são as outras ~1.700). Quem for
+mexer no botão de habilidade rola por 4.000 linhas de árvore, fogueira e corvo pra chegar lá. Cada
+facção nova custa ~1.000-1.700 linhas, e faltam 5: o arquivo caminha pra ~12.000.
+
+**O que torna a conta fácil:** a fronteira JÁ existe. O cenário inteiro fala com o resto do jogo por
+UMA função — `aplicarTema(tema)`, chamada em dois lugares — mais os dois `<canvas>`. Não é preciso
+desenhar seam nenhum; é o disco que não reflete a arquitetura que já está lá. O #199 provou isso
+arrancando uma pele inteira sem tocar em C#.
+
+**O corte:** `jogo.js` (jogo) · `cenario/motor.js` (`iniciarAr`, `aplicarTema`, `criarPo`,
+`criarNevoa`, `criarVoadores`, `criarNoHorizonte`, `medirLadrilho`/`medirDoTema`, `VOADORES` e os
+bichos compartilhados) · um arquivo por tema, cada um levando os desenhos exclusivos **e** a própria
+entrada do `AR_DO_TEMA` (`AR_DO_TEMA.folclore = {...}`). Aí "uma facção nova" vira um `.js`, um
+`.css` e uma linha no `index.html`.
+
+**A pegadinha:** `AppFront.cs` navega pro caminho do disco, ou seja o front roda em `file://`, e ali
+`<script type="module">` NÃO funciona (origem opaca). Então ou se aceita a saída barata — vários
+`<script src>` clássicos em ordem, que é recorte-e-cola puro porque tudo já vive no mesmo escopo
+global —, ou se paga uma mudança em C# (`SetVirtualHostNameToFolderMapping` + navegar pro host
+virtual) pra poder usar módulos de verdade. A saída barata não custa C# nenhum e é reversível.
+
 ---
 
 ## Princípios que guiam toda a refatoração
@@ -202,7 +362,12 @@ paisagem, é o que se conta, e o que se conta aqui é a clareira em volta do fog
 - **Todo método morto na maioria das classes que o herdam vira interface** (ISP).
   Base magra + interfaces por capacidade. A declaração da classe documenta o que faz.
 - **Refatore por DOR, não por pureza.** Migra o que incomoda; o resto segue por
-  boy scout (quando tocar) ou PR dedicado quando virar dor.
+  boy scout (quando tocar) ou PR dedicado quando virar dor. **E quando a dor ainda
+  não foi SENTIDA mas dá pra PREVER** — o arquivo que vai dobrar de tamanho, o seam
+  que já existe e o disco não reflete —, **a regra é ANOTAR aqui e AVISAR o Gabriel
+  na hora**, em vez de refatorar por conta própria ou de deixar passar em silêncio.
+  A decisão de quando pagar é dele; o que não pode é a previsão morrer na cabeça de
+  quem viu.
 - **Refatore o que PERSISTE; tolere imperfeição no que vai MORRER.** A camada de
   apresentação do console (telas, render) morre no porte. Não investir rigor nela.
   A LÓGICA de domínio (combate, turno, reações, stats) pluga DIRETO no porte como

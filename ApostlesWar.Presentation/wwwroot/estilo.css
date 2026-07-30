@@ -1340,6 +1340,94 @@ body[data-tema="folclore"] #log {
     border-color: rgba(232, 163, 61, .3);
 }
 
+/* ---------- 🐉 MÍSTICOS — a praia no crepúsculo, e a lâmpada na areia ----------
+   O quinto, e a primeira decisão dele veio antes de qualquer coisa de beleza: NÃO REPETIR A
+   ASSINATURA DE NINGUÉM. O dia claro é do Reino, a lua é do cemitério, as estrelas são da invasão e o
+   âmbar do fogo é do Folclore. Sobrou o CREPÚSCULO — o violeta caindo pro turquesa —, e foi sorte ter
+   sobrado justo ele: é a hora em que o mar ainda tem luz e o céu já não tem, então dá pra ver o que
+   salta na água sem precisar acender nada.
+
+   Uma fonte de luz SÓ, de novo — e desta vez INVERTIDA em relação ao Folclore. Lá a cena era quente e
+   fechada em volta de um fogo; aqui ela é fria e aberta, e o único ponto morno é a lâmpada do 🧞 na
+   areia. Ela é o centro da composição por ser a única coisa quente numa praia azul, não por estar no
+   meio da tela.
+
+   AS TRÊS FAIXAS (céu, mar, areia) são declaradas UMA vez, em `--mar-linha` e `--areia-linha`, e o JS
+   lê as duas pra saber onde os golfinhos saltam e onde a lâmpada está fincada. São números PUROS,
+   usados aqui via `calc(var(--mar-linha) * 1%)`: como são porcentagem da arena, escalam sozinhos com
+   a janela — e é por isso que este é o único tema que NÃO entra na escada de @media do fim desta
+   seção. Ladrilho tem um tamanho próprio pra defender; faixa em % não tem.
+
+   E o gancho dos cantos (`::before`/`::after`) fica VAGO aqui, pela primeira vez em cinco temas. Ele
+   serve pra pendurar coisa do ALTO — estandartes, teias, cabos, cipós —, e o que emoldura esta cena
+   são as palmeiras, que sobem do chão e precisam VERGAR quando o dragão passa. Coisa que reage ao
+   vento não pode ser CSS: elas são canvas (ver `criarPalmeiras` no jogo.js). */
+body[data-tema="misticos"] {
+    --fundo: #100a1e;
+    --painel: #1b1430;
+    --borda: #3d3163;
+    --apagado: #bcaade;
+}
+
+body[data-tema="misticos"] #arena {
+    position: relative;
+    isolation: isolate;
+
+    /* Onde o mar começa e onde a areia começa, em % da altura da arena. Uma fonte só pro CSS e pro
+       JS: mexer aqui leva junto o salto dos golfinhos, a cauda da sereia e o pé da lâmpada. */
+    --mar-linha: 46;
+    --areia-linha: 71;
+
+    background:
+        /* 1. vinheta FRIA: fecha os cantos sem esquentar nada (preto puro chaparia o violeta) */
+        radial-gradient(ellipse 120% 98% at 50% 46%, transparent 34%, rgba(6, 6, 20, .86) 100%),
+        /* 2. o RASTRO do poente na água — a coluna de luz que sai do horizonte e vem pra praia. É ela
+              que impede o mar de ler como uma faixa azul chapada, e custa um gradiente. */
+        radial-gradient(ellipse 22% 26% at 50% calc(var(--mar-linha) * 1%),
+            rgba(255, 186, 148, .26), transparent 74%),
+        /* 3. o brilho do poente no céu, rente à linha do mar. Quente, mas FRACO e BAIXO: se subisse,
+              viraria o céu do Folclore. */
+        radial-gradient(ellipse 74% 24% at 50% calc(var(--mar-linha) * 1%),
+            rgba(255, 138, 116, .3), transparent 72%),
+        /* 4. as TRÊS FAIXAS. O céu escurece pra cima, o mar escurece pro fundo e clareia de novo na
+              beira (água rasa), e a areia é violeta-fria — praia à noite não é bege. As duas emendas
+              são DURAS de propósito: linha do horizonte e beira d'água são bordas de verdade, e
+              suavizá-las tiraria da cena o "onde acaba o mar". */
+        linear-gradient(180deg,
+            #150c2c 0%,
+            #241d50 24%,
+            #46396f calc(var(--mar-linha) * 1% - 7%),
+            #8d7391 calc(var(--mar-linha) * 1%),
+            #1c3d69 calc(var(--mar-linha) * 1% + .6%),
+            #112a4e calc((var(--mar-linha) + var(--areia-linha)) * .5%),
+            #1a3f63 calc(var(--areia-linha) * 1% - 1.2%),
+            #97a7ba calc(var(--areia-linha) * 1%),
+            #2c2440 calc(var(--areia-linha) * 1% + 1%),
+            #1d1729 100%);
+    background-repeat: no-repeat;
+}
+
+body[data-tema="misticos"] #topo { border-bottom: 2px solid rgba(126, 214, 214, .4); }
+body[data-tema="misticos"] #painel { border-top: 2px solid rgba(126, 214, 214, .4); }
+body[data-tema="misticos"] #topo,
+body[data-tema="misticos"] #painel {
+    background:
+        linear-gradient(180deg, rgba(126, 214, 214, .07) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="misticos"] .combatente {
+    background: linear-gradient(180deg, rgba(52, 42, 82, .82), rgba(22, 16, 40, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+}
+
+/* O log vira ÁGUA FUNDA: azul profundo com o fio turquesa. O caderno de causos do Folclore é
+   queimado e o pergaminho do Reino é seco — este é molhado, e a diferença tem que dar pra ver. */
+body[data-tema="misticos"] #log {
+    background: linear-gradient(180deg, rgba(14, 34, 60, .62), rgba(8, 16, 34, .62));
+    border-color: rgba(126, 214, 214, .32);
+}
+
 /* ==========================================================================
    OS LADRILHOS DE HORIZONTE POR FAIXA DE ALTURA
    ==========================================================================
@@ -1348,6 +1436,10 @@ body[data-tema="folclore"] #log {
    e a clava do Troll. Em px fixos eles NÃO encolhiam com a janela, e isso quebrava de verdade: numa
    arena baixa o ladrilho ficava mais alto que ela, o `baseY` (`canvas.height − altura`) virava
    NEGATIVO, e o que devia estar no horizonte subia pra perto do topo da tela.
+
+   O 🐉 Místicos NÃO entra nesta escada, e a ausência dele é informação: as linhas do mar e da areia
+   são % da arena, então escalam sozinhas e não têm um tamanho próprio pra defender. Quem precisa de
+   degrau é ladrilho — imagem com dimensão em px que o JS ancora.
 
    POR QUE NÃO `min()`/`clamp()`/`vh`, que resolveria em uma linha: o JS lê estes valores com
    `parseFloat(getComputedStyle(arena).getPropertyValue('--lab-altura'))`, e propriedade customizada

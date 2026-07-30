@@ -80,7 +80,9 @@ Mergeado em sequência de PRs:
   decisão do jogador —, e a **conquista do champ** animada terminando na ficha dele.
 - **Cenário por capítulo** (branch `feature/tema-do-reino`): o `EstadoDeBatalha` carrega um `Tema`, o
   JS põe em `body[data-tema]` e a batalha ganha um lugar. A ESTRUTURA da luta não muda em nada — os
-  dois lados, o log, o painel, as animações e os tamanhos seguem os mesmos. Ver §CENÁRIO POR CAPÍTULO.
+  dois lados, o log, o painel, as animações e os tamanhos seguem os mesmos. O quarto tema (🪬 Folclore)
+  trouxe o **maestro**: uma CAUSA COMUM que as peças leem, em vez de cada uma só com o seu relógio.
+  Ver §CENÁRIO POR CAPÍTULO.
 
 **Arquitetura (detalhe em §FRONT abaixo):** ponte de mensagens LOCAL in-process (JS↔C# pela webview,
 sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos seams `ITelaDeCombate`/
@@ -115,7 +117,19 @@ canvas. Capítulo sem tema luta no visual padrão; a Arena nunca tem tema (é la
 **Ladrilho ou canvas?** Horizonte que é PAISAGEM (mata, cidade) pode ser ladrilho de CSS, porque
 paisagem repete sem mentir. Composição NOMEADA ("castelo no meio", "o reator estourado") tem que ser
 canvas: nome não sobrevive a ladrilho — o que é "a borda" muda com a largura da tela — e esticar uma
-imagem única resolveria a posição estragando a forma.
+imagem única resolveria a posição estragando a forma. Vale o mesmo pra quem precisa de ENDEREÇO:
+"aquela moita ali", de trás da qual o Oni levanta os chifres, não quer dizer nada num ladrilho que
+repete, porque a cada repetição existe uma cópia idêntica dela na tela.
+
+**O MAESTRO — quando as peças precisam de uma CAUSA COMUM** (jul/2026, nasceu no Folclore). Até o
+terceiro tema cada peça tinha o seu relógio e não sabia de nenhuma outra; dessincronia era a regra e
+continua sendo. A exceção que apareceu: o redemoinho ESCREVE num objeto `vento` (`{ forca, x }`) e
+quem quiser LÊ — o fogo verga e chega a apagar, a fumaça inclina, as brasas riscam pro lado, os corvos
+se abrem. Mesmo formato pro `fogo` (`{ viva }`), escrito pela fogueira e lido pelas brasas no ar.
+Por que isso não é o começo de uma bagunça: é DADO, não chamada — ninguém pergunta nada a ninguém,
+ninguém sabe quem mais lê, e a camada que ignora o maestro continua correta (é o que os outros três
+temas fazem: sem redemoinho, `forca` fica 0 pra sempre e todas as contas viram `+= 0`). Os dois
+objetos nascem SEMPRE, no `iniciarAr`, pra quem lê não precisar de dois caminhos.
 
 **Armadilhas que já custaram tempo aqui:**
 - `background-position: bottom` vale `50% 100%` — ancora o ladrilho no CENTRO. O JS que posiciona
@@ -127,13 +141,29 @@ imagem única resolveria a posição estragando a forma.
   isso que o cenário passava por cima do log — a solução foi posicionar o `#meio` (z 4), não mexer
   no z do canvas.
 - `destination-out` APAGA pixel. Usado pra "detalhe vazado" num escudo, abre buraco de verdade nele.
+- Ladrilho de horizonte em px CRUS não encolhe com a janela — e isso QUEBRA: numa arena baixa o
+  ladrilho fica mais alto que ela, o `baseY` (`altura do canvas − altura do ladrilho`) vira NEGATIVO e
+  o que devia estar no horizonte sobe pra perto do topo. A saída NÃO é `min()`/`clamp()`/`vh`: o JS lê
+  esses valores com `parseFloat(getComputedStyle(...))` e propriedade customizada não é resolvida pra
+  px — voltaria a string inteira, o `parseFloat` daria NaN e o padrão de emergência assumiria EM
+  SILÊNCIO, ancorando tudo no lugar errado sem quebrar nada. Quem encolhe é uma escada de
+  `@media (max-height)` em px crus, no fim da seção de temas do `estilo.css`.
 
 **Motores compartilhados** (extraídos quando apareceu o 2º cliente, não antes):
 - `criarNoHorizonte` — coisa presa no ladrilho do horizonte, com relógio OPCIONAL: quem declara
   `aceso` pisca (corujas, bobinas de Tesla), quem não declara está sempre à vista (espantalhos).
-- `criarVoadores` + a tabela `VOADORES` — um motor de voo, três bichos (morcego, disco, fantasma).
-  A `forma` é do tema.
-- `criarPo` / `criarNevoa` — partículas e manchas, com a DIREÇÃO saindo do sinal da velocidade.
+- `medirLadrilho` — lê do CSS o passo e a altura do ladrilho do horizonte. Existe pra a armadilha do
+  `parseFloat` (acima) estar documentada num lugar só, em vez de inline no meio de uma máquina de fases.
+- `criarVoadores` + a tabela `VOADORES` — um motor de voo, quatro bichos (morcego, disco, fantasma,
+  corvo). A `forma` é do tema. Quem declara `revoada` voa em BANDO — formação, rumo comum e o susto
+  que abre o bando quando o vento passa por baixo; quem não declara atravessa sozinho, como antes.
+- `criarPo` / `criarNevoa` — partículas e manchas, com a DIREÇÃO saindo do sinal da velocidade. Três
+  campos OPCIONAIS no `criarPo` (`sopro`, `cintila`, `doFogo`) viram a mesma poeira em BRASA da
+  fogueira, que é arrastada pelo vento, pisca e morre com a chama. Ausentes, nada muda — é o que
+  manteve a poeira do Reino, a cinza do cemitério e o pó da invasão intactos.
+- `criarAparicaoNaMoita` — o esqueleto de uma APARIÇÃO com endereço: espera, sorteia uma moita,
+  a moita treme, a coisa sobe, faz o GESTO que o tema passou, afunda. Dois clientes: os chifres do
+  Oni (vigília, com o pisca dos olhos) e a clava do Troll (o vaivém de quem anda atrás do arbusto).
 
 **Lições de desenho que valeram mais que código:**
 - A DISTÂNCIA manda no traço: longe, silhueta quebrada; perto, volume e curva.
@@ -143,17 +173,27 @@ imagem única resolveria a posição estragando a forma.
   em quando" de "lâmpada piscando".
 - Detalhe demais na escala errada lê como confusão. Duas tentativas de "melhorar" a caverna com boca
   recortada e estalactites ficaram piores que a silhueta simples com uma luz fraca dentro.
+- Mostrar o SINAL, não a figura. Nenhum dos quatro champs do Folclore é desenhado por inteiro em lugar
+  nenhum — o que se vê é chifre, clava, bico e carta. Figura pequena com anatomia lê como sujeira;
+  chifre lê a 20px.
+- O AVISO é a parte barata do susto, e a mais eficaz: a moita treme ANTES de a coisa subir (como a
+  terra revirando antes de o caixão abrir), e a subida vira consequência. Sem ele, a figura só aparece.
+- Uma fonte de luz SÓ por cena. No Folclore não há lua de propósito: lua e fogueira brigariam pelo
+  mesmo trabalho e a que perdesse viraria enfeite.
 
 **Peles prontas:** 👑 Reino (cidade murada, de DIA — o único claro, e é o contraste dele que faz os
 outros parecerem escuros de propósito), 🌑 Lado Sombrio (cemitério sob a lua), ⚙️ Tecnológicos (a
-noite da invasão). Faltam 6 facções, e cada uma agora é um bloco de CSS mais um punhado de
-configuração.
+noite da invasão) e 🪬 Folclore (a clareira com a fogueira, na noite QUENTE — o âmbar era a paleta que
+sobrava, e cai bem porque aqui a fonte de luz é fogo). Faltam 5 facções, e cada uma agora é um bloco
+de CSS mais um punhado de configuração.
 
-Houve uma quarta: 🪬 Folclore (a vila com o circo, a roda gigante e o torii), **removida por inteiro**
-— CSS, configuração e os seis desenhos que só ela usava. O capítulo do Folclore cai no visual padrão,
-sem tocar em C# nenhum: o `FluxoDoFront` manda o nome da facção como tema, e tema sem CSS e sem
-entrada no `AR_DO_TEMA` simplesmente não tem pele. Foi o seam pagando a conta na direção contrária —
-tirar uma pele é tão barato quanto pôr.
+**O Folclore foi e VOLTOU**, e a ida e volta é o registro que interessa. A primeira versão (a vila com
+o circo, a roda gigante e o torii) saiu por inteiro no #199 — CSS, configuração e os seis desenhos que
+só ela usava — **sem tocar em C# nenhum**: o `FluxoDoFront` manda o nome da facção como tema, e tema
+sem CSS e sem entrada no `AR_DO_TEMA` simplesmente não tem pele, então o capítulo caiu no visual
+padrão. Foi o seam pagando a conta na direção contrária: tirar uma pele é tão barato quanto pôr — e a
+volta custou o mesmo, também sem C#. A volta não é a vila melhorada, é outra IDEIA: folclore não é
+paisagem, é o que se conta, e o que se conta aqui é a clareira em volta do fogo.
 
 ---
 

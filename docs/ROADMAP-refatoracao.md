@@ -182,6 +182,54 @@ novo, sem tocar em nada do que já lia.
   chegou", e como a lavagem dura mais que o intervalo entre ondas, cada chegada REINICIAVA a conta: a
   espuma que ainda recuava sumia de uma vez. Uma lista de lavagens vivas resolve sem ajustar tempo
   nenhum, e as gerações se sobrepõem na areia como a água faz.
+- **Subcaminhos de sentidos OPOSTOS se ANULAM onde se sobrepõem** (jul/2026, ⭐ Especial). O canvas
+  preenche pela regra `nonzero`: dois subcaminhos do mesmo caminho que giram em sentidos contrários
+  têm winding 0 na interseção, e ali fica BURACO. A perna do T-Rex é coxa + canela + pé, com
+  sobreposição de propósito nas juntas (é assim que emendam sem fresta); enquanto eram três caminhos
+  separados, cada um se preenchia sozinho e o sentido não importava. Ao juntá-los num caminho só —
+  pra poder recortar as listras — a coxa, que corria ao contrário das outras duas, abriu um rasgo na
+  junta e dava pra ver o cenário através da perna. Quem denuncia é a ÁREA COM SINAL (shoelace) de
+  cada subcaminho: se os sinais discordam, há buraco.
+- **Recortar é mais barato e mais certo que acertar a borda à mão.** As primeiras listras do bicho
+  tentavam seguir a silhueta por fora, com uma aproximação da forma — e sobrava listra pendurada pra
+  fora em todo lugar em que a conta não batia com o bezier. O padrão que resolveu (`comListras`)
+  monta o caminho UMA vez e o usa pras duas coisas: preencher e `clip()`. A listra passa folgada da
+  borda e a própria forma apara; as duas nunca podem discordar porque são o MESMO caminho.
+- **Num recorte de retângulo + elipse, o retângulo tem de descer até a LINHA DO CENTRO da elipse, e
+  não até o topo dela.** O arco de cima sobe em curva: parando no topo (medido no centro), sobra uma
+  fresta em meia-lua nas laterais — 14px a 90% do raio, num ralo de 119px. Foi o anel do ralo
+  "aparecendo por dentro" do cocô que caía. Do centro pra cima o retângulo cobre tudo sem buraco, e
+  do centro pra baixo quem fecha é o próprio arco de baixo, que é o único que tem de tapar algo.
+- **`Math.pow(base negativa, expoente fracionário)` é NaN, e NaN em coordenada NÃO LANÇA.** Raio
+  negativo num `arc` joga exceção e mata o `requestAnimationFrame` — pelo menos é ruidoso. NaN num
+  `moveTo`/`lineTo` simplesmente não desenha nada, em silêncio, e a peça some sem erro em lugar
+  nenhum. O gatilho é banal: um perseguidor (`atual + (alvo−atual)·k`) pode devolver 1 + 1 ulp. A
+  bancada headless deste tema só validava `arc`/`ellipse` e deixou passar — foi corrigida pra
+  validar também os traçadores de caminho.
+- **A normal do ponto ZERO de uma fita vem do VIZINHO**, e o vizinho já carrega o movimento. Então a
+  base "não sai do lugar" (o desvio lateral vale zero em u=0, por construção) e mesmo assim a CORDA
+  dela gira um tantinho pra cada lado, abrindo fresta contra o que estiver atrás. Forçar a normal da
+  base num valor fixo resolve; puxar as duas seguintes pra ela evita o bico na emenda.
+- **Piso na largura da ponta de uma fita deixa CORTE RETO, não ponta.** O tentáculo do Invasor afina
+  com `pow(1−p, .75)` até ZERO; a cauda do T-Rex nasceu com `+ .025` de piso e terminava numa
+  tesourada atravessando de um lado ao outro.
+- **Renomear uma fase e esquecer UM dos lugares não dá erro nenhum.** `descarga` → `caindo` foi
+  trocado no relógio e não na linha que avançava o progresso do cocô: o estado ficou cravado em 0, e
+  duas animações inteiras (o alçapão e a queda) simplesmente não aconteciam, sem nada no console.
+- **Recorte também erra por EXCESSO.** O cocô parado no chão estava sendo cortado pela boca do ralo,
+  porque o recorte da queda valia sempre — e ele é bem mais largo que o ralo (98px contra 77), então
+  os cantos de baixo dele sumiam o tempo todo e a peça parecia quebrada. Recorte só enquanto desce.
+- **Quando duas peças precisam concordar num número, publique o número PRONTO, em pixel de tela.** O
+  banheiro publica as bordas da porta (`livre`, `baixo`) e os sentados só se recortam nelas. Mandar a
+  fração da abertura obrigaria os dois lados a ter cada um a sua conta da largura da folha, e elas
+  divergiriam no meio do gesto — que é a mesma lição do `--mata-passo` e das corujas.
+- **O que passa por um buraco tem de ser MENOR que o buraco.** Óbvio dito assim, e mesmo assim o ralo
+  (`.055`) ficou menor que o cocô (`.14`) durante várias rodadas: ele descia por uma boca menor que
+  ele. Os dois números andam juntos e isso está escrito na config.
+- **Ladrilho que não encosta no vizinho deixa parede nua entre os dois.** As cabines tinham largura
+  `.148` e passo `~.16`: sobrava uma tira de azulejo entre cada par e cada cabine desenhava só a
+  divisória dela, então a fileira lia como seis caixas soltas. Com largura = passo (1/6 da tela), a
+  divisória do meio vira UMA só, partilhada.
 - Ladrilho de horizonte em px CRUS não encolhe com a janela — e isso QUEBRA: numa arena baixa o
   ladrilho fica mais alto que ela, o `baseY` (`altura do canvas − altura do ladrilho`) vira NEGATIVO e
   o que devia estar no horizonte sobe pra perto do topo. A saída NÃO é `min()`/`clamp()`/`vh`: o JS lê
@@ -281,9 +329,10 @@ novo, sem tocar em nada do que já lia.
 **Peles prontas:** 👑 Reino (cidade murada, de DIA — o único claro, e é o contraste dele que faz os
 outros parecerem escuros de propósito), 🌑 Lado Sombrio (cemitério sob a lua), ⚙️ Tecnológicos (a
 noite da invasão), 🪬 Folclore (a clareira com a fogueira, na noite QUENTE — o âmbar era a paleta que
-sobrava, e cai bem porque aqui a fonte de luz é fogo) e 🐉 Místicos (a praia no CREPÚSCULO, com a
-lâmpada na areia e o dragão dando as voltas dele). Faltam 4 facções, e cada uma agora é um bloco de
-CSS mais um punhado de configuração.
+sobrava, e cai bem porque aqui a fonte de luz é fogo), 🐉 Místicos (a praia no CREPÚSCULO, com a
+lâmpada na areia e o dragão dando as voltas dele) e ⭐ Especial (o banheiro público — o primeiro
+INTERIOR). Faltam 3 facções (Humanos, 🔱 Decaídos, ✝️ Apóstolos), e cada uma agora é um bloco de CSS
+mais um punhado de configuração.
 
 **O que os 🐉 Místicos ensinaram** (jul/2026), além do que já subiu nas listas acima: três dos quatro
 champs da facção têm CORPO HUMANO (gênio, sereia, fada), e figura humana pequena em canvas fica
@@ -327,6 +376,65 @@ sem CSS e sem entrada no `AR_DO_TEMA` simplesmente não tem pele, então o capí
 padrão. Foi o seam pagando a conta na direção contrária: tirar uma pele é tão barato quanto pôr — e a
 volta custou o mesmo, também sem C#. A volta não é a vila melhorada, é outra IDEIA: folclore não é
 paisagem, é o que se conta, e o que se conta aqui é a clareira em volta do fogo.
+
+**O que o ⭐ ESPECIAL ensinou** (jul/2026) — o banheiro público, e a pele que mais custou rodada de
+ajuste até hoje.
+
+A assinatura que sobrou não foi uma HORA, foi um TETO. Os cinco temas anteriores são paisagem ao ar
+livre; este não tem céu nenhum, e é isso que o torna reconhecível de relance. A facção pedia: 💩 Cocô,
+🦸 Herói, 🦹 Vilão e 🦖 T-Rex não moram em mundo nenhum em comum, e procurar a paisagem em que os
+quatro coubessem ia dar cenário morno. O banheiro não é o mundo deles — é o único lugar onde os
+quatro estarem juntos não precisa de explicação.
+
+- **Corpo humano continua sendo o problema, e aqui a saída foi ESCONDER o corpo com o que a cena já
+  tinha.** 🦸 e 🦹 estão atrás de um jornal aberto: o que sobra são as pernas com a calça caída, os
+  dedos na borda do papel e o topo da cabeça com a máscara. Nenhum dos dois é desenhado. É a regra
+  dos Místicos ("mostrar o sinal") levada um passo além — lá o sinal SUBSTITUÍA a figura, aqui um
+  objeto de cena a TAPA.
+- **A leitura de um jornal aberto:** a borda de cima é um V com a DOBRA NO FUNDO (o meio cede, os
+  cantos empinam). Ao contrário — com o meio empinado — lê como placa. E as bordas de fora são
+  CÔNCAVAS, porque o papel está virado pra quem lê e foge de nós.
+- **A página vira pro lado DE QUEM LÊ**, e a borda de cima do jornal é a linha d'água dela: ela sobe
+  do lado de lá, rompe a superfície, atravessa e afunda. É o recorte do golfinho outra vez. Cobrir
+  com o jornal desenhado depois quase funciona — mas deixa a ponta escapando PELOS LADOS, além dos
+  cantos do V, onde não há papel pra tapar.
+- **Máscara se faz por RECORTE no círculo da cabeça.** A borda externa sai exata de graça, e o único
+  caminho que sobra pra desenhar é o de BAIXO, que é justamente o que diferencia os dois. Como
+  contorno fechado tentando acompanhar o crânio por fora, sobrava um fio de pele nas diagonais.
+- **A CABEÇA DO BICHO PODE FICAR FORA DO QUADRO** (ideia do Gabriel). O T-Rex é grande demais pra
+  sala e o pescoço sai pelo alto: o que se vê são duas pernas enormes, o tronco cortado em cima e a
+  cauda. Um bicho que não cabe na tela lê como MAIOR do que qualquer bicho que coubesse — e some a
+  peça mais cara de animar. O preço é que o rugido perde o rosto que o mostrava: quem o mostra passa
+  a ser a sala (as portas escancaram, o pó risca, o fluorescente gagueja) e a cauda varrendo pouco.
+  É a única coisa da cena que se vê pelo efeito e nunca pela causa.
+- **DUAS PEÇAS CONCÊNTRICAS COM A ORDEM TROCANDO substituem qualquer conta de "quanto da face está
+  virada".** É a ideia que fechou a cauda, e é do Gabriel. Uma fita de dorso, cheia; uma de barriga,
+  menor; a de baixo nasce quando a cauda chega ao zero e passa a sobrepor. Antes disso houve TRÊS
+  tentativas minhas de interpolar o giro — largura que abre, alfa que acende, faixa que anda pra
+  borda — e as três erraram o mesmo alvo: inventavam um estado que não existe. Um tubo que gira passa
+  do "vejo a face de cima" pro "vejo a de baixo" num instante só, quando cruza o perfil.
+- **Listra de bicho ENTRA pela borda e AFINA até morrer.** Anel de espessura constante cruzando de
+  lado a lado não é pele, é cinta de barril — é o afinar que dá o volume, porque é assim que uma
+  marca some quando a superfície vira pra longe. E no tronco elas são VERTICAIS, seguindo uma
+  longitude do barril: o x de cada uma é uma fração FIXA da meia-largura do corpo naquela altura,
+  então ela abre e fecha junto com o corpo. Horizontal, a listra só atravessa; assim ela envolve.
+- **Anel em DUAS METADES pintadas em momentos diferentes resolve oclusão sem recorte.** A metade de
+  trás da boca do ralo vai antes de tudo, a da frente depois do cocô — e é ela que tapa o que já
+  afundou. Junto numa peça só, ou a borda inteira ficava por baixo, ou por cima.
+- **O beat do Papa-Léguas.** O ralo virou alçapão: as folhas abrem pra baixo, o cocô fica um tempo
+  PARADO sobre o buraco com um tremeliquezinho, e só então despenca. O que dá graça não é a queda, é
+  a pausa antes dela.
+- **Consequência, não coincidência, de novo:** os respingos saem do abano CRUZAR O CENTRO, não de
+  uma conta de distância entre a cauda e o cocô — o cocô cai no eixo do bicho, e é exatamente ali que
+  a ponta da cauda passa. Mesma ideia da espuma disparada pela onda na praia.
+- **Abrir num tranco e fechar devagar** é a diferença entre uma porta ARROMBADA e uma manobrada por
+  alguém. A assimetria custa um `if` na velocidade do perseguidor e carrega a leitura inteira.
+- **LIÇÃO DE COLABORAÇÃO, e é a mais cara desta pele:** quando o Gabriel descreve um MECANISMO
+  ("faz dois rabos, o menor por baixo, e a ordem troca"), implementar LITERALMENTE e deixar ele
+  corrigir. Eu interpretei várias vezes e errei todas — li "em baixo" como *a metade inferior da
+  cauda* quando era *a face de trás*, li "sem girar" como *sem parecer que gira* quando era *sem
+  rotação nenhuma*, e li "o rabo maior sobrepõe o círculo menor" ao contrário. Cada leitura minha
+  custou uma rodada. O desenho dele estava certo desde a primeira frase.
 
 ### 🔴 DÍVIDA ANOTADA — um arquivo por cenário (dor PREVISTA, jul/2026)
 

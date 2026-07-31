@@ -1016,9 +1016,12 @@ body[data-tema="reino"] #arena::after {
     content: '';
     position: absolute; top: 0;
     width: 92px; height: 46%;
-    background:
-        linear-gradient(180deg, #7d1122 0%, #5c0d1a 78%, transparent 100%),
-        repeating-linear-gradient(180deg, transparent 0 26px, rgba(0, 0, 0, .18) 26px 28px);
+    /* As listras horizontais que havia aqui SAÍRAM. Elas eram do tempo do salão do trono, quando o
+       estandarte era pano pendurado numa parede e as linhas liam como as dobras dele; contra o céu
+       aberto, com o pano a 55% de opacidade, o que se via era um pente de riscos escuros aparecendo
+       por dentro da bandeira. Detalhe que sobrevive a uma troca de cenário sem ser reexaminado quase
+       sempre vira isto — um ruído que ninguém sabe explicar. */
+    background: linear-gradient(180deg, #7d1122 0%, #5c0d1a 78%, transparent 100%);
     border-left: 2px solid rgba(217, 180, 91, .35);
     border-right: 2px solid rgba(217, 180, 91, .35);
     /* a ponta em V do pano */
@@ -1358,10 +1361,21 @@ body[data-tema="folclore"] #log {
    a janela — e é por isso que este é o único tema que NÃO entra na escada de @media do fim desta
    seção. Ladrilho tem um tamanho próprio pra defender; faixa em % não tem.
 
-   E o gancho dos cantos (`::before`/`::after`) fica VAGO aqui, pela primeira vez em cinco temas. Ele
-   serve pra pendurar coisa do ALTO — estandartes, teias, cabos, cipós —, e o que emoldura esta cena
-   são as palmeiras, que sobem do chão e precisam VERGAR quando o dragão passa. Coisa que reage ao
-   vento não pode ser CSS: elas são canvas (ver `criarPalmeiras` no jogo.js). */
+   O gancho dos cantos (`::before`/`::after`) demorou a ser preenchido aqui, e a primeira tentativa —
+   folhas de palmeira de perto, penduradas do alto — saiu ruim por duas razões de uma vez: "quase não
+   vejo e o design ficou estranho".
+
+   A INVISIBILIDADE tem causa exata, e ela vale pra qualquer coisa que se ponha aqui: o céu deste tema
+   no alto é #150c2c, e eu pintei a folha de #140d2c. Silhueta escura contra o céu MAIS ESCURO de
+   todos os sete temas é silhueta invisível — nos outros o gancho funciona porque o céu deles é mais
+   claro que a peça pendurada, e aqui a regra se INVERTE: a peça é que tem de ser mais clara.
+
+   Depois da folha veio uma REDE DE PESCA, e ela também saiu — o argumento a favor (malha lê por
+   repetição, e repetição sobrevive a canto pequeno) estava certo e mesmo assim a peça não era da
+   praia: rede é do barco e do pescador, não da areia. O que ficou foram ALGAS com CONCHAS, e a
+   diferença é que a concha não precisa ser lida, ela é RECONHECIDA — vieira é uma das poucas
+   silhuetas que ninguém confunde, mesmo pequena e cortada pela borda. As algas dão o movimento
+   pendurado e as conchas dão o assunto. */
 body[data-tema="misticos"] {
     --fundo: #100a1e;
     --painel: #1b1430;
@@ -1406,6 +1420,29 @@ body[data-tema="misticos"] #arena {
             #1d1729 100%);
     background-repeat: no-repeat;
 }
+
+/* ALGAS penduradas nos cantos de cima, com CONCHAS presas nelas — sétima história do mesmo gancho.
+   Três fitas caindo, com as lâminas alternando de lado, e uma concha presa no ALTO de cada uma —
+   duas vieiras e um caramujo. Elas ficavam soltas pelos lados e pelo pé, e ali liam como objetos
+   boiando ao lado da alga; no ponto em que a fita nasce, leem como presas nela, e o canto inteiro
+   vira UMA coisa pendurada em vez de três.
+
+   Esta é a única peça de canto do front que é mais CLARA que o céu, e é obrigatório que seja (ver o
+   comentário do bloco): aqui o céu é o mais escuro dos sete temas. Alga em azul-esverdeado
+   dessaturado, conchas em areia rosada — e são elas que fazem a leitura, porque vieira é uma das
+   poucas silhuetas que ninguém confunde, mesmo a 20px e cortada pela borda. A alga sozinha seria só
+   um risco pendurado; a concha diz PRAIA. */
+body[data-tema="misticos"] #arena::before,
+body[data-tema="misticos"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 164px; height: 44%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='164' height='230' viewBox='0 0 164 230' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%237f9aa6' stroke-width='4' stroke-linecap='round' opacity='.6'%3E%3Cpath d='M12 0C22 42 4 72 18 112C30 148 12 172 22 206'/%3E%3Cpath d='M54 0C64 34 48 62 60 96C70 126 56 148 64 176'/%3E%3Cpath d='M102 0C112 28 98 50 106 78C114 102 104 118 110 140'/%3E%3C/g%3E%3Cg fill='%237f9aa6' opacity='.55'%3E%3Cpath d='M16 26Q40 30 34 48Q16 44 16 26Z'/%3E%3Cpath d='M10 62Q-14 68 -6 86Q12 80 10 62Z'/%3E%3Cpath d='M20 106Q46 112 38 132Q18 126 20 106Z'/%3E%3Cpath d='M16 152Q-8 158 0 176Q18 170 16 152Z'/%3E%3Cpath d='M58 22Q82 28 74 46Q56 40 58 22Z'/%3E%3Cpath d='M52 60Q30 66 38 84Q54 78 52 60Z'/%3E%3Cpath d='M62 100Q86 108 78 126Q60 118 62 100Z'/%3E%3Cpath d='M104 18Q126 24 118 42Q102 36 104 18Z'/%3E%3Cpath d='M100 54Q78 60 86 78Q102 72 100 54Z'/%3E%3Cpath d='M108 92Q130 100 122 116Q106 110 108 92Z'/%3E%3C/g%3E%3Cg opacity='.85'%3E%3Cpath d='M14 4L-6 34Q14 48 34 34Z' fill='%23dcc9c6'/%3E%3Cg fill='none' stroke='%23a98f92' stroke-width='1.6'%3E%3Cpath d='M14 8L0 36'/%3E%3Cpath d='M14 8v32'/%3E%3Cpath d='M14 8l14 28'/%3E%3C/g%3E%3Cpath d='M50 6q16-4 19 10t-13 18q-13 1-14-9t11-9q8 1 5 8' fill='none' stroke='%23dcc9c6' stroke-width='3.6' stroke-linecap='round'/%3E%3Cpath d='M102 2L86 26Q102 38 118 26Z' fill='%23dcc9c6'/%3E%3Cg fill='none' stroke='%23a98f92' stroke-width='1.4'%3E%3Cpath d='M102 6L91 28'/%3E%3Cpath d='M102 6v26'/%3E%3Cpath d='M102 6l11 22'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    pointer-events: none;
+    z-index: -1;
+}
+body[data-tema="misticos"] #arena::before { left: 0; }
+body[data-tema="misticos"] #arena::after { right: 0; transform: scaleX(-1); }
 
 body[data-tema="misticos"] #topo { border-bottom: 2px solid rgba(126, 214, 214, .4); }
 body[data-tema="misticos"] #painel { border-top: 2px solid rgba(126, 214, 214, .4); }
@@ -1538,10 +1575,162 @@ body[data-tema="especial"] #log {
     border-color: rgba(168, 226, 200, .3);
 }
 
+/* ---------- 🔱 DECAÍDOS — a vila élfica vendida ----------
+   O sétimo, e a assinatura dele é a única que ainda estava inteira depois de seis temas: A LUZ VEM DE
+   BAIXO. O dia é do Reino, a lua é do cemitério, as estrelas são da invasão, o âmbar é do Folclore, o
+   crepúsculo é da praia e o fluorescente é do banheiro — em todos eles a luz DESCE, ou fica na altura
+   do chão (a fogueira). Aqui ela sai de dentro da terra e sobe: não há nada aceso no céu, e a única
+   coisa clara lá em cima é a BARRIGA das nuvens, que é reflexo do que está queimando embaixo. Isso
+   inverte todas as sombras da cena, e é o que a torna reconhecível de relance.
+
+   A HISTÓRIA é do 🧝 Elfo: ele vendeu a vila élfica aos demônios. Eles subiram POR DENTRO da Árvore do
+   Mundo, que rachou ao meio e agora escorre lava — por isso a peça central e a fonte de luz são a
+   MESMA coisa, que é o arranjo mais barato que uma cena pode ter (no Folclore era a fogueira; nos
+   Místicos, a lâmpada).
+
+   NADA DE CHAMA GRANDE, e isso é regra e não gosto: o âmbar tremulante é do Folclore, e dois temas
+   quentes com fogo aceso no meio da cena contariam a mesma história. Aqui o incêndio JÁ PASSOU —
+   sobrou carvão, cinza fria caindo (`po`, com `subida` negativa) e a lava, que é carmim com as gretas
+   finas em amarelo. Os focos que ainda ardem na vila (`fogos`, no jogo.js) são a exceção que o
+   Gabriel pediu e cabem pelo mesmo motivo: são LONGE e do tamanho de uma casa de 16px, rastro do
+   incêndio e não fonte de luz. Nenhuma brasa subindo, que essa é do Folclore inteira.
+
+   O LADRILHO é a vila arrasada: troncos secos, as plataformas élficas desabadas, as pontes de corda
+   estouradas e as lanternas de vidro APAGADAS. A luz da vila morreu; a que sobrou está no lugar
+   errado. Ele é silhueta pura, porque é distância — e o clarão vermelho é listado DEPOIS dele (ou
+   seja, pinta ATRÁS), que é o que recorta a vila contra a luz, exatamente como o fogo faz com a mata
+   do Folclore.
+
+   A ÁRVORE não está aqui: é canvas, porque é uma composição NOMEADA (a Árvore do Mundo, no meio) e
+   nome não sobrevive a ladrilho que repete. Ela é plantada na linha declarada logo abaixo, que é a
+   MESMA das casas — foi o Gabriel que apontou, vendo em jogo, que a árvore num chão e a vila noutro
+   davam dois chãos na mesma cena.
+
+   Uma CASA INTACTA já morou no canvas, em cima desta linha: a do Elfo traidor, a única de pé no meio
+   da ruína. Saiu a pedido dele depois de ver rodando, e a vila não perdeu nada — a Árvore do Mundo é
+   literalmente a habilidade do 🧝, e ela ocupando o meio da tela já é o champ em cena. */
+body[data-tema="decaidos"] {
+    --fundo: #0b0507;
+    --painel: #170a0c;
+    --borda: #3d1a1a;
+    --apagado: #c09090;
+}
+
+body[data-tema="decaidos"] #arena {
+    position: relative;
+    isolation: isolate;
+
+    /* O ladrilho da vila. É ele que o JS lê (`medirLadrilho`) pra saber onde é o HORIZONTE — e daí
+       saem a casa intacta, o pé da árvore, as veias no chão e a fumaça. Uma fonte só pras cinco
+       peças; duas cópias do número divergiriam no meio da cena.
+
+       Em PX CRUS, e as faixas de altura estão no @media do fim desta seção — ver o comentário de lá
+       pra saber por que `min()`/`vh` não serve aqui. */
+    --vila-passo: 340px;
+    --vila-altura: 220px;
+    /* Onde os pés da vila encostam no chão, em % da ALTURA DO LADRILHO. Sai do desenho acima (a faixa
+       de terra começa em y=118 de 220) e existe pra a casa intacta pousar na mesma linha que as
+       ruínas em vez de flutuar acima delas. Mexeu no SVG, mexe aqui — são o mesmo chão.
+
+       Ele é 55 e não 78 por uma razão de COMPOSIÇÃO, e ela só apareceu com a cena montada: a faixa
+       entre os pés da vila e o pé da árvore é o único chão que a cena tem, e é nela que as veias de
+       lava correm. Com a vila pousando lá embaixo sobravam 17px de terra pras rachaduras — elas
+       saíam quase horizontais e a perspectiva sumia. Metade do ladrilho ser terra nua é o preço, e
+       é terra que fica coberta de luz e rachadura. */
+    --vila-chao: 55;
+
+    background:
+        /* 1. vinheta bem fechada: a cena é escura nas bordas e só tem luz no meio-baixo, que é onde a
+              árvore está. Preto puro aqui não chapa nada — não há cor fria pra proteger. */
+        radial-gradient(ellipse 116% 94% at 50% 44%, transparent 26%, rgba(6, 2, 3, .92) 100%),
+        /* 2. a VILA ARRASADA. Dois grupos, duas distâncias: o de trás é mais claro (avermelhado — o
+              que está longe tem a cor do AR que está no meio do caminho, e não a cor dele) e o da
+              frente é quase preto.
+
+              A vila élfica é o que o Gabriel descreveu: árvores queimadas com as CASAS ENTRE elas,
+              ligadas por pontes e escadas de corda — uma ponte inteira ainda pendurada, outra
+              ESTOURADA (as duas metades caem cada uma pro seu lado), uma escada de corda de pé e
+              outra CAÍDA no chão, e a casa do meio com o telhado afundado. O que está QUEIMANDO não
+              está aqui: fogo tremula, e ladrilho é imagem parada — os focos são canvas
+              (`criarFogosDaVila`), ancorados nestas coordenadas.
+
+              Nada cruza a borda do ladrilho (tudo vive dentro de [6, 334]), senão cada emenda do
+              `repeat-x` mostraria um corte reto vertical de 340 em 340px — o erro que as copas do
+              Folclore cometeram. A faixa de TERRA é a exceção, e de propósito: ela vai de 0 a 340 por
+              ser uniforme, então a emenda não tem o que denunciar. */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='220' viewBox='0 0 340 220'%3E%3Cg fill='%23190c11'%3E%3Cpath d='M78 120L81 66L86 66L88 120Z'/%3E%3Cpath d='M166 120L169 58L174 58L176 120Z'/%3E%3Cpath d='M262 120L265 72L270 72L272 120Z'/%3E%3Cpath d='M198 120h22v-14h-22Z'/%3E%3Cpath d='M195 106L209 95L223 106Z'/%3E%3C/g%3E%3Cg fill='%230a0507'%3E%3Cpath d='M0 118h340v102H0Z'/%3E%3Cpath d='M32 120Q37 74 42 14L54 14Q50 76 46 120Z'/%3E%3Cpath d='M44 44L16 22L21 32L45 52Z'/%3E%3Cpath d='M48 70L78 52L72 62L49 78Z'/%3E%3Cpath d='M124 120Q129 78 133 26L145 26Q141 80 138 120Z'/%3E%3Cpath d='M135 52L108 34L113 44L136 60Z'/%3E%3Cpath d='M218 120Q223 70 227 18L239 18Q235 72 232 120Z'/%3E%3Cpath d='M230 46L258 28L252 38L231 54Z'/%3E%3Cpath d='M298 120Q302 82 305 34L316 34Q312 84 309 120Z'/%3E%3Cpath d='M307 62L282 46L287 55L308 70Z'/%3E%3Cpath d='M62 78h48v6H62Z'/%3E%3Cpath d='M68 62h34v16H68Z'/%3E%3Cpath d='M60 62L85 43L110 62Z'/%3E%3Cpath d='M62 84L49 95L52 98L66 88Z'/%3E%3Cpath d='M248 68h44v6H248Z'/%3E%3Cpath d='M254 52h32v16H254Z'/%3E%3Cpath d='M246 52L270 35L294 52Z'/%3E%3Cpath d='M290 74L305 86L302 89L288 79Z'/%3E%3Cpath d='M164 92L204 86L205 93L165 99Z'/%3E%3Cpath d='M172 78h26v9h-26Z'/%3E%3Cpath d='M166 78L181 65L188 73L196 66L203 78Z'/%3E%3Cpath d='M10 118L13 109L17 118Z'/%3E%3Cpath d='M96 118L99 111L103 118Z'/%3E%3Cpath d='M150 118L153 108L157 118Z'/%3E%3Cpath d='M244 118L247 110L251 118Z'/%3E%3Cpath d='M286 118L289 111L293 118Z'/%3E%3Cpath d='M322 118L325 109L329 118Z'/%3E%3C/g%3E%3Cg fill='none' stroke='%230a0507' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M110 80Q138 97 164 92'/%3E%3Cpath d='M205 91Q216 101 222 105'/%3E%3Cpath d='M248 70Q240 85 234 95'/%3E%3C/g%3E%3Cg fill='none' stroke='%230a0507' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M120 86v7'/%3E%3Cpath d='M132 92v7'/%3E%3Cpath d='M146 94v7'/%3E%3Cpath d='M74 84v34'/%3E%3Cpath d='M82 84v34'/%3E%3Cpath d='M74 93h8'/%3E%3Cpath d='M74 102h8'/%3E%3Cpath d='M74 111h8'/%3E%3Cpath d='M196 114L226 111'/%3E%3Cpath d='M197 118L227 115'/%3E%3Cpath d='M202 113v4'/%3E%3Cpath d='M211 113v4'/%3E%3Cpath d='M220 112v4'/%3E%3C/g%3E%3C/svg%3E"),
+        /* 3. o CLARÃO da terra queimando, lavando o pé da vila. Vem DEPOIS do ladrilho nesta lista,
+              ou seja pinta ATRÁS dele — é o que transforma o desenho de vila em SILHUETA. Ele é o ar
+              da cena inteira; a luz LOCALIZADA da árvore é canvas, e pinta por cima disto. */
+        radial-gradient(ellipse 96% 34% at 50% 100%, rgba(186, 34, 20, .42), rgba(96, 14, 10, .16) 46%, transparent 78%),
+        /* 4. e 5. a BARRIGA das nuvens, acesa POR BAIXO. São a única coisa clara no céu, e é aí que a
+              assinatura do tema fica explícita: nuvem iluminada por baixo não existe em noite nenhuma
+              dos outros temas. Duas faixas em alturas diferentes, pra o céu ter camadas. */
+        radial-gradient(ellipse 86% 9% at 42% 25%, rgba(126, 28, 24, .3), transparent 72%),
+        radial-gradient(ellipse 68% 7% at 63% 38%, rgba(146, 34, 26, .26), transparent 74%),
+        /* 6. o céu: preto-arroxeado em cima, vinho no horizonte. Sem lua e sem estrelas — as duas são
+              de outros temas, e as duas dariam à cena uma segunda fonte de luz. */
+        linear-gradient(180deg, #07040a 0%, #100610 32%, #22080e 62%, #3d0e11 88%, #4a1211 100%);
+    background-size: cover, var(--vila-passo) var(--vila-altura), cover, cover, cover, cover;
+    background-repeat: no-repeat, repeat-x, no-repeat, no-repeat, no-repeat, no-repeat;
+    /* `left bottom` na vila pelo mesmo motivo do cemitério, do laboratório e da mata: o JS conta os
+       ladrilhos a partir do x=0, e `bottom` sozinho vale `50% 100%` — ancoraria no CENTRO, e as duas
+       contas discordariam por uma quantia que muda com a largura da janela. */
+    background-position: center, left bottom, center, center, center, center;
+}
+
+/* Galhos secos entrando pelos cantos de cima — onde o Reino pendura estandartes, o cemitério tem
+   teias, a invasão tem cabos, o Folclore tem cipós e o banheiro tem canos. Mesmo gancho, sexta
+   história: aqui é a mata morta se fechando sobre o que sobrou da vila.
+
+   E aqui os galhos ARDEM POR DENTRO, de ponta a ponta: as mesmas curvas repetidas em três traços
+   quentes, do halo largo e translúcido ao fio amarelo fino. Nasceram TRACEJADAS, com o argumento de
+   que greta interrompida se distingue de arame aceso — mas em jogo o tracejado só picotava a única
+   linha de luz do canto, e a leitura de "brasa correndo por dentro do galho" pede continuidade.
+
+   Isso existe porque o Folclore JÁ pendura galhos neste gancho, e o Gabriel viu de cara que os dois
+   temas estavam usando o mesmo desenho. A diferença não podia ser a forma (galho seco é galho seco):
+   tinha de ser o que está acontecendo com ele. */
+body[data-tema="decaidos"] #arena::before,
+body[data-tema="decaidos"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 138px; height: 44%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='138' height='220' viewBox='0 0 138 220' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23100709' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3C/g%3E%3Cg fill='none' stroke='%23100709' stroke-width='6' stroke-linecap='round'%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3Cpath d='M48 112l-26 16'/%3E%3Cpath d='M74 84l24-20'/%3E%3Cpath d='M96 136l22 10'/%3E%3C/g%3E%3Cg fill='none' stroke='%23100709' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M36 62l-22-14'/%3E%3Cpath d='M58 138l-18 22'/%3E%3Cpath d='M110 178l14 16'/%3E%3C/g%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cg stroke='%23c8190a' stroke-width='10' opacity='.22'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3C/g%3E%3Cg stroke='%23e0431a' stroke-width='3.2' opacity='.6'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3C/g%3E%3Cg stroke='%23ffb066' stroke-width='1.2' opacity='.85'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    opacity: .9;
+    pointer-events: none;
+    z-index: -1;
+}
+body[data-tema="decaidos"] #arena::before { left: 0; }
+body[data-tema="decaidos"] #arena::after { right: 0; transform: scaleX(-1); }
+
+body[data-tema="decaidos"] #topo { border-bottom: 2px solid rgba(214, 58, 40, .44); }
+body[data-tema="decaidos"] #painel { border-top: 2px solid rgba(214, 58, 40, .44); }
+body[data-tema="decaidos"] #topo,
+body[data-tema="decaidos"] #painel {
+    background:
+        linear-gradient(180deg, rgba(214, 58, 40, .07) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="decaidos"] .combatente {
+    background: linear-gradient(180deg, rgba(56, 24, 26, .84), rgba(24, 10, 12, .84));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .55);
+}
+
+/* O log vira o PACTO: couro escuro e fio de sangue. O pergaminho do Reino é seco, o caderno do
+   Folclore é queimado, a água funda dos Místicos é molhada e o azulejo do banheiro é sujo — este é o
+   papel em que se assina o que não se desfaz. */
+body[data-tema="decaidos"] #log {
+    background: linear-gradient(180deg, rgba(46, 14, 14, .62), rgba(22, 7, 8, .62));
+    border-color: rgba(214, 58, 40, .32);
+}
+
 /* ==========================================================================
    OS LADRILHOS DE HORIZONTE POR FAIXA DE ALTURA
    ==========================================================================
-   Os três ladrilhos (mata do cemitério, laboratório da invasão, floresta do folclore) são lidos pelo
+   Os quatro ladrilhos (mata do cemitério, laboratório da invasão, floresta do folclore, vila dos
+   decaídos) são lidos pelo
    JS pra ancorar o que vive no horizonte — corujas e espantalhos, bobinas de Tesla, os chifres do Oni
    e a clava do Troll. Em px fixos eles NÃO encolhiam com a janela, e isso quebrava de verdade: numa
    arena baixa o ladrilho ficava mais alto que ela, o `baseY` (`canvas.height − altura`) virava
@@ -1576,36 +1765,43 @@ body[data-tema="especial"] #log {
     body[data-tema="folclore"] #arena { --floresta-passo: 313px; --floresta-altura: 303px; }
     body[data-tema="ladosombrio"] #arena { --mata-passo: 269px; --mata-altura: 160px; }
     body[data-tema="tecnologicos"] { --lab-passo: 533px; --lab-altura: 298px; }
+    body[data-tema="decaidos"] #arena { --vila-passo: 286px; --vila-altura: 185px; }
 }
 @media (max-height: 860px) {
     body[data-tema="folclore"] #arena { --floresta-passo: 260px; --floresta-altura: 252px; }
     body[data-tema="ladosombrio"] #arena { --mata-passo: 224px; --mata-altura: 133px; }
     body[data-tema="tecnologicos"] { --lab-passo: 445px; --lab-altura: 249px; }
+    body[data-tema="decaidos"] #arena { --vila-passo: 238px; --vila-altura: 154px; }
 }
 @media (max-height: 720px) {
     body[data-tema="folclore"] #arena { --floresta-passo: 212px; --floresta-altura: 205px; }
     body[data-tema="ladosombrio"] #arena { --mata-passo: 182px; --mata-altura: 108px; }
     body[data-tema="tecnologicos"] { --lab-passo: 361px; --lab-altura: 202px; }
+    body[data-tema="decaidos"] #arena { --vila-passo: 193px; --vila-altura: 125px; }
 }
 @media (max-height: 600px) {
     body[data-tema="folclore"] #arena { --floresta-passo: 168px; --floresta-altura: 163px; }
     body[data-tema="ladosombrio"] #arena { --mata-passo: 145px; --mata-altura: 86px; }
     body[data-tema="tecnologicos"] { --lab-passo: 286px; --lab-altura: 160px; }
+    body[data-tema="decaidos"] #arena { --vila-passo: 154px; --vila-altura: 100px; }
 }
 @media (max-height: 500px) {
     body[data-tema="folclore"] #arena { --floresta-passo: 127px; --floresta-altura: 123px; }
     body[data-tema="ladosombrio"] #arena { --mata-passo: 109px; --mata-altura: 65px; }
     body[data-tema="tecnologicos"] { --lab-passo: 216px; --lab-altura: 121px; }
+    body[data-tema="decaidos"] #arena { --vila-passo: 116px; --vila-altura: 75px; }
 }
 @media (max-height: 400px) {
     body[data-tema="folclore"] #arena { --floresta-passo: 90px; --floresta-altura: 87px; }
     body[data-tema="ladosombrio"] #arena { --mata-passo: 77px; --mata-altura: 46px; }
     body[data-tema="tecnologicos"] { --lab-passo: 152px; --lab-altura: 85px; }
+    body[data-tema="decaidos"] #arena { --vila-passo: 82px; --vila-altura: 53px; }
 }
 @media (max-height: 300px) {
     body[data-tema="folclore"] #arena { --floresta-passo: 63px; --floresta-altura: 61px; }
     body[data-tema="ladosombrio"] #arena { --mata-passo: 54px; --mata-altura: 32px; }
     body[data-tema="tecnologicos"] { --lab-passo: 107px; --lab-altura: 60px; }
+    body[data-tema="decaidos"] #arena { --vila-passo: 57px; --vila-altura: 37px; }
 }
 
 /* ---------- o botão SAIR global ---------- */

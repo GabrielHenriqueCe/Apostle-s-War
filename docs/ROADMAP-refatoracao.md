@@ -136,6 +136,26 @@ Folclore: lá quem sopra é um redemoinho, aqui é o DRAGÃO na passagem de pert
 vapor da lâmpada, vaga-lumes, pólen) não sabe que a fonte mudou. Foi uma linha de escrita num builder
 novo, sem tocar em nada do que já lia.
 
+O **terceiro** (🔱 Decaídos, jul/2026) fecha a pergunta que sobrava: o maestro é um formato, e não um
+jeito de falar de VENTO. `inferno { pulso, raizes, escorrendo, tremor, jorro, passagem }` é LUZ — a respiração da lava, escrita pela Árvore do
+Mundo e lida pelas rachaduras do chão e pela fumaça. Mesmo
+formato, mesma regra (nasce sempre, ninguém pergunta nada a ninguém), e o dado agora é uma grandeza de
+outra natureza. Quem escreve tem UMA obrigação, e ela vale pra qualquer maestro futuro: **entregar o
+número já CLAMPADO na faixa que prometeu**. Do lado de lá, `pulso` vira alfa e vira largura de traço —
+e um valor fora de 0..1 chegaria como cor inválida (silenciosa) ou raio negativo (fatal), longe de
+quem o produziu.
+
+E é neste terceiro que o maestro deixa de ser um número e vira uma MESA: seis campos e três donos, com
+a regra de que **cada campo tem um escritor só**. A árvore escreve `pulso` e `raizes`; a fenda escreve
+`escorrendo`, `tremor` e `jorro`; a coluna de morcegos escreve `passagem`. Ninguém escreve no campo de
+ninguém, e é isso que impede a mesa de virar variável global — com dois escritores no mesmo campo, o
+último a rodar no quadro ganharia, e a ordem das camadas (que é sobre PROFUNDIDADE) viraria também uma
+ordem de precedência de regra. Os dois padrões que apareceram aqui valem pra qualquer maestro futuro:
+**o gatilho é um CONTADOR, não um flag** (`passagem` só sobe; quem espera guarda o último valor que
+viu — um flag precisaria de alguém pra desligá-lo, e aí duas peças seriam donas do mesmo estado), e
+**quem publica geometria publica em PIXEL DE TELA** (as raízes vão prontas pras rachaduras correrem em
+cima delas; mandar a fração obrigaria os dois lados a ter cada um a sua cópia da conta do tronco).
+
 **Armadilhas que já custaram tempo aqui:**
 - `background-position: bottom` vale `50% 100%` — ancora o ladrilho no CENTRO. O JS que posiciona
   coisas no horizonte conta a partir do x=0; use `left bottom` ou as duas contas discordam, e o erro
@@ -190,6 +210,22 @@ novo, sem tocar em nada do que já lia.
   pra poder recortar as listras — a coxa, que corria ao contrário das outras duas, abriu um rasgo na
   junta e dava pra ver o cenário através da perna. Quem denuncia é a ÁREA COM SINAL (shoelace) de
   cada subcaminho: se os sinais discordam, há buraco.
+- **O sentido do traço pode ser garantido por CONSTRUÇÃO, em vez de conferido depois** (jul/2026, 🔱
+  Decaídos). A armadilha dos subcaminhos opostos (acima) apareceu de novo na Árvore do Mundo, e por
+  uma razão pior que a do T-Rex: ali eram três peças fixas, aqui são vinte e tantos membros — tronco,
+  seis raízes, nove galhos e os garfos deles — em ângulos SORTEADOS, e todos no mesmo caminho, porque
+  é ele que é preenchido e depois vira o `clip()` da lava. Conferir a área com sinal de cada um seria
+  fazer a mesma conta vinte vezes. O que resolve de uma vez é traçar todo membro do mesmo jeito
+  RELATIVO ao sentido de marcha — vai pela margem do lado `+n`, volta pela do lado `−n`, onde `n` é a
+  normal da direção. Girar o membro gira a forma inteira junto, então o sentido de rotação do contorno
+  não muda com o ângulo, e nenhuma sobreposição pode abrir buraco. Um invariante custa menos que uma
+  verificação, e não tem como alguém esquecer de rodá-lo.
+- **Quem calcula um ponto SOBRE uma curva tem de repetir a MESMA conta, não uma parecida** (jul/2026).
+  Os galhos nascem em `noTronco(u)`, que avalia a quadrática do tronco no ponto — e ela nasceu com o
+  ponto de controle em `cx − curva·A` enquanto o `tracarMembro` desenhava `cx + curva·A`. Um sinal. O
+  defeito seria MUDO: nada lança, nada fica NaN, a bancada passa — os galhos simplesmente ficariam
+  pendurados no ar a até 29px do tronco, longe o bastante pra ver e perto o bastante pra parecer que a
+  árvore inteira é que está torta. Duas cópias de uma fórmula divergem como duas cópias de um número.
 - **Recortar é mais barato e mais certo que acertar a borda à mão.** As primeiras listras do bicho
   tentavam seguir a silhueta por fora, com uma aproximação da forma — e sobrava listra pendurada pra
   fora em todo lugar em que a conta não batia com o bezier. O padrão que resolveu (`comListras`)
@@ -326,13 +362,160 @@ novo, sem tocar em nada do que já lia.
   canvas, e não o `::before`/`::after` do CSS, porque precisam VERGAR quando o dragão passa. Foi o
   cenário pedindo a camada, e não a camada procurando serviço.
 
+- **O ladrilho decide quanto CHÃO a cena tem pra acontecer** (jul/2026, 🔱 Decaídos). A vila élfica
+  pousava os pés a 78% da altura do próprio ladrilho, que é onde uma mata costuma encostar no chão — e
+  a conta fechava: pé da árvore a 92% da faixa, vila a 78%, tudo dentro. Só que a faixa entre as duas
+  linhas é o ÚNICO chão da cena, e é nela que as veias de lava correm: sobravam 17px de profundidade
+  contra 1100 de alcance, e as rachaduras saíam quase horizontais, sem perspectiva nenhuma. Subir a
+  linha do ladrilho pra 55% resolveu — metade dele virou terra nua, que é justamente onde a luz e as
+  rachaduras moram. **A altura de um ladrilho de horizonte não é só o tamanho do desenho: é o quanto
+  de piso sobra embaixo dele.** E foi só a cena montada, com os números impressos em pixel, que
+  mostrou isso — nenhuma das duas medidas está errada sozinha.
+- **Dois champs podem partilhar o BICHO, desde que não partilhem o COMPORTAMENTO** (jul/2026). 🦇
+  Morcego e 🧛 Vampiro são o mesmo tema, e desenhar dois morcegos diferentes seria repetição. A saída
+  não foi mostrar o sinal de cada um (não há sinal desenhável de vampiro que não seja figura — capa,
+  caixão, dentes), foi dar o MESMO bicho a ambos com gestos que não se confundem: os do Morcego
+  ATRAVESSAM a tela em bando, os do Vampiro se JUNTAM numa coluna sobre a árvore, seguram e estouram.
+  Bando é bicho; coluna é alguém mandando neles. É o contraste-dentro-do-padrão da sereia entre os
+  golfinhos, aplicado ao movimento em vez de à forma — e por isso a coluna PRECISA dos morcegos
+  comuns existindo antes: sozinha, ela seria só um efeito.
+- **Peça central grande fora do centro lê como "uma peça grande num canto"** (jul/2026, 🔱 Decaídos).
+  A Árvore do Mundo nasceu em `x: .66`, alta e estreita, e o veredito do Gabriel foi "ficou bem mais ou
+  menos": ela era do tamanho certo e mesmo assim não era a cena. O que consertou foram três coisas
+  juntas, e nenhuma delas é "aumentar": ir pro MEIO (`x: .5`), engrossar o tronco, e principalmente
+  virar o crescimento pros LADOS — galhos quase horizontais e raízes deitadas, ocupando ~60% da
+  largura da tela em vez de subir. Uma peça alta e fina divide a tela em dois lados; uma peça larga e
+  centrada É a tela, e o resto vira o fundo dela. A lâmpada dos Místicos não precisa disso porque ela
+  manda pela LUZ (a única coisa quente da praia) — quando a peça manda pelo TAMANHO, ela tem de estar
+  no meio, senão o olho a lê como um objeto do cenário e não como o assunto.
+- **A dramaturgia mais barata é a PAUSA antes do susto** (jul/2026, ideia do Gabriel). O ciclo do
+  Inferno é: os morcegos passam → a lava PARA de escorrer → um momento de nada → o chão treme → a
+  terra se abre e joga lava nova na árvore → treme de novo → fecha. Tirando a pausa, sobra uma fenda
+  que abre de vez em quando; com ela, a cena parece ter ACABADO, e é isso que faz o abrir ser "do
+  nada". É o mesmo princípio do AVISO (a moita treme antes de o Oni subir), aplicado do lado de fora:
+  o aviso prepara, a pausa DESPREPARA, e as duas juntas custam duas fases numa máquina de estados.
+  Detalhe que fez a pausa funcionar: a lava não some de uma vez — cada fio termina a descida dele e só
+  então deixa de recomeçar, porque a decisão de repetir mora na pausa seca do ciclo de cada um.
+- **O que TREMULA não pode morar no ladrilho** (jul/2026). O Gabriel pediu a vila com "pontes e escadas
+  de corda, algumas caídas outras QUEIMANDO", e o queimando não cabe numa imagem parada. Os focos são
+  canvas, plantados pelo `criarNoHorizonte` em cima das coordenadas do próprio SVG — e aqui eles
+  REPETEM por ladrilho de propósito, ao contrário de tudo o que este manual manda pôr em canvas: o
+  incêndio não é "aquela casa ali", é "as casas que estão queimando", e o desenho que repete já traz
+  uma cópia de cada uma. **Canvas não quer dizer endereço; quer dizer que se mexe.** Eram duas
+  perguntas que este manual vinha tratando como uma só.
+- **Duas peças que fazem a mesma coisa é uma peça contada duas vezes** (jul/2026, 🔱 Decaídos). A cena
+  tinha a poça de lava ao pé da árvore (onde os escorridos caíam) e, alguns metros à frente, uma fenda
+  que abria e fechava — duas bocas de inferno na mesma terra, e nenhuma explicando a outra. O Gabriel
+  desfez isso numa frase: *"a verdade é que isso aí já É o buraco na terra, não precisávamos criar
+  outro, era só acrescentar a erupção direto ali"*. A poça desceu pro lugar da fenda, a fenda morreu, e
+  o ciclo inteiro (secar → tremer → escancarar → cuspir → fechar) passou a acontecer no buraco que
+  SEMPRE esteve lá — o que ainda deu de graça a ligação que faltava: a lava da árvore agora cai
+  DENTRO de alguma coisa (um vertedouro curto do pé do tronco até a boca), em vez de evaporar ao
+  encostar na terra. **Antes de animar uma peça nova, perguntar se a cena já não tem uma que só
+  precisava do gesto.**
+- **Luz que se espalha no CHÃO chapa a terra; luz que sobe dá volume** (jul/2026). Havia duas elipses
+  de clarão rente ao solo — uma ao pé da árvore, outra em volta da fenda —, e o pedido foi "remove
+  aquela luz que você joga lateralmente, deixa só o fogo pra cima". As duas saíram e no lugar entrou
+  uma coluna que nasce larga na boca do buraco e se estreita subindo. A leitura melhora por dois
+  motivos: o chão volta a ter textura (elipse translúcida por cima de tudo apaga rachadura, raiz e
+  terra de uma vez) e a fonte fica ONDE ELA ESTÁ — luz espalhada no piso não diz de onde veio, coluna
+  diz. Vale como regra: fogo tem direção, e desenhar o clarão dele como mancha simétrica é desperdiçar
+  a única informação que a peça tem pra dar.
+- **Onde a peça grande fica define ONDE SOBRA CENA** (jul/2026, 🔱 Decaídos). A árvore assentada
+  exatamente na linha das casas parecia certo e escondia o melhor evento do tema: o terremoto abria no
+  pé dela, atrás do tronco e das raízes, que é o único lugar da cena inteira onde ele não podia ser
+  visto. O Gabriel resolveu com uma frase — *"era pra árvore ficar mais em cima pro terremoto vir mais
+  embaixo e dar pra ver"* — e o que ela descreve não é uma correção de posição, é a **abertura de uma
+  faixa de palco**: recuar a árvore 16% da faixa do ladrilho cria ~130px de terra na frente dela, e é
+  ali que a fenda passa a rasgar, à vista de todo mundo. Vale como pergunta de composição: cada peça
+  grande tem de deixar um lugar VAZIO onde o que acontece possa acontecer.
+  E o recuo tem um teto que a arquitetura impõe: a vila é ladrilho do CSS e pinta SEMPRE atrás do
+  canvas, então uma árvore muito recuada continuaria sendo desenhada por cima das casas que deveriam
+  estar na frente dela. Curto funciona, longo mentiria — e saber por que o limite existe é o que
+  impede alguém de "melhorar" isso depois.
+- **Peça que serpenteia é LISTA DE NÓS, não arco** (jul/2026, 🔱 Decaídos). As raízes eram um arco
+  quadrático cada uma (o `tracarMembro`, o mesmo do tronco e dos galhos), e o pedido — *"saindo de
+  BAIXO da árvore, fazendo curvas com emaranhados até chegar nos cantos, umas 3 ou 4 pra cada lado se
+  emaranhando em curvas bruscas"* — não cabe num arco: arco tem uma curvatura só, e "brusca" quer
+  dizer que a direção MUDA várias vezes. Viraram caminhos de 8 nós, com o desvio de cada nó sorteado
+  em cheio (senoide não serve: ela dá ondulação regular, que é o oposto de curva brusca) e com uma
+  PROFUNDIDADE própria por raiz — é a profundidade que faz uma passar por cima da outra e o emaranhado
+  aparecer, e não a amplitude, porque a faixa de terra tem só ~100px de altura. E como o caminho agora
+  é sorteado, publicá-lo no maestro deixou de ser economia e virou obrigatório: refazer o mesmo
+  emaranhado do lado das rachaduras seriam duas cópias de um gerador aleatório, que nem com a mesma
+  semente dariam o mesmo desenho.
+- **Uma peça que "vai até a borda" tem de PASSAR da borda** (jul/2026). Com `alcance` sorteado em
+  `[.88, 1.22]` da meia-largura, metade das raízes morria dentro da tela — e raiz que acaba um palmo
+  antes do canto não lê como raiz longa, lê como raiz cortada. A faixa virou `[1.04, 1.4]`: todas
+  passam, cada uma por um tanto diferente. O que se sorteia é o QUANTO ela sai de cena, nunca SE ela
+  sai. (Foi um script que rodou o builder de verdade e mediu o que ele publica que mostrou isso — a
+  bancada estava verde, porque nada ali estava errado; estava só feio.)
+- **Quando a intenção é chegar na BORDA, a unidade é a borda** (jul/2026). As raízes eram medidas em
+  fração da altura da árvore, e o pedido virou "as raízes se esticando pela terra até os cantos do
+  mapa" — que é uma medida da TELA. Em fração da árvore, o mesmo número dava raiz curta em tela larga e
+  raiz passando do canto em tela estreita; em fração da MEIA-LARGURA (`1` = chega na borda, e algumas
+  passam de 1 de propósito, porque raiz que morre um palmo antes do canto lê como raiz cortada), um
+  número só serve a todas as janelas. É a mesma lição da ondulação do dragão, do outro lado: lá a
+  unidade certa era o corpo do bicho; aqui é a tela. **A pergunta que resolve as duas é "essa medida é
+  sobre o quê?"** — e a resposta quase nunca é "sobre o objeto que está desenhando".
+- **DUAS LINHAS DE CHÃO na mesma cena é a coisa que o olho pega primeiro** (jul/2026). A árvore ficava
+  plantada 37% de faixa ABAIXO dos pés da vila — deliberadamente, pra ser a coisa mais perto —, e o
+  veredito foi "como o chão e a árvore estão no mesmo lugar está estranho, coloca a árvore no nível
+  das casinhas". Ele está certo: paralaxe se conta por TAMANHO e por COR (o que está longe é menor e
+  tem a cor do ar), não por altura na tela; duas alturas de chão diferentes não leem como "uma perto e
+  outra longe", leem como duas cenas coladas. A correção apagou um número em vez de acrescentar um: a
+  árvore perdeu o `assentada` e passou a usar a linha que o `--vila-chao` declara, que já existia. **A
+  segunda cópia de uma medida quase nunca se justifica por "mas esta é diferente".**
+- **A bancada headless erra por EXCESSO também, e o falso positivo custa tempo igual** (jul/2026). O
+  validador de cor deste tema reprovou 900 mil `rgba(26, 14, 14, 3.9e-17)` — notação científica, que é
+  CSS **válido** (Syntax 3 tem expoente) e aparece sozinha quando um alfa sai de um seno perto do
+  zero. Um instrumento que grita onde não há defeito ensina a ignorá-lo, que é o pior estado possível
+  pra uma bancada. O que ela tem de pegar continua sendo a TRIPLA CRUA (`'110, 214, 176'`) indo parar
+  num `fillStyle`. E vale checar o contrário também: um autoteste que planta os dois defeitos de
+  propósito e confere que ela reprova, mais um censo de fases — "passou" pode querer dizer "a coluna
+  de morcegos nunca chegou a estourar em 900s".
+
 **Peles prontas:** 👑 Reino (cidade murada, de DIA — o único claro, e é o contraste dele que faz os
 outros parecerem escuros de propósito), 🌑 Lado Sombrio (cemitério sob a lua), ⚙️ Tecnológicos (a
 noite da invasão), 🪬 Folclore (a clareira com a fogueira, na noite QUENTE — o âmbar era a paleta que
 sobrava, e cai bem porque aqui a fonte de luz é fogo), 🐉 Místicos (a praia no CREPÚSCULO, com a
-lâmpada na areia e o dragão dando as voltas dele) e ⭐ Especial (o banheiro público — o primeiro
-INTERIOR). Faltam 3 facções (Humanos, 🔱 Decaídos, ✝️ Apóstolos), e cada uma agora é um bloco de CSS
-mais um punhado de configuração.
+lâmpada na areia e o dragão dando as voltas dele), ⭐ Especial (o banheiro público — o primeiro
+INTERIOR) e 🔱 Decaídos (a vila élfica vendida, com a Árvore do Mundo no meio escorrendo lava, e o
+Inferno se abrindo no chão de tempos em tempos). Faltam 2
+facções (Humanos, ✝️ Apóstolos), e cada uma agora é um bloco de CSS mais um punhado de configuração.
+
+**O que os 🔱 Decaídos ensinaram**, além do que subiu nas listas acima: a assinatura foi a última que
+ainda estava inteira, e ela não é uma HORA nem um lugar — é a DIREÇÃO da luz. Nos seis anteriores a
+luz desce (sol, lua, estrelas, fluorescente) ou fica na altura do chão (a fogueira); aqui ela sai de
+dentro da terra. Isso inverte todas as sombras da cena de graça, e prova que o critério "o que sobrou"
+não precisa ser sempre um horário do dia — quando os horários acabaram, o que sobra é a física.
+
+A HISTÓRIA veio antes da composição e é o que amarrou as peças, e isso foi ideia do Gabriel: o 🧝 Elfo
+vendeu a vila élfica aos demônios. Com ela, nenhuma peça precisa se justificar sozinha — as fendas são
+por onde eles subiram, a Árvore está corrompida porque foi por dentro dela que vieram, os 🦇 são os que
+chegaram depois. As cinco peças anteriores
+eram bonitas e independentes; esta é a primeira cena do front em que uma coisa explica a outra. **Um
+cenário com enredo se desenha sozinho** — e a segunda rodada provou isso de novo, porque as correções
+dele foram todas de COERÊNCIA, não de gosto: as rachaduras deixaram de ser riscos soltos no chão e
+passaram a correr POR CIMA DAS RAÍZES (o que queima por dentro é a árvore, então a terra só racha onde
+ela chegou); a lava passou a descer no modelo do veneno da ruína dos ⚙️ Tecnológicos, de vários pontos
+e com fios que se sobrepõem (líquido tem física, e ela já estava escrita num builder vizinho); e a
+vila virou casas ENTRE as árvores, ligadas por pontes e escadas de corda — porque uma vila élfica não
+é um horizonte, é um lugar onde alguém morava. O corolário é a lista de coisas que a história PROÍBE:
+sem corpos (figura humana pequena em canvas é sujeira, e caída é pior), sem chama GRANDE — o âmbar
+tremulante é do Folclore, então o incêndio aqui já passou: sobrou carvão, cinza CAINDO e uns poucos
+focos pequenos ainda ardendo na vila, longe e do tamanho de uma casa de 16px (foi o Gabriel que os
+pediu, e eles cabem porque são distantes: o que o Folclore tem é uma fogueira PERTO, que é a fonte de
+luz da cena inteira — aqui a fonte é a lava, e o fogo lá atrás é rastro) — e sem uma segunda fonte de
+luz perto, que brigaria com a árvore.
+
+**E uma peça inteira MORREU nesta pele, o que também é registro:** a casa do traidor, a única de pé no
+meio da ruína, era o 🧝 Elfo contado por uma silhueta que não combinava com as vizinhas — o truque da
+sereia entre os golfinhos. Em jogo o Gabriel mandou tirar, e a cena não perdeu nada: a **Árvore do
+Mundo é literalmente a habilidade dele**, e depois que ela foi pro meio e virou o assunto da tela, a
+casa era um segundo jeito de dizer a mesma coisa, num canto, pequeno. **Quando a peça grande passa a
+carregar o champ, a peça pequena que o carregava vira ruído** — e a economia certa é apagar, não
+realocar.
 
 **O que os 🐉 Místicos ensinaram** (jul/2026), além do que já subiu nas listas acima: três dos quatro
 champs da facção têm CORPO HUMANO (gênio, sereia, fada), e figura humana pequena em canvas fica

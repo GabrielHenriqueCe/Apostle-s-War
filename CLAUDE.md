@@ -17,8 +17,8 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   linhas variando UM fator por vez — por-habilidade e champ-inteiro × alvo imune/não-imune a malefícios
   × DEF 0/no cap. Zero mudança no motor. A seguir: **LER os números e rebalancear (#16)** — a bancada é
   o instrumento, o ajuste é o trabalho. Aberto: o #15 (faxina de comentários).
-- **Frente aberta em paralelo (jul/2026): os CENÁRIOS por capítulo.** Cinco peles prontas, faltam 4, e
-  a próxima é a ⭐ Especial — ver a seção "Fazer o CENÁRIO de uma facção" no fim deste arquivo. Custa
+- **Frente aberta em paralelo (jul/2026): os CENÁRIOS por capítulo.** Sete peles prontas, faltam 2
+  (Humanos, ✝️ Apóstolos) — ver a seção "Fazer o CENÁRIO de uma facção" no fim deste arquivo. Custa
   zero C#. Anotada no ROADMAP como **dívida prevista**: o `jogo.js` passou de 7 mil linhas e o cenário
   é ~70% delas, com a fronteira (`aplicarTema`) já pronta pra virar arquivo por tema — quando o
   Gabriel decidir pagar.
@@ -70,9 +70,11 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`.
 
-## Fazer o CENÁRIO de uma facção (faltam 🔱 Decaídos · ✝️ Apóstolos · Humanos) — leia nesta ordem
-Seis peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos · ⭐ Especial),
-faltam 3.
+## Fazer o CENÁRIO de uma facção (faltam ✝️ Apóstolos · Humanos) — leia nesta ordem
+Sete peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos · ⭐ Especial ·
+🔱 Decaídos), faltam 2. **Cuidado com o que os ✝️ Apóstolos vão querer:** neve/inverno e vitral de
+catedral são deles (Anjo, Papai Noel, Boneco de Neve) — não gastar numa pele anterior, do mesmo jeito
+que o morcego ficou guardado desde o cemitério até os Decaídos.
 **Não invente processo: já existe manual, e ele é caro — cada linha dele custou uma rodada de "ficou
 ruim" em jogo.**
 1. **`docs/ROADMAP-refatoracao.md` → §CENÁRIO POR CAPÍTULO.** É O manual: as três camadas e o que
@@ -83,9 +85,12 @@ ruim" em jogo.**
    e a entrada `misticos` do `AR_DO_TEMA` no `jogo.js` (a mais completa: mar, dragão em três
    distâncias, lâmpada, aparições, moldura em canvas). O ⭐ Especial é a segunda melhor referência, e
    a única com INTERIOR, com peças que se ocultam entre si (porta × sentado, anel × cocô) e com o
-   `comListras` — o padrão de "monta o caminho UMA vez, usa pra preencher E recortar".
-3. **`git log --oneline` dos PRs de cenário** (#195, #197, #198, #199, #200, #201) — as mensagens
-   contam o que foi tentado e MORREU, que é a parte que o código não mostra.
+   `comListras` — o padrão de "monta o caminho UMA vez, usa pra preencher E recortar". O 🔱 Decaídos
+   é a mais nova e a mais barata de imitar: uma peça grande montada de MEMBROS sorteados num caminho
+   só (`tracarMembro`, com o sentido do traço garantido por construção), o maestro sendo LUZ e não
+   vento (`inferno.pulso`), e uma HISTÓRIA amarrando as peças umas nas outras.
+3. **`git log --oneline` dos PRs de cenário** (#195, #197, #198, #199, #200, #201, #202) — as
+   mensagens contam o que foi tentado e MORREU, que é a parte que o código não mostra.
 
 **A receita, em uma linha:** o tema é `faccao.ToString().ToLowerInvariant()` → `body[data-tema]`, e
 custa **zero C#** — um bloco de CSS mais uma entrada de configuração. Tema sem CSS e sem entrada no

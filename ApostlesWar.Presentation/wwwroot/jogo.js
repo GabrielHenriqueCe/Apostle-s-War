@@ -1499,7 +1499,11 @@ document.getElementById('alternarEstatisticas').addEventListener('click', e => {
 // ---------- mostrar/esconder o log ----------
 // Escondido, sobra só a arena: dá pra assistir as animações e os números sem ler nada. O log
 // SEGUE SENDO ALIMENTADO por trás, então ao reabrir o histórico está inteiro.
-let mostrarLog = true;
+//
+// Ele nasce DESLIGADO (decisão do Gabriel): a batalha abre mostrando a luta, e quem quiser ler o
+// que aconteceu liga. Quem liga, fica ligado — a escolha vale pela sessão inteira, e não volta a
+// se esconder na batalha seguinte.
+let mostrarLog = false;
 
 document.getElementById('alternarLog').addEventListener('click', e => {
     mostrarLog = !mostrarLog;
@@ -2177,7 +2181,9 @@ const AR_DO_TEMA = {
             // A espera CHEIA só quando o ciclo volta ao começo; entre as passagens de um mesmo ciclo
             // ele mal sai de cena. Se toda passagem custasse a espera cheia, o ciclo inteiro levaria
             // minutos e ninguém veria que é o MESMO bicho indo e voltando.
-            espera: [5, 11], intervalo: [1.5, 3],
+            // A pausa entre uma passagem e a seguinte. Um número SÓ, e não uma faixa: o compasso
+            // regular é o que faz as três distâncias lerem como o mesmo bicho dando voltas.
+            espera: 4.2,
             // Ele COMEÇA NA FRENTE, se apresentando, e daí cada volta é SORTEADA entre as três
             // distâncias — do fundo ele pode vir direto pra frente (ver `criarDragao`). O lado, esse,
             // continua alternando: é o que faz ele reentrar por onde saiu, em vez de teleportar.
@@ -2555,7 +2561,7 @@ const AR_DO_TEMA = {
                 // O quanto da boca os fios usam pra se espalhar (1 = a boca toda) e o quanto eles
                 // AFUNDAM nela. A lava lá dentro é menor que a boca — quem mirasse a borda cairia na
                 // beirada de pedra, e o pedido era cair na lava.
-                espalha: .5, mergulha: .45,
+                espalha: .38, mergulha: .16,
                 // O S: o quanto o fio serpenteia na descida, em fração da MEIA-LARGURA DO TRONCO.
                 // Era fração da largura do próprio fio, e aí fio fino descia praticamente reto.
                 serpente: [.22, .5],
@@ -2586,7 +2592,11 @@ const AR_DO_TEMA = {
             largura: .175, funda: .082, linha: .5, chama: .12,
             depois: [1.2, 3], secar: 1.6, seco: [2.5, 5],
             avisar: 1.5, jorrar: 2.6, acalmar: 1.8,
-            respingos: 40, forca: .55,
+            respingos: 70, forca: .88,
+            // Quanto tempo o brilho da árvore leva pra apagar depois de aceso. É a única duração da
+            // cena que NÃO é uma fase: ela corre por fora da máquina, em todas elas, porque o apagar
+            // tem de atravessar o fim da erupção sem ser interrompido por ela.
+            brilhoDura: 6.5,
         },
 
         // A FUMAÇA que sobe da árvore e das rachaduras. Escura — o que queima aqui já queimou, então
@@ -4412,6 +4422,13 @@ function criarFogueira(cfg, canvas, vento, fogo) {
 
         // as baforadas. Cada uma tem duas frequências de vaivém, e é a soma delas que faz a massa rolar
         // em vez de subir em fila.
+        //
+        // JÁ TENTEI TIRAR O CONE, e ficou pior — fica registrado pra ninguém tentar de novo. A ideia
+        // era copiar o vapor da lâmpada dos 🐉 Místicos, que é só baforada sem corpo nenhum e lê muito
+        // bem. Mas os dois têm trabalhos diferentes: o vapor é um FIAPO fino saindo de um bico, e
+        // baforada solta é exatamente a forma disso; esta aqui é uma COLUNA de fumaça de fogueira, e
+        // sem um corpo por trás as bolas leem como bolhas soltas subindo. O cone dá a massa, e as
+        // baforadas dão o movimento dentro dela — é a soma que funciona.
         for (const s of sopros) {
             s.u += s.vel * dt;
             if (s.u > 1) s.u -= 1;
@@ -5565,9 +5582,28 @@ function criarDragao(cfg, canvas, vento) {
     // ele entra pelo lado por onde saiu. Ele deu meia-volta lá fora — e é justamente porque a distância
     // agora muda sozinha que o lado precisa continuar amarrado. Sorteando os dois, ele sumiria à
     // direita e reapareceria à esquerda, que é a única coisa que quebraria a ilusão de ser um bicho só.
+    // O SACO DE DISTÂNCIAS: as três entram embaralhadas e são tiradas uma a uma; quando acaba, ele
+    // se enche de novo. É o que garante que nenhuma passagem fique esperando muito — cada distância
+    // aparece uma vez a cada três —, sem virar a fila fixa perto→médio→longe que um rodízio puro
+    // daria. O sorteio livre de antes deixava a passagem de perto sumir por quatro, cinco voltas.
+    const sacar = () => {
+        if (!saco.length) {
+            saco = cfg.passagens.map((_, i) => i);
+            for (let i = saco.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [saco[i], saco[j]] = [saco[j], saco[i]];
+            }
+            // A emenda entre dois sacos é o único lugar onde a mesma distância pode sair duas vezes
+            // seguidas — e duas passagens idênticas em fila leem como animação em loop.
+            if (saco[0] === posicao && saco.length > 1) [saco[0], saco[1]] = [saco[1], saco[0]];
+        }
+        return saco.shift();
+    };
+
+    let saco = [];
     let posicao = 0;                        // ele começa na frente, se apresentando
     let fase = 'fora';
-    let relogio = entre(cfg.espera) * .3;   // a primeira espera é curta: a cena não pode abrir vazia
+    let relogio = cfg.espera * .3;          // a primeira espera é curta: a cena não pode abrir vazia
     let progresso = 0;
     let sentido = 1;
     let t = 0;
@@ -5598,13 +5634,13 @@ function criarDragao(cfg, canvas, vento) {
         if (progresso >= 1) {
             fase = 'fora';
             sentido = -sentido;
-            // Espera CHEIA depois das PONTAS — ele foi o acontecimento (de perto) ou sumiu no fundo
-            // (de longe), e nos dois casos cabe demorar pra voltar. Do meio ele mal sai de cena: o
-            // médio é trânsito, e cobrar a espera cheia dele faria o bicho parecer três bichos.
-            relogio = posicao === 1 ? entre(cfg.intervalo) : entre(cfg.espera);
-            // Sorteia entre as OUTRAS duas — o `+ 1` no sorteio de dois é o que exclui a atual sem
-            // precisar de laço nem de tentativa e erro.
-            posicao = (posicao + 1 + Math.floor(Math.random() * 2)) % cfg.passagens.length;
+            // A espera é a MESMA pra todas as distâncias, e fixa. Ela já foi sorteada e maior nas
+            // pontas, com o argumento de que "de longe cabe demorar pra voltar" — mas em jogo o que
+            // isso produz é uma cena que fica parada logo depois da passagem que menos se vê. Um
+            // compasso REGULAR faz o bicho ler como um só, indo e voltando; irregular ele parece
+            // sumir e ser lembrado de novo.
+            relogio = cfg.espera;
+            posicao = sacar();
             return;
         }
 
@@ -9439,7 +9475,10 @@ function criarArvoreDoMundo(cfg, canvas, inferno) {
             onda: .72 + Math.random() * .56,
             serpente: entre(cfg.escorridos.serpente),
             fase: Math.random() * Math.PI * 2,
-            ativo: true,
+            // Ninguém nasce escorrendo: a cena ABRE com a árvore seca, e a lava só desce depois que o
+            // chão treme pela primeira vez. É o buraco que manda (ver `criarBuracoDoInferno`), e é o
+            // que dá ao primeiro terremoto a função de ACENDER a cena em vez de só sacudi-la.
+            ativo: false,
         };
     });
 
@@ -9574,11 +9613,14 @@ function criarArvoreDoMundo(cfg, canvas, inferno) {
         //    luz que você joga lateralmente, deixa só o fogo pra cima"). Ele está certo e a razão é
         //    física: a lava não fica mais parada ali embaixo — ela cai dentro do buraco, e quem
         //    ilumina agora é o fogo que SOBE de dentro dele.
+        const brilho = inferno.brilho ?? 0;
         const alvoDaLuz = chao - A * .22;
-        const raio = A * cfg.clarao * .4 * (.9 + pulso * .1);
+        // Acesa, ela ilumina MAIS e mais LONGE: o clarão cresce junto com o brilho, senão a árvore
+        // acenderia sem que a cena em volta soubesse disso.
+        const raio = A * cfg.clarao * .4 * (.9 + pulso * .1) * (1 + brilho * .3);
         const clarao = ctx.createRadialGradient(cx, alvoDaLuz, 0, cx, alvoDaLuz, raio);
-        clarao.addColorStop(0, `rgba(${cfg.luz}, ${.28 * pulso})`);
-        clarao.addColorStop(.38, `rgba(${cfg.luz}, ${.1 * pulso})`);
+        clarao.addColorStop(0, `rgba(${cfg.luz}, ${Math.min(1, .28 * pulso + brilho * .42)})`);
+        clarao.addColorStop(.38, `rgba(${cfg.luz}, ${Math.min(1, .1 * pulso + brilho * .18)})`);
         clarao.addColorStop(1, `rgba(${cfg.luz}, 0)`);
         ctx.fillStyle = clarao;
         ctx.beginPath();
@@ -9598,7 +9640,17 @@ function criarArvoreDoMundo(cfg, canvas, inferno) {
 
         const fios = [];
         for (const e of escorridos) {
-            if (!e.ativo) continue;
+            // Quem está PARADO só volta quando o buraco manda escorrer de novo — e é isto que
+            // acende a cena na primeira vez, porque todos nascem parados. O `continue` antigo
+            // pulava o fio inativo antes de qualquer conferência, então nada além da erupção
+            // conseguia acordá-lo: o fogo só podia nascer uma fase DEPOIS do tremor.
+            //
+            // O atraso sorteado é o que impede os doze de largarem no mesmo quadro, que leria
+            // como um interruptor sendo ligado.
+            if (!e.ativo) {
+                if ((inferno.escorrendo ?? 1) > .5) { e.ativo = true; e.atraso = -t + Math.random() * 1.4; }
+                continue;
+            }
 
             const fase = faseDoFio(e);
             // 45% do ciclo a cabeça descendo, 45% a cauda alcançando, 10% de pausa seca.
@@ -9687,6 +9739,20 @@ function criarArvoreDoMundo(cfg, canvas, inferno) {
             ctx.fillRect(cx - L * 1.2, chao - A, L * 2.4, A);
             ctx.globalAlpha = 1;
 
+            // A ÁRVORE INTEIRA ACESA. Um retângulo por cima do recorte pinta tronco, raízes e galhos
+            // de uma vez — é a mesma vantagem que o `comListras` já dava à lava, e a razão de a árvore
+            // ser UM caminho só. Ele tem de cobrir o mundo todo porque as raízes passam das bordas.
+            if (brilho > .01) {
+                const acesa = ctx.createLinearGradient(0, chao - A, 0, canvas.height);
+                acesa.addColorStop(0, cfg.lava);
+                acesa.addColorStop(.65, cfg.lavaQuente);
+                acesa.addColorStop(1, cfg.lava);
+                ctx.fillStyle = acesa;
+                ctx.globalAlpha = Math.min(1, brilho * .62);
+                ctx.fillRect(-canvas.width, chao - A - 20, canvas.width * 3, canvas.height * 2);
+                ctx.globalAlpha = 1;
+            }
+
             // A GRETA acesa no pé do tronco SAIU: era lava que caía e FICAVA ali, parada. É a mesma
             // razão que juntou a poça com o buraco — lava parada em dois lugares é a mesma coisa
             // contada duas vezes. O que desce agora não para no pé da árvore.
@@ -9705,7 +9771,25 @@ function criarArvoreDoMundo(cfg, canvas, inferno) {
         //    grossuras diferentes. O Gabriel viu isso na hora — "o que é esse negócio que desce 3
         //    lava dali?". Um fio só, contínuo, do alto da árvore até o fundo do buraco, não tem como
         //    divergir do que está acontecendo em cima: é a mesma peça.
-        for (const f of fios) desenharFio(f, f.kNoChao, 1, true);
+        for (const f of fios) {
+            desenharFio(f, f.kNoChao, 1, true);
+
+            // O BATE: enquanto a cabeça está no fundo, um brilho curto no ponto exato em que ela
+            // entra. É o que faltava pra a queda TERMINAR em algum lugar — sem ele a lava chegava na
+            // boca e simplesmente parava de existir, que é o que se via de errado.
+            if (f.yCabeca >= alvoDaLava - 1) {
+                const px = f.x0 + f.desviaEm(alvoDaLava);
+                const raio = f.w * 3.4;
+                const bate = ctx.createRadialGradient(px, alvoDaLava, 0, px, alvoDaLava, raio);
+                bate.addColorStop(0, `rgba(${cfg.luz}, ${.5 + pulso * .3})`);
+                bate.addColorStop(1, `rgba(${cfg.luz}, 0)`);
+                ctx.fillStyle = bate;
+                ctx.beginPath();
+                // achatado: é luz batendo na superfície da poça, não uma bola no ar
+                ctx.ellipse(px, alvoDaLava, raio, raio * .45, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
         ctx.restore();
     };
@@ -9871,15 +9955,24 @@ function criarBuracoDoInferno(cfg, canvas, arvoreCfg, inferno) {
     let q = 0;
     let t = 0;
     let vistas = 0;          // quantas passagens de morcego já foram consumidas
+    let primeira = true;     // a 1ª erupção é encurtada: ver o comentário das esperas
     let respingos = [];
 
-    inferno.escorrendo = 1;
+    // Começa SECO e APAGADO. Quem acende é a erupção: os respingos sobem, batem na árvore, ela
+    // inteira brilha, e é o brilho que traz a lava de volta.
+    inferno.escorrendo = 0;
     inferno.tremor = 0;
     inferno.jorro = 0;
+    inferno.brilho = 0;
 
     return (ctx, dt) => {
         t += dt;
         relogio -= dt;
+
+        // O brilho APAGA sozinho, sempre, em qualquer fase — quem o acende é a erupção, lá embaixo, e
+        // quem o apaga é o tempo. Por isso ele vive fora da máquina de fases: um "apagar" que fosse
+        // fase seria cortado no meio pela próxima passagem de morcegos.
+        inferno.brilho = Math.max(0, (inferno.brilho ?? 0) - dt / cfg.brilhoDura);
 
         const { linha } = medir(dt);
         const chao = linha + (canvas.height - linha) * cfg.linha;
@@ -9892,12 +9985,12 @@ function criarBuracoDoInferno(cfg, canvas, arvoreCfg, inferno) {
                 if ((inferno.passagem ?? 0) !== vistas) {
                     vistas = inferno.passagem ?? 0;
                     fase = 'secando';
-                    relogio = entre(cfg.depois);
+                    relogio = primeira ? cfg.depois[0] * .5 : entre(cfg.depois);
                 }
                 break;
             case 'secando':
                 inferno.escorrendo = Math.max(0, inferno.escorrendo - dt / cfg.secar);
-                if (relogio <= 0 && inferno.escorrendo <= 0) { fase = 'seca'; relogio = entre(cfg.seco); }
+                if (relogio <= 0 && inferno.escorrendo <= 0) { fase = 'seca'; relogio = primeira ? cfg.seco[0] * .6 : entre(cfg.seco); }
                 break;
             case 'seca':
                 if (relogio <= 0) { fase = 'avisando'; q = 0; }
@@ -9905,13 +9998,22 @@ function criarBuracoDoInferno(cfg, canvas, arvoreCfg, inferno) {
             case 'avisando':
                 q += dt / cfg.avisar;
                 inferno.tremor = q * q;                 // o tremor CRESCE: começa quase nada e vira pânico
-                if (q >= 1) { fase = 'jorrando'; q = 0; }
+                // É O TREMOR que manda a lava voltar a descer — e, na primeira vez, que a manda
+                // COMEÇAR: a batalha abre com a árvore seca e escura, e é o chão sacudindo que a
+                // acende. Estava em 'jorrando', o que atrasava a lava em um gesto inteiro.
+                if (q >= 1) { fase = 'jorrando'; q = 0; primeira = false; }
                 break;
             case 'jorrando':
                 q += dt / cfg.jorrar;
                 inferno.jorro = Math.sin(Math.min(1, q) * Math.PI);
                 inferno.tremor = .8 + Math.sin(q * Math.PI) * .2;
-                inferno.escorrendo = 1;                 // a árvore volta a escorrer, e com força
+                // O BRILHO sobe depois que os respingos já estão no ar (daí o `q - .2`): eles saem,
+                // sobem, alcançam a árvore, e ela acende. Sobe rápido porque pegar fogo é rápido; é o
+                // apagar que é lento, e ele mora fora daqui.
+                inferno.brilho = Math.max(inferno.brilho, Math.min(1, (q - .2) / .35));
+                // E a LAVA só volta depois que ela acendeu. Esta é a ordem inteira em uma linha: o
+                // buraco cospe, a árvore pega fogo, a árvore escorre.
+                if (inferno.brilho >= .6) inferno.escorrendo = 1;
                 if (q >= 1) { fase = 'acalmando'; q = 0; inferno.jorro = 0; }
                 break;
             case 'acalmando':
@@ -9935,14 +10037,14 @@ function criarBuracoDoInferno(cfg, canvas, arvoreCfg, inferno) {
         // jorra — avançar PRIMEIRO e descartar depois, senão a partícula que morre neste quadro ainda
         // é desenhada com o raio já negativo, e raio negativo LANÇA.
         if (fase === 'jorrando' && respingos.length < cfg.respingos) {
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 5; i++) {
                 const lado = Math.random() < .5 ? -1 : 1;
                 respingos.push({
                     x: cx + lado * Math.random() * meia,
                     y: chao,
                     vx: lado * Math.random() * canvas.width * .04,
                     vy: -(.5 + Math.random() * .8) * canvas.height * cfg.forca,
-                    r: canvas.height * (.004 + Math.random() * .008),
+                    r: canvas.height * (.002 + Math.random() * .005),
                     vida: 1,
                 });
             }
@@ -10026,11 +10128,41 @@ function criarRespingosDoInferno(cfg, canvas, inferno) {
     return (ctx) => {
         for (const s of inferno.respingos ?? []) {
             const viva = Math.max(0, Math.min(1, s.vida));
-            ctx.fillStyle = `rgba(${cfg.luz}, ${viva * .9})`;
+            const vel = Math.hypot(s.vx, s.vy);
+            const r = Math.max(.4, s.r * (.55 + viva * .45));
+            // O ESTICAR sai da velocidade: no topo do arco ela é quase zero e a gota fica redonda; na
+            // subida e na queda ela alonga na direção do voo. É a mesma gota o tempo todo, e é a
+            // FORMA que conta que ela subiu e está caindo — sem nenhum estado a mais pra manter.
+            const comp = r + Math.min(r * 5, vel * .05);
+            const ang = Math.atan2(s.vy, s.vx);
+
+            ctx.save();
+            ctx.translate(s.x, s.y);
+            ctx.rotate(ang);
+
+            // o rastro: um fio que fica pra trás, mais apagado, e que só aparece quando ela está
+            // rápida. Sem ele a gota esticada lê como um risco; com ele, lê como algo em voo.
+            const rastro = ctx.createLinearGradient(0, 0, -comp * 2.2, 0);
+            rastro.addColorStop(0, `rgba(${cfg.luz}, ${viva * .5})`);
+            rastro.addColorStop(1, `rgba(${cfg.luz}, 0)`);
+            ctx.fillStyle = rastro;
             ctx.beginPath();
-            // esticado na direção da queda: gota de lava no ar é comprida, não redonda
-            ctx.ellipse(s.x, s.y, Math.max(.4, s.r * viva), Math.max(.4, s.r * viva * 2.1), 0, 0, Math.PI * 2);
+            ctx.moveTo(0, -r * .55);
+            ctx.quadraticCurveTo(-comp * 1.2, -r * .12, -comp * 2.2, 0);
+            ctx.quadraticCurveTo(-comp * 1.2, r * .12, 0, r * .55);
+            ctx.closePath();
             ctx.fill();
+
+            // a GOTA: ponta na frente, bojo atrás — a forma de qualquer pingo que voa.
+            ctx.fillStyle = `rgba(${cfg.luz}, ${viva * .95})`;
+            ctx.beginPath();
+            ctx.moveTo(comp, 0);
+            ctx.quadraticCurveTo(r * .2, -r, -r * .9, 0);
+            ctx.quadraticCurveTo(r * .2, r, comp, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
         }
     };
 }
@@ -10109,7 +10241,7 @@ function criarFumacaDoInferno(cfg, canvas, arvoreCfg, inferno) {
 function criarColunaDeMorcegos(cfg, canvas, arvoreCfg, inferno) {
     const medir = medidorDoChaoDaVila(canvas);
     let fase = 'espera';
-    let relogio = entre(cfg.espera) * .5;   // a primeira espera é curta: a cena não pode abrir vazia
+    let relogio = entre(cfg.espera) * .26;  // a primeira espera é curta: a cena não pode abrir vazia
     let q = 0;
 
     const bichos = Array.from({ length: cfg.quantos }, (_, i) => ({
@@ -10245,6 +10377,9 @@ function desenharChama(ctx, x, base, alt, t, cfg) {
 // ---------- partida ----------
 document.getElementById('alternarEstatisticas').classList.toggle('ativo', mostrarEstatisticas);
 document.getElementById('alternarLog').classList.toggle('ativo', mostrarLog);
+// O `#meio` também tem de nascer no estado certo: quem o escondia era só o clique do botão, então
+// com o log começando desligado a faixa dele ficaria à mostra até alguém clicar duas vezes.
+document.getElementById('meio').classList.toggle('oculto', !mostrarLog);
 aplicarVelocidade();      // sincroniza o C# com o 2x inicial
 mostrarCena('menu');      // o jogo sempre abre no menu — evita o flash da arena vazia
 mandar('pronto');         // destrava a thread do jogo no C#

@@ -1016,9 +1016,12 @@ body[data-tema="reino"] #arena::after {
     content: '';
     position: absolute; top: 0;
     width: 92px; height: 46%;
-    background:
-        linear-gradient(180deg, #7d1122 0%, #5c0d1a 78%, transparent 100%),
-        repeating-linear-gradient(180deg, transparent 0 26px, rgba(0, 0, 0, .18) 26px 28px);
+    /* As listras horizontais que havia aqui SAÍRAM. Elas eram do tempo do salão do trono, quando o
+       estandarte era pano pendurado numa parede e as linhas liam como as dobras dele; contra o céu
+       aberto, com o pano a 55% de opacidade, o que se via era um pente de riscos escuros aparecendo
+       por dentro da bandeira. Detalhe que sobrevive a uma troca de cenário sem ser reexaminado quase
+       sempre vira isto — um ruído que ninguém sabe explicar. */
+    background: linear-gradient(180deg, #7d1122 0%, #5c0d1a 78%, transparent 100%);
     border-left: 2px solid rgba(217, 180, 91, .35);
     border-right: 2px solid rgba(217, 180, 91, .35);
     /* a ponta em V do pano */
@@ -1358,10 +1361,21 @@ body[data-tema="folclore"] #log {
    a janela — e é por isso que este é o único tema que NÃO entra na escada de @media do fim desta
    seção. Ladrilho tem um tamanho próprio pra defender; faixa em % não tem.
 
-   E o gancho dos cantos (`::before`/`::after`) fica VAGO aqui, pela primeira vez em cinco temas. Ele
-   serve pra pendurar coisa do ALTO — estandartes, teias, cabos, cipós —, e o que emoldura esta cena
-   são as palmeiras, que sobem do chão e precisam VERGAR quando o dragão passa. Coisa que reage ao
-   vento não pode ser CSS: elas são canvas (ver `criarPalmeiras` no jogo.js). */
+   O gancho dos cantos (`::before`/`::after`) demorou a ser preenchido aqui, e a primeira tentativa —
+   folhas de palmeira de perto, penduradas do alto — saiu ruim por duas razões de uma vez: "quase não
+   vejo e o design ficou estranho".
+
+   A INVISIBILIDADE tem causa exata, e ela vale pra qualquer coisa que se ponha aqui: o céu deste tema
+   no alto é #150c2c, e eu pintei a folha de #140d2c. Silhueta escura contra o céu MAIS ESCURO de
+   todos os sete temas é silhueta invisível — nos outros o gancho funciona porque o céu deles é mais
+   claro que a peça pendurada, e aqui a regra se INVERTE: a peça é que tem de ser mais clara.
+
+   Depois da folha veio uma REDE DE PESCA, e ela também saiu — o argumento a favor (malha lê por
+   repetição, e repetição sobrevive a canto pequeno) estava certo e mesmo assim a peça não era da
+   praia: rede é do barco e do pescador, não da areia. O que ficou foram ALGAS com CONCHAS, e a
+   diferença é que a concha não precisa ser lida, ela é RECONHECIDA — vieira é uma das poucas
+   silhuetas que ninguém confunde, mesmo pequena e cortada pela borda. As algas dão o movimento
+   pendurado e as conchas dão o assunto. */
 body[data-tema="misticos"] {
     --fundo: #100a1e;
     --painel: #1b1430;
@@ -1406,6 +1420,29 @@ body[data-tema="misticos"] #arena {
             #1d1729 100%);
     background-repeat: no-repeat;
 }
+
+/* ALGAS penduradas nos cantos de cima, com CONCHAS presas nelas — sétima história do mesmo gancho.
+   Três fitas caindo, com as lâminas alternando de lado, e uma concha presa no ALTO de cada uma —
+   duas vieiras e um caramujo. Elas ficavam soltas pelos lados e pelo pé, e ali liam como objetos
+   boiando ao lado da alga; no ponto em que a fita nasce, leem como presas nela, e o canto inteiro
+   vira UMA coisa pendurada em vez de três.
+
+   Esta é a única peça de canto do front que é mais CLARA que o céu, e é obrigatório que seja (ver o
+   comentário do bloco): aqui o céu é o mais escuro dos sete temas. Alga em azul-esverdeado
+   dessaturado, conchas em areia rosada — e são elas que fazem a leitura, porque vieira é uma das
+   poucas silhuetas que ninguém confunde, mesmo a 20px e cortada pela borda. A alga sozinha seria só
+   um risco pendurado; a concha diz PRAIA. */
+body[data-tema="misticos"] #arena::before,
+body[data-tema="misticos"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 164px; height: 44%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='164' height='230' viewBox='0 0 164 230' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%237f9aa6' stroke-width='4' stroke-linecap='round' opacity='.6'%3E%3Cpath d='M12 0C22 42 4 72 18 112C30 148 12 172 22 206'/%3E%3Cpath d='M54 0C64 34 48 62 60 96C70 126 56 148 64 176'/%3E%3Cpath d='M102 0C112 28 98 50 106 78C114 102 104 118 110 140'/%3E%3C/g%3E%3Cg fill='%237f9aa6' opacity='.55'%3E%3Cpath d='M16 26Q40 30 34 48Q16 44 16 26Z'/%3E%3Cpath d='M10 62Q-14 68 -6 86Q12 80 10 62Z'/%3E%3Cpath d='M20 106Q46 112 38 132Q18 126 20 106Z'/%3E%3Cpath d='M16 152Q-8 158 0 176Q18 170 16 152Z'/%3E%3Cpath d='M58 22Q82 28 74 46Q56 40 58 22Z'/%3E%3Cpath d='M52 60Q30 66 38 84Q54 78 52 60Z'/%3E%3Cpath d='M62 100Q86 108 78 126Q60 118 62 100Z'/%3E%3Cpath d='M104 18Q126 24 118 42Q102 36 104 18Z'/%3E%3Cpath d='M100 54Q78 60 86 78Q102 72 100 54Z'/%3E%3Cpath d='M108 92Q130 100 122 116Q106 110 108 92Z'/%3E%3C/g%3E%3Cg opacity='.85'%3E%3Cpath d='M14 4L-6 34Q14 48 34 34Z' fill='%23dcc9c6'/%3E%3Cg fill='none' stroke='%23a98f92' stroke-width='1.6'%3E%3Cpath d='M14 8L0 36'/%3E%3Cpath d='M14 8v32'/%3E%3Cpath d='M14 8l14 28'/%3E%3C/g%3E%3Cpath d='M50 6q16-4 19 10t-13 18q-13 1-14-9t11-9q8 1 5 8' fill='none' stroke='%23dcc9c6' stroke-width='3.6' stroke-linecap='round'/%3E%3Cpath d='M102 2L86 26Q102 38 118 26Z' fill='%23dcc9c6'/%3E%3Cg fill='none' stroke='%23a98f92' stroke-width='1.4'%3E%3Cpath d='M102 6L91 28'/%3E%3Cpath d='M102 6v26'/%3E%3Cpath d='M102 6l11 22'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    pointer-events: none;
+    z-index: -1;
+}
+body[data-tema="misticos"] #arena::before { left: 0; }
+body[data-tema="misticos"] #arena::after { right: 0; transform: scaleX(-1); }
 
 body[data-tema="misticos"] #topo { border-bottom: 2px solid rgba(126, 214, 214, .4); }
 body[data-tema="misticos"] #painel { border-top: 2px solid rgba(126, 214, 214, .4); }
@@ -1644,13 +1681,22 @@ body[data-tema="decaidos"] #arena {
 
 /* Galhos secos entrando pelos cantos de cima — onde o Reino pendura estandartes, o cemitério tem
    teias, a invasão tem cabos, o Folclore tem cipós e o banheiro tem canos. Mesmo gancho, sexta
-   história: aqui é a mata morta se fechando sobre o que sobrou da vila. */
+   história: aqui é a mata morta se fechando sobre o que sobrou da vila.
+
+   E aqui os galhos ARDEM POR DENTRO, de ponta a ponta: as mesmas curvas repetidas em três traços
+   quentes, do halo largo e translúcido ao fio amarelo fino. Nasceram TRACEJADAS, com o argumento de
+   que greta interrompida se distingue de arame aceso — mas em jogo o tracejado só picotava a única
+   linha de luz do canto, e a leitura de "brasa correndo por dentro do galho" pede continuidade.
+
+   Isso existe porque o Folclore JÁ pendura galhos neste gancho, e o Gabriel viu de cara que os dois
+   temas estavam usando o mesmo desenho. A diferença não podia ser a forma (galho seco é galho seco):
+   tinha de ser o que está acontecendo com ele. */
 body[data-tema="decaidos"] #arena::before,
 body[data-tema="decaidos"] #arena::after {
     content: '';
     position: absolute; top: 0;
     width: 138px; height: 44%;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='138' height='220' viewBox='0 0 138 220' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23100709' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3C/g%3E%3Cg fill='none' stroke='%23100709' stroke-width='6' stroke-linecap='round'%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3Cpath d='M48 112l-26 16'/%3E%3Cpath d='M74 84l24-20'/%3E%3Cpath d='M96 136l22 10'/%3E%3C/g%3E%3Cg fill='none' stroke='%23100709' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M36 62l-22-14'/%3E%3Cpath d='M58 138l-18 22'/%3E%3Cpath d='M110 178l14 16'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='138' height='220' viewBox='0 0 138 220' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23100709' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3C/g%3E%3Cg fill='none' stroke='%23100709' stroke-width='6' stroke-linecap='round'%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3Cpath d='M48 112l-26 16'/%3E%3Cpath d='M74 84l24-20'/%3E%3Cpath d='M96 136l22 10'/%3E%3C/g%3E%3Cg fill='none' stroke='%23100709' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M36 62l-22-14'/%3E%3Cpath d='M58 138l-18 22'/%3E%3Cpath d='M110 178l14 16'/%3E%3C/g%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cg stroke='%23c8190a' stroke-width='10' opacity='.22'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3C/g%3E%3Cg stroke='%23e0431a' stroke-width='3.2' opacity='.6'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3C/g%3E%3Cg stroke='%23ffb066' stroke-width='1.2' opacity='.85'%3E%3Cpath d='M18 0v54q0 40 30 58t26 54'/%3E%3Cpath d='M62 0v30q0 46 34 66t18 44'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat;
     opacity: .9;
     pointer-events: none;
     z-index: -1;

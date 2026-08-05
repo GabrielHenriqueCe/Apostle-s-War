@@ -18,6 +18,102 @@
     --agindo: #7ee081;
     --alvo: #e0574f;
 
+    /* ---------- A FORJA: a placa ----------
+       Uma peça-base pra todo botão do jogo. Três ideias, duas emprestadas:
+
+       · a luz vem DE BAIXO (Diablo IV). O centro do gradiente radial fica em `50% 128%` — FORA da
+         placa, abaixo da borda inferior. É brasa embaixo da chapa, não lâmpada atrás dela. A rampa
+         que o D4 chama de "red" termina em OURO (#3e000e → #aa7220), e é isso que faz parecer
+         carvão em vez de plástico vermelho.
+       · o rótulo ACENDE em gradiente recortado (Path of Exile 2): dourado morto em repouso, ouro
+         claro no hover, via `background-clip: text`. Só funciona em elemento próprio — e todos os
+         rótulos daqui já são (.opRotulo, .faseNome, .icNome, .hNome).
+       · a forma é nova: chanfro em DOIS cantos (superior-esquerdo e inferior-direito). Simétrico
+         viraria selo; assimétrico vira placa batida.
+
+       POR QUE `corner-shape` E NÃO `clip-path`: o clip-path RECORTA a caixa, e aí (a) a borda não
+       alcança o chanfro — obrigaria um elemento extra dentro de cada botão só pra ter aresta — e
+       (b) `box-shadow` é cortado fora, morrendo em silêncio. `corner-shape` só muda a forma do
+       canto: borda, sombra e `inset` continuam valendo. Num Chromium < 139 ele é ignorado e sobra
+       o `border-radius` assimétrico — sem chanfro, mas inteiro.
+
+       A ARESTA DE METAL SEM ELEMENTO EXTRA: `border: Npx solid transparent` mais duas camadas de
+       fundo. A `padding-box` pinta o miolo e para na borda; a `border-box` aparece por baixo da
+       borda transparente. Uma palavra-chave de <box> no atalho `background` define origin E clip,
+       então não há pegadinha de origem.
+
+       TUDO DERIVA DE --painel/--borda/--ouro DE PROPÓSITO: os 8 temas de facção retingem esses
+       tokens, e é assim que a placa continua respondendo à facção. Cravar o cinza aqui mataria
+       isso — o Arsenal e as habilidades ficariam iguais em todo capítulo. */
+    --corte: 12px;
+
+    --placa-aresta: linear-gradient(160deg,
+        color-mix(in srgb, var(--ouro) 52%, #000) 0%,
+        var(--borda) 42%,
+        color-mix(in srgb, var(--borda) 72%, #000) 60%,
+        color-mix(in srgb, var(--ouro) 58%, #000) 100%);
+
+    --placa-aresta-viva: linear-gradient(160deg,
+        var(--ouro) 0%,
+        color-mix(in srgb, var(--borda) 70%, var(--ouro)) 42%,
+        color-mix(in srgb, var(--borda) 80%, #000) 60%,
+        var(--ouro) 100%);
+
+    --placa-brasa:       radial-gradient(72% 120% at 50% 128%, rgba(170,114,32,.28) 0%, rgba(126,43,10,.15) 42%, transparent 72%);
+    --placa-brasa-viva:  radial-gradient(72% 130% at 50% 126%, rgba(217,180,91,.42) 0%, rgba(126,43,10,.28) 40%, transparent 74%);
+
+    --placa-chapa: linear-gradient(180deg,
+        color-mix(in srgb, var(--painel) 88%, #fff) 0%,
+        var(--painel) 55%,
+        color-mix(in srgb, var(--painel) 76%, #000) 100%);
+
+    --placa:        var(--placa-brasa) padding-box,      var(--placa-chapa) padding-box, var(--placa-aresta) border-box;
+    --placa-acesa:  var(--placa-brasa-viva) padding-box, var(--placa-chapa) padding-box, var(--placa-aresta-viva) border-box;
+
+    --placa-bisel:  inset 0 1px 0 rgba(217,180,91,.14);
+    --placa-brilho: 0 0 12px rgba(170,114,32,.30), inset 0 1px 0 rgba(217,180,91,.22);
+    --placa-fundo:  inset 0 2px 5px rgba(0,0,0,.72);
+
+    /* o rótulo, em repouso e aceso — os dois pares de parada são do PoE2 */
+    --rotulo-morto: linear-gradient(180deg, #67655C 0%, #9E9B8B 118%);
+    --rotulo-aceso: linear-gradient(180deg, #BCB641 0%, #FFF4B4 72%, #FFF9D7 100%);
+
+    /* ---------- O POÇO: a peça-base dos CONTÊINERES ----------
+       A placa é peça ERGUIDA — brasa por baixo, aresta de ouro, acende no hover. Contêiner não é
+       nada disso: ele não é clicável, não tem estado, e existe pra AFUNDAR o que está dentro. Dar
+       placa a um contêiner (o picker, o log, o modal) põe tudo com cara de botão e o jogador perde
+       a única pista que diz onde clicar.
+
+       Então: sombra pra DENTRO em vez de brasa pra fora, aresta apagada em vez de ouro, e nada de
+       hover. É o negativo da placa, de propósito. */
+    --poco-borda: color-mix(in srgb, var(--borda) 72%, #000);
+    --poco: linear-gradient(180deg,
+        color-mix(in srgb, var(--fundo) 88%, #000) 0%,
+        color-mix(in srgb, var(--fundo) 96%, #000) 100%);
+    --poco-fundura: inset 0 2px 8px rgba(0,0,0,.55), inset 0 -1px 0 color-mix(in srgb, var(--borda) 50%, transparent);
+
+    /* ---------- A LETRA ----------
+       Serifa em caixa alta com entreletra larga é o que faz uma peça parecer FORJADA — é a família
+       da Exocet do Diablo, sem precisar embarcar fonte. Palatino Linotype vem com o Windows desde
+       sempre, então a pilha resolve na 1ª e não há risco de cair em fallback silencioso.
+
+       SÓ EM TÍTULO E RÓTULO. O corpo continua Segoe UI: descrição de habilidade a 11px em serifa
+       vira mingau. Serifa onde se RECONHECE, sans onde se LÊ. */
+    --titulo: "Palatino Linotype", "Sitka Banner", Constantia, Georgia, serif;
+
+    /* ---------- O CÉU: o fundo de tela ----------
+       Toda tela de menu é um overlay `inset: 0` com fundo PRÓPRIO — elas tapam o `body`. Esse
+       gradiente estava escrito à mão em NOVE lugares, com o `#201b2c` cravado, e era por isso que
+       mudar o `body` não aparecia em lugar nenhum.
+
+       Três camadas: vinheta clara no alto (de onde a luz entra), brasa no rodapé (a mesma ideia da
+       placa, na escala da tela) e a cor do capítulo no meio. Tudo por `color-mix` em cima de
+       `--fundo`, então os 8 temas continuam mandando no tom. */
+    --ceu:
+        radial-gradient(120% 72% at 50% -8%, color-mix(in srgb, var(--fundo) 78%, #fff 9%) 0%, transparent 62%),
+        radial-gradient(96% 52% at 50% 106%, color-mix(in srgb, var(--fundo) 70%, #7e2b0a) 0%, transparent 64%),
+        var(--fundo);
+
     /* O canto superior direito da janela TEM DONO: é do X de sair, que é `position: fixed` e mora
        por cima de todas as cenas. Qualquer coisa que encoste naquele canto tem que reservar esta
        faixa, senão o botão passa a boiar sobre ela — foi exatamente o que aconteceu com os controles
@@ -51,10 +147,15 @@
 *::-webkit-scrollbar-thumb:hover { background: var(--ouro); background-clip: content-box; }
 *::-webkit-scrollbar-corner { background: transparent; }
 
+/* O FUNDO deixou de ser cor chapada: vinheta clara no alto, brasa no rodapé, a cor do capítulo no
+   meio. Os dois radiais saem de `--fundo` por `color-mix`, então cada facção continua mandando no
+   tom — cravar o preto da amostra aqui apagaria os 8 capítulos de uma vez.
+   `background-attachment: fixed` pra vinheta não escorrer quando a tela rola. */
 html, body {
     margin: 0;
     height: 100%;
-    background: var(--fundo);
+    background: var(--ceu);
+    background-attachment: fixed;
     color: var(--texto);
     font-family: "Segoe UI", system-ui, sans-serif;
     overflow: hidden;
@@ -77,7 +178,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
 }
 #menu[hidden] { display: none; }
 
@@ -93,6 +194,122 @@ body {
 
 #menuOpcoes { display: flex; flex-direction: column; gap: 12px; width: min(320px, 80vw); }
 
+/* O RÓTULO da placa — os quatro de uma vez, pelos nomes que eles JÁ TÊM. É por isso que a Forja
+   custa zero de HTML: todo rótulo daqui já é um elemento próprio, e o `background-clip: text`
+   precisa exatamente disso. `-webkit-text-fill-color` é o que apaga a cor real do texto pra deixar
+   o gradiente aparecer — sem ele o recorte não vale nada, e é o esquecimento clássico.
+   Quem apagar isso depois (ver .habilidade.inerte) tem que devolver o fill, não só a `color`. */
+.opcaoMenu .opRotulo,
+.faseBtn .faseNome,
+.itemCard .icNome,
+.habilidade .hNome {
+    background: var(--rotulo-morto);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.opcaoMenu:hover:not(:disabled) .opRotulo,
+.faseBtn:hover:not(:disabled) .faseNome,
+.faseBtn.selecionada .faseNome,
+.itemCard:hover:not(.equipado) .icNome,
+.itemCard.equipado .icNome,
+.habilidade:hover:not(:disabled) .hNome,
+.habilidade.escolhida .hNome {
+    background: var(--rotulo-aceso);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ==========================================================================
+   QUEM É PLACA e QUEM É POÇO — a lista mora AQUI, numa regra só.
+
+   Foi o erro da 1ª passada da Forja: seis seletores viraram placa e outros
+   vinte e sete ficaram lisos, e o jogo ficou pela metade. Com a lista num
+   lugar só, a peça nova entra na lista em vez de nascer fora do idioma.
+
+   PLACA  = erguida, clicável, tem estado: brasa por baixo, aresta de ouro,
+            acende no hover.
+   POÇO   = afundado, contêiner, sem estado: sombra pra dentro, aresta
+            apagada, nenhum hover. É o negativo da placa, de propósito — se
+            os dois fossem iguais, tudo teria cara de botão e o jogador
+            perderia a pista de onde clicar.
+
+   FORA DA LISTA, de propósito: `.combatente` e `#log`. Os 8 temas pintam o
+   fundo e a borda dos dois, e o `.combatente` ainda tem ~15 regras de estado
+   na `border-color`. Os dois levam só o chanfro; a cor continua do tema.
+   ========================================================================== */
+.opcaoMenu, .faseBtn, .itemCard, .habilidade,
+.avatarCelula, .compChamp, .bonecoSlot, .champHab, .itemPremio,
+#velocidade, #auto, #alternarLog, #alternarEstatisticas,
+#faseSortear, .setupSortear, #editarNomeBtn,
+#modalBotoes button, #fasesRodape button, #setupRodape button,
+#fimFaseOpcoes button, #editarBotoes button, .setupToggle button {
+    border: 2px solid transparent;
+    border-radius: var(--corte) 0 var(--corte) 0;
+    corner-shape: bevel;
+    background: var(--placa);
+    box-shadow: var(--placa-bisel);
+    transition: box-shadow .15s, transform .1s, background .15s;
+}
+
+.opcaoMenu:hover:not(:disabled), .faseBtn:hover:not(:disabled),
+.habilidade:hover:not(:disabled), .avatarCelula:hover:not(.bloqueado),
+.compChamp:hover, .bonecoSlot:hover,
+#velocidade:hover, #auto:hover, #alternarLog:hover, #alternarEstatisticas:hover,
+#faseSortear:hover, .setupSortear:hover, #editarNomeBtn:hover,
+#modalBotoes button:hover, #fasesRodape button:hover, #setupRodape button:hover,
+#fimFaseOpcoes button:hover, #editarBotoes button:hover, .setupToggle button:hover {
+    background: var(--placa-acesa);
+    box-shadow: var(--placa-brilho);
+}
+
+/* ---------- A LETRA DE TÍTULO, aplicada ----------
+   Todo nome próprio e todo título de tela em serifa. O corpo (descrição de habilidade, log, dica,
+   stat) NÃO entra: Palatino a 11px vira mingau, e é onde se lê de verdade.
+   `letter-spacing` positivo é obrigatório aqui — serifa em caixa alta sem entreletra fica apertada
+   e some a cunha, que é justamente o que dá o ar forjado. */
+#menuTitulo, #criarPerfil h1, #compendio h1, #fasesTitulo, #fimFaseTitulo,
+#champNome, #conquistaNome, #arsenalSlotNome, #retratoNome,
+.compFaccaoNome, .rodadaTitulo, .recompensaTitulo, .atTitulo,
+.opcaoMenu .opRotulo, .faseBtn .faseNome, .itemCard .icNome, .habilidade .hNome,
+.compChamp .ccNome, .avatarCelula .aNome, .nome {
+    font-family: var(--titulo);
+    letter-spacing: .06em;
+}
+/* Os títulos grandes ganham caixa alta e entreletra larga; os rótulos pequenos ficam como estão
+   (versalete a 10px atrapalha a leitura de nome próprio). */
+#menuTitulo, #criarPerfil h1, #compendio h1, #fasesTitulo, #fimFaseTitulo, #conquistaNome {
+    text-transform: uppercase;
+    letter-spacing: .13em;
+}
+
+/* `#menuNomeBox` fica FORA: ele é pílula (`border-radius: 23px`) porque casa com a curva do círculo
+   do avatar ao emergir de trás dele. Chanfro ali brigaria com o círculo — a curva é o ponto. */
+#setupPicker, #fasePicker, #arsenalDetalhe, #arsenalTotais, #modalCaixa,
+#champArte, #champStats, #champHabilidades, #nomePerfil,
+#nomeEditar, .rodadaGrupo {
+    border: 1px solid var(--poco-borda);
+    border-radius: var(--corte) 0 var(--corte) 0;
+    corner-shape: bevel;
+    background: var(--poco);
+    box-shadow: var(--poco-fundura);
+}
+
+/* ---------- A AÇÃO PRINCIPAL: ouro maciço ----------
+   Terceira espécie, e não é placa nem poço. "Lutar", "Confirmar", "Entrar" já eram ouro chapado
+   antes da Forja, e isso está certo: uma tela tem UMA ação esperada, e ela não deve competir com o
+   resto por atenção — ela vence de saída. Placa aqui rebaixaria essas quatro ao nível dos botões
+   comuns. Elas levam o chanfro e nada mais muda. */
+#setupLutar, #fasesLutar, #confirmarPerfil, .noEntrar {
+    border: none;
+    border-radius: var(--corte) 0 var(--corte) 0;
+    corner-shape: bevel;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ouro) 88%, #fff) 0%, var(--ouro) 55%, color-mix(in srgb, var(--ouro) 72%, #000) 100%);
+    color: var(--fundo);
+    box-shadow: 0 2px 6px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.28);
+}
+
 .opcaoMenu {
     display: flex;
     align-items: center;
@@ -102,13 +319,10 @@ body {
     font-size: 19px;
     font-weight: 600;
     color: var(--texto);
-    background: var(--painel);
-    border: 2px solid var(--borda);
-    border-radius: 12px;
     cursor: pointer;
-    transition: border-color .15s, transform .1s, background .15s;
 }
-.opcaoMenu:hover:not(:disabled) { border-color: var(--ouro); transform: translateY(-2px); background: #262030; }
+.opcaoMenu:hover:not(:disabled) { background: var(--placa-acesa); box-shadow: var(--placa-brilho); transform: translateY(-2px); }
+.opcaoMenu:active:not(:disabled) { transform: translateY(0); box-shadow: var(--placa-fundo); }
 .opcaoMenu:disabled { opacity: .4; cursor: not-allowed; }
 .opcaoMenu .opIcone { font-size: 26px; }
 .opcaoMenu .opRotulo { flex: 1; text-align: left; }
@@ -133,7 +347,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 14px;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
 }
 #criarPerfil[hidden] { display: none; }
 #criarPerfil h1 { margin: 0; font-size: 40px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 14px rgba(217,180,91,.3), 0 2px 3px #000; }
@@ -146,9 +360,6 @@ body {
     font-size: 20px;
     text-align: center;
     color: var(--texto);
-    background: var(--painel);
-    border: 2px solid var(--borda);
-    border-radius: 12px;
     user-select: text;
 }
 #nomePerfil:focus { outline: none; border-color: var(--ouro); }
@@ -180,12 +391,12 @@ body {
 #modal[hidden] { display: none; }
 
 #modalCaixa {
+    --corte: 16px;
     width: min(420px, 86vw);
     padding: 24px;
-    background: var(--painel);
-    border: 2px solid var(--borda);
-    border-radius: 14px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+    /* O modal é o único poço que também PAIRA (ele está por cima de tudo): a sombra de fora fica,
+       somada à fundura de dentro. */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .5), var(--poco-fundura);
     text-align: center;
 }
 #modalTexto { margin: 0 0 20px; font-size: 16px; line-height: 1.5; color: var(--texto); }
@@ -196,10 +407,7 @@ body {
     font-family: inherit;
     font-size: 15px;
     font-weight: 600;
-    border-radius: 10px;
     cursor: pointer;
-    border: 2px solid var(--borda);
-    background: transparent;
     color: var(--texto);
     transition: border-color .15s, background .15s, transform .1s;
 }
@@ -235,10 +443,16 @@ body {
     justify-content: center;
     font-size: 44px;
     line-height: 1;
-    background: var(--painel);
-    border: 3px solid var(--ouro);
+    /* MATERIAL, não forma: o círculo continua círculo. O que a Forja traz aqui é o anel de metal
+       (mesma aresta das placas, só que redonda), a brasa subindo por baixo e o bisel interno. Um
+       medalhão. Chanfrar isto seria trocar a forma, que é justamente o que não está errado. */
+    border: 3px solid transparent;
     border-radius: 50%;
-    box-shadow: 0 0 16px rgba(217, 180, 91, .3);
+    background:
+        radial-gradient(70% 90% at 50% 118%, rgba(217,180,91,.30) 0%, transparent 70%) padding-box,
+        var(--placa-chapa) padding-box,
+        var(--placa-aresta-viva) border-box;
+    box-shadow: 0 0 16px rgba(217, 180, 91, .3), inset 0 2px 4px rgba(0,0,0,.5);
     transition: box-shadow .15s;
 }
 
@@ -265,15 +479,12 @@ body {
 #editarNomeLinha { display: flex; align-items: center; gap: 8px; }
 #nomeEditar:read-only { color: var(--apagado); cursor: default; }
 #editarNomeBtn {
-    background: transparent;
-    border: 1px solid var(--borda);
-    border-radius: 8px;
+    --corte: 8px;
     padding: 6px 12px;
     font-size: 16px;
     cursor: pointer;
-    transition: border-color .15s, transform .1s;
 }
-#editarNomeBtn:hover { border-color: var(--ouro); transform: translateY(-1px); }
+#editarNomeBtn:hover { transform: translateY(-1px); }
 
 /* ---------- editar perfil (overlay) ---------- */
 #editarPerfil {
@@ -286,7 +497,7 @@ body {
     justify-content: center;
     gap: 14px;
     padding: 24px;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
 }
 #editarPerfil[hidden] { display: none; }
 #editarPerfil h1 { margin: 0; font-size: 34px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
@@ -299,9 +510,6 @@ body {
     font-size: 18px;
     text-align: center;
     color: var(--texto);
-    background: var(--painel);
-    border: 2px solid var(--borda);
-    border-radius: 10px;
     user-select: text;
 }
 #nomeEditar:focus { outline: none; border-color: var(--ouro); }
@@ -322,18 +530,15 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 2px;
+    --corte: 10px;
     width: 76px;
     padding: 8px 4px;
-    background: var(--painel);
-    border: 2px solid var(--borda);
-    border-radius: 10px;
     cursor: pointer;
-    transition: border-color .12s, transform .1s;
 }
 .avatarCelula .aEmoji { font-size: 32px; line-height: 1; }
 .avatarCelula .aNome { font-size: 10px; color: var(--apagado); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.avatarCelula:hover:not(.bloqueado) { border-color: var(--ouro); transform: translateY(-2px); }
-.avatarCelula.selecionado { border-color: var(--ouro); background: #332b1c; box-shadow: 0 0 10px rgba(217,180,91,.4); }
+.avatarCelula:hover:not(.bloqueado) { transform: translateY(-2px); }
+.avatarCelula.selecionado { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
 
 /* Bloqueado: cinza e sem clique — a mesma linguagem do inimigo morto (grayscale + opacidade). */
 .avatarCelula.bloqueado { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
@@ -344,10 +549,7 @@ body {
     font-family: inherit;
     font-size: 16px;
     font-weight: 600;
-    border-radius: 10px;
     cursor: pointer;
-    border: 2px solid var(--borda);
-    background: transparent;
     color: var(--texto);
     transition: border-color .15s, background .15s, transform .1s;
 }
@@ -404,7 +606,7 @@ body {
     align-items: center;
     gap: 16px;
     padding: 20px;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
     overflow-y: auto;
 }
 #arenaSetup[hidden] { display: none; }
@@ -423,10 +625,9 @@ body {
 .setupControles { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
 .setupSortear, .setupToggle button {
+    --corte: 8px;
     font-family: inherit; font-size: 13px; font-weight: 600;
-    padding: 6px 12px; border-radius: 8px; cursor: pointer;
-    background: transparent; color: var(--texto); border: 1px solid var(--borda);
-    transition: border-color .15s, background .15s;
+    padding: 6px 12px; cursor: pointer; color: var(--texto);
 }
 .setupSortear:hover { border-color: var(--ouro); }
 .setupToggle { display: flex; gap: 4px; }
@@ -435,10 +636,14 @@ body {
 
 .setupSlots { display: flex; flex-direction: column; gap: 8px; }
 
+/* Slot VAZIO é tracejado, e o tracejado mora na borda — então ele fica fora da lista de placa, que
+   deixa a borda transparente e traz a aresta pelo fundo (os furos do traço seriam preenchidos e o
+   tracejado sumiria). Mesma exceção da `.habilidade.inerte.passiva`. Aqui entra só o chanfro. */
 .slot {
     display: flex; align-items: center; gap: 10px;
     min-height: 56px; padding: 8px 12px;
-    background: var(--painel); border: 2px dashed var(--borda); border-radius: 10px;
+    background: var(--painel); border: 2px dashed var(--borda);
+    border-radius: 10px 0 10px 0; corner-shape: bevel;
     cursor: pointer; transition: border-color .15s;
 }
 .slot.preenchido { border-style: solid; cursor: grab; }
@@ -463,18 +668,13 @@ body {
     max-height: 30vh;
     overflow-y: auto;
     padding: 10px;
-    border: 1px solid var(--borda);
-    border-radius: 12px;
-    background: rgba(0, 0, 0, .22);
 }
 #setupPicker .avatarCelula { width: 68px; }
 
 #setupRodape { display: flex; gap: 12px; }
 #setupRodape button {
     padding: 10px 26px; font-family: inherit; font-size: 16px; font-weight: 600;
-    border-radius: 10px; cursor: pointer; border: 2px solid var(--borda);
-    background: transparent; color: var(--texto);
-    transition: border-color .15s, background .15s, transform .1s;
+    cursor: pointer; color: var(--texto);
 }
 #setupLutar { border: none; background: var(--ouro); color: var(--fundo); }
 #setupLutar:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
@@ -484,7 +684,7 @@ body {
 #campanhaMapa {
     position: absolute; inset: 0; z-index: 30;
     display: flex; flex-direction: column;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
 }
 #campanhaMapa[hidden] { display: none; }
 
@@ -501,9 +701,17 @@ body {
     display: flex; flex-direction: column; align-items: center; gap: 8px;
     width: 130px; cursor: pointer; user-select: none;
 }
+/* Mesmo medalhão do avatar do menu — os nós da campanha e o retrato do perfil são a mesma peça em
+   escalas diferentes, e devem ler como a mesma peça. */
 .mapaNo .noCirculo {
     width: 78px; height: 78px; display: flex; align-items: center; justify-content: center;
-    font-size: 40px; border-radius: 50%; background: var(--painel); border: 3px solid var(--ouro);
+    font-size: 40px; border-radius: 50%;
+    border: 3px solid transparent;
+    background:
+        radial-gradient(70% 90% at 50% 118%, rgba(217,180,91,.30) 0%, transparent 70%) padding-box,
+        var(--placa-chapa) padding-box,
+        var(--placa-aresta-viva) border-box;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.5);
     transition: transform .12s, box-shadow .15s;
 }
 .mapaNo .noNome { font-size: 13px; font-weight: 700; color: var(--texto); white-space: nowrap; }
@@ -515,9 +723,8 @@ body {
 /* Botão "Entrar" que aparece sob a facção selecionada (2º clique / botão pra entrar). */
 .noEntrar {
     font-family: inherit; font-size: 11px; font-weight: 700;
-    padding: 3px 14px; border-radius: 8px; cursor: pointer;
-    background: var(--ouro); color: var(--fundo); border: none;
-    box-shadow: 0 2px 6px rgba(0,0,0,.4);
+    --corte: 8px;
+    padding: 3px 14px; cursor: pointer;
     animation: entrarFim .18s ease;
 }
 .noEntrar:hover { filter: brightness(1.08); }
@@ -535,7 +742,7 @@ body {
     position: absolute; inset: 0; z-index: 30;
     display: flex; flex-direction: column; align-items: center; gap: 14px;
     padding: 18px; overflow-y: auto;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
 }
 #campanhaFases[hidden] { display: none; }
 #fasesTitulo { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
@@ -545,23 +752,22 @@ body {
 /* A dica do time e o 🎲 na mesma linha: sortear é uma alternativa a montar, não um passo depois. */
 .faseLinhaTime { display: flex; align-items: center; gap: 12px; }
 #faseSortear {
+    --corte: 8px;
     padding: 5px 12px; font-family: inherit; font-size: 13px; cursor: pointer;
-    border: 1px solid var(--borda); border-radius: 8px;
-    background: transparent; color: var(--apagado);
-    transition: border-color .15s, color .15s;
+    color: var(--apagado);
 }
-#faseSortear:hover { border-color: var(--ouro); color: var(--texto); }
+#faseSortear:hover { color: var(--texto); }
 .faseBtn {
+    --corte: 9px;
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     min-width: 84px; padding: 8px 12px; font-family: inherit; cursor: pointer;
-    background: var(--painel); border: 2px solid var(--borda); border-radius: 10px; color: var(--texto);
-    transition: border-color .12s, transform .1s;
+    color: var(--texto);
 }
 .faseBtn .faseStatus { font-size: 18px; line-height: 1; }
 .faseBtn .faseNome { font-size: 12px; font-weight: 600; }
-.faseBtn:hover:not(:disabled) { border-color: var(--ouro); transform: translateY(-2px); }
+.faseBtn:hover:not(:disabled) { transform: translateY(-2px); }
 .faseBtn:disabled { opacity: .4; cursor: not-allowed; }
-.faseBtn.selecionada { border-color: var(--ouro); background: #332b1c; }
+.faseBtn.selecionada { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
 
 #faseDetalhe { display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(760px, 96vw); }
 #faseDetalhe[hidden] { display: none; }
@@ -569,9 +775,6 @@ body {
 .rodadaGrupo {
     display: flex; flex-direction: column; align-items: center; gap: 8px;
     padding: 10px 16px;
-    background: rgba(0, 0, 0, .22);
-    border: 1px solid var(--borda);
-    border-radius: 12px;
 }
 .rodadaTitulo { font-size: 12px; color: var(--ouro); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 .rodadaChamps { display: flex; gap: 6px; }
@@ -588,16 +791,13 @@ body {
 #fasePicker {
     display: grid; grid-template-columns: repeat(auto-fill, 68px); gap: 8px; justify-content: center;
     width: min(760px, 96vw); max-height: 24vh; overflow-y: auto; padding: 8px;
-    border: 1px solid var(--borda); border-radius: 12px; background: rgba(0,0,0,.22);
-    scrollbar-width: thin; scrollbar-color: var(--borda) transparent;
 }
 #fasePicker .avatarCelula { width: 68px; }
 
 #fasesRodape { display: flex; gap: 12px; }
 #fasesRodape button {
     padding: 10px 26px; font-family: inherit; font-size: 16px; font-weight: 600;
-    border-radius: 10px; cursor: pointer; border: 2px solid var(--borda);
-    background: transparent; color: var(--texto); transition: border-color .15s, background .15s, transform .1s;
+    cursor: pointer; color: var(--texto);
 }
 #fasesLutar { border: none; background: var(--ouro); color: var(--fundo); }
 #fasesLutar:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
@@ -626,9 +826,12 @@ body {
    passava despercebida no meio da tela. */
 .itemPremio {
     display: flex; align-items: center; gap: 14px;
+    --corte: 14px;
     padding: 12px 22px;
-    background: var(--painel); border: 2px solid var(--ouro); border-radius: 14px;
-    box-shadow: 0 0 20px rgba(217,180,91,.25);
+    /* O prêmio é o único que já nasce ACESO: ele não espera hover porque não se clica nele — é a
+       recompensa, e ela tem que se anunciar sozinha. */
+    background: var(--placa-acesa);
+    box-shadow: 0 0 20px rgba(217,180,91,.25), var(--placa-bisel);
 }
 .itemPremio .ipEmoji { font-size: 40px; line-height: 1; }
 .itemPremio .ipNome { font-size: 18px; font-weight: 700; color: var(--texto); }
@@ -640,11 +843,9 @@ body {
 #fimFaseOpcoes[hidden] { display: none; }
 #fimFaseOpcoes button {
     padding: 10px 20px; font-family: inherit; font-size: 15px; font-weight: 600;
-    border-radius: 10px; cursor: pointer;
-    border: 2px solid var(--borda); background: var(--painel); color: var(--texto);
-    transition: border-color .15s, transform .1s, background .15s;
+    cursor: pointer; color: var(--texto);
 }
-#fimFaseOpcoes button:hover { border-color: var(--ouro); background: #262030; transform: translateY(-2px); }
+#fimFaseOpcoes button:hover { transform: translateY(-2px); }
 /* A continuação é a ação ESPERADA depois de vencer: destacada, e a única em ouro. */
 #fimProximaFase { border-color: var(--ouro); color: var(--ouro); }
 #fimProximaFase[hidden] { display: none; }
@@ -656,7 +857,12 @@ body {
 #conquista {
     position: absolute; inset: 0; z-index: 41;   /* acima do fim de fase, que fica atrás */
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: radial-gradient(ellipse at center, #241d33 0%, #0a0810 75%);
+    /* A conquista é a única tela que fica MAIS ESCURA que o resto, de propósito: os raios de luz
+       atrás do champ só existem se houver escuro pra eles rasgarem. Então ela não usa `--ceu`; usa
+       a mesma receita mais fechada, e a brasa entra fraca só pra não destoar das outras. */
+    background:
+        radial-gradient(96% 50% at 50% 108%, rgba(126,43,10,.28) 0%, transparent 62%),
+        radial-gradient(ellipse at center, #241d33 0%, #0a0810 75%);
     overflow: hidden; cursor: pointer;
 }
 #conquista[hidden] { display: none; }
@@ -743,7 +949,7 @@ body {
     position: absolute; inset: 0; z-index: 30;
     display: flex; flex-direction: column; align-items: center; gap: 16px;
     padding: 20px; overflow-y: auto;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
 }
 #arsenal[hidden] { display: none; }
 #arsenal h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
@@ -763,9 +969,6 @@ body {
     width: 210px;
     display: flex; flex-direction: column; gap: 6px;
     padding: 12px 14px;
-    background: rgba(0, 0, 0, .22);
-    border: 1px solid var(--borda);
-    border-radius: 12px;
 }
 .atTitulo {
     font-size: 12px; font-weight: 700; color: var(--ouro);
@@ -792,8 +995,6 @@ body {
 .bonecoSlot {
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     padding: 12px 6px; cursor: pointer;
-    background: var(--painel); border: 2px solid var(--borda); border-radius: 12px;
-    transition: border-color .12s, transform .1s;
 }
 .bonecoSlot:hover { border-color: var(--ouro); transform: translateY(-2px); }
 .bonecoSlot.selecionado { border-color: var(--ouro); background: #332b1c; box-shadow: 0 0 10px rgba(217,180,91,.4); }
@@ -820,12 +1021,22 @@ body {
 .arsenalVazio { color: var(--apagado); font-size: 13px; font-style: italic; }
 
 .itemCard {
+    --corte: 10px;
     display: flex; align-items: center; gap: 10px; padding: 8px 12px;
-    background: var(--painel); border: 2px solid var(--borda); border-radius: 10px; cursor: pointer;
-    transition: border-color .12s;
+    cursor: pointer;
 }
-.itemCard:hover:not(.equipado) { border-color: var(--ouro); }
-.itemCard.equipado { border-color: var(--vida); cursor: default; }
+.itemCard:hover:not(.equipado) { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
+/* Equipado continua VERDE, não ouro: verde já é "está valendo" em toda a interface (a barra de
+   vida, o ✓ do menu, o +N do arsenal). Trocar por ouro aqui só porque a aresta ficou bonita
+   custaria a única cor que o jogador não precisa aprender. */
+.itemCard.equipado {
+    cursor: default;
+    background:
+        radial-gradient(72% 120% at 50% 128%, rgba(76,175,80,.20) 0%, transparent 72%) padding-box,
+        var(--placa-chapa) padding-box,
+        linear-gradient(160deg, var(--vida) 0%, color-mix(in srgb, var(--vida) 45%, #000) 45%, var(--vida) 100%) border-box;
+    box-shadow: var(--placa-bisel);
+}
 .itemCard .icEmoji { font-size: 26px; }
 .itemCard .icInfo { flex: 1; min-width: 0; }
 .itemCard .icNome { font-size: 13px; font-weight: 600; color: var(--texto); }
@@ -840,7 +1051,7 @@ body {
     position: absolute; inset: 0; z-index: 30;
     display: flex; flex-direction: column; align-items: center; gap: 18px;
     padding: 20px 20px 40px; overflow-y: auto;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
 }
 #compendio[hidden] { display: none; }
 #compendio h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
@@ -868,10 +1079,8 @@ body {
     position: relative;
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     padding: 14px 8px; cursor: pointer; font-family: inherit; color: var(--texto);
-    background: var(--painel); border: 2px solid var(--borda); border-radius: 12px;
-    transition: border-color .12s, transform .1s;
 }
-.compChamp:hover { border-color: var(--ouro); transform: translateY(-2px); }
+.compChamp:hover { transform: translateY(-2px); }
 .compChamp .ccEmoji { font-size: 40px; line-height: 1; }
 .compChamp .ccNome { font-size: 13px; font-weight: 600; }
 
@@ -885,7 +1094,7 @@ body {
     position: absolute; inset: 0; z-index: 30;
     display: flex; align-items: center; justify-content: center;
     padding: 20px; overflow-y: auto;
-    background: radial-gradient(ellipse at center, #201b2c 0%, var(--fundo) 70%);
+    background: var(--ceu);
 }
 #compendioChamp[hidden] { display: none; }
 
@@ -899,16 +1108,16 @@ body {
 #champCentro { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 #champArte {
     display: flex; align-items: center; justify-content: center;
+    --corte: 16px;
     width: 100%; min-height: 260px; font-size: 150px; line-height: 1;
-    background: rgba(0, 0, 0, .22); border: 1px solid var(--borda); border-radius: 16px;
 }
 #champNome { font-size: 26px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
 #champFaccao { font-size: 13px; color: var(--apagado); }
 
 #champStats, #champHabilidades {
+    --corte: 14px;
     display: flex; flex-direction: column; gap: 8px;
-    padding: 14px 16px; background: rgba(0, 0, 0, .22);
-    border: 1px solid var(--borda); border-radius: 14px;
+    padding: 14px 16px;
 }
 
 .champSecao {
@@ -922,8 +1131,8 @@ body {
 .champStat .csValor { font-weight: 700; color: var(--texto); }
 
 .champHab {
+    --corte: 10px;
     display: flex; flex-direction: column; gap: 4px; padding: 10px 12px;
-    background: var(--painel); border: 2px solid var(--borda); border-radius: 10px;
 }
 .champHab.passiva { border-style: dashed; }
 .champHab .chTopo { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
@@ -1962,13 +2171,28 @@ body[data-tema="apostolos"] #log {
     display: flex; align-items: center; justify-content: center;
     font-family: inherit; font-size: 22px; font-weight: 700; line-height: 1;
     cursor: pointer;
+    /* O arco que pegava o canto virou CHANFRO — é o mesmo gesto (ocupar o vértice cortando a
+       diagonal), agora na língua da Forja. A borda existe só nos dois lados VISÍVEIS: os outros
+       dois encostam na moldura da janela, e borda ali seria metal desenhado fora da tela. */
     border: none;
-    border-bottom-left-radius: 100%;   /* a diagonal: o arco que "pega" o canto */
-    background: rgba(58, 52, 70, .85);
+    border-bottom: 2px solid transparent;
+    border-left: 2px solid transparent;
+    border-bottom-left-radius: 100%;
+    corner-shape: bevel;
+    background:
+        radial-gradient(80% 90% at 30% 110%, rgba(170,114,32,.30) 0%, transparent 72%) padding-box,
+        linear-gradient(200deg, color-mix(in srgb, var(--painel) 92%, #fff) 0%, var(--painel) 100%) padding-box,
+        var(--placa-aresta) border-box;
     color: var(--texto);
     transition: background .15s, color .15s;
 }
-#sairTela:hover { background: var(--alvo); color: #fff; }
+#sairTela:hover {
+    background:
+        radial-gradient(80% 90% at 30% 110%, rgba(224,87,79,.55) 0%, transparent 72%) padding-box,
+        linear-gradient(200deg, #7a2b28 0%, var(--alvo) 100%) padding-box,
+        var(--placa-aresta-viva) border-box;
+    color: #fff;
+}
 #sairTela[hidden] { display: none; }
 
 /* ---------- topo ---------- */
@@ -1989,10 +2213,8 @@ body[data-tema="apostolos"] #log {
 #botoesTopo { display: flex; gap: 8px; }
 
 #alternarEstatisticas, #velocidade, #alternarLog, #auto {
-    background: transparent;
+    --corte: 7px;
     color: var(--apagado);
-    border: 1px solid var(--borda);
-    border-radius: 6px;
     padding: 4px 10px;
     cursor: pointer;
     font-size: 13px;
@@ -2096,8 +2318,11 @@ body[data-tema="apostolos"] #log {
     min-height: 0;              /* ver #arena: é isto que faz ROLAR em vez de crescer */
     overflow-y: auto;
     padding: 8px 10px;
+    /* Fora da lista de poço: os 8 temas pintam o fundo e a borda do log (o pergaminho do Reino, o
+       grimório do Lado Sombrio). Aqui entra só o chanfro; a cor continua do capítulo. */
     border: 1px solid var(--borda);
-    border-radius: 10px;
+    border-radius: 10px 0 10px 0;
+    corner-shape: bevel;
     background: rgba(0, 0, 0, .22);
     scrollbar-width: thin;
     scrollbar-color: var(--borda) transparent;
@@ -2132,11 +2357,18 @@ body[data-tema="apostolos"] #log {
 /* A caixa é só a MOLDURA e a âncora dos números que saltam (position: relative). O conteúdo mora
    no `.corpo`, que o JS repinta a cada estado — assim os `.flutuante`, que são irmãos do corpo,
    sobrevivem ao repintar. */
+/* SÓ A FORMA muda aqui, de propósito. Este card é o mais disputado do jogo: os 8 temas de facção
+   pintam o `background` e a `box-shadow` dele, e umas quinze regras de estado mexem na
+   `border-color` (agindo, alvo, alvoAmigo, foco, selecionado, clicavel...). Dar a ele a aresta de
+   metal por camada de fundo apagaria as duas coisas de uma vez — a `border-color` não pinta nada
+   quando a borda é `transparent` e o metal vem do fundo. Então ele ganha o chanfro e mais nada;
+   quem manda na cor continua sendo o tema e o estado. */
 .combatente {
     position: relative;
     padding: 8px 12px;
     border: 2px solid transparent;
-    border-radius: 10px;
+    border-radius: 12px 0 12px 0;
+    corner-shape: bevel;
     background: var(--painel);
     width: min(340px, 100%);
     transition: border-color .15s, transform .1s;
@@ -2206,17 +2438,22 @@ body[data-tema="apostolos"] #log {
     position: relative;
     height: 12px;
     background: #322c3d;
-    border-radius: 6px;
-    overflow: hidden;
+    border-radius: 5px 0 5px 0;
+    corner-shape: bevel;
+    overflow: hidden;   /* o recorte segue o chanfro, então o preenchimento também chanfra */
     margin-top: 4px;
 }
 
 .barraVida {
     height: 100%;
-    background: var(--vida);
+    background: linear-gradient(180deg, #6fd074 0%, var(--vida) 45%, #2f7a33 100%);
     transition: width .35s ease;
 }
-.barraVida.baixa { background: var(--vida-baixa); }
+/* Ferida, a barra não fica só vermelha: vira a rampa do Diablo IV inteira — ouro no topo, sangue no
+   pé. Lê como brasa acabando, e não como "cor de erro". */
+.barraVida.baixa {
+    background: linear-gradient(180deg, #aa7220 0%, #a50905 46%, #3e000e 100%);
+}
 
 /* escudo: faixa azul por cima da vida, como nos jogos do gênero */
 .barraEscudo {
@@ -2251,8 +2488,9 @@ body[data-tema="apostolos"] #log {
 .selo {
     font-size: 11px;
     padding: 1px 5px;
-    border-radius: 4px;
-    background: #2b2536;
+    border-radius: 5px 0 5px 0;
+    corner-shape: bevel;
+    background: color-mix(in srgb, var(--painel) 82%, #000);
     border: 1px solid var(--borda);
     white-space: nowrap;
 }
@@ -2289,36 +2527,51 @@ body[data-tema="apostolos"] #log {
 #habilidades { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
 .habilidade {
+    --corte: 8px;
     display: flex;
     flex-direction: column;
     gap: 2px;
     padding: 8px 12px;
-    border: 1px solid var(--borda);
-    border-radius: 8px;
-    background: #262030;
     color: var(--texto);
     cursor: pointer;
     text-align: left;
     min-width: 150px;
     font-family: inherit;
 }
-.habilidade:hover:not(:disabled) { border-color: var(--ouro); }
 .habilidade:disabled { opacity: .4; cursor: not-allowed; }
 .habilidade .hNome { font-size: 13px; font-weight: 600; }
 /* `pre-line`: honra o \n que a descrição traz do domínio (Nigiri tem 2 linhas) e ainda
    colapsa/quebra o resto normal — as descrições sem \n não mudam em nada. */
 .habilidade .hDesc { font-size: 11px; color: var(--apagado); white-space: pre-line; }
-.habilidade.escolhida { border-color: var(--ouro); background: #332b1c; }
+.habilidade.escolhida { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
 
 /* INERTE: o kit de quem você está só OLHANDO (aliado parado, inimigo). Mesma caixa do turno — o
    jogador não deveria reaprender a ler a mesma informação porque mudou de quem está olhando.
    Desfaz o `:disabled` cru, que serve pra outra coisa: lá o botão está apagado porque a habilidade
    está em cooldown ("não dá pra usar AGORA"); aqui não há nada pra usar, então nem apaga nem
    promete clique. */
-.habilidade.inerte:disabled { opacity: 1; cursor: default; background: transparent; }
-.habilidade.inerte .hNome { color: var(--apagado); }
-/* Tracejado = passiva, a mesma linguagem do compêndio. */
-.habilidade.inerte.passiva { border-style: dashed; }
+/* Sem miolo, só a aresta: continua sendo a mesma caixa, mas não promete clique. Antes isso era
+   `background: transparent` — agora a camada `border-box` fica sozinha, porque zerar o fundo
+   inteiro levaria a aresta junto. */
+.habilidade.inerte:disabled {
+    opacity: 1; cursor: default;
+    background: var(--placa-aresta) border-box;
+    box-shadow: none;
+}
+/* Devolve o preenchimento do texto: o rótulo em gradiente apagou a `color` com
+   `-webkit-text-fill-color: transparent`, então só trocar a `color` aqui não pintaria nada. */
+.habilidade.inerte .hNome {
+    background: none;
+    color: var(--apagado);
+    -webkit-text-fill-color: currentColor;
+}
+/* Tracejado = passiva, a mesma linguagem do compêndio. Aqui a borda volta a ser BORDA de verdade
+   (com cor), porque o tracejado mora na borda: com a aresta vindo do fundo, os furos do traço
+   seriam preenchidos por ela e o tracejado sumiria. */
+.habilidade.inerte.passiva {
+    background: none;
+    border: 2px dashed var(--borda);
+}
 
 /* Armada esperando confirmação: pulsa devagar pra ficar claro que o turno ainda NÃO foi gasto. */
 .habilidade.confirmar { animation: pulsarConfirmar 1s ease-in-out infinite; }

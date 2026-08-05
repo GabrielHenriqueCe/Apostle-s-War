@@ -170,3 +170,12 @@ dotnet test
 **Gabriel Henrique Cé** — Engenharia de Software (Uniasselvi) · Blumenau, SC
 
 [LinkedIn](https://www.linkedin.com/in/gabriel-henrique-ce) · [Portfólio](https://gabrielhenriquece.github.io/) · ga.biel.hce@gmail.com
+
+## 📄 Direitos
+
+© 2026 Gabriel Henrique Cé. Todos os direitos reservados.
+
+Este repositório é público para fins de portfólio e avaliação técnica. O código-fonte, a
+documentação, o design do jogo, os personagens e os cenários são de minha autoria e não estão
+licenciados para uso, cópia, modificação, redistribuição ou uso comercial sem autorização
+prévia por escrito.

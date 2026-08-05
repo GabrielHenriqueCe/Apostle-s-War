@@ -474,15 +474,95 @@ cima delas; mandar a fração obrigaria os dois lados a ter cada um a sua cópia
   num `fillStyle`. E vale checar o contrário também: um autoteste que planta os dois defeitos de
   propósito e confere que ela reprova, mais um censo de fases — "passou" pode querer dizer "a coluna
   de morcegos nunca chegou a estourar em 900s".
+- **A conta de uma composição empilhada tem de fechar em PIXEL, e ela não avisa quando não fecha**
+  (ago/2026). Portal + rosácea + lancetas na mesma nave: 83 + 118 + 34px numa faixa de 243. A lanceta
+  saía POR DENTRO do vitral e nada quebrava — não lança, não vira NaN, a bancada fica verde, e em jogo
+  parece só um vitral sujo. Quem denuncia é somar os números à mão antes de rodar. A lição é que o
+  lugar de uma peça pequena é onde SOBRA espaço, não onde ela seria mais bonita.
+- **Sentinela de ocioso nunca é zero** (ago/2026). Uma peça que espera `Math.random() * k` antes de
+  agir não pode usar `espera = 0` pra dizer "não estou esperando nada": um sorteio que caísse
+  exatamente em 0 a deixaria muda PRA SEMPRE — raro demais pra aparecer num teste e permanente quando
+  aparecesse. `Infinity` serve (`Infinity − dt` segue infinito) e mantém o estado num campo só, sem um
+  segundo booleano pra alguém esquecer de virar.
 
 **Peles prontas:** 👑 Reino (cidade murada, de DIA — o único claro, e é o contraste dele que faz os
 outros parecerem escuros de propósito), 🌑 Lado Sombrio (cemitério sob a lua), ⚙️ Tecnológicos (a
 noite da invasão), 🪬 Folclore (a clareira com a fogueira, na noite QUENTE — o âmbar era a paleta que
 sobrava, e cai bem porque aqui a fonte de luz é fogo), 🐉 Místicos (a praia no CREPÚSCULO, com a
 lâmpada na areia e o dragão dando as voltas dele), ⭐ Especial (o banheiro público — o primeiro
-INTERIOR) e 🔱 Decaídos (a vila élfica vendida, com a Árvore do Mundo no meio escorrendo lava, e o
-Inferno se abrindo no chão de tempos em tempos). Faltam 2
-facções (Humanos, ✝️ Apóstolos), e cada uma agora é um bloco de CSS mais um punhado de configuração.
+INTERIOR), 🔱 Decaídos (a vila élfica vendida, com a Árvore do Mundo no meio escorrendo lava, e o
+Inferno se abrindo no chão de tempos em tempos) e ✝️ Apóstolos (a SALA de Natal — o segundo interior,
+com a árvore num canto, a lareira no outro e a nevasca vista por uma janela no meio). Falta 1
+facção (Humanos), e ela é um bloco de CSS mais um punhado de configuração.
+
+**O que os ✝️ Apóstolos ensinaram**, além do que subiu nas listas acima. Esta pele custou TRÊS versões
+inteiras, e as duas que morreram ensinaram mais que a que ficou:
+
+- **1ª, a CATEDRAL na nevasca** — fachada em silhueta, rosácea acesa jogando luz colorida na neve, e um
+  SINO regendo a cena inteira num maestro de som. Veredito em jogo: *"o sino ficou ruim, a ideia da
+  catedral também"*. O argumento era bom no papel e a peça estava errada assim mesmo: prédio no meio da
+  neve lê como arquitetura, não como Natal. Ela deixou duas coisas que sobreviveram a tudo — a
+  ILUMINAÇÃO colorida no chão e o céu fechado — e um achado técnico que vale guardar mesmo com a peça
+  morta: **luz que ATRAVESSA se desenha ao contrário de luz que EMITE**. Os feixes da rosácea tinham de
+  ser pintados ANTES da fachada, porque uma janela acesa não ilumina a parede em que ela está — ela joga
+  luz pra FORA. Toda luz anterior deste front emite (fogueira, lâmpada, lava, fluorescente) e por isso
+  sempre pôde ser a última camada; a primeira que atravessa um vidro inverte a ordem de pintura.
+- **2ª, a ÁRVORE DE NATAL sozinha na nevasca** — *"ficou vazio"*. Uma árvore acesa num descampado não
+  tem com o que conversar: a cena vira um objeto e um fundo, e nenhum dos dois explica o outro.
+- **3ª, a SALA** — e o que consertou foi o Gabriel virar a coisa do avesso: em vez de pôr o Natal no
+  meio da neve, pôr a neve do lado de FORA de uma janela. A paisagem das duas versões mortas continua
+  ali, inteira; ela só passou a ser vista por um buraco na parede, e a casa é o que finalmente dá
+  assunto à árvore.
+
+- **A assinatura desta pele é um RECORTE.** Com sete peles prontas não sobrava hora do dia nenhuma, e o
+  que a distingue não é uma luz nem um lugar: é ser a única em que a paisagem aparece por um vão. Quando
+  a lista do que sobrou acabar, o próximo lugar pra procurar não é uma hora — é um ENQUADRAMENTO.
+- **A paisagem numa janela é um RECORTE, não uma miniatura.** A primeira versão da vista media a mata, a
+  neve, os bonecos e o trenó em fração da JANELA: proporção impecável e leitura errada, porque encolher
+  a cena inteira faz o vidro virar um quadro pendurado na parede. Olhar por uma janela não diminui o
+  mundo, mostra MENOS dele. Tudo lá dentro é medido na altura da ARENA, igual à pele externa, e o que o
+  vidro faz é cortar.
+- **Um ROTEIRO que atravessa peças distantes pede um MAESTRO, não uma máquina de estados.** O ciclo do
+  Inferno coube dentro da fenda porque todas as fases eram DELA. Aqui a noite passa pela árvore num
+  canto, pela janela no meio, pela lareira no outro canto e pelos presentes no chão — e nenhuma delas é
+  o lugar certo de guardar a história. O `criarRoteiroDaNoite` é a primeira camada do front que **não
+  desenha nada**: ela só escreve o `natal`, e as quatro peças leem. Vindo primeiro na lista, ela também
+  garante que todas leiam o mesmo instante no mesmo quadro.
+- **Aviso é um PASSO, nunca a cauda de outro.** O tremor da lareira nasceu amarrado à fração final dos
+  passos vizinhos, e virou ridículo assim que um deles passou a ter duração VARIÁVEL (o `entalado`
+  espera o presente chegar): o "fim" dele durava os três segundos inteiros da espera, e a lareira tremia
+  sem parar. Aviso é acontecimento curto — grudá-lo no fim de um passo é pedir que ele dure o que o
+  outro durar.
+- **Dependência entre peças se DIZ, não se calibra.** O Papai Noel só sobe depois que o presente chega,
+  e isso não é "põe o `entalado` maior que o `entregar`": o passo consulta a entrega e espera. Assim
+  mexer na duração da viagem do presente não obriga ninguém a lembrar de mexer na outra. Mesma regra no
+  `subir`, que não tem duração própria — ele usa a de `descer`, porque o percurso é o mesmo e ele sobe
+  na velocidade com que caiu. **Dois números iguais numa config são dois números que um dia vão ficar
+  diferentes sem ninguém perceber.**
+- **Corpo humano em canvas se resolve ESCOLHENDO O PEDAÇO.** O 🦸 e o 🦹 do ⭐ Especial mostram só a
+  canela e o pé atrás do jornal; o 🎅 aqui aparece só da cintura pra baixo, entalado na boca da lareira.
+  Nos dois casos a saída não foi desenhar melhor, foi enquadrar. E o que faz a roupa ler não é a forma,
+  é a ORDEM: casaco, cinto POR CIMA dele, terminação do casaco embaixo do cinto, e só então as pernas.
+- **Peça que entra por um vão se recorta no PRÓPRIO vão, e o recorte acaba onde o vão acaba.** O 🎅 é
+  cortado pelo mesmo caminho que preenche a boca da lareira (o padrão do `comListras`: monta uma vez,
+  usa pra preencher E pra recortar) — com um retângulo, ele passava por cima da pedra nas quinas do
+  arco. Mas o recorte ganha um segundo subcaminho largo abaixo da soleira: as paredes só mandam nele
+  enquanto ele está DENTRO delas, e sem isso as botas eram ceifadas por uma linha invisível no meio do
+  piso. Os dois subcaminhos correm no mesmo sentido de propósito — em sentidos contrários se anulariam e
+  abririam buraco bem na emenda.
+- **Tamanho de peça se lê CONTRA o vizinho, nunca sozinho.** Os bonecos nasceram em `.085` da altura da
+  arena, que parecia razoável no papel — e davam 79 a 119px numa mata de pinheiros de 85px. Um boneco de
+  neve do tamanho de uma árvore inteira: nada quebra, a bancada fica verde, e o que se perde é a
+  profundidade, que é a única coisa que um horizonte existe pra dar. A mesma coisa mordeu o casaco do
+  🎅 (mais largo que alto, um bloco deitado que não lê como corpo) e as máscaras. Foi o script que roda
+  os builders e IMPRIME as caixas em pixel que mostrou os três — **a bancada headless vê ERRO; este vê
+  feiura, e os dois são obrigatórios.**
+- **Canto de cena se faz por REPETIÇÃO, não por uma linha bem desenhada.** Duas tentativas de amarrar os
+  enfeites do canto numa trepadeira única falharam (uma diagonal, depois um S) antes de eu ir ver como
+  os outros sete são feitos: as algas dos 🐉 Místicos são TRÊS fitas saindo da borda de cima, os galhos
+  dos 🔱 Decaídos são DOIS ramos em pesos de traço diferentes. Nenhum é uma linha só. Uma mecha sozinha
+  é um risco; quatro mechas são uma moita entrando pela quina — e nenhuma quantidade de capricho numa
+  linha só substitui isso.
 
 **O que os 🔱 Decaídos ensinaram**, além do que subiu nas listas acima: a assinatura foi a última que
 ainda estava inteira, e ela não é uma HORA nem um lugar — é a DIREÇÃO da luz. Nos seis anteriores a

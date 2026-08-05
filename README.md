@@ -186,3 +186,5 @@ Este repositório é público para fins de portfólio e avaliação técnica. O 
 documentação, o design do jogo, os personagens e os cenários são de minha autoria e não estão
 licenciados para uso, cópia, modificação, redistribuição ou uso comercial sem autorização prévia
 por escrito.
+
+Termos completos em [LICENSE](LICENSE). Para solicitar licenciamento: ga.biel.hce@gmail.com

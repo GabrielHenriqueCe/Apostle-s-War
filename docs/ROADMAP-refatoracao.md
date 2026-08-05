@@ -704,6 +704,20 @@ quatro estarem juntos não precisa de explicação.
 Registrada pela regra de "dor prevista se anota e se avisa" (ver §Princípios). **Não está feita, e a
 decisão de quando fazer é do Gabriel.**
 
+> **MEDIDO DE NOVO em ago/2026 — a previsão bateu, e por baixo.** Os números abaixo eram de jul/2026;
+> os de hoje estão na tabela. A frase "o arquivo caminha pra ~12.000" se cumpriu **com uma facção
+> ainda faltando** (Humanos). A dívida parou de ser prevista e passou a ser vencida.
+>
+> | | jul/2026 | ago/2026 |
+> |---|---|---|
+> | `jogo.js` | ~5.900 | **11.920** |
+> | cenário | ~70% | **~10.240 (86%)** |
+> | telas + combate | ~1.700 | ~1.680 (14%) |
+>
+> O denominador dobrou e o numerador **triplicou**: tudo que entrou desde julho foi cenário. As telas
+> não cresceram uma linha. Isso não é acaso — é o que acontece quando um arquivo tem duas razões pra
+> mudar e só uma delas está ativa.
+
 O `jogo.js` tem ~5.900 linhas e o cenário já é **~70% delas** — o assunto principal do arquivo virou o
 que ele não se propunha a ser (menus, batalha, arsenal e campanha são as outras ~1.700). Quem for
 mexer no botão de habilidade rola por 4.000 linhas de árvore, fogueira e corvo pra chegar lá. Cada
@@ -725,6 +739,101 @@ entrada do `AR_DO_TEMA` (`AR_DO_TEMA.folclore = {...}`). Aí "uma facção nova"
 `<script src>` clássicos em ordem, que é recorte-e-cola puro porque tudo já vive no mesmo escopo
 global —, ou se paga uma mudança em C# (`SetVirtualHostNameToFolderMapping` + navegar pro host
 virtual) pra poder usar módulos de verdade. A saída barata não custa C# nenhum e é reversível.
+
+#### O PLANO, fechado em ago/2026 (o "como", que faltava)
+
+**A decisão entre as duas saídas: PAGAR o C#.** Em jul/2026 as duas empatavam. Não empatam mais: com
+9 cenários + núcleo + telas, a saída barata vira ~30 `<script src>` que **um humano tem que manter em
+ordem de dependência à mão**, e o erro dela é silencioso (função indefinida em tempo de execução,
+cena em branco). O portão inteiro são 3 linhas, em `AppFront.cs:143`:
+
+```csharp
+webview.CoreWebView2.SetVirtualHostNameToFolderMapping(
+    "apostlesware", Path.Combine(AppContext.BaseDirectory, "wwwroot"),
+    CoreWebView2HostResourceAccessKind.Allow);
+webview.CoreWebView2.Navigate("https://apostlesware/index.html");
+```
+
+Origem `https://` de verdade → `import` nativo, sem bundler, sem npm, sem build step. **Verificação:
+o jogo abrir igual já prova.**
+
+**Os critérios (o que decide as pastas, e vale além deste repo):**
+1. **Nunca por tipo de arquivo.** `css/`, `js/`, `img/` é o layout que todo mundo aprende e que os
+   times abandonaram: pra mexer no Folclore você abre 3 pastas, e nenhuma delas diz que Folclore existe.
+2. **O que muda junto fica junto** (Common Closure). O CSS, o JS e a config do Folclore têm a MESMA
+   razão pra mudar. É o irmão front do `Champs/<Faccao>/<Champ>/` que o C# já faz.
+3. **O nome da pasta grita o DOMÍNIO**, não a tecnologia.
+4. **Um arquivo = uma intenção ao abrir.** Tamanho não é critério — mas passou de ~800 linhas, quase
+   sempre tem duas razões escondidas. (Este arquivo tinha. Ver a tabela acima.)
+5. **A dependência aponta pra dentro**, igual ao C#: `cenarios/` usa `nucleo/`; `nucleo/` **nunca**
+   sabe que Folclore existe.
+
+**O destino:**
+
+```
+wwwroot/
+  index.html
+  estilo.css              ← encolhe pra shell + tokens (:root, rolagem, body, a Forja)
+  nucleo/  ponte.js (envio/recepção com o C#) · cena.js (roteador de telas) · ar.js (iniciarAr, rAF, maestro)
+  ui/      placa.css · barraVida · tooltip          ← as peças compartilhadas
+  telas/   menu/ perfil/ campanha/ arena/ arsenal/ compendio/ combate/
+  cenarios/ comum/ + reino/ ladosombrio/ tecnologicos/ folclore/ misticos/
+            especial/ decaidos/ apostolos/ humanos/
+```
+
+Cada facção vira **~700–1.300 linhas** — tamanho que cabe na cabeça. E cada pasta de cenário leva os
+três: `<faccao>.js`, `<faccao>.css` (o bloco `body[data-tema=...]`) e a própria entrada do
+`AR_DO_TEMA`, que deixa de ser objeto central e vira `export const ar = {...}`.
+
+**A parte difícil, que NÃO é opinião — é medição.** Os **102 builders** de topo da região de cenário
+estão **planos e sem dono declarado**, ordenados por ordem histórica de construção, não por facção
+(só o 🔱 Decaídos tem cabeçalho de seção). `criarFogueira`, `desenharEspada`, `criarMoitas`,
+`medirLadrilho`: alguns são de uma facção só, outros são compartilhados, e **não dá pra saber
+olhando**. O critério é claro — *usado por 1 facção vai pra pasta dela; usado por 2+ vai pro
+`cenarios/comum/`* — mas a atribuição tem que ser **medida** por um script que lê o `AR_DO_TEMA`,
+resolve os nomes que cada tema referencia e monta a tabela de quem-usa-o-quê. Sem isso, você move uma
+função e descobre três facções depois que o Místicos usava ela. É o "o grep mente" em forma de
+refatoração — e o script é descartável depois.
+
+**A ordem:**
+1. As 3 linhas de C# (host virtual). PR minúsculo, destrava tudo, verificável na hora.
+2. O script de medição dos 102 builders → a tabela de donos.
+3. **Um cenário por PR**, começando pelo 🔱 Decaídos (é o único já com cabeçalho, e é auto-contido).
+   Nove PRs pequenos e verificáveis em vez de um monstro.
+4. `telas/` e `ui/` por último — são 14% e não estão doendo.
+
+**O que uma empresa faria e aqui NÃO se deve fazer:** Vite, TypeScript, framework de componente, CSS
+Modules, ESLint, runner de teste de front. Numa empresa isso se paga com 8 pessoas e deploy. Aqui o
+ganho está **na separação, não na ferramenta** — e ES module é nativo, custo zero. A única ferramenta
+que vale é o script de medição do passo 2, e ele morre depois de usado.
+
+#### O Claude Design entra nisso? (avaliado ago/2026 — decisão: AINDA NÃO)
+
+Pergunta que vai voltar, então fica respondida por escrito. **O que a ferramenta é:** um agente que
+constrói telas **em React**, renderizadas ao vivo no navegador. Por padrão ele monta com componentes
+genéricos; a skill `/design-sync` existe pra ensinar a ele os componentes DO PROJETO, e o que ela
+sobe é um `_ds_bundle.js` (React compilado a partir do `dist/` do repo), um `.d.ts` com o contrato da
+API e cards de preview. Ela pressupõe, portanto: `package.json`, build, e componentes de verdade.
+
+Aplicado a este front, parte em três, com três respostas diferentes:
+
+| pedaço | veredito |
+|---|---|
+| **Sincronizar este front pra dentro dele** | **Inaplicável.** Não é difícil — não há o que converter. Sem `package.json`, sem React, sem `dist/`. |
+| **Usar de prancheta pro chrome** (menus, arsenal, compêndio, fases, arena — os 14%) | **Daria**, e ataca um ponto fraco real: desenhar TELA em vez de PEÇA, e ver antes de escrever. Mas a saída é React e teria que ser **traduzida à mão** pro CSS daqui. Ganha-se na decisão, paga-se na transcrição. |
+| **Os 86% de cenário em canvas** | **Fora de escopo.** `requestAnimationFrame` e trigonometria não são composição de componente. Nenhuma ferramenta de UI toca nisso. |
+
+**O gargalo deste front nunca foi capacidade de design — é o LAÇO DE RETORNO.** Todo acerto real da
+pele nova (o cercadinho da arena, os 27 seletores que ficaram lisos, o fundo dos menus tapado pelos
+overlays) veio do Gabriel rodando o jogo e apontando o defeito exato. Ferramenta nenhuma substitui
+isso; o que ela faria é encurtar. E existe substituto barato que pega quase todo o ganho: **artifacts
+no nível de TELA** (a tela de fases inteira, a arena inteira), que ele abre no Edge — mesmo benefício
+de ver antes, zero React pra traduzir, zero setup.
+
+**O "ainda não" tem prazo, e o prazo é ESTA seção.** No dia em que o front virar biblioteca de
+componentes de verdade — que é exatamente o `ui/` + `telas/` do plano acima — a ferramenta passa a
+ser aplicável, porque aí existe o que sincronizar. Ou seja: **a separação é o pré-requisito, não uma
+tarefa concorrente.** Reavaliar DEPOIS que `ui/` e `telas/` existirem, nunca antes.
 
 ---
 

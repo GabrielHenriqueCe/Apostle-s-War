@@ -9,7 +9,8 @@
 
 Monte um time de 4 campeões e atravesse 8 capítulos de campanha, um por facção. 36 personagens,
 combate com crítico, escudos, status com tick, contra-ataque, revive e prevenção de morte.
-Detalhes do jogo mais abaixo — as três seções seguintes são sobre como ele é construído.
+Detalhes do jogo mais abaixo — as próximas seções são sobre como ele é construído, e sobre como
+ele foi construído.
 
 ---
 
@@ -40,8 +41,8 @@ ApostlesWar.Presentation/    a única pele: WinForms + WebView2 (net10.0-windows
 ApostlesWar.Tests/           xUnit — motor, capacidades, services, bot, e a Bancada de dano
 ```
 
-O motor não sabe desenhar nada: ele fala com a tela por portas. Foi assim que o front nasceu sem
-tocar nas regras — e é assim que outra pele nasceria.
+O motor não sabe desenhar nada: ele fala com a tela por portas. Foi assim que a interface nasceu
+sem tocar nas regras — e é assim que outra pele nasceria.
 
 **Documentação** em `docs/`: `ROADMAP-refatoracao.md` (fila de execução e manual de cenário),
 `CATALOGO-de-acoes.md`, `GDD-expansao.md` e os `ADR-*.md` com as decisões de arquitetura —
@@ -55,29 +56,33 @@ Balancear 36 personagens à mão é chute. Então a suíte de testes virou instr
 
 A cada `dotnet test`, a Bancada roda **o motor de verdade** — não um mock — mede as 36 fichas e
 reescreve `docs/bancada-dano.md`. O relatório é **versionado de propósito**: cada ajuste de número
-vira um `git diff` legível, e dá pra ver exatamente o que um buff em um personagem fez com a curva
-dos outros.
+vira um `git diff` legível, e dá pra ver o que um buff em um personagem fez com a curva dos outros.
 
-O desenho da bancada passou por revisão antes de existir: a primeira versão media dano contra um
-alvo com DEF 0, o que tornaria invisível qualquer passiva de penetração de defesa. Está registrado
-em ADR.
+O desenho da bancada foi corrigido antes de existir: a primeira proposta media dano contra um alvo
+com DEF 0, o que tornaria invisível qualquer passiva de penetração de defesa. Está registrado em ADR.
 
 ---
 
-## 🤖 Front-end e uso de IA
+## 🤖 Como este projeto foi construído
 
-A camada de apresentação (WebView2 + HTML/CSS/JS em `wwwroot/`) foi **implementada com assistência
-de IA, sob especificação e revisão minhas**. Parte dos commits é co-autorada, e está no histórico.
+Este repositório foi desenvolvido em colaboração com IA, e é honesto sobre isso — parte dos commits
+é co-autorada e está no histórico.
 
-Foi decisão de escopo, não atalho. Meu foco de estudo é back-end e arquitetura, e eu precisava de
-uma interface jogável para validar o comportamento do motor — ver o turno acontecer é diferente de
-ler o log dele. HTML, CSS e JavaScript são justamente o que ainda estou aprendendo, então o código
-do front fica como material de estudo para quando eu chegar nessa etapa.
+**O que é meu:** a arquitetura e o desenho das camadas, a especificação de comportamento de cada
+feature (escrita como sequência causal, não como "melhora isso"), a revisão crítica de cada
+iteração, o ajuste do código entregue, e a decisão de descartar o que não funcionou — inclusive
+coisas já aprovadas por mim. As decisões estão registradas nos ADRs e o processo está no histórico
+de PRs: um PR por tema, mergeado só depois da minha revisão.
 
-O que é integralmente meu: a arquitetura, a especificação de comportamento, a crítica de cada
-iteração e a decisão de descartar o que não funcionou. O contrato entre motor e pele são as portas
-em `Application/Portas/` — foi ele que permitiu delegar a implementação da interface sem que uma
-linha de regra de jogo fosse tocada.
+**O que foi assistido por IA:** a maior parte da implementação, incluindo a camada de apresentação
+(HTML/CSS/JS em `wwwroot/`) e a suíte de testes, ambas escritas a partir das minhas especificações
+e ajustadas por mim.
+
+Foi decisão de escopo. Meu foco de estudo atual é back-end e arquitetura, e o front usa justamente
+as tecnologias que ainda estou aprendendo — o código dele fica como material de estudo para quando
+eu chegar nessa etapa. O que permitiu delegar sem risco foram as portas em `Application/Portas/`:
+o contrato entre motor e pele é explícito, então a implementação da interface nunca tocou uma linha
+de regra de jogo.
 
 ---
 
@@ -132,7 +137,7 @@ e a magnitude, então o mesmo Elmo vale mais nos capítulos finais.
 
 ---
 
-## 💡 Conceitos C# aplicados
+## 💡 Conceitos C# aplicados no projeto
 
 `Classes e objetos` · `Encapsulamento` · `Herança` · `Polimorfismo` · `Classes abstratas` ·
 `Interfaces` · `Generics` · `List<T>` · `Dictionary<T>` · `Enum` · `Record` · `File I/O` ·
@@ -171,11 +176,13 @@ dotnet test
 
 [LinkedIn](https://www.linkedin.com/in/gabriel-henrique-ce) · [Portfólio](https://gabrielhenriquece.github.io/) · ga.biel.hce@gmail.com
 
+---
+
 ## 📄 Direitos
 
 © 2026 Gabriel Henrique Cé. Todos os direitos reservados.
 
 Este repositório é público para fins de portfólio e avaliação técnica. O código-fonte, a
 documentação, o design do jogo, os personagens e os cenários são de minha autoria e não estão
-licenciados para uso, cópia, modificação, redistribuição ou uso comercial sem autorização
-prévia por escrito.
+licenciados para uso, cópia, modificação, redistribuição ou uso comercial sem autorização prévia
+por escrito.

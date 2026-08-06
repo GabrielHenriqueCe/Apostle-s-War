@@ -234,6 +234,10 @@ document.getElementById('faseSortear').addEventListener('click', () => {
 // sentir que mudou de lugar entre ganhar o item e escolher o que fazer.
 let fimComOpcoes = false;
 
+/// A tela de fim de fase mostra os botoes (Jogar Novamente / Editar / Proxima) ou so o "clique pra
+/// continuar"? Quem pergunta e o Esc, la no jogo.js, pra saber o que "voltar" significa aqui.
+export const fimDeFaseTemOpcoes = () => fimComOpcoes;
+
 
 export const fimDeFase = {
     cena: 'fimDeFase',

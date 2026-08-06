@@ -26,7 +26,7 @@ let mostrarEstatisticas = true;   // hoje ligado: fase de teste de balance
 // ---------- fim de batalha (overlay por lado) ----------
 document.getElementById('fimBatalha').addEventListener('click', () => mandar('voltarMenu'));
 
-export function mostrarFim(lado, mensagem) {
+function mostrarFim(lado, mensagem) {
     const esq = document.querySelector('#fimEsq .fimMsg');
     const dir = document.querySelector('#fimDir .fimMsg');
     if (lado === 1 || lado === 2) {
@@ -144,7 +144,7 @@ function alvosDeConfirmacao() {
 // ---------- desenho ----------
 let confirmarAtuais = new Set();   // ids que podem confirmar a habilidade armada (recalc por quadro)
 
-function desenhar() {
+export function desenhar() {
     if (!estado) return;
 
     document.getElementById('turno').textContent = `Turno ${estado.turno}`;
@@ -631,3 +631,17 @@ document.getElementById('alternarLog').classList.toggle('ativo', mostrarLog);
 // O `#meio` também tem de nascer no estado certo: quem o escondia era só o clique do botão, então
 // com o log começando desligado a faixa dele ficaria à mostra até alguém clicar duas vezes.
 document.getElementById('meio').classList.toggle('oculto', !mostrarLog);
+
+
+// Clique no VAZIO da arena (fora de qualquer combatente) — o outro "clicar em outro lugar". Sem
+// isto, só o clique em cima de outro personagem desarmava, e o espaço entre os times não fazia nada.
+document.getElementById('arena').addEventListener('click', e => {
+    if (e.target.closest('.combatente')) return;   // esse clique já tem dono (clicarEmCombatente)
+    if (desarmar()) desenhar();
+});
+
+document.getElementById('alternarEstatisticas').addEventListener('click', e => {
+    mostrarEstatisticas = !mostrarEstatisticas;
+    e.currentTarget.classList.toggle('ativo', mostrarEstatisticas);
+    desenhar();
+});

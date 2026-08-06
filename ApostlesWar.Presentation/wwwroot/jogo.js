@@ -18,21 +18,20 @@ import * as especial from './cenarios/especial/especial.js';
 import * as decaidos from './cenarios/decaidos/decaidos.js';
 import * as apostolos from './cenarios/apostolos/apostolos.js';
 
-import { ar, montar } from './cenarios/tecnologicos/tecnologicos.js';
-import { arrastando, configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPickerArrastavel } from './ui/time.js';
 import { abrirTela, aoTrocarCena, cenaAgora, menuEhRaiz, mostrarCena } from './nucleo/cena.js';
-import { confirmar, fecharModal, modalAberto } from './ui/modal.js';
-import { entre } from './cenarios/comum/basicos.js';
 import { aplicarTema, registrarCenarios } from './nucleo/ar.js';
-export { aplicarTema };   // o seam por onde o harness entra (ferramentas/rodar-tema.js)
 import { mandar, ponte } from './nucleo/ponte.js';
+import { confirmar, fecharModal, modalAberto } from './ui/modal.js';
+
+import { menu } from './telas/menu.js';
+import { criarPerfil, edicaoPerfil } from './telas/perfil.js';
+import { montagemArena } from './telas/arena.js';
+import { campanhaFases, campanhaMapa, conquista, fimDeFase, fimDeFaseTemOpcoes } from './telas/campanha.js';
 import { arsenal } from './telas/arsenal.js';
 import { compendio, compendioChamp } from './telas/compendio.js';
-import { criarPerfil, edicaoPerfil } from './telas/perfil.js';
-import { avatarDoJogador, menu } from './telas/menu.js';
-import { montagemArena } from './telas/arena.js';
-import { campanhaFases, campanhaMapa, conquista, fimDeFase } from './telas/campanha.js';
-import { aplicarEstado, aplicarEvento, aplicarVelocidade, desarmar, estadoAtual, mostrarFim, nomeDaFase } from './telas/combate.js';
+import { aplicarEstado, aplicarEvento, aplicarVelocidade, desarmar, desenhar, estadoAtual, nomeDaFase } from './telas/combate.js';
+
+export { aplicarTema };   // o seam por onde o harness entra (ferramentas/rodar-tema.js)
 
 
 
@@ -122,7 +121,7 @@ function sairDaTela() {
 
     // Fim de fase: com as opções à mostra, sair é a decisão "Sair" (que faz o mesmo que Editar
     // Equipe — sair desta tela É voltar pra montagem). Na passagem da recompensa, sair é seguir.
-    if (cenaAgora() === 'fimDeFase') { mandar(fimComOpcoes ? 'voltar' : 'continuar'); return; }
+    if (cenaAgora() === 'fimDeFase') { mandar(fimDeFaseTemOpcoes() ? 'voltar' : 'continuar'); return; }
 
     // A conquista e a ficha dela: sair fecha o champ e devolve o comando ao C#, que segue pro
     // próximo champ novo ou pra tela de vitória.
@@ -157,7 +156,7 @@ function atualizarBotaoSair() {
     b.hidden = cenaAgora() === 'criarPerfil';
 
     const encerrando = cenaAgora() === 'combate' && estadoAtual()?.modo === 'campanha'
-        && nomeDaFase(estado) !== 'Fim';
+        && nomeDaFase(estadoAtual() || {}) !== 'Fim';
     b.title = encerrando ? 'Encerrar a batalha (Esc)' : 'Sair desta tela (Esc)';
 }
 
@@ -177,24 +176,11 @@ document.addEventListener('keydown', e => {
     // A tela de fim de fase COM opções fica de fora de propósito: ali cada botão faz uma coisa
     // diferente, e o Enter escolheria uma delas por conta própria.
     const passagem = (cenaAgora() === 'combate' && nomeDaFase(estadoAtual() || {}) === 'Fim')
-        || (cenaAgora() === 'fimDeFase' && !fimComOpcoes)
+        || (cenaAgora() === 'fimDeFase' && !fimDeFaseTemOpcoes())
         || cenaAgora() === 'conquista' || cenaAgora() === 'conquistaChamp'
         || cenaAgora() === 'compendioChamp';
 
     if (e.key === 'Escape' || (passagem && e.key === 'Enter')) sairDaTela();
-});
-
-// Clique no VAZIO da arena (fora de qualquer combatente) — o outro "clicar em outro lugar". Sem
-// isto, só o clique em cima de outro personagem desarmava, e o espaço entre os times não fazia nada.
-document.getElementById('arena').addEventListener('click', e => {
-    if (e.target.closest('.combatente')) return;   // esse clique já tem dono (clicarEmCombatente)
-    if (desarmar()) desenhar();
-});
-
-document.getElementById('alternarEstatisticas').addEventListener('click', e => {
-    mostrarEstatisticas = !mostrarEstatisticas;
-    e.currentTarget.classList.toggle('ativo', mostrarEstatisticas);
-    desenhar();
 });
 
 

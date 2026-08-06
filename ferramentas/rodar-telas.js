@@ -230,6 +230,15 @@ const TELAS = [
         for (const m of src.matchAll(/getElementById\(\s*['"`]([^'"`]+)['"`]/g)) idsNoCodigo.add(m[1]);
     }
 
+    // ---------- terminações de linha ----------
+    // Entrou na verificação porque eu quebrei isso duas vezes seguidas e quem acusou foi o Visual
+    // Studio, não eu: meus scripts detectam a quebra do arquivo de origem, mas o Edit e o sed nem
+    // sempre preservam. Arquivo misto não é cosmético — um `else if` já grudou num comentário e
+    // virou código comentado por causa disso.
+    const mistos = fontes.filter(f => (fs.readFileSync(f, 'utf8').match(/(^|[^\r])\n/g) || []).length);
+    console.log(`  terminações: ${fontes.length} arquivos · ${mistos.length} com CRLF e LF misturados`);
+    for (const f of mistos) queixar(`${path.relative(WWW, f)}: terminação de linha MISTA`);
+
     const faltando = [...idsNoCodigo].filter(i => !idsNoHtml.has(i));
     console.log(`\n  ids: ${idsNoCodigo.size} citados no código (${idsPedidos.size} exercitados nesta corrida)`
         + ` · ${faltando.length} sem elemento no index.html`);

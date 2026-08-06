@@ -493,7 +493,35 @@ lâmpada na areia e o dragão dando as voltas dele), ⭐ Especial (o banheiro p�
 INTERIOR), 🔱 Decaídos (a vila élfica vendida, com a Árvore do Mundo no meio escorrendo lava, e o
 Inferno se abrindo no chão de tempos em tempos) e ✝️ Apóstolos (a SALA de Natal — o segundo interior,
 com a árvore num canto, a lareira no outro e a nevasca vista por uma janela no meio). Falta 1
-facção (Humanos), e ela é um bloco de CSS mais um punhado de configuração.
+facção (Humanos) — e ela está **bloqueada de propósito**, pela seção logo abaixo. Barata ela segue
+sendo (um bloco de CSS mais um punhado de configuração); o que falta não é esforço, é ONDE ela
+aparece.
+
+#### Os HUMANOS ficam por último DE PROPÓSITO — e quem vai cobrar a pele é o COMPÊNDIO (ago/2026)
+
+Decisão do Gabriel, com o motivo e a hora. **Não há capítulo dos Humanos** — a campanha começa no
+👑 Reino —, e **está certo assim**: a facção do jogador não é fase pra vencer. Como o tema hoje só é
+pedido pela BATALHA (`EstadoDeBatalha.Tema`, que nasce do capítulo em que se luta), uma pele dos
+Humanos não teria hoje NENHUM lugar onde aparecer. Fazer agora seria desenhar uma cena que ninguém vê.
+
+**O que muda isso, e é o pedido dele:** no **COMPÊNDIO**, clicar num personagem passa a mostrar, ao
+fundo, **o cenário da facção/capítulo DELE**. Aí o tema deixa de ser propriedade da batalha e passa a
+ser propriedade da FACÇÃO — e a facção Humanos existe (são 4 champs), com capítulo ou sem. É esse
+recurso que cria a vaga para a 9ª pele, e é por ele que ela vai ser cobrada.
+
+**A ordem é essa, e não é gosto — é dependência:**
+1. **Separar o `jogo.js`** (a §DÍVIDA ANOTADA logo abaixo). É ela que faz "um cenário" virar coisa que
+   se pede por nome em vez de um trecho no meio de 11.920 linhas.
+2. **O fundo de facção no compêndio**, que consome a separação: o compêndio vai querer montar o ar de
+   um tema fora da batalha, e hoje quem faz isso é o `aplicarTema` chamado de dentro do fluxo de luta.
+3. **A pele dos Humanos**, por último, quando já existir a tela que a mostra.
+
+Fazer os Humanos ANTES seria pagar a pele duas vezes: ela nasceria no arquivo monolítico que o passo 1
+vai picar, e nasceria sem a tela que decide o enquadramento dela. **E o enquadramento é justamente o
+que está em aberto** — não sobra hora nenhuma (dia é do Reino, lua do cemitério, estrelas da invasão,
+âmbar do Folclore, crepúsculo da praia, luz-de-baixo do Inferno), então a resposta tem de vir de um
+LUGAR ou de um recorte, no caminho do ⭐ Especial e dos ✝️ Apóstolos. Ver a cena no compêndio primeiro
+provavelmente responde isso sozinho.
 
 **O que os ✝️ Apóstolos ensinaram**, além do que subiu nas listas acima. Esta pele custou TRÊS versões
 inteiras, e as duas que morreram ensinaram mais que a que ficou:
@@ -1023,11 +1051,22 @@ tarefa concorrente.** Reavaliar DEPOIS que `ui/` e `telas/` existirem, nunca ant
 16. 🔄 **REBALANCEAMENTO — EM ITERAÇÃO** (1ª passada mergeada no #189). Não é um item que "termina":
     a bancada (§BANCADA DE DANO) é o instrumento, e cada volta é ler os números e mexer numa
     alavanca. A passada 1 padronizou o cooldown em 3 e subiu os multiplicadores de faixa.
-    **Passo 0 (auditoria) — AINDA ABERTO:** reunir as constantes de balance num lugar só — a fórmula
-    do `MultiplicadorFase` (0.5×capítulo + 0.1×fase, repetida 3× no CombateService) e
-    `DefesaPorPontoReducao`/`ReducaoMaximaPorDefesa` (Combate.cs) — senão mexer em alavanca
-    vira caça ao tesouro. *(A fórmula do MultiplicadorFase sai daqui no PR de DIFICULDADE, que
-    precisa dela centralizada pra acrescentar o eixo da dificuldade.)*
+    **Passo 0 (centralizar as constantes) — NÃO é mais item próprio.** Ele foi ABSORVIDO pelo PR de
+    DIFICULDADE (decisão do Gabriel, ago/2026): reunir as constantes agora e mexer nelas depois é
+    tocar duas vezes nos mesmos arquivos, e a dificuldade é justamente quem precisa da fórmula
+    centralizada pra acrescentar o eixo dela. Um movimento só, quando o PR de dificuldade vier.
+    **O inventário, medido em ago/2026** (pra não recaçar):
+
+    | onde | constante | forma hoje |
+    |---|---|---|
+    | `Combate.cs:47-48` | `DefesaPorPontoReducao` 1000 · `ReducaoMaximaPorDefesa` .75 | `private const` |
+    | `Personagem.cs:12-13` | `TaxaCritBase` .15 · `DanoCritBase` .60 | `public const` |
+    | `CombateService.cs:586-588` | `0.5×capítulo + 0.1×fase` | **escrita 3×** (HP/ATK/DEF) |
+
+    A fórmula é o único item repetido, e é ela que ganha o `1.75×dificuldade`. **Cuidado ao mexer:**
+    `ReceberDanoTests.cs:26-27` tem uma CÓPIA das duas constantes de defesa — e ela deve CONTINUAR
+    cópia. O teste enuncia a regra por conta própria; apontá-lo pra constante central o tornaria
+    tautológico e mudar o balance deixaria de acusar nada.
 
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
@@ -1414,16 +1453,25 @@ velho aposentado). O que resta:
 2. **Estado de Vida (Vivo/Morto) + Atos do turno** — ✅ **Passos 1-5 FEITOS** (State Pattern,
    status no Morto, Atos, Guarda limpa, seleção de alvo por estado — PR #111). Falta só a
    passiva-conta-mortos (1b), que é do EventoDano.
-3. **Turno (resto)** — reset 1x-por-agressor do CONTRA-ATAQUE ✅ FEITO (#112). Falta o reset das
-   OUTRAS reações (Espinhos/Zumbi/Coco) + TimeAtualDoTurno (centralizar aliados/inimigos).
+3. **Turno (resto)** — ✅ **FEITO** *(verificado no código em ago/2026; o texto abaixo estava velho e
+   me fez listar como pendente algo pronto)*. O reset 1x-por-agressor do CONTRA-ATAQUE veio no #112, e
+   as OUTRAS reações também já usam o mesmo orçamento: `TurnoDoPersonagem.TentarReagir(chave, agressor,
+   chance)`, chamado pelo `EspinhosVenenosos` e pelo `Fedorento` do Cocô, coberto por
+   `ReacaoPorAgressorTests.cs` (mesmo agressor não repete no turno · agressor diferente dispara · chave
+   diferente dispara · vira o turno e reabre). O **Zumbi saiu da lista** porque não tem mais reação de
+   apanhar: a `PutrefacaoContagiosa` morreu no #12 e ele ganhou a Horda (`EscalaComMortos`). E o
+   **`TimeAtualDoTurno` não vai existir** — ele foi substituído no #11 pelo `Batalha.PerspectivaDe`,
+   que deriva aliados/inimigos da ESTRUTURA (qual equipe) em vez de guardar times no combatente.
 4. **Buff-permanente vs passiva-pura** — ✅ **FEITO** (#111/#112): 6 passivas puras + Fantasma
    (Removivel=false). Ver seção própria (marcada concluída).
-5. **Composição de Ações + Motor de Habilidades** — habilidade vira DADO (lista de Ações) rodada
-   por um interpretador único; **zero `Ativar` override**. Piloto per-alvo FEITO (#115); **MOTOR
-   FEITO (#116)** — loop-flip + Escopo/EstadoAlvo por ação + fragmentos de Valor, verificado em
-   jogo. Forma-construtor + champ-como-arquivo (Mago piloto) FEITOS. Agora: **sweep por facção**
-   (Nível A fundido — cada facção migra direto pra forma final, uma passada só).
-   Ver **ADR-composicao-de-acoes.md** (revisado). Predecessor do Rebalanceamento.
+5. **Composição de Ações + Motor de Habilidades** — ✅ **SWEEP CONCLUÍDO** *(verificado no código em
+   ago/2026; o texto que dizia "agora: sweep por facção" era resíduo do meio da migração)*. Habilidade
+   é DADO (lista de Ações) rodada por um interpretador único. A conferência: os **76 arquivos de champ
+   estão todos em `Champs/<Faccao>/<Champ>/`** (nenhum solto), e os únicos `override Ativar` que
+   restam são **8 arquivos `.Passiva.cs`** devolvendo `SemDano()` ou um efeito próprio — que é a forma
+   NORMAL de passiva, não sobra de ativa. **Nenhuma habilidade ATIVA tem `Ativar` override.**
+   Ver **ADR-composicao-de-acoes.md**. Era predecessor do Rebalanceamento, e por isso o #16 pôde
+   começar: mexer em número virou editar dado.
 6. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria,
    pós-composição.
 
@@ -1896,13 +1944,17 @@ existir.
 
 ---
 
-## Auditoria das habilidades ATIVAS — NÃO FEITA
+## Auditoria das habilidades ATIVAS — ✅ ENCERRADA SEM AÇÃO (ago/2026)
 
-**Status:** PENDENTE, avaliar uma vez. NÃO refatorar preventivamente.
-As ativas usam um modelo data-driven decente (ContextoCombate + metadados + Ativar).
-Aparentemente SEM a dor do C5. (O fio do revide-com-habilidade, que dependia parcialmente
-disso, já foi resolvido SEM precisar tocar a base de HabilidadeAtiva — IAtivavelComNatureza
-é ISP à parte.) Avaliar UMA vez se há dívida; se não houver dor, encerrar como "sem ação".
+**Status:** FECHADA. Era "avaliar UMA vez se há dívida; se não houver dor, encerrar como sem ação" —
+e a avaliação foi feita pelos fatos, não por opinião: a **Composição de Ações** (fio 5) passou por
+cima deste item e resolveu a dúvida por construção. As ativas não são mais "modelo data-driven
+decente com `Ativar`" — elas são DADO puro, lista de `Acao` rodada pelo interpretador, com **zero
+`Ativar` override** entre elas. Não há o que auditar: a pergunta "essas classes escondem dívida?"
+deixou de ter sujeito.
+
+O fio do revide-com-habilidade, que dependia parcialmente disto, já tinha se resolvido sozinho sem
+tocar a base de `HabilidadeAtiva` (`IAtivavelComNatureza` é ISP à parte).
 
 ---
 

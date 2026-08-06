@@ -1,0 +1,98 @@
+/* 👑 REINO — a cidade murada sob cerco, de DIA (o único tema claro).
+
+   Carregado DEPOIS do estilo.css (ver index.html). A escada de @media do fim deste arquivo é
+   a que encolhe o ladrilho em janela baixa, e ela vem depois do bloco base DESTE tema — que é
+   a ordem que importa. Os valores dela são px CRUS de propósito: o JS os lê com parseFloat, e
+   min()/clamp()/vh voltariam como texto, virariam NaN e cairiam no padrão EM SILÊNCIO. */
+
+/* ---------- 👑 REINO — a cidade murada, de dia ----------
+   Era o salão do trono (colunas, damasco, chão de pedra). Virou CAMPO ABERTO diante do castelo, e a
+   troca vale por duas razões: os exércitos que atiram das bordas passaram a fazer sentido — isto é
+   um cerco, não uma sala — e o tema entrou na mesma língua dos outros, que são todos paisagem.
+
+   E é o único tema DE DIA. Os outros dois são noite (cemitério, invasão), então o Reino ser claro
+   não é só variedade: é o contraste que faz o resto parecer escuro de propósito. Aqui a paleta pode
+   ter COR de verdade — telhado vermelho, bandeira, grama — porque de dia a cor não precisa competir
+   com fonte de luz nenhuma.
+
+   A muralha, as torres e as casas são desenhadas no canvas (ver `castelo` no jogo.js) porque a
+   composição é NOMEADA (castelo no meio, muro pros dois lados) e nome não sobrevive a ladrilho que
+   repete. O CSS aqui fica só com o céu. */
+body[data-tema="reino"] {
+    --fundo: #6d9dc8;
+    --painel: #1b2440;
+    --borda: #46557f;
+    --apagado: #9aa6c4;
+}
+
+body[data-tema="reino"] #arena {
+    /* `relative` ancora os estandartes; `isolate` cria o contexto de empilhamento que os deixa
+       ficar ATRÁS do time (z -1) sem sumir atrás do próprio fundo. Sem ele, o `::after` — que é o
+       último filho — pintaria POR CIMA dos combatentes da direita. */
+    position: relative;
+    isolation: isolate;
+    background:
+        /* 1. vinheta LEVE: de dia ela só assenta os cantos, não pode escurecer a cena */
+        radial-gradient(ellipse 125% 95% at 50% 45%, transparent 52%, rgba(28, 44, 82, .34) 100%),
+        /* 2. o sol, alto à direita */
+        radial-gradient(circle 90px at 76% 13%, rgba(255, 250, 214, .95), rgba(255, 244, 190, .35) 42%, transparent 70%),
+        /* 3. o céu de dia: azul forte em cima, clareando até a bruma do horizonte */
+        linear-gradient(180deg, #3f77bd 0%, #6ba2d6 44%, #a9cbe4 76%, #d3e3e8 100%);
+    background-size: cover, cover, cover;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-position: center, center, center;
+}
+
+/* Estandartes pendurados: dois panos caindo do teto, um de cada lado, atrás dos times. Ficam no
+   `::before`/`::after` da arena porque são CENÁRIO — não entram no fluxo nem empurram combatente. */
+body[data-tema="reino"] #arena::before,
+body[data-tema="reino"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 92px; height: 46%;
+    /* As listras horizontais que havia aqui SAÍRAM. Elas eram do tempo do salão do trono, quando o
+       estandarte era pano pendurado numa parede e as linhas liam como as dobras dele; contra o céu
+       aberto, com o pano a 55% de opacidade, o que se via era um pente de riscos escuros aparecendo
+       por dentro da bandeira. Detalhe que sobrevive a uma troca de cenário sem ser reexaminado quase
+       sempre vira isto — um ruído que ninguém sabe explicar. */
+    background: linear-gradient(180deg, #7d1122 0%, #5c0d1a 78%, transparent 100%);
+    border-left: 2px solid rgba(217, 180, 91, .35);
+    border-right: 2px solid rgba(217, 180, 91, .35);
+    /* a ponta em V do pano */
+    clip-path: polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%);
+    opacity: .55;
+    pointer-events: none;
+    z-index: -1;   /* parede, não plateia: fica atrás dos combatentes (ver isolation acima) */
+}
+
+body[data-tema="reino"] #arena::before { left: 4%; }
+
+body[data-tema="reino"] #arena::after { right: 4%; }
+
+/* A moldura de ouro: filete no alto e no pé do salão, separando parede/piso das barras de UI. */
+body[data-tema="reino"] #topo { border-bottom: 2px solid rgba(217, 180, 91, .5); }
+
+body[data-tema="reino"] #painel { border-top: 2px solid rgba(217, 180, 91, .5); }
+
+body[data-tema="reino"] #topo,
+body[data-tema="reino"] #painel {
+    background:
+        linear-gradient(180deg, rgba(217, 180, 91, .07) 0%, transparent 60%),
+        var(--painel);
+}
+
+/* Os combatentes ganham o brasão do salão: caixa mais quente e uma sombra que os separa do fundo.
+   O tamanho NÃO muda — os dois lados são espelhos, e mexer nisso quebraria a regra da arena. */
+body[data-tema="reino"] .combatente {
+    background: linear-gradient(180deg, rgba(40, 50, 96, .82), rgba(18, 24, 52, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+}
+
+/* O log vira pergaminho: escuro e quente em vez de escuro e frio, com fio dourado. */
+body[data-tema="reino"] #log {
+    background: linear-gradient(180deg, rgba(30, 24, 14, .55), rgba(18, 15, 10, .55));
+    border-color: rgba(217, 180, 91, .28);
+}
+
+/* Turno e barras de vida seguem legíveis: só o que era lilás vira dourado. */
+body[data-tema="reino"] .selo.buff { border-color: rgba(217, 180, 91, .45); }

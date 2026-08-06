@@ -17,11 +17,16 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   linhas variando UM fator por vez — por-habilidade e champ-inteiro × alvo imune/não-imune a malefícios
   × DEF 0/no cap. Zero mudança no motor. A seguir: **LER os números e rebalancear (#16)** — a bancada é
   o instrumento, o ajuste é o trabalho. Aberto: o #15 (faxina de comentários).
-- **Frente aberta em paralelo (jul-ago/2026): os CENÁRIOS por capítulo.** Oito peles prontas, falta 1
-  (Humanos) — ver a seção "Fazer o CENÁRIO de uma facção" no fim deste arquivo. Custa
-  zero C#. Anotada no ROADMAP como **dívida prevista**: o `jogo.js` passou de 7 mil linhas e o cenário
-  é ~70% delas, com a fronteira (`aplicarTema`) já pronta pra virar arquivo por tema — quando o
-  Gabriel decidir pagar.
+- **O front foi SEPARADO (ago/2026): `jogo.js` 11.921 → 2.070 linhas.** Cada facção mora em
+  `wwwroot/cenarios/<faccao>/<faccao>.js`, o compartilhado em `cenarios/comum/`, e o `AR_DO_TEMA`
+  virou um registro de 8 linhas. Duas ferramentas ficaram: **`ferramentas/rodar-tema.js`** (harness
+  headless — roda a FIAÇÃO real dos 8 temas, pega cena em branco e NaN; usar `node
+  --experimental-vm-modules`) e **`ferramentas/medir-donos.js`** (grafo de donos, com `--porque
+  <tema> <funcao>`). **Rodar o harness depois de QUALQUER mexida em cenário.** Cada pasta leva os TRÊS (js, css,
+  config). Falta: inverter a dependência do `iniciarAr` (ele ainda importa os 8) e mover `telas/`.
+- **A 9ª pele (Humanos) está BLOQUEADA de propósito** — não há capítulo Humanos, então ela não teria
+  onde aparecer. Quem cria a vaga é o fundo de facção no COMPÊNDIO. Ver ROADMAP §CENÁRIO POR CAPÍTULO.
+  A **Arena** também vai ganhar cenário próprio — é o 1º tema que não é facção.
 
 ## Como trabalhamos
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar
@@ -136,6 +141,11 @@ ruim" em jogo.**
 **A receita, em uma linha:** o tema é `faccao.ToString().ToLowerInvariant()` → `body[data-tema]`, e
 custa **zero C#** — um bloco de CSS mais uma entrada de configuração. Tema sem CSS e sem entrada no
 `AR_DO_TEMA` simplesmente luta no visual padrão (foi assim que o Folclore saiu inteiro no #199).
+
+**Depois da separação (ago/2026) isso virou:** criar `wwwroot/cenarios/<faccao>/<faccao>.js` com
+`export const ar = {...}` e os builders, e pôr **uma linha** no registro `AR_DO_TEMA` do `jogo.js`.
+Mais o `<faccao>.css` na mesma pasta (e o `<link>` no index.html). **E rodar
+`node --experimental-vm-modules ferramentas/rodar-tema.js` antes de pedir conferência em jogo.**
 
 **As decisões que vêm ANTES de desenhar qualquer coisa:**
 - **Que assinatura sobrou.** Dia claro é do Reino, lua do cemitério, estrelas da invasão, âmbar do

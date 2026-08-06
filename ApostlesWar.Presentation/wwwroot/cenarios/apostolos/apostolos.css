@@ -1,0 +1,150 @@
+/* ✝️ APÓSTOLOS — a sala de Natal, a paisagem vista por um RECORTE.
+
+   Carregado DEPOIS do estilo.css (ver index.html). A escada de @media do fim deste arquivo é
+   a que encolhe o ladrilho em janela baixa, e ela vem depois do bloco base DESTE tema — que é
+   a ordem que importa. Os valores dela são px CRUS de propósito: o JS os lê com parseFloat, e
+   min()/clamp()/vh voltariam como texto, virariam NaN e cairiam no padrão EM SILÊNCIO. */
+
+/* ---------- ✝️ APÓSTOLOS — a sala de Natal ----------
+   O oitavo e ÚLTIMO capítulo, e o SEGUNDO interior do front (o primeiro é o banheiro do ⭐ Especial).
+
+   Ele chegou aqui pela terceira tentativa, e as duas que morreram estão registradas de propósito —
+   é a parte que o código não mostra:
+
+   1ª, a CATEDRAL na nevasca, com uma rosácea acesa e um sino regendo a cena num maestro de SOM. O
+      argumento era bom no papel (luz que ATRAVESSA um vidro colorido em vez de emitir, o que inverte
+      até a ordem de pintura: o feixe tem de vir ANTES da parede de onde ele sai) e a peça estava
+      errada mesmo assim — prédio no meio da neve lê como arquitetura, não como Natal.
+   2ª, a ÁRVORE DE NATAL sozinha no meio da nevasca: "ficou vazio". Uma árvore acesa num descampado
+      não tem com o que conversar, e a cena inteira virava um objeto e um fundo.
+
+   O que consertou foi o Gabriel virar a coisa do avesso: em vez de pôr o Natal no meio da neve, pôr a
+   neve do lado de FORA de uma janela. A nevasca continua ali — é a mesma paisagem das duas rodadas
+   mortas —, só que agora ela é o que se VÊ de dentro de casa, e a casa é o que dá assunto pra árvore.
+
+   A assinatura, portanto, não é uma hora nem um lugar: é o RECORTE. Das oito peles, esta é a única em
+   que a paisagem aparece por um buraco.
+
+   E é a única cena do jogo com um ROTEIRO — a estrela brilha, o trenó cruza a janela, o fogo apaga,
+   ele desce pela chaminé, o presente vai parar debaixo da árvore empurrando outro pra fora, ele sobe
+   e passa de volta. Isso é tudo canvas (ver o `criarRoteiroDaNoite` no jogo.js); daqui só sai a SALA,
+   que é textura que repete e por isso é CSS: a parede, o papel de parede, o rodapé e o assoalho.
+
+   O `--sala-chao` é a linha do piso, em % da arena, e é DELE que saem o pé da árvore, a base da
+   lareira e onde os presentes pousam. Número puro (e não px), então escala sozinho com a janela e
+   este tema fica fora da escada de @media do fim desta seção — a mesma razão dos 🐉 Místicos. */
+body[data-tema="apostolos"] {
+    --fundo: #170f12;
+    --painel: #241a1c;
+    --borda: #4a332e;
+    --apagado: #d8bfa8;
+}
+
+body[data-tema="apostolos"] #arena {
+    position: relative;
+    isolation: isolate;
+
+    --sala-chao: 74;
+
+    background:
+        /* 1. vinheta QUENTE: aqui ela não fecha uma noite, fecha um cômodo — o preto puro chaparia a
+              madeira, então o canto escurece pro marrom. */
+        radial-gradient(ellipse 116% 96% at 50% 52%, transparent 32%, rgba(12, 6, 8, .86) 100%),
+        /* 2. as juntas do ASSOALHO. Recortadas na faixa do piso pelo `background-size` — a tábua não
+              pode subir pela parede. */
+        repeating-linear-gradient(90deg, rgba(0, 0, 0, 0) 0 88px, rgba(0, 0, 0, .32) 88px 92px),
+        /* 3. a madeira do piso, opaca, pra o papel de parede não vazar por baixo das juntas. */
+        linear-gradient(180deg, #4a3226 0%, #33231c 100%),
+        /* 4. o PAPEL DE PAREDE: quatro-pontas e pontinhos, no tom da própria parede e quase invisível.
+              Ele existe pra a parede não ser uma chapa lisa — num interior é a textura que diz que
+              aquilo é uma casa e não um fundo. Forte, competiria com a árvore, que é quem manda aqui. */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84' viewBox='0 0 84 84'%3E%3Cg fill='%234b333a' opacity='.55'%3E%3Cpath d='M21 14Q21 21 28 21Q21 21 21 28Q21 21 14 21Q21 21 21 14Z'/%3E%3Cpath d='M63 56Q63 63 70 63Q63 63 63 70Q63 63 56 63Q63 63 63 56Z'/%3E%3Ccircle cx='63' cy='21' r='2.2'/%3E%3Ccircle cx='21' cy='63' r='2.2'/%3E%3C/g%3E%3C/svg%3E"),
+        /* 5. a PAREDE e o RODAPÉ. As paradas duras saem do `--sala-chao`: o rodapé é a faixa logo
+              acima da linha do piso, e é ele que faz a parede ENCOSTAR no chão em vez de as duas cores
+              se encontrarem num corte seco. Sem ele a sala não tem quina, e sem quina não tem canto. */
+        linear-gradient(180deg,
+            #1e1418 0%,
+            #33232a 44%,
+            #3a2830 calc(var(--sala-chao) * 1% - 3.4%),
+            #241a1e calc(var(--sala-chao) * 1% - 3.4%),
+            #191113 calc(var(--sala-chao) * 1%),
+            #191113 100%);
+    background-size:
+        cover,
+        100% calc(100% - var(--sala-chao) * 1%),
+        100% calc(100% - var(--sala-chao) * 1%),
+        84px 84px,
+        cover;
+    background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+    background-position: center, left bottom, left bottom, left top, center;
+}
+
+/* A GUIRLANDA que desce pelo canto, com as MEIAS e as BENGALINHAS presas nela — onde o Reino tem
+   estandartes, o cemitério tem teias, a invasão tem cabos, o Folclore tem cipós, os Místicos têm algas
+   com conchas, o banheiro tem canos e os Decaídos têm galhos ardendo. Mesmo gancho, oitava história.
+
+   Aqui morou GELO por duas rodadas, e ele nunca funcionou. Três versões de sincelo (reto, depois curvo
+   com gota na ponta, depois grosso e mal-espaçado) e todas leram como serrilha — o que só ficou óbvio
+   quando a cena virou interior: sincelo pendurado no teto da SALA nunca fez sentido nenhum, e nenhuma
+   quantidade de traço conserta uma peça que está no lugar errado.
+
+   Meia e bengalinha resolvem porque são as duas silhuetas que ninguém confunde — a mesma razão da
+   vieira na praia dos Místicos: elas não precisam ser lidas, são RECONHECIDAS.
+
+   Elas ficaram enfileiradas no alto, penduradas num cordão fininho, e o canto lia como quatro objetos
+   flutuando lado a lado. Duas tentativas de consertar isso com UMA trepadeira falharam — primeiro uma
+   diagonal (que é um cabo, não uma planta), depois um S (que serpenteia, e mesmo assim não amarrava
+   nada).
+
+   O que resolveu foi ir ver como os outros sete cantos são feitos, e o padrão é o mesmo nos que
+   funcionam: as algas dos 🐉 Místicos são TRÊS fitas saindo da borda de cima, cada uma com o seu
+   comprimento e o seu serpenteio; os galhos dos 🔱 Decaídos são DOIS ramos partindo do topo, em pesos
+   de traço diferentes, com galhinhos soltos pendurados neles. Nenhum dos dois é uma linha só. É a
+   REPETIÇÃO que dá massa ao canto — uma mecha sozinha é um risco, quatro mechas são uma moita
+   entrando pela quina —, e é por isso que uma trepadeira única nunca ia funcionar por melhor
+   desenhada que estivesse.
+
+   Aqui são QUATRO mechas de comprimentos bem diferentes, e cada uma segura UM enfeite na ponta. Um
+   item por mecha, e nenhum encostando no outro: com dois na mesma mecha eles brigam, e sobrepostos
+   viram uma mancha. A bengala é predominantemente VERMELHA (a listra cobre dois terços do bastão, não
+   metade) — branco demais e ela some contra a meia, que já é a peça clara. */
+body[data-tema="apostolos"] #arena::before,
+body[data-tema="apostolos"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 138px; height: 38%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='138' height='220' viewBox='0 0 138 220' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%231f4230' stroke-width='10' stroke-linecap='round'%3E%3Cpath d='M12 0C20 18 4 34 22 58'/%3E%3Cpath d='M44 0C52 26 34 48 42 74C48 94 46 100 52 116'/%3E%3Cpath d='M76 0C84 14 70 28 84 52'/%3E%3Cpath d='M110 0C118 26 100 46 108 74C114 96 100 116 106 134'/%3E%3C/g%3E%3Cg fill='none' stroke='%232f6a45' stroke-width='5' stroke-linecap='round'%3E%3Cpath d='M12 0C20 18 4 34 22 58'/%3E%3Cpath d='M44 0C52 26 34 48 42 74C48 94 46 100 52 116'/%3E%3Cpath d='M76 0C84 14 70 28 84 52'/%3E%3Cpath d='M110 0C118 26 100 46 108 74C114 96 100 116 106 134'/%3E%3C/g%3E%3Cg fill='none' stroke='%232f6a45' stroke-width='3.6' stroke-linecap='round'%3E%3Cpath d='M16 16L6 10'/%3E%3Cpath d='M16 16L26 12'/%3E%3Cpath d='M12 36L2 32'/%3E%3Cpath d='M12 36L22 30'/%3E%3Cpath d='M48 20L38 14'/%3E%3Cpath d='M48 20L58 16'/%3E%3Cpath d='M38 50L28 44'/%3E%3Cpath d='M38 50L48 46'/%3E%3Cpath d='M46 92L36 88'/%3E%3Cpath d='M46 92L56 88'/%3E%3Cpath d='M80 14L70 8'/%3E%3Cpath d='M80 14L90 10'/%3E%3Cpath d='M76 32L66 28'/%3E%3Cpath d='M76 32L86 28'/%3E%3Cpath d='M114 20L104 14'/%3E%3Cpath d='M114 20L124 16'/%3E%3Cpath d='M104 50L94 44'/%3E%3Cpath d='M104 50L114 46'/%3E%3Cpath d='M106 96L96 92'/%3E%3Cpath d='M106 96L116 92'/%3E%3C/g%3E%3Cg fill='none' stroke='%2357a06b' stroke-width='2.2' stroke-linecap='round' opacity='.75'%3E%3Cpath d='M10 26L0 22'/%3E%3Cpath d='M44 36L54 30'/%3E%3Cpath d='M44 104L34 100'/%3E%3Cpath d='M78 22L88 18'/%3E%3Cpath d='M102 62L92 58'/%3E%3Cpath d='M110 112L120 108'/%3E%3C/g%3E%3Cg fill='%23b8323c'%3E%3Ccircle cx='18' cy='26' r='2.8'/%3E%3Ccircle cx='44' cy='62' r='2.8'/%3E%3Ccircle cx='82' cy='38' r='2.8'/%3E%3Ccircle cx='110' cy='60' r='2.8'/%3E%3Ccircle cx='104' cy='110' r='2.8'/%3E%3C/g%3E%3Cg fill='%23a82f38'%3E%3Cpath d='M14 67L30 67L30 88L44 94Q49 96 48 102Q46 108 40 106L20 99Q14 97 14 88Z'/%3E%3Cpath d='M96 141L112 141L112 162L126 168Q131 170 130 176Q128 182 122 180L102 173Q96 171 96 162Z'/%3E%3C/g%3E%3Cg fill='%23eef4ff'%3E%3Cpath d='M12 58L32 58L32 67L12 67Z'/%3E%3Cpath d='M94 132L114 132L114 141L94 141Z'/%3E%3C/g%3E%3Cg fill='none' stroke='%23f2f6ff' stroke-width='7' stroke-linecap='round'%3E%3Cpath d='M52 154L52 124Q52 114 60 114Q68 114 68 122'/%3E%3Cpath d='M84 90L84 60Q84 50 92 50Q100 50 100 58'/%3E%3C/g%3E%3Cg fill='none' stroke='%23c0392f' stroke-width='7' stroke-dasharray='10 5'%3E%3Cpath d='M52 154L52 124Q52 114 60 114Q68 114 68 122'/%3E%3Cpath d='M84 90L84 60Q84 50 92 50Q100 50 100 58'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    pointer-events: none;
+    z-index: -1;
+}
+
+body[data-tema="apostolos"] #arena::before { left: 0; }
+
+body[data-tema="apostolos"] #arena::after { right: 0; transform: scaleX(-1); }
+
+/* O fio da interface é o OURO da estrela, e não o vermelho do Natal: vermelho na moldura brigaria com
+   o terno do Papai Noel e com as caixas de presente, que são as duas coisas vermelhas que precisam ser
+   vistas. */
+body[data-tema="apostolos"] #topo { border-bottom: 2px solid rgba(224, 186, 116, .44); }
+
+body[data-tema="apostolos"] #painel { border-top: 2px solid rgba(224, 186, 116, .44); }
+
+body[data-tema="apostolos"] #topo,
+body[data-tema="apostolos"] #painel {
+    background:
+        linear-gradient(180deg, rgba(224, 186, 116, .08) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="apostolos"] .combatente {
+    background: linear-gradient(180deg, rgba(62, 42, 40, .84), rgba(28, 18, 20, .84));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+}
+
+/* O log vira o PAPEL DE EMBRULHO: vermelho fosco com o fio dourado da fita. O pergaminho do Reino é
+   seco, o caderno do Folclore é queimado, a água funda dos Místicos é molhada, o azulejo do banheiro é
+   sujo e o pacto dos Decaídos é couro — este é o único que existe pra ser RASGADO. */
+body[data-tema="apostolos"] #log {
+    background: linear-gradient(180deg, rgba(74, 24, 28, .62), rgba(34, 12, 14, .62));
+    border-color: rgba(224, 186, 116, .32);
+}

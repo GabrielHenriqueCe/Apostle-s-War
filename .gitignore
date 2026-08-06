@@ -369,3 +369,4 @@ FodyWeavers.xsd
 /itens.txt
 # launchSettings do Visual Studio (era do csproj raiz, que virou os projetos por camada)
 /Properties/
+ferramentas/donos.json

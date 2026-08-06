@@ -1,0 +1,185 @@
+/* 🪬 FOLCLORE — a clareira com a fogueira, na noite quente.
+
+   Carregado DEPOIS do estilo.css (ver index.html). A escada de @media do fim deste arquivo é
+   a que encolhe o ladrilho em janela baixa, e ela vem depois do bloco base DESTE tema — que é
+   a ordem que importa. Os valores dela são px CRUS de propósito: o JS os lê com parseFloat, e
+   min()/clamp()/vh voltariam como texto, virariam NaN e cairiam no padrão EM SILÊNCIO. */
+
+/* ---------- 🪬 FOLCLORE — a mata fechada, e a fogueira no meio dela ----------
+   O quarto, e o primeiro que não é sobre um LUGAR: folclore não é uma paisagem, é o que se CONTA.
+   Daí a composição — uma clareira e uma fogueira, com os quatro champs presentes só pelo SINAL de
+   cada um (chifres, clava, corvos, cartas). O que o CSS entrega é a mata e a luz; tudo que acontece
+   dentro da clareira é canvas — ver a entrada `folclore` do `AR_DO_TEMA` no jogo.js.
+
+   A NOITE QUENTE é a decisão de paleta que sustenta o tema inteiro. Os outros três já ocuparam o dia
+   claro (Reino), a noite verde-fria (cemitério) e a noite azul-neon (invasão); sobrou o âmbar, e ele
+   cai bem porque aqui a fonte de luz é FOGO — a única do jogo que é quente por natureza em vez de
+   por escolha. Dá pra reconhecer o capítulo de relance, que é o teste real de um tema.
+
+   Uma fonte de luz SÓ. Não há lua aqui de propósito: lua e fogueira brigariam pelo mesmo trabalho, e
+   a que perdesse viraria enfeite. Sem estrelas pelo mesmo motivo (e elas são dos Tecnológicos).
+
+   O céu esquenta de cima pra baixo até o pé da mata, e o CLARÃO do fogo é listado DEPOIS do ladrilho
+   — ou seja, pinta ATRÁS dele — pra as árvores serem recortadas contra a luz. É o que transforma o
+   ladrilho de "desenho de árvore" em silhueta de mata. */
+body[data-tema="folclore"] {
+    --fundo: #170d09;
+    --painel: #24160f;
+    --borda: #4c2f20;
+    --apagado: #c6a281;
+}
+
+body[data-tema="folclore"] #arena {
+    position: relative;
+    isolation: isolate;
+
+    /* O ladrilho da mata. As MOITAS (de onde o Oni e o Troll levantam) NÃO estão aqui — elas são
+       canvas, porque precisam ter ENDEREÇO: "aquela moita ali" não existe num ladrilho que repete, já
+       que a cada repetição existe uma cópia idêntica dela na tela.
+
+       O passo encolheu de 460 pra 372 e o ladrilho ficou mais alto (290 → 360), com os troncos subindo
+       junto — o Gabriel pediu as árvores "melhores e mais altas" e apontou que "tem bem poucas árvores,
+       então o efeito fica ruim de qualquer jeito". Passo menor = mais repetições na largura da tela:
+       numa arena de 1600px são ~4,3 ladrilhos, ou seja ~17 árvores em vez das ~10 de antes.
+
+       Em PX CRUS, e as faixas de altura estão no @media do fim desta seção — ver o comentário de lá
+       pra saber por que `min()`/`vh` não serve aqui. */
+    --floresta-passo: 372px;
+    --floresta-altura: 360px;
+
+    background:
+        /* 1. vinheta quente: fecha os cantos sem esfriar a cena (o preto puro mataria o âmbar) */
+        radial-gradient(ellipse 118% 96% at 50% 42%, transparent 34%, rgba(14, 6, 3, .9) 100%),
+        /* 2. a MATA. Uma árvore aqui é TRÊS COISAS e só: tronco, galhos, folhas no topo. Quatro árvores
+              por ladrilho, em alturas diferentes, mais o capim no rodapé.
+
+              Nada de fileira de copas atrás. Existiu uma (um segundo grupo em `#2a1608`, cinco copas
+              soltas pra dar profundidade) e ela incomodou o Gabriel em três rodadas seguidas até ele
+              pedir pra tirar. Saiu, e não volta: copa sem tronco não lê como árvore distante, lê como
+              mancha no horizonte. Se um dia faltar profundidade, o caminho é árvore INTEIRA menor —
+              tronco, galho e folha, as mesmas três coisas —, nunca copa avulsa.
+
+              Nada cruza a borda do ladrilho (toda forma vive dentro de [6, 364]): o que sai do viewBox é
+              RECORTADO, e por isso as copas antigas, que passavam de x=0 e x=372, faziam cada emenda do
+              `repeat-x` mostrar um corte reto vertical de 372 em 372px.
+
+              Um grupo, uma cor (`#0d0705`). Silhueta pura: a esta distância, volume viraria borrão. */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='372' height='360' viewBox='0 0 372 360'%3E%3Cg fill='%230d0705'%3E%3Cpath d='M81 360L84 252H90L93 360Z'/%3E%3Cpath d='M84 276L72 264L75 272L85 283Z'/%3E%3Cpath d='M60 244Q56 224 72 216Q78 206 92 210Q108 210 112 226Q116 240 106 248Q104 262 86 264Q66 264 62 254Z'/%3E%3Cpath d='M167 360L170 268H176L179 360Z'/%3E%3Cpath d='M176 290L189 278L186 287L177 297Z'/%3E%3Cpath d='M148 258Q144 240 158 232Q164 222 178 226Q192 226 196 240Q200 252 190 260Q188 272 172 274Q154 274 150 266Z'/%3E%3Cpath d='M253 360L256 244H262L265 360Z'/%3E%3Cpath d='M256 268L243 256L246 265L257 276Z'/%3E%3Cpath d='M232 236Q228 216 244 208Q250 198 264 202Q280 202 284 218Q288 232 278 240Q276 254 258 256Q238 256 234 246Z'/%3E%3Cpath d='M335 360L338 262H344L347 360Z'/%3E%3Cpath d='M344 284L357 272L354 281L345 291Z'/%3E%3Cpath d='M316 254Q312 236 326 228Q332 218 346 222Q360 222 364 236Q368 248 358 256Q356 268 340 270Q322 270 318 262Z'/%3E%3Cpath d='M36 360L41 152H51L56 360Z'/%3E%3Cpath d='M41 204L24 186L28 196L42 212Z'/%3E%3Cpath d='M51 234L66 218L63 228L52 242Z'/%3E%3Cpath d='M12 130Q6 102 28 90Q34 74 56 78Q80 76 88 98Q94 118 84 134Q84 152 58 156Q26 156 14 142Z'/%3E%3Cpath d='M121 360L126 198H135L140 360Z'/%3E%3Cpath d='M135 244L149 230L146 239L136 251Z'/%3E%3Cpath d='M100 180Q96 158 114 148Q120 136 138 140Q156 140 162 156Q168 172 160 184Q160 200 138 204Q112 204 102 192Z'/%3E%3Cpath d='M209 360L215 98H226L232 360Z'/%3E%3Cpath d='M215 154L197 134L201 145L216 162Z'/%3E%3Cpath d='M226 189L245 170L242 181L227 197Z'/%3E%3Cpath d='M182 76Q176 46 202 32Q210 14 236 20Q262 20 270 44Q278 66 266 84Q266 106 236 110Q198 110 186 92Z'/%3E%3Cpath d='M311 360L315 162H325L329 360Z'/%3E%3Cpath d='M315 214L300 198L303 208L316 222Z'/%3E%3Cpath d='M288 142Q282 116 302 104Q308 90 328 94Q350 94 358 114Q364 132 354 148Q354 166 328 170Q298 170 290 156Z'/%3E%3Cpath d='M12.9 360Q13.4 343 14.4 329Q15 344.5 16.4 360Z'/%3E%3Cpath d='M17.4 360Q16 330.3 12.6 306Q18.4 333 21.8 360Z'/%3E%3Cpath d='M33.8 360Q36.6 320.8 43 288.8Q37.8 324.4 37.2 360Z'/%3E%3Cpath d='M42.9 360Q43 322.1 43.2 291.2Q45.1 325.6 47.2 360Z'/%3E%3Cpath d='M54.7 360Q50.9 328.6 42 303Q53.6 331.5 58.8 360Z'/%3E%3Cpath d='M63.4 360Q58.9 318.4 48.5 284.3Q62.3 322.2 68.6 360Z'/%3E%3Cpath d='M77.4 360Q79 325.5 82.6 297.2Q81.7 328.6 83.5 360Z'/%3E%3Cpath d='M87.4 360Q85.4 322.4 80.7 291.6Q87.4 325.8 90.7 360Z'/%3E%3Cpath d='M97.2 360Q96.4 326.6 94.7 299.3Q99.2 329.7 102.5 360Z'/%3E%3Cpath d='M108.8 360Q110.1 320.4 113.1 288Q112.7 324 114.4 360Z'/%3E%3Cpath d='M117.6 360Q117.5 343.2 117.3 329.4Q119.6 344.7 121.8 360Z'/%3E%3Cpath d='M127.3 360Q125.6 318.6 121.5 284.7Q128.8 322.4 133.2 360Z'/%3E%3Cpath d='M134.1 360Q138 331 147.1 307.2Q139.9 333.6 139.2 360Z'/%3E%3Cpath d='M150.8 360Q154.7 321.1 163.8 289.2Q155.9 324.6 154.6 360Z'/%3E%3Cpath d='M154.4 360Q151.6 339.2 145 322.1Q155 341.1 160.2 360Z'/%3E%3Cpath d='M170.9 360Q171.2 345.4 172 333.5Q174 346.7 176.5 360Z'/%3E%3Cpath d='M175.9 360Q178 325.8 182.7 297.9Q180.2 329 181.2 360Z'/%3E%3Cpath d='M185.6 360Q183.8 344 179.6 330.9Q187 345.5 191.4 360Z'/%3E%3Cpath d='M203.5 360Q204.5 328.8 207 303.3Q206.5 331.6 207.8 360Z'/%3E%3Cpath d='M207.7 360Q209.5 315 213.6 278.2Q211.4 319.1 212 360Z'/%3E%3Cpath d='M222.7 360Q226.3 330.8 234.6 306.9Q228 333.5 227.4 360Z'/%3E%3Cpath d='M228 360Q231 318.9 238 285.3Q232.4 322.7 231.7 360Z'/%3E%3Cpath d='M241 360Q243.6 334.3 249.8 313.3Q244.8 336.7 244.3 360Z'/%3E%3Cpath d='M255.3 360Q259 323.5 267.4 293.6Q260.4 326.8 259.5 360Z'/%3E%3Cpath d='M260.6 360Q259.5 332.2 256.8 309.5Q261.3 334.7 263.8 360Z'/%3E%3Cpath d='M273.7 360Q276.7 335.1 283.7 314.7Q277.8 337.4 276.9 360Z'/%3E%3Cpath d='M284.7 360Q286.5 342.4 290.9 328Q288.2 344 288.5 360Z'/%3E%3Cpath d='M294.4 360Q296.1 319.6 300.1 286.5Q298.5 323.3 299.7 360Z'/%3E%3Cpath d='M301.3 360Q299.8 333.3 296.3 311.5Q302.2 335.7 305.6 360Z'/%3E%3Cpath d='M311.8 360Q310.8 335.3 308.5 315Q313.4 337.5 316.7 360Z'/%3E%3Cpath d='M324.3 360Q324 333 323.2 310.8Q326.6 335.4 329.5 360Z'/%3E%3Cpath d='M337.7 360Q342.7 316.1 354.3 280.1Q344.1 320.1 342.2 360Z'/%3E%3Cpath d='M343.3 360Q342.5 328 340.6 301.9Q345.4 330.9 348.8 360Z'/%3E%3Cpath d='M356.5 360Q359.7 326.8 367 299.5Q362 329.8 362.2 360Z'/%3E%3C/g%3E%3C/svg%3E"),
+        /* 3. o CLARÃO do fogo lavando o pé da mata. Vem DEPOIS do ladrilho nesta lista, ou seja pinta
+              ATRÁS dele — é o que recorta as árvores contra a luz. O fogo em si é canvas, e pinta por
+              cima de tudo isto. */
+        radial-gradient(ellipse 64% 42% at 50% 100%, rgba(236, 142, 52, .5), rgba(152, 62, 24, .2) 44%, transparent 76%),
+        /* 4. o céu: noite que esquenta descendo, do quase-preto arroxeado ao tijolo do horizonte */
+        linear-gradient(180deg, #100910 0%, #1c0f16 38%, #331519 68%, #4b2018 100%);
+    background-size: cover, var(--floresta-passo) var(--floresta-altura), cover, cover;
+    background-repeat: no-repeat, repeat-x, no-repeat, no-repeat;
+    /* `left bottom` na mata pelo mesmo motivo do cemitério e do laboratório: o JS conta os ladrilhos a
+       partir do x=0, e `bottom` sozinho vale `50% 100%` — ancoraria no centro, e as duas contas
+       discordariam por uma quantia que muda com a largura da janela. */
+    background-position: center, left bottom, center, center;
+}
+
+/* Cipós grossos descendo dos cantos de cima — onde o Reino pendura estandartes, o cemitério tem teias
+   e a invasão tem cabos. Mesmo gancho, quarta história: aqui é a mata entrando na clareira. */
+body[data-tema="folclore"] #arena::before,
+body[data-tema="folclore"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 132px; height: 42%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='210' viewBox='0 0 132 210' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23140b07' stroke-width='7' stroke-linecap='round'%3E%3Cpath d='M14 0v46q0 44 24 66t14 62'/%3E%3Cpath d='M56 0v28q0 50 30 74t10 48'/%3E%3C/g%3E%3Cg fill='%23140b07'%3E%3Cellipse cx='30' cy='58' rx='13' ry='7' transform='rotate(-28 30 58)'/%3E%3Cellipse cx='44' cy='96' rx='12' ry='6' transform='rotate(24 44 96)'/%3E%3Cellipse cx='52' cy='140' rx='11' ry='6' transform='rotate(-20 52 140)'/%3E%3Cellipse cx='74' cy='62' rx='12' ry='6' transform='rotate(30 74 62)'/%3E%3Cellipse cx='88' cy='108' rx='11' ry='6' transform='rotate(-26 88 108)'/%3E%3Cellipse cx='94' cy='152' rx='10' ry='5' transform='rotate(22 94 152)'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    opacity: .85;
+    pointer-events: none;
+    z-index: -1;
+}
+
+body[data-tema="folclore"] #arena::before { left: 0; }
+
+body[data-tema="folclore"] #arena::after { right: 0; transform: scaleX(-1); }
+
+body[data-tema="folclore"] #topo { border-bottom: 2px solid rgba(232, 163, 61, .46); }
+
+body[data-tema="folclore"] #painel { border-top: 2px solid rgba(232, 163, 61, .46); }
+
+body[data-tema="folclore"] #topo,
+body[data-tema="folclore"] #painel {
+    background:
+        linear-gradient(180deg, rgba(232, 163, 61, .07) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="folclore"] .combatente {
+    background: linear-gradient(180deg, rgba(62, 38, 26, .82), rgba(28, 16, 11, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+}
+
+/* O log vira CADERNO DE CAUSOS: papel de brasa, fio âmbar. O pergaminho do Reino é dourado e seco;
+   este é vermelho e queimado — a diferença tem que dar pra ver, senão os dois temas quentes contam a
+   mesma história no mesmo móvel. */
+body[data-tema="folclore"] #log {
+    background: linear-gradient(180deg, rgba(44, 20, 12, .62), rgba(22, 10, 6, .62));
+    border-color: rgba(232, 163, 61, .3);
+}
+
+/* ==========================================================================
+   OS LADRILHOS DE HORIZONTE POR FAIXA DE ALTURA
+   ==========================================================================
+   Os quatro ladrilhos (mata do cemitério, laboratório da invasão, floresta do folclore, vila dos
+   decaídos) são lidos pelo
+   JS pra ancorar o que vive no horizonte — corujas e espantalhos, bobinas de Tesla, os chifres do Oni
+   e a clava do Troll. Em px fixos eles NÃO encolhiam com a janela, e isso quebrava de verdade: numa
+   arena baixa o ladrilho ficava mais alto que ela, o `baseY` (`canvas.height − altura`) virava
+   NEGATIVO, e o que devia estar no horizonte subia pra perto do topo da tela.
+
+   Os 🐉 Místicos e os ✝️ Apóstolos NÃO entram nesta escada, e a ausência deles é informação: as linhas
+   do mar e da areia de um, e a do piso da sala do outro, são % da arena — escalam sozinhas e não têm
+   um tamanho próprio pra defender. Quem precisa de degrau é ladrilho: imagem com dimensão em px que o
+   JS ancora. **Quando der pra escolher, a fração é a medida barata.**
+
+   POR QUE NÃO `min()`/`clamp()`/`vh`, que resolveria em uma linha: o JS lê estes valores com
+   `parseFloat(getComputedStyle(arena).getPropertyValue('--lab-altura'))`, e propriedade customizada
+   NÃO é resolvida pra px pelo getComputedStyle — ela volta como o TEXTO que está escrito aqui. Um
+   `min(266px, 60vh)` devolveria a string inteira, o parseFloat daria NaN, o `|| 320` de emergência
+   assumiria, e as âncoras cairiam no lugar errado EM SILÊNCIO. Por isso a saída é @media com px
+   crus: o CSS continua sendo o dono do número e o parseFloat continua vivo.
+
+   As faixas: a arena vale ~`100vh − 190px` (o topo tem ~40 e o painel tem 148 de mínimo), e cada
+   degrau mantém o ladrilho em torno de 45-50% da altura dela — metade de baixo pro horizonte, metade
+   de cima pro céu. As duas medidas descem JUNTAS, na proporção de cada ladrilho, senão a cidade e a
+   mata esticariam; o desvio de proporção fica abaixo de 0.7% em todos os degraus, e o que sobra é
+   arredondamento de px inteiro nos menores (a mata a 46px de altura queria 77.5 de largura). Sub-px
+   não se vê — mas não é zero, então não vale dizer que é.
+
+   O tamanho BASE de cada ladrilho não é calculado aqui: é escolhido a olho, no tema (o laboratório em
+   635×355 é calibragem à mão do Gabriel). Estas faixas só reduzem o que ele escolheu; elas não têm
+   opinião sobre o valor cheio.
+
+   Abaixo de ~400px de janela a cena fica apertada de qualquer jeito (o painel sozinho já não
+   caberia), mas o ladrilho segue MENOR que a arena até ~261px — que é a garantia que importa, porque
+   é ela que mantém o `baseY` positivo e o horizonte no horizonte. */
+@media (max-height: 1000px) {
+    body[data-tema="folclore"] #arena { --floresta-passo: 313px; --floresta-altura: 303px; }
+}
+
+@media (max-height: 860px) {
+    body[data-tema="folclore"] #arena { --floresta-passo: 260px; --floresta-altura: 252px; }
+}
+
+@media (max-height: 720px) {
+    body[data-tema="folclore"] #arena { --floresta-passo: 212px; --floresta-altura: 205px; }
+}
+
+@media (max-height: 600px) {
+    body[data-tema="folclore"] #arena { --floresta-passo: 168px; --floresta-altura: 163px; }
+}
+
+@media (max-height: 500px) {
+    body[data-tema="folclore"] #arena { --floresta-passo: 127px; --floresta-altura: 123px; }
+}
+
+@media (max-height: 400px) {
+    body[data-tema="folclore"] #arena { --floresta-passo: 90px; --floresta-altura: 87px; }
+}
+
+@media (max-height: 300px) {
+    body[data-tema="folclore"] #arena { --floresta-passo: 63px; --floresta-altura: 61px; }
+}

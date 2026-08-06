@@ -82,7 +82,8 @@ ponte.addEventListener('message', e => {
     if (msg.tipo === 'estado') aplicarEstado(msg.conteudo);
     else if (msg.tipo === 'evento') aplicarEvento(msg.conteudo);
     // TEMPORÁRIO: as telas ainda não convertidas ao contrato. Cada uma que migrar some daqui e
-    // aparece no mapa acima.});
+    // aparece no mapa acima.
+});
 
 
 

@@ -33,9 +33,6 @@ import { aplicarEstado, aplicarEvento, aplicarVelocidade, desarmar, desenhar, es
 
 export { aplicarTema };   // o seam por onde o harness entra (ferramentas/rodar-tema.js)
 
-
-
-
 // ---------- recepção: o INTERPRETADOR de telas ----------
 //
 // O CONTRATO. Toda tela é um objeto com dois campos, e nada além disso:
@@ -77,29 +74,11 @@ ponte.addEventListener('message', e => {
 
     if (msg.tipo === 'estado') aplicarEstado(msg.conteudo);
     else if (msg.tipo === 'evento') aplicarEvento(msg.conteudo);
-    // TEMPORÁRIO: as telas ainda não convertidas ao contrato. Cada uma que migrar some daqui e
-    // aparece no mapa acima.
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // A ficha do champ sai por CLIQUE ou Enter, além do Esc/X — vale nos dois donos da seção (o
 // compêndio e a conquista), porque é a mesma tela e não deve ter dois jeitos de fechar.
 document.getElementById('compendioChamp').addEventListener('click', sairDaTela);
-
-
-
 
 // ---------- sair da tela ----------
 // UMA função pra "voltar um nível", e os dois gestos que a disparam: a tecla Esc e o botão 🚪 Sair
@@ -184,22 +163,12 @@ document.addEventListener('keydown', e => {
 });
 
 
-// ---------- tema do campo de batalha ----------
-// Cada capítulo pode ter o próprio cenário. O tema entra como `data-tema` no <body> e o CSS faz o
-// resto — a ESTRUTURA da luta não muda, só a pele. É o mesmo princípio do painel de habilidades:
-// uma tela, uma forma; o que varia é a roupa.
+// ---------- os capítulos ----------
+// O REGISTRO. Cada valor é o MÓDULO do cenário, não a configuração dele: quem sabe montar a cena é
+// o capítulo, e o núcleo só pede (ver `montar` em cenarios/<faccao>/<faccao>.js).
 //
-// Aqui em cima mora só o que o CSS não sabe fazer: as partículas do ar. Um capítulo sem entrada
-// nesta tabela fica sem partículas e ainda assim ganha a pele do CSS, se ela existir — as duas
-// metades do tema são independentes de propósito, pra nenhuma delas exigir a outra.
-// O AR de cada cenário, em três camadas OPCIONAIS e independentes — um tema usa as que fizerem
-// sentido pra ele e ignora o resto:
-//   pó      · partículas pequenas. `subida` em px/s: positivo SOBE, negativo CAI. A direção é o
-//             SINAL da velocidade, não um campo à parte que se pode esquecer de casar com ela.
-//   névoa   · manchas grandes e translúcidas passeando devagar, coladas no chão.
-//   voadores· bichos atravessando a tela, com asas.
-// O REGISTRO dos capitulos. Cada valor e o MODULO do cenario, nao a configuracao dele — quem sabe
-// montar a cena e o capitulo, e o nucleo so pede. Capitulo sem entrada aqui luta no visual padrao.
+// As duas metades do tema são independentes de propósito. Capítulo sem entrada aqui luta sem
+// partículas e ainda assim ganha a pele do CSS, se ela existir — e vice-versa. Nenhuma exige a outra.
 export const CENARIOS = {
     reino,
     ladosombrio,
@@ -221,21 +190,3 @@ aoTrocarCena(atualizarBotaoSair);   // o que fazer depois de trocar de tela
 aplicarVelocidade();      // sincroniza o C# com o 2x inicial
 mostrarCena('menu');      // o jogo sempre abre no menu — evita o flash da arena vazia
 mandar('pronto');         // destrava a thread do jogo no C#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

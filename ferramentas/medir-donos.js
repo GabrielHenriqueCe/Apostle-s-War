@@ -25,7 +25,9 @@ const linhas = fonte.split(/\r?\n/);
 // ---------- as declarações de topo ----------
 // Coluna 0 é o que define "topo" — dentro de função tudo vem indentado. Pega `function nome(`,
 // `const nome = `, `let nome = ` e `class Nome`.
-const RE_DECL = /^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)|^(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=|^class\s+([A-Za-z_$][\w$]*)/;
+// O `export ` opcional na frente: a partir da separação as declarações que atravessam módulo o
+// carregam, e sem isto o medidor deixa de enxergar justamente o que já foi separado.
+const RE_DECL = /^(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)|^(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=|^(?:export\s+)?class\s+([A-Za-z_$][\w$]*)/;
 
 const decls = [];
 linhas.forEach((linha, i) => {

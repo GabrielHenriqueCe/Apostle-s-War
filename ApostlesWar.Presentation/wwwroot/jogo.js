@@ -26,6 +26,9 @@ import { entre } from './cenarios/comum/basicos.js';
 import { aplicarTema, registrarCenarios } from './nucleo/ar.js';
 export { aplicarTema };   // o seam por onde o harness entra (ferramentas/rodar-tema.js)
 import { mandar, ponte } from './nucleo/ponte.js';
+import { arsenal } from './telas/arsenal.js';
+import { compendio, compendioChamp } from './telas/compendio.js';
+import { criarPerfil, edicaoPerfil } from './telas/perfil.js';
 
 
 
@@ -35,25 +38,51 @@ let habilidadeEscolhida = null;
 let mostrarEstatisticas = true;   // hoje ligado: fase de teste de balance
 let perfilAvatar = '🧭';     // avatar do jogador; vira o marcador que caminha no mapa
 
-// ---------- recepção ----------
+// ---------- recepção: o INTERPRETADOR de telas ----------
+//
+// O CONTRATO. Toda tela é um objeto com dois campos, e nada além disso:
+//
+//     export const compendio = {
+//         cena: 'compendio',      // qual seção do index.html fica visível
+//         montar(dados) { ... },  // preenche o DOM com o que o C# mandou
+//     };
+//
+// A chave no mapa abaixo é o `tipo` da mensagem — a unidade é a MENSAGEM, não o arquivo: o
+// compêndio exporta duas telas, porque o C# manda duas mensagens.
+//
+// É o mesmo desenho do ADR-composicao-de-acoes: a habilidade virou DADO rodada por um interpretador
+// único, com zero `Ativar` override. Aqui a tela virou dado e o laço abaixo é o interpretador. Antes
+// isto era uma escada de 13 `else if`, e a escada é o que permite treze jeitos diferentes de fazer a
+// mesma coisa — que é exatamente a origem do "funciona nesta tela e não naquela".
+//
+// Tela nova = uma linha aqui, igual capítulo novo virou uma linha no CENARIOS.
+const TELAS = {
+    compendio, compendioChamp,
+    arsenal,
+    criarPerfil, edicaoPerfil,
+};
+
+// AS DUAS QUE NÃO SÃO TELA, e ficam de fora de propósito (o "Nível 3" do ADR — quando a coisa não é
+// do formato, isso se declara em vez de se torcer): `estado` e `evento` não NAVEGAM, atualizam a
+// cena que já está no ar. Enfiá-las no mapa exigiria um `cena` mentiroso e um `montar` que não monta.
 ponte.addEventListener('message', e => {
     let msg;
     try { msg = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; }
     catch { return; }
 
+    const tela = TELAS[msg.tipo];
+    if (tela) { mostrarCena(tela.cena); tela.montar(msg.conteudo); return; }
+
     if (msg.tipo === 'estado') aplicarEstado(msg.conteudo);
     else if (msg.tipo === 'evento') aplicarEvento(msg.conteudo);
+    // TEMPORÁRIO: as telas ainda não convertidas ao contrato. Cada uma que migrar some daqui e
+    // aparece no mapa acima.
     else if (msg.tipo === 'menu') aplicarMenu(msg.conteudo);
-    else if (msg.tipo === 'criarPerfil') mostrarCriarPerfil();
-    else if (msg.tipo === 'edicaoPerfil') mostrarEditarPerfil(msg.conteudo);
     else if (msg.tipo === 'montagemArena') mostrarMontagemArena(msg.conteudo.campeoes);
     else if (msg.tipo === 'campanhaMapa') mostrarMapa(msg.conteudo);
     else if (msg.tipo === 'campanhaFases') mostrarFasesCampanha(msg.conteudo);
     else if (msg.tipo === 'fimDeFase') mostrarFimDeFase(msg.conteudo);
     else if (msg.tipo === 'conquista') mostrarConquista(msg.conteudo);
-    else if (msg.tipo === 'arsenal') mostrarArsenal(msg.conteudo);
-    else if (msg.tipo === 'compendio') mostrarCompendio(msg.conteudo);
-    else if (msg.tipo === 'compendioChamp') mostrarChampDetalhe(msg.conteudo);
 });
 
 function aplicarMenu(m) {
@@ -102,89 +131,8 @@ function aplicarMenu(m) {
     }));
 }
 
-// ---------- criar perfil (1ª vez) ----------
-function mostrarCriarPerfil() {
-    mostrarCena('criarPerfil');
-    const input = document.getElementById('nomePerfil');
-    input.value = '';
-    input.focus();
-}
 
-function enviarPerfil() {
-    const nome = document.getElementById('nomePerfil').value.trim();
-    if (!nome) return;   // sem nome, não começa
-    mandar('criarPerfil', 0, nome);
-}
 
-document.getElementById('confirmarPerfil').addEventListener('click', enviarPerfil);
-document.getElementById('nomePerfil').addEventListener('keydown', e => {
-    if (e.key === 'Enter') enviarPerfil();
-});
-
-// ---------- editar perfil (nome + avatar) ----------
-// A entidade avatar+nome no menu é o gatilho inteiro.
-document.getElementById('menuPerfil').addEventListener('click', () => mandar('editarPerfil'));
-
-let avatarSelecionado = -1;   // índice na grade (= índice na lista completa que o C# mandou)
-
-function mostrarEditarPerfil(dados) {
-    mostrarCena('editarPerfil');
-    // O nome começa TRAVADO (display); só o botão ✏️ destrava pra editar.
-    const nomeInput = document.getElementById('nomeEditar');
-    nomeInput.value = dados.nome || '';
-    nomeInput.readOnly = true;
-
-    const grade = document.getElementById('avatarGrade');
-    avatarSelecionado = -1;
-
-    grade.replaceChildren(...dados.campeoes.map((c, i) => {
-        const cel = document.createElement('div');
-        cel.className = 'avatarCelula' + (c.desbloqueado ? '' : ' bloqueado');
-
-        const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
-        const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
-        cel.append(em, nm);
-
-        // Pré-seleciona o avatar atual (se desbloqueado).
-        if (c.desbloqueado && c.simbolo === dados.avatar && avatarSelecionado === -1) {
-            avatarSelecionado = i;
-            cel.classList.add('selecionado');
-        }
-        if (c.desbloqueado) cel.addEventListener('click', () => selecionarAvatar(i));
-        return cel;
-    }));
-
-    // Avatar atual não encontrado entre os desbloqueados: cai no 1º desbloqueado.
-    if (avatarSelecionado === -1) {
-        const i = dados.campeoes.findIndex(c => c.desbloqueado);
-        if (i >= 0) selecionarAvatar(i);
-    }
-}
-
-// ✏️ ao lado do nome: destrava a edição (não editável ao abrir).
-document.getElementById('editarNomeBtn').addEventListener('click', () => {
-    const nomeInput = document.getElementById('nomeEditar');
-    nomeInput.readOnly = false;
-    nomeInput.focus();
-    nomeInput.select();
-});
-
-function selecionarAvatar(i) {
-    avatarSelecionado = i;
-    const celulas = document.getElementById('avatarGrade').children;
-    for (let k = 0; k < celulas.length; k++) celulas[k].classList.toggle('selecionado', k === i);
-}
-
-function salvarEdicao() {
-    const nome = document.getElementById('nomeEditar').value.trim();
-    if (!nome || avatarSelecionado < 0) return;
-    mandar('salvarPerfil', avatarSelecionado, nome);
-}
-
-document.getElementById('salvarEditar').addEventListener('click', salvarEdicao);
-document.getElementById('nomeEditar').addEventListener('keydown', e => {
-    if (e.key === 'Enter') salvarEdicao();
-});
 
 // ---------- fim de batalha (overlay por lado) ----------
 document.getElementById('fimBatalha').addEventListener('click', () => mandar('voltarMenu'));
@@ -647,219 +595,10 @@ document.getElementById('compendioChamp').addEventListener('click', sairDaTela);
 // ---------- Arsenal ----------
 const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
 const ARSENAL_ICONES = ['🗡️', '⛑️', '🛡️', '📿', '🎽', '👖', '👢'];   // ícone do tipo quando o slot está vazio
-let arsenalDados = null;
-let arsenalSlotSel = -1;
 
-function mostrarArsenal(a) {
-    if (cenaAgora() !== 'arsenal') arsenalSlotSel = -1;   // entrada fresca → nenhum slot aberto
-    mostrarCena('arsenal');
-    arsenalDados = a;
-    desenharBoneco();
-    desenharTotais();
-    if (arsenalSlotSel >= 0) mostrarItensSlot(arsenalSlotSel);
-    else document.getElementById('arsenalDetalhe').hidden = true;
-}
 
-// O que o conjunto equipado dá, somado. Quem soma e quem escreve o número é o C#
-// (ArsenalService.TotaisEquipados + ValorFormatado) — aqui só chega texto pronto, pelo mesmo motivo
-// de sempre: "0.05" virar "5%" é exibição, mas QUANTO é regra de item.
-function desenharTotais() {
-    const cont = document.getElementById('arsenalTotais');
-    const titulo = document.createElement('div');
-    titulo.className = 'atTitulo';
-    titulo.textContent = 'Bônus do arsenal';
 
-    if (!arsenalDados.totais.length) {
-        const v = document.createElement('div');
-        v.className = 'atVazio';
-        v.textContent = 'Nada equipado ainda.';
-        cont.replaceChildren(titulo, v);
-        return;
-    }
 
-    cont.replaceChildren(titulo, ...arsenalDados.totais.map(b => {
-        const linha = document.createElement('div'); linha.className = 'atLinha';
-        const rot = document.createElement('span'); rot.className = 'atStat'; rot.textContent = b.stat;
-        const val = document.createElement('span'); val.className = 'atValor'; val.textContent = b.valor;
-        linha.append(rot, val);
-        return linha;
-    }));
-}
-
-function desenharBoneco() {
-    document.getElementById('boneco').replaceChildren(...arsenalDados.slots.map(s => {
-        const div = document.createElement('div');
-        div.className = 'bonecoSlot' + (s.slot === arsenalSlotSel ? ' selecionado' : '') + (s.equipado ? ' preenchido' : '');
-        div.style.gridArea = ARSENAL_AREAS[s.slot];
-        const emoji = document.createElement('div'); emoji.className = 'bsEmoji';
-        emoji.textContent = s.equipado ? s.equipado.simbolo : ARSENAL_ICONES[s.slot];
-        const nome = document.createElement('div'); nome.className = 'bsNome'; nome.textContent = s.nome;
-        div.append(emoji, nome);
-        div.addEventListener('click', () => mostrarItensSlot(s.slot));
-        return div;
-    }));
-}
-
-function mostrarItensSlot(slot) {
-    arsenalSlotSel = slot;
-    desenharBoneco();
-    document.getElementById('arsenalDetalhe').hidden = false;
-    document.getElementById('arsenalSlotNome').textContent = arsenalDados.slots[slot].nome;
-
-    const itens = arsenalDados.obtidos.filter(o => o.slot === slot);
-    const equipado = itens.find(o => o.equipado);
-    const cont = document.getElementById('arsenalItens');
-
-    if (!itens.length) {
-        const v = document.createElement('div'); v.className = 'arsenalVazio'; v.textContent = 'Nenhum item deste tipo ainda.';
-        cont.replaceChildren(v);
-        return;
-    }
-
-    cont.replaceChildren(...itens.map(o => {
-        const card = document.createElement('div');
-        card.className = 'itemCard' + (o.equipado ? ' equipado' : '');
-
-        const em = document.createElement('span'); em.className = 'icEmoji'; em.textContent = o.simbolo;
-        const info = document.createElement('div'); info.className = 'icInfo';
-        const nm = document.createElement('div'); nm.className = 'icNome'; nm.textContent = `${o.nome} · ${o.faccao}`;
-        const st = document.createElement('div'); st.className = 'icStat'; st.textContent = `${o.stat} +${o.valor}`;
-        info.append(nm, st);
-        card.append(em, info);
-
-        if (equipado && !o.equipado) {   // seta de diferença vs o equipado
-            const diff = o.valorNum - equipado.valorNum;
-            const d = document.createElement('div');
-            d.className = 'icDiff ' + (diff > 0 ? 'sobe' : diff < 0 ? 'desce' : '');
-            d.textContent = diff > 0 ? '▲' : diff < 0 ? '▼' : '=';
-            card.append(d);
-        }
-        if (o.equipado) {
-            const tag = document.createElement('div'); tag.className = 'icTag'; tag.textContent = 'equipado';
-            card.append(tag);
-        } else {
-            card.addEventListener('click', () => mandar('equiparItem', o.indice));
-        }
-        return card;
-    }));
-}
-
-// ---------- compêndio ----------
-// Catálogo, só leitura: nenhum clique daqui muda progresso. Por isso o champ TRAVADO é clicável
-// igual ao liberado — o cadeado diz "ainda não é seu", não "não é da sua conta". Quem decide o que
-// está travado é o C# (CampeoesService.EstaDesbloqueado); aqui só se pinta a resposta.
-function mostrarCompendio(c) {
-    mostrarCena('compendio');
-
-    document.getElementById('compendioFaccoes').replaceChildren(...c.faccoes.map(f => {
-        const bloco = document.createElement('section');
-        bloco.className = 'compFaccao';
-
-        const titulo = document.createElement('h2');
-        titulo.className = 'compFaccaoNome';
-        titulo.textContent = `${f.simbolo} ${f.nome}`;
-
-        const grade = document.createElement('div');
-        grade.className = 'compGrade';
-        grade.replaceChildren(...f.champs.map(ch => {
-            const card = document.createElement('button');
-            card.type = 'button';
-            card.className = 'compChamp' + (ch.desbloqueado ? '' : ' travado');
-
-            const em = document.createElement('span');
-            em.className = 'ccEmoji';
-            em.textContent = ch.simbolo;
-
-            const nm = document.createElement('span');
-            nm.className = 'ccNome';
-            nm.textContent = ch.nome;
-
-            card.append(em, nm);
-            if (!ch.desbloqueado) {
-                const cad = document.createElement('span');
-                cad.className = 'ccCadeado';
-                cad.textContent = '🔒';
-                card.appendChild(cad);
-            }
-
-            // O índice é GLOBAL (posição na lista completa), não o da facção: a ponte carrega um int
-            // só por clique, e mandar (facção, slot) exigiria dois.
-            card.addEventListener('click', () => mandar('verChamp', ch.indice));
-            return card;
-        }));
-
-        bloco.append(titulo, grade);
-        return bloco;
-    }));
-}
-
-function mostrarChampDetalhe(c) {
-    mostrarCena('compendioChamp');
-
-    // Hoje o emoji gigante; o #champArte é o SLOT que recebe a arte do personagem inteiro depois.
-    document.getElementById('champArte').textContent = c.simbolo;
-    document.getElementById('champNome').textContent = c.nome;
-    document.getElementById('champFaccao').textContent =
-        c.desbloqueado ? c.faccao : `${c.faccao} · 🔒 ainda não conquistado`;
-
-    // Números de BASE: catálogo, não simulador — arsenal, itens e buffs não entram aqui.
-    const stats = [
-        ['❤️', 'HP', c.hp],
-        ['⚔️', 'Ataque', c.ataque],
-        ['🛡️', 'Defesa', c.defesa],
-        ['🎯', 'Taxa de crítico', `${c.taxaCritPct}%`],
-        ['💥', 'Dano crítico', `${c.danoCritPct}%`],
-    ];
-
-    const painelStats = document.getElementById('champStats');
-    const tituloStats = document.createElement('h2');
-    tituloStats.className = 'champSecao';
-    tituloStats.textContent = 'Estatísticas';
-
-    painelStats.replaceChildren(tituloStats, ...stats.map(([icone, rotulo, valor]) => {
-        const linha = document.createElement('div');
-        linha.className = 'champStat';
-
-        const ic = document.createElement('span'); ic.className = 'csIcone'; ic.textContent = icone;
-        const rot = document.createElement('span'); rot.className = 'csRotulo'; rot.textContent = rotulo;
-        const val = document.createElement('span'); val.className = 'csValor'; val.textContent = valor;
-
-        linha.append(ic, rot, val);
-        return linha;
-    }));
-
-    const painelHabs = document.getElementById('champHabilidades');
-    const tituloHabs = document.createElement('h2');
-    tituloHabs.className = 'champSecao';
-    tituloHabs.textContent = 'Habilidades';
-
-    painelHabs.replaceChildren(tituloHabs, ...c.habilidades.map(h => {
-        const card = document.createElement('div');
-        card.className = 'champHab' + (h.passiva ? ' passiva' : '');
-
-        const topo = document.createElement('div');
-        topo.className = 'chTopo';
-
-        const nome = document.createElement('span');
-        nome.className = 'chNome';
-        nome.textContent = `${h.simbolo} ${h.nome}`;
-
-        // A passiva não se usa: dizer isso evita o jogador procurar o botão dela. As ativas mostram a
-        // cadência DECLARADA — fora da luta não há turno correndo, e é a cadência que se compara.
-        const marca = document.createElement('span');
-        marca.className = 'chMarca';
-        marca.textContent = h.passiva ? 'passiva' : `${h.cooldown} turnos`;
-
-        topo.append(nome, marca);
-
-        const desc = document.createElement('p');
-        desc.className = 'chDesc';
-        desc.textContent = h.descricao;
-
-        card.append(topo, desc);
-        return card;
-    }));
-}
 
 
 function aplicarEstado(novo) {
@@ -1599,6 +1338,9 @@ aoTrocarCena(atualizarBotaoSair);   // o que fazer depois de trocar de tela
 aplicarVelocidade();      // sincroniza o C# com o 2x inicial
 mostrarCena('menu');      // o jogo sempre abre no menu — evita o flash da arena vazia
 mandar('pronto');         // destrava a thread do jogo no C#
+
+
+
 
 
 

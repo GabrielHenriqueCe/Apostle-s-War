@@ -214,13 +214,28 @@ const EPILOGO = `
     aplicarTema: typeof aplicarTema !== 'undefined' ? aplicarTema : null,
 };`;
 
-async function carregarModulo(arquivo, cache = new Map()) {
+// DUAS FASES por causa do grafo em DIAMANTE: `jogo.js` importa `nucleo/cena.js` e `nucleo/ar.js`, e
+// o `cena.js` também importa o `ar.js`. Ligando recursivamente, o segundo pedido pelo `ar.js`
+// devolvia um módulo ainda no meio da própria ligação. Criar TODOS primeiro e ligar a raiz uma vez
+// só é o que o `import` de verdade faz.
+const cacheMod = new Map();
+
+function criarModulo(arquivo) {
     const abs = path.resolve(arquivo);
-    if (cache.has(abs)) return cache.get(abs);
-    const m = new vm.SourceTextModule(fs.readFileSync(abs, 'utf8'), { identifier: abs, context: contexto });
-    cache.set(abs, m);
-    await m.link((spec, ref) => carregarModulo(path.resolve(path.dirname(ref.identifier), spec), cache));
+    if (cacheMod.has(abs)) return cacheMod.get(abs);
+    const fonte = fs.readFileSync(abs, 'utf8');
+    const m = new vm.SourceTextModule(fonte, { identifier: abs, context: contexto });
+    cacheMod.set(abs, m);
+    for (const imp of fonte.matchAll(/^\s*import\s[^'"]*['"]([^'"]+)['"]/gm)) {
+        criarModulo(path.resolve(path.dirname(abs), imp[1]));
+    }
     return m;
+}
+
+async function carregarModulo(arquivo) {
+    const raiz = criarModulo(arquivo);
+    await raiz.link((spec, ref) => cacheMod.get(path.resolve(path.dirname(ref.identifier), spec)));
+    return raiz;
 }
 
 async function carregar() {

@@ -114,13 +114,28 @@ janela.window = janela; janela.document = document; janela.self = janela;
 // ---------- carregar ----------
 const contexto = vm.createContext(janela);
 
-async function carregar(arquivo, cache = new Map()) {
+// DUAS FASES, e a razão é o grafo em DIAMANTE: `jogo.js` importa `nucleo/cena.js` e `nucleo/ar.js`,
+// e o `cena.js` também importa o `ar.js`. Ligando recursivamente, o segundo pedido pelo `ar.js`
+// devolvia um módulo ainda no meio da própria ligação — "can not be resolved on module that is not
+// linked". Criar TODOS primeiro e ligar a raiz uma vez só resolve, e é o que o `import` real faz.
+const cache = new Map();
+
+function criar(arquivo) {
     const abs = path.resolve(arquivo);
     if (cache.has(abs)) return cache.get(abs);
-    const m = new vm.SourceTextModule(fs.readFileSync(abs, 'utf8'), { identifier: abs, context: contexto });
+    const fonte = fs.readFileSync(abs, 'utf8');
+    const m = new vm.SourceTextModule(fonte, { identifier: abs, context: contexto });
     cache.set(abs, m);
-    await m.link((spec, ref) => carregar(path.resolve(path.dirname(ref.identifier), spec), cache));
+    for (const imp of fonte.matchAll(/^\s*import\s[^'"]*['"]([^'"]+)['"]/gm)) {
+        criar(path.resolve(path.dirname(abs), imp[1]));
+    }
     return m;
+}
+
+async function carregar(arquivo) {
+    const raiz = criar(arquivo);
+    await raiz.link((spec, ref) => cache.get(path.resolve(path.dirname(ref.identifier), spec)));
+    return raiz;
 }
 
 // ---------- as telas, uma mensagem cada ----------

@@ -28,6 +28,10 @@ const queixar = (m) => { if (!problemas.includes(m)) problemas.push(m); };
 // Só o suficiente pra montar tela: o que interessa aqui não é o pixel, é a chamada não explodir.
 const LARGURA = 1500, ALTURA = 940;
 const idsPedidos = new Set();
+// Conta TOQUES no DOM durante um despacho (um getElementById basta). Existe porque o harness estava lendo "nao explodiu"
+// como "montou": uma mensagem que nao esta NEM na tabela NEM na escada nao faz nada, nao lanca, e
+// era reportada como OK. Foi assim que a montagem da Arena passou verde sem estar ligada.
+let escritas = 0;
 
 function criarElemento(id = '', tag = 'DIV') {
     const filhos = [];
@@ -79,6 +83,7 @@ const document = {
     body: criarElemento('body', 'BODY'),
     documentElement: criarElemento('html', 'HTML'),
     getElementById(id) {
+        escritas++;
         idsPedidos.add(id);
         if (!porId.has(id)) porId.set(id, criarElemento(id));
         return porId.get(id);
@@ -185,8 +190,17 @@ const TELAS = [
     console.log(`\n  ${TELAS.length} telas:`);
     for (const [tipo, conteudo] of TELAS) {
         try {
+            escritas = 0;
             ouvinte({ data: JSON.stringify({ tipo, conteudo }) });
-            console.log(`  ✓ ${tipo}`);
+            // Mensagem que não está NEM na tabela NEM no else-if não faz nada e não lança — e o
+            // harness reportava isso como OK. Foi assim que a montagem da Arena passou verde depois
+            // de eu tirar o `else if` sem ter posto a tela na tabela. "Não explodiu" ≠ "montou".
+            if (escritas === 0) {
+                console.log(`  ✗ ${tipo} — não fez NADA (não está ligada em lugar nenhum)`);
+                queixar(`${tipo}: mensagem não tratada — nem na tabela TELAS nem no else-if`);
+            } else {
+                console.log(`  ✓ ${tipo}`);
+            }
         } catch (e) {
             console.log(`  ✗ ${tipo} — ${e.message}`);
             queixar(`${tipo}: ${e.stack.split('\n').slice(0, 3).join(' | ')}`);

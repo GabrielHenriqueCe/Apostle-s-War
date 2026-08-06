@@ -26,6 +26,11 @@ export const definirMenuRaiz = (ehRaiz) => { menuRaiz = ehRaiz; };
 let aoTrocar = () => {};
 export const aoTrocarCena = (fn) => { aoTrocar = fn; };
 
+/// Dispara o gancho fora de uma troca de cena. O combate precisa disso: o botao de sair muda de
+/// sentido conforme o ESTADO da batalha (encerrar x sair), nao so quando a cena troca. Sem esta
+/// porta, o combate importaria o  do composition root — aresta de volta.
+export const revalidarSaida = () => aoTrocar();
+
 // ---------- cenas (menu × combate × criar/editar perfil) ----------
 export function mostrarCena(cena) {
     cenaAtual = cena;
@@ -56,3 +61,20 @@ export function mostrarCena(cena) {
     aoTrocar();
 }
 
+/// Abre uma tela. É por aqui que TODO mundo abre — a mensagem do C# e também o código que abre uma
+/// tela por conta (a ficha do champ que a conquista mostra depois do duplo-clique). Uma tela
+/// convertida ao contrato não tem mais uma função `mostrarX` pra chamar, e um caminho de abertura
+/// paralelo é como o duplo-clique da conquista parou de funcionar sem nada acusar.
+///
+/// Os dois parâmetros extras existem porque o jogo os pediu, não por simetria:
+///   `cena`     — a MESMA tela pode aparecer em cenas diferentes. A ficha do champ é a mesma pelo
+///                compêndio e pela conquista, mas a cena muda (`compendioChamp` × `conquistaChamp`)
+///                porque o Esc tem de voltar pra lugares diferentes.
+///   `anterior` — de onde se veio, entregue ao `montar`. Sem isto, uma tela que pergunta "eu já
+///                estava aqui?" recebe sempre "sim": quem troca a cena é esta função, ANTES do
+///                montar, e foi assim que o arsenal parou de zerar o slot aberto.
+export function abrirTela(tela, dados, cena = tela.cena) {
+    const anterior = cenaAgora();
+    mostrarCena(cena);
+    tela.montar(dados, anterior);
+}

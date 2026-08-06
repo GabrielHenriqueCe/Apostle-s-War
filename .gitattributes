@@ -1,0 +1,25 @@
+# Terminação de linha, decidida no repo e não na máquina de quem clona.
+#
+# Sem este arquivo, quem manda é o `core.autocrlf` de cada um — e um editor que preserva a quebra
+# do arquivo, outro que não, produzem arquivo MISTO. Isso já quebrou código aqui: um `else if` do
+# mapa da campanha grudou num comentário da linha anterior e virou código comentado, e quem acusou
+# foi o Visual Studio, não o build.
+#
+# `text=auto` faz o git guardar tudo em LF no repositório; `eol=crlf` faz a cópia de trabalho no
+# Windows nascer em CRLF, que é o que o VS espera. Os dois juntos: um jeito só, dos dois lados.
+* text=auto
+
+*.cs    text eol=crlf
+*.js    text eol=crlf
+*.css   text eol=crlf
+*.html  text eol=crlf
+*.json  text eol=crlf
+*.md    text eol=crlf
+*.csproj text eol=crlf
+*.sln   text eol=crlf
+
+# Binários: o git não deve tocar.
+*.png binary
+*.jpg binary
+*.ico binary
+*.svg text eol=crlf

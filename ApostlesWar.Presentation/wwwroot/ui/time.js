@@ -67,3 +67,18 @@ export function configurarSlotDnD(slot, arr, i, redesenhar) {
     });
 }
 
+/// Um time de ate 4 sorteado de um pool, sem repetir. Mora AQUI e nao na Arena porque as duas
+/// telas que montam time usam: o 🎲 da Arena e o 🎲 da Campanha. Ficou na Arena por um commit e o
+/// sorteio da Campanha parou de funcionar em silencio — helper compartilhado mora no lugar
+/// compartilhado, e nao em quem por acaso o usou primeiro.
+/// Com menos de 4 no pool, as casas que sobram ficam vazias em vez de repetir alguém.
+export function sortearTime(total) {
+    const ids = [...Array(total).keys()];
+    for (let k = ids.length - 1; k > 0; k--) {
+        const j = Math.floor(Math.random() * (k + 1));
+        [ids[k], ids[j]] = [ids[j], ids[k]];
+    }
+    const time = ids.slice(0, 4);
+    while (time.length < 4) time.push(null);
+    return time;
+}

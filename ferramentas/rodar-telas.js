@@ -28,6 +28,10 @@ const queixar = (m) => { if (!problemas.includes(m)) problemas.push(m); };
 // Só o suficiente pra montar tela: o que interessa aqui não é o pixel, é a chamada não explodir.
 const LARGURA = 1500, ALTURA = 940;
 const idsPedidos = new Set();
+// Conta TOQUES no DOM durante um despacho (um getElementById basta). Existe porque o harness estava lendo "nao explodiu"
+// como "montou": uma mensagem que nao esta NEM na tabela NEM na escada nao faz nada, nao lanca, e
+// era reportada como OK. Foi assim que a montagem da Arena passou verde sem estar ligada.
+let escritas = 0;
 
 function criarElemento(id = '', tag = 'DIV') {
     const filhos = [];
@@ -79,6 +83,7 @@ const document = {
     body: criarElemento('body', 'BODY'),
     documentElement: criarElemento('html', 'HTML'),
     getElementById(id) {
+        escritas++;
         idsPedidos.add(id);
         if (!porId.has(id)) porId.set(id, criarElemento(id));
         return porId.get(id);
@@ -114,18 +119,34 @@ janela.window = janela; janela.document = document; janela.self = janela;
 // ---------- carregar ----------
 const contexto = vm.createContext(janela);
 
-async function carregar(arquivo, cache = new Map()) {
+// DUAS FASES, e a razão é o grafo em DIAMANTE: `jogo.js` importa `nucleo/cena.js` e `nucleo/ar.js`,
+// e o `cena.js` também importa o `ar.js`. Ligando recursivamente, o segundo pedido pelo `ar.js`
+// devolvia um módulo ainda no meio da própria ligação — "can not be resolved on module that is not
+// linked". Criar TODOS primeiro e ligar a raiz uma vez só resolve, e é o que o `import` real faz.
+const cache = new Map();
+
+function criar(arquivo) {
     const abs = path.resolve(arquivo);
     if (cache.has(abs)) return cache.get(abs);
-    const m = new vm.SourceTextModule(fs.readFileSync(abs, 'utf8'), { identifier: abs, context: contexto });
+    const fonte = fs.readFileSync(abs, 'utf8');
+    const m = new vm.SourceTextModule(fonte, { identifier: abs, context: contexto });
     cache.set(abs, m);
-    await m.link((spec, ref) => carregar(path.resolve(path.dirname(ref.identifier), spec), cache));
+    for (const imp of fonte.matchAll(/^\s*import\s[^'"]*['"]([^'"]+)['"]/gm)) {
+        criar(path.resolve(path.dirname(abs), imp[1]));
+    }
     return m;
+}
+
+async function carregar(arquivo) {
+    const raiz = criar(arquivo);
+    await raiz.link((spec, ref) => cache.get(path.resolve(path.dirname(ref.identifier), spec)));
+    return raiz;
 }
 
 // ---------- as telas, uma mensagem cada ----------
 // As cargas são MÍNIMAS de propósito: o alvo é o caminho de montagem, não o conteúdo. Se a tela lê
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
+const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', simbolo: '🗡️', stat: 'ATK', valor: '+5', valorNum: 5, equipado: true };
 const champ = { id: 1, nome: 'Teste', simbolo: '🙂', faccao: 'Reino', hp: 100, hpMax: 100, ataque: 10, defesa: 10, taxaCrit: 15, danoCrit: 60, status: [], habilidades: [], liberado: true, vivo: true };
 const TELAS = [
     ['menu', { titulo: 'Apostle\'s War', subtitulo: '', opcoes: ['Jogar', 'Sair'], raiz: true, perfil: { nome: 'G', avatar: '🧭' } }],
@@ -136,7 +157,14 @@ const TELAS = [
     ['campanhaFases', { faccao: 'Reino', simbolo: '👑', fases: [{ numero: 1, nome: 'Arma', liberada: true, rodada1: [champ], rodada2: [champ], item: null }], campeoes: [champ], faseSelecionada: 1, time: [], meusCampeoes: [champ] }],
     ['fimDeFase', { venceu: true, titulo: 'Vitória', faccao: 'Reino', fase: 1, recompensa: null, temProxima: false, comOpcoes: true }],
     ['conquista', champ],
-    ['arsenal', { slots: [], itens: [], totais: [] }],
+    // COM CONTEÚDO, e não vazio: um `slots: []` faz o `.map` não rodar nenhuma vez, e o corpo do
+    // laço é justamente onde mora o que quebra. Foi assim que o harness deu verde com o
+    // `ARSENAL_AREAS` esquecido no jogo.js — lista vazia não exercita nada.
+    ['arsenal', {
+        slots: [0, 1, 2, 3, 4, 5, 6].map(s => ({ slot: s, nome: `Slot ${s}`, equipado: s === 0 ? item : null })),
+        obtidos: [item, { ...item, equipado: false, valorNum: 3 }],
+        totais: [{ stat: 'ATK', valor: '+10' }],
+    }],
     ['compendio', { faccoes: [{ nome: 'Reino', simbolo: '👑', champs: [champ] }] }],
     ['compendioChamp', champ],
     ['estado', { turno: 1, fase: 'Assistindo', mensagem: '', equipe1: [champ], equipe2: [{ ...champ, id: 9 }], quemAge: null, habilidades: [], alvosValidos: [], selecionado: null, auto: false, modo: 'Campanha', tema: 'reino' }],
@@ -162,8 +190,17 @@ const TELAS = [
     console.log(`\n  ${TELAS.length} telas:`);
     for (const [tipo, conteudo] of TELAS) {
         try {
+            escritas = 0;
             ouvinte({ data: JSON.stringify({ tipo, conteudo }) });
-            console.log(`  ✓ ${tipo}`);
+            // Mensagem que não está NEM na tabela NEM no else-if não faz nada e não lança — e o
+            // harness reportava isso como OK. Foi assim que a montagem da Arena passou verde depois
+            // de eu tirar o `else if` sem ter posto a tela na tabela. "Não explodiu" ≠ "montou".
+            if (escritas === 0) {
+                console.log(`  ✗ ${tipo} — não fez NADA (não está ligada em lugar nenhum)`);
+                queixar(`${tipo}: mensagem não tratada — nem na tabela TELAS nem no else-if`);
+            } else {
+                console.log(`  ✓ ${tipo}`);
+            }
         } catch (e) {
             console.log(`  ✗ ${tipo} — ${e.message}`);
             queixar(`${tipo}: ${e.stack.split('\n').slice(0, 3).join(' | ')}`);
@@ -192,6 +229,15 @@ const TELAS = [
         const src = fs.readFileSync(f, 'utf8');
         for (const m of src.matchAll(/getElementById\(\s*['"`]([^'"`]+)['"`]/g)) idsNoCodigo.add(m[1]);
     }
+
+    // ---------- terminações de linha ----------
+    // Entrou na verificação porque eu quebrei isso duas vezes seguidas e quem acusou foi o Visual
+    // Studio, não eu: meus scripts detectam a quebra do arquivo de origem, mas o Edit e o sed nem
+    // sempre preservam. Arquivo misto não é cosmético — um `else if` já grudou num comentário e
+    // virou código comentado por causa disso.
+    const mistos = fontes.filter(f => (fs.readFileSync(f, 'utf8').match(/(^|[^\r])\n/g) || []).length);
+    console.log(`  terminações: ${fontes.length} arquivos · ${mistos.length} com CRLF e LF misturados`);
+    for (const f of mistos) queixar(`${path.relative(WWW, f)}: terminação de linha MISTA`);
 
     const faltando = [...idsNoCodigo].filter(i => !idsNoHtml.has(i));
     console.log(`\n  ids: ${idsNoCodigo.size} citados no código (${idsPedidos.size} exercitados nesta corrida)`

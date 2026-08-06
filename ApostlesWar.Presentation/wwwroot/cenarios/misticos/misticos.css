@@ -1,0 +1,132 @@
+/* 🐉 MÍSTICOS — a praia no crepúsculo.
+
+   Carregado DEPOIS do estilo.css (ver index.html). A escada de @media do fim deste arquivo é
+   a que encolhe o ladrilho em janela baixa, e ela vem depois do bloco base DESTE tema — que é
+   a ordem que importa. Os valores dela são px CRUS de propósito: o JS os lê com parseFloat, e
+   min()/clamp()/vh voltariam como texto, virariam NaN e cairiam no padrão EM SILÊNCIO. */
+
+/* ---------- 🐉 MÍSTICOS — a praia no crepúsculo, e a lâmpada na areia ----------
+   O quinto, e a primeira decisão dele veio antes de qualquer coisa de beleza: NÃO REPETIR A
+   ASSINATURA DE NINGUÉM. O dia claro é do Reino, a lua é do cemitério, as estrelas são da invasão e o
+   âmbar do fogo é do Folclore. Sobrou o CREPÚSCULO — o violeta caindo pro turquesa —, e foi sorte ter
+   sobrado justo ele: é a hora em que o mar ainda tem luz e o céu já não tem, então dá pra ver o que
+   salta na água sem precisar acender nada.
+
+   Uma fonte de luz SÓ, de novo — e desta vez INVERTIDA em relação ao Folclore. Lá a cena era quente e
+   fechada em volta de um fogo; aqui ela é fria e aberta, e o único ponto morno é a lâmpada do 🧞 na
+   areia. Ela é o centro da composição por ser a única coisa quente numa praia azul, não por estar no
+   meio da tela.
+
+   AS TRÊS FAIXAS (céu, mar, areia) são declaradas UMA vez, em `--mar-linha` e `--areia-linha`, e o JS
+   lê as duas pra saber onde os golfinhos saltam e onde a lâmpada está fincada. São números PUROS,
+   usados aqui via `calc(var(--mar-linha) * 1%)`: como são porcentagem da arena, escalam sozinhos com
+   a janela — e é por isso que este é o único tema que NÃO entra na escada de @media do fim desta
+   seção. Ladrilho tem um tamanho próprio pra defender; faixa em % não tem.
+
+   O gancho dos cantos (`::before`/`::after`) demorou a ser preenchido aqui, e a primeira tentativa —
+   folhas de palmeira de perto, penduradas do alto — saiu ruim por duas razões de uma vez: "quase não
+   vejo e o design ficou estranho".
+
+   A INVISIBILIDADE tem causa exata, e ela vale pra qualquer coisa que se ponha aqui: o céu deste tema
+   no alto é #150c2c, e eu pintei a folha de #140d2c. Silhueta escura contra o céu MAIS ESCURO de
+   todos os sete temas é silhueta invisível — nos outros o gancho funciona porque o céu deles é mais
+   claro que a peça pendurada, e aqui a regra se INVERTE: a peça é que tem de ser mais clara.
+
+   Depois da folha veio uma REDE DE PESCA, e ela também saiu — o argumento a favor (malha lê por
+   repetição, e repetição sobrevive a canto pequeno) estava certo e mesmo assim a peça não era da
+   praia: rede é do barco e do pescador, não da areia. O que ficou foram ALGAS com CONCHAS, e a
+   diferença é que a concha não precisa ser lida, ela é RECONHECIDA — vieira é uma das poucas
+   silhuetas que ninguém confunde, mesmo pequena e cortada pela borda. As algas dão o movimento
+   pendurado e as conchas dão o assunto. */
+body[data-tema="misticos"] {
+    --fundo: #100a1e;
+    --painel: #1b1430;
+    --borda: #3d3163;
+    --apagado: #bcaade;
+}
+
+body[data-tema="misticos"] #arena {
+    position: relative;
+    isolation: isolate;
+
+    /* Onde o mar começa e onde a areia começa, em % da altura da arena. Uma fonte só pro CSS e pro
+       JS: mexer aqui leva junto o salto dos golfinhos, a cauda da sereia e o pé da lâmpada. */
+    --mar-linha: 46;
+    --areia-linha: 71;
+
+    background:
+        /* 1. vinheta FRIA: fecha os cantos sem esquentar nada (preto puro chaparia o violeta) */
+        radial-gradient(ellipse 120% 98% at 50% 46%, transparent 34%, rgba(6, 6, 20, .86) 100%),
+        /* 2. o RASTRO do poente na água — a coluna de luz que sai do horizonte e vem pra praia. É ela
+              que impede o mar de ler como uma faixa azul chapada, e custa um gradiente. */
+        radial-gradient(ellipse 22% 26% at 50% calc(var(--mar-linha) * 1%),
+            rgba(255, 186, 148, .26), transparent 74%),
+        /* 3. o brilho do poente no céu, rente à linha do mar. Quente, mas FRACO e BAIXO: se subisse,
+              viraria o céu do Folclore. */
+        radial-gradient(ellipse 74% 24% at 50% calc(var(--mar-linha) * 1%),
+            rgba(255, 138, 116, .3), transparent 72%),
+        /* 4. as TRÊS FAIXAS. O céu escurece pra cima, o mar escurece pro fundo e clareia de novo na
+              beira (água rasa), e a areia é violeta-fria — praia à noite não é bege. As duas emendas
+              são DURAS de propósito: linha do horizonte e beira d'água são bordas de verdade, e
+              suavizá-las tiraria da cena o "onde acaba o mar". */
+        linear-gradient(180deg,
+            #150c2c 0%,
+            #241d50 24%,
+            #46396f calc(var(--mar-linha) * 1% - 7%),
+            #8d7391 calc(var(--mar-linha) * 1%),
+            #1c3d69 calc(var(--mar-linha) * 1% + .6%),
+            #112a4e calc((var(--mar-linha) + var(--areia-linha)) * .5%),
+            #1a3f63 calc(var(--areia-linha) * 1% - 1.2%),
+            #97a7ba calc(var(--areia-linha) * 1%),
+            #2c2440 calc(var(--areia-linha) * 1% + 1%),
+            #1d1729 100%);
+    background-repeat: no-repeat;
+}
+
+/* ALGAS penduradas nos cantos de cima, com CONCHAS presas nelas — sétima história do mesmo gancho.
+   Três fitas caindo, com as lâminas alternando de lado, e uma concha presa no ALTO de cada uma —
+   duas vieiras e um caramujo. Elas ficavam soltas pelos lados e pelo pé, e ali liam como objetos
+   boiando ao lado da alga; no ponto em que a fita nasce, leem como presas nela, e o canto inteiro
+   vira UMA coisa pendurada em vez de três.
+
+   Esta é a única peça de canto do front que é mais CLARA que o céu, e é obrigatório que seja (ver o
+   comentário do bloco): aqui o céu é o mais escuro dos sete temas. Alga em azul-esverdeado
+   dessaturado, conchas em areia rosada — e são elas que fazem a leitura, porque vieira é uma das
+   poucas silhuetas que ninguém confunde, mesmo a 20px e cortada pela borda. A alga sozinha seria só
+   um risco pendurado; a concha diz PRAIA. */
+body[data-tema="misticos"] #arena::before,
+body[data-tema="misticos"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 164px; height: 44%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='164' height='230' viewBox='0 0 164 230' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%237f9aa6' stroke-width='4' stroke-linecap='round' opacity='.6'%3E%3Cpath d='M12 0C22 42 4 72 18 112C30 148 12 172 22 206'/%3E%3Cpath d='M54 0C64 34 48 62 60 96C70 126 56 148 64 176'/%3E%3Cpath d='M102 0C112 28 98 50 106 78C114 102 104 118 110 140'/%3E%3C/g%3E%3Cg fill='%237f9aa6' opacity='.55'%3E%3Cpath d='M16 26Q40 30 34 48Q16 44 16 26Z'/%3E%3Cpath d='M10 62Q-14 68 -6 86Q12 80 10 62Z'/%3E%3Cpath d='M20 106Q46 112 38 132Q18 126 20 106Z'/%3E%3Cpath d='M16 152Q-8 158 0 176Q18 170 16 152Z'/%3E%3Cpath d='M58 22Q82 28 74 46Q56 40 58 22Z'/%3E%3Cpath d='M52 60Q30 66 38 84Q54 78 52 60Z'/%3E%3Cpath d='M62 100Q86 108 78 126Q60 118 62 100Z'/%3E%3Cpath d='M104 18Q126 24 118 42Q102 36 104 18Z'/%3E%3Cpath d='M100 54Q78 60 86 78Q102 72 100 54Z'/%3E%3Cpath d='M108 92Q130 100 122 116Q106 110 108 92Z'/%3E%3C/g%3E%3Cg opacity='.85'%3E%3Cpath d='M14 4L-6 34Q14 48 34 34Z' fill='%23dcc9c6'/%3E%3Cg fill='none' stroke='%23a98f92' stroke-width='1.6'%3E%3Cpath d='M14 8L0 36'/%3E%3Cpath d='M14 8v32'/%3E%3Cpath d='M14 8l14 28'/%3E%3C/g%3E%3Cpath d='M50 6q16-4 19 10t-13 18q-13 1-14-9t11-9q8 1 5 8' fill='none' stroke='%23dcc9c6' stroke-width='3.6' stroke-linecap='round'/%3E%3Cpath d='M102 2L86 26Q102 38 118 26Z' fill='%23dcc9c6'/%3E%3Cg fill='none' stroke='%23a98f92' stroke-width='1.4'%3E%3Cpath d='M102 6L91 28'/%3E%3Cpath d='M102 6v26'/%3E%3Cpath d='M102 6l11 22'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    pointer-events: none;
+    z-index: -1;
+}
+
+body[data-tema="misticos"] #arena::before { left: 0; }
+
+body[data-tema="misticos"] #arena::after { right: 0; transform: scaleX(-1); }
+
+body[data-tema="misticos"] #topo { border-bottom: 2px solid rgba(126, 214, 214, .4); }
+
+body[data-tema="misticos"] #painel { border-top: 2px solid rgba(126, 214, 214, .4); }
+
+body[data-tema="misticos"] #topo,
+body[data-tema="misticos"] #painel {
+    background:
+        linear-gradient(180deg, rgba(126, 214, 214, .07) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="misticos"] .combatente {
+    background: linear-gradient(180deg, rgba(52, 42, 82, .82), rgba(22, 16, 40, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+}
+
+/* O log vira ÁGUA FUNDA: azul profundo com o fio turquesa. O caderno de causos do Folclore é
+   queimado e o pergaminho do Reino é seco — este é molhado, e a diferença tem que dar pra ver. */
+body[data-tema="misticos"] #log {
+    background: linear-gradient(180deg, rgba(14, 34, 60, .62), rgba(8, 16, 34, .62));
+    border-color: rgba(126, 214, 214, .32);
+}

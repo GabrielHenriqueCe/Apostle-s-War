@@ -1,0 +1,120 @@
+/* ⭐ ESPECIAL — o banheiro público, o primeiro INTERIOR.
+
+   Carregado DEPOIS do estilo.css (ver index.html). A escada de @media do fim deste arquivo é
+   a que encolhe o ladrilho em janela baixa, e ela vem depois do bloco base DESTE tema — que é
+   a ordem que importa. Os valores dela são px CRUS de propósito: o JS os lê com parseFloat, e
+   min()/clamp()/vh voltariam como texto, virariam NaN e cairiam no padrão EM SILÊNCIO. */
+
+/* ---------- ⭐ ESPECIAL — o banheiro público ----------
+   O sexto, e o PRIMEIRO INTERIOR. A regra de não repetir a assinatura de ninguém vinha ficando cara
+   (o dia é do Reino, a lua é do cemitério, as estrelas são da invasão, o âmbar é do Folclore e o
+   crepúsculo é da praia), e aqui ela se resolveu sozinha: os cinco anteriores são paisagem ao ar
+   livre, então o que sobrou não foi uma HORA — foi um teto. Não há céu nenhum nesta cena, e é isso
+   que a torna reconhecível de relance.
+
+   E a facção pedia isso. Os quatro champs (💩 Cocô, 🦸 Herói, 🦹 Vilão, 🦖 T-Rex) não moram em mundo
+   nenhum em comum: procurar a paisagem em que os quatro coubessem ia dar cenário morno. O banheiro
+   público não é o mundo deles — é o único lugar onde os quatro estarem juntos não precisa de
+   explicação.
+
+   A LUZ é uma só, como sempre, e aqui é fluorescente: fria, esverdeada, vinda de cima. Ela é o que
+   permite a parede ser CLARA sem virar o dia do Reino — lá a cor é do sol e é alegre; aqui é lâmpada
+   de posto, e a vinheta pesada nos cantos deixa isso explícito.
+
+   O AZULEJO é o único ladrilho do front que NÃO entra na escada de @media do fim desta seção, e por
+   um motivo diferente do dos Místicos: ele é TEXTURA, não âncora. Ninguém no JS lê o tamanho dele pra
+   pendurar coisa nenhuma, então azulejo em px crus que não encolhe com a janela é o que uma parede de
+   verdade faz. Quem o JS lê é `--piso-linha`, que é número puro (% da arena) e escala sozinho — é
+   dele que saem o pé do T-Rex, a base das cabines e o chão em que o cocô cai. */
+body[data-tema="especial"] {
+    --fundo: #0b1210;
+    --painel: #16211d;
+    --borda: #33493f;
+    --apagado: #a6c3b4;
+}
+
+body[data-tema="especial"] #arena {
+    position: relative;
+    isolation: isolate;
+
+    /* Onde a parede acaba e o piso começa, em % da altura da arena. Fonte ÚNICA: o CSS pinta a faixa
+       daqui e o JS mede o mesmo número (`medirDoTema`) pra assentar tudo que fica de pé no chão. */
+    --piso-linha: 74;
+    /* O lado do azulejo da parede. Textura, não âncora — ver o comentário do bloco. */
+    --azulejo: 44px;
+
+    background:
+        /* 1. vinheta PESADA: a cena é clara no meio e fecha nos cantos. É ela que impede a parede de
+              competir com os combatentes, e que separa este claro do dia aberto do Reino. */
+        radial-gradient(ellipse 112% 92% at 50% 40%, transparent 26%, rgba(4, 11, 9, .9) 100%),
+        /* 2. o brilho das luminárias lavando o alto da parede. Os tubos EM SI são canvas, porque eles
+              piscam — e piscam junto com o rugido do 🦖, que é coisa que CSS não sabe ouvir. */
+        radial-gradient(ellipse 62% 26% at 50% 0%, rgba(226, 255, 240, .3), transparent 74%),
+        /* 3. o rejunte do PISO, só na faixa de baixo: o `background-size` recorta a altura e o
+              `repeat-x` estende as linhas pela largura. Os quadros do chão são maiores que os da
+              parede — piso e parede nunca levam o mesmo azulejo, e é o que dá a quina entre os dois. */
+        repeating-linear-gradient(90deg, transparent 0 82px, rgba(6, 16, 12, .55) 82px 85px),
+        /* 4. o PISO. A lasca escura do topo é o rodapé, e ela é a linha que diz onde o chão começa —
+              suavizá-la tiraria da cena o "onde a parede acaba", que é o mesmo argumento da beira
+              d'água dos Místicos. */
+        linear-gradient(180deg, #1e2a26 0 4px, #3d4d47 4px, #313f3a 100%),
+        /* 5. e 6. o AZULEJO da parede: as juntas horizontais e as verticais. Duas listras cruzadas
+              custam menos que um SVG e não têm emenda pra denunciar. */
+        repeating-linear-gradient(180deg, transparent 0 var(--azulejo), rgba(10, 22, 17, .34) var(--azulejo) calc(var(--azulejo) + 2px)),
+        repeating-linear-gradient(90deg, transparent 0 var(--azulejo), rgba(10, 22, 17, .34) var(--azulejo) calc(var(--azulejo) + 2px)),
+        /* 7. a parede, escurecendo pro pé: o fluorescente vem de cima e não alcança o rodapé */
+        linear-gradient(180deg, #9cb2a6 0%, #8aa295 44%, #6b8377 100%);
+    background-size:
+        cover,
+        cover,
+        auto calc(100% - var(--piso-linha) * 1%),
+        100% calc(100% - var(--piso-linha) * 1%),
+        auto, auto,
+        cover;
+    background-repeat: no-repeat, no-repeat, repeat-x, no-repeat, repeat, repeat, no-repeat;
+    /* `left top` no azulejo e `left bottom` no piso pelo mesmo motivo dos outros ladrilhos: as duas
+       pontas contam a partir da mesma origem que o JS usa (x=0), e `bottom` sozinho vale `50% 100%`,
+       que ancoraria no CENTRO. */
+    background-position: center, top, left bottom, left bottom, left top, left top, center;
+}
+
+/* Canos descendo dos cantos de cima — onde o Reino pendura estandartes, o cemitério tem teias, a
+   invasão tem cabos e o Folclore tem cipós. Mesmo gancho, quinta história: aqui é o encanamento
+   aparente que todo banheiro velho tem. (Os Místicos são o único tema que deixa este gancho vago.) */
+body[data-tema="especial"] #arena::before,
+body[data-tema="especial"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 116px; height: 40%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='116' height='200' viewBox='0 0 116 200' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23445a52' stroke-width='12' stroke-linecap='round'%3E%3Cpath d='M20 0v78q0 26 26 26h70'/%3E%3C/g%3E%3Cg fill='none' stroke='%23394d46' stroke-width='8' stroke-linecap='round'%3E%3Cpath d='M50 0v40q0 20 20 20h46'/%3E%3C/g%3E%3Cg fill='%232b3b35'%3E%3Crect x='11' y='36' width='18' height='9' rx='2'/%3E%3Crect x='11' y='72' width='18' height='9' rx='2'/%3E%3Crect x='44' y='24' width='13' height='7' rx='2'/%3E%3Crect x='74' y='98' width='9' height='13' rx='2'/%3E%3C/g%3E%3Cg fill='none' stroke='%23c9ded4' stroke-opacity='.18' stroke-width='2'%3E%3Cpath d='M16 4v74'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    opacity: .85;
+    pointer-events: none;
+    z-index: -1;
+}
+
+body[data-tema="especial"] #arena::before { left: 0; }
+
+body[data-tema="especial"] #arena::after { right: 0; transform: scaleX(-1); }
+
+body[data-tema="especial"] #topo { border-bottom: 2px solid rgba(168, 226, 200, .4); }
+
+body[data-tema="especial"] #painel { border-top: 2px solid rgba(168, 226, 200, .4); }
+
+body[data-tema="especial"] #topo,
+body[data-tema="especial"] #painel {
+    background:
+        linear-gradient(180deg, rgba(168, 226, 200, .07) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="especial"] .combatente {
+    background: linear-gradient(180deg, rgba(34, 52, 45, .84), rgba(14, 24, 20, .84));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+}
+
+/* O log vira AZULEJO ENCARDIDO: verde de banheiro, fio esverdeado. O pergaminho do Reino é seco, o
+   caderno do Folclore é queimado e a água funda dos Místicos é molhada — este é sujo. */
+body[data-tema="especial"] #log {
+    background: linear-gradient(180deg, rgba(26, 44, 38, .62), rgba(12, 22, 18, .62));
+    border-color: rgba(168, 226, 200, .3);
+}

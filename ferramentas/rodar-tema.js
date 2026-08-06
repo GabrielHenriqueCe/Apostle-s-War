@@ -95,9 +95,24 @@ function criarCtx(nome) {
 // O `medirDoTema` lê px crus do CSS com parseFloat. Servir os valores REAIS faz o harness medir o
 // que o jogo mede; sem isto tudo cairia no padrão e as âncoras ficariam no lugar errado.
 function lerVariaveisDoCss() {
-    const css = fs.readFileSync(path.resolve(path.dirname(RAIZ), 'estilo.css'), 'utf8');
+    const raiz = path.dirname(RAIZ);
+    // TODOS os .css, não só o estilo.css: depois da separação as variáveis de ladrilho de cada tema
+    // moram em cenarios/<tema>/<tema>.css, e ler só o base faria tudo cair no valor padrão — o
+    // harness mediria uma cena que não é a que o jogo monta.
+    const arquivos = [];
+    (function varrer(dir) {
+        for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+            const p = path.join(dir, e.name);
+            if (e.isDirectory()) varrer(p);
+            else if (e.name.endsWith('.css')) arquivos.push(p);
+        }
+    })(raiz);
+
     const vars = {};
-    for (const m of css.matchAll(/(--[\w-]+)\s*:\s*([^;}]+)[;}]/g)) vars[m[1]] = m[2].trim();
+    for (const f of arquivos) {
+        const css = fs.readFileSync(f, 'utf8');
+        for (const m of css.matchAll(/(--[\w-]+)\s*:\s*([^;}]+)[;}]/g)) vars[m[1]] = m[2].trim();
+    }
     return vars;
 }
 const VARS_CSS = lerVariaveisDoCss();

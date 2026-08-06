@@ -1,0 +1,158 @@
+/* 🌑 LADO SOMBRIO — o cemitério sob a lua.
+
+   Carregado DEPOIS do estilo.css (ver index.html). A escada de @media do fim deste arquivo é
+   a que encolhe o ladrilho em janela baixa, e ela vem depois do bloco base DESTE tema — que é
+   a ordem que importa. Os valores dela são px CRUS de propósito: o JS os lê com parseFloat, e
+   min()/clamp()/vh voltariam como texto, virariam NaN e cairiam no padrão EM SILÊNCIO. */
+
+/* ---------- 🌑 LADO SOMBRIO — o cemitério sob a lua ----------
+   O oposto do Reino em tudo que importa: lá o ar SOBE na luz das tochas e o chão é quente; aqui a
+   cinza CAI, a única luz é fria e vem de cima, e o chão é névoa. Mesmo esqueleto de camadas — é o
+   que prova que o tema é roupa. */
+body[data-tema="ladosombrio"] {
+    --fundo: #090f0d;
+    --painel: #131b18;
+    --borda: #2b3a33;
+    --apagado: #8ea79c;
+}
+
+body[data-tema="ladosombrio"] #arena {
+    position: relative;
+    isolation: isolate;
+
+    /* O tamanho do ladrilho da mata é declarado AQUI e lido pelo JS (getComputedStyle) pra ancorar
+       os olhos das corujas nos troncos. Uma fonte só: mexer no ladrilho leva os olhos junto, em vez
+       de deixar duas cópias do número pra divergirem.
+
+       Este é o valor da janela ALTA; quem encolhe em janela baixa é o @media do fim desta seção, em
+       px crus — ver lá por que `min()`/`vh` quebraria o parseFloat do JS. */
+    --mata-passo: 320px;
+    --mata-altura: 190px;
+
+    background:
+        /* 1. vinheta, bem mais fechada que a do Reino: aqui não se enxerga longe */
+        radial-gradient(ellipse 100% 80% at 50% 34%, transparent 22%, rgba(2, 5, 4, .9) 100%),
+        /* 2. a LUA: um disco pálido no alto, com halo */
+        radial-gradient(circle 26px at 50% 15%, rgba(226, 240, 230, .92) 0 62%, transparent 66%),
+        radial-gradient(circle 190px at 50% 15%, rgba(150, 200, 170, .16), transparent 70%),
+        /* 3. a MATA: uma árvore grande, uma menor, cruz, lápide e grade. Duas alturas de galho e um
+              tronco que afina dão silhueta em vez de rabisco. */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='190' viewBox='0 0 320 190'%3E%3Cg fill='%23040a07'%3E%3Cpath d='M44 190v-74l-19-22 19 11V78L14 50l30 18V38L26 18l18 12V4h7v34l22-20-22 30v22l16-11-16 20v14l24-16-24 24v58z'/%3E%3Cpath d='M46 116l-13 8 13-3zM51 62l11-6-11 11z'/%3E%3Cpath d='M232 190v-58l-14-16 14 8V88l-20-19 20 12V56l-13-15 13 9V28h5v20l16-13-16 22v16l12-8-12 16v93z'/%3E%3Cpath d='M126 190v-34h26v34zM134 142h10v14h-10z'/%3E%3Cpath d='M164 190v-30h9v30zM156 168h25v7h-25z'/%3E%3Cpath d='M280 190v-22a11 11 0 0122 0v22z'/%3E%3Cpath d='M96 190v-18h3v18zM106 190v-18h3v18zM116 190v-18h3v18zM92 172h31v3H92z'/%3E%3C/g%3E%3C/svg%3E"),
+        /* 4. bancos de névoa presos ao chão */
+        linear-gradient(0deg, rgba(150, 190, 170, .16) 0 8%, transparent 26%),
+        linear-gradient(0deg, rgba(150, 190, 170, .10) 0 16%, transparent 40%),
+        /* 5. o céu */
+        linear-gradient(180deg, #0c1a18 0%, #091210 55%, #070d0b 100%);
+    background-size: cover, cover, cover, var(--mata-passo) var(--mata-altura), cover, cover, cover;
+    background-repeat: no-repeat, no-repeat, no-repeat, repeat-x, no-repeat, no-repeat, no-repeat;
+    /* `left bottom` na MATA, e não `bottom`: `bottom` sozinho vale `50% 100%`, ou seja, os ladrilhos
+       são ancorados no CENTRO da tela. O JS que posiciona as corujas conta os ladrilhos a partir do
+       x=0 — com a âncora no centro, as duas contas discordam e os olhos caem fora das árvores. */
+    background-position: center, center, center, left bottom, bottom, bottom, center;
+}
+
+/* Teias nos cantos de cima — onde o Reino pendura estandartes. Mesmo gancho, outra história. */
+body[data-tema="ladosombrio"] #arena::before,
+body[data-tema="ladosombrio"] #arena::after {
+    content: '';
+    position: absolute; top: 0;
+    width: 210px; height: 210px;
+    /* A teia é feita de ARCOS DE CÍRCULO centrados no canto, não de curvas soltas: os fios que
+       ligam os raios de uma teia real acompanham o mesmo raio. A versão anterior usava quadráticas
+       com pontas tortas e lia como um monte de riscos. `A r r 0 0 1 x y` = arco circular. */
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='210' height='210' viewBox='0 0 210 210'%3E%3Cg fill='none' stroke='%23cfe3d8' stroke-opacity='.55' stroke-width='1.1'%3E%3Cpath d='M0 0L210 26M0 0L210 78M0 0L168 147M0 0L105 210M0 0L46 210M0 0L14 210'/%3E%3Cpath d='M40 0A40 40 0 0 1 0 40'/%3E%3Cpath d='M76 0A76 76 0 0 1 0 76'/%3E%3Cpath d='M118 0A118 118 0 0 1 0 118'/%3E%3Cpath d='M162 0A162 162 0 0 1 0 162'/%3E%3Cpath d='M206 0A206 206 0 0 1 0 206'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+    opacity: .34;
+    pointer-events: none;
+    z-index: -1;
+}
+
+body[data-tema="ladosombrio"] #arena::before { left: 0; }
+
+/* Espelhada: a teia do outro canto é a mesma arte virada, não um segundo desenho pra manter. */
+body[data-tema="ladosombrio"] #arena::after { right: 0; transform: scaleX(-1); }
+
+body[data-tema="ladosombrio"] #topo { border-bottom: 2px solid rgba(150, 200, 170, .38); }
+
+body[data-tema="ladosombrio"] #painel { border-top: 2px solid rgba(150, 200, 170, .38); }
+
+body[data-tema="ladosombrio"] #topo,
+body[data-tema="ladosombrio"] #painel {
+    background:
+        linear-gradient(180deg, rgba(150, 200, 170, .06) 0%, transparent 60%),
+        var(--painel);
+}
+
+body[data-tema="ladosombrio"] .combatente {
+    background: linear-gradient(180deg, rgba(28, 42, 36, .82), rgba(12, 20, 17, .82));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .55);
+}
+
+/* O log vira grimório: papel esverdeado de mofo, fio de limo. */
+body[data-tema="ladosombrio"] #log {
+    background: linear-gradient(180deg, rgba(18, 30, 24, .6), rgba(9, 16, 13, .6));
+    border-color: rgba(150, 200, 170, .24);
+}
+
+/* ==========================================================================
+   OS LADRILHOS DE HORIZONTE POR FAIXA DE ALTURA
+   ==========================================================================
+   Os quatro ladrilhos (mata do cemitério, laboratório da invasão, floresta do folclore, vila dos
+   decaídos) são lidos pelo
+   JS pra ancorar o que vive no horizonte — corujas e espantalhos, bobinas de Tesla, os chifres do Oni
+   e a clava do Troll. Em px fixos eles NÃO encolhiam com a janela, e isso quebrava de verdade: numa
+   arena baixa o ladrilho ficava mais alto que ela, o `baseY` (`canvas.height − altura`) virava
+   NEGATIVO, e o que devia estar no horizonte subia pra perto do topo da tela.
+
+   Os 🐉 Místicos e os ✝️ Apóstolos NÃO entram nesta escada, e a ausência deles é informação: as linhas
+   do mar e da areia de um, e a do piso da sala do outro, são % da arena — escalam sozinhas e não têm
+   um tamanho próprio pra defender. Quem precisa de degrau é ladrilho: imagem com dimensão em px que o
+   JS ancora. **Quando der pra escolher, a fração é a medida barata.**
+
+   POR QUE NÃO `min()`/`clamp()`/`vh`, que resolveria em uma linha: o JS lê estes valores com
+   `parseFloat(getComputedStyle(arena).getPropertyValue('--lab-altura'))`, e propriedade customizada
+   NÃO é resolvida pra px pelo getComputedStyle — ela volta como o TEXTO que está escrito aqui. Um
+   `min(266px, 60vh)` devolveria a string inteira, o parseFloat daria NaN, o `|| 320` de emergência
+   assumiria, e as âncoras cairiam no lugar errado EM SILÊNCIO. Por isso a saída é @media com px
+   crus: o CSS continua sendo o dono do número e o parseFloat continua vivo.
+
+   As faixas: a arena vale ~`100vh − 190px` (o topo tem ~40 e o painel tem 148 de mínimo), e cada
+   degrau mantém o ladrilho em torno de 45-50% da altura dela — metade de baixo pro horizonte, metade
+   de cima pro céu. As duas medidas descem JUNTAS, na proporção de cada ladrilho, senão a cidade e a
+   mata esticariam; o desvio de proporção fica abaixo de 0.7% em todos os degraus, e o que sobra é
+   arredondamento de px inteiro nos menores (a mata a 46px de altura queria 77.5 de largura). Sub-px
+   não se vê — mas não é zero, então não vale dizer que é.
+
+   O tamanho BASE de cada ladrilho não é calculado aqui: é escolhido a olho, no tema (o laboratório em
+   635×355 é calibragem à mão do Gabriel). Estas faixas só reduzem o que ele escolheu; elas não têm
+   opinião sobre o valor cheio.
+
+   Abaixo de ~400px de janela a cena fica apertada de qualquer jeito (o painel sozinho já não
+   caberia), mas o ladrilho segue MENOR que a arena até ~261px — que é a garantia que importa, porque
+   é ela que mantém o `baseY` positivo e o horizonte no horizonte. */
+@media (max-height: 1000px) {
+    body[data-tema="ladosombrio"] #arena { --mata-passo: 269px; --mata-altura: 160px; }
+}
+
+@media (max-height: 860px) {
+    body[data-tema="ladosombrio"] #arena { --mata-passo: 224px; --mata-altura: 133px; }
+}
+
+@media (max-height: 720px) {
+    body[data-tema="ladosombrio"] #arena { --mata-passo: 182px; --mata-altura: 108px; }
+}
+
+@media (max-height: 600px) {
+    body[data-tema="ladosombrio"] #arena { --mata-passo: 145px; --mata-altura: 86px; }
+}
+
+@media (max-height: 500px) {
+    body[data-tema="ladosombrio"] #arena { --mata-passo: 109px; --mata-altura: 65px; }
+}
+
+@media (max-height: 400px) {
+    body[data-tema="ladosombrio"] #arena { --mata-passo: 77px; --mata-altura: 46px; }
+}
+
+@media (max-height: 300px) {
+    body[data-tema="ladosombrio"] #arena { --mata-passo: 54px; --mata-altura: 32px; }
+}

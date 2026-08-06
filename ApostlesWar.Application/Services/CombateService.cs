@@ -279,17 +279,8 @@ namespace ApostlesWar.Application.Services
         /// Ordem do ADR: AtoReacaoDoAlvo → AtoMorte → AtoReacaoDoAtacante.
         /// Compartilhado pelo caminho normal (ExecutarHabilidade) e pelo Irritar.
         ///
-        /// O `TipoAtaque` responde a DUAS perguntas que PARECEM uma só, e por isso elas saem daqui
-        /// separadas:
-        ///   (a) o RITMO — a narrativa pinga alvo a alvo, ou cai de uma vez?
-        ///   (b) a REGRA — a reação-por-ataque do atacante (IReageAoAtacar) dispara?
-        /// Só o SEQUENCIAL pinga: é a natureza dele (o Porradeiro do Troll são 6 pancadas e precisam
-        /// soar 6 vezes). Área e NaoAtaque caem de uma vez — mas só a Área é ataque.
-        ///
-        /// Quem provou que (a) e (b) eram eixos diferentes foi a CURA EM GRUPO: ela quer o baque
-        /// único da área e nada da semântica de ataque. Enquanto as duas perguntas dividiam o mesmo
-        /// enum, a cura de 4 aliados pingava de um em um, porque o único caminho que junta era o do
-        /// golpe em área.
+        /// O `TipoAtaque` decide duas coisas independentes: o RITMO (pinga alvo a alvo ou cai de uma
+        /// vez) e a REGRA (a reação-por-ataque dispara). Só o Sequencial pinga; só a Área é ataque.
         /// </summary>
         private void ExecutarAtos(List<EventoCombate> resultados, Combate atacante, TipoAtaque tipoAtaque)
         {
@@ -332,18 +323,13 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
-        /// UM BAQUE SÓ: mostra TODOS os resultados — dano e cura — sem pausa entre eles, de modo que
-        /// os números sobem juntos e as barras se mexem juntas; depois UMA pausa; e só então as
-        /// reações por alvo. Adiantar a exibição não muda regra nenhuma: quando isto roda, o
-        /// `hab.Ativar` já aplicou tudo no modelo (o motor executa primeiro e narra depois).
+        /// UM BAQUE SÓ (área e cura em grupo): exibe todos os resultados sem pausa entre eles, UMA
+        /// pausa, e só então as reações. Adiantar a exibição é seguro — o `hab.Ativar` já aplicou
+        /// tudo no modelo antes de qualquer narração.
         ///
-        /// Serve o golpe em ÁREA e a CURA EM GRUPO, que querem o mesmo ritmo por motivos diferentes.
-        ///
-        /// **O `dispararReacaoPorAtaque` é PARÂMETRO e não dedução, de propósito.** A tentação é
-        /// concluir "tem dano na lista, logo foi ataque" — e isso quebraria calado: o Inferno do
-        /// Diabo é `NaoAtaque` e causa dano em TODOS os inimigos. Deduzir faria o IReageAoAtacar
-        /// dele passar a disparar, ou seja, mudaria uma regra de combate dentro de um ajuste de
-        /// animação. Quem sabe se foi ataque é a habilidade, não o resultado dela.
+        /// `dispararReacaoPorAtaque` NÃO pode virar dedução do tipo "tem dano, logo foi ataque" — o
+        /// Inferno do Diabo é `NaoAtaque` e causa dano em todos, e deduzir faria o IReageAoAtacar
+        /// dele disparar.
         /// </summary>
         private void ExecutarAtosDeUmaVez(List<EventoCombate> resultados, Combate atacante,
             bool dispararReacaoPorAtaque)

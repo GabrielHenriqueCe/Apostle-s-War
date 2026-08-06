@@ -1071,7 +1071,10 @@ tarefa concorrente.** Reavaliar DEPOIS que `ui/` e `telas/` existirem, nunca ant
       teste é que escolheria a ordem, não o fluxo). O teste real nasce quando a Fatia 1 do front
       tornar a apresentação injetável — evita desenhar 2× o seam que o front vai redesenhar.
       Até lá a ordem é guardada pelo comentário no `ProcessarReacoesAoMorrer` + ADR.
-15. **Faxina de comentários** — bisturi. Penúltimo.
+15. 🔜 **Faxina de comentários — REORDENADA, não cancelada** (ago/2026). Acontece **DEPOIS da separação
+    do `jogo.js`**, e em duas etapas: o cenário que se move já sai reduzido, e então uma passada pelos
+    OUTROS arquivos. Ganhou também uma regra de escrita (`CLAUDE.md` §Comentário) pra a vazão não
+    repor o que a faxina tirar. Ver §Faxina de comentários — a medição de lá é o BRIEFING dela.
 16. 🔄 **REBALANCEAMENTO — EM ITERAÇÃO** (1ª passada mergeada no #189). Não é um item que "termina":
     a bancada (§BANCADA DE DANO) é o instrumento, e cada volta é ler os números e mexer numa
     alavanca. A passada 1 padronizou o cooldown em 3 e subiu os multiplicadores de faixa.
@@ -2350,9 +2353,58 @@ identidade — Nome/Simbolo/Descricao — herdada por `Habilidade` E `StatusEffe
 `ElementoDeJogo` (`Skills/ElementoDeJogo.cs`). No mesmo PR morreu o homônimo `Turnos`
 (cooldown/duração viraram `Cooldown`/`DuracaoRestante`, libertando "Turno").
 
-### Faxina de comentários
-**Status:** ÚLTIMO da fila. Bisturi: remove ruído, mantém os porquês. Branch própria, depois de
-tudo estabilizar.
+### Faxina de comentários — 🔜 VAI ACONTECER, e agora tem ORDEM e BRIEFING (ago/2026)
+
+Era "último da fila, bisturi, branch própria", sem data e sem números. **Continua valendo — o Gabriel
+foi explícito: *"vai ser feito isso primeiro e depois voltamos nos outros arquivos e vamos ajustar
+SIM"*.** O que mudou é que ela deixou de ser um item vago e ganhou ordem, medição e uma regra que
+impede a vazão de repor o que ela tirar.
+
+**A ORDEM (decisão do Gabriel):**
+1. **Separar o `jogo.js`** (§DÍVIDA ANOTADA). Cada cenário que se move **já sai reduzido** — a faxina
+   dos 29% pega carona no movimento, em vez de ser um segundo passe pelos mesmos arquivos.
+2. **Depois, os OUTROS arquivos** — o C# e o que sobrar do front. Aí sim como trabalho próprio.
+
+Fazer o C# antes seria trabalhar contra a ordem: 29% dos comentários vivem no `jogo.js`, que vai ser
+picado de qualquer jeito, e limpá-los antes do movimento é fazer duas vezes.
+
+**A REGRA DE ESCRITA, que é a outra metade** (`CLAUDE.md` §Comentário): sem ela a faxina se refaz
+sozinha. A conta que provou: no PR da cura em área (#207) eu escrevi **28 linhas de comentário pra 11
+de código** (70%, quase 3× a média do repo) e expliquei a MESMA armadilha três vezes — comentário,
+commit e ROADMAP —, o que pela regra da casa de que duas cópias divergem fabrica comentário mentiroso
+futuro. O piloto (#208) cortou aquele bloco de 28 pra 14 sem perder nada acionável: saiu a HISTÓRIA
+(que o git guarda melhor) e a ÊNFASE de defender-o-PR; ficou a regra e a mina.
+
+**O BRIEFING — o estoque, medido em ago/2026:**
+
+| | linhas | comentário | código |
+|---|---|---|---|
+| C# (209 arquivos) | 15.024 | **3.959 (26%)** | 9.117 (60%) |
+| `jogo.js` | 11.920 | **3.563 (29%)** | — |
+
+Dos 3.959 do C#, **3.440 são `///`** e só 519 são `//` inline. Ou seja 87% não é "comentário" no
+sentido que incomoda — é documentação de API, o contrato entre camadas.
+
+**A razão comentário/código é métrica MENTIROSA aqui.** O topo do ranking é `IPulaTurno.cs` (14
+linhas: 11 de comentário, 2 de código), `IAtaquePrimario.cs`, `ICapacidadesStatus.cs` — interfaces de
+capacidade cujo valor inteiro é a prosa que diz quando disparam e por que não são a mesma família da
+vizinha. **Faxinar por ranking destrói o melhor primeiro.**
+
+**COMO fatiar, quando chegar a vez** — o risco desta faxina não é o corte, é o TAMANHO do diff: 209
+arquivos, ZERO verificação possível (nenhum teste pega comentário apagado errado) e perda
+irrecuperável se a mão pesar, porque os becos sem saída são o conhecimento mais caro daqui e os que
+mais parecem supérfluos pra quem não os viveu. Então: **por camada ou por pasta, um PR por fatia**,
+nunca tudo de uma vez — e o critério é a tabela do `CLAUDE.md`, não o olho.
+
+**As três categorias de gordura, em ordem de custo** — a primeira dá pra atacar a qualquer momento,
+inclusive antes da separação, porque é verificável:
+1. **Comentário que MENTE.** Custa mais que cinquenta verbosos: em ago/2026 o §OS FIOS QUE FALTAM
+   dizia que 3 fios estavam abertos, e eu apresentei ao Gabriel trabalho pronto como pendência.
+   Um PR de caça a MENTIRA (comentário citando `#NNN` já mergeado, nome de classe/método que não
+   existe mais, TODO de coisa feita) é barato e **verificável** — o nome existe ou não —, ao
+   contrário de "esse comentário é supérfluo", que é gosto e vira discussão infinita.
+2. **Narração histórica** — 138 linhas no C# + 178 no `jogo.js`. Destino: mensagem de commit.
+3. **Narrar o óbvio** — a menor das três.
 
 ---
 

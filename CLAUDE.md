@@ -33,11 +33,45 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   GitHub web (não há `gh` CLI na máquina — e o *"Create a pull request by visiting…"* que aparece no
   output do push é texto do GitHub, não um PR criado). Depois eu limpo:
   `git checkout main && git pull && git branch -d <branch> && git fetch --prune`.
-- **1 PR, 1 tema.** Mergeado antes do próximo começar.
 - **Nomes:** domínio em PORTUGUÊS (`Combate`, `Habilidade`, `Batalha`), andaime em INGLÊS
   (`View`/`Controller`/`Service`). Nome de capacidade = COMPORTAMENTO, nunca identidade de classe.
 - **YAGNI, mas:** quando o Gabriel NOMEIA um futuro (Arena, front, medidor de velocidade), desenhar o seam
   agora vale — não é especulação. Verificar-antes-de-fundir ("o grep mente").
+- **1 PR, 1 tema.** Mergeado antes do próximo começar — e **uma branch por vez**: nada de empilhar
+  branch nem de adiantar o tema seguinte no working tree enquanto um PR espera. Avisar ao criar a branch.
+
+## Comentário: cada coisa em UM lugar só (ago/2026)
+Nasceu de uma medição: no PR da cura em área eu escrevi **28 linhas de comentário pra 11 de código**
+(70%, contra 26% de média do repo). Esta regra é a metade da VAZÃO — **a faxina do estoque (#15) VAI
+acontecer**, e a ordem é do Gabriel: primeiro separar o `jogo.js` (cada cenário que se move já sai
+reduzido), **depois voltar nos outros arquivos e ajustar**. Sem a regra, a faxina se refaz sozinha;
+sem a faxina, a regra só segura o que vier de novo.
+
+| o que eu quero dizer | onde mora |
+|---|---|
+| o que a linha faz | **nada.** O código diz |
+| por que ESTA linha é assim, o que quebra se mudar | comentário curto, na linha |
+| por que este DESENHO e não o outro | ADR / ROADMAP |
+| o que foi TENTADO e MORREU, o histórico, o "antes era X" | **mensagem de commit**, só |
+| contrato entre camadas | `///` na superfície pública |
+
+**O erro que a regra pega:** eu escrevo comentário no modo *"defender o PR"* — negrito, "de propósito",
+"a tentação é" — e ele fica lá pra sempre no modo errado. **O lugar de defender o PR é a mensagem de
+commit.** No piloto o bloco caiu de 28 pra 14 linhas sem perder nada acionável: saiu a HISTÓRIA (o git
+guarda melhor, datada e grudada no diff) e a ÊNFASE; ficou a regra e a armadilha.
+
+**O que NUNCA se corta:** armadilha ATIVA — o que quebra em silêncio se alguém "melhorar" o código.
+Ex.: o `dispararReacaoPorAtaque` não pode virar dedução porque o Inferno do Diabo é `NaoAtaque` com
+dano. Isso não é história, é mina. Corta-se a moral e o adjetivo, nunca o fato e a consequência.
+
+**Razão comentário/código é métrica MENTIROSA aqui** — o topo do ranking são interfaces de capacidade
+(`IPulaTurno`: 2 linhas de código, 11 de doc), onde o comentário É o produto. Faxinar por ranking
+destrói o melhor primeiro.
+
+**Como se aplica:** (1) boy-scout — mexeu no arquivo, ajusta o comentário dele no MESMO PR; (2) na
+separação do `jogo.js`, cada cenário que se move **já sai reduzido** (*"vamos movendo e já
+reduzindo"*); (3) **depois disso, a faxina dos OUTROS arquivos**, como trabalho próprio, fatiada por
+camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição de briefing.
 
 ## Comandos
 - Build: `dotnet build`  ·  Testes: `dotnet test` (xUnit em `ApostlesWar.Tests/`).

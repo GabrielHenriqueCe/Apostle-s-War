@@ -18,20 +18,22 @@ import * as especial from './cenarios/especial/especial.js';
 import * as decaidos from './cenarios/decaidos/decaidos.js';
 import * as apostolos from './cenarios/apostolos/apostolos.js';
 
+import { ar, montar } from './cenarios/tecnologicos/tecnologicos.js';
+import { arrastando, configurarSlotDnD, criarCelulaPicker, criarSlot, tornarPickerArrastavel } from './ui/time.js';
+import { aoTrocarCena, cenaAgora, definirMenuRaiz, menuEhRaiz, mostrarCena } from './nucleo/cena.js';
+import { confirmar, fecharModal, modalAberto } from './ui/modal.js';
+import { entre } from './cenarios/comum/basicos.js';
+import { aplicarTema, registrarCenarios } from './nucleo/ar.js';
+export { aplicarTema };   // o seam por onde o harness entra (ferramentas/rodar-tema.js)
+import { mandar, ponte } from './nucleo/ponte.js';
 
-const ponte = window.chrome.webview;
+
 
 let estado = null;
 let selecionadoId = null;    // quem está aberto no painel de baixo
 let habilidadeEscolhida = null;
 let mostrarEstatisticas = true;   // hoje ligado: fase de teste de balance
-let cenaAtual = 'menu';      // cena atual (menu, combate, criarPerfil, arenaSetup, campanha*) — o Esc depende disto
-let menuRaiz = true;         // o menu na tela é o PRINCIPAL? (decide o Esc: sair do jogo × voltar)
 let perfilAvatar = '🧭';     // avatar do jogador; vira o marcador que caminha no mapa
-
-// ---------- envio ----------
-// `texto` só é usado quando o valor é uma string (ex: o nome do perfil); o resto manda só o índice.
-const mandar = (tipo, valor = 0, texto = null) => ponte.postMessage(JSON.stringify({ tipo, valor, texto }));
 
 // ---------- recepção ----------
 ponte.addEventListener('message', e => {
@@ -54,39 +56,9 @@ ponte.addEventListener('message', e => {
     else if (msg.tipo === 'compendioChamp') mostrarChampDetalhe(msg.conteudo);
 });
 
-// ---------- cenas (menu × combate × criar/editar perfil) ----------
-function mostrarCena(cena) {
-    cenaAtual = cena;
-    const emCombate = cena === 'combate';
-    document.getElementById('menu').hidden = cena !== 'menu';
-    document.getElementById('criarPerfil').hidden = cena !== 'criarPerfil';
-    document.getElementById('editarPerfil').hidden = cena !== 'editarPerfil';
-    document.getElementById('arenaSetup').hidden = cena !== 'arenaSetup';
-    document.getElementById('campanhaMapa').hidden = cena !== 'campanhaMapa';
-    document.getElementById('campanhaFases').hidden = cena !== 'campanhaFases';
-    document.getElementById('fimDeFase').hidden = cena !== 'fimDeFase';
-    document.getElementById('conquista').hidden = cena !== 'conquista';
-    document.getElementById('arsenal').hidden = cena !== 'arsenal';
-    document.getElementById('compendio').hidden = cena !== 'compendio';
-    // A ficha do champ tem UMA seção e dois donos: o compêndio e a conquista (o champ recém-ganho
-    // termina na própria ficha). Copiar o HTML pra ter duas telas iguais seria duas telas pra manter.
-    document.getElementById('compendioChamp').hidden = !['compendioChamp', 'conquistaChamp'].includes(cena);
-    document.getElementById('arena').hidden = !emCombate;
-    document.getElementById('painel').hidden = !emCombate;
-    // Os controles de combate só fazem sentido na batalha.
-    document.getElementById('botoesTopo').style.visibility = emCombate ? 'visible' : 'hidden';
-    document.getElementById('turno').style.visibility = emCombate ? 'visible' : 'hidden';
-    // O overlay de fim só existe em combate; ao trocar de cena garante que sumiu.
-    if (!emCombate) document.getElementById('fimBatalha').hidden = true;
-    // O tema é do CAMPO DE BATALHA: fora dele, nenhum. Quem o LIGA é o desenhar (precisa do estado
-    // novo); aqui só se garante que ele não vaze pras telas de menu.
-    if (!emCombate) aplicarTema('');
-    atualizarBotaoSair();
-}
-
 function aplicarMenu(m) {
     mostrarCena('menu');
-    menuRaiz = !!m.raiz;
+    definirMenuRaiz(!!m.raiz);
     document.getElementById('menuTitulo').textContent = m.titulo;
     document.getElementById('menuSubtitulo').textContent = m.subtitulo || '';
 
@@ -251,70 +223,6 @@ function mostrarMontagemArena(campeoes) {
     aplicarToggleArena('dir', 'bot');
     montarPickerArena();
     desenharSlotsArena();
-}
-
-// ---------- montagem de time: helpers compartilhados (arena e campanha) ----------
-// picker = a grade de champs (de onde escolhe); slot = as casas do time montado.
-// Cliques: picker → adiciona na casa selecionada/1ª vazia; casa vazia → seleciona; casa cheia → remove.
-// Arrastar: picker→casa substitui; casa→casa troca de posição; casa→fora dos slots remove.
-let arrastando = null;   // { tipo:'picker', idx } | { tipo:'slot', arr, i }
-
-function criarCelulaPicker(c) {
-    const cel = document.createElement('div');
-    cel.className = 'avatarCelula';
-    const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
-    const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
-    cel.append(em, nm);
-    return cel;
-}
-
-function tornarPickerArrastavel(cel, idx) {
-    cel.draggable = true;
-    cel.addEventListener('dragstart', e => { arrastando = { tipo: 'picker', idx }; e.dataTransfer.setData('text', ''); });
-    cel.addEventListener('dragend', () => { arrastando = null; });
-}
-
-function criarSlot(campeoes, idx, selecionado) {
-    const slot = document.createElement('div');
-    slot.className = 'slot' + (idx != null ? ' preenchido' : '') + (selecionado ? ' selecionado' : '');
-    if (idx != null) {
-        const c = campeoes[idx];
-        const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;
-        const nm = document.createElement('span'); nm.className = 'slotNome'; nm.textContent = c.nome;
-        slot.append(em, nm);
-    } else {
-        const v = document.createElement('span'); v.className = 'slotVazio'; v.textContent = 'clique e escolha';
-        slot.append(v);
-    }
-    return slot;
-}
-
-// `arr` = array do time (o lado, na arena); `i` = índice da casa; `redesenhar` re-renderiza.
-function configurarSlotDnD(slot, arr, i, redesenhar) {
-    if (arr[i] != null) {
-        slot.draggable = true;
-        slot.addEventListener('dragstart', e => { arrastando = { tipo: 'slot', arr, i }; e.dataTransfer.setData('text', ''); });
-        slot.addEventListener('dragend', () => {   // soltou FORA de qualquer slot → remove
-            if (arrastando && arrastando.tipo === 'slot') { arrastando.arr[arrastando.i] = null; arrastando = null; redesenhar(); }
-        });
-    }
-    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('dropAlvo'); });
-    slot.addEventListener('dragleave', () => slot.classList.remove('dropAlvo'));
-    slot.addEventListener('drop', e => {
-        e.preventDefault();
-        slot.classList.remove('dropAlvo');
-        if (!arrastando) return;
-        if (arrastando.tipo === 'picker') {
-            const k = arr.indexOf(arrastando.idx);   // dedup só NESTE time (o outro lado pode repetir)
-            if (k >= 0) arr[k] = null;
-            arr[i] = arrastando.idx;                 // substitui o que estava na casa
-        } else {                                     // casa → casa: troca de posição
-            const s = arrastando;
-            const tmp = arr[i]; arr[i] = s.arr[s.i]; s.arr[s.i] = tmp;
-        }
-        arrastando = null;
-        redesenhar();
-    });
 }
 
 // ---------- montagem: Arena ----------
@@ -743,7 +651,7 @@ let arsenalDados = null;
 let arsenalSlotSel = -1;
 
 function mostrarArsenal(a) {
-    if (cenaAtual !== 'arsenal') arsenalSlotSel = -1;   // entrada fresca → nenhum slot aberto
+    if (cenaAgora() !== 'arsenal') arsenalSlotSel = -1;   // entrada fresca → nenhum slot aberto
     mostrarCena('arsenal');
     arsenalDados = a;
     desenharBoneco();
@@ -954,35 +862,11 @@ function mostrarChampDetalhe(c) {
 }
 
 
-// ---------- modal de confirmação ----------
-let modalAberto = false;
-let modalAoConfirmar = null;
-
-function confirmar(texto, aoConfirmar) {
-    modalAberto = true;
-    modalAoConfirmar = aoConfirmar;
-    document.getElementById('modalTexto').textContent = texto;
-    document.getElementById('modal').hidden = false;
-}
-
-function fecharModal() {
-    modalAberto = false;
-    modalAoConfirmar = null;
-    document.getElementById('modal').hidden = true;
-}
-
-document.getElementById('modalConfirmar').addEventListener('click', () => {
-    const cb = modalAoConfirmar;
-    fecharModal();
-    if (cb) cb();
-});
-document.getElementById('modalCancelar').addEventListener('click', fecharModal);
-
 function aplicarEstado(novo) {
     // Batalha nova (entrando no combate de outra cena) → log limpo. O log não persiste entre fases/
     // arenas: acabou a luta, morre; ao entrar de novo (mesma fase inclusive) nasce um log novo. Entre
     // as 2 rodadas de uma fase a cena continua 'combate', então o log dessa fase é preservado.
-    if (cenaAtual !== 'combate') limparLog();
+    if (cenaAgora() !== 'combate') limparLog();
     mostrarCena('combate');   // chegou estado de batalha → sai do menu
 
     // Ao voltar pra escolha de ação, a habilidade anterior já foi usada (ou cancelada).
@@ -1425,25 +1309,25 @@ const acharCombatente = id => id == null ? null
 //  - batalha → desarma o que estiver armado; sem nada armado, confirma sair da luta
 function sairDaTela() {
     if (modalAberto) { fecharModal(); return; }
-    if (cenaAtual === 'criarPerfil') return;
+    if (cenaAgora() === 'criarPerfil') return;
 
-    if (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim') { mandar('voltarMenu'); return; }
+    if (cenaAgora() === 'combate' && nomeDaFase(estado || {}) === 'Fim') { mandar('voltarMenu'); return; }
 
     // Fim de fase: com as opções à mostra, sair é a decisão "Sair" (que faz o mesmo que Editar
     // Equipe — sair desta tela É voltar pra montagem). Na passagem da recompensa, sair é seguir.
-    if (cenaAtual === 'fimDeFase') { mandar(fimComOpcoes ? 'voltar' : 'continuar'); return; }
+    if (cenaAgora() === 'fimDeFase') { mandar(fimComOpcoes ? 'voltar' : 'continuar'); return; }
 
     // A conquista e a ficha dela: sair fecha o champ e devolve o comando ao C#, que segue pro
     // próximo champ novo ou pra tela de vitória.
-    if (cenaAtual === 'conquista' || cenaAtual === 'conquistaChamp') { mandar('continuar'); return; }
+    if (cenaAgora() === 'conquista' || cenaAgora() === 'conquistaChamp') { mandar('continuar'); return; }
 
-    if (cenaAtual === 'menu') {
-        if (menuRaiz) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));
+    if (cenaAgora() === 'menu') {
+        if (menuEhRaiz()) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));
         else mandar('voltar');
         return;
     }
 
-    if (cenaAtual !== 'combate') { mandar('voltar'); return; }
+    if (cenaAgora() !== 'combate') { mandar('voltar'); return; }
 
     if (desarmar()) { desenhar(); return; }
 
@@ -1463,9 +1347,9 @@ function sairDaTela() {
 // aparece: o jogo continua, então "sair" seria mentira.
 function atualizarBotaoSair() {
     const b = document.getElementById('sairTela');
-    b.hidden = cenaAtual === 'criarPerfil';
+    b.hidden = cenaAgora() === 'criarPerfil';
 
-    const encerrando = cenaAtual === 'combate' && estado?.modo === 'campanha'
+    const encerrando = cenaAgora() === 'combate' && estado?.modo === 'campanha'
         && nomeDaFase(estado) !== 'Fim';
     b.title = encerrando ? 'Encerrar a batalha (Esc)' : 'Sair desta tela (Esc)';
 }
@@ -1485,10 +1369,10 @@ document.addEventListener('keydown', e => {
     // Nas telas de PASSAGEM o Enter também segue em frente (é o gesto natural de "ok, continuar").
     // A tela de fim de fase COM opções fica de fora de propósito: ali cada botão faz uma coisa
     // diferente, e o Enter escolheria uma delas por conta própria.
-    const passagem = (cenaAtual === 'combate' && nomeDaFase(estado || {}) === 'Fim')
-        || (cenaAtual === 'fimDeFase' && !fimComOpcoes)
-        || cenaAtual === 'conquista' || cenaAtual === 'conquistaChamp'
-        || cenaAtual === 'compendioChamp';
+    const passagem = (cenaAgora() === 'combate' && nomeDaFase(estado || {}) === 'Fim')
+        || (cenaAgora() === 'fimDeFase' && !fimComOpcoes)
+        || cenaAgora() === 'conquista' || cenaAgora() === 'conquistaChamp'
+        || cenaAgora() === 'compendioChamp';
 
     if (e.key === 'Escape' || (passagem && e.key === 'Enter')) sairDaTela();
 });
@@ -1700,202 +1584,6 @@ export const CENARIOS = {
     apostolos,
 };
 
-let temaAtual = '';
-
-export function aplicarTema(tema) {
-    if (tema === temaAtual) return;   // o estado chega dezenas de vezes por turno; só reage à TROCA
-    temaAtual = tema;
-
-    if (tema) document.body.dataset.tema = tema;
-    else document.body.removeAttribute('data-tema');
-
-    iniciarAr(CENARIOS[tema]);
-}
-
-// ---------- o ar do cenário (canvas) ----------
-// Canvas atrás de tudo (z -1), rodando SÓ enquanto há cenário. Sem cenário o laço é cancelado e o
-// canvas escondido: capítulo sem pele não pode custar quadro nenhum.
-//
-// Tudo aqui anda por DELTA DE TEMPO (`* dt`), nunca por quadro — assim a cena tem a mesma velocidade
-// num monitor de 60Hz e num de 144Hz.
-//
-// ESTA FUNÇÃO NÃO CONHECE TEMA NENHUM. Ela recebe o módulo do cenário e pede a cena; quem sabe o que
-// desenhar, em que ordem e com que config é o próprio capítulo. Até ago/2026 era o contrário: uma
-// lista única aqui dentro citava os builders dos oito temas, cada item guardado por um
-// `config.X &&` — e os guardas eram exatamente o preço de a lista não ser de ninguém.
-let arFrame = null;
-
-function iniciarAr(cenario) {
-    const telas = [document.getElementById('particulasFundo'), document.getElementById('particulas')];
-
-    if (arFrame !== null) { cancelAnimationFrame(arFrame); arFrame = null; }
-    for (const t of telas) t.hidden = !cenario;
-    if (!cenario) return;
-
-    const [fundo, frente] = telas;
-    const ctxFundo = fundo.getContext('2d');
-    const ctxFrente = frente.getContext('2d');
-
-    const dimensionar = () => {
-        for (const t of telas) { t.width = t.clientWidth; t.height = t.clientHeight; }
-    };
-    dimensionar();
-
-    // O MAESTRO: dado que uma peça escreve e as outras leem, sem ninguém perguntar nada a ninguém.
-    // Uma camada que o ignore continua correta — sem redemoinho, `vento.forca` fica 0 pra sempre e
-    // todas as contas viram `+= 0`.
-    //
-    // Só o que é lido por peça COMPARTILHADA mora aqui: o `criarPo` do comum lê os dois. Maestro de
-    // um tema só (as portas do banheiro, a luz do Inferno, a noite de Natal) nasce dentro do
-    // `montar` daquele tema, que é o tempo de vida certo pra um estado de cena.
-    const maestro = { vento: { forca: 0, x: 0 }, fogo: { viva: 1 } };
-
-    const { noFundo, naFrente } = cenario.montar({ fundo, frente, maestro });
-
-    let anterior = performance.now();
-    const quadro = (agora) => {
-        const dt = Math.min((agora - anterior) / 1000, .05);   // janela minimizada não deve dar salto
-        anterior = agora;
-
-        if (fundo.width !== fundo.clientWidth || fundo.height !== fundo.clientHeight) dimensionar();
-        ctxFundo.clearRect(0, 0, fundo.width, fundo.height);
-        ctxFrente.clearRect(0, 0, frente.width, frente.height);
-
-        for (const camada of noFundo) camada(ctxFundo, dt);
-        for (const camada of naFrente) camada(ctxFrente, dt);
-
-        arFrame = requestAnimationFrame(quadro);
-    };
-    arFrame = requestAnimationFrame(quadro);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/// As corujas empoleiradas nos troncos da mata, cada uma com o PRÓPRIO relógio.
-///
-/// Fora de sincronia é o ponto (ideia do Gabriel). Um piscar coletivo denunciaria que é um efeito
-/// só; relógios independentes fazem parecer que há bichos ali, cada um na sua.
-///
-/// O olho fica APAGADO a maior parte do tempo, e o tempo ACESO é fixo. Essa assimetria é o que
-/// separa "bicho que abre o olho de vez em quando" de "lâmpada piscando": o que se sorteia é a
-/// ESPERA, nunca a duração do olhar. Como o sorteio se repete a cada ciclo, duas corujas que por
-/// acaso acendam juntas se desencontram na volta seguinte.
-///
-/// A posição sai do ladrilho REAL da mata (as vars `--mata-*` do CSS, lidas do #arena), então os
-/// olhos caem em cima das árvores desenhadas e acompanham qualquer mudança no ladrilho — em vez de
-/// haver duas cópias do número pra divergirem.
-///
-/// As contas são em coordenadas do CANVAS, que É a arena (ele é filho dela e a preenche): a mata
-/// fica ancorada no rodapé, então o topo do ladrilho é `altura do canvas − altura do ladrilho`.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ---------- 🔱 DECAÍDOS — a vila élfica vendida ----------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ---------- partida ----------
 document.getElementById('alternarEstatisticas').classList.toggle('ativo', mostrarEstatisticas);
@@ -1903,9 +1591,15 @@ document.getElementById('alternarLog').classList.toggle('ativo', mostrarLog);
 // O `#meio` também tem de nascer no estado certo: quem o escondia era só o clique do botão, então
 // com o log começando desligado a faixa dele ficaria à mostra até alguém clicar duas vezes.
 document.getElementById('meio').classList.toggle('oculto', !mostrarLog);
+// A INJEÇÃO, e ela vem antes de qualquer coisa desenhar: é aqui que o núcleo recebe as peças
+// concretas que ele não pode conhecer por import. Mesma ideia do Program.cs no back.
+registrarCenarios(CENARIOS);        // quais capítulos existem e como cada um monta a cena
+aoTrocarCena(atualizarBotaoSair);   // o que fazer depois de trocar de tela
+
 aplicarVelocidade();      // sincroniza o C# com o 2x inicial
 mostrarCena('menu');      // o jogo sempre abre no menu — evita o flash da arena vazia
 mandar('pronto');         // destrava a thread do jogo no C#
+
 
 
 

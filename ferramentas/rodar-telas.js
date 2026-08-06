@@ -10,6 +10,26 @@
 //   · função que ficou pra trás vira ReferenceError na hora em que a tela é montada.
 //   · id trocado no meio do movimento vira tela em branco sem erro; daí a conferência de ids.
 //
+// ============================================================================================
+// O QUE ELE **NÃO** COBRE — leia antes de confiar num verde daqui.
+//
+// Ele publica as 13 mensagens do C# e vê o que elas montam. **Ele não clica em nada.** Todo
+// caminho que só existe a partir de um gesto do jogador está fora:
+//
+//   duplo-clique, clique em slot/carta/botão · arrastar-e-soltar · teclado (Esc, Enter)
+//   e tudo que roda DURANTE a batalha em resposta a isso
+//
+// Na separação do front, QUATRO bugs saíram exatamente daí — e os quatro foram achados pelo
+// Gabriel jogando, nenhum por este arquivo:
+//   · o duplo-clique da conquista não abria a ficha (função virou tela e ninguém avisou o chamador)
+//   · o clique num slot do arsenal não mostrava item (const esquecida no arquivo antigo)
+//   · o 🎲 da campanha não sorteava (helper compartilhado foi morar numa tela só)
+//   · a batalha morria no 1º quadro (referência morta dentro do `atualizarBotaoSair`)
+//
+// Verde aqui quer dizer "as telas MONTAM". Não quer dizer "o jogo FUNCIONA" — isso continua
+// sendo teste em jogo, e é do Gabriel.
+// ============================================================================================
+//
 // Uso:  node --experimental-vm-modules ferramentas/rodar-telas.js
 'use strict';
 

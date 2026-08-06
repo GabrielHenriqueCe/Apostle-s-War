@@ -497,6 +497,30 @@ facção (Humanos) — e ela está **bloqueada de propósito**, pela seção log
 sendo (um bloco de CSS mais um punhado de configuração); o que falta não é esforço, é ONDE ela
 aparece.
 
+#### A ARENA vai ter CENÁRIO PRÓPRIO (decisão do Gabriel, ago/2026)
+
+Hoje ela não tem, e não tem **de propósito**: `FluxoDoFront.cs:255` faz `_sessao.Tema = ""` com o
+comentário *"laboratório não tem cenário"*. Essa decisão está revogada — a Arena ganha uma pele dela.
+
+**O que isso muda de arquitetura, e é mais do que parece.** Até aqui a chave do tema SEMPRE foi uma
+facção: `faccao.ToString().ToLowerInvariant()` → `body[data-tema]`. O vocabulário de temas era o enum
+`Faccao`, e por isso "tema" e "capítulo" vinham sendo a mesma palavra. A Arena é o **primeiro tema que
+não é facção nenhuma** — o que aposenta essa equivalência e deixa a chave ser só um NOME. Junto com o
+fundo de facção no compêndio (logo abaixo), é o segundo sinal de que o tema pertence à CENA, e não ao
+capítulo em que se luta.
+
+**O custo continua sendo quase nada:** um `body[data-tema="arena"]` no CSS, uma entrada `arena` no
+`AR_DO_TEMA`, e **uma linha de C#** — aquele `""` vira `"arena"`. Nenhuma estrutura nova.
+
+**O que fica em aberto (é desenho, e é do Gabriel):** que cena é essa. A regra da assinatura vale
+igual — não sobra HORA nenhuma, então a resposta é um LUGAR, no caminho do ⭐ Especial e dos
+✝️ Apóstolos. E há uma pista boa no que a Arena É: ela não é um capítulo da história, é onde se
+experimenta time contra time. O antigo comentário chamava isso de *laboratório*; vale decidir se a
+cena abraça essa ideia (um lugar de treino/torneio, fora do mundo da campanha) ou se contradiz.
+
+**Ordem:** cabe antes ou depois da separação do `jogo.js` — mas depois é mais barato, porque aí ela
+nasce direto como `cenarios/arena/` em vez de virar mais um trecho no monolito.
+
 #### Os HUMANOS ficam por último DE PROPÓSITO — e quem vai cobrar a pele é o COMPÊNDIO (ago/2026)
 
 Decisão do Gabriel, com o motivo e a hora. **Não há capítulo dos Humanos** — a campanha começa no

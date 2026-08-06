@@ -1,15 +1,17 @@
 // ARSENAL — o boneco com os 7 slots, o que o conjunto dá SOMADO, e os itens pra equipar.
 
-import { cenaAgora } from '../nucleo/cena.js';
 import { mandar } from '../nucleo/ponte.js';
+
+const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
+const ARSENAL_ICONES = ['🗡️', '⛑️', '🛡️', '📿', '🎽', '👖', '👢'];   // ícone do tipo quando o slot está vazio
 
 let arsenalDados = null;
 let arsenalSlotSel = -1;
 
 export const arsenal = {
     cena: 'arsenal',
-    montar(a) {
-        if (cenaAgora() !== 'arsenal') arsenalSlotSel = -1;   // entrada fresca → nenhum slot aberto
+    montar(a, anterior) {
+        if (anterior !== 'arsenal') arsenalSlotSel = -1;   // entrada fresca → nenhum slot aberto
         arsenalDados = a;
         desenharBoneco();
         desenharTotais();

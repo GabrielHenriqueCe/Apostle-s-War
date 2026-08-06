@@ -62,6 +62,24 @@ const TELAS = {
     criarPerfil, edicaoPerfil,
 };
 
+/// Abre uma tela. É por aqui que TODO mundo abre — a mensagem do C# e também o código que abre uma
+/// tela por conta (a ficha do champ que a conquista mostra depois do duplo-clique). Uma tela
+/// convertida ao contrato não tem mais uma função `mostrarX` pra chamar, e um caminho de abertura
+/// paralelo é como o duplo-clique da conquista parou de funcionar sem nada acusar.
+///
+/// Os dois parâmetros extras existem porque o jogo os pediu, não por simetria:
+///   `cena`     — a MESMA tela pode aparecer em cenas diferentes. A ficha do champ é a mesma pelo
+///                compêndio e pela conquista, mas a cena muda (`compendioChamp` × `conquistaChamp`)
+///                porque o Esc tem de voltar pra lugares diferentes.
+///   `anterior` — de onde se veio, entregue ao `montar`. Sem isto, uma tela que pergunta "eu já
+///                estava aqui?" recebe sempre "sim": quem troca a cena é esta função, ANTES do
+///                montar, e foi assim que o arsenal parou de zerar o slot aberto.
+export function abrirTela(tela, dados, cena = tela.cena) {
+    const anterior = cenaAgora();
+    mostrarCena(cena);
+    tela.montar(dados, anterior);
+}
+
 // AS DUAS QUE NÃO SÃO TELA, e ficam de fora de propósito (o "Nível 3" do ADR — quando a coisa não é
 // do formato, isso se declara em vez de se torcer): `estado` e `evento` não NAVEGAM, atualizam a
 // cena que já está no ar. Enfiá-las no mapa exigiria um `cena` mentiroso e um `montar` que não monta.
@@ -71,7 +89,7 @@ ponte.addEventListener('message', e => {
     catch { return; }
 
     const tela = TELAS[msg.tipo];
-    if (tela) { mostrarCena(tela.cena); tela.montar(msg.conteudo); return; }
+    if (tela) { abrirTela(tela, msg.conteudo); return; }
 
     if (msg.tipo === 'estado') aplicarEstado(msg.conteudo);
     else if (msg.tipo === 'evento') aplicarEvento(msg.conteudo);
@@ -581,8 +599,7 @@ function mostrarConquista(champ) {
 // na conquista — o que ele espera é um "continuar", e é o Esc/Sair daqui que vai mandá-lo.
 function abrirFichaDaConquista() {
     if (!conquistaEmCurso) return;
-    mostrarChampDetalhe(conquistaEmCurso);
-    mostrarCena('conquistaChamp');
+    abrirTela(compendioChamp, conquistaEmCurso, 'conquistaChamp');
     conquistaEmCurso = null;
 }
 
@@ -592,9 +609,6 @@ document.getElementById('conquista').addEventListener('dblclick', abrirFichaDaCo
 // compêndio e a conquista), porque é a mesma tela e não deve ter dois jeitos de fechar.
 document.getElementById('compendioChamp').addEventListener('click', sairDaTela);
 
-// ---------- Arsenal ----------
-const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
-const ARSENAL_ICONES = ['🗡️', '⛑️', '🛡️', '📿', '🎽', '👖', '👢'];   // ícone do tipo quando o slot está vazio
 
 
 

@@ -141,6 +141,7 @@ async function carregar(arquivo) {
 // ---------- as telas, uma mensagem cada ----------
 // As cargas são MÍNIMAS de propósito: o alvo é o caminho de montagem, não o conteúdo. Se a tela lê
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
+const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', simbolo: '🗡️', stat: 'ATK', valor: '+5', valorNum: 5, equipado: true };
 const champ = { id: 1, nome: 'Teste', simbolo: '🙂', faccao: 'Reino', hp: 100, hpMax: 100, ataque: 10, defesa: 10, taxaCrit: 15, danoCrit: 60, status: [], habilidades: [], liberado: true, vivo: true };
 const TELAS = [
     ['menu', { titulo: 'Apostle\'s War', subtitulo: '', opcoes: ['Jogar', 'Sair'], raiz: true, perfil: { nome: 'G', avatar: '🧭' } }],
@@ -151,7 +152,14 @@ const TELAS = [
     ['campanhaFases', { faccao: 'Reino', simbolo: '👑', fases: [{ numero: 1, nome: 'Arma', liberada: true, rodada1: [champ], rodada2: [champ], item: null }], campeoes: [champ], faseSelecionada: 1, time: [], meusCampeoes: [champ] }],
     ['fimDeFase', { venceu: true, titulo: 'Vitória', faccao: 'Reino', fase: 1, recompensa: null, temProxima: false, comOpcoes: true }],
     ['conquista', champ],
-    ['arsenal', { slots: [], itens: [], totais: [] }],
+    // COM CONTEÚDO, e não vazio: um `slots: []` faz o `.map` não rodar nenhuma vez, e o corpo do
+    // laço é justamente onde mora o que quebra. Foi assim que o harness deu verde com o
+    // `ARSENAL_AREAS` esquecido no jogo.js — lista vazia não exercita nada.
+    ['arsenal', {
+        slots: [0, 1, 2, 3, 4, 5, 6].map(s => ({ slot: s, nome: `Slot ${s}`, equipado: s === 0 ? item : null })),
+        obtidos: [item, { ...item, equipado: false, valorNum: 3 }],
+        totais: [{ stat: 'ATK', valor: '+10' }],
+    }],
     ['compendio', { faccoes: [{ nome: 'Reino', simbolo: '👑', champs: [champ] }] }],
     ['compendioChamp', champ],
     ['estado', { turno: 1, fase: 'Assistindo', mensagem: '', equipe1: [champ], equipe2: [{ ...champ, id: 9 }], quemAge: null, habilidades: [], alvosValidos: [], selecionado: null, auto: false, modo: 'Campanha', tema: 'reino' }],

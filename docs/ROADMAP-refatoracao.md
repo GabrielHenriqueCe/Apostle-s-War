@@ -751,6 +751,56 @@ quatro estarem juntos não precisa de explicação.
   rotação nenhuma*, e li "o rabo maior sobrepõe o círculo menor" ao contrário. Cada leitura minha
   custou uma rodada. O desenho dele estava certo desde a primeira frase.
 
+### ✅ DÍVIDA PAGA — um arquivo por cenário (ago/2026)
+
+> **A separação FOI FEITA.** O `jogo.js` saiu de **11.921 para 2.070 linhas** e cada facção mora na
+> pasta dela. O texto original do plano fica abaixo, como registro — e ele acertou quase tudo.
+>
+> | | antes | depois |
+> |---|---|---|
+> | `jogo.js` | 11.921 | **2.070** |
+> | cenário no `jogo.js` | ~10.240 (86%) | 0 |
+>
+> **O que foi entregue, em ordem de commit:**
+> 1. **Host virtual** (3 linhas de C#, `AppFront.cs`) — `SetVirtualHostNameToFolderMapping` +
+>    `Navigate("https://apostlesware/index.html")`. Sem isso o front roda em `file://`, origem opaca,
+>    e `<script type="module">` não carrega. Ganhou de carona um `NavigationCompleted` que GRITA se a
+>    navegação falhar, porque a alternativa é tela preta com o jogo rodando atrás.
+> 2. **`ferramentas/rodar-tema.js`** — o harness headless, agora VERSIONADO (ver a seção própria).
+> 3. **`ferramentas/medir-donos.js`** — a tabela de quem-usa-o-quê (ver a seção própria).
+> 4. **`cenarios/comum/`** — as 15 declarações compartilhadas, em 3 arquivos por intenção
+>    (`basicos.js`, `ladrilho.js`, `ar.js`).
+> 5. **Os 8 cenários**, um por pasta, cada um levando as declarações exclusivas, o cabeçalho de
+>    comentário de cada peça e a própria entrada do `AR_DO_TEMA` como `export const ar`.
+>
+> **O `AR_DO_TEMA` virou um REGISTRO de 8 linhas** — uma por capítulo, em ordem de campanha. Era um
+> objeto de 1.131 linhas. Acrescentar facção passa a ser criar uma pasta e pôr uma linha.
+>
+> **O QUE FALTA, e não é pouco — três coisas, cada uma um PR:**
+> - **O CSS ainda não saiu.** Os blocos `body[data-tema=...]` seguem no `estilo.css`, e a razão é uma
+>   ARMADILHA DE ORDEM: a escada de `@media (max-height:...)` do fim do arquivo (a que encolhe os
+>   ladrilhos) tem de vir **depois** do bloco base de cada tema. Separar os temas em arquivos
+>   carregados após o `estilo.css` INVERTE isso — o tema passaria a sobrescrever a escada, e os
+>   ladrilhos parariam de encolher em janela baixa, **em silêncio**. O PR do CSS tem de levar, pra
+>   dentro de cada arquivo de tema, o bloco base E os pedaços da escada que são daquele tema, nessa
+>   ordem. Verificação possível sem olho: extrair a sequência de regras de cada tema do arquivo velho
+>   e do novo e provar que são idênticas.
+> - **A dependência ainda aponta pra fora.** O `iniciarAr` continua no `jogo.js` e importa os 8
+>   módulos — o contrário do critério 5 ("`nucleo/` nunca sabe que Folclore existe"). O conserto é dar
+>   a cada tema o próprio par `noFundo`/`naFrente` e deixar o `iniciarAr` só orquestrar; aí some
+>   também toda a lista de `config.X && criarY(...)`, que só existe porque UMA lista servia a todos os
+>   temas. É mudança de DESENHO, não de lugar — por isso não entrou junto com a mudança de arquivo.
+> - **`telas/` e `ui/`** seguem no `jogo.js`. São os ~14% que a medição previu e não estavam doendo.
+>
+> **A LIÇÃO QUE VALE MAIS QUE A REFATORAÇÃO:** as duas ferramentas vieram ANTES de mover a primeira
+> linha, e as duas pegaram erro que o código não mostra. O harness pegou, em segundos, duas cenas em
+> branco que só apareceriam em jogo; o medidor produziu uma primeira tabela **plausível e
+> completamente errada** (231 de 235 declarações como "compartilhadas por 6 temas"), e o que a
+> desmascarou foi ler o CAMINHO, não olhar o resultado. Sem essas duas, esta separação teria sido
+> feita no olho e quebrado calada.
+
+<details><summary>O plano original, de jul-ago/2026 (registro)</summary>
+
 ### 🔴 DÍVIDA ANOTADA — um arquivo por cenário (dor PREVISTA, jul/2026)
 
 Registrada pela regra de "dor prevista se anota e se avisa" (ver §Princípios). **Não está feita, e a
@@ -886,6 +936,50 @@ de ver antes, zero React pra traduzir, zero setup.
 componentes de verdade — que é exatamente o `ui/` + `telas/` do plano acima — a ferramenta passa a
 ser aplicável, porque aí existe o que sincronizar. Ou seja: **a separação é o pré-requisito, não uma
 tarefa concorrente.** Reavaliar DEPOIS que `ui/` e `telas/` existirem, nunca antes.
+
+</details>
+
+### As duas FERRAMENTAS que a separação deixou (ago/2026)
+
+Nasceram pra este trabalho e ficaram versionadas, porque as duas continuam servindo.
+
+**`ferramentas/rodar-tema.js` — o harness headless.** Carrega o front INTEIRO num navegador de
+mentira, chama o `aplicarTema` de VERDADE e roda N segundos por tema com dt fixo (120s × 8 temas em
+~1 min). Roda com `node ferramentas/rodar-tema.js`, e com `--experimental-vm-modules` agora que o
+front é ES module — ele detecta script × módulo sozinho.
+
+Ele existe porque bancada que monta os builders na mão **não vê exceção dentro do `iniciarAr`** — foi
+assim que a colisão de chave `arvore` (Decaídos × árvore de Natal) deixou a cena em branco sem erro
+visível. Pega três modos de falha, e os três foram PROVADOS por sabotagem antes de ele ser aceito:
+
+| falha | por que é traiçoeira |
+|---|---|
+| raio NEGATIVO em `arc`/`ellipse` | LANÇA no canvas real e mata o `requestAnimationFrame` — a cena congela |
+| exceção na MONTAGEM | a cena nem nasce, e não há erro na tela |
+| **NaN em coordenada** | o pior: **não lança**, só não desenha |
+
+Na separação ele pegou duas cenas em branco em segundos: o `jogo.js` sem reimportar os builders que
+tinham acabado de sair, e um módulo novo sem importar o `criarNoHorizonte` do comum.
+
+**`ferramentas/medir-donos.js` — quem é dono de cada função.** Monta o grafo de chamadas, acha as
+raízes de cada tema e tira o fecho transitivo. Tem um modo `--porque <tema> <funcao>` que mostra o
+CAMINHO, e foi ele que salvou a medição.
+
+**A primeira tabela saiu plausível e completamente errada** — 231 de 235 declarações como
+"compartilhadas por 6 temas", incluindo funções de TELA. Quatro formas de aresta falsa, cada uma
+capaz de colapsar o grafo sozinha:
+
+1. **sombreamento por local** — `criarNinja` tem um `const sairDaTela` (a fuga dele pela lateral) que
+   colide com a função de tela homônima. O ninja "chamava" a interface, a interface chamava o
+   `aplicarTema`, e dali TODO builder ficava alcançável de TODO tema.
+2. **sombreamento por parâmetro** — `criarNoHorizonte(cfg, canvas, desenhar)`.
+3. **chave de objeto** — `criarChifres` entrega `{ acabou, desenhar }`. Nomear campo não é chamar.
+4. **fronteira da declaração** — fechar cada uma no início da próxima fazia a ÚLTIMA engolir todo o
+   rodapé do arquivo; era por isso que `desenharRena` aparecia falando com o C#.
+
+O script imprime os sombreamentos que ignorou, pra a decisão ser auditável em vez de confiável.
+**A moral:** "o grep mente" também vale pra ferramenta que se escreve pra conferir o grep — o jeito de
+saber se ela mente é ler o CAMINHO, não o resultado.
 
 ---
 

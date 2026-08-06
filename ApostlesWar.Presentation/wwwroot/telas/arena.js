@@ -3,7 +3,7 @@
 // O picker, os slots e o arrastar vêm do `ui/time.js`: a Campanha monta time do mesmo jeito, e é
 // ter UM lugar que faz o clique-na-casa e o arrastar nascerem iguais nos dois.
 
-import { configurarSlotDnD, criarCelulaPicker, criarSlot, tornarPickerArrastavel } from '../ui/time.js';
+import { configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPickerArrastavel } from '../ui/time.js';
 import { mandar } from '../nucleo/ponte.js';
 
 // ---------- montagem da Arena ----------
@@ -68,19 +68,6 @@ function escolherCampeaoArena(idx) {
     const prox = arenaTimes[lado].indexOf(null);
     arenaSlotSel = prox >= 0 ? { lado, i: prox } : null;
     desenharSlotsArena();
-}
-
-// Quatro índices DISTINTOS de um pool — o time sorteado. Embaralho de Fisher-Yates e corta em 4;
-// com menos de 4 no pool, as casas que sobram ficam vazias em vez de repetir alguém.
-function sortearTime(total) {
-    const ids = [...Array(total).keys()];
-    for (let k = ids.length - 1; k > 0; k--) {
-        const j = Math.floor(Math.random() * (k + 1));
-        [ids[k], ids[j]] = [ids[j], ids[k]];
-    }
-    const time = ids.slice(0, 4);
-    while (time.length < 4) time.push(null);
-    return time;
 }
 
 function sortearLadoArena(lado) {

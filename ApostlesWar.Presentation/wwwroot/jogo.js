@@ -19,7 +19,7 @@ import * as decaidos from './cenarios/decaidos/decaidos.js';
 import * as apostolos from './cenarios/apostolos/apostolos.js';
 
 import { ar, montar } from './cenarios/tecnologicos/tecnologicos.js';
-import { arrastando, configurarSlotDnD, criarCelulaPicker, criarSlot, tornarPickerArrastavel } from './ui/time.js';
+import { arrastando, configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPickerArrastavel } from './ui/time.js';
 import { aoTrocarCena, cenaAgora, definirMenuRaiz, menuEhRaiz, mostrarCena } from './nucleo/cena.js';
 import { confirmar, fecharModal, modalAberto } from './ui/modal.js';
 import { entre } from './cenarios/comum/basicos.js';
@@ -97,7 +97,8 @@ ponte.addEventListener('message', e => {
     if (msg.tipo === 'estado') aplicarEstado(msg.conteudo);
     else if (msg.tipo === 'evento') aplicarEvento(msg.conteudo);
     // TEMPORÁRIO: as telas ainda não convertidas ao contrato. Cada uma que migrar some daqui e
-    // aparece no mapa acima.    else if (msg.tipo === 'campanhaMapa') mostrarMapa(msg.conteudo);
+    // aparece no mapa acima.
+    else if (msg.tipo === 'campanhaMapa') mostrarMapa(msg.conteudo);
     else if (msg.tipo === 'campanhaFases') mostrarFasesCampanha(msg.conteudo);
     else if (msg.tipo === 'fimDeFase') mostrarFimDeFase(msg.conteudo);
     else if (msg.tipo === 'conquista') mostrarConquista(msg.conteudo);

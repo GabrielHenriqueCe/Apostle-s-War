@@ -26,6 +26,11 @@ export const definirMenuRaiz = (ehRaiz) => { menuRaiz = ehRaiz; };
 let aoTrocar = () => {};
 export const aoTrocarCena = (fn) => { aoTrocar = fn; };
 
+/// Dispara o gancho fora de uma troca de cena. O combate precisa disso: o botao de sair muda de
+/// sentido conforme o ESTADO da batalha (encerrar x sair), nao so quando a cena troca. Sem esta
+/// porta, o combate importaria o  do composition root — aresta de volta.
+export const revalidarSaida = () => aoTrocar();
+
 // ---------- cenas (menu × combate × criar/editar perfil) ----------
 export function mostrarCena(cena) {
     cenaAtual = cena;

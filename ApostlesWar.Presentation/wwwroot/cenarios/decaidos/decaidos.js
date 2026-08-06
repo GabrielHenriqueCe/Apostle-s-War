@@ -1,6 +1,7 @@
 import { comListras, desenharChama, entre } from '../comum/basicos.js';
 import { criarNoHorizonte, medirDoTema, medirLadrilho } from '../comum/ladrilho.js';
 import { desenharMorcego } from '../comum/ar.js';
+import { criarNevoa, criarPo, criarVoadores } from '../comum/ar.js';
 // 🔱 A VILA ÉLFICA VENDIDA. O 🧝 Elfo entregou a vila aos demônios; eles subiram POR DENTRO da
 // Árvore do Mundo, que rachou e escorre lava. A cena é o dia seguinte ao massacre — a única luz
 // vem de BAIXO (ver o bloco do tema no estilo.css), e não há corpo nenhum em cena: o que conta o
@@ -143,6 +144,57 @@ export const ar = {
     // A NÉVOA quente rente ao chão: o ar tremendo em cima da terra que ainda está queimando.
     nevoa: { cor: '168, 46, 26', quantas: 5, deriva: [5, 17], raio: [150, 340], opacidade: [.035, .08] },
 };
+
+/// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
+///
+/// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
+/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
+/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+export function montar({ fundo, frente, maestro }) {
+    // O QUARTO dado compartilhado, e o primeiro que não é vento nem estado de peça. Três campos, e
+    // três donos diferentes — ninguém escreve no campo de ninguém:
+    //   pulso      · 0..1, a respiração da lava. Escrito pela Árvore do Mundo dos 🔱 Decaídos, lido
+    //                pelas rachaduras e pela fumaça.
+    //   raizes     · a geometria das raízes JÁ EM PIXEL DE TELA, publicada pela árvore pras
+    //                rachaduras correrem em cima delas sem ter de recalcular nada.
+    //   escorrendo · 0..1, se a lava está descendo. Escrito pela FENDA, lido pela árvore.
+    //   tremor     · 0..1, o chão tremendo. Escrito pela fenda, lido por quem está plantado nele.
+    //   jorro      · 0..1, a lava nova sendo cuspida na árvore. Fenda escreve, árvore lê.
+    //   passagem   · contador de passagens dos morcegos. A COLUNA escreve, a fenda espera mudar.
+    //
+    // É a prova de que o maestro não era um jeito de falar de VENTO: aqui o dado é LUZ e o resto é
+    // dramaturgia, e o formato é o mesmo — nasce sempre, ninguém pergunta nada a ninguém, e uma
+    // camada que ignore tudo isto continua correta. Sem árvore em cena, `pulso` fica em 1 pra sempre.
+    const inferno = { pulso: 1, raizes: [], escorrendo: 1, tremor: 0, jorro: 0, passagem: 0 };
+
+    return {
+        noFundo: [
+            // 🔱 Os Decaídos, na ordem em que a vila é vista. A CASA e os FOGOS vêm primeiro por serem o
+            // que está mais longe (moram na linha do ladrilho, com a vila arrasada). Depois a FENDA, que
+            // é o CHÃO se abrindo — e por isso vem antes da árvore: as raízes passam POR CIMA dela, que é
+            // o que faz a terra parecer ter rachado por baixo de uma coisa que já estava lá. A ÁRVORE é a
+            // peça grande; as RACHADURAS vêm logo depois porque correm em cima das raízes que ela acabou
+            // de desenhar; e a fumaça e os morcegos por último, porque são o que está no AR.
+            //
+            // As quatro recebem a config da árvore (e não uma cópia das medidas) pelo mesmo motivo do
+            // ninja com o castelo e dos sentados com o banheiro: quem sabe onde a árvore está é a árvore.
+            criarFogosDaVila(ar.fogos, fundo),
+            criarBuracoDoInferno(ar.buraco, fundo, ar.arvore, inferno),
+            criarArvoreDoMundo(ar.arvore, fundo, inferno),
+            criarVeias(ar.veias, fundo, ar.arvore, inferno),
+            criarFumacaDoInferno(ar.fumaca, fundo, ar.arvore, inferno),
+            criarColunaDeMorcegos(ar.coluna, fundo, ar.arvore, inferno),
+            // Os respingos vêm DEPOIS da árvore de propósito: o buraco está mais perto do que ela, e o que
+            // salta dele passa na frente do tronco. Quem os move é a camada do buraco; esta só pinta.
+            criarRespingosDoInferno(ar.buraco, fundo, inferno),
+            criarNevoa(ar.nevoa, fundo),
+        ].filter(Boolean),
+        naFrente: [
+            criarPo(ar.po, frente, maestro.vento, maestro.fogo),
+            criarVoadores(ar.voadores, frente, maestro.vento),
+        ].filter(Boolean),
+    };
+}
 /// A geometria do CHÃO deste tema, num lugar só. O topo do ladrilho da vila é o HORIZONTE (é lá que a
 /// vila arrasada está de pé) e `--vila-chao` diz onde, dentro do ladrilho, ficam os PÉS dela. Daí saem
 /// a ÚNICA linha de chão da cena: a árvore, a fenda e as rachaduras estão plantadas onde a vila

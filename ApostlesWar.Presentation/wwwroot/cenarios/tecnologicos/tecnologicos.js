@@ -1,5 +1,6 @@
 import { criarNoHorizonte } from '../comum/ladrilho.js';
 import { entre } from '../comum/basicos.js';
+import { criarPo, criarVoadores } from '../comum/ar.js';
 // A noite da invasão, montada em cima de quem luta aqui: 👽/👾 nos discos que cruzam o céu
 // varrendo o chão com o feixe, 🧑‍🔬 nas bobinas do laboratório soltando faísca, 🤖 nas fagulhas
 // de solda subindo. Nenhuma peça é mecanismo novo — são as MESMAS camadas dos outros dois com
@@ -56,6 +57,28 @@ export const ar = {
         ondular: [.6, 1.3], onda: [12, 30],
     },
 };
+
+/// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
+///
+/// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
+/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
+/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+export function montar({ fundo, frente, maestro }) {
+    return {
+        noFundo: [
+            criarBobinas(ar.bobinas, fundo),
+            criarRuina(ar.ruina, fundo),
+            // O Invasor vem DEPOIS da ruína e da cidade: ele desce por cima delas, que é o lugar certo
+            // — chegou depois. E fica no fundo, atrás dos combatentes, porque um bicho desse tamanho na
+            // tela da frente taparia a luta.
+            criarTentaculos(ar.tentaculos, fundo),
+        ].filter(Boolean),
+        naFrente: [
+            criarPo(ar.po, frente, maestro.vento, maestro.fogo),
+            criarVoadores(ar.voadores, frente, maestro.vento),
+        ].filter(Boolean),
+    };
+}
 /// O INVASOR descendo do céu — e dele só se vê o que ENTRA na tela: tentáculos roxos baixando do
 /// alto, o do meio maior. É o 👽/👾 chegando de verdade; os discos já cruzavam o céu, mas quem os
 /// mandava nunca aparecia.

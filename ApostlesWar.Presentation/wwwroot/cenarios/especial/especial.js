@@ -1,5 +1,6 @@
 import { caixaRedonda, comListras, entre } from '../comum/basicos.js';
 import { medirDoTema } from '../comum/ladrilho.js';
+import { criarNevoa, criarPo } from '../comum/ar.js';
 // ⭐ ESPECIAL — o banheiro público. O primeiro INTERIOR do front (ver o bloco no estilo.css).
 //
 // Os quatro champs entram pelo SINAL, como sempre, mas aqui a regra teve de ir mais longe que nos
@@ -164,6 +165,43 @@ export const ar = {
         opacidade: [.08, .28], sopro: .12,
     },
 };
+
+/// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
+///
+/// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
+/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
+/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+export function montar({ fundo, frente, maestro }) {
+    // O TERCEIRO dado compartilhado, e o primeiro que é um MAPA em vez de um número: as portas das
+    // cabines do ⭐ Especial, uma entrada por champ que mora atrás de uma. O banheiro ESCREVE (é ele
+    // que decide quando o rugido arromba e quando a porta volta a fechar) e os sentados LEEM — cada um
+    // se recorta na abertura da sua.
+    //
+    // Podia ser o banheiro anotando isso no próprio `vaos` da config, e seria menos código. Mas a
+    // config é um `const` de módulo, partilhado entre TODAS as batalhas: o estado de uma porta ficaria
+    // pendurado nela depois que a luta acabasse. Este objeto nasce e morre com o cenário, que é o
+    // tempo de vida certo pra um estado de cena.
+    const portas = {};
+
+    return {
+        noFundo: [
+            // ⭐ O banheiro, na ordem em que a sala é vista: a parede e a mobília primeiro (é o fundo de
+            // tudo), depois quem está sentado nela, e o 🦖 por último porque ele está EM PÉ no meio do
+            // salão — na frente das cabines e atrás dos combatentes.
+            //
+            // Os sentados recebem a config do banheiro (e não uma cópia das medidas) pelo mesmo motivo do
+            // ninja recebendo a do castelo: a cabine é que sabe onde ela está e quanto mede, e um homem
+            // sentado dentro dela não pode ter uma segunda opinião sobre isso.
+            criarBanheiro(ar.banheiro, fundo, maestro.vento, portas),
+            criarSentados(ar.sentados, fundo, maestro.vento, ar.banheiro, portas),
+            criarTrex(ar.trex, fundo, maestro.vento, ar.coco),
+            criarNevoa(ar.nevoa, fundo),
+        ].filter(Boolean),
+        naFrente: [
+            criarPo(ar.po, frente, maestro.vento, maestro.fogo),
+        ].filter(Boolean),
+    };
+}
 /// 🚻 O BANHEIRO — a sala do ⭐ Especial: as luminárias, a fileira de cabines, o mictório e a pia.
 ///
 /// É UM builder e não cinco pelo mesmo motivo do sítio da fogueira e do castelo: é UMA composição. As

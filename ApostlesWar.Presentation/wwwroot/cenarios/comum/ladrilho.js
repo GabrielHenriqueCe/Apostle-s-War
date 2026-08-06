@@ -1,19 +1,9 @@
 // O HORIZONTE: medir o ladrilho que o CSS do tema declarou, e fazer coisas passarem na linha dele.
-//
-// Os valores do CSS têm de ser px CRUS — `getComputedStyle` devolve propriedade customizada como
-// TEXTO, então `min()`/`clamp()`/`vh` viram NaN e caem no padrão EM SILÊNCIO, ancorando tudo no
-// lugar errado. Quem encolhe os ladrilhos em janela baixa é o @media do estilo.css.
 
 import { entre } from './basicos.js';
 
 /// Lê o tamanho do ladrilho de horizonte que o CSS do tema declarou — hoje as corujas e os espantalhos
 /// do cemitério e as bobinas do laboratório, todos pelo `criarNoHorizonte`.
-///
-/// (Ela saiu de dentro do `criarNoHorizonte` quando os chifres do Oni e a clava do Troll pareciam ir
-/// precisar dela também. Não foi o que aconteceu: as duas aparições passaram a subir de trás de uma
-/// MOITA, que é canvas, e não têm mais nada a ver com o ladrilho. A função fica extraída de qualquer
-/// forma — o `parseFloat` com fallback é exatamente o tipo de detalhe que não se quer ver inline no meio
-/// de uma máquina de fases, e ela documenta a armadilha abaixo num lugar só.)
 ///
 /// É este `parseFloat` que obriga os valores do CSS a serem PX CRUS: propriedade customizada NÃO é
 /// resolvida pelo getComputedStyle, então um `min()`/`clamp()`/`vh` voltaria como o texto literal, a

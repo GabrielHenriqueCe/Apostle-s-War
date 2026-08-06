@@ -1,5 +1,6 @@
 import { entre } from '../comum/basicos.js';
 import { medirDoTema } from '../comum/ladrilho.js';
+import { criarPo } from '../comum/ar.js';
 // 🐉 A PRAIA NO CREPÚSCULO — a lâmpada na areia, e o dragão dando as voltas dele.
 //
 // Os quatro estão aqui pelo SINAL, como no Folclore, mas o problema era outro: três dos quatro
@@ -222,6 +223,37 @@ export const ar = {
         opacidade: [.12, .4], sopro: .13,
     },
 };
+
+/// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
+///
+/// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
+/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
+/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+export function montar({ fundo, frente, maestro }) {
+    return {
+        noFundo: [
+            // Os Místicos, na ordem em que a praia é vista: o dragão está no CÉU e é a coisa mais
+            // distante mesmo quando passa perto — vem primeiro. Depois o mar (os saltos), depois a areia
+            // (a lâmpada), e as palmeiras por último porque são a moldura: elas ficam na frente de tudo o
+            // que é cenário, e ainda assim atrás dos combatentes, que é o lugar de uma borda de cena.
+            //
+            // O dragão fica no FUNDO mesmo na passagem de perto, pela mesma razão do Invasor: um bicho
+            // desse tamanho na tela da frente taparia a luta. O que dá a leitura de "por cima" não é a
+            // camada, é ele ser CORTADO pela borda de cima.
+            criarDragao(ar.dragao, fundo, maestro.vento),
+            criarMar(ar.mar, fundo),
+            criarGolfinhos(ar.golfinhos, fundo),
+            criarLampada(ar.lampada, fundo, maestro.vento),
+            criarPalmeiras(ar.palmeiras, fundo, maestro.vento),
+        ].filter(Boolean),
+        naFrente: [
+            criarPo(ar.po, frente, maestro.vento, maestro.fogo),
+            // Os vaga-lumes são da FRENTE pelo mesmo motivo dos voadores: eles estão no ar entre o jogador
+            // e o mundo, e é essa separação que dá profundidade à praia.
+            criarVagalumes(ar.vagalumes, frente, maestro.vento),
+        ].filter(Boolean),
+    };
+}
 /// 🐲 O DRAGÃO CHINÊS — o ciclo de três distâncias.
 ///
 /// O problema de uma criatura ENORME é que ela não cabe na tela, e desenhá-la inteira de uma vez a

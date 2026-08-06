@@ -1,6 +1,7 @@
 import { criarNoHorizonte } from '../comum/ladrilho.js';
 import { desenharFantasma } from '../comum/ar.js';
 import { entre } from '../comum/basicos.js';
+import { criarNevoa, criarPo } from '../comum/ar.js';
 // Cemitério: cinza caindo, névoa no chão, morcegos cruzando o céu e corujas nas árvores.
 export const ar = {
     po: { cor: '178, 205, 186', quantas: 34, subida: [-9, -3], raio: [0.5, 2.0], opacidade: [.08, .3] },
@@ -98,6 +99,25 @@ export const ar = {
         altitude: [.06, .66], mudarAltura: [4, 10], buscarAltura: 5,
     },
 };
+
+/// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
+///
+/// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
+/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
+/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+export function montar({ fundo, frente, maestro }) {
+    return {
+        noFundo: [
+            criarCorujas(ar.corujas, fundo),
+            criarEspantalhos(ar.espantalhos, fundo),
+            criarCaixao(ar.caixao, fundo),
+            criarNevoa(ar.nevoa, fundo),
+        ].filter(Boolean),
+        naFrente: [
+            criarPo(ar.po, frente, maestro.vento, maestro.fogo),
+        ].filter(Boolean),
+    };
+}
 /// O CAIXÃO que sobe no meio do cemitério — a referência do 💀 no cenário dele.
 ///
 /// Fica no CENTRO, como a ruína dos Tecnológicos e o castelo do Reino: coisa única e nomeada mora no

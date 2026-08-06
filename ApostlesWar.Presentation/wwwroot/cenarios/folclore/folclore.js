@@ -1,4 +1,6 @@
 import { entre } from '../comum/basicos.js';
+import { criarNoHorizonte } from '../comum/ladrilho.js';
+import { criarPo, criarVoadores } from '../comum/ar.js';
 // 🪬 A clareira na mata fechada, e a fogueira no meio dela.
 //
 // Este tema não é sobre um lugar — folclore não é paisagem, é o que se CONTA. Por isso os quatro
@@ -221,6 +223,35 @@ export const ar = {
         andar: 5.5, passos: 4, gingado: .1, descido: .22,
     },
 };
+
+/// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
+///
+/// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
+/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
+/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+export function montar({ fundo, frente, maestro }) {
+    return {
+        noFundo: [
+            // O Folclore. As moitas vêm ANTES das duas aparições, e elas se escondem por RECORTE (ver
+            // `criarAparicaoNaMoita`) em vez de por ordem de pintura. A ordem contrária seria mais simples e
+            // foi a primeira tentativa — mas então o brilho dos olhos do Oni ficava atrás da folhagem, e o
+            // pedido era justamente que ele vazasse ENTRE as folhas. Luz passa por folha; chifre não.
+            //
+            // Depois vem o sítio da fogueira, e o redemoinho por último de todos: ele atravessa a clareira
+            // INTEIRA, na frente do maestro.fogo e das estacas, que é o que faz o sopro parecer ter chegado onde a
+            // gente está. Ele é também o único que recebe o `maestro.vento` pra ESCREVER; a fogueira, pra ler.
+            criarMoitas(ar.moitas, fundo),
+            criarChifres(ar.chifres, fundo, ar.moitas),
+            criarClava(ar.clava, fundo, ar.moitas),
+            criarFogueira(ar.fogueira, fundo, maestro.vento, maestro.fogo),
+            criarRedemoinho(ar.redemoinho, fundo, maestro.vento),
+        ].filter(Boolean),
+        naFrente: [
+            criarPo(ar.po, frente, maestro.vento, maestro.fogo),
+            criarVoadores(ar.voadores, frente, maestro.vento),
+        ].filter(Boolean),
+    };
+}
 /// O SÍTIO DA FOGUEIRA — a peça central do 🪬 Folclore.
 ///
 /// É UM builder e não cinco porque é UMA composição: as sombras das estacas saem do pulso desta chama,

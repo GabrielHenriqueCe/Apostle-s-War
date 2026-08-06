@@ -9,17 +9,15 @@
 
 'use strict';
 
-import { caixaRedonda, comListras, desenharChama, entre } from './cenarios/comum/basicos.js';
-import { criarNevoa, criarPo, criarVoadores, desenharFantasma, desenharMorcego } from './cenarios/comum/ar.js';
-import { criarNoHorizonte, medirDoTema, medirLadrilho } from './cenarios/comum/ladrilho.js';
-import { ar as arDecaidos, criarArvoreDoMundo, criarBuracoDoInferno, criarColunaDeMorcegos, criarFogosDaVila, criarFumacaDoInferno, criarRespingosDoInferno, criarVeias } from './cenarios/decaidos/decaidos.js';
-import { ar as arMisticos, criarDragao, criarGolfinhos, criarLampada, criarMar, criarPalmeiras, criarVagalumes } from './cenarios/misticos/misticos.js';
-import { ar as arEspecial, criarBanheiro, criarSentados, criarTrex } from './cenarios/especial/especial.js';
-import { ar as arApostolos, criarArvoreDeNatal, criarCortinas, criarLareira, criarPresentes, criarRoteiroDaNoite, criarVistaDaJanela } from './cenarios/apostolos/apostolos.js';
-import { ar as arFolclore, criarAparicaoNaMoita, criarChifres, criarClava, criarFogueira, criarMoitas, criarRedemoinho } from './cenarios/folclore/folclore.js';
-import { ar as arReino, criarCastelo, criarExercitos, criarNinja } from './cenarios/reino/reino.js';
-import { ar as arLadosombrio, criarCaixao, criarCorujas, criarEspantalhos } from './cenarios/ladosombrio/ladosombrio.js';
-import { ar as arTecnologicos, criarBobinas, criarRuina, criarTentaculos } from './cenarios/tecnologicos/tecnologicos.js';
+import * as reino from './cenarios/reino/reino.js';
+import * as ladosombrio from './cenarios/ladosombrio/ladosombrio.js';
+import * as tecnologicos from './cenarios/tecnologicos/tecnologicos.js';
+import * as folclore from './cenarios/folclore/folclore.js';
+import * as misticos from './cenarios/misticos/misticos.js';
+import * as especial from './cenarios/especial/especial.js';
+import * as decaidos from './cenarios/decaidos/decaidos.js';
+import * as apostolos from './cenarios/apostolos/apostolos.js';
+
 
 const ponte = window.chrome.webview;
 
@@ -1689,15 +1687,17 @@ function flutuar(el, texto, classe) {
 //             SINAL da velocidade, não um campo à parte que se pode esquecer de casar com ela.
 //   névoa   · manchas grandes e translúcidas passeando devagar, coladas no chão.
 //   voadores· bichos atravessando a tela, com asas.
-export const AR_DO_TEMA = {
-    reino: arReino,
-    ladosombrio: arLadosombrio,
-    tecnologicos: arTecnologicos,
-    folclore: arFolclore,
-    misticos: arMisticos,
-    especial: arEspecial,
-    decaidos: arDecaidos,
-    apostolos: arApostolos,
+// O REGISTRO dos capitulos. Cada valor e o MODULO do cenario, nao a configuracao dele — quem sabe
+// montar a cena e o capitulo, e o nucleo so pede. Capitulo sem entrada aqui luta no visual padrao.
+export const CENARIOS = {
+    reino,
+    ladosombrio,
+    tecnologicos,
+    folclore,
+    misticos,
+    especial,
+    decaidos,
+    apostolos,
 };
 
 let temaAtual = '';
@@ -1709,24 +1709,28 @@ export function aplicarTema(tema) {
     if (tema) document.body.dataset.tema = tema;
     else document.body.removeAttribute('data-tema');
 
-    iniciarAr(AR_DO_TEMA[tema]);
+    iniciarAr(CENARIOS[tema]);
 }
 
 // ---------- o ar do cenário (canvas) ----------
-// Canvas atrás de tudo (z -1), rodando SÓ enquanto há tema com ar. Sem tema o laço é cancelado e o
-// canvas escondido: cenário nenhum não pode custar quadro nenhum.
+// Canvas atrás de tudo (z -1), rodando SÓ enquanto há cenário. Sem cenário o laço é cancelado e o
+// canvas escondido: capítulo sem pele não pode custar quadro nenhum.
 //
 // Tudo aqui anda por DELTA DE TEMPO (`* dt`), nunca por quadro — assim a cena tem a mesma velocidade
 // num monitor de 60Hz e num de 144Hz.
+//
+// ESTA FUNÇÃO NÃO CONHECE TEMA NENHUM. Ela recebe o módulo do cenário e pede a cena; quem sabe o que
+// desenhar, em que ordem e com que config é o próprio capítulo. Até ago/2026 era o contrário: uma
+// lista única aqui dentro citava os builders dos oito temas, cada item guardado por um
+// `config.X &&` — e os guardas eram exatamente o preço de a lista não ser de ninguém.
 let arFrame = null;
 
-
-function iniciarAr(config) {
+function iniciarAr(cenario) {
     const telas = [document.getElementById('particulasFundo'), document.getElementById('particulas')];
 
     if (arFrame !== null) { cancelAnimationFrame(arFrame); arFrame = null; }
-    for (const t of telas) t.hidden = !config;
-    if (!config) return;
+    for (const t of telas) t.hidden = !cenario;
+    if (!cenario) return;
 
     const [fundo, frente] = telas;
     const ctxFundo = fundo.getContext('2d');
@@ -1737,172 +1741,16 @@ function iniciarAr(config) {
     };
     dimensionar();
 
-    // O MAESTRO do tema, quando existe um. É um objeto só, com dois números: a força do sopro (o
-    // SINAL é a direção) e onde está quem está soprando. Uma peça escreve — o redemoinho do Folclore —
-    // e as outras leem.
+    // O MAESTRO: dado que uma peça escreve e as outras leem, sem ninguém perguntar nada a ninguém.
+    // Uma camada que o ignore continua correta — sem redemoinho, `vento.forca` fica 0 pra sempre e
+    // todas as contas viram `+= 0`.
     //
-    // É o primeiro acoplamento entre camadas deste motor, e vale dizer por que ele não é o começo de
-    // uma bagunça: o vento é um DADO, não uma chamada. Ninguém pergunta nada a ninguém, ninguém sabe
-    // quem mais lê, e uma camada que ignore o vento continua correta (é o que os outros três temas
-    // fazem — sem redemoinho, `vento.forca` fica 0 pra sempre e todas as contas viram `+= 0`).
-    //
-    // Nasce sempre, e não só quando há redemoinho: assim quem lê não precisa de dois caminhos, e um
-    // tema futuro pode ganhar outra fonte de vento (uma tempestade, um bicho batendo asa) sem que
-    // ninguém aqui mude de forma.
-    const vento = { forca: 0, x: 0 };
+    // Só o que é lido por peça COMPARTILHADA mora aqui: o `criarPo` do comum lê os dois. Maestro de
+    // um tema só (as portas do banheiro, a luz do Inferno, a noite de Natal) nasce dentro do
+    // `montar` daquele tema, que é o tempo de vida certo pra um estado de cena.
+    const maestro = { vento: { forca: 0, x: 0 }, fogo: { viva: 1 } };
 
-    // O segundo dado compartilhado, pela mesma razão e no mesmo formato: `viva` é 0..1, escrito pela
-    // fogueira (que apaga quando o redemoinho passa por cima) e lido pelas BRASAS no ar. Brasa subindo de
-    // fogueira apagada seria exatamente o detalhe que denuncia que o apagar é só pintura.
-    const fogo = { viva: 1 };
-
-    // O TERCEIRO dado compartilhado, e o primeiro que é um MAPA em vez de um número: as portas das
-    // cabines do ⭐ Especial, uma entrada por champ que mora atrás de uma. O banheiro ESCREVE (é ele
-    // que decide quando o rugido arromba e quando a porta volta a fechar) e os sentados LEEM — cada um
-    // se recorta na abertura da sua.
-    //
-    // Podia ser o banheiro anotando isso no próprio `vaos` da config, e seria menos código. Mas a
-    // config é um `const` de módulo, partilhado entre TODAS as batalhas: o estado de uma porta ficaria
-    // pendurado nela depois que a luta acabasse. Este objeto nasce e morre com o cenário, que é o
-    // tempo de vida certo pra um estado de cena.
-    const portas = {};
-
-    // O QUARTO dado compartilhado, e o primeiro que não é vento nem estado de peça. Três campos, e
-    // três donos diferentes — ninguém escreve no campo de ninguém:
-    //   pulso      · 0..1, a respiração da lava. Escrito pela Árvore do Mundo dos 🔱 Decaídos, lido
-    //                pelas rachaduras e pela fumaça.
-    //   raizes     · a geometria das raízes JÁ EM PIXEL DE TELA, publicada pela árvore pras
-    //                rachaduras correrem em cima delas sem ter de recalcular nada.
-    //   escorrendo · 0..1, se a lava está descendo. Escrito pela FENDA, lido pela árvore.
-    //   tremor     · 0..1, o chão tremendo. Escrito pela fenda, lido por quem está plantado nele.
-    //   jorro      · 0..1, a lava nova sendo cuspida na árvore. Fenda escreve, árvore lê.
-    //   passagem   · contador de passagens dos morcegos. A COLUNA escreve, a fenda espera mudar.
-    //
-    // É a prova de que o maestro não era um jeito de falar de VENTO: aqui o dado é LUZ e o resto é
-    // dramaturgia, e o formato é o mesmo — nasce sempre, ninguém pergunta nada a ninguém, e uma
-    // camada que ignore tudo isto continua correta. Sem árvore em cena, `pulso` fica em 1 pra sempre.
-    const inferno = { pulso: 1, raizes: [], escorrendo: 1, tremor: 0, jorro: 0, passagem: 0 };
-
-    // O QUINTO dado compartilhado, e o primeiro que é um ROTEIRO: a noite de Natal dos ✝️ Apóstolos.
-    // Um escritor só (o `criarRoteiroDaNoite`, que não desenha nada) e quatro leitores espalhados pela
-    // tela — a árvore num canto, a janela no meio, a lareira no outro canto e os presentes no chão:
-    //   passo     · o nome do beat corrente, pra quem precisa saber "onde estamos" numa palavra
-    //   brilho    · 0..1, a estrela anunciando que ele vem. ÁRVORE lê.
-    //   fogo      · 0..1, a lareira acesa. LAREIRA lê (e o clarão dela no piso morre junto).
-    //   voo       · 0..1, o progresso da travessia atrás da janela; 0 = ele não está em cena
-    //   sentido   · 1 = esquerda→direita (a ida), −1 = a volta. JANELA lê os dois.
-    //   pernas    · 0..1, o quanto dele está enfiado na lareira; `mexe` liga o esperneio
-    //   entrega   · 0..1 o presente descendo da lareira, −1 quando não há nenhum viajando
-    //   entregues · CONTADOR de entregas concluídas. Os PRESENTES esperam ele mudar pra empurrar a fila.
-    //
-    // Por que um maestro e não uma máquina de estados dentro de um builder, como o ciclo do Inferno:
-    // lá as fases eram todas da FENDA, e aqui elas atravessam quatro peças que estão em cantos
-    // diferentes. Não há uma delas que seja o lugar certo de guardar a história.
-    const natal = {
-        passo: 'repouso', brilho: 0, fogo: 1, voo: 0, sentido: 1,
-        pernas: 0, mexe: 0, entrega: -1, entregues: 0,
-    };
-
-    // Cada camada declara em QUE MUNDO ela vive, não em que canvas — o roteamento é consequência.
-    // A ORDEM É A PROFUNDIDADE. A paisagem vem primeiro por ser a coisa mais distante: o que
-    // ACONTECE (bichos, incêndio, os exércitos atirando) passa na frente dela, nunca por baixo — foi
-    // o que o Gabriel pediu com "a paisagem deve ficar entre as animações". E a névoa fecha a fila,
-    // porque ela é ar: some tudo que está atrás dela, um pouco.
-    const noFundo = [
-        config.castelo && criarCastelo(config.castelo, fundo),
-        // O ninja vem logo DEPOIS do castelo: ele anda em cima dos telhados que o castelo acabou de
-        // desenhar, e é do castelo que ele tira a geometria — por isso recebe as duas configurações.
-        config.ninja && config.castelo && criarNinja(config.ninja, fundo, config.castelo),
-        config.corujas && criarCorujas(config.corujas, fundo),
-        config.espantalhos && criarEspantalhos(config.espantalhos, fundo),
-        config.caixao && criarCaixao(config.caixao, fundo),
-        config.bobinas && criarBobinas(config.bobinas, fundo),
-        config.ruina && criarRuina(config.ruina, fundo),
-        // O Invasor vem DEPOIS da ruína e da cidade: ele desce por cima delas, que é o lugar certo
-        // — chegou depois. E fica no fundo, atrás dos combatentes, porque um bicho desse tamanho na
-        // tela da frente taparia a luta.
-        config.tentaculos && criarTentaculos(config.tentaculos, fundo),
-        config.exercitos && criarExercitos(config.exercitos, fundo),
-        // O Folclore. As moitas vêm ANTES das duas aparições, e elas se escondem por RECORTE (ver
-        // `criarAparicaoNaMoita`) em vez de por ordem de pintura. A ordem contrária seria mais simples e
-        // foi a primeira tentativa — mas então o brilho dos olhos do Oni ficava atrás da folhagem, e o
-        // pedido era justamente que ele vazasse ENTRE as folhas. Luz passa por folha; chifre não.
-        //
-        // Depois vem o sítio da fogueira, e o redemoinho por último de todos: ele atravessa a clareira
-        // INTEIRA, na frente do fogo e das estacas, que é o que faz o sopro parecer ter chegado onde a
-        // gente está. Ele é também o único que recebe o `vento` pra ESCREVER; a fogueira, pra ler.
-        config.moitas && criarMoitas(config.moitas, fundo),
-        config.chifres && config.moitas && criarChifres(config.chifres, fundo, config.moitas),
-        config.clava && config.moitas && criarClava(config.clava, fundo, config.moitas),
-        config.fogueira && criarFogueira(config.fogueira, fundo, vento, fogo),
-        config.redemoinho && criarRedemoinho(config.redemoinho, fundo, vento),
-        // Os Místicos, na ordem em que a praia é vista: o dragão está no CÉU e é a coisa mais
-        // distante mesmo quando passa perto — vem primeiro. Depois o mar (os saltos), depois a areia
-        // (a lâmpada), e as palmeiras por último porque são a moldura: elas ficam na frente de tudo o
-        // que é cenário, e ainda assim atrás dos combatentes, que é o lugar de uma borda de cena.
-        //
-        // O dragão fica no FUNDO mesmo na passagem de perto, pela mesma razão do Invasor: um bicho
-        // desse tamanho na tela da frente taparia a luta. O que dá a leitura de "por cima" não é a
-        // camada, é ele ser CORTADO pela borda de cima.
-        config.dragao && criarDragao(config.dragao, fundo, vento),
-        config.mar && criarMar(config.mar, fundo),
-        config.golfinhos && criarGolfinhos(config.golfinhos, fundo),
-        config.lampada && criarLampada(config.lampada, fundo, vento),
-        config.palmeiras && criarPalmeiras(config.palmeiras, fundo, vento),
-        // ⭐ O banheiro, na ordem em que a sala é vista: a parede e a mobília primeiro (é o fundo de
-        // tudo), depois quem está sentado nela, e o 🦖 por último porque ele está EM PÉ no meio do
-        // salão — na frente das cabines e atrás dos combatentes.
-        //
-        // Os sentados recebem a config do banheiro (e não uma cópia das medidas) pelo mesmo motivo do
-        // ninja recebendo a do castelo: a cabine é que sabe onde ela está e quanto mede, e um homem
-        // sentado dentro dela não pode ter uma segunda opinião sobre isso.
-        config.banheiro && criarBanheiro(config.banheiro, fundo, vento, portas),
-        config.sentados && config.banheiro && criarSentados(config.sentados, fundo, vento, config.banheiro, portas),
-        config.trex && config.coco && criarTrex(config.trex, fundo, vento, config.coco),
-        // 🔱 Os Decaídos, na ordem em que a vila é vista. A CASA e os FOGOS vêm primeiro por serem o
-        // que está mais longe (moram na linha do ladrilho, com a vila arrasada). Depois a FENDA, que
-        // é o CHÃO se abrindo — e por isso vem antes da árvore: as raízes passam POR CIMA dela, que é
-        // o que faz a terra parecer ter rachado por baixo de uma coisa que já estava lá. A ÁRVORE é a
-        // peça grande; as RACHADURAS vêm logo depois porque correm em cima das raízes que ela acabou
-        // de desenhar; e a fumaça e os morcegos por último, porque são o que está no AR.
-        //
-        // As quatro recebem a config da árvore (e não uma cópia das medidas) pelo mesmo motivo do
-        // ninja com o castelo e dos sentados com o banheiro: quem sabe onde a árvore está é a árvore.
-        config.fogos && criarFogosDaVila(config.fogos, fundo),
-        config.buraco && config.arvore && criarBuracoDoInferno(config.buraco, fundo, config.arvore, inferno),
-        config.arvore && criarArvoreDoMundo(config.arvore, fundo, inferno),
-        config.veias && config.arvore && criarVeias(config.veias, fundo, config.arvore, inferno),
-        config.fumaca && config.arvore && criarFumacaDoInferno(config.fumaca, fundo, config.arvore, inferno),
-        config.coluna && config.arvore && criarColunaDeMorcegos(config.coluna, fundo, config.arvore, inferno),
-        // Os respingos vêm DEPOIS da árvore de propósito: o buraco está mais perto do que ela, e o que
-        // salta dele passa na frente do tronco. Quem os move é a camada do buraco; esta só pinta.
-        config.buraco && criarRespingosDoInferno(config.buraco, fundo, inferno),
-        // ✝️ Os Apóstolos, na ordem em que a SALA é vista, de fora pra dentro. O ROTEIRO vem primeiro
-        // e não desenha NADA — ele só escreve o maestro, e vindo antes garante que as quatro peças
-        // leiam o mesmo instante da história no mesmo quadro. Depois a VISTA (o que está do outro lado
-        // do vidro, recortada nele), a MOLDURA com as cortinas por cima dela, e então o que está
-        // dentro da sala: a LAREIRA, a ÁRVORE e os PRESENTES no chão, que são a coisa mais perto.
-        //
-        // As cortinas recebem a config da janela, e os presentes as da árvore e da lareira, pelo mesmo
-        // motivo do ninja com o castelo e dos sentados com o banheiro: quem sabe onde uma peça está e
-        // quanto ela mede é ela mesma, e a segunda cópia de uma medida diverge no meio da cena.
-        config.roteiro && criarRoteiroDaNoite(config.roteiro, fundo, natal),
-        config.janela && criarVistaDaJanela(config.janela, fundo, natal),
-        config.cortinas && config.janela && criarCortinas(config.cortinas, fundo, config.janela),
-        config.lareira && criarLareira(config.lareira, fundo, natal),
-        config.arvoreDeNatal && criarArvoreDeNatal(config.arvoreDeNatal, fundo, natal),
-        config.presentes && config.arvoreDeNatal && config.lareira
-            && criarPresentes(config.presentes, fundo, natal, config.arvoreDeNatal, config.lareira),
-        config.nevoa && criarNevoa(config.nevoa, fundo),
-    ].filter(Boolean);
-
-    const naFrente = [
-        config.po && criarPo(config.po, frente, vento, fogo),
-        config.voadores && criarVoadores(config.voadores, frente, vento),
-        // Os vaga-lumes são da FRENTE pelo mesmo motivo dos voadores: eles estão no ar entre o jogador
-        // e o mundo, e é essa separação que dá profundidade à praia.
-        config.vagalumes && criarVagalumes(config.vagalumes, frente, vento),
-    ].filter(Boolean);
+    const { noFundo, naFrente } = cenario.montar({ fundo, frente, maestro });
 
     let anterior = performance.now();
     const quadro = (agora) => {

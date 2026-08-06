@@ -22,8 +22,8 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   virou um registro de 8 linhas. Duas ferramentas ficaram: **`ferramentas/rodar-tema.js`** (harness
   headless — roda a FIAÇÃO real dos 8 temas, pega cena em branco e NaN; usar `node
   --experimental-vm-modules`) e **`ferramentas/medir-donos.js`** (grafo de donos, com `--porque
-  <tema> <funcao>`). **Rodar o harness depois de QUALQUER mexida em cenário.** Falta: o CSS por tema
-  (tem armadilha de ordem — ver ROADMAP), inverter a dependência do `iniciarAr`, e `telas/`.
+  <tema> <funcao>`). **Rodar o harness depois de QUALQUER mexida em cenário.** Cada pasta leva os TRÊS (js, css,
+  config). Falta: inverter a dependência do `iniciarAr` (ele ainda importa os 8) e mover `telas/`.
 - **A 9ª pele (Humanos) está BLOQUEADA de propósito** — não há capítulo Humanos, então ela não teria
   onde aparecer. Quem cria a vaga é o fundo de facção no COMPÊNDIO. Ver ROADMAP §CENÁRIO POR CAPÍTULO.
   A **Arena** também vai ganhar cenário próprio — é o 1º tema que não é facção.
@@ -144,7 +144,7 @@ custa **zero C#** — um bloco de CSS mais uma entrada de configuração. Tema s
 
 **Depois da separação (ago/2026) isso virou:** criar `wwwroot/cenarios/<faccao>/<faccao>.js` com
 `export const ar = {...}` e os builders, e pôr **uma linha** no registro `AR_DO_TEMA` do `jogo.js`.
-O CSS ainda está no `estilo.css` até o PR do CSS acontecer. **E rodar
+Mais o `<faccao>.css` na mesma pasta (e o `<link>` no index.html). **E rodar
 `node --experimental-vm-modules ferramentas/rodar-tema.js` antes de pedir conferência em jogo.**
 
 **As decisões que vêm ANTES de desenhar qualquer coisa:**

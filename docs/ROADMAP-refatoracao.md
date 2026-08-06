@@ -776,15 +776,11 @@ quatro estarem juntos não precisa de explicação.
 > **O `AR_DO_TEMA` virou um REGISTRO de 8 linhas** — uma por capítulo, em ordem de campanha. Era um
 > objeto de 1.131 linhas. Acrescentar facção passa a ser criar uma pasta e pôr uma linha.
 >
-> **O QUE FALTA, e não é pouco — três coisas, cada uma um PR:**
-> - **O CSS ainda não saiu.** Os blocos `body[data-tema=...]` seguem no `estilo.css`, e a razão é uma
->   ARMADILHA DE ORDEM: a escada de `@media (max-height:...)` do fim do arquivo (a que encolhe os
->   ladrilhos) tem de vir **depois** do bloco base de cada tema. Separar os temas em arquivos
->   carregados após o `estilo.css` INVERTE isso — o tema passaria a sobrescrever a escada, e os
->   ladrilhos parariam de encolher em janela baixa, **em silêncio**. O PR do CSS tem de levar, pra
->   dentro de cada arquivo de tema, o bloco base E os pedaços da escada que são daquele tema, nessa
->   ordem. Verificação possível sem olho: extrair a sequência de regras de cada tema do arquivo velho
->   e do novo e provar que são idênticas.
+> 6. **O CSS por tema** — `estilo.css` 2.657 → 1.682 linhas, e cada pasta passou a levar **os três**
+>    (`<faccao>.js`, `<faccao>.css`, a configuração). Ver §A ARMADILHA DO CSS abaixo: não foi
+>    recorte-e-cola, e a ferramenta `ferramentas/separar-css.js` prova duas coisas antes de escrever.
+>
+> **O QUE FALTA — duas coisas, cada uma um PR:**
 > - **A dependência ainda aponta pra fora.** O `iniciarAr` continua no `jogo.js` e importa os 8
 >   módulos — o contrário do critério 5 ("`nucleo/` nunca sabe que Folclore existe"). O conserto é dar
 >   a cada tema o próprio par `noFundo`/`naFrente` e deixar o `iniciarAr` só orquestrar; aí some
@@ -980,6 +976,38 @@ capaz de colapsar o grafo sozinha:
 O script imprime os sombreamentos que ignorou, pra a decisão ser auditável em vez de confiável.
 **A moral:** "o grep mente" também vale pra ferramenta que se escreve pra conferir o grep — o jeito de
 saber se ela mente é ler o CAMINHO, não o resultado.
+
+### A ARMADILHA DO CSS, e as duas provas que a ferramenta faz (ago/2026)
+
+Separar CSS **não é recorte-e-cola**, e é por isso que este passo veio por último e com ferramenta
+própria (`ferramentas/separar-css.js`).
+
+**A armadilha:** no arquivo único, a escada de `@media (max-height:...)` que encolhe os ladrilhos vem
+DEPOIS do bloco base de cada tema. Arquivos de tema carregados após o `estilo.css` invertem a posição
+deles em relação a ~490 linhas de CSS base que hoje vêm **depois** da região de temas. Onde a
+ESPECIFICIDADE decide, ordem é irrelevante; onde ela EMPATA, a ordem é quem decide.
+
+**Prova 1 — empates de especificidade.** Para cada propriedade declarada por regra de tema, procura
+regra base posterior que declare a MESMA propriedade com especificidade IGUAL. Deu **zero**.
+
+> A 1ª versão da função de especificidade tinha uma **alternativa vazia** numa regex (um `|`
+> sobrando), e alternativa vazia casa em TODA posição do texto: a contagem virava o comprimento da
+> string, dois seletores nunca empatavam, e o verificador respondia "0 empates" pra qualquer entrada.
+> Ela ganhou **auto-teste no arranque** com seis seletores de especificidade conhecida — se mentir, o
+> script morre antes de tocar em arquivo. E foi **sabotada** pra provar que pega: um
+> `body.sabotagem { --painel: red }` (especificidade 101, a mesma de `body[data-tema="X"]`) fez os 8
+> temas acusarem. **Verificador quebrado é pior que verificador nenhum: ele dá PERMISSÃO.**
+
+**Prova 2 — nada perdido nem duplicado.** Conta o multiconjunto de seletores antes e depois. Deu 509
+antes e **510** depois — e o seletor sobrando denunciou um bug real e MUDO: o bloco da escada carrega
+junto o comentário de 20 linhas que a explica, e a abertura do `@media` estava sendo tomada como "a
+primeira linha do bloco". O `@media (max-height: 1000px) {` era trocado pela primeira linha do
+comentário, e as regras iam parar **dentro de um comentário nunca fechado**. O CSS seguia válido; o
+primeiro degrau da escada simplesmente não existia, e o ladrilho parava de encolher sem nada acusar.
+
+**A lição, que vale pra qualquer recorte de CSS:** um pedaço de CSS pode ficar sintaticamente válido
+e semanticamente MORTO. Chave balanceada e arquivo que carrega não provam nada — quem prova é contar
+as regras dos dois lados.
 
 ---
 

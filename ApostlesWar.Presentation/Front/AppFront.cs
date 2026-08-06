@@ -117,7 +117,24 @@ namespace ApostlesWar.Presentation.Front
                 webview.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
 
                 ponte.Conectar(webview.CoreWebView2);
-                webview.CoreWebView2.Navigate(CaminhoDaTela());
+
+                // O front é servido por um HOST VIRTUAL em vez de aberto por caminho de disco. Motivo:
+                // `file://` tem origem OPACA, e ali `<script type="module">` não carrega — sem isto o
+                // front inteiro teria que viver num arquivo só. Nada sai da máquina; o mapeamento
+                // aponta pra própria pasta wwwroot.
+                webview.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    HostVirtual, Path.Combine(AppContext.BaseDirectory, "wwwroot"),
+                    CoreWebView2HostResourceAccessKind.Allow);
+                // Navegação falha = tela preta com o jogo rodando atrás, falando sozinho. Grita, pelo
+                // mesmo motivo do handler de inicialização acima.
+                webview.CoreWebView2.NavigationCompleted += (_, nav) =>
+                {
+                    if (nav.IsSuccess) return;
+                    MessageBox.Show($"Falha ao carregar a tela (host virtual):\n{nav.WebErrorStatus}",
+                        "Apostle's War", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                };
+
+                webview.CoreWebView2.Navigate($"https://{HostVirtual}/index.html");
 
                 jogo = new Thread(() => RodarJogo(ponte, ritmo, repositorio, configuracao)) { IsBackground = true };
                 jogo.Start();
@@ -140,8 +157,8 @@ namespace ApostlesWar.Presentation.Front
             return 0;
         }
 
-        private static string CaminhoDaTela()
-            => Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html");
+        /// <summary>Nome só interno ao WebView2 — não é DNS e não resolve fora do processo.</summary>
+        private const string HostVirtual = "apostlesware";
 
         /// <summary>
         /// A thread do JOGO: monta os services (composition root do front) e entra na batalha. Roda o

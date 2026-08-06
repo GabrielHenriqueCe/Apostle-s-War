@@ -1,5 +1,7 @@
 import { caixaRedonda, desenharChama, entre } from '../comum/basicos.js';
 import { medirDoTema } from '../comum/ladrilho.js';
+import { comListras } from '../comum/basicos.js';
+import { criarNoHorizonte } from '../comum/ladrilho.js';
 // ✝️ APÓSTOLOS — a SALA DE NATAL. O oitavo e último capítulo, e o segundo INTERIOR do front (ver
 // o bloco no estilo.css).
 //
@@ -174,6 +176,55 @@ export const ar = {
         arco: .16, giro: 2.2,
     },
 };
+
+/// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
+///
+/// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
+/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
+/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+export function montar({ fundo, frente, maestro }) {
+    // O QUINTO dado compartilhado, e o primeiro que é um ROTEIRO: a noite de Natal dos ✝️ Apóstolos.
+    // Um escritor só (o `criarRoteiroDaNoite`, que não desenha nada) e quatro leitores espalhados pela
+    // tela — a árvore num canto, a janela no meio, a lareira no outro canto e os presentes no chão:
+    //   passo     · o nome do beat corrente, pra quem precisa saber "onde estamos" numa palavra
+    //   brilho    · 0..1, a estrela anunciando que ele vem. ÁRVORE lê.
+    //   fogo      · 0..1, a lareira acesa. LAREIRA lê (e o clarão dela no piso morre junto).
+    //   voo       · 0..1, o progresso da travessia atrás da janela; 0 = ele não está em cena
+    //   sentido   · 1 = esquerda→direita (a ida), −1 = a volta. JANELA lê os dois.
+    //   pernas    · 0..1, o quanto dele está enfiado na lareira; `mexe` liga o esperneio
+    //   entrega   · 0..1 o presente descendo da lareira, −1 quando não há nenhum viajando
+    //   entregues · CONTADOR de entregas concluídas. Os PRESENTES esperam ele mudar pra empurrar a fila.
+    //
+    // Por que um maestro e não uma máquina de estados dentro de um builder, como o ciclo do Inferno:
+    // lá as fases eram todas da FENDA, e aqui elas atravessam quatro peças que estão em cantos
+    // diferentes. Não há uma delas que seja o lugar certo de guardar a história.
+    const natal = {
+        passo: 'repouso', brilho: 0, fogo: 1, voo: 0, sentido: 1,
+        pernas: 0, mexe: 0, entrega: -1, entregues: 0,
+    };
+
+    return {
+        noFundo: [
+            // ✝️ Os Apóstolos, na ordem em que a SALA é vista, de fora pra dentro. O ROTEIRO vem primeiro
+            // e não desenha NADA — ele só escreve o maestro, e vindo antes garante que as quatro peças
+            // leiam o mesmo instante da história no mesmo quadro. Depois a VISTA (o que está do outro lado
+            // do vidro, recortada nele), a MOLDURA com as cortinas por cima dela, e então o que está
+            // dentro da sala: a LAREIRA, a ÁRVORE e os PRESENTES no chão, que são a coisa mais perto.
+            //
+            // As cortinas recebem a config da janela, e os presentes as da árvore e da lareira, pelo mesmo
+            // motivo do ninja com o castelo e dos sentados com o banheiro: quem sabe onde uma peça está e
+            // quanto ela mede é ela mesma, e a segunda cópia de uma medida diverge no meio da cena.
+            criarRoteiroDaNoite(ar.roteiro, fundo, natal),
+            criarVistaDaJanela(ar.janela, fundo, natal),
+            criarCortinas(ar.cortinas, fundo, ar.janela),
+            criarLareira(ar.lareira, fundo, natal),
+            criarArvoreDeNatal(ar.arvoreDeNatal, fundo, natal),
+            criarPresentes(ar.presentes, fundo, natal, ar.arvoreDeNatal, ar.lareira),
+        ].filter(Boolean),
+        naFrente: [
+        ].filter(Boolean),
+    };
+}
 /// Onde é o CHÃO da sala dos ✝️ Apóstolos, em pixel. Mede de vez em quando e não a cada quadro, pelo
 /// mesmo motivo do `criarNoHorizonte`: `getComputedStyle` força layout, e o que muda entre duas
 /// medidas é a janela ter cruzado uma faixa do @media — isso não acontece no meio de um gesto.

@@ -1,4 +1,6 @@
 import { entre } from '../comum/basicos.js';
+import { criarNoHorizonte } from '../comum/ladrilho.js';
+import { criarPo } from '../comum/ar.js';
 // A cidade murada sob cerco: a muralha e o castelo ao fundo, os dois exércitos trocando tiro nas
 // bordas, e a poeira dourada das tochas subindo.
 export const ar = {
@@ -50,6 +52,26 @@ export const ar = {
         espera: [2.4, 5.2], gesto: .9, guarda: .6, recolher: .9,
     },
 };
+
+/// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
+///
+/// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
+/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
+/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+export function montar({ fundo, frente, maestro }) {
+    return {
+        noFundo: [
+            criarCastelo(ar.castelo, fundo),
+            // O ninja vem logo DEPOIS do castelo: ele anda em cima dos telhados que o castelo acabou de
+            // desenhar, e é do castelo que ele tira a geometria — por isso recebe as duas configurações.
+            criarNinja(ar.ninja, fundo, ar.castelo),
+            criarExercitos(ar.exercitos, fundo),
+        ].filter(Boolean),
+        naFrente: [
+            criarPo(ar.po, frente, maestro.vento, maestro.fogo),
+        ].filter(Boolean),
+    };
+}
 /// Os DOIS EXÉRCITOS ao longe, trocando rajadas de flecha por cima do campo.
 ///
 /// A cena é um DIRETOR com uma fase por vez, e um lado atacando por vez (ideia do Gabriel: "não

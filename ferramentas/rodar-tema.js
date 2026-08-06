@@ -210,7 +210,7 @@ const EH_MODULO = /^\s*(import|export)\s/m.test(fonte);
 // arquivo, e ele só LÊ o que já existe.
 const EPILOGO = `
 ;globalThis.__exporta = {
-    AR_DO_TEMA: typeof AR_DO_TEMA !== 'undefined' ? AR_DO_TEMA : null,
+    CENARIOS: typeof CENARIOS !== 'undefined' ? CENARIOS : (typeof AR_DO_TEMA !== 'undefined' ? AR_DO_TEMA : null),
     aplicarTema: typeof aplicarTema !== 'undefined' ? aplicarTema : null,
 };`;
 
@@ -236,7 +236,7 @@ async function carregar() {
     await m.evaluate();
     // No modo módulo o entry EXPORTA o que o harness precisa; o namespace já é o contrato.
     const ns = m.namespace;
-    return { AR_DO_TEMA: ns.AR_DO_TEMA ?? contexto.__exporta?.AR_DO_TEMA, aplicarTema: ns.aplicarTema ?? contexto.__exporta?.aplicarTema };
+    return { CENARIOS: ns.CENARIOS ?? ns.AR_DO_TEMA ?? contexto.__exporta?.CENARIOS, aplicarTema: ns.aplicarTema ?? contexto.__exporta?.aplicarTema };
 }
 
 async function principal() {
@@ -252,9 +252,9 @@ if (typeof exporta.aplicarTema !== 'function') {
     console.error('\n  aplicarTema não foi encontrado — o harness não tem por onde entrar.\n');
     process.exit(1);
 }
-const temas = Object.keys(exporta.AR_DO_TEMA ?? {});
+const temas = Object.keys(exporta.CENARIOS ?? {});
 if (temas.length === 0) {
-    console.error('\n  AR_DO_TEMA não foi encontrado — o harness não tem o que rodar.\n');
+    console.error('\n  o registro de cenários não foi encontrado — o harness não tem o que rodar.\n');
     process.exit(1);
 }
 

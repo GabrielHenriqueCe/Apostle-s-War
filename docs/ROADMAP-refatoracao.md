@@ -786,7 +786,9 @@ quatro estarem juntos não precisa de explicação.
 >   a cada tema o próprio par `noFundo`/`naFrente` e deixar o `iniciarAr` só orquestrar; aí some
 >   também toda a lista de `config.X && criarY(...)`, que só existe porque UMA lista servia a todos os
 >   temas. É mudança de DESENHO, não de lugar — por isso não entrou junto com a mudança de arquivo.
-> - **`telas/` e `ui/`** seguem no `jogo.js`. São os ~14% que a medição previu e não estavam doendo.
+> - **`telas/` e `ui/`** seguem no `jogo.js` (1.917 linhas). Ver §SEPARAR AS TELAS abaixo: o harness
+>   delas já existe e a análise já foi feita, mas ela **não é mecânica como a dos cenários** — tem uma
+>   decisão de desenho no meio.
 >
 > **A LIÇÃO QUE VALE MAIS QUE A REFATORAÇÃO:** as duas ferramentas vieram ANTES de mover a primeira
 > linha, e as duas pegaram erro que o código não mostra. O harness pegou, em segundos, duas cenas em
@@ -976,6 +978,56 @@ capaz de colapsar o grafo sozinha:
 O script imprime os sombreamentos que ignorou, pra a decisão ser auditável em vez de confiável.
 **A moral:** "o grep mente" também vale pra ferramenta que se escreve pra conferir o grep — o jeito de
 saber se ela mente é ler o CAMINHO, não o resultado.
+
+### SEPARAR AS TELAS — a análise está feita, falta UMA decisão de desenho (ago/2026)
+
+O último pedaço do `jogo.js` (1.917 linhas). **O verificador já existe** — `ferramentas/rodar-telas.js`,
+que carrega o front e publica no `chrome.webview` a mesma mensagem que o C# publicaria, uma por tela
+(13), e depois confere estaticamente que todo `getElementById` do código existe no `index.html`.
+Provado por sabotagem nas duas pontas.
+
+**O corte, que sai direto da leitura das 114 declarações:**
+
+| destino | o que vai |
+|---|---|
+| `nucleo/cena.js` | `mostrarCena`, `sairDaTela`, `atualizarBotaoSair` |
+| `telas/menu.js` | `aplicarMenu` |
+| `telas/perfil.js` | criar/editar perfil, avatar |
+| `telas/arena.js` | montagem dos dois times, sorteio, toggle |
+| `telas/campanha.js` | mapa, fases, fim de fase, conquista |
+| `telas/arsenal.js` | boneco, totais, itens por slot |
+| `telas/compendio.js` | catálogo e ficha do champ |
+| `telas/combate.js` | estado, board, painel, habilidades, log, eventos |
+| `ui/time.js` | picker + slots + arrastar-e-soltar (Arena **e** Campanha usam) |
+| `ui/modal.js` · `ui/animacao.js` | confirmação · `reanimar`/`flutuar` |
+
+**POR QUE NÃO É MECÂNICO COMO OS CENÁRIOS.** Um cenário é uma função pura de config; uma tela guarda
+ESTADO. São 30 `let` de módulo no `jogo.js`, e a boa notícia é que **quase todos são locais à região
+da tela** (`arenaCampeoes` mora colado no código da arena, `campFases` no da campanha, `arsenalDados`
+no do arsenal) — esses viajam junto e não custam nada.
+
+**O que CRUZA fronteira são quatro, e só quatro** (medido, não estimado):
+
+| estado | escreve | lê |
+|---|---|---|
+| `cenaAtual` | `mostrarCena` (núcleo) | arsenal, combate, o Esc |
+| `menuRaiz` | `aplicarMenu` (menu) | `sairDaTela` (núcleo) |
+| `perfilAvatar` | menu/perfil | o marcador do mapa (campanha) |
+| `estado` | combate | 3 pontos fora dele |
+
+**E aqui está a decisão que é do Gabriel**, porque muda a forma do front: em ES module, `export let`
+é lido ao vivo pelo importador mas **não é gravável de fora** — `import { menuRaiz }` e depois
+`menuRaiz = false` não compila. Então cada travessia precisa escolher um de dois caminhos:
+
+1. **Acessadores** — o dono exporta `definirMenuRaiz(v)` / `menuRaizAtual()`. Explícito, cada escrita
+   aparece por nome, e o dono fica óbvio. Custa uma função por travessia (são 4).
+2. **Um objeto de estado da tela** — `nucleo/estado-da-tela.js` exportando um `const tela = {...}`
+   mutável que todos leem e escrevem. Menos código, mas ressuscita a variável global com outro nome,
+   e é justamente a coisa que a separação existe pra matar.
+
+**Recomendação:** o (1), pelas 4 travessias. São poucas, e o incômodo de escrever `definirMenuRaiz` é
+o que faz alguém pensar duas vezes antes de criar a quinta — que é exatamente o efeito que se quer.
+Mas é escolha de desenho, e ela vale pro front inteiro daqui pra frente.
 
 ### A ARMADILHA DO CSS, e as duas provas que a ferramenta faz (ago/2026)
 

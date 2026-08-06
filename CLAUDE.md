@@ -17,13 +17,9 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   linhas variando UM fator por vez — por-habilidade e champ-inteiro × alvo imune/não-imune a malefícios
   × DEF 0/no cap. Zero mudança no motor. A seguir: **LER os números e rebalancear (#16)** — a bancada é
   o instrumento, o ajuste é o trabalho. Aberto: o #15 (faxina de comentários).
-- **O front foi SEPARADO (ago/2026): `jogo.js` 11.921 → 2.070 linhas.** Cada facção mora em
-  `wwwroot/cenarios/<faccao>/<faccao>.js`, o compartilhado em `cenarios/comum/`, e o `AR_DO_TEMA`
-  virou um registro de 8 linhas. Duas ferramentas ficaram: **`ferramentas/rodar-tema.js`** (harness
-  headless — roda a FIAÇÃO real dos 8 temas, pega cena em branco e NaN; usar `node
-  --experimental-vm-modules`) e **`ferramentas/medir-donos.js`** (grafo de donos, com `--porque
-  <tema> <funcao>`). **Rodar o harness depois de QUALQUER mexida em cenário.** Cada pasta leva os TRÊS (js, css,
-  config). Falta: inverter a dependência do `iniciarAr` (ele ainda importa os 8) e mover `telas/`.
+- **O front foi SEPARADO e está FECHADO (ago/2026): `jogo.js` 11.921 → 192 linhas.** Ver a seção
+  "O FRONT, depois da separação" no fim deste arquivo — mapa de pastas, o contrato de tela, as duas
+  injeções e o que os harnesses NÃO cobrem.
 - **A 9ª pele (Humanos) está BLOQUEADA de propósito** — não há capítulo Humanos, então ela não teria
   onde aparecer. Quem cria a vaga é o fundo de facção no COMPÊNDIO. Ver ROADMAP §CENÁRIO POR CAPÍTULO.
   A **Arena** também vai ganhar cenário próprio — é o 1º tema que não é facção.
@@ -167,3 +163,58 @@ Mais o `<faccao>.css` na mesma pasta (e o `<link>` no index.html). **E rodar
   rodando e apontar o defeito exato. E **quando ele descreve um MECANISMO, implementar LITERALMENTE**
   — no ⭐ Especial eu interpretei quatro vezes e errei as quatro; o desenho dele estava certo desde a
   primeira frase.
+
+## O FRONT, depois da separação (ago/2026) — leia antes de tocar em `wwwroot/`
+
+```
+wwwroot/
+  jogo.js            COMPOSITION ROOT (192 linhas). Imports, a tabela TELAS, o interpretador,
+                     o Esc/botão-sair, o registro CENARIOS e o boot. NÃO desenha nada.
+  index.html · estilo.css
+  nucleo/   ponte.js (o único que sabe do C#) · cena.js (quem está na tela + abrirTela)
+            ar.js (canvas, maestro, laço, aplicarTema)
+  ui/       modal.js · time.js (picker+slots+arrastar) · animacao.js
+  telas/    menu · perfil · arena · campanha · arsenal · compendio · combate
+  cenarios/ comum/ + 8 facções (cada pasta: <faccao>.js + <faccao>.css)
+```
+
+**O paralelo com o back, e ele é do Gabriel:** `jogo.js` = `Program.cs` · `nucleo/` =
+`CombateService` · `telas/` = as habilidades (dado: carga → pinta) · `ui/` = `Acao` compartilhada.
+
+**O CONTRATO DE TELA.** Toda tela é isto, e nada além:
+```js
+export const compendio = { cena: 'compendio', montar(dados, anterior) { /* preenche o DOM */ } };
+```
+A chave no mapa `TELAS` é o **`tipo` da mensagem** — a unidade é a MENSAGEM, não o arquivo (o
+compêndio exporta duas). Tela nova = uma linha na tabela. **Abrir tela é SEMPRE `abrirTela(...)`**,
+inclusive de dentro do código (a ficha do champ pela conquista usa outra `cena` que a do compêndio,
+porque o Esc tem de voltar pra lugares diferentes).
+**`estado` e `evento` ficam FORA da tabela de propósito** — não navegam, atualizam a cena no ar.
+
+**AS DUAS INJEÇÕES seguram a direção da dependência.** O núcleo não pode importar quem depende dele,
+então o composition root ENTREGA: `registrarCenarios(CENARIOS)` e `aoTrocarCena(atualizarBotaoSair)`.
+Regra: **quando um módulo interno precisa de algo do externo, o externo INJETA ou a coisa DESCE.
+Nunca o interno importa pra cima.** Estado que cruza fronteira vira ACESSADOR (`cenaAgora()`,
+`estadoAtual()`, `menuEhRaiz()`, `avatarDoJogador()`, `fimDeFaseTemOpcoes()`) — `export let` é lido
+ao vivo mas NÃO é gravável de fora.
+
+**Verificar SEMPRE que tocar no front** (os dois passam em ~1 min):
+```
+node --experimental-vm-modules ferramentas/rodar-telas.js   # as 13 mensagens montam
+node --experimental-vm-modules ferramentas/rodar-tema.js "" 120   # 8 temas x 120s de cena
+```
+Mais `ferramentas/medir-donos.js` (grafo de donos, com `--porque <tema> <funcao>`) quando for mover
+função de cenário.
+
+**O QUE OS HARNESSES NÃO COBREM — e verde deles não é "o jogo funciona":** eles publicam mensagem,
+**não clicam em nada.** Duplo-clique, clique em slot, arrastar, teclado e tudo que roda DURANTE a
+batalha em resposta a isso estão fora. Na separação, QUATRO bugs saíram exatamente daí e os quatro
+foram achados pelo Gabriel jogando. **Conferência em jogo continua sendo dele, sempre.**
+
+**Terminação de linha:** o `.gitattributes` IMPEDE (LF no repo, CRLF na cópia de trabalho) e o
+`rodar-telas.js` ACUSA se algo escapar. Arquivo misto não é cosmético — já grudou um `else if` num
+comentário e virou código comentado.
+
+**A armadilha do CSS por tema:** a escada de `@media` que encolhe os ladrilhos tem de vir DEPOIS do
+bloco base do tema. `ferramentas/separar-css.js` prova as duas coisas (empate de especificidade e
+contagem de regras) antes de escrever — CSS pode ficar válido e semanticamente MORTO.

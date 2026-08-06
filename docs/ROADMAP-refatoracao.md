@@ -780,7 +780,16 @@ quatro estarem juntos não precisa de explicação.
 >    (`<faccao>.js`, `<faccao>.css`, a configuração). Ver §A ARMADILHA DO CSS abaixo: não foi
 >    recorte-e-cola, e a ferramenta `ferramentas/separar-css.js` prova duas coisas antes de escrever.
 >
-> **O QUE FALTA — duas coisas, cada uma um PR:**
+> 7. **A dependência INVERTIDA** (#210) — cada tema expõe `montar({fundo, frente, maestro})` e o
+>    `iniciarAr` só orquestra. Morreram os 37 guardas `config.X &&`, que só existiam porque UMA lista
+>    servia os oito temas.
+> 8. **`nucleo/` e `ui/`** (#212) e **as 7 telas** (#213) — ver §SEPARAR AS TELAS abaixo.
+>
+> **A DÍVIDA ESTÁ PAGA POR INTEIRO: `jogo.js` 11.921 → 192 linhas.** O que sobrou é composition
+> root: imports, a tabela `TELAS`, o interpretador, o Esc/botão-sair, o registro `CENARIOS` e o boot.
+>
+> <details><summary>o texto do que faltava, quando faltava</summary>
+>
 > - **A dependência ainda aponta pra fora.** O `iniciarAr` continua no `jogo.js` e importa os 8
 >   módulos — o contrário do critério 5 ("`nucleo/` nunca sabe que Folclore existe"). O conserto é dar
 >   a cada tema o próprio par `noFundo`/`naFrente` e deixar o `iniciarAr` só orquestrar; aí some
@@ -789,6 +798,12 @@ quatro estarem juntos não precisa de explicação.
 > - **`telas/` e `ui/`** seguem no `jogo.js` (1.917 linhas). Ver §SEPARAR AS TELAS abaixo: o harness
 >   delas já existe e a análise já foi feita, mas ela **não é mecânica como a dos cenários** — tem uma
 >   decisão de desenho no meio.
+>
+> </details>
+>
+> **O MAPA E O CONTRATO FINAIS estão no `CLAUDE.md` §O FRONT, depois da separação** — pastas, o
+> contrato de tela, as duas injeções, os acessadores, os dois harnesses e o que eles NÃO cobrem. É lá
+> que se lê antes de tocar em `wwwroot/`; aqui fica a história de como se chegou nisso.
 >
 > **A LIÇÃO QUE VALE MAIS QUE A REFATORAÇÃO:** as duas ferramentas vieram ANTES de mover a primeira
 > linha, e as duas pegaram erro que o código não mostra. O harness pegou, em segundos, duas cenas em
@@ -1245,10 +1260,27 @@ as regras dos dois lados.
       teste é que escolheria a ordem, não o fluxo). O teste real nasce quando a Fatia 1 do front
       tornar a apresentação injetável — evita desenhar 2× o seam que o front vai redesenhar.
       Até lá a ordem é guardada pelo comentário no `ProcessarReacoesAoMorrer` + ADR.
-15. 🔜 **Faxina de comentários — REORDENADA, não cancelada** (ago/2026). Acontece **DEPOIS da separação
-    do `jogo.js`**, e em duas etapas: o cenário que se move já sai reduzido, e então uma passada pelos
-    OUTROS arquivos. Ganhou também uma regra de escrita (`CLAUDE.md` §Comentário) pra a vazão não
-    repor o que a faxina tirar. Ver §Faxina de comentários — a medição de lá é o BRIEFING dela.
+15. ✅ **Faxina de comentários — FECHADA PELA MEDIÇÃO** (ago/2026), e não pelo corte. A separação
+    terminou; a medição de novo, arquivo por arquivo, diz que **não há gordura pra tirar**:
+
+    | | comentário |
+    |---|---|
+    | `telas/` (7 arquivos) | **3% a 22%** |
+    | `nucleo/` + `ui/` | 7% a 24% (os altos são arquivos de 11–80 linhas, onde o doc É o produto) |
+    | `cenarios/` (8 facções) | 21% a 36% — e são MECANISMO, não história |
+
+    As telas nunca foram gordas; a densidade que assustava vinha do cenário, e lá o comentário é a
+    única coisa que diz QUE FORMA está sendo desenhada (código de canvas é trigonometria). Fui atrás
+    de narração histórica com filtro e achei **25 linhas em 9.700**; abri os doze maiores blocos
+    contíguos e todos eram mecanismo ou MINA. **Cortar ali não enxuga, cega.**
+
+    O que de fato saiu foi o que a MUDANÇA introduziu — o cabeçalho duplicado do `ladrilho.js` e um
+    parágrafo de história — mais os três comentários que a separação transformou em MENTIRA no
+    `jogo.js`. O que fica valendo é a regra de escrita (`CLAUDE.md` §Comentário), que é a vazão.
+
+    **A lição, e ela vale além daqui:** razão comentário/código é métrica mentirosa. Ela é alta
+    justamente onde o comentário é o produto — as interfaces de capacidade no C#, os builders de
+    canvas no front. Faxinar por ranking destrói o melhor primeiro.
 16. 🔄 **REBALANCEAMENTO — EM ITERAÇÃO** (1ª passada mergeada no #189). Não é um item que "termina":
     a bancada (§BANCADA DE DANO) é o instrumento, e cada volta é ler os números e mexer numa
     alavanca. A passada 1 padronizou o cooldown em 3 e subiu os multiplicadores de faixa.

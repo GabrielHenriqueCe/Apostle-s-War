@@ -441,13 +441,14 @@ e um item do capítulo 1 pode ser mais forte que um do capítulo 8 até você ch
 
 Subir a raridade custa **sacrificar outros itens**, e o sacrifício é o que decide as opções:
 
-- **Consome o MESMO item, na raridade ATUAL** — arma sacrifica arma, bota sacrifica bota —, e a
-  raridade sobe um degrau (raros fazem um épico; épicos fazem um lendário). Pedir a raridade alvo
-  mataria a razão de existir da forja: quem tem épico não precisa fabricar épico.
+- **Consome o MESMO item, do MESMO CONJUNTO, na raridade ATUAL** — a arma do Reino sacrifica armas do
+  Reino —, e a raridade sobe um degrau (raros fazem um épico; épicos fazem um lendário). Pedir a
+  raridade alvo mataria a razão de existir da forja: quem tem épico não precisa fabricar épico.
 
-> **É essa regra que decide ONDE se farma.** Como cada peça só cai na fase dela, evoluir a arma pede
-> voltar na fase da arma — e a 1-1 é fácil demais pra ser a fonte de míticos. **A fase 7, dropando
-> todos os tipos, é o que torna o farm caro**: o volume existe, mas na fase mais difícil do capítulo.
+> **É essa regra que decide ONDE se farma**, e ela aperta por dois lados ao mesmo tempo: o material
+> tem de ser a mesma PEÇA e do mesmo CAPÍTULO. Evoluir a arma do Reino manda você de volta ao Reino, e
+> a 1-1 é fácil demais pra ser a fonte de míticos. **Quem paga a conta é a fase 7 daquele capítulo**,
+> que dropa todos os tipos dele — o volume existe, mas na fase mais difícil.
 - **As subestatísticas dos sacrificados viram o POOL**: a forja oferece **3 opções** e você escolhe 1.
   Se o pool não tiver o bastante, completa com aleatórias dentro das regras de sub.
 - **Dá pra RECUSAR.** Recusar mantém o item exatamente como estava e **queima o material do mesmo

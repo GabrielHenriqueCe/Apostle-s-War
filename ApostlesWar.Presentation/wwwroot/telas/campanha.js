@@ -1,10 +1,10 @@
-// CAMPANHA — o mapa de capítulos, as fases, o fim de fase e a conquista de um champ.
+// CAMPANHA — o mapa de capítulos, as fases, o fim de fase e a conquista de um apóstolo.
 //
 // Quatro TELAS num arquivo só, porque são quatro cenas do MESMO fluxo: sair de uma quase sempre é
 // entrar na seguinte, e separá-las faria quatro arquivos que só conversam entre si.
 
 import { abrirTela } from '../nucleo/cena.js';
-import { compendioChamp } from './compendio.js';
+import { compendioApostolo } from './compendio.js';
 import { avatarDoJogador } from './menu.js';
 import { configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPickerArrastavel } from '../ui/time.js';
 import { mandar } from '../nucleo/ponte.js';
@@ -159,12 +159,12 @@ function selecionarFaseCampanha(fase, btn) {
     atualizarLutarFase();
 }
 
-function grupoRodada(titulo, champs) {
+function grupoRodada(titulo, apostolos) {
     const g = document.createElement('div'); g.className = 'rodadaGrupo';
     const t = document.createElement('div'); t.className = 'rodadaTitulo'; t.textContent = titulo;
-    const cs = document.createElement('div'); cs.className = 'rodadaChamps';
-    cs.replaceChildren(...champs.map(c => {
-        const m = document.createElement('div'); m.className = 'miniChamp';
+    const cs = document.createElement('div'); cs.className = 'rodadaApostolos';
+    cs.replaceChildren(...apostolos.map(c => {
+        const m = document.createElement('div'); m.className = 'miniApostolo';
         const e = document.createElement('span'); e.className = 'mcEmoji'; e.textContent = c.simbolo;
         const n = document.createElement('span'); n.className = 'mcNome'; n.textContent = c.nome;
         m.append(e, n);
@@ -175,9 +175,9 @@ function grupoRodada(titulo, champs) {
 }
 
 function montarPickerFase() {
-    document.getElementById('fasePicker').replaceChildren(...campFases.meusCampeoes.map((c, i) => {
+    document.getElementById('fasePicker').replaceChildren(...campFases.meusApostolos.map((c, i) => {
         const cel = criarCelulaPicker(c);
-        cel.addEventListener('click', () => escolherChampFase(i));
+        cel.addEventListener('click', () => escolherApostoloFase(i));
         tornarPickerArrastavel(cel, i);
         return cel;
     }));
@@ -186,7 +186,7 @@ function montarPickerFase() {
 
 function desenharSlotsFase() {
     document.getElementById('faseSlots').replaceChildren(...campTime.map((idx, i) => {
-        const slot = criarSlot(campFases.meusCampeoes, idx, campSlotSel === i);
+        const slot = criarSlot(campFases.meusApostolos, idx, campSlotSel === i);
         slot.addEventListener('click', () => {
             if (campTime[i] != null) campTime[i] = null;   // casa cheia = remove
             else campSlotSel = i;                           // casa vazia = seleciona
@@ -199,7 +199,7 @@ function desenharSlotsFase() {
 }
 
 // Clique no picker = adiciona na casa selecionada (ou 1ª vazia). Não duplica.
-function escolherChampFase(idx) {
+function escolherApostoloFase(idx) {
     if (campTime.includes(idx)) return;
     const i = (campSlotSel != null && campTime[campSlotSel] == null) ? campSlotSel : campTime.indexOf(null);
     if (i < 0) return;
@@ -223,7 +223,7 @@ document.getElementById('fasesLutar').addEventListener('click', () => {
 
 document.getElementById('faseSortear').addEventListener('click', () => {
     if (!campFases) return;
-    campTime = sortearTime(campFases.meusCampeoes.length);
+    campTime = sortearTime(campFases.meusApostolos.length);
     campSlotSel = null;
     desenharSlotsFase();
 });
@@ -275,10 +275,10 @@ export const fimDeFase = {
         }
         if (r && r.novos && r.novos.length) {
             const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
-            const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Novos campeões';
-            const cs = document.createElement('div'); cs.className = 'recompensaChamps';
+            const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Novos apóstolos';
+            const cs = document.createElement('div'); cs.className = 'recompensaApostolos';
             cs.replaceChildren(...r.novos.map(c => {
-                const m = document.createElement('div'); m.className = 'miniChamp';
+                const m = document.createElement('div'); m.className = 'miniApostolo';
                 const e = document.createElement('span'); e.className = 'mcEmoji'; e.textContent = c.simbolo;
                 const n = document.createElement('span'); n.className = 'mcNome'; n.textContent = c.nome;
                 m.append(e, n); return m;
@@ -311,27 +311,27 @@ document.getElementById('fimDeFase').addEventListener('click', e => {
     mandar('continuar');
 });
 
-// ---------- Campanha: a conquista de um champ ----------
+// ---------- Campanha: a conquista de um apóstolo ----------
 // Ele vem do fundo, pequeno e fora de foco, e cresce até o centro; ao chegar, brilha e some o
 // brilho. Terminada a animação a tela vira a FICHA dele — a mesma seção do compêndio. Dois cliques
 // pulam pro fim (quem já viu não precisa ver de novo).
-let conquistaEmCurso = null;   // o champ que está chegando (guardado pra virar ficha no fim)
+let conquistaEmCurso = null;   // o apóstolo que está chegando (guardado pra virar ficha no fim)
 
 
 export const conquista = {
     cena: 'conquista',
-    montar(champ) {
-        conquistaEmCurso = champ;
+    montar(apostolo) {
+        conquistaEmCurso = apostolo;
 
-        document.getElementById('conquistaEmoji').textContent = champ.simbolo;
-        document.getElementById('conquistaNome').textContent = champ.nome;
-        document.getElementById('conquistaFaccao').textContent = champ.faccao;
+        document.getElementById('conquistaEmoji').textContent = apostolo.simbolo;
+        document.getElementById('conquistaNome').textContent = apostolo.nome;
+        document.getElementById('conquistaFaccao').textContent = apostolo.faccao;
 
-        // UMA classe rege a cena inteira (champ, aura, anéis, raios) — assim as peças compartilham a
+        // UMA classe rege a cena inteira (apóstolo, aura, anéis, raios) — assim as peças compartilham a
         // mesma linha do tempo sem cada uma precisar ser ligada à mão.
         const cena = document.getElementById('conquista');
         cena.classList.remove('chegando');
-        void cena.offsetWidth;          // reinicia a animação mesmo com dois champs seguidos
+        void cena.offsetWidth;          // reinicia a animação mesmo com dois apóstolos seguidos
         cena.classList.add('chegando');
 
         // Quem manda abrir a ficha é o fim da animação DO CORPO, não de qualquer uma da cena: o
@@ -347,11 +347,11 @@ export const conquista = {
 },
 };
 
-// Fim da animação (ou pulo): a mesma cena vira a ficha do champ. O C# continua achando que estamos
+// Fim da animação (ou pulo): a mesma cena vira a ficha do apóstolo. O C# continua achando que estamos
 // na conquista — o que ele espera é um "continuar", e é o Esc/Sair daqui que vai mandá-lo.
 function abrirFichaDaConquista() {
     if (!conquistaEmCurso) return;
-    abrirTela(compendioChamp, conquistaEmCurso, 'conquistaChamp');
+    abrirTela(compendioApostolo, conquistaEmCurso, 'conquistaApostolo');
     conquistaEmCurso = null;
 }
 

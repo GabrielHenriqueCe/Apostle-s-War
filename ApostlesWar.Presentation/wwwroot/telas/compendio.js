@@ -1,4 +1,4 @@
-// COMPÊNDIO — o catálogo dos 36 por facção, e a ficha de um champ.
+// COMPÊNDIO — o catálogo dos 36 por facção, e a ficha de um apóstolo.
 //
 // Os travados aparecem, com cadeado, e são clicáveis: é planejando contra o que ainda não se tem
 // que a campanha vira escolha.
@@ -8,9 +8,9 @@
 import { mandar } from '../nucleo/ponte.js';
 
 // ---------- compêndio ----------
-// Catálogo, só leitura: nenhum clique daqui muda progresso. Por isso o champ TRAVADO é clicável
+// Catálogo, só leitura: nenhum clique daqui muda progresso. Por isso o apóstolo TRAVADO é clicável
 // igual ao liberado — o cadeado diz "ainda não é seu", não "não é da sua conta". Quem decide o que
-// está travado é o C# (CampeoesService.EstaDesbloqueado); aqui só se pinta a resposta.
+// está travado é o C# (ApostolosService.EstaDesbloqueado); aqui só se pinta a resposta.
 export const compendio = {
     cena: 'compendio',
     montar(c) {
@@ -24,10 +24,10 @@ export const compendio = {
 
             const grade = document.createElement('div');
             grade.className = 'compGrade';
-            grade.replaceChildren(...f.champs.map(ch => {
+            grade.replaceChildren(...f.apostolos.map(ch => {
                 const card = document.createElement('button');
                 card.type = 'button';
-                card.className = 'compChamp' + (ch.desbloqueado ? '' : ' travado');
+                card.className = 'compApostolo' + (ch.desbloqueado ? '' : ' travado');
 
                 const em = document.createElement('span');
                 em.className = 'ccEmoji';
@@ -47,7 +47,7 @@ export const compendio = {
 
                 // O índice é GLOBAL (posição na lista completa), não o da facção: a ponte carrega um int
                 // só por clique, e mandar (facção, slot) exigiria dois.
-                card.addEventListener('click', () => mandar('verChamp', ch.indice));
+                card.addEventListener('click', () => mandar('verApostolo', ch.indice));
                 return card;
             }));
 
@@ -57,13 +57,13 @@ export const compendio = {
 },
 };
 
-export const compendioChamp = {
-    cena: 'compendioChamp',
+export const compendioApostolo = {
+    cena: 'compendioApostolo',
     montar(c) {
-        // Hoje o emoji gigante; o #champArte é o SLOT que recebe a arte do personagem inteiro depois.
-        document.getElementById('champArte').textContent = c.simbolo;
-        document.getElementById('champNome').textContent = c.nome;
-        document.getElementById('champFaccao').textContent =
+        // Hoje o emoji gigante; o #apostoloArte é o SLOT que recebe a arte do personagem inteiro depois.
+        document.getElementById('apostoloArte').textContent = c.simbolo;
+        document.getElementById('apostoloNome').textContent = c.nome;
+        document.getElementById('apostoloFaccao').textContent =
             c.desbloqueado ? c.faccao : `${c.faccao} · 🔒 ainda não conquistado`;
 
         // Números de BASE: catálogo, não simulador — arsenal, itens e buffs não entram aqui.
@@ -75,14 +75,14 @@ export const compendioChamp = {
             ['💥', 'Dano crítico', `${c.danoCritPct}%`],
         ];
 
-        const painelStats = document.getElementById('champStats');
+        const painelStats = document.getElementById('apostoloStats');
         const tituloStats = document.createElement('h2');
-        tituloStats.className = 'champSecao';
+        tituloStats.className = 'apostoloSecao';
         tituloStats.textContent = 'Estatísticas';
 
         painelStats.replaceChildren(tituloStats, ...stats.map(([icone, rotulo, valor]) => {
             const linha = document.createElement('div');
-            linha.className = 'champStat';
+            linha.className = 'apostoloStat';
 
             const ic = document.createElement('span'); ic.className = 'csIcone'; ic.textContent = icone;
             const rot = document.createElement('span'); rot.className = 'csRotulo'; rot.textContent = rotulo;
@@ -92,14 +92,14 @@ export const compendioChamp = {
             return linha;
         }));
 
-        const painelHabs = document.getElementById('champHabilidades');
+        const painelHabs = document.getElementById('apostoloHabilidades');
         const tituloHabs = document.createElement('h2');
-        tituloHabs.className = 'champSecao';
+        tituloHabs.className = 'apostoloSecao';
         tituloHabs.textContent = 'Habilidades';
 
         painelHabs.replaceChildren(tituloHabs, ...c.habilidades.map(h => {
             const card = document.createElement('div');
-            card.className = 'champHab' + (h.passiva ? ' passiva' : '');
+            card.className = 'apostoloHab' + (h.passiva ? ' passiva' : '');
 
             const topo = document.createElement('div');
             topo.className = 'chTopo';

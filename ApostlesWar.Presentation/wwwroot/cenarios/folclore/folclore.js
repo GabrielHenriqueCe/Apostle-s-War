@@ -272,7 +272,7 @@ export function montar({ fundo, frente, maestro }) {
 /// é interpolada entre o cinza-quente normal e a fuligem conforme a chama cai. Sem isso, o fogo
 /// simplesmente desapareceria e a coluna seguiria clara — o que leria como bug, não como fogo apagando.
 ///
-/// Um DESFILE de vultos dos quatro champs já viveu dentro desta fumaça. Saiu por pedido do Gabriel: os
+/// Um DESFILE de vultos dos quatro apóstolos já viveu dentro desta fumaça. Saiu por pedido do Gabriel: os
 /// quatro passaram a estar referenciados em todo o resto da cena (chifres, maça, corvos, cartas,
 /// máscaras), e o vulto virou repetição — além de deixar a fumaça rígida, porque ela precisava manter
 /// uma silhueta legível. Sem ele, a coluna pôde ficar fluida, que é o que fumaça é.

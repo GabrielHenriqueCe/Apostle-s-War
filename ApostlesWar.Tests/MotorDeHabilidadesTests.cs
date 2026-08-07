@@ -254,7 +254,7 @@ namespace Tests
         public void GuardaReal_EvitaAMorte_MantendoOsStatus()
         {
             var guarda = new Jogador(new Personagem(1, Faccao.Reino, "Guarda", "⚜️", 1000, 200, 0,
-                new ApostlesWar.Domain.Champs.Reino.GuardaReal()));
+                new ApostlesWar.Domain.Apostolos.Reino.GuardaReal()));
             new Veneno(2).Aplicar(guarda);                                 // debuff que DEVE sobreviver
             Assert.True(guarda.StatusAtivos.OfType<Veneno>().Any());
 
@@ -383,7 +383,7 @@ namespace Tests
         /// <summary>
         /// Subclasse Strangler FAKE, local ao teste — prova que uma habilidade que ainda
         /// sobrescreve Ativar (o caminho velho) continua rodando junto do motor. Local DE
-        /// PROPÓSITO: não depende de um champ real, que ao migrar pra forma-construtor sumiria e
+        /// PROPÓSITO: não depende de um apóstolo real, que ao migrar pra forma-construtor sumiria e
         /// quebraria o teste (foi o que aconteceu com o RaioX ao virar dado nos Tecnológicos).
         /// Cura 15% do HP máx dos aliados vivos, igual ao antigo RaioX.
         /// </summary>
@@ -747,7 +747,7 @@ namespace Tests
                 new List<Combate> { Novo() });
 
             // Escopo.AlvosResolvidos de propósito: é o que prova que a RESOLUÇÃO pegou os mortos
-            // (os champs de hoje usam TodosAliados e nem leriam a lista).
+            // (os apóstolos de hoje usam TodosAliados e nem leriam a lista).
             var hab = Hab(new() { new Reviver(0.5, Escopo.AlvosResolvidos) }, alvos: int.MaxValue,
                 lista: TipoLista.Aliados, estado: EstadoAlvo.Mortos);
 

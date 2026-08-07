@@ -105,7 +105,7 @@
             <div id="faseItem"></div>
             <div class="faseLinhaTime">
                 <p class="faseDica">Monte seu time (até 4)</p>
-                <button id="faseSortear" type="button" title="Sortear entre os seus campeões">🎲 sortear</button>
+                <button id="faseSortear" type="button" title="Sortear entre os seus apóstolos">🎲 sortear</button>
             </div>
             <div id="faseSlots"></div>
             <div id="fasePicker"></div>
@@ -130,12 +130,12 @@
         </div>
     </section>
 
-    <!-- CONQUISTA: um champ recém-desbloqueado, um por tela. Ele vem do fundo crescendo até o centro
+    <!-- CONQUISTA: um apostolo recém-desbloqueado, um por tela. Ele vem do fundo crescendo até o centro
          e brilha ao chegar; dois cliques pulam a animação. Terminada, a MESMA cena vira a ficha dele
          (reusa a seção do compêndio, ver mostrarCena) e sair volta pra tela de vitória. -->
     <section id="conquista" hidden>
         <!-- O cenário da chegada, em três peças separadas de propósito: os RAIOS giram devagar e
-             sempre; a AURA cresce junto com o champ; e os ANÉIS disparam no instante em que ele
+             sempre; a AURA cresce junto com o apostolo; e os ANÉIS disparam no instante em que ele
              chega. Juntas num elemento só, elas teriam que compartilhar uma linha do tempo. -->
         <div id="conquistaFundo"></div>
         <div id="conquistaAura"></div>
@@ -144,7 +144,7 @@
             <div id="conquistaNome"></div>
             <div id="conquistaFaccao"></div>
         </div>
-        <div class="continuarDica" id="conquistaDica">novo campeão! · 2 cliques pulam</div>
+        <div class="continuarDica" id="conquistaDica">novo apóstolo! · 2 cliques pulam</div>
     </section>
 
     <!-- Cena do ARSENAL: boneco com os 7 slots equipados (global), o que o conjunto dá SOMADO, e os
@@ -169,18 +169,18 @@
         <div id="compendioFaccoes"></div>
     </section>
 
-    <!-- Cena da FICHA de um champ: arte grande no meio, números à esquerda, habilidades à direita.
-         O #champArte é um SLOT: hoje mostra o emoji gigante, amanhã recebe o personagem inteiro sem
+    <!-- Cena da FICHA de um apostolo: arte grande no meio, números à esquerda, habilidades à direita.
+         O #apostoloArte é um SLOT: hoje mostra o emoji gigante, amanhã recebe o personagem inteiro sem
          a página mudar de forma (o Gabriel nomeou esse futuro). -->
-    <section id="compendioChamp" hidden>
-        <div id="champCorpo">
-            <aside id="champStats"></aside>
-            <div id="champCentro">
-                <div id="champArte"></div>
-                <div id="champNome"></div>
-                <div id="champFaccao"></div>
+    <section id="compendioApostolo" hidden>
+        <div id="apostoloCorpo">
+            <aside id="apostoloStats"></aside>
+            <div id="apostoloCentro">
+                <div id="apostoloArte"></div>
+                <div id="apostoloNome"></div>
+                <div id="apostoloFaccao"></div>
             </div>
-            <aside id="champHabilidades"></aside>
+            <aside id="apostoloHabilidades"></aside>
         </div>
         <div class="continuarDica">clique ou Enter pra voltar</div>
     </section>

@@ -15,14 +15,14 @@ namespace Tests
     /// devolve uma escolha) e não chama tela nenhuma, ao contrário do combate. Então aqui dá pra
     /// provar comportamento, não só mecanismo — "não cura quem está inteiro", "prefere o abate".
     ///
-    /// Cada teste monta champs de mentira com as habilidades exatas que quer comparar, em vez de usar
-    /// champs reais: o roster muda no rebalance e levaria os testes junto.
+    /// Cada teste monta apóstolos de mentira com as habilidades exatas que quer comparar, em vez de usar
+    /// apóstolos reais: o roster muda no rebalance e levaria os testes junto.
     /// </summary>
     public class ControladorBotTests
     {
         private static ControladorBot Bot() => new(new SelecaoDeAlvoService());
 
-        private static Combate Champ(int hp = 1000, int atk = 100, int def = 0, params Habilidade[] habs)
+        private static Combate Apostolo(int hp = 1000, int atk = 100, int def = 0, params Habilidade[] habs)
         {
             var todas = new List<Habilidade> { new AtaqueBasico() };
             todas.AddRange(habs);
@@ -49,8 +49,8 @@ namespace Tests
         public void NaoCura_QuandoOTimeEstaInteiro()
         {
             var curar = HabAliada("Curar", EstadoAlvo.Vivos, new Cura(Valor.Fixo(300)));
-            var bot = Champ(habs: curar);
-            var inimigo = Champ();
+            var bot = Apostolo(habs: curar);
+            var inimigo = Apostolo();
 
             var escolha = bot.Personagem.Habilidades.Count == 0 ? null
                 : Bot().EscolherAcao(bot, new() { bot }, new() { inimigo });
@@ -62,10 +62,10 @@ namespace Tests
         public void Cura_QuandoAlguemPerdeuVidaSuficiente()
         {
             var curar = HabAliada("Curar", EstadoAlvo.Vivos, new Cura(Valor.Fixo(300)));
-            var bot = Champ(habs: curar);
-            var ferido = Champ();
+            var bot = Apostolo(habs: curar);
+            var ferido = Apostolo();
             Ferir(ferido, 500);                     // 50% da vida — bem acima da margem
-            var inimigo = Champ();
+            var inimigo = Apostolo();
 
             var escolha = Bot().EscolherAcao(bot, new() { bot, ferido }, new() { inimigo });
 
@@ -76,10 +76,10 @@ namespace Tests
         public void Cura_EIgnorada_PorArranhaoAbaixoDaMargem()
         {
             var curar = HabAliada("Curar", EstadoAlvo.Vivos, new Cura(Valor.Fixo(300)));
-            var bot = Champ(habs: curar);
-            var arranhado = Champ();
+            var bot = Apostolo(habs: curar);
+            var arranhado = Apostolo();
             Ferir(arranhado, 50);                   // 5% — não paga o turno
-            var inimigo = Champ();
+            var inimigo = Apostolo();
 
             var escolha = Bot().EscolherAcao(bot, new() { bot, arranhado }, new() { inimigo });
 
@@ -90,9 +90,9 @@ namespace Tests
         public void NaoRevive_SemMortos_MasRevive_QuandoHaUm()
         {
             var reviver = HabAliada("Reviver", EstadoAlvo.Mortos, new Reviver(0.5, Escopo.AlvosResolvidos));
-            var bot = Champ(habs: reviver);
-            var aliado = Champ();
-            var inimigo = Champ();
+            var bot = Apostolo(habs: reviver);
+            var aliado = Apostolo();
+            var inimigo = Apostolo();
 
             Assert.IsType<AtaqueBasico>(Bot().EscolherAcao(bot, new() { bot, aliado }, new() { inimigo }));
 
@@ -105,9 +105,9 @@ namespace Tests
         public void NaoLimpaDebuff_SemDebuff_MasLimpa_QuandoHaUm()
         {
             var limpar = HabAliada("Limpar", EstadoAlvo.Vivos, new RemoverDebuffs(Seletor.Todos()));
-            var bot = Champ(habs: limpar);
-            var aliado = Champ();
-            var inimigo = Champ();
+            var bot = Apostolo(habs: limpar);
+            var aliado = Apostolo();
+            var inimigo = Apostolo();
 
             Assert.IsType<AtaqueBasico>(Bot().EscolherAcao(bot, new() { bot, aliado }, new() { inimigo }));
 
@@ -120,8 +120,8 @@ namespace Tests
         public void NaoExplode_SemOStatusDetonavel()
         {
             var explodir = Hab("Explodir", new Explodir(Seletor.Tipo<Veneno>()));
-            var bot = Champ(habs: explodir);
-            var inimigo = Champ(hp: 100_000);
+            var bot = Apostolo(habs: explodir);
+            var inimigo = Apostolo(hp: 100_000);
 
             Assert.IsType<AtaqueBasico>(Bot().EscolherAcao(bot, new() { bot }, new() { inimigo }));
         }
@@ -160,12 +160,12 @@ namespace Tests
                     new Explodir(Seletor.Tipo<Queima>(), Escopo.TodosInimigos),
                 });
 
-            var inimigo = Champ(hp: 5000);   // sem veneno e sem queima: as explosões preveem 0
+            var inimigo = Apostolo(hp: 5000);   // sem veneno e sem queima: as explosões preveem 0
 
-            var comPutrefacao = Champ(habs: putrefacao);
+            var comPutrefacao = Apostolo(habs: putrefacao);
             Assert.Same(putrefacao, Bot().EscolherAcao(comPutrefacao, new() { comPutrefacao }, new() { inimigo }));
 
-            var comInferno = Champ(habs: inferno);
+            var comInferno = Apostolo(habs: inferno);
             Assert.Same(inferno, Bot().EscolherAcao(comInferno, new() { comInferno }, new() { inimigo }));
         }
 
@@ -173,8 +173,8 @@ namespace Tests
         public void Explode_QuandoADetonacaoTiraMaisVidaQueOAtaque()
         {
             var explodir = Hab("Explodir", new Explodir(Seletor.Tipo<Veneno>()));
-            var bot = Champ(atk: 100, habs: explodir);
-            var inimigo = Champ(hp: 100_000);
+            var bot = Apostolo(atk: 100, habs: explodir);
+            var inimigo = Apostolo(hp: 100_000);
             new Veneno(stacks: 5).Aplicar(inimigo);
 
             Assert.Same(explodir, Bot().EscolherAcao(bot, new() { bot }, new() { inimigo }));
@@ -184,8 +184,8 @@ namespace Tests
         public void NaoAplicaDebuff_SeTodosOsAlvosSaoImunes()
         {
             var debuffar = Hab("Debuffar", new AplicarDebuff(() => new Veneno(stacks: 1)));
-            var bot = Champ(habs: debuffar);
-            var imune = Champ();
+            var bot = Apostolo(habs: debuffar);
+            var imune = Apostolo();
             new ImunidadeDebuffs(duracao: 5).Aplicar(imune);
 
             var escolha = Bot().EscolherAcao(bot, new() { bot }, new() { imune });
@@ -197,8 +197,8 @@ namespace Tests
         public void NaoRoubaBuff_SeOInimigoNaoTemNenhum()
         {
             var roubar = Hab("Roubar", new MoverBuffs(Seletor.Todos()));
-            var bot = Champ(habs: roubar);
-            var inimigo = Champ();
+            var bot = Apostolo(habs: roubar);
+            var inimigo = Apostolo();
 
             Assert.IsType<AtaqueBasico>(Bot().EscolherAcao(bot, new() { bot }, new() { inimigo }));
 
@@ -214,10 +214,10 @@ namespace Tests
         {
             var reviver = HabAliada("Reviver", EstadoAlvo.Mortos, new Reviver(0.5, Escopo.AlvosResolvidos));
             var curar = HabAliada("Curar", EstadoAlvo.Vivos, new Cura(Valor.Fixo(300)));
-            var bot = Champ(habs: new Habilidade[] { curar, reviver });
-            var morto = Champ(); Matar(morto);
-            var ferido = Champ(); Ferir(ferido, 500);
-            var inimigo = Champ();
+            var bot = Apostolo(habs: new Habilidade[] { curar, reviver });
+            var morto = Apostolo(); Matar(morto);
+            var ferido = Apostolo(); Ferir(ferido, 500);
+            var inimigo = Apostolo();
 
             var escolha = Bot().EscolherAcao(bot, new() { bot, morto, ferido }, new() { inimigo });
 
@@ -233,8 +233,8 @@ namespace Tests
         {
             var soDano = Hab("Só dano", new Dano(1.0));
             var danoEDebuff = Hab("Dano + debuff", new Dano(1.0), new AplicarDebuff(() => new Veneno(stacks: 1)));
-            var bot = Champ(habs: new Habilidade[] { soDano, danoEDebuff });
-            var inimigo = Champ();
+            var bot = Apostolo(habs: new Habilidade[] { soDano, danoEDebuff });
+            var inimigo = Apostolo();
 
             var escolha = Bot().EscolherAcao(bot, new() { bot }, new() { inimigo });
 
@@ -247,15 +247,15 @@ namespace Tests
         {
             var soTurnoExtra = Hab("Fôlego", new ConcederTurnoExtra());
             var curar = HabAliada("Curar", EstadoAlvo.Vivos, new Cura(Valor.Fixo(300)));
-            var bot = Champ(habs: new Habilidade[] { soTurnoExtra, curar });
-            var ferido = Champ(); Ferir(ferido, 500);
-            var inimigo = Champ();
+            var bot = Apostolo(habs: new Habilidade[] { soTurnoExtra, curar });
+            var ferido = Apostolo(); Ferir(ferido, 500);
+            var inimigo = Apostolo();
 
             // Com cura pendente, o turno extra espera.
             Assert.Same(curar, Bot().EscolherAcao(bot, new() { bot, ferido }, new() { inimigo }));
 
             // Sem nada melhor, ele vale mais que só bater.
-            var saudavel = Champ();
+            var saudavel = Apostolo();
             Assert.Same(soTurnoExtra, Bot().EscolherAcao(bot, new() { bot, saudavel }, new() { inimigo }));
         }
 
@@ -264,8 +264,8 @@ namespace Tests
         {
             var forte = new HabilidadeAtiva("Forte", "🧪", cooldown: 3, "", 1, TipoAlvo.Explicito,
                 TipoLista.Inimigos, EstadoAlvo.Vivos, new List<Acao> { new Dano(5.0) });
-            var bot = Champ(habs: forte);
-            var inimigo = Champ();
+            var bot = Apostolo(habs: forte);
+            var inimigo = Apostolo();
             bot.Cooldowns[forte].Usar();
 
             Assert.IsType<AtaqueBasico>(Bot().EscolherAcao(bot, new() { bot }, new() { inimigo }));
@@ -286,9 +286,9 @@ namespace Tests
         [Fact]
         public void Alvo_ComFoco_MiraOApontado_MesmoComAbateNaMesa()
         {
-            var bot = Champ(atk: 300);
-            var quaseMorto = Champ(hp: 1000); Ferir(quaseMorto, 900);   // 100 de vida: MORRE
-            var apontado = Champ(hp: 5000);                              // inteiro, mas foi escolhido
+            var bot = Apostolo(atk: 300);
+            var quaseMorto = Apostolo(hp: 1000); Ferir(quaseMorto, 900);   // 100 de vida: MORRE
+            var apontado = Apostolo(hp: 5000);                              // inteiro, mas foi escolhido
             var inimigos = new List<Combate> { quaseMorto, apontado };
 
             var controlador = Bot();
@@ -306,10 +306,10 @@ namespace Tests
         [Fact]
         public void Alvo_ComFocoMorto_VoltaAEscolherSozinho()
         {
-            var bot = Champ(atk: 300);
-            var apontado = Champ(); Matar(apontado);
-            var quaseMorto = Champ(hp: 1000); Ferir(quaseMorto, 900);
-            var gordo = Champ(hp: 5000);
+            var bot = Apostolo(atk: 300);
+            var apontado = Apostolo(); Matar(apontado);
+            var quaseMorto = Apostolo(hp: 1000); Ferir(quaseMorto, 900);
+            var gordo = Apostolo(hp: 5000);
             var inimigos = new List<Combate> { gordo, quaseMorto, apontado };
 
             var controlador = Bot();
@@ -329,9 +329,9 @@ namespace Tests
         public void Foco_NaoMudaAFilaDeHabilidade()
         {
             var curar = HabAliada("Curar", EstadoAlvo.Vivos, new Cura(Valor.Fixo(300)));
-            var bot = Champ(habs: curar);
-            var ferido = Champ(); Ferir(ferido, 500);
-            var apontado = Champ();
+            var bot = Apostolo(habs: curar);
+            var ferido = Apostolo(); Ferir(ferido, 500);
+            var apontado = Apostolo();
 
             var controlador = Bot();
             controlador.AlvoPreferido = apontado;
@@ -343,9 +343,9 @@ namespace Tests
         [Fact]
         public void Alvo_PrefereQuemMorre_AQuemPerderiaMaisVida()
         {
-            var bot = Champ(atk: 300);
-            var quaseMorto = Champ(hp: 1000); Ferir(quaseMorto, 900);   // 100 de vida: MORRE
-            var gordo = Champ(hp: 5000);                                 // levaria mais dano, sobrevive
+            var bot = Apostolo(atk: 300);
+            var quaseMorto = Apostolo(hp: 1000); Ferir(quaseMorto, 900);   // 100 de vida: MORRE
+            var gordo = Apostolo(hp: 5000);                                 // levaria mais dano, sobrevive
             var inimigos = new List<Combate> { gordo, quaseMorto };
 
             var controlador = Bot();
@@ -362,10 +362,10 @@ namespace Tests
         [Fact]
         public void Alvo_EvitaOBloqueado_SemRegraEspecial()
         {
-            var bot = Champ(atk: 300);
-            var bloqueado = Champ(hp: 1000);
+            var bot = Apostolo(atk: 300);
+            var bloqueado = Apostolo(hp: 1000);
             new BloqueioTotal(duracao: 2).Aplicar(bloqueado);
-            var normal = Champ(hp: 5000);
+            var normal = Apostolo(hp: 5000);
             var inimigos = new List<Combate> { bloqueado, normal };
 
             var controlador = Bot();
@@ -378,10 +378,10 @@ namespace Tests
         [Fact]
         public void Alvo_EvitaOInvencivel_PorqueEleNaoPerdeVidaDeVerdade()
         {
-            var bot = Champ(atk: 300);
-            var invencivel = Champ(hp: 1000); Ferir(invencivel, 999);   // 1 de vida
+            var bot = Apostolo(atk: 300);
+            var invencivel = Apostolo(hp: 1000); Ferir(invencivel, 999);   // 1 de vida
             new Invencivel(duracao: 2).Aplicar(invencivel);              // piso de HP = 1 → remove 0
-            var normal = Champ(hp: 5000);
+            var normal = Apostolo(hp: 5000);
             var inimigos = new List<Combate> { invencivel, normal };
 
             var controlador = Bot();
@@ -397,9 +397,9 @@ namespace Tests
         [InlineData(false)]   // contra-ataque vs reflexo  → foge do contra-ataque
         public void Alvo_FogeDaPunicaoMaisCara_PrimeiroOsEspinhos(bool espinhosContraCA)
         {
-            var bot = Champ(atk: 300);
-            var pior = Champ(hp: 5000);
-            var melhor = Champ(hp: 5000);
+            var bot = Apostolo(atk: 300);
+            var pior = Apostolo(hp: 5000);
+            var melhor = Apostolo(hp: 5000);
 
             if (espinhosContraCA)
             {
@@ -422,10 +422,10 @@ namespace Tests
         [Fact]
         public void Alvo_PrefereQuemNaoPuneNada()
         {
-            var bot = Champ(atk: 300);
-            var espinhoso = Champ(hp: 5000);
+            var bot = Apostolo(atk: 300);
+            var espinhoso = Apostolo(hp: 5000);
             new EspinhosVenenosos(duracao: 5).Aplicar(espinhoso);
-            var limpo = Champ(hp: 5000);
+            var limpo = Apostolo(hp: 5000);
             var inimigos = new List<Combate> { espinhoso, limpo };
 
             var controlador = Bot();
@@ -441,9 +441,9 @@ namespace Tests
         [Fact]
         public void Alvo_CedeAListaDoMotor_QuandoOEleitoNaoEstaNela()
         {
-            var bot = Champ(atk: 300);
-            var eleito = Champ(hp: 1000); Ferir(eleito, 900);
-            var unicoPermitido = Champ(hp: 5000);
+            var bot = Apostolo(atk: 300);
+            var eleito = Apostolo(hp: 1000); Ferir(eleito, 900);
+            var unicoPermitido = Apostolo(hp: 5000);
             var todos = new List<Combate> { eleito, unicoPermitido };
 
             var controlador = Bot();

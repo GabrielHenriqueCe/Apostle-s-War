@@ -1,5 +1,5 @@
 using ApostlesWar.Domain;
-using ApostlesWar.Domain.Champs.Tecnologicos;
+using ApostlesWar.Domain.Apostolos.Tecnologicos;
 using ApostlesWar.Domain.Skills;
 using ApostlesWar.Domain.Skills.Buffs;
 
@@ -16,7 +16,7 @@ namespace Tests
     /// Achado pela BANCADA, e por um número esquisito: o Robô media dano em múltiplos de 30 entre
     /// corridas, e 30 é exatamente a diferença entre um A1 crítico e um não-crítico ali. O crítico
     /// cravado da bancada é um buff de duração permanente — o Raio-X dele o apagava no 1º uso e o
-    /// champ voltava à taxa base de 15%. Nenhuma tela mostraria isso; só o número.
+    /// apóstolo voltava à taxa base de 15%. Nenhuma tela mostraria isso; só o número.
     /// </summary>
     public class DuracaoPermanenteTests
     {

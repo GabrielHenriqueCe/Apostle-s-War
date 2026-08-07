@@ -8,15 +8,15 @@
 
 - **100 turnos** por medição, média de **10 repetições**.
 - Stats IGUAIS pros dois lados: HP 2.000, ATK 200, DEF 0. **Crítico 100%**.
-- **O champ começa cada turno com 1 de vida.** Sem isso a coluna de cura seria toda zero
+- **O apóstolo começa cada turno com 1 de vida.** Sem isso a coluna de cura seria toda zero
   (cura não cura quem está cheio), e é também a condição em que aparece quem fica mais
   FORTE ferido — a Caveira escala `2.0 − HP%`. Ele não morre: carrega a mesma
   prevenção-de-morte do boneco, que o segura quando uma habilidade de auto-dano zeraria.
 - A coluna **Dano (4 alvos)** repete a medição com 4 bonecos no campo — é o que
   dá voz às habilidades de área, que contra alvo único ficam indistinguíveis de single-target.
-- Na medição por habilidade, o champ usa **só aquela** e **espera** durante o cooldown
+- Na medição por habilidade, o apóstolo usa **só aquela** e **espera** durante o cooldown
   (não enche o buraco com A1 — se enchesse, o A1 dominaria e todas ficariam iguais).
-- No champ inteiro, quem decide é o **mesmo `ControladorBot`** da Arena e do modo Auto.
+- No apóstolo inteiro, quem decide é o **mesmo `ControladorBot`** da Arena e do modo Auto.
 - Boneco: DEF 0 ou 1000 (o cap de 75% de redução), e **nunca age** — ele se cura.
   O HP é REALISTA nos dois lados de propósito: a Queima tira 5% do HP máximo por turno e
   cura costuma ser % do HP máximo, então inflar qualquer um dos dois estoura o número.
@@ -26,24 +26,24 @@
 - **O 🥷 Ninja oscila ±1 entre rodadas, e isso é esperado — não é regressão.** A Shuriken
   é `TipoAlvo.Aleatorio` com 2 alvos: o sorteio cai diferente a cada corrida, e com o
   `ignorarDefesaPctSeAnteriorCritico` acoplando hit a hit, a média das repetições fecha
-  num centésimo diferente. Ele é o único champ do relatório que faz isso, então um
+  num centésimo diferente. Ele é o único apóstolo do relatório que faz isso, então um
   `git diff` que mexe SÓ na linha dele (em ~58.000, com 10 repetições) é ruído do
-  sorteio — dá pra descartar sem investigar. Qualquer OUTRO champ mudando é sinal.
+  sorteio — dá pra descartar sem investigar. Qualquer OUTRO apóstolo mudando é sinal.
 
 ### O que este relatório NÃO mede
 
 O boneco **não revida**. Contra-ataque, espinhos e revide (Herói, Operário, Zumbi)
-medem **zero** aqui: isto é uma bancada de dano CAUSADO, não de duelo. Um champ
+medem **zero** aqui: isto é uma bancada de dano CAUSADO, não de duelo. Um apóstolo
 com número baixo pode ser reativo, não fraco — confira o kit antes de mexer.
 
-A coluna **Usos** é diagnóstico do BOT: se uma habilidade dispara 0× no champ
+A coluna **Usos** é diagnóstico do BOT: se uma habilidade dispara 0× no apóstolo
 inteiro mas tem dano alto isolada, o problema está na fila do bot, não no balanço.
 
-Nas linhas de champ inteiro, **`Habilidades usadas` descreve a corrida de 1 alvo**. A de
+Nas linhas de apóstolo inteiro, **`Habilidades usadas` descreve a corrida de 1 alvo**. A de
 4 alvos é uma simulação à parte — o bot escolhe outra fila com mais gente em campo —
 e o `Esperado (4)` é cobrado pelos usos DELA, senão a sinergia sairia inventada.
 
-**Por que a `Sinergia (4)` existe:** a de 1 alvo subestima o champ de área. Quem raspa
+**Por que a `Sinergia (4)` existe:** a de 1 alvo subestima o apóstolo de área. Quem raspa
 DEF em área e martela em área colhe o malefício vezes o número de alvos — a diferença entre
 as duas colunas é o tamanho real desse composto.
 
@@ -53,7 +53,7 @@ as duas colunas é o tamanho real desse composto.
 
 Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 
-| Champ | Habilidade | CD | Usos | Dano | Dano/uso | Dano (4 alvos) | Cura |
+| Apóstolo | Habilidade | CD | Usos | Dano | Dano/uso | Dano (4 alvos) | Cura |
 |---|---|--:|--:|--:|--:|--:|--:|
 | 👷 Operário | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 0 | 0 | 0 | 0 |
@@ -168,7 +168,7 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 
 Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 
-| Champ | Habilidade | CD | Usos | Dano | Dano/uso | Dano (4 alvos) | Cura |
+| Apóstolo | Habilidade | CD | Usos | Dano | Dano/uso | Dano (4 alvos) | Cura |
 |---|---|--:|--:|--:|--:|--:|--:|
 | 👷 Operário | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 0 | 0 | 0 | 0 |
@@ -186,7 +186,7 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20931 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20925 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 8160 | 240 | 32640 | 0 |
@@ -279,18 +279,18 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 34 | 11016 | 324 | 44064 | 0 |
 | 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 34 | 10200 | 300 | 40800 | 0 |
 
-## Linha 3 — champ inteiro · boneco DEF no cap · imune a malefícios
+## Linha 3 — apóstolo inteiro · boneco DEF no cap · imune a malefícios
 
-O champ jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o esperado aplica o dano-por-uso da linha 2 às ativações que de fato aconteceram aqui. Positivo = as habilidades valem mais juntas do que separadas.
+O apóstolo jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o esperado aplica o dano-por-uso da linha 2 às ativações que de fato aconteceram aqui. Positivo = as habilidades valem mais juntas do que separadas.
 
-| Champ | Dano | Esperado | Sinergia | Dano (4 alvos) | Esperado (4) | Sinergia (4) | Tick | Habilidades usadas |
+| Apóstolo | Dano | Esperado | Sinergia | Dano (4 alvos) | Esperado (4) | Sinergia (4) | Tick | Habilidades usadas |
 |---|--:|--:|--:|--:|--:|--:|--:|---|
 | 👷 Operário | 12640 | 12640 | 0 | 12640 | 12640 | 0 | 0 | Atacar 33×, Parede de Tijolos 17×, Marretada 50× |
 | 🕵️ Detetive | 10800 | 10800 | 0 | 35280 | 35280 | 0 | 0 | Atacar 33×, Espionagem 33×, Furtividade 34× |
 | 👮 Policial | 24320 | 24320 | 0 | 24320 | 24320 | 0 | 0 | Atacar 66×, Tiroteio 34×, Prender 0× |
 | 👲 Sushiman  | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
 | 💂 Guarda | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 57725 | 57387 | +338 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 57728 | 57387 | +341 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
 | 🧙 Mago | 20080 | 20080 | 0 | 72400 | 72400 | 0 | 0 | Atacar 33×, Bola de Fogo 33×, Incêndio 34× |
 | 🫅 Rei | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
 | 💀 Caveira | 10527 | 10527 | 0 | 34188 | 34188 | 0 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
@@ -322,18 +322,18 @@ O champ jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o 
 | 😇 Anjo | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Celestial 34×, Céu 33× |
 | 🎅 Papai Noel | 26658 | 23556 | +3102 | 96732 | 86304 | +10428 | 0 | Atacar 33×, Saco de Presente 34×, Fábrica de Presente 33× |
 
-## Linha 4 — champ inteiro · boneco DEF no cap · RECEBENDO malefícios
+## Linha 4 — apóstolo inteiro · boneco DEF no cap · RECEBENDO malefícios
 
-O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia aqui sai do MESMO esperado da linha 2 que a linha 3 usa — é o que mantém as duas colunas comparáveis, já que entre elas varia só a imunidade. Então **sinergia(4) − sinergia(3) = a sinergia que passa por malefício**: raspar DEF (`ReduçãoDefesa`, −30% sobre um boneco no cap) infla o golpe DIRETO e some do `Tick`, e a linha 3 não consegue enxergar isso porque o boneco dela é imune.
+O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia aqui sai do MESMO esperado da linha 2 que a linha 3 usa — é o que mantém as duas colunas comparáveis, já que entre elas varia só a imunidade. Então **sinergia(4) − sinergia(3) = a sinergia que passa por malefício**: raspar DEF (`ReduçãoDefesa`, −30% sobre um boneco no cap) infla o golpe DIRETO e some do `Tick`, e a linha 3 não consegue enxergar isso porque o boneco dela é imune.
 
-| Champ | Dano | Esperado | Sinergia | Dano (4 alvos) | Esperado (4) | Sinergia (4) | Tick | Habilidades usadas |
+| Apóstolo | Dano | Esperado | Sinergia | Dano (4 alvos) | Esperado (4) | Sinergia (4) | Tick | Habilidades usadas |
 |---|--:|--:|--:|--:|--:|--:|--:|---|
 | 👷 Operário | 12640 | 12640 | 0 | 12640 | 12640 | 0 | 0 | Atacar 33×, Parede de Tijolos 17×, Marretada 50× |
 | 🕵️ Detetive | 20304 | 10800 | +9504 | 66168 | 35280 | +30888 | 0 | Atacar 33×, Espionagem 33×, Furtividade 34× |
 | 👮 Policial | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Tiroteio 33×, Prender 34× |
 | 👲 Sushiman  | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
 | 💂 Guarda | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 57724 | 57387 | +337 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 57725 | 57387 | +338 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
 | 🧙 Mago | 33010 | 20040 | +12970 | 122140 | 72240 | +49900 | 10000 | Atacar 33×, Bola de Fogo 34×, Incêndio 33× |
 | 🫅 Rei | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
 | 💀 Caveira | 10527 | 10527 | 0 | 34188 | 34188 | 0 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
@@ -369,7 +369,7 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia 
 
 **(5) − (2) por habilidade = de quem é o mérito do malefício.** Sem esta linha, o DoT de uma habilidade (a Queima do Mago) não aparece em número nenhum por-habilidade.
 
-| Champ | Habilidade | CD | Usos | Dano | Dano/uso | Dano (4 alvos) | Cura | Tick | Δ vs linha 2 |
+| Apóstolo | Habilidade | CD | Usos | Dano | Dano/uso | Dano (4 alvos) | Cura | Tick | Δ vs linha 2 |
 |---|---|--:|--:|--:|--:|--:|--:|--:|--:|
 | 👷 Operário | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 👷 Operário | 🧱 Parede de Tijolos | 6 | 17 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -387,7 +387,7 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia 
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 | 0 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 | 0 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20934 | 0 | 0 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20929 | 0 | 0 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 | 0 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |
@@ -482,12 +482,12 @@ O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia 
 
 ## Rankings (condições da linha 1: DEF 0, alvo imune)
 
-A tabela por champ acima responde "como é o kit deste personagem?".
+A tabela por apóstolo acima responde "como é o kit deste personagem?".
 Estas respondem "quem está fora da curva?".
 
 ### Dano por uso — o BURST
 
-| # | Champ | Habilidade | CD | Valor |
+| # | Apóstolo | Habilidade | CD | Valor |
 |--:|---|---|--:|--:|
 | 1 | 👮 Policial | 🔫 Tiroteio | 3 | 2240 |
 | 2 | 💂 Guarda | 🤺 Esgrima | 3 | 2240 |
@@ -570,7 +570,7 @@ Estas respondem "quem está fora da curva?".
 
 ### Dano em 100 turnos, 4 alvos — o SUSTENTADO com área
 
-| # | Champ | Habilidade | CD | Valor |
+| # | Apóstolo | Habilidade | CD | Valor |
 |--:|---|---|--:|--:|
 | 1 | 👺 Tengu | 🌬️ Corte de Vento | 3 | 212160 |
 | 2 | 🦸 Herói | 💪 Super | 3 | 195840 |
@@ -653,7 +653,7 @@ Estas respondem "quem está fora da curva?".
 
 ### Cura em 100 turnos
 
-| # | Champ | Habilidade | CD | Valor |
+| # | Apóstolo | Habilidade | CD | Valor |
 |--:|---|---|--:|--:|
 | 1 | 😇 Anjo | 🌟 Celestial | 3 | 30400 |
 | 2 | 👲 Sushiman  | 🍣 Sushi | 3 | 20400 |

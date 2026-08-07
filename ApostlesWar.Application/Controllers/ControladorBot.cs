@@ -18,7 +18,7 @@ namespace ApostlesWar.Application.Controllers
     ///
     /// Por que o cérebro não sabe o que é "um Dano" ou "uma Cura": porque perguntar `is Dano` seria
     /// reabrir o dispatch por tipo concreto que o modelo de capacidades fechou (#9). Ação nova
-    /// classifica a si mesma e o cérebro continua igual — inclusive as bespoke dos champs.
+    /// classifica a si mesma e o cérebro continua igual — inclusive as bespoke dos apóstolos.
     /// </summary>
     public class ControladorBot : IControladorDeTurno
     {
@@ -31,7 +31,7 @@ namespace ApostlesWar.Application.Controllers
         /// pontuação somando pesos. O Gabriel cravou assim depois de ver, em outros jogos, estratégia
         /// degenerada emergir de score (matar o próprio aliado fraco pra negar um buff ao time). Fila
         /// fixa é previsível, explicável e depurável; e como quase toda habilidade tem cooldown, o
-        /// champ usa a boa, ela esfria, e no turno seguinte ele bate.
+        /// apóstolo usa a boa, ela esfria, e no turno seguinte ele bate.
         ///
         /// TurnoExtra fica logo acima de Ferir de propósito: ganhar o turno é ótimo DE CARONA, mas não
         /// pode arrastar a habilidade pra frente da fila. Com ele no topo, o Copiando do Mímico
@@ -203,7 +203,7 @@ namespace ApostlesWar.Application.Controllers
         /// <summary>
         /// Quão livre de punição é bater neste alvo — maior é melhor. Sem punição alguma dá o valor
         /// máximo; com punição, vale a MENOS grave que ele carrega (não adianta somar: o que assusta
-        /// é a pior). Só BUFF conta: passiva é identidade permanente do champ, e fugir dela deixaria
+        /// é a pior). Só BUFF conta: passiva é identidade permanente do apóstolo, e fugir dela deixaria
         /// Herói, Elfo, Zumbi e Cocô praticamente inatacáveis.
         /// </summary>
         private static int LiberdadeDe(Combate alvo)

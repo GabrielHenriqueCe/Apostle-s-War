@@ -240,7 +240,7 @@ body {
    na `border-color`. Os dois levam só o chanfro; a cor continua do tema.
    ========================================================================== */
 .opcaoMenu, .faseBtn, .itemCard, .habilidade,
-.avatarCelula, .compChamp, .bonecoSlot, .champHab, .itemPremio,
+.avatarCelula, .compApostolo, .bonecoSlot, .apostoloHab, .itemPremio,
 #velocidade, #auto, #alternarLog, #alternarEstatisticas,
 #faseSortear, .setupSortear, #editarNomeBtn,
 #modalBotoes button, #fasesRodape button, #setupRodape button,
@@ -255,7 +255,7 @@ body {
 
 .opcaoMenu:hover:not(:disabled), .faseBtn:hover:not(:disabled),
 .habilidade:hover:not(:disabled), .avatarCelula:hover:not(.bloqueado),
-.compChamp:hover, .bonecoSlot:hover,
+.compApostolo:hover, .bonecoSlot:hover,
 #velocidade:hover, #auto:hover, #alternarLog:hover, #alternarEstatisticas:hover,
 #faseSortear:hover, .setupSortear:hover, #editarNomeBtn:hover,
 #modalBotoes button:hover, #fasesRodape button:hover, #setupRodape button:hover,
@@ -270,10 +270,10 @@ body {
    `letter-spacing` positivo é obrigatório aqui — serifa em caixa alta sem entreletra fica apertada
    e some a cunha, que é justamente o que dá o ar forjado. */
 #menuTitulo, #criarPerfil h1, #compendio h1, #fasesTitulo, #fimFaseTitulo,
-#champNome, #conquistaNome, #arsenalSlotNome, #retratoNome,
+#apostoloNome, #conquistaNome, #arsenalSlotNome, #retratoNome,
 .compFaccaoNome, .rodadaTitulo, .recompensaTitulo, .atTitulo,
 .opcaoMenu .opRotulo, .faseBtn .faseNome, .itemCard .icNome, .habilidade .hNome,
-.compChamp .ccNome, .avatarCelula .aNome, .nome {
+.compApostolo .ccNome, .avatarCelula .aNome, .nome {
     font-family: var(--titulo);
     letter-spacing: .06em;
 }
@@ -287,7 +287,7 @@ body {
 /* `#menuNomeBox` fica FORA: ele é pílula (`border-radius: 23px`) porque casa com a curva do círculo
    do avatar ao emergir de trás dele. Chanfro ali brigaria com o círculo — a curva é o ponto. */
 #setupPicker, #fasePicker, #arsenalDetalhe, #arsenalTotais, #modalCaixa,
-#champArte, #champStats, #champHabilidades, #nomePerfil,
+#apostoloArte, #apostoloStats, #apostoloHabilidades, #nomePerfil,
 #nomeEditar, .rodadaGrupo {
     border: 1px solid var(--poco-borda);
     border-radius: var(--corte) 0 var(--corte) 0;
@@ -776,10 +776,10 @@ body {
     padding: 10px 16px;
 }
 .rodadaTitulo { font-size: 12px; color: var(--ouro); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-.rodadaChamps { display: flex; gap: 6px; }
-.miniChamp { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 56px; }
-.miniChamp .mcEmoji { font-size: 26px; }
-.miniChamp .mcNome { font-size: 9px; color: var(--apagado); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.rodadaApostolos { display: flex; gap: 6px; }
+.miniApostolo { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 56px; }
+.miniApostolo .mcEmoji { font-size: 26px; }
+.miniApostolo .mcNome { font-size: 9px; color: var(--apagado); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 #faseItem { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--texto); }
 #faseItem .fiEmoji { font-size: 24px; }
@@ -819,7 +819,7 @@ body {
 
 .recompensaBloco { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .recompensaTitulo { font-size: 13px; color: var(--apagado); text-transform: uppercase; letter-spacing: 1px; }
-.recompensaChamps { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.recompensaApostolos { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
 /* O item ganho: CARD, não uma linha de texto. É a recompensa que o jogador veio buscar e antes
    passava despercebida no meio da tela. */
@@ -852,12 +852,12 @@ body {
 .continuarDica { position: absolute; bottom: 40px; font-size: 14px; color: var(--apagado); letter-spacing: 2px; text-transform: uppercase; }
 .continuarDica[hidden] { display: none; }
 
-/* ---------- Campanha: a conquista de um champ ---------- */
+/* ---------- Campanha: a conquista de um apóstolo ---------- */
 #conquista {
     position: absolute; inset: 0; z-index: 41;   /* acima do fim de fase, que fica atrás */
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     /* A conquista é a única tela que fica MAIS ESCURA que o resto, de propósito: os raios de luz
-       atrás do champ só existem se houver escuro pra eles rasgarem. Então ela não usa `--ceu`; usa
+       atrás do apóstolo só existem se houver escuro pra eles rasgarem. Então ela não usa `--ceu`; usa
        a mesma receita mais fechada, e a brasa entra fraca só pra não destoar das outras. */
     background:
         radial-gradient(96% 50% at 50% 108%, rgba(126,43,10,.28) 0%, transparent 62%),
@@ -866,7 +866,7 @@ body {
 }
 #conquista[hidden] { display: none; }
 
-/* Raios de luz atrás do champ. Eram faixas de 6° girando em 24s — o que numa tela inteira dava
+/* Raios de luz atrás do apóstolo. Eram faixas de 6° girando em 24s — o que numa tela inteira dava
    MOIRÉ e lia como cata-vento, não como luz. Agora são poucos feixes LARGOS, borrados, apagando nas
    bordas por máscara, e girando devagar demais pra o olho seguir: o que sobra é a sensação de luz
    se movendo, que era o ponto. */
@@ -886,7 +886,7 @@ body {
 }
 @keyframes girarRaios { to { transform: rotate(360deg); } }
 
-/* A AURA cresce junto com o champ — é a luz que ele traz, não uma luz onde ele cai. */
+/* A AURA cresce junto com o apóstolo — é a luz que ele traz, não uma luz onde ele cai. */
 #conquistaAura {
     position: absolute; width: 62vmin; height: 62vmin;
     border-radius: 50%;
@@ -902,7 +902,7 @@ body {
     100% { transform: scale(1);   opacity: .5; }
 }
 
-/* Os ANÉIS: dois pulsos que saem do champ no instante da chegada e morrem. É o que dá o "baque" —
+/* Os ANÉIS: dois pulsos que saem do apóstolo no instante da chegada e morrem. É o que dá o "baque" —
    antes a animação crescia e simplesmente parava, e o fim ficava sem acontecimento. */
 #conquista.chegando #conquistaAura::before,
 #conquista.chegando #conquistaAura::after {
@@ -1074,76 +1074,76 @@ body {
     gap: 10px;
 }
 
-.compChamp {
+.compApostolo {
     position: relative;
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     padding: 14px 8px; cursor: pointer; font-family: inherit; color: var(--texto);
 }
-.compChamp:hover { transform: translateY(-2px); }
-.compChamp .ccEmoji { font-size: 40px; line-height: 1; }
-.compChamp .ccNome { font-size: 13px; font-weight: 600; }
+.compApostolo:hover { transform: translateY(-2px); }
+.compApostolo .ccEmoji { font-size: 40px; line-height: 1; }
+.compApostolo .ccNome { font-size: 13px; font-weight: 600; }
 
 /* Travado é MAIS APAGADO, não indisponível: continua clicável (a ficha é completa de qualquer jeito). */
-.compChamp.travado .ccEmoji { filter: grayscale(1); opacity: .45; }
-.compChamp.travado .ccNome { color: var(--apagado); }
-.compChamp .ccCadeado { position: absolute; top: 6px; right: 8px; font-size: 13px; }
+.compApostolo.travado .ccEmoji { filter: grayscale(1); opacity: .45; }
+.compApostolo.travado .ccNome { color: var(--apagado); }
+.compApostolo .ccCadeado { position: absolute; top: 6px; right: 8px; font-size: 13px; }
 
-/* ---------- Compêndio: a ficha de um champ ---------- */
-#compendioChamp {
+/* ---------- Compêndio: a ficha de um apóstolo ---------- */
+#compendioApostolo {
     position: absolute; inset: 0; z-index: 30;
     display: flex; align-items: center; justify-content: center;
     padding: 20px; overflow-y: auto;
     background: var(--ceu);
 }
-#compendioChamp[hidden] { display: none; }
+#compendioApostolo[hidden] { display: none; }
 
 /* Três colunas: números | arte | habilidades. O centro é 1fr pra a arte ficar com a maior fatia —
    é o slot que vai receber o personagem inteiro no lugar do emoji. */
-#champCorpo {
+#apostoloCorpo {
     width: min(1100px, 96vw);
     display: grid; grid-template-columns: 260px 1fr 320px; gap: 22px; align-items: start;
 }
 
-#champCentro { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-#champArte {
+#apostoloCentro { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+#apostoloArte {
     display: flex; align-items: center; justify-content: center;
     --corte: 16px;
     width: 100%; min-height: 260px; font-size: 150px; line-height: 1;
 }
-#champNome { font-size: 26px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
-#champFaccao { font-size: 13px; color: var(--apagado); }
+#apostoloNome { font-size: 26px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
+#apostoloFaccao { font-size: 13px; color: var(--apagado); }
 
-#champStats, #champHabilidades {
+#apostoloStats, #apostoloHabilidades {
     --corte: 14px;
     display: flex; flex-direction: column; gap: 8px;
     padding: 14px 16px;
 }
 
-.champSecao {
+.apostoloSecao {
     margin: 0 0 4px; font-size: 13px; font-weight: 700; color: var(--ouro);
     letter-spacing: 1px; text-transform: uppercase;
 }
 
-.champStat { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-.champStat .csIcone { font-size: 16px; }
-.champStat .csRotulo { flex: 1; color: var(--apagado); }
-.champStat .csValor { font-weight: 700; color: var(--texto); }
+.apostoloStat { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.apostoloStat .csIcone { font-size: 16px; }
+.apostoloStat .csRotulo { flex: 1; color: var(--apagado); }
+.apostoloStat .csValor { font-weight: 700; color: var(--texto); }
 
-.champHab {
+.apostoloHab {
     --corte: 10px;
     display: flex; flex-direction: column; gap: 4px; padding: 10px 12px;
 }
-.champHab.passiva { border-style: dashed; }
-.champHab .chTopo { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.champHab .chNome { font-size: 14px; font-weight: 700; }
-.champHab .chMarca { font-size: 11px; color: var(--ouro); white-space: nowrap; }
+.apostoloHab.passiva { border-style: dashed; }
+.apostoloHab .chTopo { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.apostoloHab .chNome { font-size: 14px; font-weight: 700; }
+.apostoloHab .chMarca { font-size: 11px; color: var(--ouro); white-space: nowrap; }
 /* pre-line pelo mesmo motivo do .hDesc do combate: as descrições trazem \n do domínio. */
-.champHab .chDesc { margin: 0; font-size: 12px; color: var(--apagado); line-height: 1.45; white-space: pre-line; }
+.apostoloHab .chDesc { margin: 0; font-size: 12px; color: var(--apagado); line-height: 1.45; white-space: pre-line; }
 
 /* Estreitou: as colunas viram linhas e a arte encolhe, em vez de espremer os três painéis. */
 @media (max-width: 900px) {
-    #champCorpo { grid-template-columns: 1fr; }
-    #champArte { min-height: 170px; font-size: 100px; }
+    #apostoloCorpo { grid-template-columns: 1fr; }
+    #apostoloArte { min-height: 170px; font-size: 100px; }
 }
 
 /* ==========================================================================
@@ -1290,7 +1290,7 @@ body {
 
 /* Os dois lados são ESPELHOS: mesma largura de caixa, muda só pra que lado ela encosta e a
    ordem interna (emoji/infos). Nada aqui pode mexer em TAMANHO, senão a direita deixa de ser
-   o reflexo da esquerda — o mesmo champ pode lutar dos dois lados e tem que se comportar igual.
+   o reflexo da esquerda — o mesmo apóstolo pode lutar dos dois lados e tem que se comportar igual.
 
    Não há `overflow` de propósito: o time é de 4 (Slot1..Slot4), nunca precisa rolar. O antigo
    `overflow-y: auto` daqui causava TRÊS bugs de uma vez — recortava o número de dano que salta

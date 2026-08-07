@@ -19,7 +19,7 @@ O porte pro **front webview (WebView2)** está FEITO: o jogo é jogável inteiro
 é a **ÚNICA** (`ApostlesWar.App.exe` abre a janela direto — o `--front` sumiu com o console).
 Mergeado em sequência de PRs:
 - **Menu principal + Perfil** (#172): menu data-driven, perfil do jogador (nome + avatar; o avatar
-  libera conforme a campanha desbloqueia champs), criar/editar/excluir conta, "sair" confirmado, modal
+  libera conforme a campanha desbloqueia apóstolos), criar/editar/excluir conta, "sair" confirmado, modal
   reutilizável.
 - **Arena com seleção de time** (#173): monta os 2 times e escolhe o controle de cada lado
   (Você×Bot / Bot×Você / hotseat Você×Você / Bot×Bot); fim de batalha por lado.
@@ -40,12 +40,12 @@ Mergeado em sequência de PRs:
   turnos eram penalidade escondida — a habilidade boa aparecia menos, e a coluna `Usos` denunciava) e
   **multiplicadores de dano subindo de faixa** (a maioria de 1.5–3.0 pra 3.0–4.5, porque o boneco com
   DEF no cap engolia os golpes baixos: eles apareciam como se não existissem nas linhas 2 e 5). 36
-  champs tocados. De carona vieram o **bug do hit-all** — o guard do `ResolverAlvos` cobrava a
+  apóstolos tocados. De carona vieram o **bug do hit-all** — o guard do `ResolverAlvos` cobrava a
   semente, e como hit-all não tem pick o `CombateService` manda o próprio atacante de placeholder;
   os 5 revive-de-todos (Robô, Sereia, Anjo, Palhaço, Diabo) explodiam com `InvalidOperationException`
   justamente quando havia alguém pra reviver, e sem mortos o early-return salvava antes (por isso
-  passava) — e as **colunas de área** nas duas linhas de champ inteiro da bancada: medir contra 1
-  boneco SUBESTIMA o champ de área (os malefícios do Detetive valem +9.504 contra 1 alvo e +30.888
+  passava) — e as **colunas de área** nas duas linhas de apóstolo inteiro da bancada: medir contra 1
+  boneco SUBESTIMA o apóstolo de área (os malefícios do Detetive valem +9.504 contra 1 alvo e +30.888
   contra 4; com uma coluna só, o instrumento dizia que ele era médio).
 - **Save, compêndio e navegação** (#190): (a) **"excluir conta" virou wipe de verdade** — duas causas
   independentes. A semente versionada (`Save/**` copiado pro build "com tudo liberado") repunha o save
@@ -77,7 +77,7 @@ Mergeado em sequência de PRs:
   nunca índice), 🎲 na campanha, **tela única de fim de fase** (Jogar Novamente / Editar Equipe /
   Próxima) com o Esc da batalha virando ENCERRAR (derrota + essa tela), continuação atravessando pro
   capítulo seguinte depois da fase 7 — mas **nunca dando a volta**, porque trocar de dificuldade é
-  decisão do jogador —, e a **conquista do champ** animada terminando na ficha dele.
+  decisão do jogador —, e a **conquista do apóstolo** animada terminando na ficha dele.
 - **Cenário por capítulo** (branch `feature/tema-do-reino`): o `EstadoDeBatalha` carrega um `Tema`, o
   JS põe em `body[data-tema]` e a batalha ganha um lugar. A ESTRUTURA da luta não muda em nada — os
   dois lados, o log, o painel, as animações e os tamanhos seguem os mesmos. O quarto tema (🪬 Folclore)
@@ -302,7 +302,7 @@ cima delas; mandar a fração obrigaria os dois lados a ter cada um a sua cópia
   em quando" de "lâmpada piscando".
 - Detalhe demais na escala errada lê como confusão. Duas tentativas de "melhorar" a caverna com boca
   recortada e estalactites ficaram piores que a silhueta simples com uma luz fraca dentro.
-- Mostrar o SINAL, não a figura. Nenhum dos quatro champs do Folclore é desenhado por inteiro em lugar
+- Mostrar o SINAL, não a figura. Nenhum dos quatro apóstolos do Folclore é desenhado por inteiro em lugar
   nenhum — o que se vê é chifre, clava, bico e carta. Figura pequena com anatomia lê como sujeira;
   chifre lê a 20px.
 - O AVISO é a parte barata do susto, e a mais eficaz: a moita treme ANTES de a coisa subir (como a
@@ -371,7 +371,7 @@ cima delas; mandar a fração obrigaria os dois lados a ter cada um a sua cópia
   rachaduras moram. **A altura de um ladrilho de horizonte não é só o tamanho do desenho: é o quanto
   de piso sobra embaixo dele.** E foi só a cena montada, com os números impressos em pixel, que
   mostrou isso — nenhuma das duas medidas está errada sozinha.
-- **Dois champs podem partilhar o BICHO, desde que não partilhem o COMPORTAMENTO** (jul/2026). 🦇
+- **Dois apóstolos podem partilhar o BICHO, desde que não partilhem o COMPORTAMENTO** (jul/2026). 🦇
   Morcego e 🧛 Vampiro são o mesmo tema, e desenhar dois morcegos diferentes seria repetição. A saída
   não foi mostrar o sinal de cada um (não há sinal desenhável de vampiro que não seja figura — capa,
   caixão, dentes), foi dar o MESMO bicho a ambos com gestos que não se confundem: os do Morcego
@@ -530,7 +530,7 @@ Humanos não teria hoje NENHUM lugar onde aparecer. Fazer agora seria desenhar u
 
 **O que muda isso, e é o pedido dele:** no **COMPÊNDIO**, clicar num personagem passa a mostrar, ao
 fundo, **o cenário da facção/capítulo DELE**. Aí o tema deixa de ser propriedade da batalha e passa a
-ser propriedade da FACÇÃO — e a facção Humanos existe (são 4 champs), com capítulo ou sem. É esse
+ser propriedade da FACÇÃO — e a facção Humanos existe (são 4 apóstolos), com capítulo ou sem. É esse
 recurso que cria a vaga para a 9ª pele, e é por ele que ela vai ser cobrada.
 
 **A ordem é essa, e não é gosto — é dependência:**
@@ -646,11 +646,11 @@ meio da ruína, era o 🧝 Elfo contado por uma silhueta que não combinava com 
 sereia entre os golfinhos. Em jogo o Gabriel mandou tirar, e a cena não perdeu nada: a **Árvore do
 Mundo é literalmente a habilidade dele**, e depois que ela foi pro meio e virou o assunto da tela, a
 casa era um segundo jeito de dizer a mesma coisa, num canto, pequeno. **Quando a peça grande passa a
-carregar o champ, a peça pequena que o carregava vira ruído** — e a economia certa é apagar, não
+carregar o apóstolo, a peça pequena que o carregava vira ruído** — e a economia certa é apagar, não
 realocar.
 
 **O que os 🐉 Místicos ensinaram** (jul/2026), além do que já subiu nas listas acima: três dos quatro
-champs da facção têm CORPO HUMANO (gênio, sereia, fada), e figura humana pequena em canvas fica
+apóstolos da facção têm CORPO HUMANO (gênio, sereia, fada), e figura humana pequena em canvas fica
 esquisita — o Ninja é a única do front inteiro e só passa porque é preta, distante e em movimento. A
 regra "mostrar o sinal, não a figura" deixou de ser economia e virou a única saída: o gênio é a
 LÂMPADA e o vapor que sai dela, a sereia é uma CAUDA que rompe a água no meio dos golfinhos, e a fada
@@ -876,7 +876,7 @@ o jogo abrir igual já prova.**
 1. **Nunca por tipo de arquivo.** `css/`, `js/`, `img/` é o layout que todo mundo aprende e que os
    times abandonaram: pra mexer no Folclore você abre 3 pastas, e nenhuma delas diz que Folclore existe.
 2. **O que muda junto fica junto** (Common Closure). O CSS, o JS e a config do Folclore têm a MESMA
-   razão pra mudar. É o irmão front do `Champs/<Faccao>/<Champ>/` que o C# já faz.
+   razão pra mudar. É o irmão front do `Apostolos/<Faccao>/<Apostolo>/` que o C# já faz.
 3. **O nome da pasta grita o DOMÍNIO**, não a tecnologia.
 4. **Um arquivo = uma intenção ao abrir.** Tamanho não é critério — mas passou de ~800 linhas, quase
    sempre tem duas razões escondidas. (Este arquivo tinha. Ver a tabela acima.)
@@ -1011,14 +1011,14 @@ Provado por sabotagem nas duas pontas.
 | `telas/arena.js` | montagem dos dois times, sorteio, toggle |
 | `telas/campanha.js` | mapa, fases, fim de fase, conquista |
 | `telas/arsenal.js` | boneco, totais, itens por slot |
-| `telas/compendio.js` | catálogo e ficha do champ |
+| `telas/compendio.js` | catálogo e ficha do apóstolo |
 | `telas/combate.js` | estado, board, painel, habilidades, log, eventos |
 | `ui/time.js` | picker + slots + arrastar-e-soltar (Arena **e** Campanha usam) |
 | `ui/modal.js` · `ui/animacao.js` | confirmação · `reanimar`/`flutuar` |
 
 **POR QUE NÃO É MECÂNICO COMO OS CENÁRIOS.** Um cenário é uma função pura de config; uma tela guarda
 ESTADO. São 30 `let` de módulo no `jogo.js`, e a boa notícia é que **quase todos são locais à região
-da tela** (`arenaCampeoes` mora colado no código da arena, `campFases` no da campanha, `arsenalDados`
+da tela** (`arenaApostolos` mora colado no código da arena, `campFases` no da campanha, `arsenalDados`
 no do arsenal) — esses viajam junto e não custam nada.
 
 **O que CRUZA fronteira são quatro, e só quatro** (medido, não estimado):
@@ -1198,7 +1198,7 @@ as regras dos dois lados.
    sinal (`IContribuiAtaque`/`IContribuiDefesa`/`IContribuiTaxaCrit`/`IContribuiDanoCrit`), não
    tipo concreto — inclusive o getter `Defesa`, que estava meio-migrado (ReceberDano já usava a
    interface). **Matriz de status agora simétrica** (buff + debuff pra todo stat): nasceram
-   `ReducaoAtaque`, `ReducaoTaxaCrit`, `BuffDanoCrit`, `ReducaoDanoCrit` (só infra — champs ligam
+   `ReducaoAtaque`, `ReducaoTaxaCrit`, `BuffDanoCrit`, `ReducaoDanoCrit` (só infra — apóstolos ligam
    no rebalance #16). `AtaqueComStacks` exposto (espelho de `DefesaComStacks`). Refactor puro,
    nenhum número mudou; +6 testes headless (getters são puros).
 9. ✅ **Capacidade D — comportamento de turno** — o `CombateService` parou de decidir por tipo
@@ -1247,7 +1247,7 @@ as regras dos dois lados.
     semente agora é validada contra os candidatos e **lança `InvalidOperationException`** se não
     for candidata (antes entrava no resultado e o `IndexOf` devolvia -1, desalinhando o sorteio
     dos extras — errado em silêncio). Critério do Gabriel: *mira errada é bug de declaração do
-    champ, tem que gritar* — não "consertar" escondido. O guard mora DEPOIS do early-return de
+    apóstolo, tem que gritar* — não "consertar" escondido. O guard mora DEPOIS do early-return de
     candidatos vazios, porque "sem ninguém no estado pedido" é caso LEGÍTIMO (Doces de Abóbora
     sem mortos → o CombateService manda o próprio atacante e conta com o vazio). 3 testes cobrem
     os 2 lados + o caso legítimo. 75 testes verdes.
@@ -1309,7 +1309,7 @@ as regras dos dois lados.
     **O que mudou (zero lógica):** o valor do enum `Faccao` + o `[Description]` · o símbolo em
     `Faccoes.cs` · a chave de tema `body[data-tema]` · a pasta `wwwroot/cenarios/ascendentes/` (o
     `.js`, o `.css` e o `<link>` do index) · a entrada do `AR_DO_TEMA` · a pasta
-    `ApostlesWar.Domain/Champs/Ascendentes/` (8 arquivos, namespace junto) · `ArsenalService`,
+    `ApostlesWar.Domain/Apostolos/Ascendentes/` (8 arquivos, namespace junto) · `ArsenalService`,
     `CapitulosService`, `PersonagemService` e 2 testes · o `TEMAS` e o cabeçalho do
     `ferramentas/separar-css.js` · e o ✝️ que **nunca existiu no jogo** (invenção minha em comentário
     no #204, espalhada por 17 lugares de prosa) virou ❄️ junto.
@@ -1323,28 +1323,37 @@ as regras dos dois lados.
       lista não seria.**
     **Escolha do ❄️:** é **tema de Natal**, que é a estética da facção (decisão do Gabriel) — e o
     anjo cabe nela pelo caminho curto: anjo → Natal → Jesus. Também não colide com os 8 símbolos em
-    uso. (🪽 estava fora: já é o item de bota da própria facção; ⛄ é champ; ⭐ é o Especial.)
+    uso. (🪽 estava fora: já é o item de bota da própria facção; ⛄ é apóstolo; ⭐ é o Especial.)
 
-18. ⏳ **RENOMEAR `champ`/`campeão` → `apóstolo` em TODO o repo** *(ago/2026, vem da §LORE)*.
-    **O 17 já saiu, então este está LIBERADO.** A dependência era concreta: com a facção ainda
-    chamada `Apostolos`, `Champs/` virando `Apostolos/` teria criado `Apostolos/Apostolos/` — pasta
-    dentro de pasta homônima, com `git mv` no meio. Hoje a facção é `Ascendentes` e o caminho está
-    livre.
-    **Tamanho medido (ago/2026), ~1.008 ocorrências em 148 arquivos:**
+18. ✅ **O NOME ANTIGO DO HERÓI JOGÁVEL VIROU `apóstolo` EM TODO O REPO** *(ago/2026, vem da
+    §LORE)*. **904 substituições em 136 arquivos**, mais `Domain/Apostolos/` (78 arquivos movidos
+    um a um) e o `ApostolosService.cs`. Zero lógica. Precisava vir DEPOIS do 17, senão a pasta
+    nasceria dentro de uma homônima. **Os nomes antigos estão na mensagem do commit** — aqui não,
+    porque um doc que ainda os escreve é um doc que ainda os ensina.
 
-    | área | ocorrências | arquivos |
-    |---|---|---|
-    | Presentation (front) | 420 | 42 |
-    | Tests | 202 | 10 |
-    | docs | 175 | 5 |
-    | Domain | 125 | **81** |
-    | Application | 86 | 10 |
+    **AS TRÊS COISAS QUE EU CHEQUEI ANTES DE TROCAR A PRIMEIRA LETRA** — é o que transforma um
+    replace global de arriscado em mecânico, e vale repetir em qualquer renomeação grande:
+    1. **Falso positivo.** Listei toda palavra que CONTÉM cada radical (`git grep -ohE` + `sort
+       -u`): 26 compostos de um, 19 do outro, e **nenhum** era outra coisa. Se houvesse um, o
+       replace o teria corrompido em silêncio.
+    2. **O que vai pro SAVE.** JSON grava **nome de propriedade**, não nome de tipo. O record que é
+       salvo tem `Faccao`/`Slot` como propriedades, então renomear o TIPO é invisível pro save. Uma
+       `public int X { get; }` com o nome antigo num modelo salvo teria quebrado o save do jogador
+       sem aviso nenhum.
+    3. **O que atravessa a PONTE.** O `tipo` das mensagens, os ids do DOM e os records de View
+       existem dos DOIS lados. Como o replace pega C#, JS, CSS e HTML na mesma passada, eles mudam
+       em lockstep — e o `rodar-telas.js` confere os ids contra o `index.html`, que é a rede.
 
-    Quase tudo é mecânico. **O que NÃO é:** a pasta `ApostlesWar.Domain/Champs/` (81 arquivos) muda
-    de nome — mover pasta versionada tem a armadilha do §CLAUDE.md (mover só os VERSIONADOS; o
-    `bin`/`obj` travado pelo VS faz o `git mv` da pasta inteira falhar no meio). **Fechar o jogo
-    antes.** Domínio em PORTUGUÊS pela regra da casa: `Campeao` → `Apostolo`, `CampeoesService` →
-    `ApostolosService`.
+    **E O ACENTO É PARTE DO TRABALHO, não detalhe.** O replace escreve o identificador (sem acento)
+    e isso vaza pra PROSA, que em português leva acento. Foram duas passadas extras: nos `.md`
+    (pulando crase e bloco de código) e nos comentários do código (com um scanner que rastreia
+    string e `/* */`, porque no código a mesma palavra solta é ora prosa, ora nome de método).
+    **Strings que viram documento gerado contam como prosa** — as da bancada foram acentuadas à mão
+    e o `docs/bancada-dano.md` regerado.
+
+    **O 🦸 Herói NÃO entrou** (decisão do Gabriel: *"o Heroi é um personagem apenas ELE é Heroi"*).
+    Ele é nome próprio, par do 🦹 Vilão, e vive em `Apostolos/Especial/Heroi/`. As duas "heróis"
+    que trocaram são a fala do ritual no `LORE.md`, que é o conceito e não o personagem.
 
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
@@ -1367,11 +1376,11 @@ arena, campanha e arsenal. O texto abaixo fica como registro do desenho original
 **Alternativa futura = UNITY (se quiser mobile/console ou animação pesada; reusa o mesmo motor):**
 - **Input via Unity Input System** (mouse/gamepad; `Selecionar(N)` já é a ponte).
 - **Camada de animação/eventos** (coroutines/UnityEvents/animation events) — consome os eventos.
-  Nota: contra-ataque com A1 usa a animação de A1 do PRÓPRIO champ (já roda a habilidade A1 real
+  Nota: contra-ataque com A1 usa a animação de A1 do PRÓPRIO apóstolo (já roda a habilidade A1 real
   via `AtivarComNatureza`, então o vínculo mapeia natural).
 - **`SaveSteam` / `SavePlayGames`** — impls da porta `IRepositorioDeSave` (Steamworks.NET /
   Google Play Games plugin). Steam Auto-Cloud ≈ zero código; Play usa Snapshots.
-- **[bônus] champ-como-dado → ScriptableObjects** (o motor de Ações já está pré-moldado pra isso).
+- **[bônus] apóstolo-como-dado → ScriptableObjects** (o motor de Ações já está pré-moldado pra isso).
 
 **Comum aos dois portes (a "leva de eventos"):**
 - **Encapsular coleções → choke-point de evento de status** (gatilho da camada de eventos).
@@ -1455,7 +1464,7 @@ render no JS, SEM tocar no motor.** Sem susto de performance (é por turnos, nã
 - **Fatias seguintes — ✅ FEITAS** (ver §ESTADO ATUAL no topo): menu principal + perfil (#172),
   Arena com seleção de time (#173), montagem de time com arrastar-e-soltar (#175), campanha com mapa
   de facções (#174), arsenal (#176/#177). Configurações (som/tela-cheia) ficaram como placeholder
-  "em breve"; falas dos champs e sprites seguem em aberto (o front emite/renderiza, o motor não muda).
+  "em breve"; falas dos apóstolos e sprites seguem em aberto (o front emite/renderiza, o motor não muda).
 
 ---
 
@@ -1565,27 +1574,27 @@ funcionava).
 
 ## ✅ BANCADA DE DANO — o instrumento do REBALANCE (#16) (jul/2026)
 
-A dor que o Gabriel nomeou: pra saber qual habilidade está quebrada, teria que jogar 36 champs × ~4
+A dor que o Gabriel nomeou: pra saber qual habilidade está quebrada, teria que jogar 36 apóstolos × ~4
 habilidades à mão. A bancada roda isso sozinha e escreve **`docs/bancada-dano.md`**, VERSIONADO — cada
 tweak de número vira um `git diff` legível. A entrega é o RELATÓRIO, não ajustar valores.
 
 **Ela só foi possível porque habilidade é DADO.** O `Detetive.Espionagem()` é uma fábrica PRIVADA — a
 bancada nunca a chama e nem poderia. Mas o `Definir()` já executou a fábrica e guardou a instância em
-`Personagem.Habilidades`, então varrer os 36 champs é um `foreach` sobre `TodosOsCampeoes()`. Se as
+`Personagem.Habilidades`, então varrer os 36 apóstolos é um `foreach` sobre `TodosOsApostolos()`. Se as
 habilidades fossem métodos, seria reflection ou uma lista de 144 nomes escrita à mão, que envelheceria
-no primeiro champ novo. **O refactor pra dados pagou por si aqui.**
+no primeiro apóstolo novo. **O refactor pra dados pagou por si aqui.**
 
 **Colunas** (pedido do Gabriel na 2ª rodada): além de `Usos`/`Dano`/`Dano por uso`, cada linha por
 habilidade traz **`Dano (4 alvos)`** — a mesma medição com 4 bonecos, que é o que dá voz às habilidades
 de ÁREA (contra alvo único elas ficam indistinguíveis de single-target; agora medem 4,0× exatos,
-enquanto as de alvo único seguem 1,0×) — e **`Cura`**, que exigiu uma condição nova: **o champ começa
+enquanto as de alvo único seguem 1,0×) — e **`Cura`**, que exigiu uma condição nova: **o apóstolo começa
 cada turno com 1 de vida.** Sem isso a coluna seria toda zero (cura não cura quem está cheio). De
 quebra é a condição em que aparece quem fica mais FORTE ferido: a Caveira escala `2.0 − HP%` e o
-Ossinho dela mede 638 = 200 × **1,99** × 1,6. O champ carrega a mesma prevenção-de-morte do boneco pra
+Ossinho dela mede 638 = 200 × **1,99** × 1,6. O apóstolo carrega a mesma prevenção-de-morte do boneco pra
 não morrer de auto-dano em 1 de HP. **O HP virou IGUAL nos dois lados** (2.000): cura costuma ser % do
-HP máximo, então inflar o champ estouraria a cura pelo mesmo motivo que inflar o boneco estourava o DoT.
+HP máximo, então inflar o apóstolo estouraria a cura pelo mesmo motivo que inflar o boneco estourava o DoT.
 
-**Duas vistas dos mesmos dados:** a tabela agrupada por champ responde "como é o kit deste
+**Duas vistas dos mesmos dados:** a tabela agrupada por apóstolo responde "como é o kit deste
 personagem?"; os **rankings** no fim (burst, sustentado com área, cura) respondem "quem está fora da
 curva?" sem obrigar a varrer 144 linhas com o olho.
 
@@ -1595,8 +1604,8 @@ curva?" sem obrigar a varrer 144 linhas com o olho.
 |---|---|---|---|---|
 | 1 | por habilidade | 0 | não | dano cru |
 | 2 | por habilidade | cap | não | **(2)−(1) = o que furar/reduzir DEF vale** |
-| 3 | champ inteiro | cap | não | **real − esperado = a SINERGIA do kit** |
-| 4 | champ inteiro | cap | **sim** | **(4)−(3) = o que os malefícios valem** |
+| 3 | apóstolo inteiro | cap | não | **real − esperado = a SINERGIA do kit** |
+| 4 | apóstolo inteiro | cap | **sim** | **(4)−(3) = o que os malefícios valem** |
 | 5 | por habilidade | cap | **sim** | **(5)−(2) = de quem é o mérito do malefício** |
 
 **Zero mudança no motor.** Tudo saiu de seam que já existia: o horizonte de 100 turnos é o controlador
@@ -1629,19 +1638,19 @@ que o valida):**
   habilidade; somar N deles e comparar com UMA corrida de 100 turnos é laranja com maçã (dava negativo
   pra todo mundo). O certo é **real − esperado**, com esperado = dano-por-uso isolado × ativações que
   de fato aconteceram.
-- **Durante o cooldown o champ ESPERA, não usa A1.** Se enchesse o buraco com A1, toda habilidade
+- **Durante o cooldown o apóstolo ESPERA, não usa A1.** Se enchesse o buraco com A1, toda habilidade
   carregaria ~75 ataques básicos junto e todas ficariam parecidas.
 
 **Validação:** o A1 mede 320 = ATK 200 × 1,60 (o `DanoCritBase`), provando que o crítico está cravado.
 E a história do Mago sai decomposta: Bola de Fogo isolada com alvo imune = 4000; com malefício = 11500
-(7500 são o tick da Queima); o champ inteiro salta de 11000 pra 19750, e o ~1250 que sobra é a passiva
+(7500 são o tick da Queima); o apóstolo inteiro salta de 11000 pra 19750, e o ~1250 que sobra é a passiva
 Piromancer — que só rende quando OUTRA habilidade bate no alvo já queimado, e por isso o isolado nunca
 a veria.
 
 **Limitação declarada no próprio relatório:** o boneco **nunca age**, então contra-ataque, espinhos,
 revide e passivas de apanhar (Herói, Operário, Zumbi, Troll) medem ZERO. É bancada de dano CAUSADO, não
-de duelo — champ com número baixo pode ser reativo, não fraco. A coluna **Usos** é diagnóstico do BOT:
-habilidade que dispara 0× no champ inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
+de duelo — apóstolo com número baixo pode ser reativo, não fraco. A coluna **Usos** é diagnóstico do BOT:
+habilidade que dispara 0× no apóstolo inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
 
 Roda em ~37s dentro do `dotnet test`.
 
@@ -1715,7 +1724,7 @@ barra de vida até o número ser narrado) — presentation pura, no lugar certo.
 
 **Dívida registrada, não paga — emoji no Domain.** `Personagem.Simbolo`, `Habilidade.Simbolo`,
 `Item.Simbolo` e `Faccoes.simbolos` são RENDER dentro do domínio de regras. Fica como está: pagar
-isso hoje custa tocar os 36 champs e todas as skills por uma dor que só chega **quando os sprites
+isso hoje custa tocar os 36 apóstolos e todas as skills por uma dor que só chega **quando os sprites
 entrarem** — aí o emoji deixa de ser "o visual" e vira "um dos visuais", e o Domain vira o lugar
 errado pra ele. Gatilho nomeado, sem data.
 
@@ -1744,8 +1753,8 @@ velho aposentado). O que resta:
    (Removivel=false). Ver seção própria (marcada concluída).
 5. **Composição de Ações + Motor de Habilidades** — ✅ **SWEEP CONCLUÍDO** *(verificado no código em
    ago/2026; o texto que dizia "agora: sweep por facção" era resíduo do meio da migração)*. Habilidade
-   é DADO (lista de Ações) rodada por um interpretador único. A conferência: os **76 arquivos de champ
-   estão todos em `Champs/<Faccao>/<Champ>/`** (nenhum solto), e os únicos `override Ativar` que
+   é DADO (lista de Ações) rodada por um interpretador único. A conferência: os **76 arquivos de apóstolo
+   estão todos em `Apostolos/<Faccao>/<Apostolo>/`** (nenhum solto), e os únicos `override Ativar` que
    restam são **8 arquivos `.Passiva.cs`** devolvendo `SemDano()` ou um efeito próprio — que é a forma
    NORMAL de passiva, não sobra de ativa. **Nenhuma habilidade ATIVA tem `Ativar` override.**
    Ver **ADR-composicao-de-acoes.md**. Era predecessor do Rebalanceamento, e por isso o #16 pôde
@@ -1764,16 +1773,16 @@ A **unificação dos mecanismos de ignorar** ✅ CONCLUÍDA (jul/2026) — a nat
 > habilidade nova — verbo compartilhado 1º, promover bespoke no 2º cliente, não duplicar.
 
 **Status:** MOTOR IMPLEMENTADO (#116, verificado em jogo: Furtividade/Sushi/Prender + regressão
-do Mago) e **forma-construtor + champ-como-arquivo FEITOS** (Mago piloto em `Champs/Reino/Mago/`).
+do Mago) e **forma-construtor + apóstolo-como-arquivo FEITOS** (Mago piloto em `Apostolos/Reino/Mago/`).
 Ver **ADR-composicao-de-acoes.md**. É a "Auditoria das ativas" com dor real: ~70% das ativas
 são só dado (loop + lista fixa de efeitos), reinventando boilerplate. Predecessor do
 Rebalanceamento (mexer em número/efeito vira editar dado, não 74 classes).
 
 **Decisões novas (jul/2026, pós-motor):**
-- **Fusão do Nível A no sweep:** cada PR de facção migra os champs direto pra FORMA FINAL
-  (pasta `Champs/<Faccao>/<Champ>/`, habilidades como métodos `static HabilidadeAtiva X() =>
+- **Fusão do Nível A no sweep:** cada PR de facção migra os apóstolos direto pra FORMA FINAL
+  (pasta `Apostolos/<Faccao>/<Apostolo>/`, habilidades como métodos `static HabilidadeAtiva X() =>
   new(...)`, passiva movida junto, classes velhas deletadas, linha do `PersonagemService` vira
-  `Champ.Definir()`). Uma passada por champ em vez de duas — e a VIEW do champ chega facção a
+  `Apostolo.Definir()`). Uma passada por apóstolo em vez de duas — e a VIEW do apóstolo chega facção a
   facção. O `PersonagemService` encolhe até virar o `Roster`.
 - **Família do revive mapeada (7 clientes de `Reviver`):** Nigiri, Céu, Tecnology, AnjoCaído,
   DocesDeAbobora (revive SÓ 1), Circo (Intocável exceto self) e Atlantis (Intocável só nos
@@ -1816,7 +1825,7 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
 - **Toda `Acao` declara `Utilidade` + `TemEfeitoUtil` + `PreverVidaRemovida`** (jul/2026, PR do bot):
   o que ela FAZ, se tem trabalho agora e quanto machuca — tudo respondido pela própria ação. É o que
   permite AVALIAR uma habilidade sem executá-la. `Utilidade` é abstrata: ação nova (inclusive bespoke
-  de champ) é obrigada pelo compilador a se classificar, em vez de o avaliador dar `switch` no tipo.
+  de apóstolo) é obrigada pelo compilador a se classificar, em vez de o avaliador dar `switch` no tipo.
 - Disciplina: promove no 2º cliente REAL; verificar-antes-de-fundir (o grep mente — **Copiando
   era Balde 3 e é vocabulário puro**; **Atlantis** revelou o boundary de "pipeline / conjunto
   afetado", 1 cliente, registrado sem construir).
@@ -1824,16 +1833,16 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
   `EventoDano` das ações de dano.
 
 **Sequência:** #115 piloto per-alvo ✅ → #116 motor (loop-flip) ✅ → #117 forma-construtor +
-Mago champ-arquivo + rename passivas ✅ → #118 testes do motor ✅ → **Humanos ✅** (4 champs na
-forma final em `Champs/Humanos/`; `Reviver` nasceu no Nigiri — 1º da família dos 7; Marretada
+Mago apóstolo-arquivo + rename passivas ✅ → #118 testes do motor ✅ → **Humanos ✅** (4 apóstolos na
+forma final em `Apostolos/Humanos/`; `Reviver` nasceu no Nigiri — 1º da família dos 7; Marretada
 é a 1ª híbrida `.Ativa.cs`; o Nigiri deixou de usar `Ambos`) → **Reino ✅** (Guarda/Ninja/Rei
-migrados em `Champs/Reino/`, ao lado do Mago piloto; `AplicarEscudo` nasceu Ação de
+migrados em `Apostolos/Reino/`, ao lado do Mago piloto; `AplicarEscudo` nasceu Ação de
 vocabulário — Lealdade, já estava mapeada em §5.1 (como "Escudo") mas sem cliente até agora
 (nome `AplicarEscudo`, não `Escudo`, pra não colidir com `Skills.Buffs.Escudo` — o namespace
 raiz `ApostlesWar` é envolvente de quase todo o código); `Dano` ganhou
 `ignorarDefesaPct`/`forcaCritico` opcionais — Kunai; Shuriken estreou a 1ª Ação bespoke Nível 3,
 `GolpeSeguidor`, acoplamento hit-a-hit lido via `eventos`) → **LadoSombrio ✅** (Caveira/
-Fantasma/Abóbora/Zumbi migrados em `Champs/LadoSombrio/` — momento de design, estreou 4
+Fantasma/Abóbora/Zumbi migrados em `Apostolos/LadoSombrio/` — momento de design, estreou 4
 mecanismos novos do motor, com duas rodadas de revisão de Gabriel por cima do sweep:
 **regra do revive firmada** (ADR §9): `Reviver` per-alvo só com `percentualHP` — revive-de-N
 usa o pick do motor (habilidade declara `numeroDeAlvos: N` + `TipoAlvo.Aleatorio` +
@@ -1874,10 +1883,10 @@ renomes do Vampiro: "Controle de Sangue" 🩸 + "Vampiro Primordial" 🌙; colis
 **Ascendentes ✅ — SWEEP DAS 9 FACÇÕES COMPLETO** (Boneco de Neve/Mímico/Anjo/Papai Noel — 100%
 vocabulário puro, ZERO bespoke; `MoverBuffs` construído [gêmeo do RemoverBuffs, cliente Copiando] e
 com ele o vocabulário mapeado esgotou; Imitação = `Dano(Func)` [molde Tengu]; Céu = 7º/último do revive
-e último champ com `Ambos` → agora NENHUM champ usa `Ambos`; fio §9 fechado com Repetindo deixada como
+e último apóstolo com `Ambos` → agora NENHUM apóstolo usa `Ambos`; fio §9 fechado com Repetindo deixada como
 está [3ª de 3, igual AnáliseCrítica/Policial]) → **sweep segue** (unificar-ignorar → pick do menu/§8.2
 quando o `Ambos` morrer). Revive 7/7 (Nigiri, DocesDeAbobora, Tecnology, Circo, Atlantis, AnjoCaído,
-Céu). Quando uma facção ESTREIA um mecanismo, o champ é momento de
+Céu). Quando uma facção ESTREIA um mecanismo, o apóstolo é momento de
 design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ---
@@ -2067,7 +2076,7 @@ sem critério — o "monte de ignorar que ninguém sabia qual usar".
 - Perfis: QueimaDano `Ignora = [Escudo, ProtecaoAliado]`; Veneno/DanoIndireto `= [ProtecaoAliado]`;
   Ataque `= []`.
 - `IModificaDanoRecebido.DeveAgir` **DELETADO** (interface + as 6 implementações). O ReceberDano
-  agora tem **1 gate só**: `ignorados` = natureza.Ignora ∪ golpe ∪ champ; o status pergunta "fui
+  agora tem **1 gate só**: `ignorados` = natureza.Ignora ∪ golpe ∪ apóstolo; o status pergunta "fui
   listado?". Nenhum número de dano mudou (tradução flag→lista fiel; provada por 5 testes de paridade).
 - **Anti-StackOverflow de proteção mútua agora ESTRUTURAL:** `DanoIndireto.Ignora ∋ ProtecaoAliado`
   → o redirect (que usa DanoIndireto) não re-redireciona. Numa linha, sem depender de disciplina de
@@ -2075,7 +2084,7 @@ sem critério — o "monte de ignorar que ninguém sabia qual usar".
 
 ### Critério de autoria (o produto pro usuário — no CATALOGO)
 De quem é a perfuração? essência do dano → perfil de `NaturezaDano`; só o golpe → `ignorarStatus`
-no `Dano`; o champ sempre → passiva `IIgnoraStatusNoAtaque`; % do stat DEF → `ignorarDefesaPct`.
+no `Dano`; o apóstolo sempre → passiva `IIgnoraStatusNoAtaque`; % do stat DEF → `ignorarDefesaPct`.
 
 ### Resíduo — ✅ FEITO (PR limpeza-e-robustez pós-sweep, jul/2026)
 - **Defesa montada limpa:** a etapa 1 do ReceberDano agora monta `defesaEfetiva = DefesaComStacks +
@@ -2149,7 +2158,7 @@ acima — "boss mata todos após X turnos") — são dois relógios em níveis d
 
 **Motivação (Gabriel):** "pro rebalanceamento vou PRECISAR desse Versus". ✅ **FEITO (jul/2026):**
 "⚔️ Arena" (3ª opção do menu principal) → menu de 4 modos de controle (**Você×Bot, Bot×Você,
-Você×Você hotseat, Bot×Bot**) → monta os 2 times com **TODOS os 36 campeões** (pool independente do
+Você×Você hotseat, Bot×Bot**) → monta os 2 times com **TODOS os 36 apóstolos** (pool independente do
 progresso — qualquer matchup) → `CombateService.ExecutarArena(bot1, bot2)` (irmão do `ExecutarFase`:
 monta Equipes + o mapa `Dictionary<Equipe, IControladorDeTurno>` conforme o modo; o loop de combate
 NÃO muda — o seam faz tudo funcionar). Ambos os times são classe `Jogador` (a ESTRUTURA define quem é
@@ -2244,8 +2253,8 @@ tocar a base de `HabilidadeAtiva` (`IAtivavelComNatureza` é ISP à parte).
 "os status que EU criei". NÃO é o EventoDano (que descreve o golpe) — é a proveniência (de quem
 é o status).
 
-**Exemplo motivador (Gabriel):** escudo que reflete X% do dano de CADA escudo que ESTE campeão
-colocou. Se o campeão põe escudo em vários aliados, reflete só dos escudos DELE; se outro
+**Exemplo motivador (Gabriel):** escudo que reflete X% do dano de CADA escudo que ESTE apóstolo
+colocou. Se o apóstolo põe escudo em vários aliados, reflete só dos escudos DELE; se outro
 substituiu, a ligação quebra. Combo de time: A põe escudo, B aumenta valor+duração → escudo
 sempre cresce e nunca acaba → dano refletido cresce junto. Precisa de: (1) Escudo carrega
 Aplicador, (2) passiva filtra por origem, (3) regra "maior prevalece" (já existe).
@@ -2395,8 +2404,8 @@ só-aliados/só-inimigos nascem prontos p/ passivas futuras. (O Zumbi perdeu a `
 que era clone do Fedorento do Cocô.)
 
 **IRMÃ — `EscalaComAbates` (DESIGN PRONTO, NÃO construída; Gabriel implementa depois do front + mais
-champs):** mesmo TEMA, gatilho/persistência diferentes.
-- Gatilho: `IReageAoMatar` (reage quando ESTE champ mata; `ctx.Portador` = matador), não tabuleiro.
+apóstolos):** mesmo TEMA, gatilho/persistência diferentes.
+- Gatilho: `IReageAoMatar` (reage quando ESTE apóstolo mata; `ctx.Portador` = matador), não tabuleiro.
 - Efeito: bônus **PERMANENTE** que ACUMULA por abate (molde da **Ambição** do Troll — `AdicionarBonus
   XPermanente`), **não** é buff.
 - Generaliza **stat × por-abate** via closure `Action<Combate>` (os bônus permanentes são heterogêneos:
@@ -2482,7 +2491,7 @@ comportamento, mas o dia que um buff quiser reagir ao início do turno, já func
 
 ### Auditoria de código (jul/2026 — olhar fresco, pós-fila)
 Leitura crítica do núcleo (CombateService, Combate, HabilidadeAtiva, Acao, TurnoDoPersonagem,
-Program.cs, champs na forma final) procurando o que discordar. **Veredito: a arquitetura está
+Program.cs, apóstolos na forma final) procurando o que discordar. **Veredito: a arquitetura está
 sólida** — motor de 8 linhas, composition root limpo, cadeia de Atos da morte robusta (cada ato
 re-checa EstaVivo — a Guarda reverter a morte e os posteriores não dispararem é design, não sorte).
 **4 achados, todos encaixados na fila:**
@@ -2491,17 +2500,17 @@ re-checa EstaVivo — a Guarda reverter a morte e os posteriores não dispararem
    `Console.WriteLine`+`Thread.Sleep` nos fallbacks de save do `ArsenalService`/`CapitulosService`.
 2. **Mina latente no `ResolverAlvos` (→ item 14):** `resultado.Add(alvoSelecionado)` confia que a
    semente está nos `candidatos` filtrados; se não estiver (ex.: hab `Mortos` + hit-all → semente =
-   atacante vivo), o vivo entra nos resolvidos e `IndexOf` devolve -1. VERIFICADO: nenhum champ
+   atacante vivo), o vivo entra nos resolvidos e `IndexOf` devolve -1. VERIFICADO: nenhum apóstolo
    ativa esse caminho hoje (só DocesDeAbobora usa `Mortos`, com pick real que trata o vazio). Não é
    bug vivo — é contrato sem guarda. Guard de 1 linha + teste que o documente.
-   - **EPÍLOGO (jul/2026): o "nenhum champ ativa" ENVELHECEU e o guard virou crash.** O sweep dos
-     champs pra forma-construtor trouxe 5 revive-de-todos com exatamente essa forma (hit-all +
+   - **EPÍLOGO (jul/2026): o "nenhum apóstolo ativa" ENVELHECEU e o guard virou crash.** O sweep dos
+     apóstolos pra forma-construtor trouxe 5 revive-de-todos com exatamente essa forma (hit-all +
      `Mortos`): Robô/Technology, Sereia/Atlantis, Anjo/Céu, Palhaço/Circo, Diabo/Anjo Caído. Todos
      explodiam ao reviver — só quando havia alguém morto pra reviver (sem mortos, o early-return
      de candidatos vazios salvava antes). **Correção:** o guard só vale onde existe PICK; hit-all
      (`NumeroDeAlvos == int.MaxValue`) não tem — a semente é placeholder do `CombateService`, e o
      `ResolverAlvos` agora devolve os candidatos inteiros antes de cobrá-la. Lição de doc: um
-     "VERIFICADO: nenhum champ faz isso" é foto, não regra — quem adiciona champs não lê o
+     "VERIFICADO: nenhum apóstolo faz isso" é foto, não regra — quem adiciona apóstolos não lê o
      ROADMAP. O que faz a regra valer é o teste (`HitAllDeMortos_ComSementeViva_...`).
 3. **Constantes de balance espalhadas (→ item 16 passo 0).**
 4. **Contrato traiçoeiro no `ColetarPassivasReativas`:** consome o cooldown AO COLETAR, antes de
@@ -2693,7 +2702,7 @@ inclusive antes da separação, porque é verificável:
   rica no porte (Propósito B).
 - **Unificação do ignorar (✅ jul/2026):** a natureza virou lista (`NaturezaDano.Ignora`), o
   `DeveAgir` foi REMOVIDO (interface + 6 impl), o ReceberDano ficou com 1 gate de lista só
-  (natureza ∪ golpe ∪ champ). Anti-StackOverflow de proteção mútua agora estrutural
+  (natureza ∪ golpe ∪ apóstolo). Anti-StackOverflow de proteção mútua agora estrutural
   (`DanoIndireto.Ignora ∋ ProtecaoAliado`). `NaturezasDano.Direto` deletado (órfão). Paridade
   provada por 5 testes. (Antes: o passo 1 introduziu o `DeveAgir`; agora ele morreu no passo final.)
 - **Capacidade C (IContribui*, generalizada FILA A #8):** os 4 stats (Ataque/Defesa/TaxaCrit/

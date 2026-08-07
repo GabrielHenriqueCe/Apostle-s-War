@@ -28,7 +28,7 @@ import { criarPerfil, edicaoPerfil } from './telas/perfil.js';
 import { montagemArena } from './telas/arena.js';
 import { campanhaFases, campanhaMapa, conquista, fimDeFase, fimDeFaseTemOpcoes } from './telas/campanha.js';
 import { arsenal } from './telas/arsenal.js';
-import { compendio, compendioChamp } from './telas/compendio.js';
+import { compendio, compendioApostolo } from './telas/compendio.js';
 import { aplicarEstado, aplicarEvento, aplicarVelocidade, desarmar, desenhar, estadoAtual, nomeDaFase } from './telas/combate.js';
 
 export { aplicarTema };   // o seam por onde o harness entra (ferramentas/rodar-tema.js)
@@ -57,7 +57,7 @@ const TELAS = {
     montagemArena,
     campanhaMapa, campanhaFases, fimDeFase, conquista,
     arsenal,
-    compendio, compendioChamp,
+    compendio, compendioApostolo,
 };
 
 
@@ -76,9 +76,9 @@ ponte.addEventListener('message', e => {
     else if (msg.tipo === 'evento') aplicarEvento(msg.conteudo);
 });
 
-// A ficha do champ sai por CLIQUE ou Enter, além do Esc/X — vale nos dois donos da seção (o
+// A ficha do apóstolo sai por CLIQUE ou Enter, além do Esc/X — vale nos dois donos da seção (o
 // compêndio e a conquista), porque é a mesma tela e não deve ter dois jeitos de fechar.
-document.getElementById('compendioChamp').addEventListener('click', sairDaTela);
+document.getElementById('compendioApostolo').addEventListener('click', sairDaTela);
 
 // ---------- sair da tela ----------
 // UMA função pra "voltar um nível", e os dois gestos que a disparam: a tecla Esc e o botão 🚪 Sair
@@ -102,9 +102,9 @@ function sairDaTela() {
     // Equipe — sair desta tela É voltar pra montagem). Na passagem da recompensa, sair é seguir.
     if (cenaAgora() === 'fimDeFase') { mandar(fimDeFaseTemOpcoes() ? 'voltar' : 'continuar'); return; }
 
-    // A conquista e a ficha dela: sair fecha o champ e devolve o comando ao C#, que segue pro
-    // próximo champ novo ou pra tela de vitória.
-    if (cenaAgora() === 'conquista' || cenaAgora() === 'conquistaChamp') { mandar('continuar'); return; }
+    // A conquista e a ficha dela: sair fecha o apóstolo e devolve o comando ao C#, que segue pro
+    // próximo apóstolo novo ou pra tela de vitória.
+    if (cenaAgora() === 'conquista' || cenaAgora() === 'conquistaApostolo') { mandar('continuar'); return; }
 
     if (cenaAgora() === 'menu') {
         if (menuEhRaiz()) confirmar('Sair do jogo?', () => mandar('sairDoJogo'));
@@ -156,8 +156,8 @@ document.addEventListener('keydown', e => {
     // diferente, e o Enter escolheria uma delas por conta própria.
     const passagem = (cenaAgora() === 'combate' && nomeDaFase(estadoAtual() || {}) === 'Fim')
         || (cenaAgora() === 'fimDeFase' && !fimDeFaseTemOpcoes())
-        || cenaAgora() === 'conquista' || cenaAgora() === 'conquistaChamp'
-        || cenaAgora() === 'compendioChamp';
+        || cenaAgora() === 'conquista' || cenaAgora() === 'conquistaApostolo'
+        || cenaAgora() === 'compendioApostolo';
 
     if (e.key === 'Escape' || (passagem && e.key === 'Enter')) sairDaTela();
 });

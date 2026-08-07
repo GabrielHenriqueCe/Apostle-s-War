@@ -30,7 +30,7 @@ namespace ApostlesWar.Domain
     /// acoplamento que o modelo de capacidades existe pra evitar.
     ///
     /// Implementadores hoje são todos BUFF, e isso é decisão de jogo: passiva é identidade
-    /// permanente do champ, e fugir dela deixaria Herói, Elfo, Zumbi e Cocô praticamente
+    /// permanente do apóstolo, e fugir dela deixaria Herói, Elfo, Zumbi e Cocô praticamente
     /// inatacáveis. Buff é temporário — desviar dele é tática, não paralisia.
     /// </summary>
     public interface IPuneQuemAtaca

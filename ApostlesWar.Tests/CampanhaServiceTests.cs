@@ -20,33 +20,33 @@ namespace Tests
             public bool Contem(string chave) => _dados.ContainsKey(chave);
         }
 
-        private static (CampanhaService campanha, CapitulosService capitulos, CampeoesService campeoes)
+        private static (CampanhaService campanha, CapitulosService capitulos, ApostolosService apostolos)
             Montar()
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
-            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            return (new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo), capitulos, campeoes);
+            var apostolos = new ApostolosService(new PersonagemService(), capitulos);
+            return (new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo), capitulos, apostolos);
         }
 
         [Fact]
-        public void ProcessarVitoria_Reino1_DesbloqueiaProximaFase_ChampsEItem()
+        public void ProcessarVitoria_Reino1_DesbloqueiaProximaFase_ApostolosEItem()
         {
-            var (campanha, capitulos, campeoes) = Montar();
+            var (campanha, capitulos, apostolos) = Montar();
 
-            Assert.Equal(4, campeoes.ObterDesbloqueados().Count);              // só os 4 Humanos no começo
+            Assert.Equal(4, apostolos.ObterDesbloqueados().Count);              // só os 4 Humanos no começo
             Assert.False(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2)); // fase 2 ainda travada
 
             RecompensaDaFase r = campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1);
 
             Assert.True(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));   // marcou concluída
             Assert.True(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2)); // liberou a próxima
-            // Reino fase 1: Rodada1=[Slot1 Guarda], Rodada2=[Slot2 Ninja] → 2 champs novos
-            Assert.Equal(2, r.NovosCampeoes.Count);
+            // Reino fase 1: Rodada1=[Slot1 Guarda], Rodada2=[Slot2 Ninja] → 2 apóstolos novos
+            Assert.Equal(2, r.NovosApostolos.Count);
             Assert.NotNull(r.Item);
             Assert.Equal("Arma", r.Item!.Nome);
-            Assert.Equal(6, campeoes.ObterDesbloqueados().Count);              // 4 Humanos + 2 novos
+            Assert.Equal(6, apostolos.ObterDesbloqueados().Count);              // 4 Humanos + 2 novos
         }
 
         [Fact]
@@ -55,8 +55,8 @@ namespace Tests
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
-            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo);
+            var apostolos = new ApostolosService(new PersonagemService(), capitulos);
+            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo);
 
             campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1);
 
@@ -156,7 +156,7 @@ namespace Tests
 
         /// <summary>
         /// FLAT e PCT do mesmo stat NÃO se fundem: "+550 de HP" e "+5% de HP" são coisas diferentes
-        /// até haver um champ pra aplicar o percentual (o `AplicarItem` usa o HP BASE dele). O
+        /// até haver um apóstolo pra aplicar o percentual (o `AplicarItem` usa o HP BASE dele). O
         /// arsenal informa o que o equipamento dá; quem soma isso a alguém é a luta.
         /// </summary>
         [Fact]
@@ -234,10 +234,10 @@ namespace Tests
         }
 
         [Fact]
-        public void UltimoTime_VoltaOsMesmosChamps()
+        public void UltimoTime_VoltaOsMesmosApostolos()
         {
-            var (campanha, _, campeoes) = Montar();
-            var time = campeoes.ObterDesbloqueados().Take(2).ToList();
+            var (campanha, _, apostolos) = Montar();
+            var time = apostolos.ObterDesbloqueados().Take(2).ToList();
 
             campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, time);
 
@@ -256,18 +256,18 @@ namespace Tests
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
-            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            var time = campeoes.ObterDesbloqueados().Take(3).ToList();
+            var apostolos = new ApostolosService(new PersonagemService(), capitulos);
+            var time = apostolos.ObterDesbloqueados().Take(3).ToList();
 
-            new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo)
+            new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo)
                 .SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, time);
 
-            var outro = new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo);
+            var outro = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo);
             Assert.Equal(time.Select(p => p.Nome), outro.UltimoTime().Select(p => p.Nome));
         }
 
         /// <summary>
-        /// Champ que não está liberado não volta pro time. O estrago seria a tela de fases montar um
+        /// Apóstolo que não está liberado não volta pro time. O estrago seria a tela de fases montar um
         /// slot com alguém que o jogador não tem, e o back recusar o "Lutar" sem explicar.
         ///
         /// O teste salva um time MISTO de propósito — um Humano (liberado desde sempre) e o Guarda
@@ -277,12 +277,12 @@ namespace Tests
         [Fact]
         public void UltimoTime_IgnoraQuemNaoEstaLiberado()
         {
-            var (campanha, _, campeoes) = Montar();
+            var (campanha, _, apostolos) = Montar();
             var personagens = new PersonagemService();
-            Personagem humano = campeoes.ObterDesbloqueados().First();
+            Personagem humano = apostolos.ObterDesbloqueados().First();
             Personagem trancado = personagens.ObterPersonagem(Faccao.Reino, Slot.Slot1);
 
-            Assert.False(campeoes.EstaDesbloqueado(trancado));   // a premissa do teste
+            Assert.False(apostolos.EstaDesbloqueado(trancado));   // a premissa do teste
 
             campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, new List<Personagem> { humano, trancado });
 

@@ -315,7 +315,7 @@ namespace ApostlesWar.Domain
         }
 
         /// <summary>
-        /// A lista unida de "quais status este golpe FURA": golpe ∪ champ (já compostos no Atacar
+        /// A lista unida de "quais status este golpe FURA": golpe ∪ apóstolo (já compostos no Atacar
         /// via ComporListaIgnorar) ∪ natureza.Ignora. Match por tipo EXATO ou BASE
         /// (typeof(Buff) = todos os buffs). Extraída pra o Prever e o Receber usarem a MESMA.
         /// </summary>

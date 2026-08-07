@@ -6,12 +6,12 @@ using ApostlesWar.Domain;
 namespace Tests.Bancada
 {
     /// <summary>
-    /// A BANCADA DE DANO — o instrumento do REBALANCE (#16). Roda os 36 campeões contra um boneco de
+    /// A BANCADA DE DANO — o instrumento do REBALANCE (#16). Roda os 36 apóstolos contra um boneco de
     /// pancada padronizado e escreve <c>docs/bancada-dano.md</c>, que é VERSIONADO: cada tweak de
     /// número vira um `git diff` legível, que é a entrega de verdade (não "ajustar valores").
     ///
     /// **O desenho é do Gabriel, e cada escolha tem um porquê:**
-    /// - **Stats iguais pra todos** — a bancada mede a HABILIDADE, não o personagem. Se um champ tem
+    /// - **Stats iguais pra todos** — a bancada mede a HABILIDADE, não o personagem. Se um apóstolo tem
     ///   que ser mais forte, isso se resolve no ataque DELE, depois.
     /// - **Crítico 100%** — quem força crítico para de ganhar vantagem artificial, e o RNG do crítico
     ///   morre de quebra.
@@ -30,7 +30,7 @@ namespace Tests.Bancada
     {
         private const int Turnos = 100;
         private const int Repeticoes = 10;      // média sobre o RNG que sobra (chances, paralisia)
-        // HP REALISTA e IGUAL pros dois lados (a faixa dos champs). É condição, não conveniência: o
+        // HP REALISTA e IGUAL pros dois lados (a faixa dos apóstolos). É condição, não conveniência: o
         // jogo tem efeito percentual sobre o HP máximo nas DUAS pontas — a Queima tira 5% dele por
         // turno, e cura costuma ser % do HP máximo do alvo. Inflar qualquer um dos dois faz o número
         // correspondente explodir e a comparação perder o sentido.
@@ -49,13 +49,13 @@ namespace Tests.Bancada
             new("2 — por habilidade · boneco DEF no cap · imune a malefícios",
                 "Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**",
                 PorHab: true, DefBoneco: DefNoCap, Imune: true),
-            new("3 — champ inteiro · boneco DEF no cap · imune a malefícios",
-                "O champ jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o esperado " +
+            new("3 — apóstolo inteiro · boneco DEF no cap · imune a malefícios",
+                "O apóstolo jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o esperado " +
                 "aplica o dano-por-uso da linha 2 às ativações que de fato aconteceram aqui. Positivo = " +
                 "as habilidades valem mais juntas do que separadas.",
                 PorHab: false, DefBoneco: DefNoCap, Imune: true),
-            new("4 — champ inteiro · boneco DEF no cap · RECEBENDO malefícios",
-                "O champ completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia aqui sai " +
+            new("4 — apóstolo inteiro · boneco DEF no cap · RECEBENDO malefícios",
+                "O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia aqui sai " +
                 "do MESMO esperado da linha 2 que a linha 3 usa — é o que mantém as duas colunas " +
                 "comparáveis, já que entre elas varia só a imunidade. Então **sinergia(4) − sinergia(3) " +
                 "= a sinergia que passa por malefício**: raspar DEF (`ReduçãoDefesa`, −30% sobre um " +
@@ -74,7 +74,7 @@ namespace Tests.Bancada
         /// ATIVAÇÕES) e o TOTAL alimenta o Δ da linha 5 (que compara o mesmo horizonte de 100
         /// turnos). Guardar um só foi bug: o Δ saía comparando total contra dano-por-uso.
         ///
-        /// O POR USO EM ÁREA é o terceiro porque a sinergia de 1 alvo SUBESTIMA o champ de área — e
+        /// O POR USO EM ÁREA é o terceiro porque a sinergia de 1 alvo SUBESTIMA o apóstolo de área — e
         /// não por pouco: o Detetive raspa DEF em área e martela em área, então os malefícios dele
         /// valem +9.504 contra 1 boneco e +30.888 contra 4, 3,2× mais. Medir isso não custa corrida
         /// nova: a corrida de área já roda no `PorHabilidade`, só era jogada fora depois de imprimir.
@@ -87,10 +87,10 @@ namespace Tests.Bancada
         // ---------- montagem das peças ----------
 
         /// <summary>
-        /// Mesmo champ, stats padronizados. Reaproveita a MESMA lista de `Habilidades` — que é o que
-        /// torna a bancada possível sem tocar nos 36 arquivos de champ: a habilidade é DADO, então
+        /// Mesmo apóstolo, stats padronizados. Reaproveita a MESMA lista de `Habilidades` — que é o que
+        /// torna a bancada possível sem tocar nos 36 arquivos de apóstolo: a habilidade é DADO, então
         /// varrer é um `foreach`, e as PASSIVAS viajam junto (elas moram na mesma lista, e passiva é
-        /// identidade do champ, não algo que se mede isolado).
+        /// identidade do apóstolo, não algo que se mede isolado).
         /// </summary>
         private static Personagem Normalizar(Personagem original, HabilidadeAtiva espera)
         {
@@ -117,7 +117,7 @@ namespace Tests.Bancada
         {
             var espera = Espera.Nova();
             var esperaDoBoneco = Espera.Descanso();
-            var champ = Normalizar(original, espera);
+            var apostolo = Normalizar(original, espera);
             var bonecos = Enumerable.Range(0, quantosBonecos)
                 .Select(_ => Boneco(linha.DefBoneco, linha.Imune, esperaDoBoneco))
                 .ToList();
@@ -132,16 +132,16 @@ namespace Tests.Bancada
 
             var combate = new CombateService(
                 new ArsenalService(capitulos, repo),
-                new CampeoesService(personagens, capitulos),
+                new ApostolosService(personagens, capitulos),
                 personagens, tela, selecao,
                 controladorJogador: controlador,
-                // Só o BONECO cai neste slot: o cérebro do bot que joga pelo champ na medição de
-                // champ-inteiro é uma instância própria, dentro do ControladorDeBancada.
+                // Só o BONECO cai neste slot: o cérebro do bot que joga pelo apóstolo na medição de
+                // apóstolo-inteiro é uma instância própria, dentro do ControladorDeBancada.
                 controladorBot: new ControladorQueEspera(esperaDoBoneco),
                 new SemEspera(), new RelogioDoCombate());
 
-            // bot1: false → a equipe1 (o champ) é dirigida pelo controlador da bancada.
-            combate.ExecutarArenaComTimes(new List<Personagem> { champ }, bonecos,
+            // bot1: false → a equipe1 (o apóstolo) é dirigida pelo controlador da bancada.
+            combate.ExecutarArenaComTimes(new List<Personagem> { apostolo }, bonecos,
                 bot1: false, bot2: true);
 
             // Soma os bonecos TODOS: com 4 no campo, é o que dá voz à habilidade de área.
@@ -152,11 +152,11 @@ namespace Tests.Bancada
 
         /// <summary>Média sobre N repetições: mata o resto do RNG (chances de aplicar debuff,
         /// paralisia do Medo) que o crítico cravado não cobre.</summary>
-        private static Medicao Media(Personagem champ, HabilidadeAtiva? hab, Linha linha,
+        private static Medicao Media(Personagem apostolo, HabilidadeAtiva? hab, Linha linha,
             int quantosBonecos = 1)
         {
             var corridas = new List<Medicao>();
-            for (int i = 0; i < Repeticoes; i++) corridas.Add(Rodar(champ, hab, linha, quantosBonecos));
+            for (int i = 0; i < Repeticoes; i++) corridas.Add(Rodar(apostolo, hab, linha, quantosBonecos));
 
             var usos = new Dictionary<Habilidade, int>();
             var dano = new Dictionary<Habilidade, int>();
@@ -180,8 +180,8 @@ namespace Tests.Bancada
         [Fact]
         public void GerarRelatorio()
         {
-            var campeoes = new CampeoesService(new PersonagemService(), new CapitulosService(new SaveEmMemoria()));
-            var todos = campeoes.TodosOsCampeoes();
+            var apostolos = new ApostolosService(new PersonagemService(), new CapitulosService(new SaveEmMemoria()));
+            var todos = apostolos.TodosOsApostolos();
             Assert.Equal(36, todos.Count);
 
             var md = new StringBuilder();
@@ -201,7 +201,7 @@ namespace Tests.Bancada
                 if (linha.PorHab)
                     PorHabilidade(md, todos, linha, isoladosDaLinha2,
                         coletar: linha.Titulo.StartsWith("1") ? paraRanking : null);
-                else PorChamp(md, todos, linha, isoladosDaLinha2);
+                else PorApostolo(md, todos, linha, isoladosDaLinha2);
 
                 md.AppendLine();
             }
@@ -212,7 +212,7 @@ namespace Tests.Bancada
         }
 
         /// <summary>Uma linha da tabela, guardada também pros rankings do fim do relatório.</summary>
-        private sealed record Registro(string Champ, string Hab, int Cooldown, int Usos,
+        private sealed record Registro(string Apostolo, string Hab, int Cooldown, int Usos,
             int Dano, int DanoPorUso, int DanoEmArea, int Cura);
 
         private static void PorHabilidade(StringBuilder md, List<Personagem> todos, Linha linha,
@@ -222,21 +222,21 @@ namespace Tests.Bancada
             bool eLinha5 = linha.Titulo.StartsWith("5");
 
             md.AppendLine(eLinha5
-                ? $"| Champ | Habilidade | CD | Usos | Dano | Dano/uso | Dano ({BonecosEmArea} alvos) | Cura | Tick | Δ vs linha 2 |"
-                : $"| Champ | Habilidade | CD | Usos | Dano | Dano/uso | Dano ({BonecosEmArea} alvos) | Cura |");
+                ? $"| Apóstolo | Habilidade | CD | Usos | Dano | Dano/uso | Dano ({BonecosEmArea} alvos) | Cura | Tick | Δ vs linha 2 |"
+                : $"| Apóstolo | Habilidade | CD | Usos | Dano | Dano/uso | Dano ({BonecosEmArea} alvos) | Cura |");
             md.AppendLine(eLinha5
                 ? "|---|---|--:|--:|--:|--:|--:|--:|--:|--:|"
                 : "|---|---|--:|--:|--:|--:|--:|--:|");
 
-            foreach (var champ in todos)
+            foreach (var apostolo in todos)
             {
-                var ativas = champ.Habilidades.OfType<HabilidadeAtiva>().ToList();
-                if (eLinha2) memoria[champ.Nome] = new Dictionary<Habilidade, Isolado>();
+                var ativas = apostolo.Habilidades.OfType<HabilidadeAtiva>().ToList();
+                if (eLinha2) memoria[apostolo.Nome] = new Dictionary<Habilidade, Isolado>();
 
                 foreach (var hab in ativas)
                 {
-                    var m = Media(champ, hab, linha);
-                    var area = Media(champ, hab, linha, BonecosEmArea);
+                    var m = Media(apostolo, hab, linha);
+                    var area = Media(apostolo, hab, linha, BonecosEmArea);
                     int usos = m.Usos.GetValueOrDefault(hab);
                     int porUso = usos > 0 ? m.DanoTotal / usos : 0;
                     int usosArea = area.Usos.GetValueOrDefault(hab);
@@ -244,17 +244,17 @@ namespace Tests.Bancada
 
                     // Guarda o dano POR USO, não o total: a linha 3 precisa comparar com o mesmo
                     // orçamento de turnos, e cada isolado aqui gastou 100 turnos SÓ nesta habilidade.
-                    if (eLinha2) memoria[champ.Nome][hab] = new Isolado(porUso, m.DanoTotal, porUsoArea);
+                    if (eLinha2) memoria[apostolo.Nome][hab] = new Isolado(porUso, m.DanoTotal, porUsoArea);
 
-                    coletar?.Add(new Registro($"{champ.Simbolo} {champ.Nome}", $"{hab.Simbolo} {hab.Nome}",
+                    coletar?.Add(new Registro($"{apostolo.Simbolo} {apostolo.Nome}", $"{hab.Simbolo} {hab.Nome}",
                         hab.Cooldown, usos, m.DanoTotal, porUso, area.DanoTotal, m.CuraTotal));
 
-                    md.Append($"| {champ.Simbolo} {champ.Nome} | {hab.Simbolo} {hab.Nome} | {hab.Cooldown} " +
+                    md.Append($"| {apostolo.Simbolo} {apostolo.Nome} | {hab.Simbolo} {hab.Nome} | {hab.Cooldown} " +
                               $"| {usos} | {m.DanoTotal} | {porUso} | {area.DanoTotal} | {m.CuraTotal} ");
 
                     if (eLinha5)
                     {
-                        int antes = memoria.TryGetValue(champ.Nome, out var mapa)
+                        int antes = memoria.TryGetValue(apostolo.Nome, out var mapa)
                             ? mapa.GetValueOrDefault(hab).Total : 0;
                         md.Append($"| {m.DanoDeTick} | {Sinal(m.DanoTotal - antes)} ");
                     }
@@ -264,14 +264,14 @@ namespace Tests.Bancada
         }
 
         /// <summary>
-        /// Os rankings. A tabela agrupada por champ acima serve pra ler UM personagem inteiro; esta
+        /// Os rankings. A tabela agrupada por apóstolo acima serve pra ler UM personagem inteiro; esta
         /// serve pra achar o outlier sem ter que varrer 144 linhas com o olho. Mesmos dados, duas
         /// perguntas diferentes — por isso as duas vistas convivem em vez de uma substituir a outra.
         /// </summary>
         private static void Rankings(StringBuilder md, List<Registro> regs)
         {
             md.AppendLine("## Rankings (condições da linha 1: DEF 0, alvo imune)").AppendLine();
-            md.AppendLine("A tabela por champ acima responde \"como é o kit deste personagem?\".");
+            md.AppendLine("A tabela por apóstolo acima responde \"como é o kit deste personagem?\".");
             md.AppendLine("Estas respondem \"quem está fora da curva?\".").AppendLine();
 
             Ranque(md, "Dano por uso — o BURST", regs.Where(r => r.DanoPorUso > 0)
@@ -289,33 +289,33 @@ namespace Tests.Bancada
         {
             var lista = ordenados.ToList();
             md.AppendLine($"### {titulo}").AppendLine();
-            md.AppendLine("| # | Champ | Habilidade | CD | Valor |");
+            md.AppendLine("| # | Apóstolo | Habilidade | CD | Valor |");
             md.AppendLine("|--:|---|---|--:|--:|");
             for (int i = 0; i < lista.Count; i++)
-                md.AppendLine($"| {i + 1} | {lista[i].Champ} | {lista[i].Hab} | {lista[i].Cooldown} | {valor(lista[i])} |");
+                md.AppendLine($"| {i + 1} | {lista[i].Apostolo} | {lista[i].Hab} | {lista[i].Cooldown} | {valor(lista[i])} |");
             md.AppendLine();
         }
 
         /// <summary>
-        /// As duas linhas de champ inteiro. Elas têm as MESMAS colunas de propósito: entre a 3 e a 4
+        /// As duas linhas de apóstolo inteiro. Elas têm as MESMAS colunas de propósito: entre a 3 e a 4
         /// varia só a imunidade do boneco, então toda coluna que sobrevive às duas vira uma subtração
         /// legível — e a Sinergia é a que mais rende, porque o esperado das duas sai da MESMA memória
         /// (a da linha 2, imune). Baseline diferente por linha faria as duas colunas medirem coisas
         /// diferentes e a comparação entre elas morreria.
         /// </summary>
-        private static void PorChamp(StringBuilder md, List<Personagem> todos, Linha linha,
+        private static void PorApostolo(StringBuilder md, List<Personagem> todos, Linha linha,
             Dictionary<string, Dictionary<Habilidade, Isolado>> memoria)
         {
-            md.AppendLine("| Champ | Dano | Esperado | Sinergia " +
+            md.AppendLine("| Apóstolo | Dano | Esperado | Sinergia " +
                           $"| Dano ({BonecosEmArea} alvos) | Esperado ({BonecosEmArea}) | Sinergia ({BonecosEmArea}) " +
                           "| Tick | Habilidades usadas |");
             md.AppendLine("|---|--:|--:|--:|--:|--:|--:|--:|---|");
 
-            foreach (var champ in todos)
+            foreach (var apostolo in todos)
             {
-                var m = Media(champ, null, linha);
-                var area = Media(champ, null, linha, BonecosEmArea);
-                string usadas = string.Join(", ", champ.Habilidades.OfType<HabilidadeAtiva>()
+                var m = Media(apostolo, null, linha);
+                var area = Media(apostolo, null, linha, BonecosEmArea);
+                string usadas = string.Join(", ", apostolo.Habilidades.OfType<HabilidadeAtiva>()
                     .Select(h => $"{h.Nome} {m.Usos.GetValueOrDefault(h)}×"));
 
                 // Esperado = o que essas MESMAS ativações renderiam se cada habilidade entregasse o
@@ -324,14 +324,14 @@ namespace Tests.Bancada
                 // O de área usa os usos da corrida de ÁREA, não os de 1 alvo: com mais gente em campo
                 // o bot escolhe outra fila, e cobrar o esperado pela fila errada inventaria sinergia.
                 int esperado = 0, esperadoArea = 0;
-                if (memoria.TryGetValue(champ.Nome, out var mapa))
+                if (memoria.TryGetValue(apostolo.Nome, out var mapa))
                     foreach (var (h, iso) in mapa)
                     {
                         esperado += iso.PorUso * m.Usos.GetValueOrDefault(h);
                         esperadoArea += iso.PorUsoArea * area.Usos.GetValueOrDefault(h);
                     }
 
-                md.AppendLine($"| {champ.Simbolo} {champ.Nome} " +
+                md.AppendLine($"| {apostolo.Simbolo} {apostolo.Nome} " +
                               $"| {m.DanoTotal} | {esperado} | {Sinal(m.DanoTotal - esperado)} " +
                               $"| {area.DanoTotal} | {esperadoArea} | {Sinal(area.DanoTotal - esperadoArea)} " +
                               $"| {m.DanoDeTick} | {usadas} |");
@@ -349,15 +349,15 @@ namespace Tests.Bancada
             md.AppendLine("## Condições").AppendLine();
             md.AppendLine($"- **{Turnos} turnos** por medição, média de **{Repeticoes} repetições**.");
             md.AppendLine($"- Stats IGUAIS pros dois lados: HP {HPPadrao:N0}, ATK {AtkPadrao}, DEF 0. **Crítico 100%**.");
-            md.AppendLine("- **O champ começa cada turno com 1 de vida.** Sem isso a coluna de cura seria toda zero");
+            md.AppendLine("- **O apóstolo começa cada turno com 1 de vida.** Sem isso a coluna de cura seria toda zero");
             md.AppendLine("  (cura não cura quem está cheio), e é também a condição em que aparece quem fica mais");
             md.AppendLine("  FORTE ferido — a Caveira escala `2.0 − HP%`. Ele não morre: carrega a mesma");
             md.AppendLine("  prevenção-de-morte do boneco, que o segura quando uma habilidade de auto-dano zeraria.");
             md.AppendLine($"- A coluna **Dano ({BonecosEmArea} alvos)** repete a medição com {BonecosEmArea} bonecos no campo — é o que");
             md.AppendLine("  dá voz às habilidades de área, que contra alvo único ficam indistinguíveis de single-target.");
-            md.AppendLine("- Na medição por habilidade, o champ usa **só aquela** e **espera** durante o cooldown");
+            md.AppendLine("- Na medição por habilidade, o apóstolo usa **só aquela** e **espera** durante o cooldown");
             md.AppendLine("  (não enche o buraco com A1 — se enchesse, o A1 dominaria e todas ficariam iguais).");
-            md.AppendLine("- No champ inteiro, quem decide é o **mesmo `ControladorBot`** da Arena e do modo Auto.");
+            md.AppendLine("- No apóstolo inteiro, quem decide é o **mesmo `ControladorBot`** da Arena e do modo Auto.");
             md.AppendLine($"- Boneco: DEF 0 ou {DefNoCap} (o cap de 75% de redução), e **nunca age** — ele se cura.");
             md.AppendLine("  O HP é REALISTA nos dois lados de propósito: a Queima tira 5% do HP máximo por turno e");
             md.AppendLine("  cura costuma ser % do HP máximo, então inflar qualquer um dos dois estoura o número.");
@@ -367,19 +367,19 @@ namespace Tests.Bancada
             md.AppendLine("- **O 🥷 Ninja oscila ±1 entre rodadas, e isso é esperado — não é regressão.** A Shuriken");
             md.AppendLine("  é `TipoAlvo.Aleatorio` com 2 alvos: o sorteio cai diferente a cada corrida, e com o");
             md.AppendLine("  `ignorarDefesaPctSeAnteriorCritico` acoplando hit a hit, a média das repetições fecha");
-            md.AppendLine("  num centésimo diferente. Ele é o único champ do relatório que faz isso, então um");
+            md.AppendLine("  num centésimo diferente. Ele é o único apóstolo do relatório que faz isso, então um");
             md.AppendLine($"  `git diff` que mexe SÓ na linha dele (em ~58.000, com {Repeticoes} repetições) é ruído do");
-            md.AppendLine("  sorteio — dá pra descartar sem investigar. Qualquer OUTRO champ mudando é sinal.").AppendLine();
+            md.AppendLine("  sorteio — dá pra descartar sem investigar. Qualquer OUTRO apóstolo mudando é sinal.").AppendLine();
             md.AppendLine("### O que este relatório NÃO mede").AppendLine();
             md.AppendLine("O boneco **não revida**. Contra-ataque, espinhos e revide (Herói, Operário, Zumbi)");
-            md.AppendLine("medem **zero** aqui: isto é uma bancada de dano CAUSADO, não de duelo. Um champ");
+            md.AppendLine("medem **zero** aqui: isto é uma bancada de dano CAUSADO, não de duelo. Um apóstolo");
             md.AppendLine("com número baixo pode ser reativo, não fraco — confira o kit antes de mexer.").AppendLine();
-            md.AppendLine("A coluna **Usos** é diagnóstico do BOT: se uma habilidade dispara 0× no champ");
+            md.AppendLine("A coluna **Usos** é diagnóstico do BOT: se uma habilidade dispara 0× no apóstolo");
             md.AppendLine("inteiro mas tem dano alto isolada, o problema está na fila do bot, não no balanço.").AppendLine();
-            md.AppendLine("Nas linhas de champ inteiro, **`Habilidades usadas` descreve a corrida de 1 alvo**. A de");
+            md.AppendLine("Nas linhas de apóstolo inteiro, **`Habilidades usadas` descreve a corrida de 1 alvo**. A de");
             md.AppendLine($"{BonecosEmArea} alvos é uma simulação à parte — o bot escolhe outra fila com mais gente em campo —");
             md.AppendLine($"e o `Esperado ({BonecosEmArea})` é cobrado pelos usos DELA, senão a sinergia sairia inventada.").AppendLine();
-            md.AppendLine($"**Por que a `Sinergia ({BonecosEmArea})` existe:** a de 1 alvo subestima o champ de área. Quem raspa");
+            md.AppendLine($"**Por que a `Sinergia ({BonecosEmArea})` existe:** a de 1 alvo subestima o apóstolo de área. Quem raspa");
             md.AppendLine("DEF em área e martela em área colhe o malefício vezes o número de alvos — a diferença entre");
             md.AppendLine("as duas colunas é o tamanho real desse composto.").AppendLine();
             md.AppendLine("---").AppendLine();

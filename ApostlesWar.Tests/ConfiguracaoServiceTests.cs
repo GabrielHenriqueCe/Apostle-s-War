@@ -68,9 +68,9 @@ namespace Tests
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
-            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo);
-            var perfil = new PerfilService(repo, campeoes, campanha);
+            var apostolos = new ApostolosService(new PersonagemService(), capitulos);
+            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo);
+            var perfil = new PerfilService(repo, apostolos, campanha);
             var config = new ConfiguracaoService(repo);
 
             config.AlternarTelaCheia();          // o jogador escolheu janela

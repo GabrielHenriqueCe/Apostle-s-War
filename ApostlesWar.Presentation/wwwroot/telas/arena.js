@@ -7,7 +7,7 @@ import { configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPic
 import { mandar } from '../nucleo/ponte.js';
 
 // ---------- montagem da Arena ----------
-let arenaCampeoes = [];                                            // pool [{simbolo, nome}] (índice = id)
+let arenaApostolos = [];                                            // pool [{simbolo, nome}] (índice = id)
 let arenaTimes = { esq: [null, null, null, null], dir: [null, null, null, null] };  // índices ou null
 let arenaControle = { esq: 'jogador', dir: 'bot' };               // padrão: esquerda joga, direita bot
 let arenaSlotSel = null;                                           // { lado, i } ou null
@@ -15,9 +15,9 @@ let arenaSlotSel = null;                                           // { lado, i 
 export const montagemArena = {
     cena: 'arenaSetup',
     // Desestrutura porque `montar` recebe o `conteudo` da mensagem INTEIRO — o despacho antigo
-    // passava `msg.conteudo.campeoes` à mão, e essa foi a única tela em que ele fazia isso.
-    montar({ campeoes }) {
-        arenaCampeoes = campeoes;
+    // passava `msg.conteudo.apostolos` à mão, e essa foi a única tela em que ele fazia isso.
+    montar({ apostolos }) {
+        arenaApostolos = apostolos;
         arenaTimes = { esq: [null, null, null, null], dir: [null, null, null, null] };
         arenaControle = { esq: 'jogador', dir: 'bot' };
         arenaSlotSel = null;
@@ -30,9 +30,9 @@ export const montagemArena = {
 
 // ---------- montagem: Arena ----------
 function montarPickerArena() {
-    document.getElementById('setupPicker').replaceChildren(...arenaCampeoes.map((c, i) => {
+    document.getElementById('setupPicker').replaceChildren(...arenaApostolos.map((c, i) => {
         const cel = criarCelulaPicker(c);
-        cel.addEventListener('click', () => escolherCampeaoArena(i));
+        cel.addEventListener('click', () => escolherApostoloArena(i));
         tornarPickerArrastavel(cel, i);
         return cel;
     }));
@@ -42,7 +42,7 @@ function desenharSlotsArena() {
     for (const lado of ['esq', 'dir']) {
         const cont = document.getElementById(lado === 'esq' ? 'slotsEsq' : 'slotsDir');
         cont.replaceChildren(...arenaTimes[lado].map((idx, i) => {
-            const slot = criarSlot(arenaCampeoes, idx, arenaSlotSel && arenaSlotSel.lado === lado && arenaSlotSel.i === i);
+            const slot = criarSlot(arenaApostolos, idx, arenaSlotSel && arenaSlotSel.lado === lado && arenaSlotSel.i === i);
             slot.addEventListener('click', () => {
                 if (arenaTimes[lado][i] != null) arenaTimes[lado][i] = null;   // casa cheia = remove
                 else arenaSlotSel = { lado, i };                                // casa vazia = seleciona (foca o lado)
@@ -58,8 +58,8 @@ function desenharSlotsArena() {
 }
 
 // Clique no picker = adiciona na casa selecionada (ou 1ª vazia do lado em foco). Não duplica NO MESMO
-// lado — mas o mesmo champ PODE estar nos dois times (espelho no versus).
-function escolherCampeaoArena(idx) {
+// lado — mas o mesmo apóstolo PODE estar nos dois times (espelho no versus).
+function escolherApostoloArena(idx) {
     const lado = arenaSlotSel ? arenaSlotSel.lado : 'esq';
     if (arenaTimes[lado].includes(idx)) return;
     const i = (arenaSlotSel && arenaTimes[lado][arenaSlotSel.i] == null) ? arenaSlotSel.i : arenaTimes[lado].indexOf(null);
@@ -71,7 +71,7 @@ function escolherCampeaoArena(idx) {
 }
 
 function sortearLadoArena(lado) {
-    arenaTimes[lado] = sortearTime(arenaCampeoes.length);
+    arenaTimes[lado] = sortearTime(arenaApostolos.length);
     if (arenaSlotSel && arenaSlotSel.lado === lado) arenaSlotSel = null;
     desenharSlotsArena();
 }

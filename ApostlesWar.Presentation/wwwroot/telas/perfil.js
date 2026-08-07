@@ -43,7 +43,7 @@ export const edicaoPerfil = {
         const grade = document.getElementById('avatarGrade');
         avatarSelecionado = -1;
 
-        grade.replaceChildren(...dados.campeoes.map((c, i) => {
+        grade.replaceChildren(...dados.apostolos.map((c, i) => {
             const cel = document.createElement('div');
             cel.className = 'avatarCelula' + (c.desbloqueado ? '' : ' bloqueado');
 
@@ -62,7 +62,7 @@ export const edicaoPerfil = {
 
         // Avatar atual não encontrado entre os desbloqueados: cai no 1º desbloqueado.
         if (avatarSelecionado === -1) {
-            const i = dados.campeoes.findIndex(c => c.desbloqueado);
+            const i = dados.apostolos.findIndex(c => c.desbloqueado);
             if (i >= 0) selecionarAvatar(i);
         }
 },

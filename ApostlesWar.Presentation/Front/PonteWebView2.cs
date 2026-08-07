@@ -101,8 +101,8 @@ namespace ApostlesWar.Presentation.Front
         /// <summary>Abre a tela de editar perfil com os dados atuais. A resposta volta como "salvarPerfil".</summary>
         public void EnviarEdicaoPerfil(EdicaoPerfilVista edicao) => Enviar("edicaoPerfil", edicao);
 
-        /// <summary>Abre a montagem da Arena com o pool de campeões. A resposta volta como "iniciarArena".</summary>
-        public void EnviarMontagemArena(List<CampeaoVisto> campeoes) => Enviar("montagemArena", new { campeoes });
+        /// <summary>Abre a montagem da Arena com o pool de apóstolos. A resposta volta como "iniciarArena".</summary>
+        public void EnviarMontagemArena(List<ApostoloVisto> apostolos) => Enviar("montagemArena", new { apostolos });
 
         // ---------- Campanha ----------
         public void EnviarMapa(MapaVista mapa) => Enviar("campanhaMapa", mapa);
@@ -110,8 +110,8 @@ namespace ApostlesWar.Presentation.Front
         /// <summary>Vitória e derrota, na mesma tela. A resposta volta como "fimDeFase" (ou "voltar", no Esc).</summary>
         public void EnviarFimDeFase(FimDeFaseVista fim) => Enviar("fimDeFase", fim);
 
-        /// <summary>A tela de um champ recém-conquistado. A resposta volta como "continuar".</summary>
-        public void EnviarConquista(ChampDetalheVista champ) => Enviar("conquista", champ);
+        /// <summary>A tela de um apóstolo recém-conquistado. A resposta volta como "continuar".</summary>
+        public void EnviarConquista(ApostoloDetalheVista apostolo) => Enviar("conquista", apostolo);
 
         public void EnviarArsenal(ArsenalVista arsenal) => Enviar("arsenal", arsenal);
 
@@ -120,7 +120,7 @@ namespace ApostlesWar.Presentation.Front
         // as fichas dentro e deixar o JS navegar), mas aí o C# perderia de vista em que tela o
         // jogador está — e é ele quem responde o Esc/Sair. Mesma divisão do mapa × fases da campanha.
         public void EnviarCompendio(CompendioVista compendio) => Enviar("compendio", compendio);
-        public void EnviarChampDetalhe(ChampDetalheVista champ) => Enviar("compendioChamp", champ);
+        public void EnviarApostoloDetalhe(ApostoloDetalheVista apostolo) => Enviar("compendioApostolo", apostolo);
 
         private void Enviar(string tipo, object conteudo)
         {

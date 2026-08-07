@@ -4,7 +4,7 @@
 // ter UM lugar que faz o clique-na-casa e o arrastar nascerem iguais nos dois.
 
 // ---------- montagem de time: helpers compartilhados (arena e campanha) ----------
-// picker = a grade de champs (de onde escolhe); slot = as casas do time montado.
+// picker = a grade de apóstolos (de onde escolhe); slot = as casas do time montado.
 // Cliques: picker → adiciona na casa selecionada/1ª vazia; casa vazia → seleciona; casa cheia → remove.
 // Arrastar: picker→casa substitui; casa→casa troca de posição; casa→fora dos slots remove.
 export let arrastando = null;   // { tipo:'picker', idx } | { tipo:'slot', arr, i }
@@ -24,11 +24,11 @@ export function tornarPickerArrastavel(cel, idx) {
     cel.addEventListener('dragend', () => { arrastando = null; });
 }
 
-export function criarSlot(campeoes, idx, selecionado) {
+export function criarSlot(apostolos, idx, selecionado) {
     const slot = document.createElement('div');
     slot.className = 'slot' + (idx != null ? ' preenchido' : '') + (selecionado ? ' selecionado' : '');
     if (idx != null) {
-        const c = campeoes[idx];
+        const c = apostolos[idx];
         const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;
         const nm = document.createElement('span'); nm.className = 'slotNome'; nm.textContent = c.nome;
         slot.append(em, nm);

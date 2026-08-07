@@ -26,20 +26,20 @@ namespace Tests
             public bool Contem(string chave) => _dados.ContainsKey(chave);
         }
 
-        // O PerfilService precisa dos desbloqueados pra decidir avatar; o CampeoesService nasce com
+        // O PerfilService precisa dos desbloqueados pra decidir avatar; o ApostolosService nasce com
         // os 4 Humanos e é DADO puro (não pede tela), então dá pra montar de verdade. Idem o
         // CampanhaService, que é quem o "excluir conta" chama pra zerar o progresso.
         private static PerfilService Montar(IRepositorioDeSave repo)
             => MontarCompleto(repo).Perfil;
 
-        private static (PerfilService Perfil, CapitulosService Capitulos, CampeoesService Campeoes,
+        private static (PerfilService Perfil, CapitulosService Capitulos, ApostolosService Apostolos,
             ArsenalService Arsenal, CampanhaService Campanha) MontarCompleto(IRepositorioDeSave repo)
         {
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
-            var campeoes = new CampeoesService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, campeoes, capitulos, new PersonagemService(), repo);
-            return (new PerfilService(repo, campeoes, campanha), capitulos, campeoes, arsenal, campanha);
+            var apostolos = new ApostolosService(new PersonagemService(), capitulos);
+            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo);
+            return (new PerfilService(repo, apostolos, campanha), capitulos, apostolos, arsenal, campanha);
         }
 
         [Fact]
@@ -88,27 +88,27 @@ namespace Tests
         // O bug que estes dois fixam: "excluir conta" apagava o DISCO e deixava a MEMÓRIA intacta.
         // Como o CarregarProgresso/CarregarItensEquipados só sobrescrevem quando a porta devolve
         // não-nulo, um save ausente PRESERVA o que já está carregado — então o jogador excluía a
-        // conta, criava perfil novo e continuava com os 36 champs e o loot, que voltavam pro disco
+        // conta, criava perfil novo e continuava com os 36 apóstolos e o loot, que voltavam pro disco
         // na primeira fase vencida.
 
         [Fact]
         public void Excluir_ZeraOProgressoEmMemoria_NaoSoNoDisco()
         {
             var repo = new RepositorioFake();
-            var (servico, capitulos, campeoes, arsenal, _) = MontarCompleto(repo);
+            var (servico, capitulos, apostolos, arsenal, _) = MontarCompleto(repo);
 
-            // Uma campanha em andamento: venceu a 1ª do Reino, liberou os champs e pegou o item.
+            // Uma campanha em andamento: venceu a 1ª do Reino, liberou os apóstolos e pegou o item.
             servico.CriarPerfil("Gabriel", "🕵️");
             capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1);
             capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1);
-            campeoes.DesbloquearCampeoes(Faccao.Reino, Fases.Fase1);
+            apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1);
             arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase1));
-            Assert.True(campeoes.ObterDesbloqueados().Count > 4);
+            Assert.True(apostolos.ObterDesbloqueados().Count > 4);
 
             servico.Excluir();
 
-            Assert.Equal(4, campeoes.ObterDesbloqueados().Count);   // só os Humanos de volta
-            Assert.All(campeoes.ObterDesbloqueados(), p => Assert.Equal(Faccao.Humanos, p.Faccao));
+            Assert.Equal(4, apostolos.ObterDesbloqueados().Count);   // só os Humanos de volta
+            Assert.All(apostolos.ObterDesbloqueados(), p => Assert.Equal(Faccao.Humanos, p.Faccao));
             Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));
             Assert.False(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2));
             Assert.Empty(arsenal.ObterObtidos());
@@ -119,7 +119,7 @@ namespace Tests
         public void Excluir_ERecarregar_NaoRessuscitaOProgresso()
         {
             var repo = new RepositorioFake();
-            var (servico, capitulos, campeoes, arsenal, campanha) = MontarCompleto(repo);
+            var (servico, capitulos, apostolos, arsenal, campanha) = MontarCompleto(repo);
 
             servico.CriarPerfil("Gabriel", "🕵️");
             capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1);
@@ -129,7 +129,7 @@ namespace Tests
             servico.Excluir();
             campanha.CarregarSaves();   // o boot seguinte, com o save já apagado
 
-            Assert.Equal(4, campeoes.ObterDesbloqueados().Count);
+            Assert.Equal(4, apostolos.ObterDesbloqueados().Count);
             Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));
             Assert.Empty(arsenal.ObterObtidos());
         }
@@ -166,13 +166,13 @@ namespace Tests
         public void PodeUsarAvatar_LiberaQuandoACampanhaDesbloqueia()
         {
             var repo = new RepositorioFake();
-            var (servico, _, campeoes, _, _) = MontarCompleto(repo);
+            var (servico, _, apostolos, _, _) = MontarCompleto(repo);
             var personagens = new PersonagemService();
 
             Personagem doReino = personagens.ObterPersonagem(Faccao.Reino, Slot.Slot1);
             Assert.False(servico.PodeUsarAvatar(doReino));
 
-            campeoes.DesbloquearCampeoes(Faccao.Reino, Fases.Fase1);   // venceu a 1ª fase do Reino
+            apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1);   // venceu a 1ª fase do Reino
 
             Assert.True(servico.PodeUsarAvatar(doReino));   // a cara do jogador é troféu de campanha
         }

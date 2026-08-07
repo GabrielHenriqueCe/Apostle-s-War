@@ -7,9 +7,19 @@ export const ar = {
     // A PAISAGEM é a coisa mais distante — por isso é a primeira do fundo (ver iniciarAr): os
     // exércitos atiram na frente dela, não por cima.
     castelo: {
-        pedra: '#bcc2d2', sombra: '#8e95ad', telhado: '#b0453c', telhadoAlt: '#3f6ea8',
-        grama: '#5d8c46', gramaSombra: '#4a7539', janela: '#2c3452', bandeira: '#d9b45b',
-        morro: '#7fa4a8', nuvem: '255, 255, 255',
+        // Esta paleta é PAR do céu do `reino.css`: o canvas pinta em `z-index: 0`, ACIMA do fundo
+        // CSS, então os dois lados se leem juntos.
+        //
+        // O que dá DESTAQUE ao castelo não é a pedra clara — é o telhado, a bandeira e as janelas
+        // escuras CONTRA ela. Uma passada escureceu a paleta inteira no mesmo fator pra baixar a
+        // claridade da cena; isso preserva as razões entre as cores e mesmo assim apaga tudo,
+        // porque tira a saturação em valor absoluto e encolhe a faixa entre o mais claro e o mais
+        // escuro. Baixar luz é mexer no CÉU, que é o campo; o assunto tem que manter a cor cheia.
+        pedra: '#b4bbcc', sombra: '#868da6', telhado: '#bd4438', telhadoAlt: '#3d70ad',
+        grama: '#5f9444', gramaSombra: '#4a7a38', janela: '#232a45', bandeira: '#e0b95e',
+        // O morro é o único que fica lavado de propósito: ele é a coisa MAIS distante, e perder
+        // cor com a distância é o que o põe atrás do castelo sem precisar de outro truque.
+        morro: '#7099a2', nuvem: '248, 251, 255',
         muro: .3, torre: .46, casas: 11, nuvens: 6, vento: 5,
     },
     po: { cor: '217, 180, 91', quantas: 46, subida: [4, 14], raio: [0.6, 2.2], opacidade: [.12, .5] },

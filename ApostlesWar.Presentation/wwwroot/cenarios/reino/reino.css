@@ -10,16 +10,22 @@
    troca vale por duas razões: os exércitos que atiram das bordas passaram a fazer sentido — isto é
    um cerco, não uma sala — e o tema entrou na mesma língua dos outros, que são todos paisagem.
 
-   E é o único tema DE DIA. Os outros dois são noite (cemitério, invasão), então o Reino ser claro
-   não é só variedade: é o contraste que faz o resto parecer escuro de propósito. Aqui a paleta pode
-   ter COR de verdade — telhado vermelho, bandeira, grama — porque de dia a cor não precisa competir
-   com fonte de luz nenhuma.
+   E é o único tema DE DIA entre os oito, então aqui a paleta pode ter COR de verdade — telhado
+   vermelho, bandeira, grama — porque de dia a cor não precisa competir com fonte de luz nenhuma.
+   Dia, porém, não é MEIO-DIA: a luz desta cena desceu um degrau inteiro (céu, sol, vinheta aqui;
+   pedra, morro, grama e nuvem no `reino.js`). **Os dois arquivos descem JUNTOS** — o canvas pinta
+   em `z-index: 0`, ACIMA deste fundo, então clarear só um lado faz o castelo boiar sobre o céu.
 
    A muralha, as torres e as casas são desenhadas no canvas (ver `castelo` no jogo.js) porque a
    composição é NOMEADA (castelo no meio, muro pros dois lados) e nome não sobrevive a ladrilho que
    repete. O CSS aqui fica só com o céu. */
 body[data-tema="reino"] {
-    --fundo: #6d9dc8;
+    /* NÃO é a cor do céu — é o token da UI (o `--ceu` do html/body e o `--poco` dos contêineres
+       afundados), e ele também é a cor do TEXTO sobre os botões de ouro. Estava em azul-céu claro,
+       o único dos 8 temas fora da faixa quase-preta: a moldura da tela brilhava em volta da batalha
+       e o rótulo dourado ficava no pior par de contraste que há. Azul profundo mantém o capítulo
+       sendo o azul e devolve a moldura pro lugar. */
+    --fundo: #26375a;
     --painel: #1b2440;
     --borda: #46557f;
     --apagado: #9aa6c4;
@@ -32,12 +38,17 @@ body[data-tema="reino"] #arena {
     position: relative;
     isolation: isolate;
     background:
-        /* 1. vinheta LEVE: de dia ela só assenta os cantos, não pode escurecer a cena */
-        radial-gradient(ellipse 125% 95% at 50% 45%, transparent 52%, rgba(28, 44, 82, .34) 100%),
-        /* 2. o sol, alto à direita */
-        radial-gradient(circle 90px at 76% 13%, rgba(255, 250, 214, .95), rgba(255, 244, 190, .35) 42%, transparent 70%),
-        /* 3. o céu de dia: azul forte em cima, clareando até a bruma do horizonte */
-        linear-gradient(180deg, #3f77bd 0%, #6ba2d6 44%, #a9cbe4 76%, #d3e3e8 100%);
+        /* 1. vinheta: assenta os cantos e nada mais. De dia ela não pode fechar a cena — subiu pra
+              .46 numa passada e o que se ganhou foi peso, não profundidade */
+        radial-gradient(ellipse 125% 95% at 50% 45%, transparent 50%, rgba(20, 34, 66, .38) 100%),
+        /* 2. o sol: PEQUENO e ACESO, não grande e morno. É o branco desta cena, o que a lua é pras
+              noites — largar a mancha de 90px sobre o canto direito estourava o céu sem dar
+              brilho nenhum, e apagá-la tirou da cena a ponta de cima da faixa */
+        radial-gradient(circle 66px at 76% 13%, rgba(255, 251, 226, .92), rgba(255, 242, 186, .26) 44%, transparent 72%),
+        /* 3. o céu de dia. Fundo pra RECUAR (é o campo, não o assunto), mas azul SATURADO: escalar
+              a rampa velha pra baixo levou a bruma a #a5b1b5, cinza neutro, e cinza no maior
+              pedaço da tela é o que faz uma cena inteira parecer sem graça */
+        linear-gradient(180deg, #2a63a8 0%, #4a8ac2 44%, #7db1cf 76%, #adcedb 100%);
     background-size: cover, cover, cover;
     background-repeat: no-repeat, no-repeat, no-repeat;
     background-position: center, center, center;

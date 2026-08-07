@@ -38,42 +38,137 @@ o stat mais forte que existe; se o nível a empurrasse junto com HP/ATK/DEF, o c
 dominaria os dois eixos ao mesmo tempo e não haveria calibragem que salvasse. Deixando-a no
 equipamento ela vira **escolha de build**, e não consequência de investimento.
 
-> **Onde ela passa a ser balanceada:** na tabela de itens, não na ficha do champ. O risco é todo mundo
-> montar velocidade em tudo, e o freio clássico (Raid faz assim) é **concentrá-la num slot** — as
-> botas. Aí ela custa um slot, e o custo de oportunidade resolve sozinho. Decisão adiada de propósito.
+**A base vem do TIPO e mexe pouco:** `+1 a cada 10 níveis`, do Guardião (85 → 90) ao Atirador
+(110 → 115). Uma faixa de ~28% — pequena o bastante pra não decidir a luta sozinha, grande o bastante
+pra ser identidade. **A Velocidade fica FORA da variação por facção** (§2): sendo o stat que decide
+quem joga, uma facção com bônus nela domina todas as outras.
+
+> **Onde ela é balanceada:** na tabela de itens. **Principal exclusivo da Bota**, e **sub em valor
+> cheio** nas outras peças — assim existe o endgame de montar velocidade, e a Bota é o grande prêmio
+> em cima dele.
 >
 > **De graça:** como item é trocável, qualquer champ pode virar rápido se você pagar por isso —
 > flexibilidade sem apagar a identidade do tipo.
 
-### Aptidão × Resistência — o malefício cola?
+### Defesa — `DEF / (DEF + 5000)`
 
-Os nomes vieram do WoW pt-BR, e a **Aptidão** é a peça exata: lá ela existe **só para vencer a defesa
-do alvo**. É a definição do que se quer aqui — meu malefício vence a Resistência dele.
+Uma curva que **nunca satura e nunca chega a 100%**: o ganho por ponto despenca conforme sobe, sem cap
+e sem penhasco, e **o item de DEF nunca vira lixo por ter passado de um número**.
 
-### Precisão × Evasão — o golpe conecta?
+> **O `k` tem leitura direta: é a DEF que dá exatamente 50%.** É o botão do joelho da curva, e é o
+> único número a calibrar.
+>
+> **Esta forma serve à DEFESA e não ao malefício**, e a diferença é de propósito: na defesa se QUER que
+> nunca sature; no malefício é preciso **poder aplicar o efeito cheio**, senão nenhuma habilidade
+> jamais faz o que está escrito nela. Por isso Precisão × Resistência usa uma curva que **satura**.
 
-Fica livre porque a Aptidão assumiu o malefício. **Recomendação: não implementar agora.** Raid, Epic
-Seven e Summoners War tiraram a esquiva de propósito — dois "errou" diferentes na mesma luta dobram a
-frustração sem dobrar a profundidade. Tirar depois é muito mais caro que acrescentar depois.
+| DEF | redução | o que os próximos **+1000** ainda valem |
+|---|---|---|
+| 1.000 | 16,7% | +11,9 pontos |
+| 2.500 | 33,3% | +6,3 pontos |
+| **5.000** | **50%** | +4,5 pontos |
+| 10.000 | 66,7% | +2,1 pontos |
+| 20.000 | 80% | +0,8 ponto |
 
-### RETORNOS DECRESCENTES — o achado do WoW
+> **O que isto substitui:** `min(DEF/1000 × 0,75, 0,75)` (`Combate.cs:47-48,366`), que é **linear até
+> 1000 e vale ZERO daí em diante**. Com o item de DEF valendo `55 × capítulo`, **dois deles já
+> saturavam** — e com 7 slots míticos o slot de DEF morreria sozinho.
 
-Para resistir a controle o WoW **não usa estatística**: o mesmo tipo de efeito no mesmo alvo dura
-**metade** na 2ª vez, **um quarto** na 3ª, e depois o alvo fica **imune** por um tempo.
+### Precisão × Resistência — o malefício cola?
 
-**As duas coisas se completam e não competem:**
-- **Aptidão × Resistência** — o rolo do acerto: cola AGORA?
-- **Retornos decrescentes** — o teto da repetição: colou de novo, mas dura menos.
+**O nome é `Precisão`** (era "Aptidão", jargão de WoW pt-BR que ninguém decodifica). Sem esquiva no
+jogo, nada mais pode "errar", então o nome fica livre e se explica sozinho.
 
-Só Resistência vira loteria; só retornos faz todo mundo colar sempre. Juntos, premiam **variedade**
-(quatro malefícios diferentes valem mais que o mesmo quatro vezes) — que é exatamente a estratégia de
-time que a bancada atual não consegue medir.
+**A ESCALA:** 0–1.000. Uma build balanceada fica em **400–600**; full na estatística chega a **1.000**.
+Vale igual pros dois lados.
 
-> **Resistência por TIPO de efeito**, como no Darkest Dungeon (lá são Atordoamento, Sangramento,
-> Praga, Debuff, Movimento, Golpe Fatal), é melhor que uma resistência única: o alvo pode ser durão
-> contra atordoar e frágil contra veneno, e isso vira decisão de time. **Cuidado:** o encaixe é o
-> `StatusEffect`, NÃO a `NaturezaDano` — esta descreve o golpe (ignora defesa, tipo de dano), não o
-> efeito aplicado.
+```
+chance de colar            =  min( 100% , Precisão ÷ (Resistência × 2) )
+chance de reduzir 1 turno  =  (100% − chance de colar) ÷ 2
+piso: nunca abaixo de 1 turno — já colou, então dura
+```
+
+**Empate = 50% de chance. O DOBRO da Resistência = 100%, garantido.** Contra um alvo balanceado de
+**500 de Resistência**, numa habilidade de 2 turnos:
+
+| sua Precisão | cola | reduz 1t | o que acontece |
+|---|---|---|---|
+| 250 | 25% | 37,5% | 75% nada · 15,6% com 2t · 9,4% com 1t |
+| **500** (empate) | **50%** | **25%** | 50% nada · 37,5% com 2t · 12,5% com 1t |
+| 750 | 75% | 12,5% | 25% nada · 65,6% com 2t · 9,4% com 1t |
+| **1.000** (full) | **100%** | **0%** | **sempre cola, sempre cheio** |
+
+**A segunda rolagem morre junto com a primeira** — quem chega a 100% de Precisão cola sempre **e**
+cola cheio. A build perfeita compra as duas certezas de uma vez, sem regra separada pra isso.
+
+> **É RNG, mas o RNG é comprável.** A objeção de sempre contra chance é perder a ação inteira pra um
+> dado — e ela só vale quando o dado é **inevitável**. Aqui a Precisão é o preço de sair da loteria.
+> Melhor que o Raid nisso: lá sempre sobra 3% de erro, piso que existe pra impedir garantia em PvP e
+> arena. **Sem PvP, não há motivo pra negar 100% a quem pagou.**
+>
+> **Na tela é UM número.** A habilidade continua dizendo o que sempre disse (valores íntegros, nada de
+> efeito pela metade); ao mirar, aparece `chance de aplicar: 75%` — e essa linha **some** quando chega
+> a 100%, que é o estado que o jogador persegue.
+>
+> **O `× 2` é o botão:** baixa pra 1,5 e o controle fica fácil; sobe pra 3 e Resistência vira muito
+> forte. **Precisão × Evasão não existe** — a esquiva está cortada, e `Precisão` assumiu o nome.
+
+**Por que a potência NÃO é reduzida** (a alternativa considerada): aplicar o efeito a 18% em vez de 30%
+seria determinístico e granular, mas exigiria **mostrar o valor recalculado por alvo** na tela. A
+habilidade passa a dizer coisas diferentes conforme quem se mira. Uma porcentagem de acerto é um número
+só, e o jogador já sabe ler.
+
+### Nada de RETORNOS DECRESCENTES globais — quem trava é o BOSS
+
+A escada do WoW (2ª aplicação vale metade, 3ª um quarto, depois imune) **fica de fora**. Reaplicar
+veneno, queima ou redução de defesa não quebra nada; o único abuso real é **controle que tira o turno**
+— quatro champs atordoando em sequência travam um chefe pra sempre.
+
+**A trava não é regra global, é PASSIVA DO BOSS**, e o jogador **lê na ficha dele**:
+
+- *"não pode ter o turno reduzido"*
+- *"redução de turno limitada a 10%"*
+- *"imune a atordoamento, prisão e qualquer impedimento de agir"*
+- *"dano de veneno e queima acumulados têm teto"*
+
+**Isso é melhor que a regra global por três motivos:** vira **conteúdo** (cada boss é um quebra-cabeça
+diferente em vez de uma regra que vale pra todos), é **visível** (lido na ficha, não descoberto na
+marra), e **não põe exceção nenhuma no motor** — que é justamente o que a Composição de Ações existe
+pra permitir.
+
+#### Metade dessas passivas já funciona; a outra metade pede um gancho novo
+
+`IBloqueiaStatus` (`ICapacidadesStatus.cs:79`) é chamado em `Combate.PodeReceber` antes de adicionar
+qualquer status, e **já tem implementadores em passiva-pura** (`CascaDura`, `PeleDeDragao`). Mas a
+resposta dele é **binária** — o status entra inteiro ou não entra:
+
+| passiva de boss | cabe no `IBloqueiaStatus`? |
+|---|---|
+| *"imune a atordoamento, prisão e qualquer impedimento de agir"* | ✅ sim, e custa **zero motor** |
+| *"não pode ter o turno reduzido"* | ✅ sim |
+| *"redução de turno limitada a **10%**"* | ❌ precisa **entrar mais fraco** |
+| *"veneno e queima acumulados têm **teto**"* | ❌ idem |
+
+**Falta o gancho de ATENUAR, e o motor já tem o espelho dele do lado do dano:**
+
+| | dano | status |
+|---|---|---|
+| **barrar** | `IPrevineMorte`, bloqueios | `IBloqueiaStatus` ✅ |
+| **atenuar** | `IModificaDanoRecebido` (escudo, bloqueio, proteção de aliado) | **não existe** ❌ |
+
+Ele entra no mesmo ponto do fluxo: depois que ninguém bloqueou, os atenuadores ajustam valor e/ou
+duração antes de o status ser adicionado.
+
+> **ARMADILHA CONHECIDA, e ela já custou um bug aqui:** com dois atenuadores no mesmo status, **a ordem
+> muda o resultado**. Foi exatamente o bug do bloqueio × escudo, fechado no **#185** com o
+> `OrdemDeMitigacao` (`ReduzDeGraca` × `ConsomeRecurso`, **sem `default`**, pra o compilador cobrar de
+> quem escrever capacidade nova). O gancho de status deve **nascer com a ordem declarada** — descobrir
+> isso depois significa um boss se comportando errado em silêncio.
+
+> **Resistência por TIPO** (Darkest Dungeon: Atordoamento, Sangramento, Praga…) custaria seis stats na
+> ficha, seis fontes em item e seis números pra calibrar. **Uma Resistência única no stat**, com a
+> variedade vindo de traço/passiva de champ, dá a mesma decisão de time por muito menos. O encaixe é o
+> `StatusEffect` (que já tem tipo), **NÃO** a `NaturezaDano` — esta descreve o golpe, não o efeito.
 
 ---
 
@@ -143,6 +238,35 @@ habilidade** — trabalho de implementação, não decisão em aberto.
 > Combatente…). Zero campo novo — o slot já é identidade no save (`Faccao+Slot`) e já comanda a ordem
 > de drop, então o jogador ganharia os papéis sempre na mesma ordem e teria time completo cedo. O
 > preço é engessar a ordem de descoberta. Não decidido.
+
+### A VARIAÇÃO POR FACÇÃO — ±5%, soma zero
+
+Dentro de uma facção, os Guardiões são idênticos; entre facções, cada uma torce a ficha um pouco. O
+Lado Sombrio pode ser `+HP +ATK −DEF`, **ganhando e perdendo o mesmo tanto**. Assim um Guardião de uma
+facção realmente aguenta mais que o de outra, e nenhuma facção é estritamente melhor.
+
+**A matriz é 4 tipos + 9 facções = 13 conjuntos de números**, não 36 fichas soltas.
+
+> **CUIDADO, e ele é matemático: soma zero em % NÃO é soma zero em PODER.** HP e DEF se
+> **multiplicam** (o quanto se aguenta é `HP × 1/(1−redução)`), enquanto ATK é linear. `+5% ATK` e
+> `−5% DEF` não se cancelam no jogo, só na planilha. **A neutralidade tem de ser MEDIDA na bancada**,
+> nunca presumida da soma.
+>
+> **Velocidade fica FORA da matriz.** Sendo o stat que decide quem joga, uma facção com bônus nela
+> domina todas as outras, e nenhum `−5% DEF` compensa isso.
+
+### Dano que escala com DEF ou HP — somando, nunca substituindo
+
+```
+dano  =  ATK × multiplicador            (todo mundo)
+      +  DEF × multiplicador2           (só quem tem essa habilidade)
+```
+
+Um Guardião que bate forte por ser durão é bom; **um champ que IGNORA o ATK não é.** No Raid isso cria
+duas economias de equipamento paralelas — o item de ATK vira lixo pra metade do elenco. Somando em vez
+de substituir, o ATK segue sendo o eixo do dano do jogo inteiro e a parcela extra é tempero.
+
+**Custo: um campo a mais na habilidade**, e nenhuma exceção no motor.
 
 ### O nível sobe por CURVA DO TIPO — nada de pontos distribuíveis
 
@@ -268,11 +392,12 @@ raridade, em vez de reescrever cada habilidade.
 
 - **Equipados no CAMPEÃO**, não mais no jogador. É o que os torna valiosos — e é a mudança de maior
   impacto no save.
-- **CONJUNTOS**: bônus por peças equipadas, e o que cada conjunto faz cresce com a raridade.
+- **CONJUNTOS de 9 peças**, com bônus em **3 / 6 / 9**. E o que cada conjunto faz cresce com a
+  raridade. *(O que cada conjunto FAZ ainda não foi desenhado.)*
 
-> **O problema do número ímpar (7 peças) tem saída barata:** bônus em **2/4/6** e o **acessório fora
-> do conjunto** — um slot livre. Resolve hoje, sem mexer no boneco e sem inventar 3 acessórios (que
-> segue como ideia futura, levando o conjunto a 9).
+> **O número ímpar deixou de ser problema.** O GDD antigo remendava com bônus em 2/4/6 e o acessório
+> **fora** do conjunto — sobrava uma peça sem função. Com os **2 acessórios das dungeons**, são 9
+> peças, três degraus iguais entre si, e **toda peça conta**.
 
 ### Os três eixos do item — e cada um com sua fonte de custo
 
@@ -286,6 +411,140 @@ raridade, em vez de reescrever cada habilidade.
 > estrela **e** raridade, no teto daquela dificuldade. Uma condição, dois eixos.
 
 > **A moeda que ficou parqueada já tem dono: é o nível.** Não é preciso procurar função pra ela.
+
+### A FÓRMULA — o % multiplica o cheio, e os %s somam entre si
+
+```
+total  =  (base + valores cheios) × (1 + Σ percentuais)
+```
+
+**Duas decisões dentro de uma linha, e cada uma resolve um problema:**
+
+**1. O % incide sobre `base + cheios`.** Hoje (`Combate.cs:98`) ele multiplica só a base e **ignora os
+valores cheios** — então cheio e % viram duas parcelas somadas que **competem pelo mesmo slot**, e
+qual delas ganha muda com o nível (cedo o cheio é enorme perto da base pequena; tarde a base cresceu e
+o % passa na frente). Multiplicando, os dois **se amplificam**: cada ponto de cheio aumenta o quanto
+vale cada % que você já tem. O cheio deixa de ser concorrente e vira o **piso** sobre o qual tudo
+incide — nunca é lixo.
+
+**2. Os percentuais SOMAM entre si; nunca compõem.** Três peças de 3% dão **9%**, não `1,03³`.
+
+| modelo | 3 peças de 3% sobre `base 10.000 + cheios 5.000` |
+|---|---|
+| **soma** ← esta | 16.350 |
+| compõe | 16.391 |
+| % sobre a base crua (o de hoje) | 15.900 |
+
+> Compor parece inofensivo com números pequenos (0,25% de diferença aqui), mas com 7 peças a 20%
+> aditivo dá `×2,4` e composto dá `×3,58` — **50% de diferença**, e no topo os %s serão grandes. Pior:
+> compor tira a **previsibilidade** (somar os %s da ficha é conta de cabeça; multiplicar sete fatores
+> não) e faz **o valor de uma peça depender das outras**, o que torna comparar dois itens impossível.
+
+**Buffs de combate continuam por cima**, como já são hoje (`base × multFase + itens` → bônus permanente
+→ buff/debuff sobre esse total). Isso separa **o que você construiu** (itens, aditivo, previsível) do
+**que aconteceu na luta** (buffs, temporário, multiplicativo) — e um buff de +50% valendo mais no
+boneco bem-equipado é o comportamento certo.
+
+**Calibrar o valor cheio pelo TOPO:**
+
+```
+rolagem de valor cheio  ≈  (% por rolagem) × (base típica do topo)
+```
+
+Assim os dois **empatam no full mítico** e o cheio **domina no começo** (onde a base é pequena) — que é
+o desenho que se quer: nenhum dos dois é lixo em momento nenhum da curva.
+
+### OS 9 SLOTS — 3 fixos, 4 variáveis, 2 acessórios
+
+Os 7 de armadura **já existem e já têm nome de corpo** (`ArsenalService.cs:73-83`), um por fase.
+
+| slot | | principal |
+|---|---|---|
+| **Arma** (fase 1) | fixo | ATK cheio |
+| **Elmo** (fase 2) | fixo | HP cheio |
+| **Escudo** (fase 3) | fixo | DEF cheio |
+| **Manopla** (fase 4) | variável | ATK% · HP% · DEF% · **Taxa Crítica** · **Dano Crítico** |
+| **Peitoral** (fase 5) | variável | ATK% · HP% · DEF% · **Resistência** |
+| **Calça** (fase 6) | variável | ATK% · HP% · DEF% · **Precisão** |
+| **Bota** (fase 7) | variável | ATK% · HP% · DEF% · **Velocidade** |
+| **Colar** · **Pulseira** | dungeons | *a definir* |
+
+**Por que metade fixa e metade variável:** se todos variassem, o jogador teria 7 loterias simultâneas e
+nunca fecharia uma build; se nenhum variasse, não existiria build, só acúmulo. **Fixos = esqueleto
+garantido, variáveis = espaço de escolha.** E o encaixe com as fases é feliz: os fixos são as fases
+**1–3** (o esqueleto vem cedo e barato) e os variáveis as **4–7** (a build vem tarde e cara).
+
+**Cada slot variável tem UM stat exclusivo** mais o trio `ATK%/HP%/DEF%` — assim **nenhum drop é 100%
+lixo**, e cada peça tem motivo próprio de ser farmada. A Manopla é a mão que golpeia (o crítico inteiro
+mora nela, e taxa × dano viram escolha); o Peitoral é o torso que aguenta; a Calça é a perna que se
+move; a **Bota** é a única fonte de Velocidade como principal — e ela **já era a fase 7**, a mais
+difícil do capítulo, então o stat mais forte do jogo já nasce no lugar mais caro sem mexer em nada.
+
+> **`ATK%` ainda não existe.** O `Combate.cs:86` já tem o `ItensAtaquePct` sendo usado no cálculo, mas
+> **não há `TipoStat.ATKPct`** que o alimente — HP e DEF têm cheio *e* %, o ATK só tem cheio. É criar o
+> valor no enum e ligar.
+>
+> **O botão da Velocidade:** a raridade dela é o **tamanho do leque da Bota**. Quatro opções = 25% de
+> chance de vir Velocidade. Quer mais rara? Acrescenta opções. Um número por slot.
+
+### AS SUBESTATÍSTICAS — 8 no pool, e nenhuma escolha aritmética
+
+```
+armadura (7)   → subs em PERCENTUAL
+acessórios (2) → subs em VALOR CHEIO
+```
+
+**Esta divisão existe por um motivo de INTERFACE, não de balanço.** Se `ATK` e `ATK%` pudessem sair
+juntos, o jogador escolheria entre duas caras do mesmo stat — e decidir entre elas é uma **conta**, não
+uma escolha. Pior: na forja, duas das três opções seriam a mesma coisa. Separando por peça, **as duas
+formas nunca aparecem lado a lado** e toda opção oferecida é uma coisa diferente das outras.
+
+**O pool (8):** `ATK%` · `HP%` · `DEF%` · `Taxa Crítica` · `Dano Crítico` · `Velocidade` · `Precisão` ·
+`Resistência`.
+
+Numa Manopla com **Dano Crítico** de principal, as opções são `Taxa Crítica · ATK% · Velocidade ·
+Precisão · HP% · DEF% · Resistência` — sete coisas **diferentes**, e a decisão vira estratégica:
+*acertar mais, agir mais ou bater mais?*
+
+**As regras:**
+- **`sub ≠ principal` daquele item** — a exclusão é da **forma exata**: uma Arma com `ATK cheio` de
+  principal **pode** ter `ATK%` de sub, e é justamente ela que o Combatente quer.
+- **Não repete no mesmo item** — além do teto, é o que faz a forja compor quatro coisas diferentes em
+  vez de empilhar a mesma.
+- **Valores FIXOS**, sem variação de rolagem. Não é só "somos offline, não gacha": a variação
+  **brigaria com a forja**. Pagar caro, recusar três vezes, escolher a sub que queria — e ela vir no
+  mínimo? A escolha comprada seria anulada por um dado. A variação em gacha existe pra criar uma
+  camada extra de farm; a forja **é** essa camada, e é conteúdo.
+- **A Velocidade é em valor cheio**, nunca %. Em % o Atirador (base 115) ganharia mais velocidade
+  absoluta que o Guardião (base 90) com a mesma sub — o rápido ficaria mais rápido e a faixa explodiria
+  sozinha.
+
+**O teto, e ele CALCULA o valor da sub:** uma sub totalmente aprimorada são **6 rolagens** (a inicial +
+5 aprimoramentos). Se ela tem de ficar abaixo do principal no topo:
+
+```
+rolagem de sub  =  principal (6★ +20) ÷ 7
+```
+
+Escolhe-se **um** número — quanto o principal dá no topo — e o da sub sai por divisão, já obedecendo
+"principal > sub" por construção, em todo stat.
+
+**A estrela multiplica principal e sub juntos**, então a hierarquia se mantém em qualquer estrela sem
+regra extra: `valor = base(stat) × fator(★) × (1 + aprimoramentos)`.
+
+> **SEM restrição temática por slot** (arma podendo ter `DEF%`, etc.). Ela existe em gacha pra afunilar
+> **volume** — o jogador abre centenas de peças e precisa descartar. Aqui o volume não existe (9 slots
+> × 8 conjuntos, drop garantido) e **a forja conserta a sub**: o item "errado" é matéria-prima, não
+> lixo. O custo dela seria fechar builds legítimas por estética. **E a assimetria decide:**
+> acrescentar depois é barato; tirar depois deixa todo item já dropado com um perfil sem sentido.
+>
+> **A alavanca, se ficar sem sabor:** em vez de PROIBIR `DEF%` na arma, dar a ela **peso menor no
+> sorteio**. Troca uma lista de proibições por uma tabela de pesos — dado, não regra.
+
+**O acúmulo tem freio, e ele já estava no desenho.** Um boneco full mítico tem `9 × (4 subs + 5
+aprimoramentos)` rolagens, e a tentação é achar que o jogador empilha tudo num stat só. **Ele não
+consegue:** a forja escolhe *quais subs existem*, mas **quem escolhe o slot do aprimoramento é o RNG**.
+Os 5 aprimoramentos se espalham entre as 4 subs (~1,25 cada); concentrar os 5 numa é ~0,1%.
 
 ### Raridade → quantas subs, e até onde o nível vai
 
@@ -510,6 +769,36 @@ Custos adicionais, para o reset não virar re-sorteio infinito:
 > **O custo de subir nível é o botão que calibra o endgame inteiro** — barato demais e todo mundo tem
 > o item perfeito numa semana; caro e o `(5,0,0,0)` é um troféu.
 
+### AS DUNGEONS — a fonte dos acessórios
+
+**Duas dungeons**, uma por acessório (colar, pulseira). É o que leva o conjunto a 9 peças.
+
+- **Escolhe-se a FACÇÃO na entrada**, e essa escolha define **o conjunto que dropa** e **a luta que se
+  enfrenta**. Deixa de ser menu e vira decisão.
+- Cada facção traz **buff no boss e/ou debuff no jogador**, combináveis — mais variedade sem inflar um
+  boss só. **Não removíveis.**
+- **As mesmas 4 dificuldades** da campanha, **desbloqueadas pelo capítulo** correspondente, e o jogador
+  escolhe qual enfrentar.
+- **Os modificadores são revelados na tela de pick**, antes de entrar.
+- **Marco do acessório** = vencer aquela dungeon, naquela facção, naquela dificuldade — a mesma regra
+  dos outros itens, com "fase" trocada por "dungeon".
+
+> **O motor já suporta o "não removível": custo ZERO.** `StatusEffect.Removivel` existe
+> (`StatusEffect.cs:42`) e o `Seletor.Removiveis()` já a respeita — quem limpa debuff só alcança o que
+> está marcado. A peça foi construída pro DocesOuTravessuras e serve aqui inteira.
+>
+> **Usar as mesmas 4 dificuldades foi decisão de ECONOMIA:** uma escada própria criaria um segundo
+> lugar onde "quanto vale a dificuldade X" está escrito, e duas cópias de um número divergem. Se um dia
+> quiser mais granularidade, ter níveis DENTRO de cada dificuldade mantém o teto vindo do bloco.
+
+**Duas regras pros modificadores valerem a pena:**
+1. **Eles têm de pedir uma RESPOSTA, não mais números.** `+50% de HP no boss` só faz a luta durar mais;
+   `reflete dano em área` faz trocar o time. O segundo é conteúdo, o primeiro é tempo.
+2. **Buff no boss é o padrão** (mais legível — vê-se contra o que se luta). **Debuff no jogador é a
+   ferramenta de forçar COMPOSIÇÃO** (`cura recebida −50%` desliga a dependência de healer). Não
+   removível **e anunciado** é quebra-cabeça; não removível **e invisível** é loteria — e a diferença
+   entre as duas coisas é texto numa tela.
+
 ### Sobre o offline e o save editado
 
 **Não existe defesa real em jogo offline single-player.** Ofuscar, assinar, checksum: uma tarde de
@@ -582,7 +871,7 @@ Arena já existe justamente pra isso, e o `ControladorBot` já joga os dois lado
 mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar.
 
 1. **Velocidade + barra de turno + fila única.** Mexe em `Batalha`, `Equipe`, `TurnoDoPersonagem`.
-2. **Aptidão × Resistência + retornos decrescentes.**
+2. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
 3. **Posição na habilidade** (`posicoesDeUso`/`posicoesAlvo`) + ordenar o time na montagem.
 4. **Tipos** (Guardião/Combatente/Atirador/Suporte) — **com o stat base vindo do tipo** e um de cada
    por facção. Arrasta sobrescrever habilidade nos capítulos com dois champs do mesmo papel.
@@ -621,6 +910,19 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - **Quem escolhe o slot do aprimoramento é o RNG.**
 - **O marco do item é por FASE**, não por capítulo — vencer a fase de origem dele naquela dificuldade.
   Isso fecha a cadeia sozinho: não existe item com estrela acima do próprio marco.
+- **A DEF usa `DEF/(DEF+5000)`** — sem cap, sem penhasco, e o item de DEF nunca vira lixo.
+- **`Aptidão` virou `Precisão`**, na escala 0–1.000 (típico 400–600). A esquiva segue cortada.
+- **Malefício é CHANCE**, não potência reduzida: `min(100%, P ÷ 2R)` pra colar, mais `(1−chance)÷2` de
+  perder 1 turno, com piso de 1. **O dobro da Resistência garante 100%** — o RNG é comprável.
+- **Sem retornos decrescentes globais.** Quem trava controle é **passiva do BOSS**, escrita na ficha
+  dele — conteúdo em vez de regra, e zero exceção no motor.
+- **Percentuais SOMAM entre si** e incidem sobre `base + valores cheios`.
+- **Subs em % na armadura, em valor cheio nos acessórios** — assim as duas formas do mesmo stat nunca
+  aparecem lado a lado, e nenhuma escolha do jogador é aritmética.
+- **Conjunto de 9 peças, bônus em 3/6/9.**
+- **Variação por facção de ±5%, soma zero**, com a Velocidade fora da matriz.
+- **Dano pode escalar com DEF/HP SOMANDO ao ATK**, nunca substituindo.
+- **Não há restrição temática de sub por slot** (arma pode ter `DEF%`).
 - **Campeão dropa garantido** na fase dele.
 - Nada de **forçar o uso** de um campeão específico pra passar de fase.
 

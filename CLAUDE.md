@@ -103,14 +103,22 @@ camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição d
   VS faria o `git mv` da pasta inteira falhar no meio) e apagar a pasta velha depois — ela reaparece
   enquanto o VS estiver com a solução antiga carregada.
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
-- Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`.
+- Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`,
+  `docs/GDD-progressao.md` (o plano que muda quase todo número), **`docs/LORE.md`**.
+
+## A LORE existe agora, e ela RENOMEIA coisas (ago/2026)
+**Os apóstolos são peças de brinquedo dos deuses; a guerra é entre apóstolos.** Ler `docs/LORE.md`
+antes de mexer em nome de facção, de champ ou em texto de tela. Duas consequências já na fila
+(ROADMAP §FILA A #17 e #18), **e a ordem entre elas não é negociável**: (1) a facção `Apostolos`
+vira **`Ascendentes`** e o símbolo 🌬️ vira ❄️; (2) só então `champ`/`campeão` vira **`apóstolo`** em
+todo o repo (~1.008 ocorrências, 148 arquivos). Invertendo, nasce `Apostolos/Apostolos/`.
 
 ## Fazer o CENÁRIO de uma facção (falta Humanos) — leia nesta ordem
 Oito peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos · ⭐ Especial ·
-🔱 Decaídos · ✝️ Apóstolos), falta 1. **A conta das assinaturas está fechada:** dia claro (Reino), lua
+🔱 Decaídos · 🌬️ Apóstolos), falta 1. **A conta das assinaturas está fechada:** dia claro (Reino), lua
 (cemitério), estrelas (invasão), âmbar de fogo (Folclore), crepúsculo (praia), interior sem céu
 (Especial), luz vinda de baixo (Inferno) e a paisagem vista por um RECORTE (a janela dos Apóstolos).
-Pros Humanos não sobra HORA nenhuma — o caminho é o mesmo do ⭐ Especial e dos ✝️ Apóstolos: um LUGAR em
+Pros Humanos não sobra HORA nenhuma — o caminho é o mesmo do ⭐ Especial e dos 🌬️ Apóstolos: um LUGAR em
 vez de uma hora, ou um enquadramento.
 **Não invente processo: já existe manual, e ele é caro — cada linha dele custou uma rodada de "ficou
 ruim" em jogo.**
@@ -125,7 +133,7 @@ ruim" em jogo.**
    `comListras` — o padrão de "monta o caminho UMA vez, usa pra preencher E recortar". O 🔱 Decaídos
    é a mais barata de imitar em peça grande: ela é montada de MEMBROS sorteados num caminho
    só (`tracarMembro`, com o sentido do traço garantido por construção), o maestro sendo LUZ e não
-   vento (`inferno.pulso`), e uma HISTÓRIA amarrando as peças umas nas outras. O ✝️ Apóstolos é a mais
+   vento (`inferno.pulso`), e uma HISTÓRIA amarrando as peças umas nas outras. O 🌬️ Apóstolos é a mais
    NOVA, e a de imitar quando a cena tiver um ROTEIRO: a noite inteira dele é uma sequência de passos
    (`criarRoteiroDaNoite`) escrita num maestro por uma camada que **não desenha nada**, e lida por
    quatro peças em cantos diferentes da tela. É também a única em que a paisagem é vista por um

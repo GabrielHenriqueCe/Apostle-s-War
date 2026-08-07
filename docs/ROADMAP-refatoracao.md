@@ -1301,6 +1301,38 @@ as regras dos dois lados.
     cópia. O teste enuncia a regra por conta própria; apontá-lo pra constante central o tornaria
     tautológico e mudar o balance deixaria de acusar nada.
 
+17. ⏳ **RENOMEAR A FACÇÃO: `Apostolos` → `Ascendentes`, símbolo 🌬️ → ❄️** *(ago/2026, vem da
+    §LORE)*. **É o PRIMEIRO dos dois, e a ordem NÃO é negociável** — ver o item 18.
+    **Por que:** o jogo se chama *Apostle's War* e **todo herói é um apóstolo**, então não pode
+    existir uma facção com esse nome. Detalhe em `docs/LORE.md`.
+    **O que muda (zero lógica):** o valor do enum `Faccao` + o `[Description]` (`Enums.cs:17`) · o
+    símbolo em `Faccoes.cs:22` · a chave de tema `body[data-tema="apostolos"]` · a pasta
+    `wwwroot/cenarios/apostolos/` (o `.js`, o `.css` e o `<link>` do index) · a entrada do
+    `AR_DO_TEMA` · a pasta `ApostlesWar.Domain/Champs/Apostolos/` · a linha do `ArsenalService:39`.
+    **Verificar:** `rodar-telas.js` + `rodar-tema.js` (o tema some se a chave escapar em um lugar só).
+    **Escolha do ❄️:** único candidato que carrega gelo E algo cristalino, não colide com os 8
+    símbolos em uso, e tem a ironia certa — quem se chama *Ascendente* é simbolizado por algo que
+    **cai**. (🪽 estava fora: já é o item de bota da própria facção; ⛄ é champ; ⭐ é o Especial.)
+
+18. ⏳ **RENOMEAR `champ`/`campeão` → `apóstolo` em TODO o repo** *(ago/2026, vem da §LORE)*.
+    **Depende do 17.** Se `Champs/` virar `Apostolos/` **antes** de a facção mudar de nome, nasce
+    `Apostolos/Apostolos/` — pasta dentro de pasta homônima, com `git mv` no meio.
+    **Tamanho medido (ago/2026), ~1.008 ocorrências em 148 arquivos:**
+
+    | área | ocorrências | arquivos |
+    |---|---|---|
+    | Presentation (front) | 420 | 42 |
+    | Tests | 202 | 10 |
+    | docs | 175 | 5 |
+    | Domain | 125 | **81** |
+    | Application | 86 | 10 |
+
+    Quase tudo é mecânico. **O que NÃO é:** a pasta `ApostlesWar.Domain/Champs/` (81 arquivos) muda
+    de nome — mover pasta versionada tem a armadilha do §CLAUDE.md (mover só os VERSIONADOS; o
+    `bin`/`obj` travado pelo VS faz o `git mv` da pasta inteira falhar no meio). **Fechar o jogo
+    antes.** Domínio em PORTUGUÊS pela regra da casa: `Campeao` → `Apostolo`, `CampeoesService` →
+    `ApostolosService`.
+
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
 

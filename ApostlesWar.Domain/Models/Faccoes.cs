@@ -18,7 +18,7 @@ namespace ApostlesWar.Domain
             { Faccao.Misticos, "🐉" },
             { Faccao.Especial, "⭐" },
             { Faccao.Decaidos, "🔱" },
-            { Faccao.Apostolos, "🌬️" }
+            { Faccao.Ascendentes, "❄️" }
         };
 
         public static string Simbolo(Faccao faccao) => simbolos[faccao];

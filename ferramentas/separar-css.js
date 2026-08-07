@@ -18,7 +18,7 @@ const path = require('path');
 
 const WWW = path.resolve(__dirname, '../ApostlesWar.Presentation/wwwroot');
 const CSS = path.join(WWW, 'estilo.css');
-const TEMAS = ['reino', 'ladosombrio', 'tecnologicos', 'folclore', 'misticos', 'especial', 'decaidos', 'apostolos'];
+const TEMAS = ['reino', 'ladosombrio', 'tecnologicos', 'folclore', 'misticos', 'especial', 'decaidos', 'ascendentes'];
 const SO_CONFERIR = process.argv.includes('--conferir');
 
 // ---------- especificidade ----------
@@ -197,7 +197,7 @@ const CABECA = {
     misticos: '🐉 MÍSTICOS — a praia no crepúsculo.',
     especial: '⭐ ESPECIAL — o banheiro público, o primeiro INTERIOR.',
     decaidos: '🔱 DECAÍDOS — a vila élfica vendida, com a luz vindo de baixo.',
-    apostolos: '✝️ APÓSTOLOS — a sala de Natal, a paisagem vista por um RECORTE.',
+    ascendentes: '❄️ ASCENDENTES — a sala de Natal, a paisagem vista por um RECORTE.',
 };
 
 for (const t of TEMAS) {

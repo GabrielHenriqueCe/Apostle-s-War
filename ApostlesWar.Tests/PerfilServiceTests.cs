@@ -159,7 +159,7 @@ namespace Tests
 
             // Começo de jogo: os 4 Humanos liberados, o resto travado.
             Assert.True(servico.PodeUsarAvatar(personagens.ObterPersonagem(Faccao.Humanos, Slot.Slot1)));
-            Assert.False(servico.PodeUsarAvatar(personagens.ObterPersonagem(Faccao.Apostolos, Slot.Slot4)));
+            Assert.False(servico.PodeUsarAvatar(personagens.ObterPersonagem(Faccao.Ascendentes, Slot.Slot4)));
         }
 
         [Fact]

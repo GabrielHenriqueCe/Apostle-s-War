@@ -2,7 +2,7 @@ using ApostlesWar.Domain;
 using ApostlesWar.Domain.Skills.Buffs;
 using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Domain.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Ascendentes
 {
     /// <summary>
     /// Papai Noel — champ como DADO. Saco de Presente buffa os aliados, ataca todos e aplica Medo.
@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Champs.Apostolos
     public static class PapaiNoel
     {
         public static Personagem Definir() => new(
-            4, Faccao.Apostolos, "Papai Noel", "🎅", 1000, 200, 200,
+            4, Faccao.Ascendentes, "Papai Noel", "🎅", 1000, 200, 200,
             SacoDePresente(), FabricaDePresente(), new Surpresa());
 
         static HabilidadeAtiva SacoDePresente() => new(

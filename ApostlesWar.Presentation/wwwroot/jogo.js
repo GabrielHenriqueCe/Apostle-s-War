@@ -16,7 +16,7 @@ import * as folclore from './cenarios/folclore/folclore.js';
 import * as misticos from './cenarios/misticos/misticos.js';
 import * as especial from './cenarios/especial/especial.js';
 import * as decaidos from './cenarios/decaidos/decaidos.js';
-import * as apostolos from './cenarios/apostolos/apostolos.js';
+import * as ascendentes from './cenarios/ascendentes/ascendentes.js';
 
 import { abrirTela, aoTrocarCena, cenaAgora, menuEhRaiz, mostrarCena } from './nucleo/cena.js';
 import { aplicarTema, registrarCenarios } from './nucleo/ar.js';
@@ -177,7 +177,7 @@ export const CENARIOS = {
     misticos,
     especial,
     decaidos,
-    apostolos,
+    ascendentes,
 };
 
 // ---------- partida ----------

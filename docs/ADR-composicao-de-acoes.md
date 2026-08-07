@@ -219,7 +219,7 @@ Galáxia ✅ (Alien, Tecnológicos), Esmagar ✅ (Ogro, Folclore)).
 `Sentença(Mortos)` pegar os recém-mortos. **O `Ambos` MORRE** — uma habilidade que mira dois
 estados é só uma habilidade com duas ações de estados diferentes; o `throw` no `Ambos` ficou
 sem sentido e foi descartado. **✅ O enum-value `Ambos` MORREU (jul/2026):** o 7º e último cliente
-(o Céu) migrou nos Apóstolos; o value, o check no `CombateService:282` e o branch "sem filtro" do
+(o Céu) migrou nos Ascendentes; o value, o check no `CombateService:282` e o branch "sem filtro" do
 interpretador foram removidos no PR de limpeza pós-sweep. `EstadoAlvo` hoje é só `{ Vivos, Mortos }`.
 
 ### 5.4 Seletor (quais/quantos STATUS por combatente)
@@ -418,7 +418,7 @@ CONCEITO de `Seletor` — mas **NÃO o dispatch** (passiva = `IReageAo*`, ação
 sistemas ficam separados de propósito, não se fundem). Possível consolidação: as passivas
 passarem a escolher status via o mesmo `Seletor` (unir o "pegar status", não o invólucro).
 **QUANDO:** ao TOCAR cada passiva de duração no sweep da facção dela — AnáliseCrítica caiu nos
-Tecnológicos (deixada como estava, DE PROPÓSITO), Repetindo cai em Apóstolos, Policial já está
+Tecnológicos (deixada como estava, DE PROPÓSITO), Repetindo cai em Ascendentes, Policial já está
 em Humanos. **REGRA (Gabriel):** ao chegar nessas passivas, **PARAR e reavaliar este ponto** —
 decidir juntos se vale unir a seleção; não construir especulativo antes da hora.
 
@@ -430,7 +430,7 @@ usos triviais (um estende Preso, um estende 1 debuff aleatório, um reduz todos 
 Se um dia nascer uma 4ª passiva de duração com seleção complexa, reabrir; até lá, fechado.
 
 **A família do revive (descoberta jul/2026, lendo os usuários de `EstadoAlvo.Ambos`):**
-`Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology ✅ (Tecnológicos), Céu (Apóstolos),
+`Reviver` tem **7 clientes** — Nigiri ✅ (Humanos), Tecnology ✅ (Tecnológicos), Céu (Ascendentes),
 AnjoCaído (Decaídos), DocesDeAbobora ✅ (LadoSombrio, revive **SÓ 1**), Circo ✅ (Folclore) e
 Atlantis ✅ (Místicos). Circo e Atlantis usam `buffNoRevivido` (Intocável só nos revividos — §8.1 dissolvido).
 
@@ -544,7 +544,7 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
   ("Espinhos Corrompidos") — colidia no display com o buff `EspinhosVenenosos` (que exibe "Espinhos").
   **A unificação-do-ignorar NÃO foi feita aqui** (a Drenagem é fonte, não muda): vira PR próprio logo
   após, com desenho fechado (natureza fala a língua da lista, os `DeveAgir` morrem). Revive 6/7.
-  **Apóstolos ✅ — SWEEP DAS 9 FACÇÕES COMPLETO** (Boneco de Neve/Mímico/Anjo/Papai Noel): 100%
+  **Ascendentes ✅ — SWEEP DAS 9 FACÇÕES COMPLETO** (Boneco de Neve/Mímico/Anjo/Papai Noel): 100%
   vocabulário puro, ZERO bespoke. `MoverBuffs` **construído** (gêmeo do `RemoverBuffs`, move a
   instância; cliente = Copiando) — com ele o vocabulário mapeado esgotou (só resta `AcaoSobreConjunto`,
   sem cliente). Imitação usa `Dano(Func)` (escala com os buffs do Mímico, molde do Tengu). Céu = **7º e

@@ -1,7 +1,7 @@
 ﻿using ApostlesWar.Domain;
 using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar.Domain.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Ascendentes
 {
     /// <summary>
     /// Ao ser atacado, escolhe 1 debuff aleatório do atacante e aumenta sua

@@ -538,7 +538,7 @@ namespace Tests
             Assert.Equal(1800, inimigo.HPAtual);
         }
 
-        // ---------- Vocabulário novo (Apóstolos) ----------
+        // ---------- Vocabulário novo (Ascendentes) ----------
 
         [Fact]
         public void MoverBuffs_RoubaSoOsRemoviveis_DoAlvoProAtacante()

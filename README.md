@@ -92,7 +92,7 @@ Vencer uma fase dropa um item; vencer um capítulo desbloqueia a facção seguin
 Cada capítulo tem **cenário próprio, animado em canvas**: o dia claro da cidade murada do Reino, o
 cemitério enluarado do Lado Sombrio, a invasão sob as estrelas dos Tecnológicos, a clareira do
 Folclore, a praia no crepúsculo dos Místicos, o banheiro dos Especiais, a Árvore do Mundo escorrendo
-lava dos Decaídos e a sala de Natal dos Apóstolos.
+lava dos Decaídos e a sala de Natal dos Ascendentes.
 
 - **🧙 36 personagens** em 9 facções, cada um com kit próprio (ativas + passiva)
 - **🗺️ Campanha** — 8 capítulos × 7 fases, com desbloqueio progressivo
@@ -116,9 +116,9 @@ lava dos Decaídos e a sala de Natal dos Apóstolos.
 | 🐉 Místicos | 🧞 Gênio · 🧜 Sereia · 🧚 Fada · 🐲 Dragão |
 | ⭐ Especial | 💩 Cocô · 🦸 Herói · 🦹 Vilão · 🦖 T-Rex |
 | 🔱 Decaídos | 🦇 Morcego · 🧛 Vampiro · 🧝 Elfo · 😈 Diabo |
-| ✝️ Apóstolos | ☃️ Boneco de Neve · 🎭 Mímico · 👼 Anjo · 🎅 Papai Noel |
+| ❄️ Ascendentes | ☃️ Boneco de Neve · 🎭 Mímico · 👼 Anjo · 🎅 Papai Noel |
 
-Os **Humanos** são o time inicial — a campanha começa no Reino e termina nos Apóstolos.
+Os **Humanos** são o time inicial — a campanha começa no Reino e termina nos Ascendentes.
 
 ### Sistema de itens
 

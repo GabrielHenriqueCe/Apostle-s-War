@@ -177,7 +177,7 @@ namespace ApostlesWar.Presentation.Front
 
     // ---------- Campanha ----------
 
-    /// <summary>Um nó do mapa = uma facção-capítulo. Índice = posição na lista enviada (Reino..Apóstolos).</summary>
+    /// <summary>Um nó do mapa = uma facção-capítulo. Índice = posição na lista enviada (Reino..Ascendentes).</summary>
     internal record CapituloVista(string Simbolo, string Nome, bool Desbloqueado, bool Concluido);
 
     /// <summary>O mapa: as 8 facções em ordem + a posição atual (índice) onde o marcador começa.</summary>

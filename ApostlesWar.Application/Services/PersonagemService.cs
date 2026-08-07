@@ -10,7 +10,7 @@ using ApostlesWar.Domain.Champs.Folclore;
 using ApostlesWar.Domain.Champs.Misticos;
 using ApostlesWar.Domain.Champs.Especial;
 using ApostlesWar.Domain.Champs.Decaidos;
-using ApostlesWar.Domain.Champs.Apostolos;
+using ApostlesWar.Domain.Champs.Ascendentes;
 using ApostlesWar.Domain.Skills.Ativas;
 using ApostlesWar.Domain.Skills.Passivas;
 
@@ -74,7 +74,7 @@ namespace ApostlesWar.Application.Services
             Diabo.Definir(),
 
 
-            // Apóstolos — facção migrada pra forma final (Champs/Apostolos/), cada arquivo é a view.
+            // Ascendentes — facção migrada pra forma final (Champs/Ascendentes/), cada arquivo é a view.
             BonecoDeNeve.Definir(),
             Mimico.Definir(),
             Anjo.Definir(),

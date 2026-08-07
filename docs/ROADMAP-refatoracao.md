@@ -491,7 +491,7 @@ noite da invasão), 🪬 Folclore (a clareira com a fogueira, na noite QUENTE �
 sobrava, e cai bem porque aqui a fonte de luz é fogo), 🐉 Místicos (a praia no CREPÚSCULO, com a
 lâmpada na areia e o dragão dando as voltas dele), ⭐ Especial (o banheiro público — o primeiro
 INTERIOR), 🔱 Decaídos (a vila élfica vendida, com a Árvore do Mundo no meio escorrendo lava, e o
-Inferno se abrindo no chão de tempos em tempos) e ✝️ Apóstolos (a SALA de Natal — o segundo interior,
+Inferno se abrindo no chão de tempos em tempos) e ❄️ Ascendentes (a SALA de Natal — o segundo interior,
 com a árvore num canto, a lareira no outro e a nevasca vista por uma janela no meio). Falta 1
 facção (Humanos) — e ela está **bloqueada de propósito**, pela seção logo abaixo. Barata ela segue
 sendo (um bloco de CSS mais um punhado de configuração); o que falta não é esforço, é ONDE ela
@@ -514,7 +514,7 @@ capítulo em que se luta.
 
 **O que fica em aberto (é desenho, e é do Gabriel):** que cena é essa. A regra da assinatura vale
 igual — não sobra HORA nenhuma, então a resposta é um LUGAR, no caminho do ⭐ Especial e dos
-✝️ Apóstolos. E há uma pista boa no que a Arena É: ela não é um capítulo da história, é onde se
+❄️ Ascendentes. E há uma pista boa no que a Arena É: ela não é um capítulo da história, é onde se
 experimenta time contra time. O antigo comentário chamava isso de *laboratório*; vale decidir se a
 cena abraça essa ideia (um lugar de treino/torneio, fora do mundo da campanha) ou se contradiz.
 
@@ -544,10 +544,10 @@ Fazer os Humanos ANTES seria pagar a pele duas vezes: ela nasceria no arquivo mo
 vai picar, e nasceria sem a tela que decide o enquadramento dela. **E o enquadramento é justamente o
 que está em aberto** — não sobra hora nenhuma (dia é do Reino, lua do cemitério, estrelas da invasão,
 âmbar do Folclore, crepúsculo da praia, luz-de-baixo do Inferno), então a resposta tem de vir de um
-LUGAR ou de um recorte, no caminho do ⭐ Especial e dos ✝️ Apóstolos. Ver a cena no compêndio primeiro
+LUGAR ou de um recorte, no caminho do ⭐ Especial e dos ❄️ Ascendentes. Ver a cena no compêndio primeiro
 provavelmente responde isso sozinho.
 
-**O que os ✝️ Apóstolos ensinaram**, além do que subiu nas listas acima. Esta pele custou TRÊS versões
+**O que os ❄️ Ascendentes ensinaram**, além do que subiu nas listas acima. Esta pele custou TRÊS versões
 inteiras, e as duas que morreram ensinaram mais que a que ficou:
 
 - **1ª, a CATEDRAL na nevasca** — fachada em silhueta, rosácea acesa jogando luz colorida na neve, e um
@@ -893,7 +893,7 @@ wwwroot/
   ui/      placa.css · barraVida · tooltip          ← as peças compartilhadas
   telas/   menu/ perfil/ campanha/ arena/ arsenal/ compendio/ combate/
   cenarios/ comum/ + reino/ ladosombrio/ tecnologicos/ folclore/ misticos/
-            especial/ decaidos/ apostolos/ humanos/
+            especial/ decaidos/ ascendentes/ humanos/
 ```
 
 Cada facção vira **~700–1.300 linhas** — tamanho que cabe na cabeça. E cada pasta de cenário leva os
@@ -1300,6 +1300,51 @@ as regras dos dois lados.
     `ReceberDanoTests.cs:26-27` tem uma CÓPIA das duas constantes de defesa — e ela deve CONTINUAR
     cópia. O teste enuncia a regra por conta própria; apontá-lo pra constante central o tornaria
     tautológico e mudar o balance deixaria de acusar nada.
+
+17. ✅ **RENOMEAR A FACÇÃO: `Apostolos` → `Ascendentes`, símbolo 🌬️ → ❄️** *(ago/2026, vem da §LORE;
+    feito junto com as correções da lore)*. **Era o PRIMEIRO dos dois** — ver o item 18.
+    **Por que:** o jogo se chama *Apostle's War* e **todo herói é um apóstolo**, então não pode
+    existir uma facção com esse nome. E o 🌬️ era o símbolo da **Cindy**, a deusa — uma facção estava
+    usando o símbolo dela como se fosse próprio. Detalhe em `docs/LORE.md`.
+    **O que mudou (zero lógica):** o valor do enum `Faccao` + o `[Description]` · o símbolo em
+    `Faccoes.cs` · a chave de tema `body[data-tema]` · a pasta `wwwroot/cenarios/ascendentes/` (o
+    `.js`, o `.css` e o `<link>` do index) · a entrada do `AR_DO_TEMA` · a pasta
+    `ApostlesWar.Domain/Champs/Ascendentes/` (8 arquivos, namespace junto) · `ArsenalService`,
+    `CapitulosService`, `PersonagemService` e 2 testes · o `TEMAS` e o cabeçalho do
+    `ferramentas/separar-css.js` · e o ✝️ que **nunca existiu no jogo** (invenção minha em comentário
+    no #204, espalhada por 17 lugares de prosa) virou ❄️ junto.
+    **DUAS COISAS QUE VALE SABER ANTES DE RENOMEAR OUTRA FACÇÃO:**
+    - **A chave de tema é DERIVADA do enum** (`FluxoDoFront.cs:431`,
+      `faccao.ToString().ToLowerInvariant()`). Renomear o membro troca a chave sozinho, então pasta,
+      CSS, `<link>` e registro têm de acompanhar no MESMO commit — senão o tema some **sem erro
+      nenhum**, só cai no visual padrão.
+    - **O save NÃO quebra.** Não há `JsonStringEnumConverter` em lugar nenhum, então o
+      `System.Text.Json` grava enum como NÚMERO. Renomear o membro é seguro; **mudar a ORDEM da
+      lista não seria.**
+    **Escolha do ❄️:** é **tema de Natal**, que é a estética da facção (decisão do Gabriel) — e o
+    anjo cabe nela pelo caminho curto: anjo → Natal → Jesus. Também não colide com os 8 símbolos em
+    uso. (🪽 estava fora: já é o item de bota da própria facção; ⛄ é champ; ⭐ é o Especial.)
+
+18. ⏳ **RENOMEAR `champ`/`campeão` → `apóstolo` em TODO o repo** *(ago/2026, vem da §LORE)*.
+    **O 17 já saiu, então este está LIBERADO.** A dependência era concreta: com a facção ainda
+    chamada `Apostolos`, `Champs/` virando `Apostolos/` teria criado `Apostolos/Apostolos/` — pasta
+    dentro de pasta homônima, com `git mv` no meio. Hoje a facção é `Ascendentes` e o caminho está
+    livre.
+    **Tamanho medido (ago/2026), ~1.008 ocorrências em 148 arquivos:**
+
+    | área | ocorrências | arquivos |
+    |---|---|---|
+    | Presentation (front) | 420 | 42 |
+    | Tests | 202 | 10 |
+    | docs | 175 | 5 |
+    | Domain | 125 | **81** |
+    | Application | 86 | 10 |
+
+    Quase tudo é mecânico. **O que NÃO é:** a pasta `ApostlesWar.Domain/Champs/` (81 arquivos) muda
+    de nome — mover pasta versionada tem a armadilha do §CLAUDE.md (mover só os VERSIONADOS; o
+    `bin`/`obj` travado pelo VS faz o `git mv` da pasta inteira falhar no meio). **Fechar o jogo
+    antes.** Domínio em PORTUGUÊS pela regra da casa: `Campeao` → `Apostolo`, `CampeoesService` →
+    `ApostolosService`.
 
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
@@ -1767,7 +1812,7 @@ Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só n
   `Seletor`). Implementados: Dano/Cura/AplicarEscudo/AplicarBuff/AplicarDebuff/Reviver/
   RemoverBuffs/**Explodir** (genérico, `Seletor` + `IStatusComTick.Detonar → EventoDano`;
   1º cliente Putrefação; Inferno no shim até Decaídos)/IStatusComTick/Seletor. Faltam:
-  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra. *(Vocabulário esgotado desde os Apóstolos.)*
+  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra. *(Vocabulário esgotado desde os Ascendentes.)*
 - **Toda `Acao` declara `Utilidade` + `TemEfeitoUtil` + `PreverVidaRemovida`** (jul/2026, PR do bot):
   o que ela FAZ, se tem trabalho agora e quanto machuca — tudo respondido pela própria ação. É o que
   permite AVALIAR uma habilidade sem executá-la. `Utilidade` é abstrata: ação nova (inclusive bespoke
@@ -1826,7 +1871,7 @@ construído [1º cliente = Rato Voador, não o Copiando]; Inferno migrou pro `Ex
 [`RemoverDebuffs`(Sentença,Mortos)+`Reviver`+`Cura`, a ordem quebra a Sentença antes de reviver];
 renomes do Vampiro: "Controle de Sangue" 🩸 + "Vampiro Primordial" 🌙; colisão "Espinhos" resolvida
 [passiva do Elfo → `EspinhosCorrompidos`]; unificar-ignorar NÃO feito aqui — vira PR próprio a seguir) →
-**Apóstolos ✅ — SWEEP DAS 9 FACÇÕES COMPLETO** (Boneco de Neve/Mímico/Anjo/Papai Noel — 100%
+**Ascendentes ✅ — SWEEP DAS 9 FACÇÕES COMPLETO** (Boneco de Neve/Mímico/Anjo/Papai Noel — 100%
 vocabulário puro, ZERO bespoke; `MoverBuffs` construído [gêmeo do RemoverBuffs, cliente Copiando] e
 com ele o vocabulário mapeado esgotou; Imitação = `Dano(Func)` [molde Tengu]; Céu = 7º/último do revive
 e último champ com `Ambos` → agora NENHUM champ usa `Ambos`; fio §9 fechado com Repetindo deixada como

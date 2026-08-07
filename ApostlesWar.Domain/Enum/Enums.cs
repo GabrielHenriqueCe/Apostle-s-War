@@ -14,7 +14,7 @@ namespace ApostlesWar.Domain
         [Description("Místicos")] Misticos,
         [Description("Especial")] Especial,
         [Description("Decaídos")] Decaidos,
-        [Description("Apóstolos")] Apostolos
+        [Description("Ascendentes")] Ascendentes
     }
 
     public enum Slot { Slot1 = 1, Slot2 = 2, Slot3 = 3, Slot4 = 4 }

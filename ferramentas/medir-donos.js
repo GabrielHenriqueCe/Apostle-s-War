@@ -37,7 +37,7 @@ linhas.forEach((linha, i) => {
 // O FIM de cada declaração é o fechamento na COLUNA 0 (`}`, `};`, `];`), não o início da próxima.
 // Fechar na próxima parecia equivalente e não é: a ÚLTIMA declaração engolia todo o rodapé do
 // arquivo — os `mandar('pronto')` e `addEventListener` soltos no fim —, e assim a `desenharRena`
-// aparecia chamando a ponte com o C#. Aresta falsa que jogava os Apóstolos dentro das telas.
+// aparecia chamando a ponte com o C#. Aresta falsa que jogava os Ascendentes dentro das telas.
 const RE_FECHA = /^[}\])]+\s*;?\s*,?\s*$/;
 for (let i = 0; i < decls.length; i++) {
     const limite = (i + 1 < decls.length ? decls[i + 1].inicio : linhas.length) - 1;

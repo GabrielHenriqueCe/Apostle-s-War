@@ -2,7 +2,7 @@ import { caixaRedonda, desenharChama, entre } from '../comum/basicos.js';
 import { medirDoTema } from '../comum/ladrilho.js';
 import { comListras } from '../comum/basicos.js';
 import { criarNoHorizonte } from '../comum/ladrilho.js';
-// ✝️ APÓSTOLOS — a SALA DE NATAL. O oitavo e último capítulo, e o segundo INTERIOR do front (ver
+// ❄️ ASCENDENTES — a SALA DE NATAL. O oitavo e último capítulo, e o segundo INTERIOR do front (ver
 // o bloco no estilo.css).
 //
 // Duas peles anteriores morreram vendo em jogo, e as duas ensinaram: a CATEDRAL com a rosácea e o
@@ -183,7 +183,7 @@ export const ar = {
 /// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
 /// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
 export function montar({ fundo, frente, maestro }) {
-    // O QUINTO dado compartilhado, e o primeiro que é um ROTEIRO: a noite de Natal dos ✝️ Apóstolos.
+    // O QUINTO dado compartilhado, e o primeiro que é um ROTEIRO: a noite de Natal dos ❄️ Ascendentes.
     // Um escritor só (o `criarRoteiroDaNoite`, que não desenha nada) e quatro leitores espalhados pela
     // tela — a árvore num canto, a janela no meio, a lareira no outro canto e os presentes no chão:
     //   passo     · o nome do beat corrente, pra quem precisa saber "onde estamos" numa palavra
@@ -205,7 +205,7 @@ export function montar({ fundo, frente, maestro }) {
 
     return {
         noFundo: [
-            // ✝️ Os Apóstolos, na ordem em que a SALA é vista, de fora pra dentro. O ROTEIRO vem primeiro
+            // ❄️ Os Ascendentes, na ordem em que a SALA é vista, de fora pra dentro. O ROTEIRO vem primeiro
             // e não desenha NADA — ele só escreve o maestro, e vindo antes garante que as quatro peças
             // leiam o mesmo instante da história no mesmo quadro. Depois a VISTA (o que está do outro lado
             // do vidro, recortada nele), a MOLDURA com as cortinas por cima dela, e então o que está
@@ -225,7 +225,7 @@ export function montar({ fundo, frente, maestro }) {
         ].filter(Boolean),
     };
 }
-/// Onde é o CHÃO da sala dos ✝️ Apóstolos, em pixel. Mede de vez em quando e não a cada quadro, pelo
+/// Onde é o CHÃO da sala dos ❄️ Ascendentes, em pixel. Mede de vez em quando e não a cada quadro, pelo
 /// mesmo motivo do `criarNoHorizonte`: `getComputedStyle` força layout, e o que muda entre duas
 /// medidas é a janela ter cruzado uma faixa do @media — isso não acontece no meio de um gesto.
 ///
@@ -242,7 +242,7 @@ export function medidorDoChaoDaSala(canvas) {
     };
 }
 
-/// O ROTEIRO DA NOITE — o maestro dos ✝️ Apóstolos, e a única camada do front que NÃO DESENHA NADA.
+/// O ROTEIRO DA NOITE — o maestro dos ❄️ Ascendentes, e a única camada do front que NÃO DESENHA NADA.
 ///
 /// Isso é de propósito. As quatro peças da cena (a árvore num canto, a janela no meio, a lareira no
 /// outro canto e os presentes no chão) contam UMA história, e nenhuma delas é o lugar certo pra

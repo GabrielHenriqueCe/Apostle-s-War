@@ -304,7 +304,7 @@ namespace Tests
             Assert.Equal(8, faccoes.Count);
             Assert.DoesNotContain(Faccao.Humanos, faccoes);   // time inicial, não é capítulo
             Assert.Equal(Faccao.Reino, faccoes[0]);           // a campanha começa no Reino
-            Assert.Equal(Faccao.Apostolos, faccoes[^1]);      // e termina nos Apóstolos
+            Assert.Equal(Faccao.Ascendentes, faccoes[^1]);    // e termina nos Ascendentes
         }
     }
 }

@@ -5,7 +5,7 @@ namespace ApostlesWar.Domain
     /// <summary>
     /// Move buffs do alvo PRO ATACANTE conforme um Seletor — gêmeo do RemoverBuffs, mas em vez de
     /// remover, migra a INSTÂNCIA (do StatusAtivos do alvo pro do atacante). Nome reservado no
-    /// vocabulário (ADR-composicao-de-acoes §9); 1º cliente: Copiando (Mímico, Apóstolos — roubo
+    /// vocabulário (ADR-composicao-de-acoes §9); 1º cliente: Copiando (Mímico, Ascendentes — roubo
     /// de buff + turno extra).
     ///
     /// Mover a instância (não recriar) preserva o trade-off do Copiando original (ADR §356): buffs

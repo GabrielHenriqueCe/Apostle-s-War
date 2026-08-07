@@ -20,8 +20,8 @@ sobre a sua habilidade *como jogador*, não sobre força, linhagem ou destino: u
 chamado pra uma partida de verdade, por alguém que precisa vencer.
 
 **Como você entra na partida:** o 👑 **Reino fez um ritual de invocação**, pedindo apóstolos para
-ajudar na guerra. **Você escolheu qual apóstolo humano atenderia ao chamado** — e é literalmente o
-que o jogo faz na primeira escolha de time.
+ajudar na guerra — e o ritual trouxe **você junto, como JOGADOR**. **Você escolheu qual apóstolo
+humano atenderia ao chamado** — e é literalmente o que o jogo faz na primeira escolha de time.
 
 - **Os 👷🕵️👮👲 Humanos são as peças do MUNDO DELE** — a Terra. Por isso são gente comum e urbana, sem
   nada de heroico, com 🛠️ de símbolo de facção. **Eles não deviam parecer guerreiros.**
@@ -39,8 +39,8 @@ que já está lá**.
 |---|---|
 | **você joga com quem derrotou** | apóstolos são peças, e o jogador comanda peças. **Recrutar apóstolo É a lore acontecendo** — a coleção deixa de ser convenção de gênero e vira o assunto |
 | **nove mundos incompatíveis no mesmo mapa** | deuses puxam peças de onde quiserem. O Papai Noel ao lado do disco voador e do 🦖 não é inconsistência, é o tabuleiro sendo montado por quem não liga |
-| **o 👑 Reino é o capítulo 1** | é o Reino que faz o ritual. Você entra na partida por ali porque foi ali que te chamaram |
-| **você ESCOLHE o time inicial, e ele é de Humanos** | o ritual pediu apóstolos; quem escolheu qual apóstolo humano atender foi você |
+| **o 👑 Reino é o capítulo 1** | é o Reino que faz o ritual, e é ele que traz você. Você entra na partida por ali porque foi ali que te chamaram |
+| **você ESCOLHE o time inicial, e ele é de Humanos** | o ritual pediu apóstolos e trouxe você como jogador; quem escolheu qual apóstolo humano atender foi você |
 | **a campanha escurece capítulo a capítulo** | você se afasta de quem te acolheu |
 
 > **O que a lore NÃO explica, e é bom deixar dito:** o 👑 Reino ser a única cena de DIA é **decisão

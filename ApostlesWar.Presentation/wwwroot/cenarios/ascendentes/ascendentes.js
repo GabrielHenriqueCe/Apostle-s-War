@@ -24,7 +24,7 @@ import { criarNoHorizonte } from '../comum/ladrilho.js';
 // tela. Por isso o roteiro virou um maestro (o `natal`) em vez de uma máquina de estados dentro de
 // um builder — quem escreve é um só, e a árvore, a janela, a lareira e os presentes só LEEM.
 //
-// Os champs: ⛄ os bonecos de neve, vistos pela janela; 🎅 o dono da noite inteira; 🎭 as máscaras
+// Os apóstolos: ⛄ os bonecos de neve, vistos pela janela; 🎅 o dono da noite inteira; 🎭 as máscaras
 // penduradas na árvore. O 😇 Anjo ficou SEM representação nesta versão — a coluna de luz que era
 // dele não cabe num interior, e a lista de peças da cena é do Gabriel.
 export const ar = {
@@ -1250,7 +1250,7 @@ export function desenharEstrela(ctx, cx, cy, s, aceso, t, cfg) {
     ctx.restore();
 }
 
-/// 😇 Um ANJINHO de árvore de Natal. É o champ que estava sem representação desde a cena virar
+/// 😇 Um ANJINHO de árvore de Natal. É o apóstolo que estava sem representação desde a cena virar
 /// interior: a coluna de luz que era dele não cabe dentro de uma casa, e enfeite de árvore cabe.
 ///
 /// Máscaras de teatro moraram neste lugar (eram o 🎭 Mímico) e saíram por pedido do Gabriel. O que

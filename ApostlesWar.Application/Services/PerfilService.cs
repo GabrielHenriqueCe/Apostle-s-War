@@ -11,8 +11,8 @@ namespace ApostlesWar.Application.Services
     /// entre pedir o nome (1ª vez) ou cair direto no menu.
     ///
     /// As regras de avatar moravam na tela de edição: ela sabia que o avatar inicial é um Humano e
-    /// que só campeão desbloqueado vale. Isso é progressão (a campanha libera avatar junto com o
-    /// champ), então mora aqui. O front segue validando o clique, mas como FRONTEIRA — não como a
+    /// que só apóstolo desbloqueado vale. Isso é progressão (a campanha libera avatar junto com o
+    /// apóstolo), então mora aqui. O front segue validando o clique, mas como FRONTEIRA — não como a
     /// fonte da regra.
     ///
     /// <see cref="Excluir"/> é o "excluir conta" escondido nas configurações: limpa o perfil E o
@@ -23,14 +23,14 @@ namespace ApostlesWar.Application.Services
         private const string ChavePerfil = "perfil";
 
         private readonly IRepositorioDeSave _repositorio;
-        private readonly CampeoesService _campeoes;
+        private readonly ApostolosService _apostolos;
         private readonly CampanhaService _campanha;
 
-        public PerfilService(IRepositorioDeSave repositorio, CampeoesService campeoes,
+        public PerfilService(IRepositorioDeSave repositorio, ApostolosService apostolos,
             CampanhaService campanha)
         {
             _repositorio = repositorio;
-            _campeoes = campeoes;
+            _apostolos = apostolos;
             _campanha = campanha;
         }
 
@@ -40,15 +40,15 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         public string AvatarInicial()
         {
-            var iniciais = _campeoes.ObterDesbloqueados().Where(p => p.Faccao == Faccao.Humanos).ToList();
+            var iniciais = _apostolos.ObterDesbloqueados().Where(p => p.Faccao == Faccao.Humanos).ToList();
             return iniciais[Random.Shared.Next(iniciais.Count)].Simbolo;
         }
 
         /// <summary>
-        /// Este campeão pode ser o avatar? Só os DESBLOQUEADOS — a cara do jogador é troféu de
+        /// Este apóstolo pode ser o avatar? Só os DESBLOQUEADOS — a cara do jogador é troféu de
         /// campanha, não catálogo. A grade mostra os 36 (os travados em cinza); quem recusa é isto.
         /// </summary>
-        public bool PodeUsarAvatar(Personagem campeao) => _campeoes.EstaDesbloqueado(campeao);
+        public bool PodeUsarAvatar(Personagem apostolo) => _apostolos.EstaDesbloqueado(apostolo);
 
         public Perfil? Carregar() => _repositorio.Carregar<Perfil>(ChavePerfil);
 

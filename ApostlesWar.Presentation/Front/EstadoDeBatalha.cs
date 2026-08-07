@@ -85,7 +85,7 @@ namespace ApostlesWar.Presentation.Front
         /// <see cref="HabilidadeVista"/> continua existindo à parte porque aquele é pra CLICAR
         /// (índice, disponível, pede alvo) e só faz sentido pra quem está com o turno na mão.
         /// </summary>
-        List<HabilidadeDoChampVista> Habilidades
+        List<HabilidadeDoApostoloVista> Habilidades
     );
 
     internal record StatusVisto(string Nome, string Simbolo, int DuracaoRestante, bool EhBuff);
@@ -158,19 +158,19 @@ namespace ApostlesWar.Presentation.Front
     internal record OpcaoMenuVista(string Rotulo, string Icone, bool Habilitado,
         string? Confirmar = null, bool? Marcado = null);
 
-    /// <summary>Um campeão na grade de escolha de avatar. `Desbloqueado: false` = aparece em cinza,
+    /// <summary>Um apóstolo na grade de escolha de avatar. `Desbloqueado: false` = aparece em cinza,
     /// não clicável (ainda não conquistado na campanha).</summary>
-    internal record CampeaoVisto(string Simbolo, string Nome, bool Desbloqueado);
+    internal record ApostoloVisto(string Simbolo, string Nome, bool Desbloqueado);
 
     /// <summary>
     /// A tela de EDITAR PERFIL: o nome atual (pra pré-preencher), o avatar atual (pra pré-selecionar
-    /// na grade) e a lista completa de campeões (a ORDEM é o índice que o clique devolve).
+    /// na grade) e a lista completa de apóstolos (a ORDEM é o índice que o clique devolve).
     /// </summary>
-    internal record EdicaoPerfilVista(string Nome, string Avatar, List<CampeaoVisto> Campeoes);
+    internal record EdicaoPerfilVista(string Nome, string Avatar, List<ApostoloVisto> Apostolos);
 
     /// <summary>
-    /// A montagem da Arena que o front devolve: os dois times como ÍNDICES na lista de campeões
-    /// (mesma ordem do TodosOsCampeoes que foi enviada) + quem é bot de cada lado. Vem serializado no
+    /// A montagem da Arena que o front devolve: os dois times como ÍNDICES na lista de apóstolos
+    /// (mesma ordem do TodosOsApostolos que foi enviada) + quem é bot de cada lado. Vem serializado no
     /// campo Texto da mensagem (a ponte só carrega 1 int/1 string por clique).
     /// </summary>
     internal record ArenaConfig(int[] Time1, int[] Time2, bool Bot1, bool Bot2);
@@ -188,21 +188,21 @@ namespace ApostlesWar.Presentation.Front
 
     /// <summary>Uma fase: número (1..7), nome (do item), status, inimigos das 2 rodadas e o item que dropa.</summary>
     internal record FaseVista(int Numero, string Nome, bool Desbloqueado, bool Concluido,
-        List<CampeaoVisto> Rodada1, List<CampeaoVisto> Rodada2, ItemVista Item);
+        List<ApostoloVisto> Rodada1, List<ApostoloVisto> Rodada2, ItemVista Item);
 
     /// <summary>
-    /// A tela de fases de uma facção: as 7 fases + o pool de champs desbloqueados pra montar o time.
+    /// A tela de fases de uma facção: as 7 fases + o pool de apóstolos desbloqueados pra montar o time.
     ///
     /// <see cref="FaseSelecionada"/> e <see cref="TimeMontado"/> são a MEMÓRIA: a tela abre já na
     /// última fase visitada e com o último time nos slots, em vez de exigir que o jogador remonte
-    /// tudo a cada visita. O time vem como índices em <see cref="MeusCampeoes"/> porque é isso que o
+    /// tudo a cada visita. O time vem como índices em <see cref="MeusApostolos"/> porque é isso que o
     /// clique devolve; o save guarda identidade (ver CampanhaService.UltimoTime).
     /// </summary>
     internal record FasesVista(string CapituloNome, string CapituloSimbolo, List<FaseVista> Fases,
-        List<CampeaoVisto> MeusCampeoes, int FaseSelecionada, List<int> TimeMontado);
+        List<ApostoloVisto> MeusApostolos, int FaseSelecionada, List<int> TimeMontado);
 
-    /// <summary>Recompensa da vitória: os champs novos desbloqueados + o item dropado (null se já tinha).</summary>
-    internal record RecompensaVista(List<CampeaoVisto> Novos, ItemVista? Item);
+    /// <summary>Recompensa da vitória: os apóstolos novos desbloqueados + o item dropado (null se já tinha).</summary>
+    internal record RecompensaVista(List<ApostoloVisto> Novos, ItemVista? Item);
 
     /// <summary>
     /// O fim de uma fase — vitória e derrota na MESMA tela, porque a pergunta que vem depois das duas
@@ -210,7 +210,7 @@ namespace ApostlesWar.Presentation.Front
     /// continuar significava voltar pra lista de fases mesmo quando o jogador só queria tentar de
     /// novo com o mesmo time.
     ///
-    /// <see cref="ComOpcoes"/> false = é a passagem da recompensa (o item em destaque, os champs
+    /// <see cref="ComOpcoes"/> false = é a passagem da recompensa (o item em destaque, os apóstolos
     /// novos a caminho), que pede um clique e segue pras conquistas; true = é a tela de decisão.
     /// A mesma tela nos dois momentos, pra o jogador não sentir que mudou de lugar.
     ///
@@ -247,14 +247,14 @@ namespace ApostlesWar.Presentation.Front
     ///
     /// Dois clientes, e a diferença entre eles é só o <see cref="CooldownRestante"/>:
     /// - o COMPÊNDIO, onde não há turno correndo, então o restante é 0 e o que importa é a cadência
-    ///   DECLARADA (é ela que se compara entre champs);
+    ///   DECLARADA (é ela que se compara entre apóstolos);
     /// - o painel da BATALHA, onde clicar em qualquer combatente mostra o kit dele com o cooldown
     ///   andando de verdade.
     ///
     /// <see cref="Passiva"/> separa a passiva das ativas: ela não se usa, e a tela precisa dizer isso
     /// em vez de deixar o jogador procurando o botão.
     /// </summary>
-    internal record HabilidadeDoChampVista(string Nome, string Simbolo, string Descricao,
+    internal record HabilidadeDoApostoloVista(string Nome, string Simbolo, string Descricao,
         int Cooldown, bool Passiva, int CooldownRestante = 0);
 
     /// <summary>
@@ -268,40 +268,40 @@ namespace ApostlesWar.Presentation.Front
         /// <summary>
         /// <paramref name="dono"/> null = fora da luta (compêndio): não há turno correndo, então o
         /// cooldown restante é 0 e o que vale é a cadência declarada. Com dono, o restante é o DELE —
-        /// cooldown é do combatente, não do champ: o mesmo Ninja nos dois lados da Arena tem
+        /// cooldown é do combatente, não do apóstolo: o mesmo Ninja nos dois lados da Arena tem
         /// contagens independentes.
         /// </summary>
-        public static HabilidadeDoChampVista De(Habilidade h, Combate? dono = null) => new(
+        public static HabilidadeDoApostoloVista De(Habilidade h, Combate? dono = null) => new(
             h.Nome, h.Simbolo, h.Descricao, h.Cooldown,
             Passiva: h is HabilidadePassiva,
             CooldownRestante: dono?.Cooldowns.GetValueOrDefault(h)?.CooldownRestante ?? 0);
     }
 
     /// <summary>
-    /// Um champ na grade do compêndio. <see cref="Indice"/> é a posição na lista COMPLETA (a mesma
-    /// ordem do TodosOsCampeoes) — é o que o clique devolve, e é global às facções justamente pra
+    /// Um apóstolo na grade do compêndio. <see cref="Indice"/> é a posição na lista COMPLETA (a mesma
+    /// ordem do TodosOsApostolos) — é o que o clique devolve, e é global às facções justamente pra
     /// não precisar mandar (facção, slot) de volta pela ponte, que carrega um int só.
     /// </summary>
-    internal record CompendioChampVista(int Indice, string Simbolo, string Nome, bool Desbloqueado);
+    internal record CompendioApostoloVista(int Indice, string Simbolo, string Nome, bool Desbloqueado);
 
-    /// <summary>Uma facção com os 4 champs dela, na ordem dos slots. É como o catálogo se agrupa.</summary>
-    internal record CompendioFaccaoVista(string Nome, string Simbolo, List<CompendioChampVista> Champs);
+    /// <summary>Uma facção com os 4 apóstolos dela, na ordem dos slots. É como o catálogo se agrupa.</summary>
+    internal record CompendioFaccaoVista(string Nome, string Simbolo, List<CompendioApostoloVista> Apostolos);
 
     /// <summary>O catálogo inteiro: as 9 facções, cada uma com seus 4 — travados incluídos.</summary>
     internal record CompendioVista(List<CompendioFaccaoVista> Faccoes);
 
     /// <summary>
-    /// A FICHA de um champ. Os números são os de BASE (o que ele é antes de arsenal, buff ou item):
+    /// A FICHA de um apóstolo. Os números são os de BASE (o que ele é antes de arsenal, buff ou item):
     /// o compêndio é catálogo, não simulador — quem quer saber o efeito do equipamento olha o
-    /// Arsenal. Crit não vem do <see cref="Personagem"/> porque lá ele não existe por champ: é o
+    /// Arsenal. Crit não vem do <see cref="Personagem"/> porque lá ele não existe por apóstolo: é o
     /// <c>TaxaCritBase</c>/<c>DanoCritBase</c>, global a todo mundo.
     ///
     /// <see cref="Desbloqueado"/> só pinta a moldura — a ficha é COMPLETA mesmo travada, porque um
     /// catálogo que esconde o que você ainda não tem não serve pra planejar a campanha.
     /// </summary>
-    internal record ChampDetalheVista(string Nome, string Simbolo, string Faccao, bool Desbloqueado,
+    internal record ApostoloDetalheVista(string Nome, string Simbolo, string Faccao, bool Desbloqueado,
         int HP, int Ataque, int Defesa, int TaxaCritPct, int DanoCritPct,
-        List<HabilidadeDoChampVista> Habilidades);
+        List<HabilidadeDoApostoloVista> Habilidades);
 
     // ---------- Arsenal ----------
 

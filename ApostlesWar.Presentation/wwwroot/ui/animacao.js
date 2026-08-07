@@ -9,7 +9,7 @@ export function reanimar(el, classe) {
 }
 
 // O número é CUSPIDO pra fora da caixa, na direção do seu próprio lado — a direita é o espelho
-// da esquerda. O mesmo champ pode lutar dos dois lados, então a animação não pode ter "lado
+// da esquerda. O mesmo apóstolo pode lutar dos dois lados, então a animação não pode ter "lado
 // certo": ela deriva de onde a caixa está, não de quem é o personagem.
 export function flutuar(el, texto, classe) {
     const n = document.createElement('span');

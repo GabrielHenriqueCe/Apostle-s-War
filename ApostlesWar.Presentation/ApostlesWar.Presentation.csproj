@@ -45,7 +45,7 @@
   <!-- NÃO existe semente de save. Houve uma (`..\Save\**` copiada pra saída), versionada e "com tudo
        liberado" pra encurtar o teste — e ela QUEBRAVA o excluir conta: o wipe apagava os arquivos da
        saída e o build seguinte repunha `save.txt`/`itens.txt` do repo, então o jogador recomeçava com
-       os 36 champs e os itens de volta. Removida em jul/2026.
+       os 36 apostolos e os itens de volta. Removida em jul/2026.
 
        O jogo boota liso sem arquivo nenhum: a porta devolve default e cada service fica no estado
        inicial (Reino fase 1, os 4 Humanos, slots vazios). "Jogo novo" é a AUSÊNCIA de save, não um

@@ -3,7 +3,7 @@ import { medirDoTema } from '../comum/ladrilho.js';
 import { criarNevoa, criarPo } from '../comum/ar.js';
 // ⭐ ESPECIAL — o banheiro público. O primeiro INTERIOR do front (ver o bloco no estilo.css).
 //
-// Os quatro champs entram pelo SINAL, como sempre, mas aqui a regra teve de ir mais longe que nos
+// Os quatro apóstolos entram pelo SINAL, como sempre, mas aqui a regra teve de ir mais longe que nos
 // Místicos: 🦸 e 🦹 são CORPO HUMANO, que é o que fica esquisito em canvas. A saída foi tirar o
 // corpo da vista — eles estão sentados atrás de um jornal aberto, e o que sobra são as pernas com
 // a calça caída, duas mãozinhas na borda do papel (com o dedinho pra fora) e o topo da cabeça
@@ -14,7 +14,7 @@ import { criarNevoa, criarPo } from '../comum/ar.js';
 // MAESTRO daqui — o rugido varre de um lado ao outro e o vento varre a sala junto, então os dois
 // jornais balançam em tempos diferentes sem ninguém ter sincronizado nada.
 //
-// E o 💩 é o único champ do front que NASCE em cena em vez de estar lá desde o começo. Ele fica um
+// E o 💩 é o único apóstolo do front que NASCE em cena em vez de estar lá desde o começo. Ele fica um
 // tempo no chão fedendo, com as moscas, e some pelo ralo antes de o próximo cair — senão em dois
 // minutos o banheiro tem uma fileira deles, e o que era acontecimento vira decoração.
 export const ar = {
@@ -173,7 +173,7 @@ export const ar = {
 /// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
 export function montar({ fundo, frente, maestro }) {
     // O TERCEIRO dado compartilhado, e o primeiro que é um MAPA em vez de um número: as portas das
-    // cabines do ⭐ Especial, uma entrada por champ que mora atrás de uma. O banheiro ESCREVE (é ele
+    // cabines do ⭐ Especial, uma entrada por apóstolo que mora atrás de uma. O banheiro ESCREVE (é ele
     // que decide quando o rugido arromba e quando a porta volta a fechar) e os sentados LEEM — cada um
     // se recorta na abertura da sua.
     //

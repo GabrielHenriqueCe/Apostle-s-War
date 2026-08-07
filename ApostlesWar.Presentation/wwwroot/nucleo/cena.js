@@ -45,9 +45,9 @@ export function mostrarCena(cena) {
     document.getElementById('conquista').hidden = cena !== 'conquista';
     document.getElementById('arsenal').hidden = cena !== 'arsenal';
     document.getElementById('compendio').hidden = cena !== 'compendio';
-    // A ficha do champ tem UMA seção e dois donos: o compêndio e a conquista (o champ recém-ganho
+    // A ficha do apóstolo tem UMA seção e dois donos: o compêndio e a conquista (o apóstolo recém-ganho
     // termina na própria ficha). Copiar o HTML pra ter duas telas iguais seria duas telas pra manter.
-    document.getElementById('compendioChamp').hidden = !['compendioChamp', 'conquistaChamp'].includes(cena);
+    document.getElementById('compendioApostolo').hidden = !['compendioApostolo', 'conquistaApostolo'].includes(cena);
     document.getElementById('arena').hidden = !emCombate;
     document.getElementById('painel').hidden = !emCombate;
     // Os controles de combate só fazem sentido na batalha.
@@ -62,13 +62,13 @@ export function mostrarCena(cena) {
 }
 
 /// Abre uma tela. É por aqui que TODO mundo abre — a mensagem do C# e também o código que abre uma
-/// tela por conta (a ficha do champ que a conquista mostra depois do duplo-clique). Uma tela
+/// tela por conta (a ficha do apóstolo que a conquista mostra depois do duplo-clique). Uma tela
 /// convertida ao contrato não tem mais uma função `mostrarX` pra chamar, e um caminho de abertura
 /// paralelo é como o duplo-clique da conquista parou de funcionar sem nada acusar.
 ///
 /// Os dois parâmetros extras existem porque o jogo os pediu, não por simetria:
-///   `cena`     — a MESMA tela pode aparecer em cenas diferentes. A ficha do champ é a mesma pelo
-///                compêndio e pela conquista, mas a cena muda (`compendioChamp` × `conquistaChamp`)
+///   `cena`     — a MESMA tela pode aparecer em cenas diferentes. A ficha do apóstolo é a mesma pelo
+///                compêndio e pela conquista, mas a cena muda (`compendioApostolo` × `conquistaApostolo`)
 ///                porque o Esc tem de voltar pra lugares diferentes.
 ///   `anterior` — de onde se veio, entregue ao `montar`. Sem isto, uma tela que pergunta "eu já
 ///                estava aqui?" recebe sempre "sim": quem troca a cena é esta função, ANTES do

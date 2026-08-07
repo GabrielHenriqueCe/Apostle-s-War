@@ -15,7 +15,7 @@ namespace ApostlesWar.Domain
     ///
     /// "Ignorar status" tem UMA língua só (unificação jul/2026): a lista `Ignora` de tipos de
     /// StatusEffect que o dano fura — é a MESMA gramática de `ignorarStatus` (por golpe) e
-    /// `IIgnoraStatusNoAtaque` (por champ). O ReceberDano une as três numa lista e cada status
+    /// `IIgnoraStatusNoAtaque` (por apóstolo). O ReceberDano une as três numa lista e cada status
     /// pergunta "fui listado?" (não há mais `DeveAgir` por-status lendo flags). `IgnoraDefesa`
     /// segue bool porque DEFESA é um STAT, não um status na lista.
     ///

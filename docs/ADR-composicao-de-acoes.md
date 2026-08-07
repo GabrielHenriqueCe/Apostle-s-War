@@ -4,7 +4,7 @@
 > **Status:** Aceito — desenho do MOTOR fechado; implementação incremental a seguir.
 > **Contexto:** Apostle's War. Consome a "Auditoria das habilidades ativas" que o
 >   ROADMAP deixou em aberto. É o fio predecessor natural do Rebalanceamento e da
->   reorganização pasta-por-champ.
+>   reorganização pasta-por-apóstolo.
 > **Data:** julho/2026 (revisão: motor desenhado, vocabulário e boundaries mapeados
 >   lendo o roster real — Inferno, Putridão, AnjoCaído, Copiando, Atlantis, Quebrar, Barata).
 
@@ -57,16 +57,16 @@ fricção que Gabriel sentiu ("senti que reinventei o que já existe" ao criar h
 
 O que se decidiu tem **dois níveis distintos**, que na 1ª versão estavam grudados:
 
-- **Nível A — Organização (champ como classe/arquivo).** Cada champ vira uma classe/arquivo
+- **Nível A — Organização (apóstolo como classe/arquivo).** Cada apóstolo vira uma classe/arquivo
   próprio com suas habilidades dentro, em vez de uma linha numa `List<Personagem>` gigante.
   Isso é **organização pura**, não precisa do motor, não tem parede. Benefício extra: o
-  arquivo do champ vira a **view** — abre `Mago.cs` e lê todas as habilidades, símbolos,
+  arquivo do apóstolo vira a **view** — abre `Mago.cs` e lê todas as habilidades, símbolos,
   cooldowns e descrições **sem rodar o jogo** (§10.1).
 - **Nível B — Composição (o motor).** Trocar o `Ativar` por-habilidade por uma lista
   declarativa de **Ações** rodada por um interpretador único.
 
 Os dois são ortogonais — dá pra fazer o A sem tocar no B. Este ADR desenha o B; o A e a
-reorganização pasta-por-champ têm o seu próprio momento (§10).
+reorganização pasta-por-apóstolo têm o seu próprio momento (§10).
 
 **Princípio-guia (corrigido):** a unidade de reúso é o **FRAGMENTO**, não a Ação inteira
 (§5.5). Decompõe-se a habilidade em fragmentos e pergunta-se de cada um "isso se repete?".
@@ -188,7 +188,7 @@ os três são `new HabilidadeAtiva(..., acoes: [...])`:
 | 3. **Ação custom inteira** | a habilidade é uma `Acao` bespoke que faz tudo | as genuinamente únicas |
 
 A diferença entre os níveis é só **se as ações da lista são do vocabulário ou custom-locais
-do champ**. "Único" deixa de ser uma habilidade especial (subclasse com `Ativar`) e vira uma
+do apóstolo**. "Único" deixa de ser uma habilidade especial (subclasse com `Ativar`) e vira uma
 `Acao` especial dentro da forma padrão. O código imperativo não morre — ele muda de
 recipiente (de `Ativar` override para `Acao` custom), e ganha uniformidade de graça.
 
@@ -358,7 +358,7 @@ distinguir "dano da ação anterior". Detalhe que aparece quando esse cliente fo
 
 ## 9. Bespoke e a disciplina de promoção
 
-Ações genuinamente únicas ficam como `Acao` custom local na pasta do champ (Nível 2/3) até
+Ações genuinamente únicas ficam como `Acao` custom local na pasta do apóstolo (Nível 2/3) até
 ganharem um 2º cliente. **Promoção local → compartilhado acontece no 2º cliente REAL**, nunca
 especulativo (YAGNI / "não desenhar no escuro"). Duas travas:
 
@@ -456,33 +456,33 @@ Atlantis; faltam Céu, AnjoCaído).
 
 ---
 
-## 10. Organização de pastas e a view do champ
+## 10. Organização de pastas e a view do apóstolo
 
-### 10.1 Champ como arquivo = a view
+### 10.1 Apóstolo como arquivo = a view
 ```
-Champs/<Faccao>/<Champ>/
-    <Champ>.cs             ← DADO: stats + habilidades montadas como config
+Apostolos/<Faccao>/<Apostolo>/
+    <Apostolo>.cs             ← DADO: stats + habilidades montadas como config
     <Passiva>.cs           ← CÓDIGO: comportamento (sai de Skills/Passivas/)
     <AcaoBespoke>.cs       ← Ação custom local (Nível 2/3, não promovida)
 Skills/Acoes/              ← vocabulário compartilhado + os fragmentos de Valor/Seletor
 Skills/Buffs/  Skills/Debuffs/   ← os StatusEffect (já existem)
-Champs/Roster.cs           ← registro explícito de 1 linha por champ (NÃO reflection)
+Apostolos/Roster.cs           ← registro explícito de 1 linha por apóstolo (NÃO reflection)
 ```
 
-Criar champ novo = uma pasta nova, sem tocar arquivos de outro. E o arquivo do champ vira a
+Criar apóstolo novo = uma pasta nova, sem tocar arquivos de outro. E o arquivo do apóstolo vira a
 **view** que Gabriel quer: abre `Mago.cs`, lê nome/símbolo/cooldown/descrição de todas as
 habilidades **sem rodar o jogo**. Uniformidade também torna trivial uma view *imprimível*
 genérica (um método lê `Nome`/`Simbolo`/`Descricao` de qualquer `HabilidadeAtiva`).
 
 ### 10.2 Ordem dos temas — REVISADO (jul/2026): Nível A FUNDIDO no sweep
-A 1ª versão separava o Nível A (champ-como-arquivo) do motor. **Revisado com o motor pronto:**
+A 1ª versão separava o Nível A (apóstolo-como-arquivo) do motor. **Revisado com o motor pronto:**
 manter separado custaria tocar ~70 habilidades DUAS vezes (uma pra "subclasse com Acoes", outra
-pra forma-construtor no arquivo do champ). Decidido: um PR de infra deixou `HabilidadeAtiva`
+pra forma-construtor no arquivo do apóstolo). Decidido: um PR de infra deixou `HabilidadeAtiva`
 construível por construtor (props `virtual` com backing — as subclasses Strangler seguem
-válidas), e **cada PR de facção migra os champs direto pra forma FINAL** (pasta + habilidades
-como métodos + passiva movida + classes velhas deletadas). Uma passada por champ; a view chega
+válidas), e **cada PR de facção migra os apóstolos direto pra forma FINAL** (pasta + habilidades
+como métodos + passiva movida + classes velhas deletadas). Uma passada por apóstolo; a view chega
 facção a facção; o `PersonagemService` encolhe até virar o `Roster`. O custo aceito: PRs de
-facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
+facção maiores (movem passiva junto). Piloto: **Mago** (`Apostolos/Reino/Mago/`).
 
 ---
 
@@ -493,8 +493,8 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
 - **PR #116 ✅ (o motor):** loop-flip (§3.2) + `Escopo` + `EstadoAlvo` por ação avaliado na
   execução + fragmentos de `Valor` + `AplicarBuff`/`Cura`. Pilotos: Furtividade (escopo
   próprio), Sushi (Cura+PorHP), Prender. Verificado em jogo.
-- **Forma-construtor + champ-arquivo ✅:** `HabilidadeAtiva` concreta com dois construtores
-  (dado + subclasse Strangler); Mago como piloto da forma final (`Champs/Reino/Mago/`);
+- **Forma-construtor + apóstolo-arquivo ✅:** `HabilidadeAtiva` concreta com dois construtores
+  (dado + subclasse Strangler); Mago como piloto da forma final (`Apostolos/Reino/Mago/`);
   AtaqueBasico híbrido (Acoes + `AtivarComNatureza`); `Ambos` numa ação = sem filtro.
 - **Testes do motor ✅:** 11 testes xUnit do interpretador (escopo, estado-na-execução,
   ordem, agregação, Aleatorio com duplicata) — feitos ANTES do sweep, o motor é infra
@@ -548,11 +548,11 @@ facção maiores (movem passiva junto). Piloto: **Mago** (`Champs/Reino/Mago/`).
   vocabulário puro, ZERO bespoke. `MoverBuffs` **construído** (gêmeo do `RemoverBuffs`, move a
   instância; cliente = Copiando) — com ele o vocabulário mapeado esgotou (só resta `AcaoSobreConjunto`,
   sem cliente). Imitação usa `Dano(Func)` (escala com os buffs do Mímico, molde do Tengu). Céu = **7º e
-  ÚLTIMO da família do revive** (`Reviver`+2×`AplicarBuff`); era o último champ com `EstadoAlvo.Ambos` —
-  agora NENHUM champ usa `Ambos`, o que desbloqueia a remoção do enum no §8.2 (pick-do-menu). **Fio §9
+  ÚLTIMO da família do revive** (`Reviver`+2×`AplicarBuff`); era o último apóstolo com `EstadoAlvo.Ambos` —
+  agora NENHUM apóstolo usa `Ambos`, o que desbloqueia a remoção do enum no §8.2 (pick-do-menu). **Fio §9
   fechado:** Repetindo (3ª e última passiva de duração) avaliada e deixada como está, igual a
   AnáliseCrítica e Policial — passiva ≠ ação, o dispatch não funde (só o primitivo `AumentarDuracao` e
-  o conceito de Seletor são compartilhados). `PersonagemService` não instancia mais nenhum champ à mão.
+  o conceito de Seletor são compartilhados). `PersonagemService` não instancia mais nenhum apóstolo à mão.
   Segue: unificação-do-ignorar → pick-do-menu/§8.2 (o `Ambos` morre). Facção que estreia mecanismo =
   momento de design, não sweep.
 - **Pick do menu (§8.2):** o lado UI, quando o `Ambos` morrer (pós-família-do-revive).
@@ -568,7 +568,7 @@ Um PR, um tema. Build verde o tempo todo (Strangler). **Docs bumpam NO MESMO PR 
   atacante sozinha (forma multiplicador, dobrada antes do (int) do Atacar); o `Piromancer` implementa
   a interface e o `static MultExtra` morreu. Espelho do `IModificaDanoRecebido`. Fórmula-de-hab
   (Caveira/Tengu) segue no `Dano(Func)` — é outro balde (fórmula da hab ≠ modificador do atacante).
-- **Champ-como-dado + pastas** (§10) — tema separado, depois do motor provar-se.
+- **Apóstolo-como-dado + pastas** (§10) — tema separado, depois do motor provar-se.
 - **`EventoDano` por ID** — hoje carrega objetos vivos (`Combate`); referenciar por id/nome
   desacopla o log/stream dos objetos.
 - **Rename do repo/namespace ✅** — tirado o `v1` (`v1_Apostle_s_War` → `ApostlesWar`, sln/csproj junto).

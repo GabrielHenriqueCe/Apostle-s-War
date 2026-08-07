@@ -11,7 +11,7 @@ namespace Tests
     /// confirmação de morte (FILA A #14).
     ///
     /// O que já vive em MotorDeHabilidadesTests (não duplicar aqui): a gramática de IGNORAR
-    /// (natureza/golpe/champ), o Invencível em 1 HP e o GuardaReal preservando status. Aqui entram
+    /// (natureza/golpe/apostolo), o Invencível em 1 HP e o GuardaReal preservando status. Aqui entram
     /// as partes do funil que estavam sem dono: a MATEMÁTICA da defesa (fórmula + cap +
     /// ignorarDefesaPct + IgnoraDefesa), os ACUMULADORES do resumo (#7a), a ORDEM
     /// passiva-antes-de-status e o prevent-death consumindo COOLDOWN.
@@ -106,7 +106,7 @@ namespace Tests
 
         /// <summary>
         /// Passiva-pura FAKE, local ao teste (mesma razão do Strangler em MotorDeHabilidadesTests:
-        /// não amarrar o teste a um champ real que pode migrar/sumir). Corta o dano pela metade.
+        /// não amarrar o teste a um apóstolo real que pode migrar/sumir). Corta o dano pela metade.
         /// </summary>
         private class MetadeDoDano : HabilidadePassiva, IModificaDanoRecebido
         {
@@ -374,7 +374,7 @@ namespace Tests
         {
             // GuardaReal tem cooldown 4 e é consumido ao prevenir: o 2º golpe fatal no mesmo
             // combate encontra a capacidade indisponível e a morte acontece.
-            var guarda = NovoCom(new ApostlesWar.Domain.Champs.Reino.GuardaReal(), hp: 1000);
+            var guarda = NovoCom(new ApostlesWar.Domain.Apostolos.Reino.GuardaReal(), hp: 1000);
 
             guarda.ReceberDano(5000, NaturezasDano.Ataque);
             Assert.True(guarda.EstaVivo());               // salvo pelo prevent-death

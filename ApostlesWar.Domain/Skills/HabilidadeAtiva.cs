@@ -7,7 +7,7 @@ namespace ApostlesWar.Domain
     /// <summary>
     /// Concreta e construível por DADO (forma-construtor — ver ADR-composicao-de-acoes §3.1):
     /// a forma final de uma habilidade é `new HabilidadeAtiva(..., acoes: [...])`, montada no
-    /// arquivo do champ. Durante a migração (Strangler), as habilidades antigas continuam como
+    /// arquivo do apóstolo. Durante a migração (Strangler), as habilidades antigas continuam como
     /// subclasses usando o construtor curto + override das propriedades virtuais.
     /// </summary>
     public class HabilidadeAtiva : Habilidade
@@ -180,11 +180,11 @@ namespace ApostlesWar.Domain
         /// CONTRATO da semente (`alvoSelecionado`): ela tem que ser um dos `candidatos` — ou seja,
         /// já ter passado pelo MESMO EstadoAlvo que esta habilidade declara. Quem escolhe o alvo
         /// (`CombateService.ResolverAlvoInicial` → menu do jogador ou bot) filtra por
-        /// `hab.EstadoAlvo` antes de escolher, então o contrato vale hoje pra todos os champs.
-        /// Se um champ futuro violar (ex: pedir alvo Vivo e mandar um morto), a semente entraria
+        /// `hab.EstadoAlvo` antes de escolher, então o contrato vale hoje pra todos os apóstolos.
+        /// Se um apóstolo futuro violar (ex: pedir alvo Vivo e mandar um morto), a semente entraria
         /// no resultado sem ser candidata E o `IndexOf` abaixo devolveria -1, desalinhando o `%`
         /// dos extras — erro silencioso. Por isso o guard EXPLODE em vez de "consertar":
-        /// mira errada é bug de declaração do champ, tem que gritar na primeira execução.
+        /// mira errada é bug de declaração do apóstolo, tem que gritar na primeira execução.
         ///
         /// O guard vem DEPOIS do early-return de lista vazia de propósito: "não há candidato no
         /// estado pedido" é caso LEGÍTIMO (Doces de Abóbora sem nenhum aliado morto — o

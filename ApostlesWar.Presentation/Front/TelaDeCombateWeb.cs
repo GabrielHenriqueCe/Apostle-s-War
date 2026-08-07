@@ -96,7 +96,7 @@ namespace ApostlesWar.Presentation.Front
         }
 
         /// <summary>
-        /// A "fala" do champ ao usar a habilidade — o balão que o Gabriel pediu.
+        /// A "fala" do apóstolo ao usar a habilidade — o balão que o Gabriel pediu.
         ///
         /// Publica SEM SINCRONIZAR A VIDA. Quando isto roda, o `hab.Ativar` já mexeu no modelo (o
         /// CombateService executa tudo e só depois narra): sincronizar aqui entregaria o HP já
@@ -112,7 +112,7 @@ namespace ApostlesWar.Presentation.Front
             _sessao.Publicar(sincronizarVida: false);
         }
 
-        // Campanha: o fim é a tela de VITÓRIA/DERROTA que o FluxoDoFront manda logo depois (com champs
+        // Campanha: o fim é a tela de VITÓRIA/DERROTA que o FluxoDoFront manda logo depois (com apóstolos
         // novos + item). Aqui é no-op pra não piscar o overlay genérico de "Fim da batalha!" antes dela.
         public void ExibirResumoBatalha(List<Combate> jogador) { }
 

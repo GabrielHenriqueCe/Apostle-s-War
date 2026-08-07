@@ -14,7 +14,7 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   — fechou o bug do bloqueio × escudo, #185) e a **DEF do protetor** no `ProtecaoAliado` (doc mentia; a
   impl é a certa — tanque protege mais barato). A **bancada de dano ✅ está construída**
   (`ApostlesWar.Tests/Bancada/`, ~35s no `dotnet test`, escreve `docs/bancada-dano.md` versionado): 5
-  linhas variando UM fator por vez — por-habilidade e champ-inteiro × alvo imune/não-imune a malefícios
+  linhas variando UM fator por vez — por-habilidade e apóstolo-inteiro × alvo imune/não-imune a malefícios
   × DEF 0/no cap. Zero mudança no motor. A seguir: **LER os números e rebalancear (#16)** — a bancada é
   o instrumento, o ajuste é o trabalho. Aberto: o #15 (faxina de comentários).
 - **O front foi SEPARADO e está FECHADO (ago/2026): `jogo.js` 11.921 → 192 linhas.** Ver a seção
@@ -85,7 +85,7 @@ camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição d
 ## Mapa rápido — Clean Architecture, 1 PROJETO por camada (a dependência aponta pra dentro)
 - `ApostlesWar.Domain/` regras do jogo, ZERO referências: `Combat/` (Combate, Batalha/Equipe,
   TurnoDoPersonagem, RelogioDoCombate, capacidades), `Skills/` (ações/buffs/debuffs/passivas),
-  `Champs/<Faccao>/<Champ>/`, `Models/`, `Enum/`.
+  `Apostolos/<Faccao>/<Apostolo>/`, `Models/`, `Enum/`.
 - `ApostlesWar.Application/` casos de uso: `Services/` orquestração · `Controllers/` (bot) ·
   `Portas/` (IApresentacao+Momento, ITelaDeCombate, IControladorDeTurno, IRepositorioDeSave).
 - `ApostlesWar.Infrastructure/` impl das portas de dados (SaveLocal). Só a Presentation enxerga.
@@ -106,16 +106,20 @@ camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição d
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`,
   `docs/GDD-progressao.md` (o plano que muda quase todo número), **`docs/LORE.md`**.
 
-## A LORE existe agora, e ela RENOMEIA coisas (ago/2026)
+## A LORE, e as duas renomeações que ela obrigou — AS DUAS FEITAS (ago/2026)
 **Os apóstolos são peças de brinquedo dos deuses; a guerra é entre apóstolos — e o JOGADOR não é um
-apóstolo, é um jogador no nível dos deuses.** Ler `docs/LORE.md` antes de mexer em nome de facção,
-de champ ou em texto de tela.
+apóstolo, é um jogador no nível dos deuses, convidado pela deusa Cindy.** Ler `docs/LORE.md` antes
+de mexer em nome de facção, de apóstolo ou em texto de tela.
 
-Duas consequências, **e a ordem entre elas não é negociável**:
-- ✅ **#17 FEITO:** a facção `Apostolos` virou **`Ascendentes`** e o 🌬️ virou ❄️. O 🌬️ era o símbolo
-  da **Cindy**, a deusa — não da facção.
-- ⏳ **#18:** só agora `champ`/`campeão` pode virar **`apóstolo`** em todo o repo (~1.008
-  ocorrências, 148 arquivos). Fazer antes do #17 teria criado `Apostolos/Apostolos/`.
+- ✅ **#17:** a facção `Apostolos` virou **`Ascendentes`** e o 🌬️ virou ❄️. O 🌬️ era o símbolo da
+  **Cindy** — não da facção.
+- ✅ **#18:** o herói jogável passou a se chamar **`apóstolo`** em todo o repo (904 trocas, 136
+  arquivos; nasceram `Domain/Apostolos/` e o `ApostolosService`). Nesta ordem porque o inverso
+  criaria pasta dentro de pasta homônima. **Os nomes velhos ficaram só na mensagem do commit.**
+- **O 🦸 Herói ficou Herói** — é nome próprio, par do 🦹 Vilão. "Apóstolo" é o conceito, não o
+  personagem.
+- **Em identificador é `apostolo`; em PROSA é `apóstolo`.** Vale pra comentário, doc e string que
+  vira documento gerado.
 
 **Ao renomear uma facção, o que é derivado e o que não é:** a chave de tema NASCE do enum
 (`FluxoDoFront.cs:431`, `faccao.ToString().ToLowerInvariant()`), então o `body[data-tema]`, a pasta
@@ -166,7 +170,7 @@ Mais o `<faccao>.css` na mesma pasta (e o `<link>` no index.html). **E rodar
 - **Que assinatura sobrou.** Dia claro é do Reino, lua do cemitério, estrelas da invasão, âmbar do
   fogo, crepúsculo da praia. Escolha o que SOBROU antes de escolher o que é bonito — é o que faz o
   capítulo ser reconhecível de relance.
-- **Os 4 champs entram pelo SINAL, não pela figura.** Nada de corpo humano (fica esquisito em canvas);
+- **Os 4 apóstolos entram pelo SINAL, não pela figura.** Nada de corpo humano (fica esquisito em canvas);
   o gênio é a lâmpada, a sereia é a cauda, a fada é o vaga-lume maior. E o gesto tem que ser do sinal:
   cauda sozinha fazendo salto de golfinho lê como pedaço arremessado.
 - **Uma peça CENTRAL, uma fonte de luz.** Fogueira, lâmpada. E o que mais acontece na cena responde a
@@ -206,7 +210,7 @@ export const compendio = { cena: 'compendio', montar(dados, anterior) { /* preen
 ```
 A chave no mapa `TELAS` é o **`tipo` da mensagem** — a unidade é a MENSAGEM, não o arquivo (o
 compêndio exporta duas). Tela nova = uma linha na tabela. **Abrir tela é SEMPRE `abrirTela(...)`**,
-inclusive de dentro do código (a ficha do champ pela conquista usa outra `cena` que a do compêndio,
+inclusive de dentro do código (a ficha do apóstolo pela conquista usa outra `cena` que a do compêndio,
 porque o Esc tem de voltar pra lugares diferentes).
 **`estado` e `evento` ficam FORA da tabela de propósito** — não navegam, atualizam a cena no ar.
 

@@ -1165,7 +1165,7 @@ export function criarFumacaDoInferno(cfg, canvas, arvoreCfg, inferno) {
 /// A COLUNA DE MORCEGOS — o 🧛 Vampiro, e nenhum vampiro desenhado. (A peça que o Gabriel aprovou de
 /// primeira: *"gostei dos morcegos ao redor da arvore"*.)
 ///
-/// Três dos quatro champs desta facção são figura humana ou quase (vampiro, elfo, diabo), e figura
+/// Três dos quatro apóstolos desta facção são figura humana ou quase (vampiro, elfo, diabo), e figura
 /// humana pequena em canvas fica esquisita — foi a lição que virou o gênio numa lâmpada e a sereia numa
 /// cauda. Aqui a saída é OUTRA: o vampiro é o MESMO bicho do 🦇, com outro comportamento. Os morcegos
 /// do `voadores` atravessam a tela em bando; estes se JUNTAM num rodamoinho sobre a árvore, seguram, e

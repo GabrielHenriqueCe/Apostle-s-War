@@ -20,16 +20,16 @@ namespace ApostlesWar.Application.Services
         private const string ChaveOndeParou = "campanha";
 
         private readonly ArsenalService _arsenal;
-        private readonly CampeoesService _campeoes;
+        private readonly ApostolosService _apostolos;
         private readonly CapitulosService _capitulos;
         private readonly PersonagemService _personagens;
         private readonly IRepositorioDeSave _repo;
 
-        public CampanhaService(ArsenalService arsenal, CampeoesService campeoes,
+        public CampanhaService(ArsenalService arsenal, ApostolosService apostolos,
             CapitulosService capitulos, PersonagemService personagens, IRepositorioDeSave repo)
         {
             _arsenal = arsenal;
-            _campeoes = campeoes;
+            _apostolos = apostolos;
             _capitulos = capitulos;
             _personagens = personagens;
             _repo = repo;
@@ -38,7 +38,7 @@ namespace ApostlesWar.Application.Services
         /// <summary>
         /// O marcador do save. Chave ANTIGA guardava só o int da posição; a porta devolve default
         /// silencioso quando não consegue ler (ver SaveLocal), então um save velho custa só o
-        /// marcador do mapa voltar pro Reino — champs, itens e fases vivem em outras chaves.
+        /// marcador do mapa voltar pro Reino — apóstolos, itens e fases vivem em outras chaves.
         /// </summary>
         private OndeParou Carregar() => _repo.Carregar<OndeParou>(ChaveOndeParou) ?? new OndeParou();
 
@@ -74,8 +74,8 @@ namespace ApostlesWar.Application.Services
         ///
         /// Guardado por IDENTIDADE (facção + slot), não por posição na lista de desbloqueados. Hoje o
         /// índice funcionaria por acidente — a lista só CRESCE, e sempre pelo fim, então quem já está
-        /// nela não muda de lugar. Mas isso é uma propriedade do `DesbloquearCampeoes`, não uma
-        /// promessa: basta o roster ser reordenado, ou um champ sair, pra um índice salvo passar a
+        /// nela não muda de lugar. Mas isso é uma propriedade do `DesbloquearApostolos`, não uma
+        /// promessa: basta o roster ser reordenado, ou um apóstolo sair, pra um índice salvo passar a
         /// apontar pra outra pessoa — e o sintoma seria o jogador entrar na fase com o time errado,
         /// sem nada dizendo por quê. Identidade não tem esse modo de falhar.
         ///
@@ -83,7 +83,7 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         public List<Personagem> UltimoTime() => Carregar().UltimoTime
             .Select(c => _personagens.ObterPersonagem(c.Faccao, c.Slot))
-            .Where(_campeoes.EstaDesbloqueado)
+            .Where(_apostolos.EstaDesbloqueado)
             .ToList();
 
         /// <summary>
@@ -99,19 +99,19 @@ namespace ApostlesWar.Application.Services
                 UltimaFase = fases,
                 // `Personagem.Slot` é int (1..4) e o PersonagemService pede o enum — a conversão é
                 // aqui, na fronteira do save, pra o record guardar o tipo com significado.
-                UltimoTime = time.Select(p => new ChampSalvo(p.Faccao, (Slot)p.Slot)).ToList(),
+                UltimoTime = time.Select(p => new ApostoloSalvo(p.Faccao, (Slot)p.Slot)).ToList(),
             });
         }
 
         /// <summary>
-        /// Restaura o progresso na ORDEM que importa: capítulos antes de champs/itens — os dois se
+        /// Restaura o progresso na ORDEM que importa: capítulos antes de apostolos/itens — os dois se
         /// derivam do FaseConcluida dos capítulos carregados.
         /// </summary>
         public void CarregarSaves()
         {
             _arsenal.CarregarItensEquipados();
             _capitulos.CarregarProgresso();
-            _campeoes.CarregarCampeoes();
+            _apostolos.CarregarApostolos();
             _arsenal.CarregarItens();
         }
 
@@ -128,41 +128,41 @@ namespace ApostlesWar.Application.Services
         {
             _repo.Excluir(ChaveOndeParou);
             _capitulos.Resetar();
-            _campeoes.Resetar();
+            _apostolos.Resetar();
             _arsenal.Resetar();
         }
 
         /// <summary>
-        /// Tudo que acontece ao VENCER uma fase: desbloqueia a próxima, marca concluída, libera os champs
+        /// Tudo que acontece ao VENCER uma fase: desbloqueia a próxima, marca concluída, libera os apóstolos
         /// daquela fase, dropa o item, libera a próxima facção (se completou todas) e salva os dois saves.
-        /// A ORDEM é load-bearing (snapshot ANTES pra o diff dos novos). Devolve os champs novos + o item.
+        /// A ORDEM é load-bearing (snapshot ANTES pra o diff dos novos). Devolve os apóstolos novos + o item.
         /// </summary>
         public RecompensaDaFase ProcessarVitoria(Faccao faccao, Fases fase)
         {
-            var antes = _campeoes.ObterDesbloqueados().ToList();
+            var antes = _apostolos.ObterDesbloqueados().ToList();
 
             _capitulos.DesbloquearFase(faccao, fase);
             _capitulos.ConcluirFase(faccao, fase);
-            _campeoes.DesbloquearCampeoes(faccao, fase);
+            _apostolos.DesbloquearApostolos(faccao, fase);
             Item? item = _arsenal.DroparItem(faccao, fase);
             _capitulos.DesbloquearFaccao(faccao, fase);
             _capitulos.SalvarProgresso();
             _arsenal.SalvarItens();
 
-            var novos = _campeoes.ObterDesbloqueados().Except(antes).ToList();
+            var novos = _apostolos.ObterDesbloqueados().Except(antes).ToList();
             return new RecompensaDaFase(novos, item);
         }
     }
 
-    /// <summary>Os champs desbloqueados NESTA vitória + o item dropado (null se a fase já tinha caído).</summary>
-    public record RecompensaDaFase(List<Personagem> NovosCampeoes, Item? Item);
+    /// <summary>Os apóstolos desbloqueados NESTA vitória + o item dropado (null se a fase já tinha caído).</summary>
+    public record RecompensaDaFase(List<Personagem> NovosApostolos, Item? Item);
 
     /// <summary>
-    /// Um champ no save. Facção + slot é a IDENTIDADE dele no jogo (é assim que o
-    /// <see cref="CampeoesService.EstaDesbloqueado"/> compara), e é o que sobrevive a um roster que
+    /// Um apóstolo no save. Facção + slot é a IDENTIDADE dele no jogo (é assim que o
+    /// <see cref="ApostolosService.EstaDesbloqueado"/> compara), e é o que sobrevive a um roster que
     /// cresce — ao contrário de um índice, que aponta pra outra pessoa assim que a lista muda.
     /// </summary>
-    public record ChampSalvo(Faccao Faccao, Slot Slot);
+    public record ApostoloSalvo(Faccao Faccao, Slot Slot);
 
     /// <summary>
     /// Onde o jogador parou na campanha: o capítulo do marcador, a última fase visitada de CADA
@@ -176,6 +176,6 @@ namespace ApostlesWar.Application.Services
         /// <summary>A última fase visitada em cada capítulo (1..7). Capítulo ausente = nunca entrou.</summary>
         public Dictionary<Faccao, int> UltimaFase { get; init; } = new();
 
-        public List<ChampSalvo> UltimoTime { get; init; } = new();
+        public List<ApostoloSalvo> UltimoTime { get; init; } = new();
     }
 }

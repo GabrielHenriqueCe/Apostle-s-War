@@ -19,7 +19,7 @@ também comanda peças. Os apóstolos são as peças — dos dois lados do tabul
 sobre a sua habilidade *como jogador*, não sobre força, linhagem ou destino: um jogador de verdade,
 chamado pra uma partida de verdade, por alguém que precisa vencer.
 
-**Como você entra na partida:** o 👑 **Reino fez um ritual de invocação**, pedindo heróis para
+**Como você entra na partida:** o 👑 **Reino fez um ritual de invocação**, pedindo apóstolos para
 ajudar na guerra. **Você escolheu qual apóstolo humano atenderia ao chamado** — e é literalmente o
 que o jogo faz na primeira escolha de time.
 
@@ -37,10 +37,10 @@ que já está lá**.
 
 | o que o jogo já faz | por que, agora |
 |---|---|
-| **você joga com quem derrotou** | apóstolos são peças, e o jogador comanda peças. **Recrutar campeão É a lore acontecendo** — a coleção deixa de ser convenção de gênero e vira o assunto |
+| **você joga com quem derrotou** | apóstolos são peças, e o jogador comanda peças. **Recrutar apóstolo É a lore acontecendo** — a coleção deixa de ser convenção de gênero e vira o assunto |
 | **nove mundos incompatíveis no mesmo mapa** | deuses puxam peças de onde quiserem. O Papai Noel ao lado do disco voador e do 🦖 não é inconsistência, é o tabuleiro sendo montado por quem não liga |
 | **o 👑 Reino é o capítulo 1** | é o Reino que faz o ritual. Você entra na partida por ali porque foi ali que te chamaram |
-| **você ESCOLHE o time inicial, e ele é de Humanos** | o ritual pediu heróis; quem escolheu qual apóstolo humano atender foi você |
+| **você ESCOLHE o time inicial, e ele é de Humanos** | o ritual pediu apóstolos; quem escolheu qual apóstolo humano atender foi você |
 | **a campanha escurece capítulo a capítulo** | você se afasta de quem te acolheu |
 
 > **O que a lore NÃO explica, e é bom deixar dito:** o 👑 Reino ser a única cena de DIA é **decisão

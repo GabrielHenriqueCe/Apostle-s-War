@@ -40,7 +40,7 @@ namespace ApostlesWar.Presentation.Front
 
         private readonly PonteWebView2 _ponte;
         private readonly CombateService _combate;
-        private readonly CampeoesService _campeoes;
+        private readonly ApostolosService _apostolos;
         private readonly PerfilService _perfil;
         private readonly SessaoDoFront _sessao;
         private readonly CampanhaService _campanha;
@@ -49,13 +49,13 @@ namespace ApostlesWar.Presentation.Front
         private readonly PersonagemService _personagens;
         private readonly ConfiguracaoService _configuracao;
 
-        public FluxoDoFront(PonteWebView2 ponte, CombateService combate, CampeoesService campeoes,
+        public FluxoDoFront(PonteWebView2 ponte, CombateService combate, ApostolosService apostolos,
             PerfilService perfil, SessaoDoFront sessao, CampanhaService campanha, CapitulosService capitulos,
             ArsenalService arsenal, PersonagemService personagens, ConfiguracaoService configuracao)
         {
             _ponte = ponte;
             _combate = combate;
-            _campeoes = campeoes;
+            _apostolos = apostolos;
             _perfil = perfil;
             _sessao = sessao;
             _campanha = campanha;
@@ -69,8 +69,8 @@ namespace ApostlesWar.Presentation.Front
         {
             try
             {
-                // Carrega o progresso UMA vez no boot: assim os champs desbloqueados já valem em todo
-                // lugar (ex: o picker de avatar do perfil libera conforme a campanha libera os champs),
+                // Carrega o progresso UMA vez no boot: assim os apóstolos desbloqueados já valem em todo
+                // lugar (ex: o picker de avatar do perfil libera conforme a campanha libera os apóstolos),
                 // não só depois de entrar na Campanha. Depois o estado vive em memória (a vitória
                 // atualiza + salva).
                 _campanha.CarregarSaves();
@@ -224,17 +224,17 @@ namespace ApostlesWar.Presentation.Front
         private static readonly JsonSerializerOptions ConfigJson = new() { PropertyNameCaseInsensitive = true };
 
         /// <summary>
-        /// Arena (PVP): manda o pool de campeões pro front montar os dois times + escolher o controle
+        /// Arena (PVP): manda o pool de apóstolos pro front montar os dois times + escolher o controle
         /// de cada lado, espera a config e roda a luta. Uma batalha por entrada; abortar/sair/Esc volta
         /// pro menu (o loop de Rodar redesenha).
         /// </summary>
         private void MontarArena()
         {
-            var pool = _campeoes.TodosOsCampeoes();
-            var campeoes = pool.Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+            var pool = _apostolos.TodosOsApostolos();
+            var apostolos = pool.Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
 
             _ponte.LimparPendentes();
-            _ponte.EnviarMontagemArena(campeoes);
+            _ponte.EnviarMontagemArena(apostolos);
 
             while (true)
             {
@@ -269,7 +269,7 @@ namespace ApostlesWar.Presentation.Front
             catch (JsonException) { return null; }
         }
 
-        // Cada time: de 1 a 4 champs, índices válidos (o front garante ≥1 de cada lado pra dar 1x1).
+        // Cada time: de 1 a 4 apóstolos, índices válidos (o front garante ≥1 de cada lado pra dar 1x1).
         private static bool ConfigValida(ArenaConfig cfg, int total)
             => TimeValido(cfg.Time1, total) && TimeValido(cfg.Time2, total);
 
@@ -305,15 +305,15 @@ namespace ApostlesWar.Presentation.Front
 
         /// <summary>
         /// Editar perfil: troca o nome e escolhe o avatar na grade dos 36 (os bloqueados em cinza).
-        /// O front devolve o ÍNDICE na lista completa; quem diz se aquele campeão VALE é o
+        /// O front devolve o ÍNDICE na lista completa; quem diz se aquele apóstolo VALE é o
         /// <see cref="PerfilService.PodeUsarAvatar"/> — aqui só se pinta o que ele responde.
         /// </summary>
         private void MostrarEditarPerfil()
         {
-            var todos = _campeoes.TodosOsCampeoes();
+            var todos = _apostolos.TodosOsApostolos();
 
             var lista = todos
-                .Select(p => new CampeaoVisto(p.Simbolo, p.Nome, _perfil.PodeUsarAvatar(p)))
+                .Select(p => new ApostoloVisto(p.Simbolo, p.Nome, _perfil.PodeUsarAvatar(p)))
                 .ToList();
 
             Perfil? perfil = _perfil.Carregar();
@@ -440,7 +440,7 @@ namespace ApostlesWar.Presentation.Front
                 if (venceu)
                 {
                     RecompensaDaFase r = _campanha.ProcessarVitoria(faccao, fase);
-                    novos = r.NovosCampeoes;
+                    novos = r.NovosApostolos;
                     recompensa = MontarRecompensa(r);
                 }
 
@@ -474,9 +474,9 @@ namespace ApostlesWar.Presentation.Front
         }
 
         /// <summary>
-        /// A celebração do champ conquistado, quando há algum. Ordem pedida pelo Gabriel: primeiro a
-        /// tela de vitória com o item em destaque, e só depois cada champ novo — um por vez, cada um
-        /// com a própria tela. Sem champ novo isto não faz nada, e a tela de decisão aparece direto.
+        /// A celebração do apóstolo conquistado, quando há algum. Ordem pedida pelo Gabriel: primeiro a
+        /// tela de vitória com o item em destaque, e só depois cada apóstolo novo — um por vez, cada um
+        /// com a própria tela. Sem apóstolo novo isto não faz nada, e a tela de decisão aparece direto.
         ///
         /// O C# conduz a sequência (manda um, espera o "continuar") em vez de despejar a lista e
         /// deixar o JS navegar, pelo mesmo motivo do compêndio: quem responde o Esc/Sair é ele, então
@@ -539,12 +539,12 @@ namespace ApostlesWar.Presentation.Front
         private FasesVista MontarFases(Faccao faccao)
         {
             var fases = Enum.GetValues<Fases>().Select(f => MontarFase(faccao, f)).ToList();
-            var desbloqueados = _campeoes.ObterDesbloqueados();
+            var desbloqueados = _apostolos.ObterDesbloqueados();
             var meus = desbloqueados
-                .Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+                .Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
 
             // O time salvo volta como ÍNDICES nesta lista, porque é isso que o clique devolve. A
-            // tradução identidade→índice é do C#: o save guarda quem é o champ (ver
+            // tradução identidade→índice é do C#: o save guarda quem é o apóstolo (ver
             // CampanhaService.UltimoTime), e a posição na lista é só o endereço de hoje.
             var time = _campanha.UltimoTime()
                 .Select(p => desbloqueados.FindIndex(d => d.Faccao == p.Faccao && d.Slot == p.Slot))
@@ -567,14 +567,14 @@ namespace ApostlesWar.Presentation.Front
                 new ItemVista(item.Simbolo, item.Nome, NomeDoStat(item.TipoStat), ValorFormatado(item)));
         }
 
-        private List<CampeaoVisto> Inimigos(Faccao faccao, List<Slot> slots) => slots
+        private List<ApostoloVisto> Inimigos(Faccao faccao, List<Slot> slots) => slots
             .Select(s => _personagens.ObterPersonagem(faccao, s))
-            .Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true))
+            .Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true))
             .ToList();
 
         private static RecompensaVista MontarRecompensa(RecompensaDaFase r)
         {
-            var novos = r.NovosCampeoes.Select(p => new CampeaoVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+            var novos = r.NovosApostolos.Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
             ItemVista? item = r.Item is null ? null
                 : new ItemVista(r.Item.Simbolo, r.Item.Nome, NomeDoStat(r.Item.TipoStat), ValorFormatado(r.Item));
             return new RecompensaVista(novos, item);
@@ -595,7 +595,7 @@ namespace ApostlesWar.Presentation.Front
             fase = (Fases)cfg.Fase;
             if (!_capitulos.EstaDesbloqueado(faccao, fase)) return false;
 
-            var pool = _campeoes.ObterDesbloqueados();
+            var pool = _apostolos.ObterDesbloqueados();
             if (cfg.Time is not { Length: >= 1 and <= 4 } || !cfg.Time.All(i => i >= 0 && i < pool.Count))
                 return false;
 
@@ -638,7 +638,7 @@ namespace ApostlesWar.Presentation.Front
         /// Compêndio: o catálogo dos 36, agrupado por facção, TRAVADOS INCLUÍDOS — e a ficha completa
         /// de qualquer um deles. Só lê; nada aqui muda progresso.
         ///
-        /// Mostrar champ travado é a decisão que dá sentido à tela: é planejando contra o que ainda
+        /// Mostrar apóstolo travado é a decisão que dá sentido à tela: é planejando contra o que ainda
         /// não se tem que a campanha vira escolha. O cadeado diz "ainda não é seu", não "não é da sua
         /// conta" — e é por isso que a ficha não esconde nada.
         ///
@@ -647,7 +647,7 @@ namespace ApostlesWar.Presentation.Front
         /// </summary>
         private void MostrarCompendio()
         {
-            var todos = _campeoes.TodosOsCampeoes();
+            var todos = _apostolos.TodosOsApostolos();
 
             while (true)
             {
@@ -658,21 +658,21 @@ namespace ApostlesWar.Presentation.Front
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
                 if (msg.Tipo == "voltar") return;   // volta pro menu principal
 
-                if (msg.Tipo == "verChamp")
+                if (msg.Tipo == "verApostolo")
                 {
                     int idx = msg.Valor;
                     if (idx < 0 || idx >= todos.Count) continue;
-                    MostrarChampDetalhe(todos[idx]);
+                    MostrarApostoloDetalhe(todos[idx]);
                     // o while redesenha a grade
                 }
             }
         }
 
-        /// <summary>A ficha de um champ. Sai no Esc/Sair — não há mais nada a fazer nela.</summary>
-        private void MostrarChampDetalhe(Personagem champ)
+        /// <summary>A ficha de um apóstolo. Sai no Esc/Sair — não há mais nada a fazer nela.</summary>
+        private void MostrarApostoloDetalhe(Personagem apostolo)
         {
             _ponte.LimparPendentes();
-            _ponte.EnviarChampDetalhe(MontarDetalhe(champ));
+            _ponte.EnviarApostoloDetalhe(MontarDetalhe(apostolo));
 
             while (true)
             {
@@ -683,9 +683,9 @@ namespace ApostlesWar.Presentation.Front
         }
 
         /// <summary>
-        /// Agrupa a lista COMPLETA por facção preservando o índice global de cada champ — é ele que o
+        /// Agrupa a lista COMPLETA por facção preservando o índice global de cada apóstolo — é ele que o
         /// clique devolve. Agrupar por `GroupBy` em vez de varrer os enums de novo mantém uma ordem
-        /// só: a que o <see cref="CampeoesService.TodosOsCampeoes"/> definiu.
+        /// só: a que o <see cref="ApostolosService.TodosOsApostolos"/> definiu.
         /// </summary>
         private CompendioVista MontarCompendio(List<Personagem> todos)
         {
@@ -695,28 +695,28 @@ namespace ApostlesWar.Presentation.Front
                 .Select(g => new CompendioFaccaoVista(
                     g.Key.Descricao(),
                     Faccoes.Simbolo(g.Key),
-                    g.Select(x => new CompendioChampVista(
+                    g.Select(x => new CompendioApostoloVista(
                         x.Indice, x.Personagem.Simbolo, x.Personagem.Nome,
-                        _campeoes.EstaDesbloqueado(x.Personagem))).ToList()))
+                        _apostolos.EstaDesbloqueado(x.Personagem))).ToList()))
                 .ToList();
 
             return new CompendioVista(faccoes);
         }
 
-        private ChampDetalheVista MontarDetalhe(Personagem champ) => new(
-            champ.Nome, champ.Simbolo, champ.Faccao.Descricao(),
-            _campeoes.EstaDesbloqueado(champ),
-            champ.HP, champ.Ataque, champ.Defesa,
-            // Crit é global (não vive no champ): vem das constantes-base do Personagem.
+        private ApostoloDetalheVista MontarDetalhe(Personagem apostolo) => new(
+            apostolo.Nome, apostolo.Simbolo, apostolo.Faccao.Descricao(),
+            _apostolos.EstaDesbloqueado(apostolo),
+            apostolo.HP, apostolo.Ataque, apostolo.Defesa,
+            // Crit é global (não vive no apóstolo): vem das constantes-base do Personagem.
             (int)(Personagem.TaxaCritBase * 100), (int)(Personagem.DanoCritBase * 100),
             // Sem dono: fora da luta não há turno correndo, então o cooldown é o DECLARADO — que é
-            // justamente o que se compara entre champs num catálogo. Ver VistaDeHabilidade.
-            champ.Habilidades.Select(h => VistaDeHabilidade.De(h)).ToList());
+            // justamente o que se compara entre apóstolos num catálogo. Ver VistaDeHabilidade.
+            apostolo.Habilidades.Select(h => VistaDeHabilidade.De(h)).ToList());
 
         // ---------- Arsenal ----------
 
         /// <summary>
-        /// Arsenal: o boneco com os 7 slots equipados GLOBALMENTE ("em Mim", valem pra todos os champs)
+        /// Arsenal: o boneco com os 7 slots equipados GLOBALMENTE ("em Mim", valem pra todos os apóstolos)
         /// e os itens obtidos pra escolher. Quem grava é o <see cref="ArsenalService.EquiparItem"/>.
         /// </summary>
         private void MostrarArsenal()

@@ -5,7 +5,7 @@
     ///
     /// Se o modificador AGE neste golpe é decidido fora, por UMA língua só (unificação
     /// jul/2026): o ReceberDano pergunta "este status está na lista de ignorados?" — a lista
-    /// unida de natureza.Ignora + ignorarStatus (golpe) + IIgnoraStatusNoAtaque (champ). Não há
+    /// unida de natureza.Ignora + ignorarStatus (golpe) + IIgnoraStatusNoAtaque (apóstolo). Não há
     /// mais `DeveAgir` por-status lendo flags da natureza; as regras que eram flags viraram
     /// entradas na lista `NaturezasDano` (ex: QueimaDano fura Escudo; todo dano sem reação fura
     /// ProtecaoAliado — o anti-loop de proteção mútua).

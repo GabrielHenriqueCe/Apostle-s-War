@@ -13,7 +13,7 @@ namespace ApostlesWar.Application.Services
         #region Construtor
 
         private readonly ArsenalService _arsenalService;
-        private readonly CampeoesService _campeoesService;
+        private readonly ApostolosService _apostolosService;
         private readonly PersonagemService _personagemService;
         private readonly ITelaDeCombate _tela;
         private readonly SelecaoDeAlvoService _selecaoDeAlvoService;
@@ -29,12 +29,12 @@ namespace ApostlesWar.Application.Services
         private Dictionary<Equipe, IControladorDeTurno> _controladores = new();
 
         public CombateService(ArsenalService arsenalService,
-            CampeoesService campeoesService, PersonagemService personagemService, ITelaDeCombate tela,
+            ApostolosService apostolosService, PersonagemService personagemService, ITelaDeCombate tela,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
             IControladorDeTurno controladorBot, IApresentacao apresentacao, RelogioDoCombate relogio)
         {
             _arsenalService = arsenalService;
-            _campeoesService = campeoesService;
+            _apostolosService = apostolosService;
             _personagemService = personagemService;
             _tela = tela;
             _selecaoDeAlvoService = selecaoDeAlvoService;
@@ -652,7 +652,7 @@ namespace ApostlesWar.Application.Services
         /// de fase (luta justa, mult 1.0), SEM itens (leitura limpa de balance) e SEM recompensa/save.
         /// Reusa o mesmo loop de combate — o seam Batalha/controlador faz tudo funcionar independente
         /// da classe. Ambos os times são Jogador (a estrutura, não o tipo, define quem é inimigo de
-        /// quem). A seleção é problema de quem chama: o pick de campeões é TELA, e a luta não depende
+        /// quem). A seleção é problema de quem chama: o pick de apóstolos é TELA, e a luta não depende
         /// dela. Esc = sai sem drama.
         /// </summary>
         /// <returns>true = a batalha terminou naturalmente (resumo na tela); false = foi ABORTADA no

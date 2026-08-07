@@ -27,7 +27,7 @@ namespace Tests.Bancada
 
         public TelaDeBancada(bool critMaximo) => _critMaximo = critMaximo;
 
-        public List<Combate> Champs { get; private set; } = new();
+        public List<Combate> Apostolos { get; private set; } = new();
         public List<Combate> Bonecos { get; private set; } = new();
 
         /// <summary>Setada pelo controlador ANTES de devolver a habilidade — é o que dá endereço
@@ -40,7 +40,7 @@ namespace Tests.Bancada
 
         public void ExibirInicioArena(List<Combate> equipe1, List<Combate> equipe2)
         {
-            Champs = equipe1;
+            Apostolos = equipe1;
             Bonecos = equipe2;
 
             // Crítico 100% pra todo mundo. Duas razões: quem FORÇA crítico (Kunai) para de ganhar
@@ -71,7 +71,7 @@ namespace Tests.Bancada
         /// </summary>
         public void ExibirCura(EventoCura c)
         {
-            if (HabEmExecucao is null || !Champs.Contains(c.Curador)) return;
+            if (HabEmExecucao is null || !Apostolos.Contains(c.Curador)) return;
             CuraPorHab[HabEmExecucao] = CuraPorHab.GetValueOrDefault(HabEmExecucao) + c.Quantidade;
         }
 
@@ -147,7 +147,7 @@ namespace Tests.Bancada
         /// <summary>
         /// O turno do BONECO: ele se cura em vez de revidar (ideia do Gabriel). Podia ser a casca
         /// vazia acima — o efeito na medição é o mesmo, já que o que importa é ele não ENCOSTAR no
-        /// champ — mas uma ação de jogo de verdade é mais honesta que um turno oco, e de quebra
+        /// apóstolo — mas uma ação de jogo de verdade é mais honesta que um turno oco, e de quebra
         /// devolve o alvo ao HP cheio pelo caminho do próprio motor.
         /// </summary>
         public static HabilidadeAtiva Descanso() => new(
@@ -158,11 +158,11 @@ namespace Tests.Bancada
     }
 
     /// <summary>
-    /// Quem joga pelo champ na bancada, nos dois modos:
+    /// Quem joga pelo apóstolo na bancada, nos dois modos:
     /// - **isolada** (`habIsolada` != null): usa SÓ aquela habilidade, e espera quando ela está em
     ///   cooldown. Mede a habilidade.
-    /// - **champ inteiro** (`habIsolada` == null): delega ao <c>ControladorBot</c>, o MESMO cérebro
-    ///   que joga a Arena e o modo Auto. Mede o champ como ele é de fato jogado — e é por isso que
+    /// - **apóstolo inteiro** (`habIsolada` == null): delega ao <c>ControladorBot</c>, o MESMO cérebro
+    ///   que joga a Arena e o modo Auto. Mede o apóstolo como ele é de fato jogado — e é por isso que
     ///   a contagem de usos por habilidade importa: se uma nunca é escolhida, isso é um fato sobre
     ///   a FILA DO BOT, não sobre o dano dela.
     ///
@@ -203,15 +203,15 @@ namespace Tests.Bancada
             // `DanoRecebido` — que é o funil único — segue somando tudo.
             // Reset AQUI (entre turnos, antes de decidir) e não via Invencível de propósito: o piso
             // de HP deixaria o alvo em 1 de vida, e aí o `PreverVidaRemovida` devolveria ~0 pra tudo
-            // e o BOT escolheria as habilidades com a régua errada na medição do champ inteiro.
+            // e o BOT escolheria as habilidades com a régua errada na medição do apóstolo inteiro.
             foreach (Combate boneco in _tela.Bonecos)
                 boneco.RestaurarVida(boneco.HPMaximo);
 
-            // E o CHAMP começa cada turno com 1 de vida. Duas razões, e a segunda foi o Gabriel quem
+            // E o APOSTOLO começa cada turno com 1 de vida. Duas razões, e a segunda foi o Gabriel quem
             // viu: (a) cura só cura quem está ferido — sem isto, toda habilidade de cura mediria 0 e
-            // a coluna não existiria; (b) há champ que fica MAIS FORTE com pouca vida (a Caveira
+            // a coluna não existiria; (b) há apóstolo que fica MAIS FORTE com pouca vida (a Caveira
             // escala `2.0 − HP%`), então esta é a condição em que o kit dele aparece.
-            // O champ não morre disto: ele carrega a mesma prevenção-de-morte do boneco, que o
+            // O apóstolo não morre disto: ele carrega a mesma prevenção-de-morte do boneco, que o
             // segura quando uma habilidade de auto-dano (o Fantasma) o levaria a zero.
             atacante.RestaurarVida(1);
 

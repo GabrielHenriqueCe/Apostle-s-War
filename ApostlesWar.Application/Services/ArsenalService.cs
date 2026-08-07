@@ -148,7 +148,7 @@ namespace ApostlesWar.Application.Services
         public List<Item> ObterObtidos() => obtidos;
 
         /// <summary>
-        /// Carrega itens a partir do FaseConcluida igual ao CarregarCampeoes
+        /// Carrega itens a partir do FaseConcluida igual ao CarregarApostolos
         /// </summary>
         public void CarregarItens()
         {
@@ -173,7 +173,7 @@ namespace ApostlesWar.Application.Services
         /// slots derem ATK a conta já está no lugar certo — e não espalhada por quem desenha.
         ///
         /// FLAT e PCT continuam SEPARADOS de propósito: "+300 de HP" e "+15% de HP" não viram um
-        /// número só sem escolher um champ, porque o percentual é sobre o HP base DELE (ver
+        /// número só sem escolher um apóstolo, porque o percentual é sobre o HP base DELE (ver
         /// <see cref="Combate.AplicarItem"/>). O arsenal informa o que o equipamento dá; quem soma
         /// isso a um personagem é a luta.
         ///

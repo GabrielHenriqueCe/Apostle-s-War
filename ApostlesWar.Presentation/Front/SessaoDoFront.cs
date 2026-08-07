@@ -20,7 +20,7 @@ namespace ApostlesWar.Presentation.Front
         private readonly RelogioDoCombate _relogio;
 
         // Combate não sobrescreve Equals, então o dicionário casa por REFERÊNCIA — que é o que
-        // queremos: dois champs iguais em ficha são combatentes distintos na luta.
+        // queremos: dois apóstolos iguais em ficha são combatentes distintos na luta.
         private readonly Dictionary<Combate, int> _ids = new();
         private readonly Dictionary<int, Combate> _porId = new();
         private readonly Dictionary<Combate, int> _lado = new();
@@ -237,7 +237,7 @@ namespace ApostlesWar.Presentation.Front
                 .Select(s => new StatusVisto(s.Nome, s.Simbolo, s.DuracaoRestante, s is Buff))
                 .ToList(),
             // O kit dele pra LER, com o cooldown andando. `Personagem.Habilidades` já traz a passiva
-            // junto — ela é identidade do champ e o jogador quer vê-la ao inspecionar.
+            // junto — ela é identidade do apóstolo e o jogador quer vê-la ao inspecionar.
             Habilidades: c.Personagem.Habilidades.Select(h => VistaDeHabilidade.De(h, c)).ToList());
 
         private HabilidadeVista VerHabilidade(HabilidadeAtiva h)

@@ -40,17 +40,17 @@
 
 ---
 
-## 2. Bespokes por champ (Nível 2/3 — locais até o 2º cliente) — NÃO recriar, PROMOVER
+## 2. Bespokes por apóstolo (Nível 2/3 — locais até o 2º cliente) — NÃO recriar, PROMOVER
 
-Ações custom que vivem na pasta do champ porque têm só 1 cliente. Se um SEGUNDO champ precisar do
+Ações custom que vivem na pasta do apóstolo porque têm só 1 cliente. Se um SEGUNDO apóstolo precisar do
 mesmo verbo, **pare e promova** pra `Skills/Acoes/` (ADR §9) em vez de duplicar.
 
 | Ação | O que faz | Nível | Cliente | Gatilho de promoção | Arquivo |
 |---|---|---|---|---|---|
-| `GolpeSeguidor` | ataque cujo ignore-DEF depende do hit anterior ter sido crítico | 3 | Shuriken (Ninja) | 2º com acoplamento hit-a-hit | `Champs/Reino/Ninja/GolpeSeguidor.cs` |
-| `AutoDano` | dano ao PRÓPRIO atacante por um fragmento de Valor | 2 | VindoDoAlém (Fantasma) | 2º cliente real | `Champs/LadoSombrio/Fantasma/AutoDano.cs` |
-| `EstenderBuffs` | estende a duração de buffs conforme um Seletor | 2 | RaioX (Robô) | 2º cliente ATIVO (→ nasce `EstenderDebuffs`) | `Champs/Tecnologicos/Robo/EstenderBuffs.cs` |
-| `RestaurarHPMaximo` | restaura HP máximo perdido do alvo, até um cap % do HP máx inicial | 2 | DragãoProtetor (Dragão) | 2º cliente real | `Champs/Misticos/Dragao/RestaurarHPMaximo.cs` |
+| `GolpeSeguidor` | ataque cujo ignore-DEF depende do hit anterior ter sido crítico | 3 | Shuriken (Ninja) | 2º com acoplamento hit-a-hit | `Apostolos/Reino/Ninja/GolpeSeguidor.cs` |
+| `AutoDano` | dano ao PRÓPRIO atacante por um fragmento de Valor | 2 | VindoDoAlém (Fantasma) | 2º cliente real | `Apostolos/LadoSombrio/Fantasma/AutoDano.cs` |
+| `EstenderBuffs` | estende a duração de buffs conforme um Seletor | 2 | RaioX (Robô) | 2º cliente ATIVO (→ nasce `EstenderDebuffs`) | `Apostolos/Tecnologicos/Robo/EstenderBuffs.cs` |
+| `RestaurarHPMaximo` | restaura HP máximo perdido do alvo, até um cap % do HP máx inicial | 2 | DragãoProtetor (Dragão) | 2º cliente real | `Apostolos/Misticos/Dragao/RestaurarHPMaximo.cs` |
 
 ---
 
@@ -79,7 +79,7 @@ Ao criar habilidade que FURA um status, pergunte **de quem vem a perfuração** 
 |---|---|---|
 | da ESSÊNCIA do dano (todo dano desse tipo, sempre) | perfil de `NaturezaDano` (campo `Ignora`) | QueimaDano fura Escudo |
 | só DESTE GOLPE | `ignorarStatus` na ação `Dano` | CorteDeVento fura Escudo; PóMágico fura `typeof(Buff)` |
-| DESTE CHAMP, em todo ataque (identidade) | passiva `IIgnoraStatusNoAtaque` | Drenagem (Vampiro) fura Invencível+Bloqueio |
+| DESTE APOSTOLO, em todo ataque (identidade) | passiva `IIgnoraStatusNoAtaque` | Drenagem (Vampiro) fura Invencível+Bloqueio |
 | % do stat DEFESA (não é status) | `ignorarDefesaPct` no `Dano` | Vendaval, Controle de Sangue |
 
 As três primeiras convergem numa lista só no `ReceberDano` (match por tipo EXATO ou BASE —

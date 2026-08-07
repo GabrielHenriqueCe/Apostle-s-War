@@ -371,7 +371,7 @@ function desenharHabilidades(c) {
 }
 
 // A caixa de uma habilidade no painel. Os dois chamadores mandam formatos diferentes de dado
-// (HabilidadeVista pra clicar, HabilidadeDoChampVista pra ler), mas o que a tela desenha vem só do
+// (HabilidadeVista pra clicar, HabilidadeDoApostoloVista pra ler), mas o que a tela desenha vem só do
 // que os dois têm em comum: símbolo, nome, cooldown restante e descrição.
 function criarBotaoHabilidade(h, descricao) {
     const b = document.createElement('button');

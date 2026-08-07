@@ -4,13 +4,13 @@ O plano que o Gabriel desenhou depois que a separação do front ficou pronta. *
 de quase todo número do jogo**, e é por isso que o #16 (rebalance) e o PR de dificuldade estão
 parados: rebalancear agora é medir uma coisa que vai deixar de existir.
 
-> **Por que o #16 espera.** A bancada mede champ com stat FIXO contra boneco parado. Aqui o stat base
+> **Por que o #16 espera.** A bancada mede apóstolo com stat FIXO contra boneco parado. Aqui o stat base
 > passa a vir do **tipo**, cresce por `nível`, a habilidade muda por `raridade`, a ordem de turno passa
 > a ser barra de velocidade e a posição limita quem alcança quem. Os 144 números do relatório atual
 > medem um jogo que está sendo substituído.
 >
-> **E a bancada não responde a pergunta certa.** O Gabriel: *"um champ que ignora defesa e causa
-> muito mais dano que um champ que causa menos dano e coloca um debuff — qual é mais quebrado?"* Não
+> **E a bancada não responde a pergunta certa.** O Gabriel: *"um apóstolo que ignora defesa e causa
+> muito mais dano que um apóstolo que causa menos dano e coloca um debuff — qual é mais quebrado?"* Não
 > há número de dano que responda: o segundo só vale o que valer JUNTO com os outros três. A própria
 > bancada já declara isso — o boneco nunca age, então contra-ataque, espinhos e revide medem ZERO.
 > **Quem responde é uma bancada de TIME contra TIME.** Ver §A BANCADA 2.0.
@@ -34,7 +34,7 @@ controle sem dano. É o que faltava pro 🧌 Troll e pro 👹 Ogro existirem sem
 > decide QUEM joga. Coexistem.
 
 **A Velocidade quase não sobe de nível — ela vem de EQUIPAMENTO.** Num modelo de barra de turno ela é
-o stat mais forte que existe; se o nível a empurrasse junto com HP/ATK/DEF, o campeão nivelado
+o stat mais forte que existe; se o nível a empurrasse junto com HP/ATK/DEF, o apóstolo nivelado
 dominaria os dois eixos ao mesmo tempo e não haveria calibragem que salvasse. Deixando-a no
 equipamento ela vira **escolha de build**, e não consequência de investimento.
 
@@ -47,7 +47,7 @@ quem joga, uma facção com bônus nela domina todas as outras.
 > cheio** nas outras peças — assim existe o endgame de montar velocidade, e a Bota é o grande prêmio
 > em cima dele.
 >
-> **De graça:** como item é trocável, qualquer champ pode virar rápido se você pagar por isso —
+> **De graça:** como item é trocável, qualquer apóstolo pode virar rápido se você pagar por isso —
 > flexibilidade sem apagar a identidade do tipo.
 
 ### Defesa — `DEF / (DEF + 5000)`
@@ -122,7 +122,7 @@ só, e o jogador já sabe ler.
 
 A escada do WoW (2ª aplicação vale metade, 3ª um quarto, depois imune) **fica de fora**. Reaplicar
 veneno, queima ou redução de defesa não quebra nada; o único abuso real é **controle que tira o turno**
-— quatro champs atordoando em sequência travam um chefe pra sempre.
+— quatro apóstolos atordoando em sequência travam um chefe pra sempre.
 
 **A trava não é regra global, é PASSIVA DO BOSS**, e o jogador **lê na ficha dele**:
 
@@ -167,7 +167,7 @@ duração antes de o status ser adicionado.
 
 > **Resistência por TIPO** (Darkest Dungeon: Atordoamento, Sangramento, Praga…) custaria seis stats na
 > ficha, seis fontes em item e seis números pra calibrar. **Uma Resistência única no stat**, com a
-> variedade vindo de traço/passiva de champ, dá a mesma decisão de time por muito menos. O encaixe é o
+> variedade vindo de traço/passiva de apóstolo, dá a mesma decisão de time por muito menos. O encaixe é o
 > `StatusEffect` (que já tem tipo), **NÃO** a `NaturezaDano` — esta descreve o golpe, não o efeito.
 
 ---
@@ -212,26 +212,26 @@ Separar as duas coisas é o que barateia as duas. *"Tanque não alcança o últi
 > leituras (Guardião converte em redução, Combatente em dano, Suporte em potência de cura). Não é
 > pra agora.
 
-### O STAT BASE É DO TIPO, não do champ
+### O STAT BASE É DO TIPO, não do apóstolo
 
 **Todo Guardião começa com os mesmos status. O que diferencia dois Guardiões é o KIT e o SET que você
-monta neles.** E **cada facção/capítulo tem um de cada tipo** — quatro champs, quatro papéis.
+monta neles.** E **cada facção/capítulo tem um de cada tipo** — quatro apóstolos, quatro papéis.
 
-**108 números viram 12** (36 champs × HP/ATK/DEF → 4 tipos × HP/ATK/DEF). E isso muda a natureza do
+**108 números viram 12** (36 apóstolos × HP/ATK/DEF → 4 tipos × HP/ATK/DEF). E isso muda a natureza do
 #16: rebalancear deixa de ser "ajustar 36 fichas" e passa a ser "ajustar 4 arquétipos + os
 multiplicadores das habilidades". A bancada também fica legível, porque a variação que ela mede passa
 a ser **só de kit**.
 
 > **Não é reescrita, é consolidação — os stats atuais já vivem numa grade:**
-> `HP 600·800·1000·1200·1400` (passo 200) e `ATK/DEF 120·160·200·240·280` (passo 40). Cada champ já
+> `HP 600·800·1000·1200·1400` (passo 200) e `ATK/DEF 120·160·200·240·280` (passo 40). Cada apóstolo já
 > escolheu um degrau; a mudança é fixar 4 degraus em vez de 36 pontos soltos.
 
-**O erro fica grande e visível, e isso é bom:** um Guardião mal calibrado estraga 9 champs de uma vez
+**O erro fica grande e visível, e isso é bom:** um Guardião mal calibrado estraga 9 apóstolos de uma vez
 — mas é **um** erro, em **um** lugar, consertável com **um** número. Vence nove erros dispersos que só
 aparecem jogando.
 
 **Custo real, e o Gabriel já aceitou pagar:** quem decide o tipo é o KIT, e hoje há capítulos com dois
-champs do mesmo papel (o Reino tem Ninja e Mago, ambos de dano). Adequar significa **sobrescrever
+apóstolos do mesmo papel (o Reino tem Ninja e Mago, ambos de dano). Adequar significa **sobrescrever
 habilidade** — trabalho de implementação, não decisão em aberto.
 
 > **Ideia barata quando for implementar:** o `Slot` pode VIRAR o tipo (Slot1 = Guardião, Slot2 =
@@ -262,7 +262,7 @@ dano  =  ATK × multiplicador            (todo mundo)
       +  DEF × multiplicador2           (só quem tem essa habilidade)
 ```
 
-Um Guardião que bate forte por ser durão é bom; **um champ que IGNORA o ATK não é.** No Raid isso cria
+Um Guardião que bate forte por ser durão é bom; **um apóstolo que IGNORA o ATK não é.** No Raid isso cria
 duas economias de equipamento paralelas — o item de ATK vira lixo pra metade do elenco. Somando em vez
 de substituir, o ATK segue sendo o eixo do dano do jogo inteiro e a parcela extra é tempero.
 
@@ -276,11 +276,11 @@ nada.
 **Por que não pontos livres**, mesmo sendo uma ideia boa em abstrato:
 - **A agência já mora no ITEM** — 7 slots, subs escolhidas na forja, conjuntos. Ali a decisão é rica e
   **reversível**. Pontos no nível seriam uma segunda fonte de build, irreversível, competindo com a
-  primeira, e com 36 champs viraria planilha.
+  primeira, e com 36 apóstolos viraria planilha.
 - **Pontos livres apagam os 4 arquétipos.** Um Guardião com tudo em ATK deixa de ser Guardião, e os 12
   números acima param de significar coisa alguma.
 - **A Velocidade condena a ideia sozinha:** sendo o stat rei da barra de turno, todo jogador
-  despejaria tudo nela, em todos os champs.
+  despejaria tudo nela, em todos os apóstolos.
 
 Com a curva por tipo acontece o contrário: **o Guardião fica mais Guardião conforme sobe** — o
 arquétipo define o ponto de partida E a inclinação, e a identidade se aprofunda com o investimento.
@@ -290,7 +290,7 @@ arquétipo define o ponto de partida E a inclinação, e a identidade se aprofun
 
 ---
 
-## 3. O CAMPEÃO — NÍVEL E RARIDADE (não tem estrela)
+## 3. O APÓSTOLO — NÍVEL E RARIDADE (não tem estrela)
 
 **A separação é do Gabriel e é coerente:** número cresce por nível; **comportamento** muda por
 raridade.
@@ -298,12 +298,12 @@ raridade.
 - **Raridade**: comum (cinza) · incomum (verde) · raro (azul) · épico (roxo) · lendário (dourado) ·
   mítico (vermelho). **Sobe** (não é fixa no drop).
 - **Nível sobe por XP de batalha** — barra de progressão com marcos, igual à do item.
-- **Raridade sobe por MISSÃO do campeão** + teto da dificuldade.
+- **Raridade sobe por MISSÃO do apóstolo** + teto da dificuldade.
 - **Subir raridade NÃO zera o nível.**
 
-### O CAMPEÃO NÃO TEM ESTRELA — e não se perde nada
+### O APÓSTOLO NÃO TEM ESTRELA — e não se perde nada
 
-**O eixo estava vazio.** A estrela do campeão não tinha fonte de custo que não fosse *sacrificar
+**O eixo estava vazio.** A estrela do apóstolo não tinha fonte de custo que não fosse *sacrificar
 cópias*, e duplicata está descartada (ver §4, offline). Eixo sem fonte própria não é eixo, é peça
 esperando um sistema que não se quer construir.
 
@@ -311,7 +311,7 @@ esperando um sistema que não se quer construir.
 20…*) — exatamente o papel que a raridade tem no item. Passando a função pra frente, **nenhum número
 muda, só o dono**:
 
-| raridade do campeão | nível máx |
+| raridade do apóstolo | nível máx |
 |---|---|
 | comum | 10 |
 | incomum | 20 |
@@ -322,7 +322,7 @@ muda, só o dono**:
 
 Mesmo `6 × 10 = 60` que a estrela dava. E a simetria com o item fica exata: **raridade destrava nível,
 nível dá os números.** De quebra, o teto de raridade por dificuldade passa a limitar o nível do
-campeão **de graça** — no Fácil não se passa de raro, logo não se passa do nível 30.
+apóstolo **de graça** — no Fácil não se passa de raro, logo não se passa do nível 30.
 
 > **A estrela continua existindo no jogo** — no ITEM, onde ela tem fonte própria (a barra de uso) e
 > função própria (magnitude). Não se perde a sensação; para-se de pagar por ela duas vezes.
@@ -330,9 +330,9 @@ campeão **de graça** — no Fácil não se passa de raro, logo não se passa d
 ### As missões, e por que o nível avisa a hora
 
 **Missão é conteúdo; duplicata é imposto de tempo.** Uma missão boa usa o que já existe e prova
-domínio do campeão — *"passar a fase 7 do capítulo dele sozinho"*.
+domínio do apóstolo — *"passar a fase 7 do capítulo dele sozinho"*.
 
-E o encaixe com a escada é automático: **o campeão trava no teto e a barra encosta na parede**, o que
+E o encaixe com a escada é automático: **o apóstolo trava no teto e a barra encosta na parede**, o que
 avisa o jogador sozinho, sem tela de tutorial.
 
 ```
@@ -357,7 +357,7 @@ raro                      →  parou de vez: o Fácil não vai além
 > Quem adotar um protagonista novo lá pelo capítulo 5 alcança rápido pela XP. Os humanos são o **slot
 > flexível** do elenco.
 >
-> **Nada de forçar o uso deles pra passar da 8-7.** Obrigar um campeão específico na fase final é
+> **Nada de forçar o uso deles pra passar da 8-7.** Obrigar um apóstolo específico na fase final é
 > gargalo: invalida o time que o jogador montou, justo onde ele mais quer usá-lo.
 
 ### Raridade → habilidade, e o refactor já pagou por isso
@@ -376,8 +376,8 @@ A habilidade **já é DADO** — uma lista de `Acao` com `Escopo`, `chance`, `va
 Piromancer do 🔮 Mago (que faz as outras habilidades renderem mais em alvo queimado). Ela escala com a
 raridade, em vez de reescrever cada habilidade.
 
-> **Por que isso é o caminho barato:** 36 champs × 6 raridades, se cada degrau mexesse em TODAS as
-> habilidades, seriam centenas de variantes pra escrever **e pra balancear**. Uma passiva por champ que
+> **Por que isso é o caminho barato:** 36 apóstolos × 6 raridades, se cada degrau mexesse em TODAS as
+> habilidades, seriam centenas de variantes pra escrever **e pra balancear**. Uma passiva por apóstolo que
 > ganha degraus é uma peça, não vinte. Mudar as habilidades diretamente segue como opção pra casos
 > especiais.
 
@@ -390,7 +390,7 @@ raridade, em vez de reescrever cada habilidade.
 > manter isso saudável é o CUSTO:** o caminho do fraco tem de ser mais caro que vestir o forte já
 > pronto, senão ninguém quer o forte. Toda trava desta seção existe por causa disso.
 
-- **Equipados no CAMPEÃO**, não mais no jogador. É o que os torna valiosos — e é a mudança de maior
+- **Equipados no APÓSTOLO**, não mais no jogador. É o que os torna valiosos — e é a mudança de maior
   impacto no save.
 - **CONJUNTOS de 9 peças**, com bônus em **3 / 6 / 9**. E o que cada conjunto faz cresce com a
   raridade. *(O que cada conjunto FAZ ainda não foi desenhado.)*
@@ -622,7 +622,7 @@ tabela — e a dificuldade continua regulando a raridade, de graça, através da
 sentimentalismo e vira a decisão correta.
 
 > **Por que o drop de raridade alta NÃO vira lixo**, mesmo com a evolução dando escolha: são dezenas de
-> campeões pra vestir, e **ninguém vai evoluir 7 itens × dezenas de campeões desde 1★**. A evolução é
+> apóstolos pra vestir, e **ninguém vai evoluir 7 itens × dezenas de apóstolos desde 1★**. A evolução é
 > pros poucos itens que se carrega; o drop mítico veste todo o resto do elenco. **Por isso as
 > subestatísticas são IGUAIS nos dois caminhos** — não há privilégio de nascença pro drop; o que
 > segura a fantasia dele é a escassez de tempo do outro lado.
@@ -636,7 +636,7 @@ mesmo uso, em ritmos diferentes — **a de raridade é bem mais lenta**. Não é
 como a estrela é o teto da raridade, investir em raridade primeiro seria sempre errado, e escolha em
 que uma opção domina só pune quem não leu o wiki.
 
-**A barra é do ITEM, não do campeão** — ela viaja quando o item troca de dono. Trocar de portador pausa
+**A barra é do ITEM, não do apóstolo** — ela viaja quando o item troca de dono. Trocar de portador pausa
 o progresso, nunca destrói.
 
 #### Como a barra enche
@@ -649,7 +649,7 @@ derrota  = o acumulado                        →  perder também evolui: você 
 vitória  = o acumulado + um BÔNUS fixo        →  vencer domina sempre
 ```
 
-> **Contar rodada, não ação do portador.** Com a barra de velocidade (§1), um campeão rápido age o
+> **Contar rodada, não ação do portador.** Com a barra de velocidade (§1), um apóstolo rápido age o
 > dobro — se ele também evoluísse equipamento ao dobro, a Velocidade viraria duplamente dominante.
 > **Rodada é a unidade que não acopla.**
 >
@@ -746,7 +746,7 @@ coisas, à escolha:
 Duas utilidades numa operação só: o material rende o dobro em decisões, sem nenhuma mecânica nova.
 
 **Aqui nasce a primeira decisão de recurso de verdade da economia:** o mítico dropado passa a ter
-destinos que **competem** — vestir mais um campeão da frota, virar material da forja de subs, ou pagar
+destinos que **competem** — vestir mais um apóstolo da frota, virar material da forja de subs, ou pagar
 um re-sorteio.
 
 #### Resetar aprimoramentos = resetar o NÍVEL
@@ -809,7 +809,7 @@ afete o de outro. Quem editar estraga o próprio jogo.
 
 **E isso libera o desenho.** A economia pode ser feita pelo que é DIVERTIDO, não pelo que é à prova de
 fraude — o que permite fugir do "junte 100 cópias", que é design de retenção de live service.
-**Por isso a ideia das MISSÕES POR CHAMP é melhor que duplicata:** missão é conteúdo, duplicata é
+**Por isso a ideia das MISSÕES POR APOSTOLO é melhor que duplicata:** missão é conteúdo, duplicata é
 imposto de tempo.
 
 ---
@@ -818,14 +818,14 @@ imposto de tempo.
 
 - **Ao criar a conta o jogador escolhe UM dos 4 humanos**, em vez de receber os quatro.
 - **A partir do capítulo 2, toda fase é contra 4 inimigos** — acaba o crescente.
-- **O campeão continua caindo GARANTIDO na fase dele.** A ordem de descoberta por fase fica como está
+- **O apóstolo continua caindo GARANTIDO na fase dele.** A ordem de descoberta por fase fica como está
   — ela vale mais que a uniformidade, e sem "chance" some junto a pergunta "e se cair de novo?".
-- **A tela precisa mostrar o que pode ser obtido em cada fase** (campeões e itens).
+- **A tela precisa mostrar o que pode ser obtido em cada fase** (apóstolos e itens).
 
-### A fase 1 entrega DOIS champs — e é só uma linha pra consertar
+### A fase 1 entrega DOIS apóstolos — e é só uma linha pra consertar
 
 `ApostlesWar.Domain/Models/Campanha.cs:12` monta a fase 1 como `Rodada1 = [Slot1]` e
-`Rodada2 = [Slot2]`, e o `DesbloquearCampeoes` varre as duas rodadas. **Deixar as duas iguais**
+`Rodada2 = [Slot2]`, e o `DesbloquearApostolos` varre as duas rodadas. **Deixar as duas iguais**
 (`[Slot1]` / `[Slot1]`) resolve, e não abre buraco nenhum — os outros slots já aparecem sozinhos
 adiante:
 
@@ -844,13 +844,13 @@ Ideia do Gabriel: o inimigo pode ser **nível 250 com muito mais vida e status**
 
 **A dificuldade só pode ser calibrada DEPOIS disto.** A fórmula atual (`1,75×dif + 0,5×cap + 0,1×fase`)
 multiplica o inimigo contra um jogador que **não tinha progressão**. Com nível, raridade e o
-equipamento do campeão, o jogador cresce também — a curva tem que ser desenhada contra as duas.
+equipamento do apóstolo, o jogador cresce também — a curva tem que ser desenhada contra as duas.
 
 ---
 
 ## 6. A BANCADA 2.0 — time contra time
 
-A bancada atual mede **champ contra boneco parado**. Com posição, velocidade e tipos, ela fica ainda
+A bancada atual mede **apóstolo contra boneco parado**. Com posição, velocidade e tipos, ela fica ainda
 mais cega: não vê alcance, não vê ordem de turno, não vê sinergia.
 
 **A que responde a pergunta do Gabriel roda TIME contra TIME**, bot contra bot, e conta vitórias.
@@ -874,18 +874,18 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
 2. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
 3. **Posição na habilidade** (`posicoesDeUso`/`posicoesAlvo`) + ordenar o time na montagem.
 4. **Tipos** (Guardião/Combatente/Atirador/Suporte) — **com o stat base vindo do tipo** e um de cada
-   por facção. Arrasta sobrescrever habilidade nos capítulos com dois champs do mesmo papel.
-5. **Nível (curva do tipo) + Raridade** nos campeões. Sem estrela.
+   por facção. Arrasta sobrescrever habilidade nos capítulos com dois apóstolos do mesmo papel.
+5. **Nível (curva do tipo) + Raridade** nos apóstolos. Sem estrela.
 6. **Raridade → passiva que escala.**
-7. **Item equipado no campeão.**
+7. **Item equipado no apóstolo.**
 
 > **O save atual é DESCARTADO** (decisão do Gabriel: *"descarta, não me importo"*). Sem migração.
 
 ### DEPOIS
 
 Subestatísticas e aprimoramento · conjuntos 2/4/6 · drop por fase e dificuldade · a tela do "o que cai
-onde" · escolher 1 champ inicial · **as barras de uso, os marcos e a forja** · **missões por campeão**
-· a fase 1 entregando um champ só · **a dificuldade, agora calibrada contra a progressão** · **a
+onde" · escolher 1 apóstolo inicial · **as barras de uso, os marcos e a forja** · **missões por apóstolo**
+· a fase 1 entregando um apóstolo só · **a dificuldade, agora calibrada contra a progressão** · **a
 bancada 2.0** · e só então o **#16**.
 
 Sem data e sem plataforma: cloud save · os 3 acessórios (9 peças de conjunto) · conquistas e
@@ -900,12 +900,12 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - **Não** implementar esquiva agora.
 - A raridade **sobe**; não é fixa no drop.
 - Não tentar impedir save editado — tornar inútil, não impossível.
-- **O campeão não tem estrela.** A raridade é o teto de nível dele.
-- **Stat base é do tipo**, não do champ; o nível sobe por **curva do tipo**, sem pontos distribuíveis.
+- **O apóstolo não tem estrela.** A raridade é o teto de nível dele.
+- **Stat base é do tipo**, não do apóstolo; o nível sobe por **curva do tipo**, sem pontos distribuíveis.
 - **Velocidade não escala com nível** — vem de equipamento.
 - **Subestatísticas iguais** no drop e na evolução; nenhum privilégio de nascença pro drop.
 - **Duas barras** (estrela e raridade), mesma fonte, ritmos próprios — não é escolha de investimento.
-- A barra é do **item**, não do campeão.
+- A barra é do **item**, não do apóstolo.
 - **Derrota também progride** a barra; a vitória dá bônus.
 - **Quem escolhe o slot do aprimoramento é o RNG.**
 - **O marco do item é por FASE**, não por capítulo — vencer a fase de origem dele naquela dificuldade.
@@ -923,8 +923,8 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - **Variação por facção de ±5%, soma zero**, com a Velocidade fora da matriz.
 - **Dano pode escalar com DEF/HP SOMANDO ao ATK**, nunca substituindo.
 - **Não há restrição temática de sub por slot** (arma pode ter `DEF%`).
-- **Campeão dropa garantido** na fase dele.
-- Nada de **forçar o uso** de um campeão específico pra passar de fase.
+- **Apóstolo dropa garantido** na fase dele.
+- Nada de **forçar o uso** de um apóstolo específico pra passar de fase.
 
 ### Revogado nesta rodada (estava escrito aqui e não vale mais)
 
@@ -933,6 +933,6 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 | *"na campanha só caem comuns"* | qualquer raridade cai em qualquer dificuldade | reservar raridade pra loja é desenho de gacha, e aqui não há loja |
 | *"a fonte decide o teto de raridade"* (Fácil até Incomum…) | a **estrela** é o teto | virou redundante — a estrela já limita, e piso por dificuldade não acrescentava nada |
 | *"fusão com semente"* | **sacrifício da raridade atual** alimentando 3 opções de sub | o sacrifício dá custo, liga o drop à evolução e ainda decide as opções |
-| *"subir estrela não zera o nível"* | **subir raridade** não zera o nível | o campeão perdeu a estrela; some uma exceção, porque essa já era a regra do item |
-| *"campeão tem chance de cair"* | cai **garantido** | apaga junto a pergunta "e se cair de novo?" |
+| *"subir estrela não zera o nível"* | **subir raridade** não zera o nível | o apóstolo perdeu a estrela; some uma exceção, porque essa já era a regra do item |
+| *"apóstolo tem chance de cair"* | cai **garantido** | apaga junto a pergunta "e se cair de novo?" |
 | *"a ordem dos inimigos nas fases muda"* | fica como está | a descoberta por fase vale mais que a uniformidade |

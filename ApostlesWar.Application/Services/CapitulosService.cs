@@ -52,7 +52,7 @@ namespace ApostlesWar.Application.Services
         /// Devolve o progresso ao estado de jogo novo — disco E memória, nesta ordem de importância:
         /// só apagar o arquivo NÃO reseta nada, porque o <see cref="CarregarProgresso"/> mantém o que
         /// já está em memória quando a porta devolve null. Era esse o buraco do "excluir conta": o
-        /// wipe limpava o disco, o jogador criava um perfil novo e seguia com os 36 champs liberados,
+        /// wipe limpava o disco, o jogador criava um perfil novo e seguia com os 36 apóstolos liberados,
         /// que voltavam pro disco na primeira fase vencida.
         /// </summary>
         public void Resetar()

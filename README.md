@@ -7,7 +7,7 @@
 > **[GIF DE 5–10s DO COMBATE AQUI]** — grave com ScreenToGif, salve em `docs/media/combate.gif`
 > e referencie: `![Combate](docs/media/combate.gif)`
 
-Monte um time de 4 campeões e atravesse 8 capítulos de campanha, um por facção. 36 personagens,
+Monte um time de 4 apóstolos e atravesse 8 capítulos de campanha, um por facção. 36 personagens,
 combate com crítico, escudos, status com tick, contra-ataque, revive e prevenção de morte.
 Detalhes do jogo mais abaixo — as próximas seções são sobre como ele é construído, e sobre como
 ele foi construído.
@@ -24,7 +24,7 @@ A fronteira não é convenção de pasta: é verificada pelo compilador.
 ApostlesWar.Domain/          regras do jogo, ZERO referências
   Combat/                      Combate, Batalha/Equipe, TurnoDoPersonagem, RelógioDoCombate, capacidades
   Skills/                      ações, buffs, debuffs, passivas
-  Champs/<Faccao>/<Champ>/     cada campeão como dado: stats + habilidades
+  Apostolos/<Faccao>/<Apostolo>/     cada apóstolo como dado: stats + habilidades
   Models/ · Enum/
 
 ApostlesWar.Application/     casos de uso
@@ -88,7 +88,7 @@ de regra de jogo.
 
 ## ✨ O jogo
 
-Vencer uma fase dropa um item; vencer um capítulo desbloqueia a facção seguinte e os campeões dela.
+Vencer uma fase dropa um item; vencer um capítulo desbloqueia a facção seguinte e os apóstolos dela.
 Cada capítulo tem **cenário próprio, animado em canvas**: o dia claro da cidade murada do Reino, o
 cemitério enluarado do Lado Sombrio, a invasão sob as estrelas dos Tecnológicos, a clareira do
 Folclore, a praia no crepúsculo dos Místicos, o banheiro dos Especiais, a Árvore do Mundo escorrendo
@@ -99,7 +99,7 @@ lava dos Decaídos e a sala de Natal dos Ascendentes.
 - **⚔️ Arena** — batalha livre montando os dois times, pra testar composições
 - **🤖 Modo Auto** — o mesmo cérebro que joga pelo inimigo joga por você, com foco de alvo clicável
 - **📦 Arsenal** — 7 slots, itens escalados por capítulo, com totais dos bônus equipados
-- **📖 Compêndio** — os 36 campeões por facção, os travados com cadeado
+- **📖 Compêndio** — os 36 apóstolos por facção, os travados com cadeado
 - **💥 Combate completo** — crítico, escudos, buffs/debuffs, status com tick, proteção de aliado,
   contra-ataque, revive e prevenção de morte
 - **💾 Perfil e save** — progresso, time e itens equipados persistidos em arquivo

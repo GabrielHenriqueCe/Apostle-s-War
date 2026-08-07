@@ -51,7 +51,7 @@ namespace ApostlesWar.Application.Portas
         /// <summary>Anuncia a habilidade ANTES dos resultados (ordem firmada no #7b).</summary>
         void ExibirUsoHabilidade(Combate atacante, Habilidade hab);
 
-        /// <summary>Resumo de fim de batalha da campanha (dano causado/recebido/cura por champ).</summary>
+        /// <summary>Resumo de fim de batalha da campanha (dano causado/recebido/cura por apóstolo).</summary>
         void ExibirResumoBatalha(List<Combate> jogador);
 
         /// <summary>Resumo de fim de batalha da Arena (os dois times + quem venceu).</summary>

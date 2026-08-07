@@ -1,7 +1,7 @@
 ﻿using ApostlesWar.Domain;
 using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Domain.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Ascendentes
 {
     /// <summary>
     /// Ao ser atacado, 10% de chance de aplicar Preso 1t no atacante. Migrada para

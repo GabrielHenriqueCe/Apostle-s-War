@@ -103,7 +103,7 @@ body[data-tema="ladosombrio"] #log {
    arena baixa o ladrilho ficava mais alto que ela, o `baseY` (`canvas.height − altura`) virava
    NEGATIVO, e o que devia estar no horizonte subia pra perto do topo da tela.
 
-   Os 🐉 Místicos e os ✝️ Apóstolos NÃO entram nesta escada, e a ausência deles é informação: as linhas
+   Os 🐉 Místicos e os ❄️ Ascendentes NÃO entram nesta escada, e a ausência deles é informação: as linhas
    do mar e da areia de um, e a do piso da sala do outro, são % da arena — escalam sozinhas e não têm
    um tamanho próprio pra defender. Quem precisa de degrau é ladrilho: imagem com dimensão em px que o
    JS ancora. **Quando der pra escolher, a fração é a medida barata.**

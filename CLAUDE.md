@@ -107,18 +107,29 @@ camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição d
   `docs/GDD-progressao.md` (o plano que muda quase todo número), **`docs/LORE.md`**.
 
 ## A LORE existe agora, e ela RENOMEIA coisas (ago/2026)
-**Os apóstolos são peças de brinquedo dos deuses; a guerra é entre apóstolos.** Ler `docs/LORE.md`
-antes de mexer em nome de facção, de champ ou em texto de tela. Duas consequências já na fila
-(ROADMAP §FILA A #17 e #18), **e a ordem entre elas não é negociável**: (1) a facção `Apostolos`
-vira **`Ascendentes`** e o símbolo 🌬️ vira ❄️; (2) só então `champ`/`campeão` vira **`apóstolo`** em
-todo o repo (~1.008 ocorrências, 148 arquivos). Invertendo, nasce `Apostolos/Apostolos/`.
+**Os apóstolos são peças de brinquedo dos deuses; a guerra é entre apóstolos — e o JOGADOR não é um
+apóstolo, é um jogador no nível dos deuses.** Ler `docs/LORE.md` antes de mexer em nome de facção,
+de champ ou em texto de tela.
+
+Duas consequências, **e a ordem entre elas não é negociável**:
+- ✅ **#17 FEITO:** a facção `Apostolos` virou **`Ascendentes`** e o 🌬️ virou ❄️. O 🌬️ era o símbolo
+  da **Cindy**, a deusa — não da facção.
+- ⏳ **#18:** só agora `champ`/`campeão` pode virar **`apóstolo`** em todo o repo (~1.008
+  ocorrências, 148 arquivos). Fazer antes do #17 teria criado `Apostolos/Apostolos/`.
+
+**Ao renomear uma facção, o que é derivado e o que não é:** a chave de tema NASCE do enum
+(`FluxoDoFront.cs:431`, `faccao.ToString().ToLowerInvariant()`), então o `body[data-tema]`, a pasta
+`wwwroot/cenarios/<tema>/`, os dois arquivos dela, o `<link>` do index e a entrada do `AR_DO_TEMA`
+têm de mudar no MESMO commit ou o tema some sem erro nenhum. **O save NÃO quebra:** não há
+`JsonStringEnumConverter`, então enum vira NÚMERO no JSON — renomear o membro é seguro desde que a
+ORDEM da lista não mude.
 
 ## Fazer o CENÁRIO de uma facção (falta Humanos) — leia nesta ordem
 Oito peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos · ⭐ Especial ·
-🔱 Decaídos · 🌬️ Apóstolos), falta 1. **A conta das assinaturas está fechada:** dia claro (Reino), lua
+🔱 Decaídos · ❄️ Ascendentes), falta 1. **A conta das assinaturas está fechada:** dia claro (Reino), lua
 (cemitério), estrelas (invasão), âmbar de fogo (Folclore), crepúsculo (praia), interior sem céu
-(Especial), luz vinda de baixo (Inferno) e a paisagem vista por um RECORTE (a janela dos Apóstolos).
-Pros Humanos não sobra HORA nenhuma — o caminho é o mesmo do ⭐ Especial e dos 🌬️ Apóstolos: um LUGAR em
+(Especial), luz vinda de baixo (Inferno) e a paisagem vista por um RECORTE (a janela dos Ascendentes).
+Pros Humanos não sobra HORA nenhuma — o caminho é o mesmo do ⭐ Especial e dos ❄️ Ascendentes: um LUGAR em
 vez de uma hora, ou um enquadramento.
 **Não invente processo: já existe manual, e ele é caro — cada linha dele custou uma rodada de "ficou
 ruim" em jogo.**
@@ -133,7 +144,7 @@ ruim" em jogo.**
    `comListras` — o padrão de "monta o caminho UMA vez, usa pra preencher E recortar". O 🔱 Decaídos
    é a mais barata de imitar em peça grande: ela é montada de MEMBROS sorteados num caminho
    só (`tracarMembro`, com o sentido do traço garantido por construção), o maestro sendo LUZ e não
-   vento (`inferno.pulso`), e uma HISTÓRIA amarrando as peças umas nas outras. O 🌬️ Apóstolos é a mais
+   vento (`inferno.pulso`), e uma HISTÓRIA amarrando as peças umas nas outras. O ❄️ Ascendentes é a mais
    NOVA, e a de imitar quando a cena tiver um ROTEIRO: a noite inteira dele é uma sequência de passos
    (`criarRoteiroDaNoite`) escrita num maestro por uma camada que **não desenha nada**, e lida por
    quatro peças em cantos diferentes da tela. É também a única em que a paisagem é vista por um

@@ -11,12 +11,17 @@ fecha. Resolver isso destravou a história inteira.
 > **Os apóstolos são peças de brinquedo dos deuses.** A guerra é entre apóstolos — quem joga são os
 > deuses.
 
-Uma **deusa** (ainda sem nome) escolheu um apóstolo **da Terra**, porque acha que ele é o **único
-jogador capaz de resolver este jogo sozinho**. Os humanos o invocaram **no Reino**.
+**Cindy**, uma deusa, escolheu **você** — um humano, da Terra — porque acha que você é o **único
+jogador capaz de resolver este jogo sozinho**.
 
-**O jogador é esse apóstolo.** E a escolha dela é sobre a habilidade dele *como jogador* — não sobre
-força, linhagem ou destino. A premissa é deliberadamente meta: um jogador de verdade, convocado para
-uma partida de verdade, por alguém que precisa vencer.
+**Você NÃO é um apóstolo.** Você foi convidado pra jogar **no nível dos deuses**, porque você
+também comanda peças. Os apóstolos são as peças — dos dois lados do tabuleiro. A escolha dela é
+sobre a sua habilidade *como jogador*, não sobre força, linhagem ou destino: um jogador de verdade,
+chamado pra uma partida de verdade, por alguém que precisa vencer.
+
+**Como você entra na partida:** o 👑 **Reino fez um ritual de invocação**, pedindo heróis para
+ajudar na guerra. **Você escolheu qual apóstolo humano atenderia ao chamado** — e é literalmente o
+que o jogo faz na primeira escolha de time.
 
 - **Os 👷🕵️👮👲 Humanos são as peças do MUNDO DELE** — a Terra. Por isso são gente comum e urbana, sem
   nada de heroico, com 🛠️ de símbolo de facção. **Eles não deviam parecer guerreiros.**
@@ -34,23 +39,29 @@ que já está lá**.
 |---|---|
 | **você joga com quem derrotou** | apóstolos são peças, e o jogador comanda peças. **Recrutar campeão É a lore acontecendo** — a coleção deixa de ser convenção de gênero e vira o assunto |
 | **nove mundos incompatíveis no mesmo mapa** | deuses puxam peças de onde quiserem. O Papai Noel ao lado do disco voador e do 🦖 não é inconsistência, é o tabuleiro sendo montado por quem não liga |
-| **o 👑 Reino é o capítulo 1 E a única cena de DIA** | é onde você é invocado, e o único lugar que te recebe. O contraste que existia "de propósito" ganhou motivo |
-| **os Humanos são o time inicial** | eles te chamaram; andam com você porque são responsáveis por você estar aqui |
+| **o 👑 Reino é o capítulo 1** | é o Reino que faz o ritual. Você entra na partida por ali porque foi ali que te chamaram |
+| **você ESCOLHE o time inicial, e ele é de Humanos** | o ritual pediu heróis; quem escolheu qual apóstolo humano atender foi você |
 | **a campanha escurece capítulo a capítulo** | você se afasta de quem te acolheu |
+
+> **O que a lore NÃO explica, e é bom deixar dito:** o 👑 Reino ser a única cena de DIA é **decisão
+> de design**, não de história. Como assinatura visual ela vale (ver ROADMAP §CENÁRIO POR CAPÍTULO);
+> como enredo, não há nada ali. Tentar amarrar as duas coisas foi uma invenção que não se sustenta.
 
 ---
 
-## A DEUSA — e o vestígio que ficou no código
+## CINDY — e o vestígio que estava no código
 
 Ela vem de **antes deste jogo**: existia no **campo minado** do Gabriel, como **deusa do vento**. Lá
 ela transformava pessoas em **apóstolos**, e virava os personagens em **boneco de neve**, **mímico**,
 ou **Papai Noel se fosse chefe**.
 
-**Esse vínculo se perdeu** ao longo do desenvolvimento — mas o rastro nunca foi apagado:
+**Esse vínculo se perdeu** ao longo do desenvolvimento — mas o rastro tinha ficado no código:
 
-> **O símbolo da facção é 🌬️** (`Faccoes.cs:22`), vento soprando. É a deusa do vento, ainda lá.
+> O símbolo da facção era 🌬️ (`Faccoes.cs`), vento soprando. Era a deusa do vento, ainda lá.
 
-**Ela não precisa mais ser do vento.** Pode ser simplesmente uma deusa, e **ainda não tem nome**.
+**O 🌬️ é da Cindy, não da facção** — e uma facção usando o símbolo da deusa como se fosse dela é
+motivo suficiente pra trocar. Virou ❄️ na renomeação (ROADMAP §FILA A #17). **Ela não precisa mais
+ser do vento**; é simplesmente uma deusa.
 
 ---
 
@@ -76,14 +87,20 @@ Nove, na ordem da campanha. Os Humanos são o time inicial, não um capítulo.
 
 ---
 
+## DECIDIDO — o Natal é a estética dos ❄️ Ascendentes
+
+O ❄️ foi escolhido **por ser tema de Natal**, e é isso que resolve as duas dúvidas que estavam
+abertas aqui:
+
+- **O 😇 Anjo tem casa.** Ele não precisa de vínculo com a deusa antiga: anjo é Natal, Natal é Jesus
+  Cristo. Ele é coerente com a facção pelo caminho mais curto.
+- **Os itens natalinos ficam** (🎄 🧣 🔔 🧤 👘 🩲 🪽). O Natal é a **estética**; "Ascendentes" é o
+  **conceito**. Os dois convivem, e a sala de Natal do cenário (#204) já é a prova em jogo.
+
+---
+
 ## EM ABERTO
 
-- **O nome da deusa.**
 - **Os ❄️ Ascendentes são peça de qual deus?** Se a guerra é entre apóstolos, cada facção tende a ter
   um dono — e eles são o capítulo final.
-- **O 😇 Anjo.** Ele era o que amarrava o nome "Apóstolos"; numa facção de gelo fica sem casa. **A
-  hipótese aberta é que ele seja o último resquício da deusa antiga** — o que rimaria com o 🌬️ que
-  sobreviveu no código. É criação do Gabriel, não decidido.
-- **Os itens dos Ascendentes são natalinos puros** (🎄 🧣 🔔 🧤 👘 🩲 🪽). Se o Natal segue sendo a
-  **estética** e "Ascendentes" é o **conceito**, ficam como estão.
-- **A deusa é aliada ou usa o jogador?** "Peça de brinquedo" comporta as duas.
+- **A Cindy é aliada ou usa o jogador?** "Peça de brinquedo" comporta as duas.

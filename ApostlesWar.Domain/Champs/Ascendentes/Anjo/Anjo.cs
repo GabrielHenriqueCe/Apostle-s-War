@@ -1,7 +1,7 @@
 using ApostlesWar.Domain;
 using ApostlesWar.Domain.Skills.Buffs;
 
-namespace ApostlesWar.Domain.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Ascendentes
 {
     /// <summary>
     /// Anjo — champ como DADO. Celestial limpa debuffs e cura os aliados (molde Coringa+Sushi).
@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Champs.Apostolos
     public static class Anjo
     {
         public static Personagem Definir() => new(
-            3, Faccao.Apostolos, "Anjo", "😇", 1200, 160, 200,
+            3, Faccao.Ascendentes, "Anjo", "😇", 1200, 160, 200,
             Celestial(), Ceu(), new Bencao());
 
         static HabilidadeAtiva Celestial() => new(

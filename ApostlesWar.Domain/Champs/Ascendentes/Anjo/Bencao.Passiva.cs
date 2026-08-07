@@ -1,6 +1,6 @@
 using ApostlesWar.Domain;
 
-namespace ApostlesWar.Domain.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Ascendentes
 {
     /// <summary>
     /// Recupera 5% HP no início do turno, permanentemente. Capacidade direta

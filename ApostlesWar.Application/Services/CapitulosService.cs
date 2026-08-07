@@ -38,7 +38,7 @@ namespace ApostlesWar.Application.Services
             new List<bool> { false, false, false, false, false, false, false }, false),
             new Capitulo(Faccao.Decaidos, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
-            new Capitulo(Faccao.Apostolos, new List<bool> { true, false, false, false, false, false, false },
+            new Capitulo(Faccao.Ascendentes, new List<bool> { true, false, false, false, false, false, false },
             new List<bool> { false, false, false, false, false, false, false }, false),
         };
 

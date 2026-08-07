@@ -20,7 +20,7 @@ namespace ApostlesWar.Domain.Champs.Tecnologicos
     /// Seletor. A união do "pegar status via Seletor" entre passivas e ações é fio FUTURO —
     /// ver a nota no ADR §9 ("Unir a seleção de status entre passivas e ações"): PARAR e
     /// reavaliar quando o sweep tocar cada passiva de duração (AnáliseCrítica nos Tecnológicos;
-    /// Repetindo em Apóstolos), não agora.
+    /// Repetindo em Ascendentes), não agora.
     /// </summary>
     public class EstenderBuffs : Acao
     {

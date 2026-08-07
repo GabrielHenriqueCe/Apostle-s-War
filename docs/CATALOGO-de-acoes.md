@@ -64,7 +64,7 @@ Nomes reservados (ADR §9) — não invente sinônimo, use estes quando o client
 
 > `ConcederTurnoExtra` saiu desta tabela — **construído** nos Decaídos (1º cliente real: Rato
 > Voador do Morcego, não o Copiando como previsto). Ver tabela 1.
-> `MoverBuffs` saiu desta tabela — **construído** nos Apóstolos (cliente: Copiando do Mímico).
+> `MoverBuffs` saiu desta tabela — **construído** nos Ascendentes (cliente: Copiando do Mímico).
 > Ver tabela 1. Com isso o sweep das 9 facções está COMPLETO e o vocabulário mapeado esgotou-se
 > (só resta `AcaoSobreConjunto`, que segue sem cliente).
 

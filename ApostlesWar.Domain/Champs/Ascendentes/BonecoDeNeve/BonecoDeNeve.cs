@@ -1,7 +1,7 @@
 using ApostlesWar.Domain;
 using ApostlesWar.Domain.Skills.Debuffs;
 
-namespace ApostlesWar.Domain.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Ascendentes
 {
     /// <summary>
     /// Boneco de Neve — champ como DADO. Bola de Neve ataca 1 e prende (molde da Natureza).
@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Champs.Apostolos
     public static class BonecoDeNeve
     {
         public static Personagem Definir() => new(
-            1, Faccao.Apostolos, "Boneco de Neve", "⛄", 1000, 200, 200,
+            1, Faccao.Ascendentes, "Boneco de Neve", "⛄", 1000, 200, 200,
             BolaDeNeve(), Gelado(), new Derretendo());
 
         static HabilidadeAtiva BolaDeNeve() => new(

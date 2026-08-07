@@ -36,7 +36,7 @@ namespace ApostlesWar.Application.Services
             { Faccao.Misticos,     new[] { "🪭", "👒", "👛", "💅", "🥻", "👙", "👠" } },
             { Faccao.Especial,     new[] { "🔪", "⛑️", "🍳", "🚬", "🦺", "🛢️", "👢" } },
             { Faccao.Decaidos,     new[] { "🪄", "🎩", "🎒", "🩼", "🧥", "🦼", "🥾" } },
-            { Faccao.Apostolos,    new[] { "🎄", "🧣", "🔔", "🧤", "👘", "🩲", "🪽" } },
+            { Faccao.Ascendentes,  new[] { "🎄", "🧣", "🔔", "🧤", "👘", "🩲", "🪽" } },
         };
 
         /// <summary>

@@ -1,7 +1,7 @@
 using ApostlesWar.Domain;
 using ApostlesWar.Domain.Skills;
 
-namespace ApostlesWar.Domain.Champs.Apostolos
+namespace ApostlesWar.Domain.Champs.Ascendentes
 {
     /// <summary>
     /// Mímico — champ como DADO. Imitação escala o dano com os buffs do próprio Mímico via a
@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Champs.Apostolos
     public static class Mimico
     {
         public static Personagem Definir() => new(
-            2, Faccao.Apostolos, "Mímico", "🎭", 1000, 200, 200,
+            2, Faccao.Ascendentes, "Mímico", "🎭", 1000, 200, 200,
             Imitacao(), Copiando(), new Repetindo());
 
         static HabilidadeAtiva Imitacao() => new(

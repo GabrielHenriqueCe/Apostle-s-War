@@ -159,16 +159,22 @@ function selecionarFaseCampanha(fase, btn) {
     atualizarLutarFase();
 }
 
+// A rodada desenhada como TABULEIRO: quatro casas, com a mesma peça (`criarSlot`) e na mesma ordem
+// das suas. As casas são sempre QUATRO mesmo quando a onda tem menos gente — o vazio diz em quais
+// casas o inimigo NÃO está, e isso é o que o jogador precisa pra decidir onde põe cada um.
 function grupoRodada(titulo, apostolos) {
-    const g = document.createElement('div'); g.className = 'rodadaGrupo';
-    const t = document.createElement('div'); t.className = 'rodadaTitulo'; t.textContent = titulo;
-    const cs = document.createElement('div'); cs.className = 'rodadaApostolos';
-    cs.replaceChildren(...apostolos.map(c => {
-        const m = document.createElement('div'); m.className = 'miniApostolo';
-        const e = document.createElement('span'); e.className = 'mcEmoji'; e.textContent = c.simbolo;
-        const n = document.createElement('span'); n.className = 'mcNome'; n.textContent = c.nome;
-        m.append(e, n);
-        return m;
+    const g = document.createElement('div'); g.className = 'faseGrupo';
+    const t = document.createElement('div'); t.className = 'faseGrupoTitulo'; t.textContent = titulo;
+    const cs = document.createElement('div'); cs.className = 'faseCasas';
+    cs.replaceChildren(...[0, 1, 2, 3].map(casa => {
+        // O `criarSlot` pede o ÍNDICE dentro da lista; aqui a lista já vem na ordem das casas,
+        // então índice e casa são o mesmo número — e `null` é casa vazia.
+        const slot = criarSlot(apostolos, casa < apostolos.length ? casa : null, false, casa);
+        slot.classList.add('inimigo');   // mesma cara, sem clique nem arraste
+        // "clique e escolha" é convite, e casa de inimigo não se escolhe.
+        const vazio = slot.querySelector('.slotVazio');
+        if (vazio) vazio.textContent = '—';
+        return slot;
     }));
     g.append(t, cs);
     return g;

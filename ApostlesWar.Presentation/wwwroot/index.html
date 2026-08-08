@@ -101,13 +101,23 @@
         <h1 id="fasesTitulo"></h1>
         <div id="fasesLista"></div>
         <div id="faseDetalhe" hidden>
-            <div id="faseInimigos"></div>
+            <!-- A preparação é um TABULEIRO, na mesma geometria da luta: o seu time à esquerda com a
+                 casa 1 encostando no meio, e as duas rodadas empilhadas à direita. Elas aparecem
+                 juntas de propósito — a rodada 2 é o mesmo inimigo DEPOIS, e escondê-la atrás de uma
+                 aba faria o jogador montar o time contra metade da informação. -->
+            <div id="faseTabuleiro">
+                <div class="faseGrupo" id="faseLadoMeu">
+                    <div class="faseGrupoTitulo">Seu time</div>
+                    <div id="faseSlots"></div>
+                </div>
+                <div id="faseVs">vs</div>
+                <div id="faseInimigos"></div>
+            </div>
             <div id="faseItem"></div>
             <div class="faseLinhaTime">
                 <p class="faseDica">Monte seu time (até 4) — a casa <b>1</b> é a frente, a <b>4</b> é o fundo. Arraste pra trocar de casa.</p>
                 <button id="faseSortear" type="button" title="Sortear entre os seus apóstolos">🎲 sortear</button>
             </div>
-            <div id="faseSlots"></div>
             <div id="fasePicker"></div>
         </div>
         <div id="fasesRodape">

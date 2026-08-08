@@ -18,6 +18,15 @@
     --agindo: #7ee081;
     --alvo: #e0574f;
 
+    /* O TAMANHO DE UM TIME, e ele é UM só. A casa da montagem, o espaço entre elas, a fileira de
+       quatro e a tela que precisa caber duas fileiras lado a lado — tudo daqui. Antes cada tela
+       tinha a sua largura (760 na campanha, 900 na arena) e a casa era 25% do pai, então o mesmo
+       time aparecia de três tamanhos diferentes conforme onde você olhasse. */
+    --casa: 96px;
+    --casa-gap: 6px;
+    --fileira: calc(4 * var(--casa) + 3 * var(--casa-gap));
+    --tabuleiro: min(940px, 96vw);
+
     /* ---------- A FORJA: a placa ----------
        Uma peça-base pra todo botão do jogo. Três ideias, duas emprestadas:
 
@@ -271,7 +280,7 @@ body {
    e some a cunha, que é justamente o que dá o ar forjado. */
 #menuTitulo, #criarPerfil h1, #compendio h1, #fasesTitulo, #fimFaseTitulo,
 #apostoloNome, #conquistaNome, #arsenalSlotNome, #retratoNome,
-.compFaccaoNome, .rodadaTitulo, .recompensaTitulo, .atTitulo,
+.compFaccaoNome, .faseGrupoTitulo, .recompensaTitulo, .atTitulo,
 .opcaoMenu .opRotulo, .faseBtn .faseNome, .itemCard .icNome, .habilidade .hNome,
 .compApostolo .ccNome, .avatarCelula .aNome, .nome {
     font-family: var(--titulo);
@@ -288,7 +297,7 @@ body {
    do avatar ao emergir de trás dele. Chanfro ali brigaria com o círculo — a curva é o ponto. */
 #setupPicker, #fasePicker, #arsenalDetalhe, #arsenalTotais, #modalCaixa,
 #apostoloArte, #apostoloStats, #apostoloHabilidades, #nomePerfil,
-#nomeEditar, .rodadaGrupo {
+#nomeEditar {
     border: 1px solid var(--poco-borda);
     border-radius: var(--corte) 0 var(--corte) 0;
     corner-shape: bevel;
@@ -617,7 +626,7 @@ body {
     grid-template-columns: 1fr auto 1fr;
     gap: 20px;
     align-items: start;
-    width: min(900px, 96vw);
+    width: var(--tabuleiro);
 }
 #setupVs { align-self: center; font-size: 26px; font-weight: 800; color: var(--apagado); }
 
@@ -668,18 +677,22 @@ body {
    inverte o eixo pelo mesmo motivo que o `#ladoEsquerdo` inverte (ver §.lado): o primeiro filho é
    a casa 1, e com `row-reverse` ele é desenhado à direita.
    O `#faseSlots` é o time do JOGADOR, que em campo é sempre o lado esquerdo — por isso inverte. */
-.setupSlots { display: flex; flex-direction: row; gap: 6px; }
-#slotsEsq, #faseSlots { flex-direction: row-reverse; }
+/* UMA FILEIRA É UMA FILEIRA — a mesma largura e a mesma casa nas três (arena, campanha, inimigo).
+   O `min(--fileira, 100%)` é o que faz a régua ser uma só: quando cabe, todas têm o tamanho
+   declarado; quando a janela aperta, todas encolhem JUNTAS, porque encolhem contra o mesmo número.
+   O `0 1` deixa a casa encolher só sob aperto; crescer, nunca. */
+.setupSlots, #faseSlots, .faseCasas {
+    display: flex;
+    flex-direction: row;
+    gap: var(--casa-gap);
+    width: min(var(--fileira), 100%);
+}
+.setupSlots > .slot, #faseSlots > .slot, .faseCasas > .slot { flex: 0 1 var(--casa); min-width: 0; }
 
-/* A CASA tem tamanho fixo, não 25% do pai — foi assim que a campanha (760px de contêiner) e a
-   arena (900px em três colunas) acabaram com casas de 190px e de 105px. Um time é um time: tem
-   que ter o mesmo tamanho na tela em que se monta e na tela em que se joga.
-   O `0 1` deixa encolher só quando a janela obriga; crescer, nunca. */
-.setupSlots > .slot, #faseSlots > .slot { flex: 0 1 96px; min-width: 0; }
-
-/* Os dois lados da arena encostam no MEIO — e é o mesmo valor pros dois, porque o esquerdo já
-   está em `row-reverse` e o `flex-start` dele cai à direita. */
-#slotsEsq, #slotsDir { justify-content: flex-start; }
+/* Os times encostam no MEIO da tela. Do lado esquerdo quem faz isso é o `margin-left: auto` (a
+   fileira tem largura própria, então sobra espaço à esquerda dela); do direito, nada — ela já
+   nasce colada. */
+#slotsEsq, #faseSlots { flex-direction: row-reverse; margin-left: auto; }
 
 /* O NÚMERO DA CASA — a lista de slots é uma FILA (1 = frente, 4 = fundo), não um conjunto, e sem
    isto o jogador arrasta sem saber pra onde. A casa 1 é destacada porque é a única cuja posição
@@ -702,7 +715,7 @@ body {
     grid-template-columns: repeat(auto-fill, 68px);
     gap: 8px;
     justify-content: center;
-    width: min(900px, 96vw);
+    width: var(--tabuleiro);
     max-height: 30vh;
     overflow-y: auto;
     padding: 10px;
@@ -810,15 +823,34 @@ body {
 .faseBtn:disabled { opacity: .4; cursor: not-allowed; }
 .faseBtn.selecionada { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
 
-#faseDetalhe { display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(760px, 96vw); }
+#faseDetalhe { display: flex; flex-direction: column; align-items: center; gap: 10px; width: var(--tabuleiro); }
 #faseDetalhe[hidden] { display: none; }
-#faseInimigos { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; align-items: stretch; }
-.rodadaGrupo {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    padding: 10px 16px;
+/* O TABULEIRO DA PREPARAÇÃO — a mesma geometria da luta: o seu time à esquerda com a casa 1
+   encostando no meio, e as rodadas empilhadas à direita. As duas aparecem de uma vez, sem aba:
+   a rodada 2 é o MESMO inimigo depois, e escondê-la atrás de um clique faz o jogador montar time
+   contra metade da informação. */
+#faseTabuleiro {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 14px;
+    align-items: center;
+    width: 100%;
 }
-.rodadaTitulo { font-size: 12px; color: var(--ouro); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-.rodadaApostolos { display: flex; gap: 6px; }
+#faseVs { align-self: center; font-size: 26px; font-weight: 800; color: var(--apagado); }
+
+#faseInimigos { display: flex; flex-direction: column; gap: 12px; }
+
+/* Sem moldura: o grupo é só título + fileira, como os lados da arena. A caixa escura em volta
+   competia com a caixa de cada casa e fazia a preparação parecer outra tela. */
+.faseGrupo { display: flex; flex-direction: column; gap: 6px; }
+.faseGrupoTitulo { font-size: 12px; color: var(--ouro); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+/* As casas do inimigo têm a MESMA cara das suas — é o mesmo `.slot`, sem clique. Casa vazia aqui é
+   informação e não buraco: mostra que a onda vem com menos de quatro, e em QUAIS casas. */
+.slot.inimigo { cursor: default; }
+
+/* O seu lado é o espelho: o título acompanha as casas, que encostam no `vs`. */
+#faseLadoMeu .faseGrupoTitulo { text-align: right; }
 .miniApostolo { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 56px; }
 .miniApostolo .mcEmoji { font-size: 26px; }
 .miniApostolo .mcNome { font-size: 9px; color: var(--apagado); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
@@ -830,10 +862,13 @@ body {
 .faseDica { margin: 4px 0 0; color: var(--apagado); font-size: 13px; }
 /* Sem `flex-wrap` de propósito: as casas são QUATRO e uma quebrando de linha desmonta a fileira.
    O `gap` tem de casar com a conta do `flex-basis` do `.slot` (ver §.setupSlots). */
-#faseSlots { display: flex; gap: 6px; justify-content: center; }
+/* O alinhamento dele mora lá em cima, junto com o `#slotsEsq` (encosta no meio). Não repetir
+   `justify-content` aqui: esta regra vem DEPOIS e tem a mesma especificidade, então venceria em
+   silêncio e o time voltaria a flutuar no centro do lado. */
+#faseSlots { display: flex; gap: 6px; }
 #fasePicker {
     display: grid; grid-template-columns: repeat(auto-fill, 68px); gap: 8px; justify-content: center;
-    width: min(760px, 96vw); max-height: 24vh; overflow-y: auto; padding: 8px;
+    width: var(--tabuleiro); max-height: 24vh; overflow-y: auto; padding: 8px;
 }
 #fasePicker .avatarCelula { width: 68px; }
 

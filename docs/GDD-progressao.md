@@ -393,9 +393,52 @@ raridade.
 
 - **Raridade**: comum (cinza) · incomum (verde) · raro (azul) · épico (roxo) · lendário (dourado) ·
   mítico (vermelho). **Sobe** (não é fixa no drop).
-- **Nível sobe por XP de batalha** — barra de progressão com marcos, igual à do item.
+- **Nível sobe por XP de batalha** — igual ao item, que também sobe de nível jogando.
 - **Raridade sobe por MISSÃO do apóstolo** + teto da dificuldade.
 - **Subir raridade NÃO zera o nível.**
+
+### A CURVA DE XP — e ela foi calibrada pra não obrigar a farmar
+
+```
+custo do nível N → N+1   =   100 × N
+XP de uma fase           =   22 × (capítulo × 7 + fase)   ×   multiplicador da dificuldade
+                             Fácil 1 · Normal 2 · Difícil 3 · Pesadelo 4
+```
+
+**O critério foi um só: jogar cada fase UMA vez, em ordem, tem de bastar.** No Fácil isso fecha
+cravado no teto da dificuldade:
+
+| ao terminar o capítulo | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| **nível** | 6 | 9 | 13 | 16 | 20 | 23 | 26 | **30** |
+
+Nível **30** ao fim do capítulo 8, que é exatamente o teto do raro — o teto do Fácil. **Zero repetição
+obrigatória.** E como a XP cresce dentro do capítulo e entre capítulos, a **8-7 vale 8× uma 1-1**:
+quem quiser repetir tem onde, e o lugar é o mais difícil.
+
+**O que cada dificuldade custa** (o total do jogo é `100 × (1+…+59)` = **177.000**):
+
+| dificuldade | níveis | XP | % do jogo |
+|---|--:|--:|--:|
+| Fácil | 1 → 30 | 43.500 | 24,6% |
+| Normal | 30 → 40 | 34.500 | 19,5% |
+| Difícil | 40 → 50 | 44.500 | 25,1% |
+| Pesadelo | 50 → 60 | 54.500 | 30,8% |
+
+> **Cada dificuldade custa ~um quarto do jogo, e ninguém desenhou isso.** Cai da curva quadrática: o
+> Fácil entrega **29 níveis** e o Pesadelo **10**, e mesmo assim o Pesadelo custa **mais**. As quatro
+> etapas se equalizam sozinhas.
+
+> **DO NORMAL EM DIANTE VOCÊ BATE O TETO DE NÍVEL NA METADE DA PASSADA** — por volta do capítulo 3 —
+> e os cinco capítulos restantes não dão mais nível nenhum. **Isso é o desenho, não um furo:** é a
+> medição do §2 aparecendo, onde o crescimento do jogador deixa de vir do nível e passa a vir do item
+> (`1,11×` de nível contra `1,71×` de item no Pesadelo). O nível é o eixo do começo; o item é o do fim,
+> e a XP entrega a passagem de bastão sem precisar de regra pra isso.
+
+> **O apóstolo que entra tarde não alcança — chega perto.** Quem é descoberto no capítulo 5 do Fácil
+> acumula ~30.400 e termina em **nv 25** contra os 30 do veterano. O doc promete que *"alcança rápido
+> pela XP"*; sem bônus de recuperação isso é **falso por 5 níveis**. Decidir se entra um bônus ou se a
+> promessa muda de texto.
 
 ### O APÓSTOLO NÃO TEM ESTRELA — e não se perde nada
 
@@ -1356,6 +1399,10 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
   os dois de crítico · Suporte Precisão/Resistência · Atirador ATK/Velocidade.
 - **A curva de nível é CONTÍNUA e vai de 1× a 30×** (`base × (1 + 29(nv−1)/59)`). Declaram-se as
   PONTAS; a taxa por nível é consequência. Só HP/ATK/DEF escalam.
+- **A CURVA DE XP é `100 × N` por nível**, e a fase dá `22 × (cap×7 + fase)` vezes o multiplicador da
+  dificuldade (1·2·3·4). Calibrada pra **uma passada do Fácil fechar no nv 30** sem repetir nada.
+  Consequência aceita: do Normal em diante o teto de nível chega por volta do capítulo 3, e o resto da
+  passada é jogo de ITEM.
 - **Dano Crítico tem piso de 60%** pra todos — nenhum item pode ser lixo pra um tipo inteiro.
 - **OS PRINCIPAIS DOS 9 SLOTS ESTÃO CALIBRADOS** (§4), no 6★ +20. A **Velocidade tem fonte ÚNICA** (a
   Bota, +50); os outros quatro especiais têm DUAS, sempre com um acessório de dungeon como segunda.

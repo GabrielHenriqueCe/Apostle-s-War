@@ -1355,6 +1355,67 @@ as regras dos dois lados.
     Ele é nome próprio, par do 🦹 Vilão, e vive em `Apostolos/Especial/Heroi/`. As duas "heróis"
     que trocaram são a fala do ritual no `LORE.md`, que é o conceito e não o personagem.
 
+19. 🔄 **A PROGRESSÃO EM CÓDIGO** *(ago/2026 — em andamento)*. O desenho inteiro está no
+    **`docs/GDD-progressao.md`**; aqui fica só a EXECUÇÃO. **Ler o GDD §2 antes de tocar em posição
+    e o §7 pra ordem — não re-deduzir o modelo daqui.**
+
+    **Feito e mergeado:**
+    - ✅ **#228 — tipos + status base do tipo.** Os 108 números soltos viraram `Arquetipos`
+      (4 fichas + 9 torções + a curva `1 + 29(nv−1)/59`). O crítico saiu de constante global.
+      A ficha inteira (Tipo, Nível, Velocidade, Precisão, Resistência) chega na tela.
+    - ✅ **#229 — o modelo da posição no GDD §2.** O portão do DD (`posicoesDeUso`/`posicoesAlvo`)
+      morreu; a posição MODULA o dano.
+    - ✅ **#230 — o campo virou fileira** com as frentes se olhando, casa sempre de ¼, stats
+      empilhados, montagem espelhando o campo, casas numeradas.
+    - ✅ **#231 — a preparação da fase virou tabuleiro** (seu time × rodada 1, rodada 2 embaixo),
+      casas do inimigo com a mesma peça, e o tamanho do time virou parâmetro (`--casa`,
+      `--casa-gap`, `--fileira`, `--tabuleiro`).
+
+    **➡️ PRÓXIMO PR — O PERFIL DE DISTÂNCIA NO MOTOR** (só motor; a pintura é o PR seguinte).
+    Branch `feature/perfil-de-distancia`.
+    - **A regra (GDD §2):** `distância = casa do atacante + casa do alvo − 1` (1 a 7). Multiplicador
+      = `1,30 − 0,10 × |distância − d*|`, com **d\* por tipo: 🛡️ Guardião 1 · ⚔️ Combatente 4 ·
+      🏹 Atirador 5 · 💗 Suporte plano (1,00 sempre)**.
+    - **Onde a tabela mora:** no `Arquetipos`, junto da ficha — o d\* é do TIPO, é ficha e não regra
+      de combate. Uma função pura `MultiplicadorDePosicao(tipo, distancia)`.
+    - **Como o combatente sabe a casa dele:** `Combate` ganha `Casa` (1..4), preenchida no
+      `IniciarCombate` — o `CombateService` já varre `equipe1.Membros`/`equipe2.Membros` chamando-o
+      (hoje em `CombateService.cs`, no `IniciarCombate` de cada um), e o índice na lista **é** a
+      casa. Ordem preservada de ponta a ponta: o `int[] Time` do front → `cfg.Time.Select(i =>
+      pool[i])` → `new Equipe(...)` → `Membros`. **Não** precisa de `Batalha` no pipeline: a
+      distância só existe atacante→inimigo, então bastam as duas casas.
+    - **Onde entra no pipeline:** lado do ATACANTE, **antes da mitigação** — é irmão do ATK, não da
+      DEF. Ou seja, entra no `DanoBruto` do `EventoDano` (que é, por definição, "o valor do golpe ao
+      chegar, antes da mitigação do alvo"). Cuidar da `OrdemDeMitigacao` (#185): não é lugar dele.
+    - **De graça:** o `PreverDanoRecebido` é o mesmo caminho, então o **bot fica esperto sem uma
+      linha de bot** — ele passa a escolher alvo pela geometria.
+    - **Testes (e este é o 1º PR da série que dá pra testar):** o multiplicador é função pura →
+      xUnit direto. Mais um ponta-a-ponta em `Tests/ReceberDanoTests.cs`.
+    - **⚠️ A BANCADA VAI MUDAR DE NÚMERO.** `BancadaDeDano` roda combate de verdade, então as casas
+      passam a existir e o `docs/bancada-dano.md` regenera diferente. **É esperado** — mas conferir
+      que a variação bate com o multiplicador, e não com outra coisa.
+
+    **PR seguinte — OS DOIS BRILHOS** (só pintura; nenhuma regra nova):
+    - **onde ele PODE bater mais forte** — mapa de calor do multiplicador. Três gatilhos: passar o
+      mouse, selecionar (o clique, que é o que salva quem não usa hover) e **arrastar entre as
+      casas**. Cor + o número escrito (`×1,20`), escala divergindo no 1,00.
+    - **onde ele VAI bater mais forte** — com a habilidade já escolhida, o alvo que mais sofre
+      brilha e os outros apagam. Passa por DEF, escudo, resistências.
+    - **O front NÃO pode ter cópia da tabela:** o C# manda a **grade 4×4 por apóstolo** (casa onde
+      ele poderia estar × casa do alvo), e o arraste vira troca de linha numa grade que já está na
+      mão. *"Duas cópias de uma fórmula divergem como duas cópias de um número"* — essa já custou um
+      defeito mudo nos Decaídos.
+    - **🚫 NUNCA um NÚMERO de dano previsto** (decisão do Gabriel). Multiplicador é ficha e pode
+      aparecer; dano previsto é simulação. Brilho relativo sim, número não.
+
+    **Depois, na ordem do GDD §7:** o **medidor de turno** (fila única — hoje a ordem é um `for`
+    sobre `Equipe1.Membros ++ Equipe2.Membros` no `CombateService.ExecutarCombate`, e é esse `Concat`
+    que é a vantagem de time que o §1 quer matar; o desempate é por posição, que já existe agora) e
+    depois **`DEF/(DEF+5000)` + Precisão × Resistência** (hoje a DEF é `DEF/1000` com cap 75% em
+    `Combate.cs`, e no nv 1 mitiga 2–5% — está inerte em jogo, e é esperado até esse PR; a Precisão
+    também não faz nada: o que existe é `AplicarDebuff(chance:)`, chance FIXA por habilidade, que
+    ignora quem aplica e em quem).
+
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.
 

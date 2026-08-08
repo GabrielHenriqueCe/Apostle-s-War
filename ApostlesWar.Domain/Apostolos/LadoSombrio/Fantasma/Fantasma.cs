@@ -9,7 +9,7 @@ namespace ApostlesWar.Domain.Apostolos.LadoSombrio
     public static class Fantasma
     {
         public static Personagem Definir() => new(
-            2, Faccao.LadoSombrio, "Fantasma", "👻", 1400, 120, 200,
+            2, Faccao.LadoSombrio, "Fantasma", "👻", TipoDeApostolo.Combatente,
             Assombracao(), VindoDoAlem(), new Espectral());
 
         // Cura AGREGADA (decisão de Gabriel): 20% da SOMA do dano causado no ataque inteiro,

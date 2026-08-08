@@ -14,7 +14,7 @@ namespace ApostlesWar.Domain.Apostolos.Tecnologicos
     public static class Invasor
     {
         public static Personagem Definir() => new(
-            1, Faccao.Tecnologicos, "Invasor", "👾", 600, 240, 240,
+            1, Faccao.Tecnologicos, "Invasor", "👾", TipoDeApostolo.Combatente,
             Glitch(), Barata(), new Virus());
 
         static HabilidadeAtiva Glitch() => new(

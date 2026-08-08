@@ -13,7 +13,7 @@ namespace ApostlesWar.Domain.Apostolos.Misticos
     public static class Dragao
     {
         public static Personagem Definir() => new(
-            4, Faccao.Misticos, "Dragão", "🐲", 1400, 200, 120,
+            4, Faccao.Misticos, "Dragão", "🐲", TipoDeApostolo.Combatente,
             SoproDoDragao(), DragaoProtetor(), new PeleDeDragao());
 
         static HabilidadeAtiva SoproDoDragao() => new(

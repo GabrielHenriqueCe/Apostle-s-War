@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.Especial
     public static class TRex
     {
         public static Personagem Definir() => new(
-            4, Faccao.Especial, "T-Rex", "🦖", 1000, 160, 240,
+            4, Faccao.Especial, "T-Rex", "🦖", TipoDeApostolo.Guardiao,
             Rugido(), Pisada(), new PeleGrossa());
 
         static HabilidadeAtiva Rugido() => new(

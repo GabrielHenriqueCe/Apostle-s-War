@@ -167,7 +167,7 @@ async function carregar(arquivo) {
 // As cargas são MÍNIMAS de propósito: o alvo é o caminho de montagem, não o conteúdo. Se a tela lê
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
 const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', simbolo: '🗡️', stat: 'ATK', valor: '+5', valorNum: 5, equipado: true };
-const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', faccao: 'Reino', hp: 100, hpMax: 100, ataque: 10, defesa: 10, taxaCrit: 15, danoCrit: 60, status: [], habilidades: [], liberado: true, vivo: true };
+const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', faccao: 'Reino', tipo: 'Guardião', nivel: 1, hp: 100, hpMax: 100, ataque: 10, defesa: 10, velocidade: 85, precisao: 50, resistencia: 120, taxaCrit: 15, danoCrit: 60, status: [], habilidades: [], liberado: true, vivo: true };
 const TELAS = [
     ['menu', { titulo: 'Apostle\'s War', subtitulo: '', opcoes: ['Jogar', 'Sair'], raiz: true, perfil: { nome: 'G', avatar: '🧭' } }],
     ['criarPerfil', {}],

@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Decaidos
     public static class Vampiro
     {
         public static Personagem Definir() => new(
-            2, Faccao.Decaidos, "Vampiro", "🧛", 800, 280, 160,
+            2, Faccao.Decaidos, "Vampiro", "🧛", TipoDeApostolo.Atirador,
             ControleDeSangue(), VampiroPrimordial(), new Drenagem());
 
         static HabilidadeAtiva ControleDeSangue() => new(

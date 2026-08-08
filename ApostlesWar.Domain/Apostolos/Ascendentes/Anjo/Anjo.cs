@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Ascendentes
     public static class Anjo
     {
         public static Personagem Definir() => new(
-            3, Faccao.Ascendentes, "Anjo", "😇", 1200, 160, 200,
+            3, Faccao.Ascendentes, "Anjo", "😇", TipoDeApostolo.Suporte,
             Celestial(), Ceu(), new Bencao());
 
         static HabilidadeAtiva Celestial() => new(

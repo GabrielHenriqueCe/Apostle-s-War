@@ -10,7 +10,7 @@ namespace ApostlesWar.Domain.Apostolos.Reino
     public static class Ninja
     {
         public static Personagem Definir() => new(
-            2, Faccao.Reino, "Ninja", "🥷", 600, 280, 200,
+            2, Faccao.Reino, "Ninja", "🥷", TipoDeApostolo.Combatente,
             Shuriken(), Kunai(), new Sorrateiro());
 
         static HabilidadeAtiva Shuriken() => new(

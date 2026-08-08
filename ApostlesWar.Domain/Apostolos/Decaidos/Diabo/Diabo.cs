@@ -13,7 +13,7 @@ namespace ApostlesWar.Domain.Apostolos.Decaidos
     public static class Diabo
     {
         public static Personagem Definir() => new(
-            4, Faccao.Decaidos, "Diabo", "😈", 1400, 160, 160,
+            4, Faccao.Decaidos, "Diabo", "😈", TipoDeApostolo.Suporte,
             Inferno(), AnjoCaido(), new CresceComDor());
 
         static HabilidadeAtiva Inferno() => new(

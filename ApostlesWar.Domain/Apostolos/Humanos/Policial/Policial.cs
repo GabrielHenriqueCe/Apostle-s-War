@@ -7,7 +7,7 @@ namespace ApostlesWar.Domain.Apostolos.Humanos
     public static class Policial
     {
         public static Personagem Definir() => new(
-            3, Faccao.Humanos, "Policial", "👮", 1000, 120, 280,
+            3, Faccao.Humanos, "Policial", "👮", TipoDeApostolo.Atirador,
             Tiroteio(), Prender(), new AlgemasReforcadas());
 
         static HabilidadeAtiva Tiroteio() => new(

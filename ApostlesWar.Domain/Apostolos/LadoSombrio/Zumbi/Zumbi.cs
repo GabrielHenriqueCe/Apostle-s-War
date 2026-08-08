@@ -16,7 +16,7 @@ namespace ApostlesWar.Domain.Apostolos.LadoSombrio
     public static class Zumbi
     {
         public static Personagem Definir() => new(
-            4, Faccao.LadoSombrio, "Zumbi", "🧟", 1400, 200, 120,
+            4, Faccao.LadoSombrio, "Zumbi", "🧟", TipoDeApostolo.Atirador,
             VomitoToxico(), Putridao(),
             new EscalaComMortos("Horda", "🧟", "+10% ATK por combatente morto no campo (dos dois times).",
                 EscopoMortos.AmbosOsTimes, porMorto: 0.10, v => new BuffAtaque(duracao: 2, percentual: v)));

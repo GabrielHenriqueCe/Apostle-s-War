@@ -71,6 +71,12 @@ namespace ApostlesWar.Presentation.Front
         int Escudo,
         int Ataque,
         int Defesa,
+        // Velocidade/Precisão/Resistência ainda vêm do Personagem, não de camadas do Combate: nada
+        // no motor os modifica hoje. Quando o medidor de turno chegar, a Velocidade ganha as camadas
+        // (base + buff) no molde da Defesa, e é ELA que passa a alimentar este campo.
+        int Velocidade,
+        int Precisao,
+        int Resistencia,
         int TaxaCritPct,
         int DanoCritPct,
         bool Vivo,
@@ -293,14 +299,18 @@ namespace ApostlesWar.Presentation.Front
     /// <summary>
     /// A FICHA de um apóstolo. Os números são os de BASE (o que ele é antes de arsenal, buff ou item):
     /// o compêndio é catálogo, não simulador — quem quer saber o efeito do equipamento olha o
-    /// Arsenal. Crit não vem do <see cref="Personagem"/> porque lá ele não existe por apóstolo: é o
-    /// <c>TaxaCritBase</c>/<c>DanoCritBase</c>, global a todo mundo.
+    /// Arsenal.
+    ///
+    /// <see cref="Tipo"/> vem como TEXTO, não como o enum: não há JsonStringEnumConverter na ponte,
+    /// então enum viraria número do outro lado.
     ///
     /// <see cref="Desbloqueado"/> só pinta a moldura — a ficha é COMPLETA mesmo travada, porque um
     /// catálogo que esconde o que você ainda não tem não serve pra planejar a campanha.
     /// </summary>
     internal record ApostoloDetalheVista(string Nome, string Simbolo, string Faccao, bool Desbloqueado,
-        int HP, int Ataque, int Defesa, int TaxaCritPct, int DanoCritPct,
+        string Tipo, int Nivel,
+        int HP, int Ataque, int Defesa, int Velocidade, int Precisao, int Resistencia,
+        int TaxaCritPct, int DanoCritPct,
         List<HabilidadeDoApostoloVista> Habilidades);
 
     // ---------- Arsenal ----------

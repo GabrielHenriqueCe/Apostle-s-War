@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.LadoSombrio
     public static class Caveira
     {
         public static Personagem Definir() => new(
-            1, Faccao.LadoSombrio, "Caveira", "💀", 600, 280, 200,
+            1, Faccao.LadoSombrio, "Caveira", "💀", TipoDeApostolo.Guardiao,
             Ossinho(), OssoDuroDeRoer(), new Necromancia());
 
         static HabilidadeAtiva Ossinho() => new(

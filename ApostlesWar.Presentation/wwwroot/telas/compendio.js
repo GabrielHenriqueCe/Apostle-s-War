@@ -63,15 +63,22 @@ export const compendioApostolo = {
         // Hoje o emoji gigante; o #apostoloArte é o SLOT que recebe a arte do personagem inteiro depois.
         document.getElementById('apostoloArte').textContent = c.simbolo;
         document.getElementById('apostoloNome').textContent = c.nome;
+        // O TIPO entra aqui e não na lista de stats: ele é a identidade que explica os números
+        // abaixo (todo Guardião tem a mesma ficha), não mais um número entre eles.
+        const identidade = `${c.faccao} · ${c.tipo} · nv ${c.nivel}`;
         document.getElementById('apostoloFaccao').textContent =
-            c.desbloqueado ? c.faccao : `${c.faccao} · 🔒 ainda não conquistado`;
+            c.desbloqueado ? identidade : `${identidade} · 🔒 ainda não conquistado`;
 
         // Números de BASE: catálogo, não simulador — arsenal, itens e buffs não entram aqui.
+        // A ordem é a da tabela do GDD §2, pra conferir a ficha contra o doc de cima a baixo.
         const stats = [
             ['❤️', 'HP', c.hp],
             ['⚔️', 'Ataque', c.ataque],
             ['🛡️', 'Defesa', c.defesa],
-            ['🎯', 'Taxa de crítico', `${c.taxaCritPct}%`],
+            ['⚡', 'Velocidade', c.velocidade],
+            ['🎯', 'Precisão', c.precisao],
+            ['🧿', 'Resistência', c.resistencia],
+            ['🎲', 'Taxa de crítico', `${c.taxaCritPct}%`],
             ['💥', 'Dano crítico', `${c.danoCritPct}%`],
         ];
 

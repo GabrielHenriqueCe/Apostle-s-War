@@ -16,7 +16,7 @@ namespace ApostlesWar.Domain.Apostolos.LadoSombrio
     public static class Abobora
     {
         public static Personagem Definir() => new(
-            3, Faccao.LadoSombrio, "Abóbora", "🎃", 600, 200, 280,
+            3, Faccao.LadoSombrio, "Abóbora", "🎃", TipoDeApostolo.Suporte,
             DocesOuTravessuras(), DocesDeAbobora(), new CascaDura());
 
         static HabilidadeAtiva DocesOuTravessuras() => new(

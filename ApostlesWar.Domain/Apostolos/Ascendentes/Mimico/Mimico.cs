@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Ascendentes
     public static class Mimico
     {
         public static Personagem Definir() => new(
-            2, Faccao.Ascendentes, "Mímico", "🎭", 1000, 200, 200,
+            2, Faccao.Ascendentes, "Mímico", "🎭", TipoDeApostolo.Combatente,
             Imitacao(), Copiando(), new Repetindo());
 
         static HabilidadeAtiva Imitacao() => new(

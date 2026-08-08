@@ -706,9 +706,11 @@ namespace ApostlesWar.Presentation.Front
         private ApostoloDetalheVista MontarDetalhe(Personagem apostolo) => new(
             apostolo.Nome, apostolo.Simbolo, apostolo.Faccao.Descricao(),
             _apostolos.EstaDesbloqueado(apostolo),
+            apostolo.Tipo.Descricao(), apostolo.Nivel,
             apostolo.HP, apostolo.Ataque, apostolo.Defesa,
-            // Crit é global (não vive no apóstolo): vem das constantes-base do Personagem.
-            (int)(Personagem.TaxaCritBase * 100), (int)(Personagem.DanoCritBase * 100),
+            apostolo.Velocidade, apostolo.Precisao, apostolo.Resistencia,
+            // O crit passou a vir do TIPO (o Combatente é o dono dos dois), então sai do apóstolo.
+            (int)(apostolo.TaxaCrit * 100), (int)(apostolo.DanoCrit * 100),
             // Sem dono: fora da luta não há turno correndo, então o cooldown é o DECLARADO — que é
             // justamente o que se compara entre apóstolos num catálogo. Ver VistaDeHabilidade.
             apostolo.Habilidades.Select(h => VistaDeHabilidade.De(h)).ToList());

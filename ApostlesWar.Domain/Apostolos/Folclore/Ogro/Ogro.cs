@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Folclore
     public static class Ogro
     {
         public static Personagem Definir() => new(
-            1, Faccao.Folclore, "Ogro", "👹", 1400, 160, 160,
+            1, Faccao.Folclore, "Ogro", "👹", TipoDeApostolo.Guardiao,
             Esmagar(), Quebrar(), new Intimidador());
 
         static HabilidadeAtiva Esmagar() => new(

@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.Misticos
     public static class Fada
     {
         public static Personagem Definir() => new(
-            3, Faccao.Misticos, "Fada", "🧚", 1000, 280, 120,
+            3, Faccao.Misticos, "Fada", "🧚", TipoDeApostolo.Atirador,
             Sininho(), PoMagico(), new Voar());
 
         static HabilidadeAtiva Sininho() => new(

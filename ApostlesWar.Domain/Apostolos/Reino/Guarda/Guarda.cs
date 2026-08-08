@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.Reino
     public static class Guarda
     {
         public static Personagem Definir() => new(
-            1, Faccao.Reino, "Guarda", "💂", 1200, 160, 200,
+            1, Faccao.Reino, "Guarda", "💂", TipoDeApostolo.Guardiao,
             Protetor(), Esgrima(), new GuardaReal());
 
         static HabilidadeAtiva Protetor() => new(

@@ -9,7 +9,7 @@ namespace ApostlesWar.Domain.Apostolos.Especial
     public static class Vilao
     {
         public static Personagem Definir() => new(
-            3, Faccao.Especial, "Vilão", "🦹", 1200, 200, 160,
+            3, Faccao.Especial, "Vilão", "🦹", TipoDeApostolo.Combatente,
             DestruindoDia(), Vilania(), new Sentenca());
 
         static HabilidadeAtiva DestruindoDia() => new(

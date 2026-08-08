@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Ascendentes
     public static class PapaiNoel
     {
         public static Personagem Definir() => new(
-            4, Faccao.Ascendentes, "Papai Noel", "🎅", 1000, 200, 200,
+            4, Faccao.Ascendentes, "Papai Noel", "🎅", TipoDeApostolo.Atirador,
             SacoDePresente(), FabricaDePresente(), new Surpresa());
 
         static HabilidadeAtiva SacoDePresente() => new(

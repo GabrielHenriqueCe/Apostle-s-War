@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.Ascendentes
     public static class BonecoDeNeve
     {
         public static Personagem Definir() => new(
-            1, Faccao.Ascendentes, "Boneco de Neve", "⛄", 1000, 200, 200,
+            1, Faccao.Ascendentes, "Boneco de Neve", "⛄", TipoDeApostolo.Guardiao,
             BolaDeNeve(), Gelado(), new Derretendo());
 
         static HabilidadeAtiva BolaDeNeve() => new(

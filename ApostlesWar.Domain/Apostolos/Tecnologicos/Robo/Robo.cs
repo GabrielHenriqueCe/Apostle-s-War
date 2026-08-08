@@ -14,7 +14,7 @@ namespace ApostlesWar.Domain.Apostolos.Tecnologicos
     public static class Robo
     {
         public static Personagem Definir() => new(
-            3, Faccao.Tecnologicos, "Robô", "🤖", 1200, 120, 240,
+            3, Faccao.Tecnologicos, "Robô", "🤖", TipoDeApostolo.Suporte,
             RaioX(), Tecnology(), new ReparoAutomatico());
 
         static HabilidadeAtiva RaioX() => new(

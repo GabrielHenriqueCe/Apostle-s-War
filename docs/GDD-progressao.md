@@ -47,6 +47,11 @@ equipamento ela vira **escolha de build**, e não consequência de investimento.
 | Suporte | 105 | 110 |
 | Atirador | 110 | 115 |
 
+> **⚠️ Esta tabela DIVERGE da de §2, que é a autoritativa** (a calibrada do nv 60 pra trás). Lá o
+> Suporte no nv 60 é **105**, não 110 — ele é o único dos quatro que não sobe +5. Ou é engano de
+> digitação aqui, ou o +5 dele foi cortado de propósito e esta tabela ficou velha. **Pendente de
+> decisão**; até lá, §2 manda. Duplicar a tabela foi o que permitiu a divergência existir.
+
 Uma faixa de ~28% — pequena o bastante pra não decidir a luta sozinha, grande o bastante pra ser
 identidade. **A Velocidade fica FORA da variação por facção** (§2): sendo o stat que decide quem
 joga, uma facção com bônus nela domina todas as outras.
@@ -64,6 +69,94 @@ joga, uma facção com bônus nela domina todas as outras.
 >
 > **De graça:** como item é trocável, qualquer apóstolo pode virar rápido se você pagar por isso —
 > flexibilidade sem apagar a identidade do tipo.
+
+#### COMO A BARRA FUNCIONA — o modelo fechado
+
+**Cada apóstolo tem a PRÓPRIA barra**, de 0 a 100, e enche pela própria Velocidade. Não existe
+relógio compartilhado que alguém precise consultar sobre os outros: se um ganha ou perde Velocidade
+no meio da luta, muda só o ritmo dele.
+
+- **Age quem cruzou 100.** Entre os prontos, o **mais cheio**.
+- **Desempate:** a **posição** (a frente primeiro) e, se ainda empatar, o **lado do jogador**.
+- **Ao agir, desconta 100 e a sobra CARREGA** — empurrão nunca se desperdiça.
+- **A ação custa tempo**, e é durante esse tempo que cada um enche pela própria Velocidade.
+
+**O desempate precisa ser determinístico, e o critério é arbitrário de propósito.** Empate perfeito
+só acontece com Velocidade idêntica; o que importa é que o mesmo estado produza sempre a mesma
+ordem, senão a prévia da fila promete o que o motor não cumpre.
+
+> **A regra do MAIS CHEIO não se troca por velocidade.** Chegou-se a propor que, entre os prontos,
+> agisse o mais RÁPIDO — assim um inimigo veloz furaria um empurrão sem depender do relógio. Está
+> descartado: fazia alguém em **105% jogar antes de alguém em 133%**, e aí a barra desenhada na tela
+> vira mentira, que é o defeito que este desenho inteiro existe pra consertar. Quem quiser passar na
+> frente **passa no medidor**.
+
+#### O CUSTO DA AÇÃO — e por que ele não é opcional
+
+Sem ele o jogo congela entre uma ação e outra: quem está esperando não anda, e **nenhuma velocidade
+alcança ninguém**. Um apóstolo de 1000 de Velocidade parado atrás de um empurrão fica exatamente
+onde está enquanto os outros jogam. É o custo que dá à Velocidade um intervalo onde agir.
+
+**A constante é ADIMENSIONAL**, e é isto que se guarda:
+
+```
+FRAÇÃO = 10%                              uma ação dura 10% do ciclo de um apóstolo de referência
+custo  = FRAÇÃO × 100 / VEL_REFERENCIA    (com VEL_REFERENCIA = 200, dá 0,05)
+```
+
+**Gravar `0,05` é gravar o número certo na unidade errada** — ele carrega escondido a suposição
+*"Velocidade típica ≈ 200"* e quebra se um dia a escala do jogo mudar. Com a fração, dobrar a escala
+é trocar **uma** constante: a ordem dos turnos sai idêntica em 200, 400 ou 2000.
+
+**O teto de estabilidade tem leitura direta:** cada ação faz o campo gerar `Σvel × custo` de medidor
+e consumir 100. Passando de 100, as barras inflam pra sempre e todo mundo vive acima da linha — o
+trilho de 0 a 100 perde o sentido. Em fração: **`FRAÇÃO < 100 ÷ (nº em campo)`**, ou seja **12,5%**
+num 4×4. Os 10% de hoje têm um quinto de folga; se a luta virar 5×5, o teto cai pra 10%.
+
+> **Uma versão anterior derivava o custo de `Σvel` a cada uso**, pra garantir a estabilidade sozinha.
+> Descartado: obriga cada apóstolo a saber quem mais está vivo, quando a regra é justamente que cada
+> um se calcula. E era desnecessário — medido, o pior caso realista (os 8 no teto de Velocidade) fica
+> dentro da folga.
+
+#### VELOCIDADE É, LITERALMENTE, QUANTOS TURNOS SE JOGA
+
+A razão de turnos entre dois combatentes é **exatamente** a razão das Velocidades, e o custo da ação
+não distorce isso — ele entrega medidor proporcional à Velocidade de cada um, então o fator sai da
+divisão. **1000 contra 100 é 10 turnos para 1, cravado.** O custo muda só **onde** os turnos caem na
+sequência, nunca quantos.
+
+Isso torna o item de Velocidade o único que **multiplica todo o resto**: ATK aumenta o dano por
+golpe; a Bota aumenta quantos golpes se dá, e portanto multiplica ATK, crítico, cura e aplicação de
+malefício ao mesmo tempo.
+
+**E o inimigo fica parado nesse eixo.** Ele não tem item (§5) e Velocidade não escala com nível
+(§4), então a Velocidade inimiga é **85–115 no jogo inteiro** enquanto a do jogador chega a 315 (nv
+60, Atirador, 6★ mítico +20 com a Bota e as subs). No fim da progressão o time joga **~3 turnos para
+cada 1** do inimigo, para sempre. Vale saber ao calibrar dificuldade: é vantagem estrutural, não
+curva.
+
+#### O EMPURRÃO DE MEDIDOR — a tabela de consulta
+
+Não há um número global: **cada habilidade tem o seu**, como multiplicador de dano. O que a medição
+dá é o que cada tamanho compra, num time full mítico (178–203) com o custo em 10%:
+
+| **em área** | turnos seguidos que compra | | **alvo único** | turnos seguidos |
+|---|--:|---|---|--:|
+| +10 | 1,5 | | +50 | 1,6 |
+| +20 | 1,9 | | +100 | 1,8 |
+| +30 | 2,3 | | | |
+| +50 | 3,0 | | | |
+
+**Em área custa ~25 de empurrão por turno seguido comprado**, e é uma reta. **Alvo único compra
+muito menos tempo** — só empurra um acima de 100 — mas faz outra coisa: **escolhe quem joga**,
+adiantando o nuker pra o combo sair na janela certa. São dois formatos com propósitos diferentes,
+não um forte e um fraco.
+
+> **Cortar não é mecânica — é consequência, e não há taxa a calibrar.** É só alguém ser mais rápido
+> e chegar a vez dele. Medido, um inimigo entra no meio de um empurrão em **1–4% dos casos**, e isso
+> não responde a tamanho de empurrão, a custo nem a Velocidade. O trabalho de design não é ajustar
+> quanto o corte acontece: é deixar a **ordem legível**, pra que quando acontecer o jogador veja que
+> foi a montagem dele e possa afinar. É o que a fila na tela resolve.
 
 ### Defesa — `DEF / (DEF + 5000)`
 
@@ -1364,12 +1457,17 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
 
 1. **Velocidade + barra de turno + fila única.** Mexe em `Batalha`, `Equipe`, `TurnoDoPersonagem`.
 2. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
-3. **Posição na habilidade** (`posicoesDeUso`/`posicoesAlvo`) + ordenar o time na montagem.
+3. **A POSIÇÃO SAIU DAQUI E FOI PRO FIM DA LISTA** *(decisão do Gabriel, ago/2026)*. Nível, status e
+   raridade não dependem dela e podem ser jogados e testados antes — segurá-los atrás da posição
+   adiava o que já dava pra sentir em jogo. A ordem que continua **não sendo negociável** é a de
+   cima: status e turno antes de nível e raridade.
 4. **Tipos** (Guardião/Combatente/Atirador/Suporte) — **com o stat base vindo do tipo** e um de cada
    por facção. Arrasta sobrescrever habilidade nos capítulos com dois apóstolos do mesmo papel.
 5. **Nível (curva do tipo) + Raridade** nos apóstolos. Sem estrela.
 6. **Raridade → passiva que escala.**
 7. **Item equipado no apóstolo.**
+8. **Posição na habilidade** (`posicoesDeUso`/`posicoesAlvo`) + ordenar o time na montagem. **Por
+   último**, pelo motivo do item 3.
 
 > **O save atual é DESCARTADO** (decisão do Gabriel: *"descarta, não me importo"*). Sem migração.
 
@@ -1388,6 +1486,15 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 ## Decisões já fechadas (não reabrir)
 
 - A posição é **compromisso do jogador**; nada de correção automática.
+- **A BARRA DE TURNO está fechada** (§1): barra própria por apóstolo · age quem cruzou 100, o mais
+  cheio primeiro · desempate por **posição** e depois pelo **lado do jogador** · a sobra **carrega** ·
+  a ação **custa tempo**. **Não trocar "mais cheio" por "mais rápido"** — foi proposto e descartado,
+  porque punha alguém em 105% na frente de alguém em 133% e transformava a barra da tela em mentira.
+- **O custo da ação é ADIMENSIONAL** (§1): guarda-se **10% do ciclo de um apóstolo de referência**,
+  não `0,05`. Teto de estabilidade: `FRAÇÃO < 100 ÷ (nº em campo)`. **Não** derivar de `Σvel` — obriga
+  cada apóstolo a saber quem está vivo, e a medição mostrou que é desnecessário.
+- **Cortar não é mecânica, é consequência** (§1) — 1–4% medidos, e não responde a nenhum botão. O que
+  se projeta é a **legibilidade da ordem**, não a taxa.
 - O save atual é **descartado**.
 - **Não** implementar esquiva agora.
 - A raridade **sobe**; não é fixa no drop.

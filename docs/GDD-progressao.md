@@ -420,7 +420,7 @@ Mesmo `6 × 10 = 60` que a estrela dava. E a simetria com o item fica exata: **r
 nível dá os números.** De quebra, o teto de raridade por dificuldade passa a limitar o nível do
 apóstolo **de graça** — no Fácil não se passa de raro, logo não se passa do nível 30.
 
-> **A estrela continua existindo no jogo** — no ITEM, onde ela tem fonte própria (a barra de uso) e
+> **A estrela continua existindo no jogo** — no ITEM, onde ela tem fonte própria (o nível de uso) e
 > função própria (magnitude). Não se perde a sensação; para-se de pagar por ela duas vezes.
 
 ### As missões, e por que o nível avisa a hora
@@ -499,14 +499,23 @@ raridade, em vez de reescrever cada habilidade.
 
 | eixo | o que dá | como sobe | o que custa |
 |---|---|---|---|
-| **raridade** | QUANTAS subestatísticas (+ teto de nível) | barra de uso (lenta) + marco da fase + forja | sacrificar itens da raridade atual |
-| **nível** | QUÃO BOAS elas são (aprimoramento) | forja, a qualquer momento | material / moeda |
-| **estrela** | MAGNITUDE (principal e subs) | barra de uso (rápida) + marco da fase | tempo de jogo |
+| **raridade** | QUANTAS subestatísticas (+ teto de aprimoramento) | **nível** (lento) + marco da fase + forja | sacrificar itens da raridade atual |
+| **aprimoramento** | QUÃO BOAS elas são — `+0…+20` | forja, a qualquer momento | material / moeda |
+| **estrela** | MAGNITUDE (principal e subs) | **nível** (rápido) + marco da fase | tempo de jogo |
+
+> **NOMENCLATURA — e ela foi corrigida (ago/2026), porque estava invertida.** O que sobe **jogando** é
+> o **NÍVEL**, igual ao apóstolo: os dois ganham nível usando, e é essa simetria que faz o nome ser
+> esse. O que sobe **pagando** na forja é o **APRIMORAMENTO** (`+0…+20`), e é ele que aparece como
+> `(1)`…`(5)` ao lado de cada sub. Antes o doc chamava a forja de "nível" e o uso de "barra de uso" —
+> **trocado**, e a troca confundia porque nível do item e nível do apóstolo funcionavam ao contrário.
+
+> **São DOIS NÍVEIS, não um** — um pra estrela e um pra raridade, mesma fonte (uso em combate) e
+> ritmos diferentes. Ver §A EVOLUÇÃO.
 
 > **O marco é o mesmo para os dois** — vencer a fase de origem do item naquela dificuldade destrava
 > estrela **e** raridade, no teto daquela dificuldade. Uma condição, dois eixos.
 
-> **A moeda que ficou parqueada já tem dono: é o nível.** Não é preciso procurar função pra ela.
+> **A moeda que ficou parqueada já tem dono: é o aprimoramento.** Não é preciso procurar função pra ela.
 
 ### A FÓRMULA — o % multiplica o cheio, e os %s somam entre si
 
@@ -741,27 +750,26 @@ aprimoramentos)` rolagens, e a tentação é achar que o jogador empilha tudo nu
 consegue:** a forja escolhe *quais subs existem*, mas **quem escolhe o slot do aprimoramento é o RNG**.
 Os 5 aprimoramentos se espalham entre as 4 subs (~1,25 cada); concentrar os 5 numa é ~0,1%.
 
-### Raridade → quantas subs, e até onde o nível vai
+### Raridade → quantas subs, e até onde o APRIMORAMENTO vai
 
-| raridade | subs | nível máx | aprimoramentos no teto |
+| raridade | subs | aprimoramento máx | unidades de sub |
 |---|---|---|---|
-| comum | 0 | **4** | 0 |
-| incomum | 1 | **9** | 1 |
-| raro | 2 | **14** | 2 |
-| épico | 3 | **19** | 3 |
-| lendário | 4 | **20** | 4 |
-| mítico | 4 (+1 de nascença) | 20 | 5 |
+| comum | 0 | **+4** | 0 |
+| incomum | 1 | **+9** | 1 |
+| raro | 2 | **+14** | 2 |
+| épico | 3 | **+19** | 3 |
+| lendário | 4 | **+20** | 4 |
+| mítico | 4 | +20 | **5** *(a 5ª é o bônus de nascença)* |
 
-**Cada degrau de raridade vale exatamente +1 sub, +5 níveis e +1 aprimoramento.** Escada regular,
-legível pro jogador, barata de calibrar — e o mítico é o único que foge (mesmas subs do lendário, só o
-aprimoramento a mais), o que faz o último degrau ser especial **sem regra escrita pra isso**.
+**Cada degrau de raridade vale exatamente +1 sub e +5 de aprimoramento.** Escada regular, legível pro
+jogador, barata de calibrar — e o mítico é o único que foge (mesmas subs do lendário, só a unidade a
+mais), o que faz o último degrau ser especial **sem regra escrita pra isso**.
 
-> **Por que o teto de nível é preso à raridade — a correção é do Gabriel.** Sem isso, nível e raridade
-> fazem a MESMA coisa: um comum nível 20 acabaria com as mesmas 4 subs de um mítico, e a raridade só
-> voltaria a significar algo na pontinha do aprimoramento. **Prendendo os dois, cada eixo vira uma
-> frase:** raridade = quantas · nível = quão boas.
+> **Por que o teto de aprimoramento é preso à raridade — a correção é do Gabriel.** Sem isso os dois
+> fazem a MESMA coisa: um comum a `+20` acabaria com as mesmas 4 subs de um mítico. **Prendendo os
+> dois, cada eixo vira uma frase:** raridade = quantas · aprimoramento = quão boas.
 >
-> **De quebra, um comum é um item cru de verdade** — trava no nível 4, sem sub nenhuma, valendo só o
+> **De quebra, um comum é um item cru de verdade** — trava em `+4`, sem sub nenhuma, valendo só o
 > atributo principal. É o item que se usa e se joga fora, que é o que um comum deve ser.
 
 ### Nível → aprimoramento
@@ -778,64 +786,60 @@ dele. Se zerasse, a sub que veio aprimorada viraria intocável por acidente — 
 > reforjar não a redistribui. Um `(5,0,0,0)` é um achado; reforjar deixa você pôr a sub que quiser no
 > slot gordo. Quem escolhe o slot é o RNG — **decisão fechada**.
 
-### A ESCALA — estrela × nível, e a trava que impede a sub de passar o principal
+### A ESCALA — a estrela dá magnitude, o aprimoramento dá subs
 
 Os valores da tabela dos 9 slots são o **teto: 6★ +20**. Daí pra baixo:
 
 ```
-principal  =  MÁXIMO  × fatorEstrela × fatorNível
-sub        =  UNIDADE × fatorEstrela × nº de aprimoramentos naquele slot
+principal  =  MÁXIMO  × fatorEstrela                              só a ESTRELA
+sub        =  UNIDADE × fatorEstrela × aprimoramentos no slot
 
 fatorEstrela   1★ 25%   2★ 40%   3★ 55%   4★ 70%   5★ 85%   6★ 100%
-fatorNível     40% no +0, +3% por nível, 100% no +20
-
-               a estrela vale 4×    ·    o nível vale 2,5×
 ```
 
-**A raridade não multiplica nada** — ela **trava** o nível e a contagem de aprimoramento, e é o nível
-que multiplica. Três eixos, dois multiplicadores. Onde cada raridade para:
+**O APRIMORAMENTO NÃO TOCA O PRINCIPAL** — e isso é o eixo fazendo o que a tabela dos três eixos já
+dizia: magnitude é da estrela, o aprimoramento é *"quão boas são as SUBS"*. Uma versão anterior desta
+seção pôs um `fatorNível` multiplicando o principal (40%→100%); estava errado, e o efeito era a forja
+fazer o trabalho da estrela.
 
-| raridade | teto de nível | fator do principal | unidades de sub |
-|---|--:|--:|--:|
-| comum | +4 | 52% | 0 |
-| incomum | +9 | 67% | 1 |
-| raro | +14 | 82% | 2 |
-| épico | +19 | 97% | 3 |
-| lendário | +20 | 100% | 4 |
-| mítico | +20 | 100% | **5** |
+**Um `6★ +0` e um `6★ +20` têm o MESMO principal.** O que os separa são as 5 unidades de sub.
+
+**A raridade não multiplica nada** — ela **trava** o aprimoramento, e com ele a contagem de subs:
+
+| raridade | teto de aprimoramento | unidades de sub |
+|---|--:|--:|
+| comum | +4 | 0 |
+| incomum | +9 | 1 |
+| raro | +14 | 2 |
+| épico | +19 | 3 |
+| lendário | +20 | 4 |
+| mítico | +20 | **5** |
 
 > **Unidade de sub = aprimoramento**, um pra um. O `(5)` do mítico é a 5ª unidade caindo toda no mesmo
-> slot — e é **a única coisa** que separa um mítico de um lendário, já que o principal empata em 100%
-> nos dois. **Esse bônus não cai no drop, só se conquista evoluindo**, e é ele que dá razão pra rota do
-> item fraco existir (§A EVOLUÇÃO).
+> slot — e é **a única coisa** que separa um mítico de um lendário, já que o principal empata nos dois
+> em qualquer estrela. **Esse bônus não cai no drop, só se conquista evoluindo**, e é ele que dá razão
+> pra rota do item fraco existir (§A EVOLUÇÃO).
 
-**A TRAVA: a sub escala pela ESTRELA, nunca pelo NÍVEL.** O nível só acrescenta unidades; quem muda o
-valor de cada unidade é a estrela — a mesma que move o principal. Por isso a razão entre os dois é fixa:
+**A TRAVA: a sub escala pela ESTRELA, junto com o principal.** O aprimoramento só acrescenta unidades;
+quem muda o valor de cada unidade é a estrela — a mesma que move o principal. Por isso a razão entre os
+dois é **fixa em qualquer estrela**:
 
 ```
-                       principal    sub máx (5 un.)    razão
-6★ +20                    100%           50%            50%
-6★  +0                     40%           10%            25%
-1★ +20                     25%          12,5%           50%
-1★  +0                     10%           2,5%           25%
+              principal    sub máx (5 un.)    razão
+6★               100%           50%            50%
+4★                70%           35%            50%
+1★                25%          12,5%           50%
 ```
 
-**O pior caso é sempre 50%**, em qualquer estrela e qualquer nível. Se a sub escalasse por nível em vez
-de estrela, um `1★ +20` teria principal a 25% e sub a 25% — **empate**, e a peça deixaria de ter dono.
+**A sub nunca passa de METADE do principal**, e isso não é calibragem — é consequência de as duas
+escalarem pelo mesmo fator. Se a sub escalasse pelo aprimoramento, um item `+20` de estrela baixa teria
+sub maior que principal, e a peça deixaria de ter dono.
 
-**A grade do principal** (para um máximo de 100%; os outros stats são a mesma grade vezes o máximo deles):
+**A grade do principal** (para um máximo de 100%; os outros stats são esta coluna vezes o máximo deles):
 
-| | +0 | +5 | +10 | +15 | +20 |
-|---|--:|--:|--:|--:|--:|
-| **1★** | 10,00 | 13,75 | 17,50 | 21,25 | 25,00 |
-| **2★** | 16,00 | 22,00 | 28,00 | 34,00 | 40,00 |
-| **3★** | 22,00 | 30,25 | 38,50 | 46,75 | 55,00 |
-| **4★** | 28,00 | 38,50 | 49,00 | 59,50 | 70,00 |
-| **5★** | 34,00 | 46,75 | 59,50 | 72,25 | 85,00 |
-| **6★** | 40,00 | 55,00 | 70,00 | 85,00 | **100,00** |
-
-**Um `6★ +0` (40%) vale mais que um `1★ +20` (25%).** A estrela pesa mais que o nível inteiro — é ela
-que se persegue primeiro, e é o que a torna o eixo caro.
+| 1★ | 2★ | 3★ | 4★ | 5★ | 6★ |
+|--:|--:|--:|--:|--:|--:|
+| 25,00 | 40,00 | 55,00 | 70,00 | 85,00 | **100,00** |
 
 > **A ficha mostra DUAS CASAS DECIMAIS** (decisão do Gabriel). Os números não fecham redondo — com 9
 > stats e dois eixos, qualquer rampa produz decimal em algum cruzamento — e **esconder a casa é pior
@@ -847,15 +851,17 @@ que se persegue primeiro, e é o que a torna o eixo caro.
 
 | etapa | principal | subs | o que mudou |
 |---|--:|---|---|
-| 1★ comum +0 | 10,00% | — | o drop |
-| 1★ comum +4 | 13,00% | — | teto do comum |
-| 3★ comum +4 | 28,60% | — | duas estrelas |
-| 3★ raro +14 | 45,10% | Taxa (1) 2,75% · ATK% (1) 2,75% | a raridade abriu +5 níveis e 2 subs |
-| 5★ épico +19 | 82,45% | Taxa 4,25% · ATK% 4,25% · Vel 4,25 | **as subs subiram sem aprimoramento** — só pela estrela |
+| 1★ comum +0 | 25,00% | — | o drop |
+| 1★ comum +4 | 25,00% | — | **o aprimoramento não moveu nada**: comum não tem sub |
+| 3★ comum +4 | 55,00% | — | duas estrelas — e é a estrela que dobra o principal |
+| 3★ raro +14 | 55,00% | Taxa (1) 2,75% · ATK% (1) 2,75% | a raridade abriu 2 subs; o principal ficou parado |
+| 5★ épico +19 | 85,00% | Taxa 4,25% · ATK% 4,25% · Vel 4,25 | **as subs subiram sem aprimoramento** — só pela estrela |
 | 6★ lendário +20 | 100,00% | Taxa 5% · ATK% 5% · Vel 5 · Prec 13 | principal no teto |
-| 6★ mítico +20 | 100,00% | **Taxa (2) 10%** · ATK% 5% · Vel 5 · Prec 13 | só a 5ª unidade — o principal não muda |
+| 6★ mítico +20 | 100,00% | **Taxa (2) 10%** · ATK% 5% · Vel 5 · Prec 13 | só a 5ª unidade |
 
-**O principal cresce 10× do drop ao topo**, e o item sai de zero a nove pontos de subestatística.
+**O principal cresce 4× do drop ao topo, e quem faz isso é a ESTRELA sozinha.** O aprimoramento entrega
+outra coisa: de zero a cinco unidades de sub. As duas linhas em que o principal não se move (`+4` e
+`+14`) são o desenho aparecendo — **forja não compra magnitude**.
 
 ### O drop
 
@@ -914,17 +920,21 @@ sentimentalismo e vira a decisão correta.
 > evoluiu escolheu 1 entre 3 em **cada degrau**, gastando raro/épico/lendário (barato); quem dropou
 > chegou cedo com 4 subs aleatórias e precisa da forja de **míticos** pra consertar cada uma (caro).
 
-**DUAS BARRAS, uma fonte.** Estrela e raridade têm barras próprias, que enchem ao mesmo tempo pelo
-mesmo uso, em ritmos diferentes — **a de raridade é bem mais lenta**. Não é escolha de investimento:
-como a estrela é o teto da raridade, investir em raridade primeiro seria sempre errado, e escolha em
-que uma opção domina só pune quem não leu o wiki.
+**DOIS NÍVEIS, uma fonte.** Estrela e raridade têm **nível próprio**, e os dois sobem ao mesmo tempo
+pelo mesmo uso, em ritmos diferentes — **o de raridade é bem mais lento**. Não é escolha de
+investimento: como a estrela é o teto da raridade, investir em raridade primeiro seria sempre errado, e
+escolha em que uma opção domina só pune quem não leu o wiki.
 
-**A barra é do ITEM, não do apóstolo** — ela viaja quando o item troca de dono. Trocar de portador pausa
+> **É por isso que se chama NÍVEL.** O apóstolo sobe de nível jogando; o item também. **A simetria é o
+> que corrige a incoerência** — antes o item chamava de "nível" o que se comprava na forja e de "barra"
+> o que se ganhava jogando, exatamente ao contrário do apóstolo.
+
+**O nível é do ITEM, não do apóstolo** — ele viaja quando o item troca de dono. Trocar de portador pausa
 o progresso, nunca destrói.
 
-#### Como a barra enche
+#### Como o nível sobe
 
-A barra é de **uso**: ganha por rodada de combate, com o item equipado em alguém em campo.
+O nível é de **uso**: ganha por rodada de combate, com o item equipado em alguém em campo.
 
 ```
 por RODADA do combate, com TETO por batalha   →  arrastar a luta não paga
@@ -942,7 +952,7 @@ vitória  = o acumulado + um BÔNUS fixo        →  vencer domina sempre
 
 #### Os marcos, e as três travas em cadeia
 
-Barra cheia é a primeira condição. A segunda é o **marco**, e ele é **por FASE, não por capítulo**:
+Nível cheio é a primeira condição. A segunda é o **marco**, e ele é **por FASE, não por capítulo**:
 
 > **O marco de um item é vencer, naquela dificuldade, a FASE DE ORIGEM dele.** Passou a fase 1 do
 > capítulo 1 no Pesadelo → o item da fase 1 do capítulo 1 destrava **6★ e mítico**. No Difícil → 5★ e
@@ -956,7 +966,7 @@ na fase 1 do Pesadelo é legítimo e não abre buraco nenhum.
 ```
 marco da FASE do item  →  trava a ESTRELA e a RARIDADE (teto da dificuldade vencida)
 ESTRELA                →  trava a RARIDADE (raridade ≤ estrela)
-barra lenta            →  encosta no teto e para
+nível lento            →  encosta no teto e para
 ```
 
 Farmar mais só leva mais rápido até uma parede que não se compra com tempo. Sem anti-cheat, sem trava
@@ -1036,11 +1046,14 @@ Duas utilidades numa operação só: o material rende o dobro em decisões, sem 
 destinos que **competem** — vestir mais um apóstolo da frota, virar material da forja de subs, ou pagar
 um re-sorteio.
 
-#### Resetar aprimoramentos = resetar o NÍVEL
+#### Resetar = voltar o APRIMORAMENTO a `+0`
 
-Sem mecânica nova: **o nível volta a 0 e sobe de novo**; os aprimoramentos re-sorteiam sozinhos,
-porque são consequência dos marcos e não algo guardado à parte. O custo é refazer os níveis, pagando o
-material outra vez — **um preço que já existe**.
+Sem mecânica nova: **o aprimoramento volta a `+0` e sobe de novo**, e a distribuição das unidades
+re-sorteia sozinha, porque ela é consequência da subida e não algo guardado à parte. O custo é refazer
+os `+20` pagando o material outra vez — **um preço que já existe**.
+
+> **O NÍVEL não é tocado.** Resetar mexe só no que a forja comprou; o que foi ganho jogando fica. É a
+> separação dos dois eixos aparecendo na mecânica de reset sem precisar de regra escrita pra isso.
 
 Custos adicionais, para o reset não virar re-sorteio infinito:
 - **Custo CRESCENTE por item** (2ª vez 2×, 3ª 4×…, com teto pra não matar o item). É o que realmente
@@ -1187,28 +1200,35 @@ cópias de um número" que o multiplicador criava.
 > O doc antes alertava pra manter a conta como multiplicador e **não** como nível de verdade. Vale o
 > contrário: é justamente ser nível de verdade que garante que jogador e inimigo nunca divirjam.
 
-**A CALIBRAGEM, medida em simulação (ago/2026):**
+**A CALIBRAGEM É POR DIFICULDADE**, e tem de ser: a raridade do apóstolo trava o nível dele, então no
+Fácil ele para em **30** e só no Pesadelo chega a **60**. Uma tabela só serviria a uma dificuldade.
 
-| capítulo | jogador esperado | equipado | **nível do inimigo** |
-|--:|--:|---|--:|
-| 1 | nv 8 | comum 1★ | **15** |
-| 2 | nv 15 | comum 2★ | **27** |
-| 3 | nv 22 | incomum 2★ | **42** |
-| 4 | nv 29 | incomum 3★ | **59** |
-| 5 | nv 36 | raro 3★ | **81** |
-| 6 | nv 43 | raro 4★ | **107** |
-| 7 | nv 50 | épico 4★ | **143** |
-| 8 | nv 60 | épico 5★ | **186** |
+Medido em simulação 4×4 com barra de turno (ago/2026). Lê-se *"jogador nv X enfrenta inimigo nv Y"*:
 
-**A regra que sobrevive aos números: o inimigo vale ~2× o nível do jogador no começo e ~3× no fim.** E
-a razão sobe **porque o item do jogador cresce** — o inimigo não tem item, então precisa de nível extra
-pra compensar o equipamento. É o mesmo fato de outro jeito: *não tem problema o inimigo ser muito mais
-forte depois que eu começar a me equipar*.
+| cap | Fácil | Normal | Difícil | Pesadelo |
+|--:|--:|--:|--:|--:|
+| 1 | 1 → **14** | 30 → **63** | 40 → **97** | 50 → **145** |
+| 2 | 4 → **17** | 31 → **67** | 41 → **107** | 51 → **157** |
+| 3 | 7 → **30** | 32 → **84** | 42 → **129** | 52 → **184** |
+| 4 | 10 → **37** | 33 → **86** | 43 → **130** | 53 → **186** |
+| 5 | 14 → **42** | 35 → **97** | 45 → **148** | 55 → **191** |
+| 6 | 17 → **63** | 36 → **120** | 46 → **171** | 56 → **225** |
+| 7 | 20 → **67** | 37 → **121** | 47 → **173** | 57 → **227** |
+| 8 | 23 → **71** | 38 → **122** | 48 → **175** | 58 → **228** |
 
-> **O chute do Gabriel foi "nível 250" e a conta 1×1 deu 254.** O 4×4 — que é o jogo de verdade —
-> baixou pra 186, porque o Guardião e o Suporte puxam o dano do time pra baixo. **Fica o 186**; o 254
-> serve como instrumento barato: o 1×1 acerta a FORMA da curva e erra a escala por um fator estável de
-> `0,70`, então dá pra usá-lo pra ver o efeito de um número sem rodar o time inteiro.
+**A regra que sobrevive aos números: o inimigo vale ~3× o nível do jogador, subindo pra ~4× no
+Pesadelo.** A razão cresce **porque o item do jogador cresce** — o inimigo não tem item, então precisa
+de nível extra pra compensar o equipamento. É o mesmo fato de outro jeito: *não tem problema o inimigo
+ser muito mais forte depois que eu começar a me equipar*.
+
+> **Trocar de dificuldade dá um respiro, e ele é de graça.** O capítulo 1 de cada dificuldade é mais
+> fraco que o capítulo 8 da anterior (71 → 63, 122 → 97, 175 → 145). Ninguém desenhou isso: cai de o
+> jogador ganhar 10 níveis e um degrau de raridade ao virar a página.
+
+> **O chute do Gabriel foi "nível 250".** O 1×1 deu 254 e o 4×4 — que é o jogo de verdade — baixou pra
+> 228, porque o Guardião e o Suporte puxam o dano do time pra baixo. O 1×1 acerta a FORMA da curva e
+> erra a escala por um fator estável de ~`0,7`, então serve de instrumento barato pra ver o efeito de
+> um número sem rodar o time inteiro.
 >
 > **O que a simulação NÃO tinha:** habilidade nenhuma, cura nenhuma, e as posições fora da conta. Os
 > dois lados perdem o mesmo, então a forma deve sobreviver — **a escala não**. Estes níveis vão mudar
@@ -1285,16 +1305,24 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
   mataria o item duas vezes.
 - **A sub tem a mesma FORMA que o principal do slot** (cheio com cheio, % com %). Acessório não dá
   Velocidade, nem principal nem sub.
-- **A ESCALA é `MÁXIMO × estrela × nível`** (§4). Estrela `25→100%`, nível `40→100%`. A **raridade não
-  multiplica** — ela trava o nível e a contagem de aprimoramento.
-- **A sub escala pela ESTRELA, nunca pelo nível** — é o que trava a sub em, no máximo, **metade** do
-  principal em qualquer combinação. Se escalasse por nível, um `1★ +20` empataria os dois.
+- **NOMENCLATURA (corrigida, ago/2026):** o que sobe **jogando** é o **NÍVEL** — igual ao apóstolo, e é
+  essa simetria que dá o nome. O que sobe **pagando** na forja é o **APRIMORAMENTO** (`+0…+20`), que é
+  o `(1)`…`(5)` ao lado da sub. O doc chamava os dois ao contrário.
+- **São DOIS NÍVEIS**, um pra estrela e um pra raridade, mesma fonte e ritmos diferentes.
+- **A ESCALA é `principal = MÁXIMO × estrela`** — só a estrela, `25→100%`. **O aprimoramento NÃO toca
+  o principal**; ele entrega unidades de sub. Um `6★ +0` e um `6★ +20` têm o mesmo principal.
+- **A sub escala pela ESTRELA também**, junto com o principal — é o que trava a sub em **metade** do
+  principal, em qualquer estrela, sem calibragem nenhuma.
+- **A raridade não multiplica nada** — ela trava o teto de aprimoramento (`+4 … +20`) e com ele a
+  contagem de subs (0 a 5).
 - **Unidade de sub = aprimoramento**, um pra um. O `(5)` do mítico é o bônus que **só a evolução dá**.
+- **Resetar mexe só no APRIMORAMENTO** — o nível ganho jogando não é tocado.
 - **A ficha mostra 2 CASAS DECIMAIS.** Arredondar esconderia justo a Taxa Crítica perto do teto, que é
   o número que o jogador mais precisa conferir — é o defeito conhecido do Raid.
 - **O INIMIGO ESCALA POR NÍVEL, não por multiplicador** (§5) — mesma curva e mesma tabela de tipo do
-  jogador, uma fórmula só pros dois lados. Calibrado em **~2× o nível do jogador no começo, ~3× no
-  fim** (cap 1 ≈ nv 15 · cap 8 ≈ nv 186). O `0,5×cap + 0,1×fase` está morto.
+  jogador, uma fórmula só pros dois lados. **Calibrado POR DIFICULDADE** (o teto de nível do apóstolo
+  muda com ela): ~**3×** o nível do jogador, subindo pra ~**4×** no Pesadelo. O `0,5×cap + 0,1×fase`
+  está morto.
 - **Nível só toca HP/ATK/DEF.** Velocidade, Precisão e Resistência não escalam — e como inimigo não tem
   item, é isso que permite calibrar o eixo de efeito de uma vez pro jogo inteiro. *(Em aberto, como
   pensamento: talvez algo disso mude em BOSS.)*

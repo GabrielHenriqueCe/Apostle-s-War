@@ -280,40 +280,144 @@ duração antes de o status ser adicionado.
 
 ---
 
-## 2. POSIÇÃO E TIPO — e por que são coisas DIFERENTES
+## 2. POSIÇÃO E TIPO — e por que uma não existe sem a outra
 
-### A posição mora na HABILIDADE, não no personagem (modelo Darkest Dungeon)
+### A posição não PROÍBE nada — ela muda o QUANTO
 
-Quatro posições por lado (1–4, frente pro fundo). E a regra do DD é a chave: **cada habilidade
-declara duas coisas separadas**.
+Quatro casas por lado e **as frentes se olhando**: o tabuleiro é uma fila de 8, cada time de costas
+pra sua borda.
 
 ```
-posicoesDeUso: [1, 2]     // de onde dá pra usar
-posicoesAlvo:  [1, 2]     // quem ela alcança
+        SEU TIME                          INIMIGO
+   ┌────┬────┬────┬────┐            ┌────┬────┬────┬────┐
+   │ 4  │ 3  │ 2  │ 1  │            │ 1  │ 2  │ 3  │ 4  │
+   └────┴────┴────┴────┘            └────┴────┴────┴────┘
+    fundo ........ frente            frente ........ fundo
 ```
 
-Por isso o mesmo herói tem uma habilidade que só funciona na frente e outra só no fundo. E por isso
-**empurrar e puxar viram ataque**: tirar o atirador da posição 4 desliga metade do kit dele sem
-causar um ponto de dano.
+A distância é **quantas casas separam os dois nessa fila** — frente contra frente é 1, fundo contra
+fundo é 7:
 
-**Custo aqui: dois campos.** A habilidade já é DADO (`numeroDeAlvos`, `tipoAlvo`, `tipoLista`) — isto
-são mais dois. E o `ControladorBot`, que já filtra alvo válido, ganha o filtro novo no mesmo lugar.
+```
+distância = minha casa + casa do alvo − 1
+```
 
-**O jogador ordena os 4 na montagem, e a ordem é COMPROMISSO** (Gabriel: *"se colocou em casa errada
-se fudeu"*). Nada de correção automática. A tela de montar time (hoje `ui/time.js`) passa a ordenar,
-não só escolher.
+#### Cada tipo tem uma DISTÂNCIA IDEAL
 
-### O TIPO é identidade, não geometria
+O dano é máximo nela e cai **0,10 por casa de desvio, pros dois lados**. Um número por tipo, e nada
+mais:
 
-Separar as duas coisas é o que barateia as duas. *"Tanque não alcança o último"* é regra da
-**habilidade**. *"Tanque é tanque"* é **identidade** — e é isso que o jogador lê pra montar time.
+| tipo | d\* | d1 | d2 | d3 | d4 | d5 | d6 | d7 |
+|---|:--:|--:|--:|--:|--:|--:|--:|--:|
+| 🛡️ Guardião | **1** | **1,30** | 1,20 | 1,10 | 1,00 | 0,90 | 0,80 | 0,70 |
+| ⚔️ Combatente | **4** | 1,00 | 1,10 | 1,20 | **1,30** | 1,20 | 1,10 | 1,00 |
+| 🏹 Atirador | **5** | 0,90 | 1,00 | 1,10 | 1,20 | **1,30** | 1,20 | 1,10 |
+| 💗 Suporte | — | 1,00 | 1,00 | 1,00 | 1,00 | 1,00 | 1,00 | 1,00 |
 
-| tipo | posição natural | papel |
-|---|---|---|
-| **Guardião** | 1–2 | aguenta e protege; alcance curto |
-| **Combatente** | 1–2 | dano corpo a corpo |
-| **Atirador** | 3–4 | alcança o fundo inimigo |
-| **Suporte** | 3–4 | cura, buff e malefício |
+**Nenhuma habilidade é proibida em lugar nenhum.** Todo mundo alcança todo mundo, sempre — a casa
+decide só o quanto. **O Suporte é o único que não liga pra onde está**, o que combina com quem cura e
+limpa: ele já tem com o que se preocupar.
+
+Das casas naturais, sem ninguém andar, cada um cai em cima de um alvo **diferente**:
+
+| quem | da casa | pica em | ou seja |
+|---|:--:|:--:|---|
+| 🛡️ Guardião | 1 | casa 1 | o tanque deles |
+| ⚔️ Combatente | 2 | casa 3 | o suporte deles |
+| 🏹 Atirador | 4 | casa 2 | o combatente deles |
+| 💗 Suporte | 3 | — | igual em todo mundo |
+
+**E sobra um buraco de propósito: ninguém pica no arqueiro deles (casa 4) parado.** Pra alcançá-lo
+você avança o Combatente pra casa 1 ou o Atirador pra casa 2. Quer matar o maior ATK do campo? Expõe
+alguém. É essa a decisão, e ela é toda partida.
+
+#### O pico ANDA junto com quem se move
+
+Como o que vale é a distância, mudar de casa **muda o alvo preferido** — não só a força:
+
+| o arqueiro na… | o pico dele cai em… |
+|---|---|
+| casa 4 | casa 2 — o combatente deles |
+| casa 3 | casa 3 — o suporte deles |
+| casa 2 | casa 4 — **o arqueiro deles** |
+| casa 1 | *fora do tabuleiro* — da frente ele alcança 4 de distância no máximo, e ele quer 5 |
+
+**Recuar aproxima o pico da frente inimiga; avançar joga o pico pro fundo dela.** É contraintuitivo
+na primeira leitura e vira segunda natureza na terceira partida — e é uma decisão real, porque
+avançar o frágil pra caçar o frágil deles é pôr o frágil na frente.
+
+> **O Atirador é o único que não atinge o próprio pico estando na casa 1**: da frente a maior
+> distância possível é 4, e ele quer 5 (o Combatente, que quer 4, atinge). Isso é aceito de propósito
+> — baixar o d\* dele pra 4 o empataria com o Combatente, e dois tipos com a mesma curva não são dois
+> tipos.
+
+#### Quem morre FICA na casa
+
+**As fileiras NÃO compactam.** O corpo ocupa a casa dele até o fim da luta — e não é limitação, é o
+que o jogo já pede: **existem apóstolos que revivem**, então a casa tem que estar lá esperando.
+
+Isso fecha a pergunta que ficou aberta duas rodadas ("o que acontece com a posição quando alguém
+morre") e aposenta junto o **⚔️ Atacar universal** que era o remendo proposto pra ela: ele existia pra
+ninguém ficar travado sem habilidade válida, e neste modelo **ninguém trava nunca**.
+
+> É a resposta oposta à do DD, e de graça. Lá as fileiras deslizam pra frente quando alguém morre, e
+> o DD1 precisou inventar **cadáveres** justamente pra controlar o quanto elas andam — mecânica
+> polêmica o bastante pra virar opção que se desliga.
+
+#### O tamanho disso: a posição é TEMPERO, não motor
+
+Medido no nv 60, com a `DEF/(DEF+5000)` e os dois times na formação natural:
+
+| casa | quem está lá | bruto que chega | depois da DEF dele | HP | **rodadas até morrer** |
+|---|---|--:|--:|--:|--:|
+| 1 | 🛡️ Guardião | 4.758 | 3.660 | 30.000 | **8,2** |
+| 2 | ⚔️ Combatente | **4.992** | 4.025 | 25.200 | **6,3** |
+| 3 | 💗 Suporte | 4.926 | 4.132 | 20.100 | **4,9** |
+| 4 | 🏹 Atirador | **4.590** | 4.165 | 15.000 | **3,6** |
+
+**A casa 4 é a que recebe MENOS dano bruto de todas — e o Atirador morre lá mais que duas vezes mais
+rápido que o Guardião.** A casa não protegeu nada; quem decidiu foi a ficha.
+
+Dá pra medir o tamanho: o bruto varia **4%** entre a pior casa e a melhor; o HP efetivo varia **136%**
+entre o Atirador e o Guardião. **A ficha do tipo pesa umas trinta vezes mais que a posição** — e é
+assim que deve ser. Os 12 números da tabela abaixo são o esqueleto; a posição é tempero.
+
+> **Consequência que vale lembrar ao desenhar kit:** o Guardião **não** protege o time por estar na
+> casa 1 — 4% de dano desviado é nada. Ele protege **puxando o golpe pra si** (`ProtecaoAliado`), e
+> isso vale 2,4× de HP efetivo. A geometria dá sabor; a proteção de verdade continua sendo do kit.
+>
+> Se um dia a posição precisar morder de verdade, o botão é a queda por casa (0,10 → 0,20). Mas
+> calibrar isso antes de os itens existirem é calibrar contra número que ainda não tem dono.
+
+#### Na tela: cor e multiplicador, nunca dano previsto
+
+O mapa de calor é **um componente com três gatilhos** — passar o mouse, selecionar (o clique, que é o
+que salva quem não usa hover) e arrastar entre as casas. Os três pintam a mesma coisa: as casas
+inimigas tingidas pelo multiplicador de quem está em foco, **com o número escrito junto** (`×1,20`).
+A escala diverge no 1,00 — abaixo esfria e apaga, acima acende e esquenta.
+
+**O front NÃO pode ter cópia da tabela.** O C# manda a **grade 4×4 por apóstolo** (a casa onde ele
+poderia estar × a casa do alvo): 16 números por apóstolo, e o arraste vira troca de linha numa grade
+que já está na mão, sem ida e volta na ponte no meio do gesto. Duas cópias de uma fórmula divergem
+como duas cópias de um número — e essa já custou um defeito mudo nos Decaídos.
+
+> **NUNCA mostrar o dano que a habilidade vai causar antes de usá-la** (decisão do Gabriel). O
+> multiplicador é **ficha** — é atributo do apóstolo naquela casa, igual a ATK. Dano previsto é
+> simulação, e simulação tira a decisão do jogador. O mapa vai apontar pro tanque deles, que é o pior
+> alvo do jogo pra matar; *"a anta que ficar focando no tank tem que se fuder"*. O `PreverDanoRecebido`
+> do motor é ferramenta interna (bot, ordem de morte) e continua fora da tela.
+
+### O TIPO é identidade — e agora também é geometria
+
+A ficha (o que ele aguenta e o quanto bate) é **identidade**; a curva de distância é o **gesto** dele
+no tabuleiro. As duas juntas é que fazem o jogador ler o time antes de montar.
+
+| tipo | casa natural | papel |
+|---|:--:|---|
+| 🛡️ **Guardião** | 1 | aguenta, protege puxando o golpe, e só rende colado |
+| ⚔️ **Combatente** | 2 | atravessa a linha e castiga o miolo |
+| 🏹 **Atirador** | 4 | o maior alcance do campo |
+| 💗 **Suporte** | 3 | cura, buff e malefício — e rende igual em qualquer casa |
 
 > **A MAESTRIA, ideia guardada.** No WoW ela faz **coisa diferente por especialização** — mesmo
 > número, efeito distinto. Se um dia quiser um eixo a mais sem inchar a ficha: um stat só, quatro
@@ -1379,13 +1483,12 @@ apóstolo é.
 > **Isto corrige o bug de a fase 1 entregar DOIS apóstolos.** `Campanha.cs:12` monta a fase 1 como
 > `[Slot1]` / `[Slot2]` e o `DesbloquearApostolos` varre as duas rodadas — por isso saem dois.
 
-> **⏳ EM ABERTO — o que acontece quando alguém MORRE.** O doc define de onde se usa e quem se alcança,
-> mas não o que fazer com o buraco. Sem regra, **a luta trava**: se sobra um Combatente meu (alcança
-> 1–2) contra um Atirador na posição 4, ninguém encosta em ninguém. A proposta é o modelo do DD —
-> **as fileiras COMPACTAM** (morreu o da 1, todos deslizam pra frente), mais o **⚔️ Atacar como piso
-> universal** (usa de qualquer posição, alcança 1–2). Aí o travamento é impossível por construção, e
-> de quebra derrubar a frente **arrasta o fundo** pra dentro do alcance — podendo desligar o kit dele
-> no caminho, sem você ter tocado nele. **Não decidido: fica pro estudo das posições.**
+> **✅ RESOLVIDO — o que acontece quando alguém MORRE: nada. O corpo fica na casa** (§2). A pergunta
+> existia porque o modelo antigo tinha PORTÃO de alcance, e aí um buraco podia travar a luta (um
+> Combatente que só alcançava 1–2 contra um Atirador na 4 nunca encostava nele). **Sem portão não há
+> travamento possível**, então a compactação de fileiras e o ⚔️ Atacar universal — que eram os dois
+> remendos propostos — deixaram de ter problema pra resolver. E manter a casa ocupada é o que os
+> apóstolos que **revivem** precisam.
 
 ### Os inimigos não têm itens — e isso resolve a calibragem
 
@@ -1455,19 +1558,22 @@ Arena já existe justamente pra isso, e o `ControladorBot` já joga os dois lado
 **A ordem importa e não é negociável:** status e turno ANTES de nível e raridade. Subir status antes de
 mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar.
 
-1. **Velocidade + barra de turno + fila única.** Mexe em `Batalha`, `Equipe`, `TurnoDoPersonagem`.
-2. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
-3. **A POSIÇÃO SAIU DAQUI E FOI PRO FIM DA LISTA** *(decisão do Gabriel, ago/2026)*. Nível, status e
-   raridade não dependem dela e podem ser jogados e testados antes — segurá-los atrás da posição
-   adiava o que já dava pra sentir em jogo. A ordem que continua **não sendo negociável** é a de
-   cima: status e turno antes de nível e raridade.
-4. **Tipos** (Guardião/Combatente/Atirador/Suporte) — **com o stat base vindo do tipo** e um de cada
-   por facção. Arrasta sobrescrever habilidade nos capítulos com dois apóstolos do mesmo papel.
+1. ✅ **Tipos + o stat base vindo do tipo** — FEITO (#228). Os 108 números soltos viraram 4 fichas +
+   9 torções, o crítico saiu de constante global pra vir do tipo, e a ficha inteira chegou na tela.
+2. **Posição** (§2): o campo na horizontal com as frentes se olhando, a ordenação livre na montagem,
+   o perfil de distância dentro do pipeline de dano e o mapa de calor. **Subiu de último pra segundo**
+   *(ago/2026)* — o desempate da barra de turno é **por posição**, então ela tem que existir antes.
+3. **Velocidade + barra de turno + fila única.** Mexe em `Batalha`, `Equipe`, `TurnoDoPersonagem` —
+   hoje a ordem é um `for` sobre `Equipe1.Membros ++ Equipe2.Membros`, e é esse `Concat` que é a
+   vantagem de time que o §1 quer matar.
+4. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
 5. **Nível (curva do tipo) + Raridade** nos apóstolos. Sem estrela.
 6. **Raridade → passiva que escala.**
 7. **Item equipado no apóstolo.**
-8. **Posição na habilidade** (`posicoesDeUso`/`posicoesAlvo`) + ordenar o time na montagem. **Por
-   último**, pelo motivo do item 3.
+
+> **A ordem de 3 e 4 continua não sendo negociável** em relação a 5 e 6: status e turno ANTES de nível
+> e raridade. Subir status antes de mudar quem joga quando é calibrar contra uma ordem de turno que
+> ainda vai mudar.
 
 > **O save atual é DESCARTADO** (decisão do Gabriel: *"descarta, não me importo"*). Sem migração.
 
@@ -1485,7 +1591,13 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 
 ## Decisões já fechadas (não reabrir)
 
-- A posição é **compromisso do jogador**; nada de correção automática.
+- A posição é **compromisso do jogador**; nada de correção automática. A ordenação é **livre** — nada
+  de travar cada tipo na casa natural dele, porque é justamente furar a casa natural que abre build.
+- **A POSIÇÃO NÃO PROÍBE, ela modula** (§2): cada tipo tem uma **distância ideal** (🛡️ 1 · ⚔️ 4 ·
+  🏹 5 · 💗 plano), pico 1,30 caindo 0,10 por casa de desvio pros dois lados. **Nenhuma habilidade
+  fica indisponível em casa nenhuma.** Quem morre **fica na casa** — as fileiras não compactam.
+- **Nunca mostrar dano previsto antes de usar a habilidade** (§2). Multiplicador é ficha e pode ser
+  mostrado; dano previsto é simulação e fica fora da tela.
 - **A BARRA DE TURNO está fechada** (§1): barra própria por apóstolo · age quem cruzou 100, o mais
   cheio primeiro · desempate por **posição** e depois pelo **lado do jogador** · a sobra **carrega** ·
   a ação **custa tempo**. **Não trocar "mais cheio" por "mais rápido"** — foi proposto e descartado,
@@ -1585,6 +1697,10 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 
 | dizia | vale agora | por quê |
 |---|---|---|
+| *"a posição mora na HABILIDADE"* — `posicoesDeUso`/`posicoesAlvo`, o portão do DD | **a posição MODULA o dano** por distância ideal do tipo (§2) | o portão desliga metade do kit de quem está na casa errada; aqui **nenhuma habilidade morre**, e a decisão vira dial em vez de penhasco. Custo: perde-se o castigo duro do DD, ganha-se que todo apóstolo sempre tem o que fazer |
+| *"empurrar e puxar viram ataque porque desligam o kit"* | empurrar e puxar **deslocam o pico**, não desligam nada | com o portão fora, tirar o arqueiro da casa 4 não o cala — muda em quem ele bate mais forte |
+| *"compactar as fileiras quando alguém morre"* (proposta) | **o morto fica na casa** | existem apóstolos que revivem, então a casa tem que estar lá esperando. Some junto o **⚔️ Atacar universal**, que era o remendo pra ninguém ficar travado |
+| *"o tipo é identidade, NÃO geometria"* | o tipo é identidade **e** geometria (§2) | a curva de distância é do TIPO — é o gesto dele no tabuleiro, e é o que separa dois apóstolos de fichas iguais |
 | *"na campanha só caem comuns"* | qualquer raridade cai em qualquer dificuldade | reservar raridade pra loja é desenho de gacha, e aqui não há loja |
 | *"a fonte decide o teto de raridade"* (Fácil até Incomum…) | a **estrela** é o teto | virou redundante — a estrela já limita, e piso por dificuldade não acrescentava nada |
 | *"fusão com semente"* | **sacrifício da raridade atual** alimentando 3 opções de sub | o sacrifício dá custo, liga o drop à evolução e ainda decide as opções |

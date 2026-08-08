@@ -24,9 +24,20 @@ export function tornarPickerArrastavel(cel, idx) {
     cel.addEventListener('dragend', () => { arrastando = null; });
 }
 
-export function criarSlot(apostolos, idx, selecionado) {
+// `casa` = 0..3, a posição no tabuleiro. A ORDEM destes slots é a ordem em que o time entra em
+// campo: a casa 1 encosta no inimigo e a 4 fica na retaguarda. Sem o número na tela o jogador
+// arrasta às cegas — a lista parecia um conjunto e é uma FILA.
+export function criarSlot(apostolos, idx, selecionado, casa) {
     const slot = document.createElement('div');
     slot.className = 'slot' + (idx != null ? ' preenchido' : '') + (selecionado ? ' selecionado' : '');
+    if (casa != null) {
+        const n = document.createElement('span');
+        n.className = 'slotCasa';
+        n.textContent = casa + 1;
+        n.title = casa === 0 ? 'casa 1 — a frente, encosta no inimigo'
+            : casa === 3 ? 'casa 4 — o fundo' : `casa ${casa + 1}`;
+        slot.append(n);
+    }
     if (idx != null) {
         const c = apostolos[idx];
         const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;

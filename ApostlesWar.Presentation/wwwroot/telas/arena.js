@@ -42,7 +42,7 @@ function desenharSlotsArena() {
     for (const lado of ['esq', 'dir']) {
         const cont = document.getElementById(lado === 'esq' ? 'slotsEsq' : 'slotsDir');
         cont.replaceChildren(...arenaTimes[lado].map((idx, i) => {
-            const slot = criarSlot(arenaApostolos, idx, arenaSlotSel && arenaSlotSel.lado === lado && arenaSlotSel.i === i);
+            const slot = criarSlot(arenaApostolos, idx, arenaSlotSel && arenaSlotSel.lado === lado && arenaSlotSel.i === i, i);
             slot.addEventListener('click', () => {
                 if (arenaTimes[lado][i] != null) arenaTimes[lado][i] = null;   // casa cheia = remove
                 else arenaSlotSel = { lado, i };                                // casa vazia = seleciona (foca o lado)

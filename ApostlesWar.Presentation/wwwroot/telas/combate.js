@@ -258,9 +258,25 @@ function atualizarCombatente(el, c) {
         hp.textContent = `${c.hpAtual}/${c.hpMaximo}` + (c.escudo > 0 ? `  🛡️${c.escudo}` : '');
         infos.appendChild(hp);
 
+        // Uma linha por estatística: na caixa estreita a fila com `·` quebrava em pontos aleatórios
+        // e virava um bloco amontoado. Empilhado, os rótulos alinham e dá pra comparar duas casas
+        // de relance — que é pra isso que o número está aqui.
         const stats = document.createElement('div');
         stats.className = 'statsLinha';
-        stats.textContent = `ATK ${c.ataque} · DEF ${c.defesa} · ⚡${c.velocidade} · 🎲${c.taxaCritPct}% · 💥${c.danoCritPct}%`;
+        stats.append(...[
+            ['ATK', c.ataque],
+            ['DEF', c.defesa],
+            ['⚡', c.velocidade],
+            ['🎲', `${c.taxaCritPct}%`],
+            ['💥', `${c.danoCritPct}%`],
+        ].map(([rotulo, valor]) => {
+            const l = document.createElement('div');
+            l.className = 'statItem';
+            const r = document.createElement('span'); r.className = 'statRotulo'; r.textContent = rotulo;
+            const v = document.createElement('span'); v.className = 'statValor'; v.textContent = valor;
+            l.append(r, v);
+            return l;
+        }));
         infos.appendChild(stats);
     }
 

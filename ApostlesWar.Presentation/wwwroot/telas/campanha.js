@@ -186,7 +186,7 @@ function montarPickerFase() {
 
 function desenharSlotsFase() {
     document.getElementById('faseSlots').replaceChildren(...campTime.map((idx, i) => {
-        const slot = criarSlot(campFases.meusApostolos, idx, campSlotSel === i);
+        const slot = criarSlot(campFases.meusApostolos, idx, campSlotSel === i, i);
         slot.addEventListener('click', () => {
             if (campTime[i] != null) campTime[i] = null;   // casa cheia = remove
             else campSlotSel = i;                           // casa vazia = seleciona

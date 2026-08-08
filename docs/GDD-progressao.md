@@ -554,27 +554,112 @@ o desenho que se quer: nenhum dos dois é lixo em momento nenhum da curva.
 
 Os 7 de armadura **já existem e já têm nome de corpo** (`ArsenalService.cs:73-83`), um por fase.
 
-| slot | | principal |
+| slot | | forma | principal — e o valor no **6★ +20** |
+|---|---|---|---|
+| **Arma** (fase 1) | fixo | cheio | ATK **+500** |
+| **Elmo** (fase 2) | fixo | cheio | HP **+11.000** |
+| **Escudo** (fase 3) | fixo | cheio | DEF **+500** |
+| **Manopla** (fase 4) | variável | % | ATK%·HP%·DEF% **50%** · **Taxa Crít 50%** · **Dano Crít 100%** |
+| **Peitoral** (fase 5) | variável | % | ATK%·HP%·DEF% **50%** · **Resistência +125** |
+| **Calça** (fase 6) | variável | % | ATK%·HP%·DEF% **50%** · **Precisão +125** |
+| **Bota** (fase 7) | variável | % | ATK%·HP%·DEF% **50%** · **Velocidade +50** |
+| **Pulseira** | dungeon | cheio | HP·ATK·DEF cheio · **Taxa Crít 25%** · **Dano Crít 50%** |
+| **Colar** | dungeon | cheio | HP·ATK·DEF cheio · **Precisão +125** · **Resistência +125** |
+
+**Os dois acessórios se leem numa frase cada:** a **Pulseira é o acessório do CRÍTICO**, o **Colar é o
+do EFEITO**, e os dois carregam o cheio de HP/ATK/DEF — que é a pista do quem só quer status bruto.
+**Nenhum dos dois dá Velocidade**, nem no principal nem em sub: ela tem uma fonte só no jogo inteiro.
+
+**Como os valores foram derivados** (nada aqui é chute solto):
+
+| stat | valor | de onde vem |
 |---|---|---|
-| **Arma** (fase 1) | fixo | ATK cheio |
-| **Elmo** (fase 2) | fixo | HP cheio |
-| **Escudo** (fase 3) | fixo | DEF cheio |
-| **Manopla** (fase 4) | variável | ATK% · HP% · DEF% · **Taxa Crítica** · **Dano Crítico** |
-| **Peitoral** (fase 5) | variável | ATK% · HP% · DEF% · **Resistência** |
-| **Calça** (fase 6) | variável | ATK% · HP% · DEF% · **Precisão** |
-| **Bota** (fase 7) | variável | ATK% · HP% · DEF% · **Velocidade** |
-| **Colar** · **Pulseira** | dungeons | *a definir* |
+| ATK% · HP% · DEF% | 50% | escolha do Gabriel; é o degrau de referência de todos os outros |
+| Arma · Elmo · Escudo | +500 · +11.000 · +500 | **50% da base MÉDIA dos 4 tipos** no nv 60, pela regra do `rolagem de cheio ≈ % × base típica do topo` acima |
+| Velocidade | +50 | **os mesmos 50%**, aplicados à base média de Velocidade (≈100). A Bota vale exatamente o que qualquer outro principal vale — nem mais |
+| Precisão · Resistência | +125 × 2 fontes | 250 no total, dividido entre a peça de armadura e o Colar |
+| Taxa · Dano Crítico | 50/25 e 100/50 | proporção **2:1** entre Manopla e Pulseira — ver a escada abaixo |
+
+> **Por que a Velocidade não é maior.** A faixa entre os arquétipos é de **30 pontos** (85→115). Uma
+> Bota de +100, que chegou a ser proposta, é **mais que o triplo dessa distância** — o número do tipo
+> viraria ruído e um Guardião com Bota passaria longe de um Atirador sem. Com +50 a Bota quase dobra
+> a Velocidade (continua sendo o grande prêmio) e a distância entre os tipos sobrevive.
+
+#### A ESCADA DO CRÍTICO — por que 2:1, e por que nenhuma opção domina
+
+A Taxa Crítica é o **único stat do jogo com teto duro**. No Raid isso degenera: a luva de dano crítico
+é sempre a certa, porque subs e conjuntos capam a taxa sozinhos e a luva de taxa passa a valer **zero**.
+A proporção 2:1 entre Manopla e Pulseira evita isso. Combatente (base 25% taxa, 90% dano crít), variando
+só o que ele põe nas duas peças:
+
+| Manopla | Pulseira | taxa de principal | subs pra capar | dano crít | **multiplicador** |
+|---|---|--:|--:|--:|--:|
+| Taxa 50 | Taxa 25 | 75 | **0** | 90% | **1,90** |
+| Taxa 50 | DanoCrit 50 | 50 | 5 | 140% | **2,40** |
+| DanoCrit 100 | Taxa 25 | 25 | 10 | 190% | **2,90** |
+| DanoCrit 100 | DanoCrit 50 | 0 | 15 | 240% | **3,40** |
+
+**Cada degrau custa exatamente 5 rolos de sub e paga exatamente +0,50 de multiplicador** — consequência
+de a proporção ser a mesma nos dois stats. Por isso **nenhuma linha domina**: a pergunta deixa de ser
+*"qual é melhor?"* e vira *"o que esses 5 rolos fariam em outro lugar?"*.
+
+**E a base do tipo aparece como rolos economizados**, que é a vantagem do Combatente em ato:
+
+| | base | +75 de principal | ainda falta |
+|---|--:|--:|--:|
+| Combatente | 25% | **100%** | 0 rolos |
+| Atirador | 15% | 90% | 2 rolos |
+| Suporte | 10% | 85% | 3 rolos |
+| Guardião | 5% | 80% | 4 rolos |
+
+> **NÃO travar a sub de taxa** (proposta descartada). Chegou-se a propor um teto artificial na
+> contribuição das subs; é desnecessário e prejudicial. **O custo já existe e é a escassez:** chegar a
+> 70% de taxa por sub gasta um slot em SETE peças, slots que deixariam de ser qualquer outra coisa.
+> Uma trava por cima disso mataria o item duas vezes.
+
+#### PRECISÃO E RESISTÊNCIA — e por que 250 basta
+
+**O multiplicador de fase/dificuldade incide SÓ em HP/ATK/DEF.** Velocidade, Precisão e Resistência
+**não escalam com dificuldade** — nem do lado do jogador nem do inimigo. E como inimigo não tem item
+(§5), a Resistência dele fica presa na base do tipo, **50–150, no jogo inteiro**.
+
+Isso torna esses dois os **únicos stats que dá pra calibrar de uma vez pro jogo todo**, e a conta fecha:
+
+```
+garantir 100%  →  Precisão = 2 × Resistência do alvo
+alvo mais teimoso  →  R 150  →  preciso de 300
+
+Precisão do jogador (base + Calça 125 + Colar 125):
+   Suporte 400 · Atirador 370 · Combatente 330 · Guardião 300
+```
+
+**Os quatro garantem contra qualquer inimigo comum**, e o Guardião raspando — ele consegue, mas
+gastando Calça E Colar num stat que não é dele. E o eixo continua vivo do outro lado, porque a
+Resistência do jogador não é infinita: contra um inimigo de Precisão 150, o Suporte é atingido 27% das
+vezes, o Guardião 31% e o **Atirador 43%** — a fragilidade dele funcionando.
+
+> **Fica em aberto, e é PENSAMENTO do Gabriel, não decisão:** talvez um dia Precisão ou Velocidade
+> escalem em BOSS. É o lugar natural — o GDD já põe a trava de controle na passiva do boss (§1). Por
+> ora **o inimigo evolui só o nível normal, igual aos apóstolos**, e nada mais.
 
 **Por que metade fixa e metade variável:** se todos variassem, o jogador teria 7 loterias simultâneas e
 nunca fecharia uma build; se nenhum variasse, não existiria build, só acúmulo. **Fixos = esqueleto
 garantido, variáveis = espaço de escolha.** E o encaixe com as fases é feliz: os fixos são as fases
 **1–3** (o esqueleto vem cedo e barato) e os variáveis as **4–7** (a build vem tarde e cara).
 
-**Cada slot variável tem UM stat exclusivo** mais o trio `ATK%/HP%/DEF%` — assim **nenhum drop é 100%
-lixo**, e cada peça tem motivo próprio de ser farmada. A Manopla é a mão que golpeia (o crítico inteiro
-mora nela, e taxa × dano viram escolha); o Peitoral é o torso que aguenta; a Calça é a perna que se
-move; a **Bota** é a única fonte de Velocidade como principal — e ela **já era a fase 7**, a mais
-difícil do capítulo, então o stat mais forte do jogo já nasce no lugar mais caro sem mexer em nada.
+**Cada slot variável tem um stat próprio** mais o trio `ATK%/HP%/DEF%` — assim **nenhum drop é 100%
+lixo**, e cada peça tem motivo próprio de ser farmada. A Manopla é a mão que golpeia (taxa × dano viram
+escolha ali); o Peitoral é o torso que aguenta; a Calça é a perna que se move.
+
+**Exclusivo mesmo, um só: a Velocidade.** Ela é a única com fonte ÚNICA (a Bota), e é de propósito —
+sendo o stat mais forte do jogo, uma segunda fonte a tornaria barata. E a Bota **já era a fase 7**, a
+mais difícil do capítulo, então ele nasce no lugar mais caro sem mexer em nada.
+
+> **Os outros quatro especiais têm DUAS fontes**, e isso é desenho e não descuido: Taxa e Dano Crítico
+> na Manopla + Pulseira; Precisão na Calça + Colar; Resistência no Peitoral + Colar. A segunda fonte é
+> sempre um **acessório**, que vem de dungeon — conteúdo mais difícil, então é prêmio, não atalho.
+> **A regra que governa isso: stat com TETO tem que ter fonte controlada** (a Taxa é a única com teto,
+> e por isso as duas fontes dela somam 75% em vez de capar sozinhas); stat sem teto aguenta duas.
 
 > **`ATK%` ainda não existe.** O `Combate.cs:86` já tem o `ItensAtaquePct` sendo usado no cálculo, mas
 > **não há `TipoStat.ATKPct`** que o alimente — HP e DEF têm cheio *e* %, o ATK só tem cheio. É criar o
@@ -586,17 +671,31 @@ difícil do capítulo, então o stat mais forte do jogo já nasce no lugar mais 
 ### AS SUBESTATÍSTICAS — 8 no pool, e nenhuma escolha aritmética
 
 ```
-armadura (7)   → subs em PERCENTUAL
-acessórios (2) → subs em VALOR CHEIO
+Arma · Elmo · Escudo          → subs CHEIAS      (a forma do principal deles)
+Manopla · Peitoral · Calça · Bota → subs em %    (a forma do principal deles)
+Pulseira · Colar              → subs CHEIAS      — e SEM Velocidade
 ```
+
+**A divisão é por PEÇA, e a regra é: a sub tem a mesma forma que o principal daquele slot.** Uma peça
+de valor cheio tem subs cheias; uma peça de percentual tem subs em percentual. Assim cada item é
+internamente coerente, e é o que o jogador olha.
+
+> **A versão anterior dizia "armadura em %, acessório em cheio"** e não fechava: obrigava a Arma, cujo
+> principal é `ATK cheio`, a ter subs em percentual. O corte por forma do slot resolve isso e mantém
+> a razão original intacta.
 
 **Esta divisão existe por um motivo de INTERFACE, não de balanço.** Se `ATK` e `ATK%` pudessem sair
 juntos, o jogador escolheria entre duas caras do mesmo stat — e decidir entre elas é uma **conta**, não
 uma escolha. Pior: na forja, duas das três opções seriam a mesma coisa. Separando por peça, **as duas
 formas nunca aparecem lado a lado** e toda opção oferecida é uma coisa diferente das outras.
 
+> **A regra só morde em TRÊS stats.** ATK, HP e DEF são os únicos que têm duas caras. Taxa, Dano
+> Crítico, Velocidade, Precisão e Resistência **existem de um jeito só** — não há "Velocidade%" pra
+> escolher, então elas aparecem iguais em qualquer peça.
+
 **O pool (8):** `ATK%` · `HP%` · `DEF%` · `Taxa Crítica` · `Dano Crítico` · `Velocidade` · `Precisão` ·
-`Resistência`.
+`Resistência`. Nos três slots CHEIOS o trio sai em valor cheio em vez de percentual, e **nos dois
+acessórios são 7: a Velocidade não entra.**
 
 Numa Manopla com **Dano Crítico** de principal, as opções são `Taxa Crítica · ATK% · Velocidade ·
 Precisão · HP% · DEF% · Resistência` — sete coisas **diferentes**, e a decisão vira estratégica:
@@ -1004,6 +1103,18 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - **A curva de nível é CONTÍNUA e vai de 1× a 30×** (`base × (1 + 29(nv−1)/59)`). Declaram-se as
   PONTAS; a taxa por nível é consequência. Só HP/ATK/DEF escalam.
 - **Dano Crítico tem piso de 60%** pra todos — nenhum item pode ser lixo pra um tipo inteiro.
+- **OS PRINCIPAIS DOS 9 SLOTS ESTÃO CALIBRADOS** (§4), no 6★ +20. A **Velocidade tem fonte ÚNICA** (a
+  Bota, +50); os outros quatro especiais têm DUAS, sempre com um acessório de dungeon como segunda.
+- **A proporção Manopla:Pulseira é 2:1** nos dois stats de crítico (50/25 e 100/50). É ela que faz cada
+  degrau custar 5 rolos de sub e pagar +0,50 de multiplicador — **nenhuma opção de luva domina**, que é
+  o defeito conhecido do Raid.
+- **NÃO travar a contribuição das subs de Taxa.** O custo já é a escassez de slot; trava artificial
+  mataria o item duas vezes.
+- **A sub tem a mesma FORMA que o principal do slot** (cheio com cheio, % com %). Acessório não dá
+  Velocidade, nem principal nem sub.
+- **O multiplicador de fase/dificuldade só toca HP/ATK/DEF.** Velocidade, Precisão e Resistência não
+  escalam com dificuldade — e como inimigo não tem item, é isso que permite calibrar o eixo de efeito
+  de uma vez pro jogo inteiro. *(Em aberto, como pensamento: talvez algo disso mude em BOSS.)*
 - **Velocidade não escala com nível** — vem de equipamento (só +5 do nv 1 ao 60, por tipo).
 - **Subestatísticas iguais** no drop e na evolução; nenhum privilégio de nascença pro drop.
 - **Duas barras** (estrela e raridade), mesma fonte, ritmos próprios — não é escolha de investimento.

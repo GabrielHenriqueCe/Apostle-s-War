@@ -38,10 +38,25 @@ o stat mais forte que existe; se o nível a empurrasse junto com HP/ATK/DEF, o a
 dominaria os dois eixos ao mesmo tempo e não haveria calibragem que salvasse. Deixando-a no
 equipamento ela vira **escolha de build**, e não consequência de investimento.
 
-**A base vem do TIPO e mexe pouco:** `+1 a cada 10 níveis`, do Guardião (85 → 90) ao Atirador
-(110 → 115). Uma faixa de ~28% — pequena o bastante pra não decidir a luta sozinha, grande o bastante
-pra ser identidade. **A Velocidade fica FORA da variação por facção** (§2): sendo o stat que decide
-quem joga, uma facção com bônus nela domina todas as outras.
+**A base vem do TIPO e mexe pouco** — **+5 no total** entre o nv 1 e o nv 60, e nada mais:
+
+| tipo | nv 1 | nv 60 |
+|---|--:|--:|
+| Guardião | 85 | 90 |
+| Combatente | 95 | 100 |
+| Suporte | 105 | 110 |
+| Atirador | 110 | 115 |
+
+Uma faixa de ~28% — pequena o bastante pra não decidir a luta sozinha, grande o bastante pra ser
+identidade. **A Velocidade fica FORA da variação por facção** (§2): sendo o stat que decide quem
+joga, uma facção com bônus nela domina todas as outras.
+
+> **CUIDADO que vem do DD, e ele inverte a intuição.** No Darkest Dungeon a ordem do turno é
+> `Velocidade + d8`, **rolado a cada rodada** — por isso a faixa apertada deles funciona: o dado
+> domina e o lento tem chance real toda rodada. **A nossa barra é o modelo Raid, e é
+> DETERMINÍSTICA.** 90 contra 115 não é "provavelmente antes", é **sempre** antes, e a diferença se
+> acumula rodada após rodada. Copiar amplitude estreita pra dentro de um sistema sem dado dá o pior
+> dos dois mundos: parece pouca diferença na ficha e é diferença absoluta na luta.
 
 > **Onde ela é balanceada:** na tabela de itens. **Principal exclusivo da Bota**, e **sub em valor
 > cheio** nas outras peças — assim existe o endgame de montar velocidade, e a Bota é o grande prêmio
@@ -222,9 +237,90 @@ monta neles.** E **cada facção/capítulo tem um de cada tipo** — quatro apó
 multiplicadores das habilidades". A bancada também fica legível, porque a variação que ela mede passa
 a ser **só de kit**.
 
-> **Não é reescrita, é consolidação — os stats atuais já vivem numa grade:**
-> `HP 600·800·1000·1200·1400` (passo 200) e `ATK/DEF 120·160·200·240·280` (passo 40). Cada apóstolo já
-> escolheu um degrau; a mudança é fixar 4 degraus em vez de 36 pontos soltos.
+> **A grade atual foi DESCARTADA** (decisão do Gabriel, ago/2026). Chegou-se a considerar consolidar
+> os degraus de hoje (`HP 600…1400`, `ATK/DEF 120…280`), mas eles foram escritos contra um jogo sem
+> progressão e sem os stats novos. Os números abaixo nascem do zero, calibrados do TOPO.
+
+#### A TABELA — calibrada do nv 60 pra trás
+
+O método é do Gabriel: **crava o topo e deriva o resto.** O nv 60 é o teto do mítico (§3), então é a
+ficha que o jogo inteiro tem de servir; o nv 1 é ela dividida por 30.
+
+**nv 60 — mítico, ZERO item:**
+
+| tipo | pos | HP | ATK | DEF | Vel | Precisão | Resist. | Taxa Crít. | Dano Crít. |
+|---|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| **Guardião** | 1–2 | **30.000** | 510 | **1.500** | 90 | 50 | 120 | 5% | 60% |
+| **Combatente** | 1–2 | 25.200 | 1.350 | 1.200 | 100 | 80 | 90 | **25%** | **90%** |
+| **Suporte** | 3–4 | 20.100 | 810 | 960 | 105 | **150** | **150** | 10% | 70% |
+| **Atirador** | 3–4 | 15.000 | **1.500** | 510 | **115** | 120 | 50 | 15% | 80% |
+
+**nv 1 — a mesma ficha ÷ 30:**
+
+| tipo | pos | HP | ATK | DEF | Vel | Precisão | Resist. | Taxa Crít. | Dano Crít. |
+|---|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| Guardião | 1–2 | 1.000 | 17 | 50 | 85 | 50 | 120 | 5% | 60% |
+| Combatente | 1–2 | 840 | 45 | 40 | 95 | 80 | 90 | 25% | 90% |
+| Suporte | 3–4 | 670 | 27 | 32 | 105 | 150 | 150 | 10% | 70% |
+| Atirador | 3–4 | 500 | 50 | 17 | 110 | 120 | 50 | 15% | 80% |
+
+**A REGRA QUE GOVERNA A TABELA: cada tipo é PRIMEIRO em dois stats e ÚLTIMO em algum.**
+
+| stat | dono |
+|---|---|
+| HP · DEF | **Guardião** |
+| Taxa Crítica · Dano Crítico | **Combatente** |
+| Precisão · Resistência | **Suporte** |
+| ATK · Velocidade | **Atirador** |
+
+Isso não é enfeite — é o critério de aceitação. **A primeira versão desta tabela foi rejeitada por
+ser uma RAMPA**: cada stat deslizava de Guardião até Atirador, e o Suporte caía em 3º lugar de tudo,
+sem vantagem nenhuma. Se uma revisão futura deixar um tipo sem primeiro lugar, ela quebrou a regra.
+
+**Os dois tipos de DANO não são um degrau, são formatos diferentes.** O dano médio por pancada sai
+quase idêntico — Atirador `1.500 × (1 + 0,15 × 0,80) = 1.680`, Combatente
+`1.350 × (1 + 0,25 × 0,90) = 1.654` — mas o Atirador entrega dano REGULAR e o Combatente entrega
+dano IRREGULAR com picos. O que os separa de verdade é o resto da ficha: o Combatente tem 10.000 HP
+e 690 DEF a mais; o Atirador tem 15 de Velocidade a mais (≈15% mais turnos) e alcança o fundo pela
+habilidade. **Um sobrevive, o outro age mais vezes e chega mais longe.**
+
+> **Por que a Taxa Crítica é vantagem de verdade** (observação do Gabriel): ela é o **único stat com
+> teto duro**. Base de taxa não vale "mais crítico", vale **menos item gasto pra chegar aos 100%** —
+> e o que sobra vai pra Dano Crítico. A vantagem é economia de slot, não magnitude.
+>
+> **E o Dano Crítico tem PISO 60% pra todo mundo**, de propósito: abaixo disso, item de dano crítico
+> vira lixo na mão do Guardião e do Suporte, e nenhum item deve ser lixo pra ninguém.
+
+#### A CURVA DE NÍVEL — contínua, de 1× a 30×
+
+```
+stat(nv)  =  base × (1 + 29 × (nv − 1) / 59)
+```
+
+| nível | 1 | 10 | 20 | 30 | 40 | 50 | 60 |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| multiplicador | **1×** | 5,4× | 10,3× | 15,3× | 20,2× | 25,1× | **30×** |
+
+**As duas pontas é que são declaradas; a taxa por nível (`29/59 ≈ 0,49`) cai fora da fórmula
+sozinha** — ninguém a escolhe, e por isso ela não pode divergir das pontas. São ~4,9× por década.
+
+**A curva é CONTÍNUA, não escada** (decisão do Gabriel): sobe todo nível, e não em saltos a cada 10.
+O jogador tem retorno a cada batalha em vez de ficar parado entre marcos.
+
+**Só HP, ATK e DEF escalam com nível.** A Velocidade sobe 5 no total (§1). Precisão, Resistência e os
+dois de crítico **não sobem com nível** — vêm do tipo e do item.
+
+> **Consequência que fecha um buraco:** como o ÷30 é uniforme, a razão HP:ATK é a mesma nas duas
+> pontas, e **a luta dura o mesmo tanto no nv 1 e no nv 60**. Um escalonamento desigual (HP ×20, ATK
+> ×5) faria a luta de fim de jogo ficar 5× mais longa que a inicial sem ninguém ter pedido isso.
+
+> **O que esta tabela AINDA NÃO valida:** os status dos itens não existem (o Gabriel apontou). Como o
+> item multiplica MUITO, nenhum número aqui está provado até a tabela de item existir — em especial a
+> DEF, que precisa dos milhares pra `DEF/(DEF+5000)` ter joelho. O nv 60 base entrega 1.500 de DEF ao
+> Guardião (23% de redução); é o item que leva isso pra faixa dos 50–60%.
+>
+> **E o ATK 17 do Guardião no nv 1 é de propósito** — ele é inofensivo. Se algum dia ele precisar
+> matar alguma coisa sozinho no começo do jogo, é esse o número a subir.
 
 **O erro fica grande e visível, e isso é bom:** um Guardião mal calibrado estraga 9 apóstolos de uma vez
 — mas é **um** erro, em **um** lugar, consertável com **um** número. Vence nove erros dispersos que só
@@ -902,7 +998,13 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - Não tentar impedir save editado — tornar inútil, não impossível.
 - **O apóstolo não tem estrela.** A raridade é o teto de nível dele.
 - **Stat base é do tipo**, não do apóstolo; o nível sobe por **curva do tipo**, sem pontos distribuíveis.
-- **Velocidade não escala com nível** — vem de equipamento.
+- **A TABELA DE STATS BASE dos 4 tipos está calibrada** (§2) — do nv 60 pra trás, com a grade antiga
+  descartada. Critério de aceitação: **cada tipo é 1º em dois stats**. Guardião HP/DEF · Combatente
+  os dois de crítico · Suporte Precisão/Resistência · Atirador ATK/Velocidade.
+- **A curva de nível é CONTÍNUA e vai de 1× a 30×** (`base × (1 + 29(nv−1)/59)`). Declaram-se as
+  PONTAS; a taxa por nível é consequência. Só HP/ATK/DEF escalam.
+- **Dano Crítico tem piso de 60%** pra todos — nenhum item pode ser lixo pra um tipo inteiro.
+- **Velocidade não escala com nível** — vem de equipamento (só +5 do nv 1 ao 60, por tipo).
 - **Subestatísticas iguais** no drop e na evolução; nenhum privilégio de nascença pro drop.
 - **Duas barras** (estrela e raridade), mesma fonte, ritmos próprios — não é escolha de investimento.
 - A barra é do **item**, não do apóstolo.

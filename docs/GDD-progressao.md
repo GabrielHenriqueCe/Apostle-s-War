@@ -778,6 +778,85 @@ dele. Se zerasse, a sub que veio aprimorada viraria intocável por acidente — 
 > reforjar não a redistribui. Um `(5,0,0,0)` é um achado; reforjar deixa você pôr a sub que quiser no
 > slot gordo. Quem escolhe o slot é o RNG — **decisão fechada**.
 
+### A ESCALA — estrela × nível, e a trava que impede a sub de passar o principal
+
+Os valores da tabela dos 9 slots são o **teto: 6★ +20**. Daí pra baixo:
+
+```
+principal  =  MÁXIMO  × fatorEstrela × fatorNível
+sub        =  UNIDADE × fatorEstrela × nº de aprimoramentos naquele slot
+
+fatorEstrela   1★ 25%   2★ 40%   3★ 55%   4★ 70%   5★ 85%   6★ 100%
+fatorNível     40% no +0, +3% por nível, 100% no +20
+
+               a estrela vale 4×    ·    o nível vale 2,5×
+```
+
+**A raridade não multiplica nada** — ela **trava** o nível e a contagem de aprimoramento, e é o nível
+que multiplica. Três eixos, dois multiplicadores. Onde cada raridade para:
+
+| raridade | teto de nível | fator do principal | unidades de sub |
+|---|--:|--:|--:|
+| comum | +4 | 52% | 0 |
+| incomum | +9 | 67% | 1 |
+| raro | +14 | 82% | 2 |
+| épico | +19 | 97% | 3 |
+| lendário | +20 | 100% | 4 |
+| mítico | +20 | 100% | **5** |
+
+> **Unidade de sub = aprimoramento**, um pra um. O `(5)` do mítico é a 5ª unidade caindo toda no mesmo
+> slot — e é **a única coisa** que separa um mítico de um lendário, já que o principal empata em 100%
+> nos dois. **Esse bônus não cai no drop, só se conquista evoluindo**, e é ele que dá razão pra rota do
+> item fraco existir (§A EVOLUÇÃO).
+
+**A TRAVA: a sub escala pela ESTRELA, nunca pelo NÍVEL.** O nível só acrescenta unidades; quem muda o
+valor de cada unidade é a estrela — a mesma que move o principal. Por isso a razão entre os dois é fixa:
+
+```
+                       principal    sub máx (5 un.)    razão
+6★ +20                    100%           50%            50%
+6★  +0                     40%           10%            25%
+1★ +20                     25%          12,5%           50%
+1★  +0                     10%           2,5%           25%
+```
+
+**O pior caso é sempre 50%**, em qualquer estrela e qualquer nível. Se a sub escalasse por nível em vez
+de estrela, um `1★ +20` teria principal a 25% e sub a 25% — **empate**, e a peça deixaria de ter dono.
+
+**A grade do principal** (para um máximo de 100%; os outros stats são a mesma grade vezes o máximo deles):
+
+| | +0 | +5 | +10 | +15 | +20 |
+|---|--:|--:|--:|--:|--:|
+| **1★** | 10,00 | 13,75 | 17,50 | 21,25 | 25,00 |
+| **2★** | 16,00 | 22,00 | 28,00 | 34,00 | 40,00 |
+| **3★** | 22,00 | 30,25 | 38,50 | 46,75 | 55,00 |
+| **4★** | 28,00 | 38,50 | 49,00 | 59,50 | 70,00 |
+| **5★** | 34,00 | 46,75 | 59,50 | 72,25 | 85,00 |
+| **6★** | 40,00 | 55,00 | 70,00 | 85,00 | **100,00** |
+
+**Um `6★ +0` (40%) vale mais que um `1★ +20` (25%).** A estrela pesa mais que o nível inteiro — é ela
+que se persegue primeiro, e é o que a torna o eixo caro.
+
+> **A ficha mostra DUAS CASAS DECIMAIS** (decisão do Gabriel). Os números não fecham redondo — com 9
+> stats e dois eixos, qualquer rampa produz decimal em algum cruzamento — e **esconder a casa é pior
+> que mostrá-la**: é o defeito conhecido do Raid, onde a ficha arredonda e o jogador lê `100%` estando
+> em 99,6%. Como a Taxa Crítica é o único stat com teto duro e a build inteira gira em torno de fechar
+> exatamente esse teto, arredondar esconderia justo o número que precisa ser conferido.
+
+**A jornada de uma peça, do drop ao topo** — uma Manopla de Dano Crítico (máximo 100%):
+
+| etapa | principal | subs | o que mudou |
+|---|--:|---|---|
+| 1★ comum +0 | 10,00% | — | o drop |
+| 1★ comum +4 | 13,00% | — | teto do comum |
+| 3★ comum +4 | 28,60% | — | duas estrelas |
+| 3★ raro +14 | 45,10% | Taxa (1) 2,75% · ATK% (1) 2,75% | a raridade abriu +5 níveis e 2 subs |
+| 5★ épico +19 | 82,45% | Taxa 4,25% · ATK% 4,25% · Vel 4,25 | **as subs subiram sem aprimoramento** — só pela estrela |
+| 6★ lendário +20 | 100,00% | Taxa 5% · ATK% 5% · Vel 5 · Prec 13 | principal no teto |
+| 6★ mítico +20 | 100,00% | **Taxa (2) 10%** · ATK% 5% · Vel 5 · Prec 13 | só a 5ª unidade — o principal não muda |
+
+**O principal cresce 10× do drop ao topo**, e o item sai de zero a nove pontos de subestatística.
+
 ### O drop
 
 - **Item sempre cai**, mas a estrela varia: 1–3★ Fácil · 2–4★ Normal · 3–5★ Difícil · 4–6★ Pesadelo.
@@ -1112,6 +1191,13 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
   mataria o item duas vezes.
 - **A sub tem a mesma FORMA que o principal do slot** (cheio com cheio, % com %). Acessório não dá
   Velocidade, nem principal nem sub.
+- **A ESCALA é `MÁXIMO × estrela × nível`** (§4). Estrela `25→100%`, nível `40→100%`. A **raridade não
+  multiplica** — ela trava o nível e a contagem de aprimoramento.
+- **A sub escala pela ESTRELA, nunca pelo nível** — é o que trava a sub em, no máximo, **metade** do
+  principal em qualquer combinação. Se escalasse por nível, um `1★ +20` empataria os dois.
+- **Unidade de sub = aprimoramento**, um pra um. O `(5)` do mítico é o bônus que **só a evolução dá**.
+- **A ficha mostra 2 CASAS DECIMAIS.** Arredondar esconderia justo a Taxa Crítica perto do teto, que é
+  o número que o jogador mais precisa conferir — é o defeito conhecido do Raid.
 - **O multiplicador de fase/dificuldade só toca HP/ATK/DEF.** Velocidade, Precisão e Resistência não
   escalam com dificuldade — e como inimigo não tem item, é isso que permite calibrar o eixo de efeito
   de uma vez pro jogo inteiro. *(Em aberto, como pensamento: talvez algo disso mude em BOSS.)*

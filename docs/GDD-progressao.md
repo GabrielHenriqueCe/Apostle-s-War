@@ -619,9 +619,9 @@ de a proporção ser a mesma nos dois stats. Por isso **nenhuma linha domina**: 
 
 #### PRECISÃO E RESISTÊNCIA — e por que 250 basta
 
-**O multiplicador de fase/dificuldade incide SÓ em HP/ATK/DEF.** Velocidade, Precisão e Resistência
-**não escalam com dificuldade** — nem do lado do jogador nem do inimigo. E como inimigo não tem item
-(§5), a Resistência dele fica presa na base do tipo, **50–150, no jogo inteiro**.
+**O crescimento do inimigo é NÍVEL (§5), e o nível só toca HP/ATK/DEF.** Velocidade, Precisão e
+Resistência **não escalam** — nem do lado do jogador nem do inimigo. E como inimigo não tem item (§5),
+a Resistência dele fica presa na base do tipo, **50–150, no jogo inteiro**.
 
 Isso torna esses dois os **únicos stats que dá pra calibrar de uma vez pro jogo todo**, e a conta fecha:
 
@@ -862,8 +862,17 @@ que se persegue primeiro, e é o que a torna o eixo caro.
 - **Item sempre cai**, mas a estrela varia: 1–3★ Fácil · 2–4★ Normal · 3–5★ Difícil · 4–6★ Pesadelo.
 - **O item é FIXO por fase**, como já é hoje — a arma na 1-1, e cada fase com a peça dela. O que varia
   no drop é estrela e raridade, não qual item cai.
-- **A quantidade CRESCE ao longo do capítulo**, e a **fase 7 dropa mais itens e de todos os tipos** —
-  além de dar mais XP. É ela que dá motivo pra farmar a fase mais difícil.
+- **CADA FASE DROPA SÓ O SLOT DELA — inclusive a 7.** Sete fases, sete peças de armadura: encaixe
+  exato, e **as sete ficam vivas o jogo inteiro**. Quem quer Manopla vai na 4, e não há atalho.
+- **O que a fase difícil paga é XP, não variedade.** A quantidade cresce ao longo do capítulo e a
+  fase 7 dá mais XP — a 8-7 é a que mais dá no jogo. **É esse o motivo de farmar a fase difícil**, e
+  ele não compete com o item: você escolhe entre *a peça que falta* e *o nível que falta*.
+
+> **A fase 7 dropava "todos os tipos" e isso foi revogado.** Ela existia pra sustentar o sacrifício do
+> mesmo conjunto (§A FORJA): a Arma do Reino só cai na Reino 1-1, e *"a 1-1 é fácil demais pra ser
+> fonte de mítico"*. **Aquela justificativa estava errada** — quem gateia raridade é a **dificuldade**,
+> não a fase (ver a tabela de estrelas acima). A Reino 1-1 no **Pesadelo** é fonte legítima de mítico,
+> e o sacrifício se alimenta lá. Com a variedade fora da 7, ela deixa de ser a única fase que importa.
 - **A raridade pode ser QUALQUER uma, em qualquer dificuldade** — o que muda é a CHANCE. No Pesadelo
   cai de mítico a comum; mítico é só muito mais raro.
 - **A única trava do drop é a estrela: `raridade ≤ estrela`** (comum 1 … mítico 6).
@@ -979,9 +988,13 @@ Subir a raridade custa **sacrificar outros itens**, e o sacrifício é o que dec
   raridade alvo mataria a razão de existir da forja: quem tem épico não precisa fabricar épico.
 
 > **É essa regra que decide ONDE se farma**, e ela aperta por dois lados ao mesmo tempo: o material
-> tem de ser a mesma PEÇA e do mesmo CAPÍTULO. Evoluir a arma do Reino manda você de volta ao Reino, e
-> a 1-1 é fácil demais pra ser a fonte de míticos. **Quem paga a conta é a fase 7 daquele capítulo**,
-> que dropa todos os tipos dele — o volume existe, mas na fase mais difícil.
+> tem de ser a mesma PEÇA e do mesmo CAPÍTULO. Evoluir a arma do Reino manda você de volta à **Reino
+> 1-1**, que é a única fonte de arma do Reino (§O drop).
+>
+> **E o preço não é a fase, é a DIFICULDADE.** Chegou-se a escrever que *"a 1-1 é fácil demais pra ser
+> fonte de mítico"*, e foi por isso que a fase 7 ganhou a variedade — **a justificativa estava errada**:
+> quem gateia raridade é a dificuldade, e a Reino 1-1 no **Pesadelo** é fonte legítima de mítico. Fase
+> curta não é fase barata.
 - **As subestatísticas dos sacrificados viram o POOL**: a forja oferece **3 opções** e você escolhe 1.
   Se o pool não tiver o bastante, completa com aleatórias dentro das regras de sub.
 - **Dá pra RECUSAR.** Recusar mantém o item exatamente como estava e **queima o material do mesmo
@@ -1000,8 +1013,8 @@ Subir a raridade custa **sacrificar outros itens**, e o sacrifício é o que dec
 
 **O N de uma tentativa tem de ser pequeno** (chute inicial: 2–3 no primeiro degrau, subindo pouco).
 Quem gasta dez vezes isso gastou **por escolha**, perseguindo a sub — e aposta voluntária é conteúdo,
-enquanto obrigação é fazenda. **O volume vem da fase 7**, que dropa mais itens e de todos os tipos —
-então o material tem preço (é a fase mais difícil do capítulo) sem obrigar a repetir a fase 1 cem
+enquanto obrigação é fazenda. **O material sai da fase da própria peça, na dificuldade mais alta que
+você aguenta** — é aí que ele tem preço, sem obrigar a repetir a fase 1 cem
 vezes. **Se o número obrigar a repetir fase curta, virou imposto — baixar.**
 
 > **Efeito colateral a vigiar:** com mais volume E mais variedade, a fase 7 domina e as fases 1–6 viram
@@ -1091,34 +1104,115 @@ imposto de tempo.
 ## 5. CAMPANHA
 
 - **Ao criar a conta o jogador escolhe UM dos 4 humanos**, em vez de receber os quatro.
-- **A partir do capítulo 2, toda fase é contra 4 inimigos** — acaba o crescente.
-- **O apóstolo continua caindo GARANTIDO na fase dele.** A ordem de descoberta por fase fica como está
-  — ela vale mais que a uniformidade, e sem "chance" some junto a pergunta "e se cair de novo?".
+- **O apóstolo continua caindo GARANTIDO na fase dele.** Sem "chance" some junto a pergunta "e se cair
+  de novo?".
 - **A tela precisa mostrar o que pode ser obtido em cada fase** (apóstolos e itens).
 
-### A fase 1 entrega DOIS apóstolos — e é só uma linha pra consertar
+### A COMPOSIÇÃO DAS FASES — o Fácil descobre, o resto reorganiza
 
-`ApostlesWar.Domain/Models/Campanha.cs:12` monta a fase 1 como `Rodada1 = [Slot1]` e
-`Rodada2 = [Slot2]`, e o `DesbloquearApostolos` varre as duas rodadas. **Deixar as duas iguais**
-(`[Slot1]` / `[Slot1]`) resolve, e não abre buraco nenhum — os outros slots já aparecem sozinhos
-adiante:
+**A descoberta um-por-um existe SÓ no Fácil.** Nas outras dificuldades você já conhece os quatro, então
+são sempre quatro inimigos. Isso mata a regra antiga (*"a partir do capítulo 2, toda fase é contra 4
+inimigos"*), que resolvia pelo capítulo o que na verdade é por **dificuldade**.
 
-```
-fase 1 → Slot1     fase 2 → Slot2     fase 3 → Slot3     fase 7 → Slot4
-```
+`G` Guardião · `C` Combatente (frente, posições 1–2) · `A` Atirador · `S` Suporte (fundo, 3–4).
+Como **cada facção tem um de cada tipo**, a tabela se escreve por PAPEL e a posição vem do que o
+apóstolo é.
+
+**FÁCIL — a facção se junta, depois se reorganiza:**
+
+| | | pos 1 | pos 2 | pos 3 | pos 4 | estreia |
+|---|---|:-:|:-:|:-:|:-:|---|
+| **FASE 1** | r1 | · | C | · | · | **C** |
+| | r2 | C | · | · | · | |
+| **FASE 2** | r1 | C | · | · | · | **G** |
+| | r2 | G | C | · | · | |
+| **FASE 3** | r1 | G | C | · | · | **A** |
+| | r2 | G | C | A | · | |
+| **FASE 4** | r1 | G | C | A | · | **S** |
+| | r2 | G | C | A | S | |
+| **FASE 5** | r1 | G | C | A | S | — |
+| | r2 | C | C | A | S | |
+| **FASE 6** | r1 | C | C | A | S | — |
+| | r2 | G | C | S | S | |
+| **FASE 7** | r1 | G | C | S | S | — |
+| | r2 | G | C | A | S | |
+
+**NORMAL · DIFÍCIL · PESADELO — sempre quatro:**
+
+| | | pos 1 | pos 2 | pos 3 | pos 4 | a formação É |
+|---|---|:-:|:-:|:-:|:-:|---|
+| **FASE 1** | r1 · r2 | G | C | A | S | o padrão |
+| **FASE 2** | r2 | G | C | A | A | dois atiradores |
+| **FASE 3** | r2 | G | G | A | S | a muralha |
+| **FASE 4** | r2 | C | C | A | S | dois combatentes |
+| **FASE 5** | r2 | G | C | S | S | dois suportes |
+| **FASE 6** | r2 | C | C | A | A | sem guardião — corrida |
+| **FASE 7** | r2 | G | C | A | S | o time perfeito, no topo |
+
+> **A rodada 1 de cada fase repete a rodada 2 da anterior.** Cada formação é vista duas vezes — como
+> aquecimento no fim de uma fase e como tema da seguinte. Dá pra aprender a resposta antes de ela
+> virar o problema, e amarra as sete fases numa sequência em vez de sete lutas soltas.
+
+**AS DUAS REGRAS QUE GOVERNAM AS TABELAS:**
+
+1. **Ninguém fica FORA DE POSIÇÃO, em fase nenhuma.** Todo `G`/`C` na 1 ou 2, todo `A`/`S` na 3 ou 4 —
+   sempre com o kit funcionando inteiro. **A variedade vem da COMPOSIÇÃO, não do desalinho:** dois
+   guardiões é uma muralha, dois combatentes é dano sem parede, dois suportes é uma luta que não
+   acaba. Cada formação é um problema diferente, e nenhuma é "o mesmo inimigo mal arrumado".
+2. **A estreia é sempre na rodada 2.** A rodada 1 é com quem você já conhece; a 2 apresenta o novo.
+
+> **O time completo fecha na FASE 4, não na 7.** A primeira versão desta tabela dava o Suporte só na
+> última rodada do capítulo — ele aparecia **uma vez na vida**, e as fases 5–7 eram a mesma luta com
+> nível maior. Puxando as estreias pra frente, o Suporte aparece em 7 rodadas e o jogador **joga
+> metade do capítulo com quatro apóstolos** em vez de receber o quarto quando o capítulo acabou.
+
+> **Isto corrige o bug de a fase 1 entregar DOIS apóstolos.** `Campanha.cs:12` monta a fase 1 como
+> `[Slot1]` / `[Slot2]` e o `DesbloquearApostolos` varre as duas rodadas — por isso saem dois.
+
+> **⏳ EM ABERTO — o que acontece quando alguém MORRE.** O doc define de onde se usa e quem se alcança,
+> mas não o que fazer com o buraco. Sem regra, **a luta trava**: se sobra um Combatente meu (alcança
+> 1–2) contra um Atirador na posição 4, ninguém encosta em ninguém. A proposta é o modelo do DD —
+> **as fileiras COMPACTAM** (morreu o da 1, todos deslizam pra frente), mais o **⚔️ Atacar como piso
+> universal** (usa de qualquer posição, alcança 1–2). Aí o travamento é impossível por construção, e
+> de quebra derrubar a frente **arrasta o fundo** pra dentro do alcance — podendo desligar o kit dele
+> no caminho, sem você ter tocado nele. **Não decidido: fica pro estudo das posições.**
 
 ### Os inimigos não têm itens — e isso resolve a calibragem
 
-Ideia do Gabriel: o inimigo pode ser **nível 250 com muito mais vida e status**, e o jogador vence por
-**velocidade e sinergia de time**, não por status bruto.
+**O inimigo escala por NÍVEL, e o multiplicador de fase MORRE.** Decisão do Gabriel: nada de
+`0,5×capítulo + 0,1×fase` multiplicando status. O inimigo usa a **mesma curva de nível do jogador**
+(§2) sobre a mesma tabela de tipo — **uma fórmula só pros dois lados**, e some a armadilha das "duas
+cópias de um número" que o multiplicador criava.
 
-> **Cuidado:** mostrar o nível ao jogador é bom (comunica ameaça), mas a conta deve continuar sendo
-> **multiplicador de status**, não um nível de verdade. Duas fórmulas de poder pra manter em acordo
-> divergem — é a mesma armadilha de "duas cópias de um número".
+> O doc antes alertava pra manter a conta como multiplicador e **não** como nível de verdade. Vale o
+> contrário: é justamente ser nível de verdade que garante que jogador e inimigo nunca divirjam.
 
-**A dificuldade só pode ser calibrada DEPOIS disto.** A fórmula atual (`1,75×dif + 0,5×cap + 0,1×fase`)
-multiplica o inimigo contra um jogador que **não tinha progressão**. Com nível, raridade e o
-equipamento do apóstolo, o jogador cresce também — a curva tem que ser desenhada contra as duas.
+**A CALIBRAGEM, medida em simulação (ago/2026):**
+
+| capítulo | jogador esperado | equipado | **nível do inimigo** |
+|--:|--:|---|--:|
+| 1 | nv 8 | comum 1★ | **15** |
+| 2 | nv 15 | comum 2★ | **27** |
+| 3 | nv 22 | incomum 2★ | **42** |
+| 4 | nv 29 | incomum 3★ | **59** |
+| 5 | nv 36 | raro 3★ | **81** |
+| 6 | nv 43 | raro 4★ | **107** |
+| 7 | nv 50 | épico 4★ | **143** |
+| 8 | nv 60 | épico 5★ | **186** |
+
+**A regra que sobrevive aos números: o inimigo vale ~2× o nível do jogador no começo e ~3× no fim.** E
+a razão sobe **porque o item do jogador cresce** — o inimigo não tem item, então precisa de nível extra
+pra compensar o equipamento. É o mesmo fato de outro jeito: *não tem problema o inimigo ser muito mais
+forte depois que eu começar a me equipar*.
+
+> **O chute do Gabriel foi "nível 250" e a conta 1×1 deu 254.** O 4×4 — que é o jogo de verdade —
+> baixou pra 186, porque o Guardião e o Suporte puxam o dano do time pra baixo. **Fica o 186**; o 254
+> serve como instrumento barato: o 1×1 acerta a FORMA da curva e erra a escala por um fator estável de
+> `0,70`, então dá pra usá-lo pra ver o efeito de um número sem rodar o time inteiro.
+>
+> **O que a simulação NÃO tinha:** habilidade nenhuma, cura nenhuma, e as posições fora da conta. Os
+> dois lados perdem o mesmo, então a forma deve sobreviver — **a escala não**. Estes níveis vão mudar
+> quando as habilidades entrarem, e provavelmente pra CIMA, porque o jogador é quem escolhe o time.
 
 ---
 
@@ -1198,9 +1292,18 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - **Unidade de sub = aprimoramento**, um pra um. O `(5)` do mítico é o bônus que **só a evolução dá**.
 - **A ficha mostra 2 CASAS DECIMAIS.** Arredondar esconderia justo a Taxa Crítica perto do teto, que é
   o número que o jogador mais precisa conferir — é o defeito conhecido do Raid.
-- **O multiplicador de fase/dificuldade só toca HP/ATK/DEF.** Velocidade, Precisão e Resistência não
-  escalam com dificuldade — e como inimigo não tem item, é isso que permite calibrar o eixo de efeito
-  de uma vez pro jogo inteiro. *(Em aberto, como pensamento: talvez algo disso mude em BOSS.)*
+- **O INIMIGO ESCALA POR NÍVEL, não por multiplicador** (§5) — mesma curva e mesma tabela de tipo do
+  jogador, uma fórmula só pros dois lados. Calibrado em **~2× o nível do jogador no começo, ~3× no
+  fim** (cap 1 ≈ nv 15 · cap 8 ≈ nv 186). O `0,5×cap + 0,1×fase` está morto.
+- **Nível só toca HP/ATK/DEF.** Velocidade, Precisão e Resistência não escalam — e como inimigo não tem
+  item, é isso que permite calibrar o eixo de efeito de uma vez pro jogo inteiro. *(Em aberto, como
+  pensamento: talvez algo disso mude em BOSS.)*
+- **A descoberta um-por-um existe SÓ no Fácil**; nas outras dificuldades são sempre 4 inimigos. Morre
+  a regra antiga do *"4 inimigos a partir do capítulo 2"*, que resolvia por capítulo o que é por
+  dificuldade. As duas tabelas de composição estão no §5.
+- **Ninguém fica fora de posição em fase nenhuma** — a variedade vem da COMPOSIÇÃO (dois guardiões,
+  dois suportes…), não do desalinho. E a estreia de um apóstolo é sempre na **rodada 2**.
+- **Cada fase dropa SÓ o slot dela**, inclusive a 7. O que a fase difícil paga é **XP**.
 - **Velocidade não escala com nível** — vem de equipamento (só +5 do nv 1 ao 60, por tipo).
 - **Subestatísticas iguais** no drop e na evolução; nenhum privilégio de nascença pro drop.
 - **Duas barras** (estrela e raridade), mesma fonte, ritmos próprios — não é escolha de investimento.
@@ -1234,4 +1337,7 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 | *"fusão com semente"* | **sacrifício da raridade atual** alimentando 3 opções de sub | o sacrifício dá custo, liga o drop à evolução e ainda decide as opções |
 | *"subir estrela não zera o nível"* | **subir raridade** não zera o nível | o apóstolo perdeu a estrela; some uma exceção, porque essa já era a regra do item |
 | *"apóstolo tem chance de cair"* | cai **garantido** | apaga junto a pergunta "e se cair de novo?" |
-| *"a ordem dos inimigos nas fases muda"* | fica como está | a descoberta por fase vale mais que a uniformidade |
+| *"a ordem dos inimigos nas fases muda"* | **a composição foi redesenhada** (§5) | com posição e tipo, quem está em cada casa passou a significar algo — a tabela velha era arbitrária |
+| *"a partir do capítulo 2, toda fase é contra 4 inimigos"* | **só o Fácil descobre um por vez**; Normal+ é sempre 4 | resolvia por CAPÍTULO o que é por DIFICULDADE — nas outras você já achou todos |
+| *"a fase 7 dropa mais itens e de TODOS os tipos"* | cada fase dropa **só o slot dela**; a 7 paga em **XP** | a variedade na 7 fazia as outras seis morrerem depois de uma passada |
+| *"o inimigo é `0,5×cap + 0,1×fase` de status"* | o inimigo tem **NÍVEL**, na mesma curva do jogador | o multiplicador foi escrito contra um jogador sem progressão; e duas fórmulas de poder divergem |

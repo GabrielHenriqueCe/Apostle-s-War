@@ -509,8 +509,8 @@ raridade, em vez de reescrever cada habilidade.
 > `(1)`…`(5)` ao lado de cada sub. Antes o doc chamava a forja de "nível" e o uso de "barra de uso" —
 > **trocado**, e a troca confundia porque nível do item e nível do apóstolo funcionavam ao contrário.
 
-> **São DOIS NÍVEIS, não um** — um pra estrela e um pra raridade, mesma fonte (uso em combate) e
-> ritmos diferentes. Ver §A EVOLUÇÃO.
+> **UM NÍVEL SÓ, e ele dá a estrela.** A raridade não tem trilha própria — ela vem de ATOS (sacrifício
+> + marco + `raridade ≤ estrela`). Ver §A EVOLUÇÃO.
 
 > **O marco é o mesmo para os dois** — vencer a fase de origem do item naquela dificuldade destrava
 > estrela **e** raridade, no teto daquela dificuldade. Uma condição, dois eixos.
@@ -920,35 +920,86 @@ sentimentalismo e vira a decisão correta.
 > evoluiu escolheu 1 entre 3 em **cada degrau**, gastando raro/épico/lendário (barato); quem dropou
 > chegou cedo com 4 subs aleatórias e precisa da forja de **míticos** pra consertar cada uma (caro).
 
-**DOIS NÍVEIS, uma fonte.** Estrela e raridade têm **nível próprio**, e os dois sobem ao mesmo tempo
-pelo mesmo uso, em ritmos diferentes — **o de raridade é bem mais lento**. Não é escolha de
-investimento: como a estrela é o teto da raridade, investir em raridade primeiro seria sempre errado, e
-escolha em que uma opção domina só pune quem não leu o wiki.
+**UM NÍVEL SÓ, e ele entrega a ESTRELA.** A raridade **não tem trilha própria** — ela é destravada por
+ATOS: o sacrifício na forja, o marco da fase, e a trava `raridade ≤ estrela`. Três condições, nenhuma
+delas uma espera.
 
-> **É por isso que se chama NÍVEL.** O apóstolo sobe de nível jogando; o item também. **A simetria é o
-> que corrige a incoerência** — antes o item chamava de "nível" o que se comprava na forja e de "barra"
-> o que se ganhava jogando, exatamente ao contrário do apóstolo.
+> **A versão anterior tinha DUAS barras** e o próprio doc dava o argumento contra: *"não é escolha de
+> investimento — como a estrela é o teto da raridade, investir em raridade primeiro seria sempre
+> errado"*. **Duas trilhas que enchem juntas, da mesma fonte, sem escolha entre elas, são uma trilha
+> só**; a segunda existia pra ser lida na tela.
+>
+> **E a simetria com o apóstolo fecha:** ele sobe de nível **jogando** e sobe de raridade por **missão**
+> — um ato, não uma barra. O item faz igual: nível jogando, raridade por sacrifício e marco.
 
 **O nível é do ITEM, não do apóstolo** — ele viaja quando o item troca de dono. Trocar de portador pausa
 o progresso, nunca destrói.
 
-#### Como o nível sobe
+#### Como o nível sobe — e por que a rodada vale mais onde dói
 
-O nível é de **uso**: ganha por rodada de combate, com o item equipado em alguém em campo.
+O nível é de **uso**: ganha por rodada de combate, com o item equipado em alguém em campo. **E o que
+uma rodada rende depende da dificuldade:**
 
 ```
-por RODADA do combate, com TETO por batalha   →  arrastar a luta não paga
-derrota  = o acumulado                        →  perder também evolui: você usou o item
-vitória  = o acumulado + um BÔNUS fixo        →  vencer domina sempre
+ponto por RODADA      Fácil 1  ·  Normal 2  ·  Difícil 3  ·  Pesadelo 4
+
+custo da estrela      1★→2★    100      dobra a cada degrau
+                      2★→3★    200
+                      3★→4★    400
+                      4★→5★    800
+                      5★→6★  1.600
+
+teto por batalha      arrastar a luta não paga
+derrota = o acumulado · vitória = o acumulado + BÔNUS fixo
 ```
+
+> **O ponto por dificuldade fecha um furo que o teto por batalha não pega.** O teto impede *arrastar*
+> a luta; não impede *repetir a luta curta*. Se a rodada valesse igual em todo lugar, o jeito ótimo de
+> estrelar item seria **repetir a Fácil 1-1**, que acaba em duas rodadas. Com o ponto escalando, jogar
+> onde é difícil é sempre melhor — **e é o mesmo princípio da XP**, que também paga mais na fase dura.
+
+**Quanto cada teto custa de uma passada** (56 fases × ~12 rodadas = 672 rodadas):
+
+| dificuldade | teto | custo do degrau | pontos na passada | % da passada |
+|---|:-:|--:|--:|--:|
+| Fácil | 3★ | 300 | 672 | 45% |
+| Normal | 4★ | 400 | 1.344 | 30% |
+| Difícil | 5★ | 800 | 2.016 | 40% |
+| Pesadelo | 6★ | 1.600 | 2.688 | 60% |
+
+**Nenhum teto exige repetir fase, e nenhum sai de graça** — o mais barato custa 30% de uma passada, o
+mais caro 60%. O último degrau, que é o mais caro do jogo, cabe na metade do Pesadelo: dá pra terminar
+a dificuldade **e** estrelar o conjunto que você escolheu levar.
+
+**E os dois primeiros degraus saem em 2 e 3 fases**, o que é o que impede a coisa de ser maçante: você
+vê estrela subir na primeira sessão, e como o nível é **por peça** com 9 slots, sempre há algo prestes
+a estourar. O degrau caro só aparece depois que você já escolheu o item que quer levar até o fim.
 
 > **Contar rodada, não ação do portador.** Com a barra de velocidade (§1), um apóstolo rápido age o
 > dobro — se ele também evoluísse equipamento ao dobro, a Velocidade viraria duplamente dominante.
 > **Rodada é a unidade que não acopla.**
 >
-> O teto por batalha e o bônus de vitória fecham as duas frestas de exploit (arrastar a luta, perder
-> de propósito) **sem** tirar o progresso de quem tentou a fase acima do nível e perdeu — que é o que
-> faz o jogador continuar arriscando.
+> O teto por batalha e o bônus de vitória fecham as frestas de exploit (arrastar a luta, perder de
+> propósito) **sem** tirar o progresso de quem tentou a fase acima do nível e perdeu — que é o que faz
+> o jogador continuar arriscando.
+
+#### Por que evoluir NÃO atropela o drop
+
+Cada eixo tem fonte própria, e **só um é exclusivo de quem persiste**:
+
+| eixo | vem do DROP? | vem de JOGAR? | vem de PAGAR? |
+|---|:-:|:-:|:-:|
+| **estrela** | ✅ sorteada na faixa da dificuldade | ✅ o nível | — |
+| **raridade** | ✅ sorteada em `[comum..estrela]` | — | ✅ sacrifício |
+| **aprimoramento** | — | — | ✅ forja |
+
+**Estrela e raridade o drop também dá.** No Fácil você chega a 3★ raro evoluindo — e um 3★ raro pode
+cair pronto ali do lado. Evoluir **não é o caminho superior; é o caminho para o item que você quer
+manter.** Quem só quer status veste o que caiu.
+
+**O item evoluído só ganha em APRIMORAMENTO**, o eixo mais lento e o único que nenhum drop entrega. É
+pouco o bastante pra a caixa de surpresa continuar valendo, e o bastante pra o item antigo ter alma —
+que é o *"o mais fraco sempre pode virar o mais forte"* sem matar o drop.
 
 #### Os marcos, e as três travas em cadeia
 
@@ -957,6 +1008,16 @@ Nível cheio é a primeira condição. A segunda é o **marco**, e ele é **por 
 > **O marco de um item é vencer, naquela dificuldade, a FASE DE ORIGEM dele.** Passou a fase 1 do
 > capítulo 1 no Pesadelo → o item da fase 1 do capítulo 1 destrava **6★ e mítico**. No Difícil → 5★ e
 > lendário. Normal → 4★ e épico. Fácil → 3★ e raro. Um marco por item, na fase que é dele.
+
+> **É POR PEÇA, e é isso que impede o destravamento em bloco.** Terminar as 7 fases do capítulo 1 no
+> Normal destrava `4★ épico` para as **7 peças do Reino** e mais nada — as do Lado Sombrio seguem
+> presas no marco do Fácil até você fazer o capítulo 2 no Normal. Vencer uma fase difícil nunca
+> destrava o arsenal inteiro.
+>
+> **E o marco é a ÚNICA coisa que a dificuldade alta dá com exclusividade.** O nível enche em qualquer
+> lugar; depois que o teto subiu, dá pra completar a estrela jogando no Fácil mesmo — só que a rodada
+> lá vale um ponto contra os quatro do Pesadelo. **O caminho fácil existe e é lento, que é como uma
+> escolha deve ser.**
 
 **Isso fecha a cadeia sozinho, sem regra extra.** Pra dropar um item 6★ é preciso vencer aquela fase no
 Pesadelo — e vencer aquela fase **é** o marco. **Não existe item com estrela acima do próprio marco**,
@@ -1308,7 +1369,17 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - **NOMENCLATURA (corrigida, ago/2026):** o que sobe **jogando** é o **NÍVEL** — igual ao apóstolo, e é
   essa simetria que dá o nome. O que sobe **pagando** na forja é o **APRIMORAMENTO** (`+0…+20`), que é
   o `(1)`…`(5)` ao lado da sub. O doc chamava os dois ao contrário.
-- **São DOIS NÍVEIS**, um pra estrela e um pra raridade, mesma fonte e ritmos diferentes.
+- **UM NÍVEL SÓ, e ele dá a ESTRELA.** A raridade não tem trilha: é destravada por ATOS (sacrifício +
+  marco + `raridade ≤ estrela`). A versão de duas barras morreu pelo argumento que o próprio doc já
+  dava — duas trilhas que enchem juntas, da mesma fonte, sem escolha entre elas, são uma trilha só.
+- **A rodada vale mais onde dói:** 1 ponto no Fácil, 2 Normal, 3 Difícil, 4 Pesadelo. Sem isso, o jeito
+  ótimo de estrelar item seria repetir a **Fácil 1-1** — o teto por batalha impede arrastar a luta, não
+  repetir a luta curta.
+- **A estrela custa `100 · 200 · 400 · 800 · 1.600` pontos**, dobrando. Cada teto de dificuldade cabe
+  em 30–60% de uma passada dela: nenhum obriga a repetir fase, nenhum é de graça.
+- **O marco é POR PEÇA** — terminar o capítulo 1 no Normal destrava as 7 peças do Reino e mais nada.
+- **Evoluir não atropela o drop:** estrela e raridade o drop também dá; **só o aprimoramento é
+  exclusivo de quem persiste**.
 - **A ESCALA é `principal = MÁXIMO × estrela`** — só a estrela, `25→100%`. **O aprimoramento NÃO toca
   o principal**; ele entrega unidades de sub. Um `6★ +0` e um `6★ +20` têm o mesmo principal.
 - **A sub escala pela ESTRELA também**, junto com o principal — é o que trava a sub em **metade** do
@@ -1334,7 +1405,7 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - **Cada fase dropa SÓ o slot dela**, inclusive a 7. O que a fase difícil paga é **XP**.
 - **Velocidade não escala com nível** — vem de equipamento (só +5 do nv 1 ao 60, por tipo).
 - **Subestatísticas iguais** no drop e na evolução; nenhum privilégio de nascença pro drop.
-- **Duas barras** (estrela e raridade), mesma fonte, ritmos próprios — não é escolha de investimento.
+- ~~Duas barras (estrela e raridade)~~ — **revogado**: virou UM nível, e a raridade sai de atos.
 - A barra é do **item**, não do apóstolo.
 - **Derrota também progride** a barra; a vitória dá bônus.
 - **Quem escolhe o slot do aprimoramento é o RNG.**
@@ -1369,3 +1440,5 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 | *"a partir do capítulo 2, toda fase é contra 4 inimigos"* | **só o Fácil descobre um por vez**; Normal+ é sempre 4 | resolvia por CAPÍTULO o que é por DIFICULDADE — nas outras você já achou todos |
 | *"a fase 7 dropa mais itens e de TODOS os tipos"* | cada fase dropa **só o slot dela**; a 7 paga em **XP** | a variedade na 7 fazia as outras seis morrerem depois de uma passada |
 | *"o inimigo é `0,5×cap + 0,1×fase` de status"* | o inimigo tem **NÍVEL**, na mesma curva do jogador | o multiplicador foi escrito contra um jogador sem progressão; e duas fórmulas de poder divergem |
+| *"duas barras, uma pra estrela e uma pra raridade"* | **um nível só**; a raridade vem de ATOS (sacrifício + marco) | o próprio doc dizia que não era escolha — duas trilhas que enchem juntas, sem escolha entre elas, são uma trilha só |
+| *"a barra enche por rodada"* (valor único) | a rodada vale **1·2·3·4** por dificuldade | valor único fazia o ótimo ser repetir a Fácil 1-1; o teto por batalha impede arrastar a luta, não repetir a luta curta |

@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.Especial
     public static class Heroi
     {
         public static Personagem Definir() => new(
-            2, Faccao.Especial, "Herói", "🦸", 800, 240, 200,
+            2, Faccao.Especial, "Herói", "🦸", TipoDeApostolo.Suporte,
             SalvandoDia(), Super(), new Vigilante());
 
         static HabilidadeAtiva SalvandoDia() => new(

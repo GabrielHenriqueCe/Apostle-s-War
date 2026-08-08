@@ -19,6 +19,19 @@ namespace ApostlesWar.Domain
 
     public enum Slot { Slot1 = 1, Slot2 = 2, Slot3 = 3, Slot4 = 4 }
 
+    /// <summary>
+    /// O arquétipo do apóstolo, e a ÚNICA fonte do status base dele: dois apóstolos do mesmo tipo
+    /// nascem com a mesma ficha, e o que os separa é o kit e o equipamento. Cada facção tem
+    /// exatamente um de cada. Ver <see cref="Arquetipos"/> e docs/GDD-progressao.md §2.
+    /// </summary>
+    public enum TipoDeApostolo
+    {
+        [Description("Guardião")] Guardiao,
+        [Description("Combatente")] Combatente,
+        [Description("Suporte")] Suporte,
+        [Description("Atirador")] Atirador
+    }
+
     public enum Fases
     {
         [Description("Arma")] Fase1 = 1,

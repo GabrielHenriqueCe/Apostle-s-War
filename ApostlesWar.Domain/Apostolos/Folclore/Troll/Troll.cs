@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Folclore
     public static class Troll
     {
         public static Personagem Definir() => new(
-            4, Faccao.Folclore, "Troll", "🧌", 1200, 160, 200,
+            4, Faccao.Folclore, "Troll", "🧌", TipoDeApostolo.Combatente,
             Pancada(), Porradeiro(), new Ambicao());
 
         static HabilidadeAtiva Pancada() => new(

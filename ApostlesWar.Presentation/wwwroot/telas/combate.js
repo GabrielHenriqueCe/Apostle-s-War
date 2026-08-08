@@ -260,7 +260,7 @@ function atualizarCombatente(el, c) {
 
         const stats = document.createElement('div');
         stats.className = 'statsLinha';
-        stats.textContent = `ATK ${c.ataque} · DEF ${c.defesa} · 🎯${c.taxaCritPct}% · 💥${c.danoCritPct}%`;
+        stats.textContent = `ATK ${c.ataque} · DEF ${c.defesa} · ⚡${c.velocidade} · 🎲${c.taxaCritPct}% · 💥${c.danoCritPct}%`;
         infos.appendChild(stats);
     }
 
@@ -326,8 +326,11 @@ function desenharPainel() {
     document.getElementById('retratoEmoji').textContent = c.simbolo;
     document.getElementById('retratoNome').textContent = c.nome;
 
+    // A ficha INTEIRA mora aqui, e não na linha embaixo do combatente: ali o espaço é o de um
+    // cartão e a leitura é de relance; aqui é o painel de INSPECIONAR, que já existe pra ler devagar.
     document.getElementById('painelStats').textContent = mostrarEstatisticas
-        ? `HP ${c.hpAtual}/${c.hpMaximo}${c.escudo ? ` · 🛡️ ${c.escudo}` : ''} · ATK ${c.ataque} · DEF ${c.defesa} · 🎯 ${c.taxaCritPct}% · 💥 ${c.danoCritPct}%`
+        ? `HP ${c.hpAtual}/${c.hpMaximo}${c.escudo ? ` · 🛡️ ${c.escudo}` : ''} · ATK ${c.ataque} · DEF ${c.defesa}`
+        + ` · ⚡ ${c.velocidade} · 🎯 ${c.precisao} · 🧿 ${c.resistencia} · 🎲 ${c.taxaCritPct}% · 💥 ${c.danoCritPct}%`
         : '';
 
     const caixaStatus = document.getElementById('painelStatus');

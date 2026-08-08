@@ -10,7 +10,7 @@ namespace ApostlesWar.Domain.Apostolos.Reino
     public static class Rei
     {
         public static Personagem Definir() => new(
-            4, Faccao.Reino, "Rei", "🫅", 1000, 200, 200,
+            4, Faccao.Reino, "Rei", "🫅", TipoDeApostolo.Suporte,
             Democracia(), Lealdade(), new CoroaDoSoberano());
 
         static HabilidadeAtiva Democracia() => new(

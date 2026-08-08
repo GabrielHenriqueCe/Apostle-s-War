@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.Misticos
     public static class Genio
     {
         public static Personagem Definir() => new(
-            1, Faccao.Misticos, "Gênio", "🧞", 1400, 120, 200,
+            1, Faccao.Misticos, "Gênio", "🧞", TipoDeApostolo.Guardiao,
             Desejo(), Profecia(), new Realidade());
 
         static HabilidadeAtiva Desejo() => new(

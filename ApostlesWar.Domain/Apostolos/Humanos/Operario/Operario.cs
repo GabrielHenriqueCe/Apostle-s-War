@@ -10,7 +10,7 @@ namespace ApostlesWar.Domain.Apostolos.Humanos
     public static class Operario
     {
         public static Personagem Definir() => new(
-            1, Faccao.Humanos, "Operário", "👷", 1200, 240, 120,
+            1, Faccao.Humanos, "Operário", "👷", TipoDeApostolo.Guardiao,
             ParedeDeTijolos(), new Marretada(), new InstintoDoOperario());
 
         static HabilidadeAtiva ParedeDeTijolos() => new(

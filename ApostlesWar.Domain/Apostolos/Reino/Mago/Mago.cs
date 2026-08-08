@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Reino
     public static class Mago
     {
         public static Personagem Definir() => new(
-            3, Faccao.Reino, "Mago", "🧙", 1000, 280, 120,
+            3, Faccao.Reino, "Mago", "🧙", TipoDeApostolo.Atirador,
             BolaDeFogo(), Incendio(), new Piromancer());
 
         static HabilidadeAtiva BolaDeFogo() => new(

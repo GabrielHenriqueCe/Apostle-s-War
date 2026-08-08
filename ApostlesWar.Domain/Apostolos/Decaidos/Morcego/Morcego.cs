@@ -13,7 +13,7 @@ namespace ApostlesWar.Domain.Apostolos.Decaidos
     public static class Morcego
     {
         public static Personagem Definir() => new(
-            1, Faccao.Decaidos, "Morcego", "🦇", 800, 160, 280,
+            1, Faccao.Decaidos, "Morcego", "🦇", TipoDeApostolo.Combatente,
             Mordida(), RatoVoador(), new SedentoDeSangue());
 
         static HabilidadeAtiva Mordida() => new(

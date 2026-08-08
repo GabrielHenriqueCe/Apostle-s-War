@@ -8,7 +8,7 @@ namespace ApostlesWar.Domain.Apostolos.Humanos
     public static class Detetive
     {
         public static Personagem Definir() => new(
-            2, Faccao.Humanos, "Detetive", "🕵️", 1400, 160, 160,
+            2, Faccao.Humanos, "Detetive", "🕵️", TipoDeApostolo.Combatente,
             Espionagem(), Furtividade(), new OlhoClinico());
 
         static HabilidadeAtiva Espionagem() => new(

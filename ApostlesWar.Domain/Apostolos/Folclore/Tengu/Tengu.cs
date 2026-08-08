@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Folclore
     public static class Tengu
     {
         public static Personagem Definir() => new(
-            2, Faccao.Folclore, "Tengu", "👺", 800, 280, 160,
+            2, Faccao.Folclore, "Tengu", "👺", TipoDeApostolo.Atirador,
             CorteDeVento(), Vendaval(), new Ventania());
 
         static HabilidadeAtiva CorteDeVento() => new(

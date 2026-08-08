@@ -186,7 +186,7 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20925 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20920 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 8160 | 240 | 32640 | 0 |
@@ -290,7 +290,7 @@ O apóstolo jogando com o cérebro do bot. **Sinergia = real − esperado**, ond
 | 👮 Policial | 24320 | 24320 | 0 | 24320 | 24320 | 0 | 0 | Atacar 66×, Tiroteio 34×, Prender 0× |
 | 👲 Sushiman  | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
 | 💂 Guarda | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 57728 | 57387 | +341 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 57722 | 57387 | +335 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
 | 🧙 Mago | 20080 | 20080 | 0 | 72400 | 72400 | 0 | 0 | Atacar 33×, Bola de Fogo 33×, Incêndio 34× |
 | 🫅 Rei | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
 | 💀 Caveira | 10527 | 10527 | 0 | 34188 | 34188 | 0 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
@@ -333,7 +333,7 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 👮 Policial | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Tiroteio 33×, Prender 34× |
 | 👲 Sushiman  | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
 | 💂 Guarda | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 57725 | 57387 | +338 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 57733 | 57387 | +346 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
 | 🧙 Mago | 33010 | 20040 | +12970 | 122140 | 72240 | +49900 | 10000 | Atacar 33×, Bola de Fogo 34×, Incêndio 33× |
 | 🫅 Rei | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
 | 💀 Caveira | 10527 | 10527 | 0 | 34188 | 34188 | 0 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
@@ -387,7 +387,7 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 | 0 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 | 0 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20929 | 0 | 0 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20923 | 0 | 0 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 | 0 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |

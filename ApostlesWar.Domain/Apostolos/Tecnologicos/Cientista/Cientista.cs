@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.Tecnologicos
     public static class Cientista
     {
         public static Personagem Definir() => new(
-            4, Faccao.Tecnologicos, "Cientista", "🧑‍🔬", 1000, 200, 200,
+            4, Faccao.Tecnologicos, "Cientista", "🧑‍🔬", TipoDeApostolo.Atirador,
             Quimica(), Fisica(), new AnaliseCritica());
 
         static HabilidadeAtiva Quimica() => new(

@@ -7,32 +7,94 @@
     /// </summary>
     public class Personagem
     {
-        // Valores base de crit aplicados a TODOS os personagens. Modificar aqui
-        // afeta o balanceamento global. Itens e habilidades modificam por cima.
-        public const double TaxaCritBase = 0.15;
-        public const double DanoCritBase = 0.60;
         public int Slot { get; private set; }
         public Faccao Faccao { get; private set; }
         public string Nome { get; private set; }
         public string Simbolo { get; private set; }
+        public TipoDeApostolo Tipo { get; private set; }
+        public int Nivel { get; private set; }
         public int HP { get; private set; }
         public int Ataque { get; private set; }
         public int Defesa { get; private set; }
-        public double TaxaCrit { get; private set; } = TaxaCritBase;
-        public double DanoCrit { get; private set; } = DanoCritBase;
+        public int Velocidade { get; private set; }
+        public int Precisao { get; private set; }
+        public int Resistencia { get; private set; }
+        public double TaxaCrit { get; private set; }
+        public double DanoCrit { get; private set; }
         public List<Habilidade> Habilidades { get; private set; }
 
-        public Personagem(int slot, Faccao faccao, string nome, string simbolo, int hp, int ataque, int def, params Habilidade[] habilidades)
+        /// <summary>
+        /// O construtor dos apóstolos DE VERDADE: a ficha inteira nasce do <paramref name="tipo"/>,
+        /// torcida pela facção e escalada pelo nível (ver <see cref="Arquetipos"/>). Nenhum apóstolo
+        /// declara os próprios números — dois Guardiões da mesma facção são idênticos na ficha, e o
+        /// que os separa é o kit e o equipamento.
+        /// </summary>
+        public Personagem(int slot, Faccao faccao, string nome, string simbolo,
+            TipoDeApostolo tipo, params Habilidade[] habilidades)
+            : this(slot, faccao, nome, simbolo, tipo, Arquetipos.NivelMinimo, habilidades) { }
+
+        public Personagem(int slot, Faccao faccao, string nome, string simbolo,
+            TipoDeApostolo tipo, int nivel, params Habilidade[] habilidades)
         {
             Slot = slot;
             Faccao = faccao;
             Nome = nome;
             Simbolo = simbolo;
+            Tipo = tipo;
+            Nivel = nivel;
+            Habilidades = new List<Habilidade>(habilidades);
+
+            var combate = Arquetipos.StatsDeCombate(tipo, faccao, nivel);
+            HP = combate.HP;
+            Ataque = combate.Ataque;
+            Defesa = combate.Defesa;
+
+            Arquetipos.Ficha ficha = Arquetipos.Base(tipo);
+            Velocidade = Arquetipos.Velocidade(tipo, nivel);
+            Precisao = ficha.Precisao;
+            Resistencia = ficha.Resistencia;
+            TaxaCrit = ficha.TaxaCrit;
+            DanoCrit = ficha.DanoCrit;
+        }
+
+        /// <summary>
+        /// FICHA CRUA, com os números na mão — existe pros BONECOS: os alvos de isolamento da bancada
+        /// e os personagens de teste, cujo propósito é justamente ter stats arbitrários (defesa 0,
+        /// HP 100.000) que nenhum arquétipo produziria.
+        ///
+        /// <b>Apóstolo do jogo não usa este caminho.</b> Se um dia um deles precisar de número
+        /// próprio, o lugar é a tabela do <see cref="Arquetipos"/> ou a variação da facção — senão os
+        /// 108 números soltos voltam pela porta dos fundos.
+        /// </summary>
+        public Personagem(int slot, Faccao faccao, string nome, string simbolo,
+            int hp, int ataque, int def, params Habilidade[] habilidades)
+        {
+            Slot = slot;
+            Faccao = faccao;
+            Nome = nome;
+            Simbolo = simbolo;
+            Tipo = TipoDeApostolo.Combatente;
+            Nivel = Arquetipos.NivelMinimo;
             HP = hp;
             Ataque = ataque;
             Defesa = def;
             Habilidades = new List<Habilidade>(habilidades);
+
+            // O boneco herda Velocidade/Precisão/Resistência do Combatente (o arquétipo do meio, pra
+            // não enviesar medição), mas o CRÍTICO fica nos valores históricos — 15%/60% eram as
+            // constantes globais contra as quais os testes de hoje foram escritos, e herdar os 25%/90%
+            // do Combatente mudaria a frequência de crítico deles em silêncio.
+            Arquetipos.Ficha ficha = Arquetipos.Base(TipoDeApostolo.Combatente);
+            Velocidade = ficha.VelocidadeNv1;
+            Precisao = ficha.Precisao;
+            Resistencia = ficha.Resistencia;
+            TaxaCrit = CritCruTaxa;
+            DanoCrit = CritCruDano;
         }
+
+        /// <summary>Crítico da ficha crua. Era a constante global, antes de o crítico virar do TIPO.</summary>
+        public const double CritCruTaxa = 0.15;
+        public const double CritCruDano = 0.60;
     }
 
     #endregion

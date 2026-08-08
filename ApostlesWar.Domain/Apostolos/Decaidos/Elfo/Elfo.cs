@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Decaidos
     public static class Elfo
     {
         public static Personagem Definir() => new(
-            3, Faccao.Decaidos, "Elfo", "🧝", 1400, 160, 160,
+            3, Faccao.Decaidos, "Elfo", "🧝", TipoDeApostolo.Guardiao,
             ArvoreDoMundo(), Natureza(), new EspinhosCorrompidos());
 
         static HabilidadeAtiva ArvoreDoMundo() => new(

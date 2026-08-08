@@ -13,7 +13,7 @@ namespace ApostlesWar.Domain.Apostolos.Tecnologicos
     public static class Alien
     {
         public static Personagem Definir() => new(
-            2, Faccao.Tecnologicos, "Alien", "👽", 1200, 240, 120,
+            2, Faccao.Tecnologicos, "Alien", "👽", TipoDeApostolo.Guardiao,
             Abduzir(), Galaxia(), new CarapacaAlienigena());
 
         static HabilidadeAtiva Abduzir() => new(

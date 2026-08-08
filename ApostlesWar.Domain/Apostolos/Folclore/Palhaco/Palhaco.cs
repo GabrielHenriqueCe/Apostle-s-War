@@ -13,7 +13,7 @@ namespace ApostlesWar.Domain.Apostolos.Folclore
     public static class Palhaco
     {
         public static Personagem Definir() => new(
-            3, Faccao.Folclore, "Palhaço", "🤡", 800, 160, 280,
+            3, Faccao.Folclore, "Palhaço", "🤡", TipoDeApostolo.Suporte,
             Coringa(), Circo(), new PiadaDeMauGosto());
 
         static HabilidadeAtiva Coringa() => new(

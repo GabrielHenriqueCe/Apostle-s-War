@@ -12,7 +12,7 @@ namespace ApostlesWar.Domain.Apostolos.Misticos
     public static class Sereia
     {
         public static Personagem Definir() => new(
-            2, Faccao.Misticos, "Sereia", "🧜", 600, 280, 200,
+            2, Faccao.Misticos, "Sereia", "🧜", TipoDeApostolo.Suporte,
             CantoDeSereia(), Atlantis(), new Aquagirl());
 
         static HabilidadeAtiva CantoDeSereia() => new(

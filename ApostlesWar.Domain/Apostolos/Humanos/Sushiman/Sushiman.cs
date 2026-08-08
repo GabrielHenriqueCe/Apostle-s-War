@@ -11,7 +11,7 @@ namespace ApostlesWar.Domain.Apostolos.Humanos
     public static class Sushiman
     {
         public static Personagem Definir() => new(
-            4, Faccao.Humanos, "Sushiman ", "👲", 800, 280, 160,
+            4, Faccao.Humanos, "Sushiman ", "👲", TipoDeApostolo.Suporte,
             Sushi(), Nigiri(), new CodigoDoSushi());
 
         static HabilidadeAtiva Sushi() => new(

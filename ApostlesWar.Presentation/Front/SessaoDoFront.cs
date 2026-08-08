@@ -230,6 +230,9 @@ namespace ApostlesWar.Presentation.Front
             Escudo: c.StatusAtivos.OfType<Escudo>().FirstOrDefault()?.PontosRestantes ?? 0,
             Ataque: c.Ataque,
             Defesa: c.Defesa,
+            Velocidade: c.Personagem.Velocidade,
+            Precisao: c.Personagem.Precisao,
+            Resistencia: c.Personagem.Resistencia,
             TaxaCritPct: (int)(c.TaxaCrit * 100),
             DanoCritPct: (int)(c.DanoCrit * 100),
             Vivo: Mostrado(c).Vivo,   // idem: quem morreu só "apaga" quando o golpe for narrado

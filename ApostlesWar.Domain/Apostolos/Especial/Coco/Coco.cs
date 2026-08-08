@@ -10,7 +10,7 @@ namespace ApostlesWar.Domain.Apostolos.Especial
     public static class Coco
     {
         public static Personagem Definir() => new(
-            1, Faccao.Especial, "Cocô", "💩", 1200, 160, 200,
+            1, Faccao.Especial, "Cocô", "💩", TipoDeApostolo.Atirador,
             Descarga(), Desentupidor(), new Fedorento());
 
         static HabilidadeAtiva Descarga() => new(

@@ -382,6 +382,11 @@ namespace Tests.Bancada
             md.AppendLine($"**Por que a `Sinergia ({BonecosEmArea})` existe:** a de 1 alvo subestima o apóstolo de área. Quem raspa");
             md.AppendLine("DEF em área e martela em área colhe o malefício vezes o número de alvos — a diferença entre");
             md.AppendLine("as duas colunas é o tamanho real desse composto.").AppendLine();
+            md.AppendLine($"**⚠️ Parte da `Sinergia ({BonecosEmArea})` é GEOMETRIA, não composição.** Com {BonecosEmArea} bonecos em campo as");
+            md.AppendLine("casas 1 a 4 existem, e o perfil de distância multiplica o golpe (o apóstolo é Combatente, então");
+            md.AppendLine("×1,00 na casa 1 e ×1,30 na 4 — média 1,15 quando o golpe pega todo mundo). A coluna de **1 alvo**");
+            md.AppendLine("é imune a isso: lá os dois estão na casa 1, distância 1, ×1,00. Compare apóstolos entre si na");
+            md.AppendLine("mesma coluna e o fator se cancela; ler a razão entre as duas colunas como composição, não.").AppendLine();
             md.AppendLine("---").AppendLine();
         }
 

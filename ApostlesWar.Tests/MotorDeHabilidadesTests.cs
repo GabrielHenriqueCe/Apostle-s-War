@@ -517,7 +517,8 @@ namespace Tests
         {
             var atacante = Novo();
             var inimigo = Novo(hp: 2000, atk: 0);
-            inimigo.IniciarCombate();   // Queima usa HPMaximoInicial, setado aqui (≠ Veneno, que usa HPMaximo)
+            // Queima usa HPMaximoInicial, setado aqui (≠ Veneno, que usa HPMaximo).
+            inimigo.IniciarCombate(Combate.ForaDoTabuleiro);
             var ctx = new ContextoCombate(atacante,
                 new List<Combate> { atacante },
                 new List<Combate> { inimigo });

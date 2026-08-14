@@ -583,6 +583,20 @@ namespace ApostlesWar.Application.Services
         #region Fluxo de fase
 
         /// <summary>
+        /// Põe um time no tabuleiro e abre o combate dele: o ÍNDICE na lista é a casa (1 = frente …
+        /// 4 = fundo, GDD §2). A ordem chega intacta do front (`int[] Time` → `List&lt;Personagem&gt;`
+        /// → `Membros`), então não há nada a traduzir — só a contagem a partir de 1.
+        ///
+        /// É o único lugar que chama o <c>IniciarCombate</c>: quem entra em batalha sem passar por
+        /// aqui luta fora do tabuleiro e não tem perfil de distância.
+        /// </summary>
+        private static void Posicionar(IReadOnlyList<Combate> time)
+        {
+            for (int i = 0; i < time.Count; i++)
+                time[i].IniciarCombate(casa: i + 1);
+        }
+
+        /// <summary>
         /// A fase da campanha a partir de um time JÁ ESCOLHIDO — quem monta o time é problema de quem
         /// chama (o clique no front). Roda as 2 rodadas com o multiplicador de fase e os itens
         /// equipados. A recompensa (unlock/drop/save) é DEPOIS, no CampanhaService.
@@ -603,8 +617,7 @@ namespace ApostlesWar.Application.Services
 
             // Captura HPMaximoInicial DOS JOGADORES depois de mult + itens (jogadores não recebem
             // multiplicador de fase, mas mantemos pra simetria/consistência).
-            foreach (Combate c in jogador)
-                c.IniciarCombate();
+            Posicionar(jogador);
 
             try
             {
@@ -623,11 +636,9 @@ namespace ApostlesWar.Application.Services
         {
             var inimigo = new List<Combate>();
             foreach (Slot slot in slotsInimigos)
-            {
-                var novoInimigo = new Inimigo(_personagemService.ObterPersonagem(capitulo, slot), mult);
-                novoInimigo.IniciarCombate();  // NOVO: snapshot do HP máximo do inimigo nesta rodada
-                inimigo.Add(novoInimigo);
-            }
+                inimigo.Add(new Inimigo(_personagemService.ObterPersonagem(capitulo, slot), mult));
+
+            Posicionar(inimigo);   // snapshot do HP máximo desta rodada + a casa de cada um
 
             var batalha = new Batalha(new Equipe(jogador), new Equipe(inimigo));
 
@@ -661,8 +672,8 @@ namespace ApostlesWar.Application.Services
         {
             var equipe1 = new Equipe(time1.Select(p => (Combate)new Jogador(p)).ToList());
             var equipe2 = new Equipe(time2.Select(p => (Combate)new Jogador(p)).ToList());
-            foreach (Combate c in equipe1.Membros) c.IniciarCombate();
-            foreach (Combate c in equipe2.Membros) c.IniciarCombate();
+            Posicionar(equipe1.Membros);
+            Posicionar(equipe2.Membros);
 
             var batalha = new Batalha(equipe1, equipe2);
             _controladores = new Dictionary<Equipe, IControladorDeTurno>

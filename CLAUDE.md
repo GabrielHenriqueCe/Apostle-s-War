@@ -11,11 +11,13 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
 - `git log --oneline -15` → os commits recentes.
 - **🔄 O QUE ESTÁ ACONTECENDO AGORA (ago/2026): a PROGRESSÃO está saindo do papel.** Mergeados
   #228 (tipos + status base do tipo), #229 (o modelo da posição no GDD), #230 (o campo virou fileira
-  com as frentes se olhando) e #231 (a preparação da fase virou tabuleiro). **O próximo é o perfil
-  de distância no motor**, na branch `feature/perfil-de-distancia`. **Onde está escrito o quê:** o
-  MODELO em `docs/GDD-progressao.md` §2 (a distância ideal por tipo) e §7 (a ordem dos passos); a
-  EXECUÇÃO no `docs/ROADMAP-refatoracao.md` §FILA A item 19, que lista arquivo por arquivo o que
-  fazer. Ler os dois antes de escrever qualquer linha — nada disso se re-deduz do código.
+  com as frentes se olhando) e #231 (a preparação da fase virou tabuleiro). O **perfil de distância
+  no motor** saiu na branch `feature/perfil-de-distancia` (`Arquetipos.MultiplicadorDePosicao` +
+  `Combate.Casa`); **o próximo são OS DOIS BRILHOS** — a pintura do mapa de calor, com a grade 4×4
+  vindo do C# (o front NÃO pode ter cópia da tabela). **Onde está escrito o quê:** o MODELO em
+  `docs/GDD-progressao.md` §2 (a distância ideal por tipo) e §7 (a ordem dos passos); a EXECUÇÃO no
+  `docs/ROADMAP-refatoracao.md` §FILA A item 19, que lista arquivo por arquivo o que fazer. Ler os
+  dois antes de escrever qualquer linha — nada disso se re-deduz do código.
 - **Fase atual:** FRONT feito, console REMOVIDO (#179), camadas ajustadas (#180), `PreverDano` (#181),
   **bot inteligente** (#182), **botão Auto** (#183), a **ordem do pipeline de dano** (`OrdemDeMitigacao`
   — fechou o bug do bloqueio × escudo, #185) e a **DEF do protetor** no `ProtecaoAliado` (doc mentia; a

@@ -1371,31 +1371,29 @@ as regras dos dois lados.
       casas do inimigo com a mesma peça, e o tamanho do time virou parâmetro (`--casa`,
       `--casa-gap`, `--fileira`, `--tabuleiro`).
 
-    **➡️ PRÓXIMO PR — O PERFIL DE DISTÂNCIA NO MOTOR** (só motor; a pintura é o PR seguinte).
-    Branch `feature/perfil-de-distancia`.
-    - **A regra (GDD §2):** `distância = casa do atacante + casa do alvo − 1` (1 a 7). Multiplicador
-      = `1,30 − 0,10 × |distância − d*|`, com **d\* por tipo: 🛡️ Guardião 1 · ⚔️ Combatente 4 ·
-      🏹 Atirador 5 · 💗 Suporte plano (1,00 sempre)**.
-    - **Onde a tabela mora:** no `Arquetipos`, junto da ficha — o d\* é do TIPO, é ficha e não regra
-      de combate. Uma função pura `MultiplicadorDePosicao(tipo, distancia)`.
-    - **Como o combatente sabe a casa dele:** `Combate` ganha `Casa` (1..4), preenchida no
-      `IniciarCombate` — o `CombateService` já varre `equipe1.Membros`/`equipe2.Membros` chamando-o
-      (hoje em `CombateService.cs`, no `IniciarCombate` de cada um), e o índice na lista **é** a
-      casa. Ordem preservada de ponta a ponta: o `int[] Time` do front → `cfg.Time.Select(i =>
-      pool[i])` → `new Equipe(...)` → `Membros`. **Não** precisa de `Batalha` no pipeline: a
-      distância só existe atacante→inimigo, então bastam as duas casas.
-    - **Onde entra no pipeline:** lado do ATACANTE, **antes da mitigação** — é irmão do ATK, não da
-      DEF. Ou seja, entra no `DanoBruto` do `EventoDano` (que é, por definição, "o valor do golpe ao
-      chegar, antes da mitigação do alvo"). Cuidar da `OrdemDeMitigacao` (#185): não é lugar dele.
-    - **De graça:** o `PreverDanoRecebido` é o mesmo caminho, então o **bot fica esperto sem uma
-      linha de bot** — ele passa a escolher alvo pela geometria.
-    - **Testes (e este é o 1º PR da série que dá pra testar):** o multiplicador é função pura →
-      xUnit direto. Mais um ponta-a-ponta em `Tests/ReceberDanoTests.cs`.
-    - **⚠️ A BANCADA VAI MUDAR DE NÚMERO.** `BancadaDeDano` roda combate de verdade, então as casas
-      passam a existir e o `docs/bancada-dano.md` regenera diferente. **É esperado** — mas conferir
-      que a variação bate com o multiplicador, e não com outra coisa.
+    - ✅ **O PERFIL DE DISTÂNCIA NO MOTOR** *(branch `feature/perfil-de-distancia`)*. A regra do GDD
+      §2 virou código, e só motor — a pintura é o PR seguinte.
+      - **A tabela mora no `Arquetipos`** (o d\* é do TIPO, é ficha): `DistanciaIdeal`,
+        `DistanciaEntreCasas` e a função pura `MultiplicadorDePosicao(tipo, distancia)`. Ela conta
+        em CENTÉSIMOS de propósito — `1.30 - 0.10 * 3` em double dá 0,9999999999999999, e o `(int)`
+        do dano transformaria 200 em 199.
+      - **`Combate.Casa`** (1 = frente … 4 = fundo) é preenchida pelo `IniciarCombate(casa)`, que
+        agora exige o argumento. Quem posiciona é o `CombateService.Posicionar` — um lugar só, o
+        índice em `Membros` + 1 —, chamado pelos três pontos de entrada (fase, rodada de inimigos,
+        arena). **`Casa == ForaDoTabuleiro` (0) = sem geometria**, multiplicador 1,00: é o caso dos
+        bonecos de teste, e é explícito em vez de um 1 chutado.
+      - **Entra no `Atacar` e no `PreverAtaque`, no MESMO ponto** — dentro do `(int)` do `danoBase`,
+        do lado do atacante, antes da mitigação. A `OrdemDeMitigacao` (#185) não foi tocada.
+      - **O bot ficou esperto sem uma linha de bot**, como previsto: ele passa a mirar por
+        geometria, e isso aparece no relatório (o ×1,30 das colunas de 4 alvos).
+      - **A bancada regenerou, e a variação BATE com o multiplicador** — conferido célula a célula:
+        **toda** mudança caiu em coluna de 4 alvos, dentro da faixa [1,00 … 1,30], com o grosso
+        exatamente em **1,15** (a média das quatro casas). As colunas de 1 alvo não mudaram uma
+        casa decimal, porque ali os dois estão na casa 1 e a distância é 1. **O que passou a mentir
+        um pouco:** parte da `Sinergia (4)` agora é geometria e não composição — está avisado no
+        cabeçalho do próprio relatório.
 
-    **PR seguinte — OS DOIS BRILHOS** (só pintura; nenhuma regra nova):
+    **➡️ PRÓXIMO PR — OS DOIS BRILHOS** (só pintura; nenhuma regra nova):
     - **onde ele PODE bater mais forte** — mapa de calor do multiplicador. Três gatilhos: passar o
       mouse, selecionar (o clique, que é o que salva quem não usa hover) e **arrastar entre as
       casas**. Cor + o número escrito (`×1,20`), escala divergindo no 1,00.

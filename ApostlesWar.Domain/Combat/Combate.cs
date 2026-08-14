@@ -61,6 +61,20 @@ namespace ApostlesWar.Domain
         /// </summary>
         public int HPMaximoInicial { get; private set; }
 
+        /// <summary>Casa de quem não está numa fileira — o perfil de distância não vale, e o
+        /// multiplicador dele é 1,00.</summary>
+        public const int ForaDoTabuleiro = 0;
+
+        /// <summary>
+        /// A casa deste combatente na fileira do time: <b>1 = frente, 4 = fundo</b> (GDD §2).
+        /// Preenchida no <see cref="IniciarCombate"/> com o índice em <c>Equipe.Membros</c> + 1 — a
+        /// ordem da lista É a formação, de ponta a ponta (o `int[] Time` do front vira essa ordem).
+        ///
+        /// Fica <see cref="ForaDoTabuleiro"/> em quem nasce fora de uma equipe: os bonecos montados
+        /// na mão dos testes. Não é descuido — sem as duas casas não existe distância.
+        /// </summary>
+        public int Casa { get; private set; } = ForaDoTabuleiro;
+
         /// <summary>
         /// Total de HP máximo reduzido neste combate (acumulado).
         /// Cada habilidade redutora soma aqui; cada habilidade restauradora abate daqui.
@@ -249,8 +263,11 @@ namespace ApostlesWar.Domain
         /// Deve ser chamado APÓS toda configuração inicial estar pronta (mult + itens),
         /// e ANTES do primeiro turno.
         /// </summary>
-        public void IniciarCombate()
+        /// <param name="casa">A casa na fileira (1 = frente … 4 = fundo), ou
+        /// <see cref="ForaDoTabuleiro"/> pra quem luta sem formação. Ver <see cref="Casa"/>.</param>
+        public void IniciarCombate(int casa)
         {
+            Casa = casa;
             HPMaximoInicial = HPMaximo;
 
             // Aplica buffs iniciais permanentes de passivas (ex: Espectral -> Intocavel)
@@ -471,6 +488,26 @@ namespace ApostlesWar.Domain
         }
 
         /// <summary>
+        /// O quanto a GEOMETRIA aumenta (ou corta) o golpe deste combatente neste alvo: o perfil de
+        /// distância do tipo dele, lido na distância entre as duas casas (GDD §2). 1,00 se qualquer
+        /// um dos dois estiver <see cref="ForaDoTabuleiro"/>.
+        ///
+        /// Entra do lado do ATACANTE, antes da mitigação — é irmão do ATK, não da DEF, e por isso
+        /// NÃO tem nada a ver com a <c>OrdemDeMitigacao</c> (#185).
+        ///
+        /// A distância pressupõe as duas frentes se olhando, que é a única geometria que o jogo tem.
+        /// Golpe em ALIADO não passa por aqui: quem fere o próprio time (AutoDano, redirecionamento,
+        /// reflexo, DoT) chama <see cref="ReceberDano"/> direto, não o <see cref="Atacar"/>.
+        /// </summary>
+        public double MultiplicadorDePosicaoContra(Combate alvo)
+        {
+            if (Casa == ForaDoTabuleiro || alvo.Casa == ForaDoTabuleiro) return 1.0;
+
+            return Arquetipos.MultiplicadorDePosicao(
+                Personagem.Tipo, Arquetipos.DistanciaEntreCasas(Casa, alvo.Casa));
+        }
+
+        /// <summary>
         /// Ataque com multiplicador de dano, opção de ignorar % de defesa, forçar
         /// crítico e ignorar status específicos do alvo.
         /// </summary>
@@ -482,7 +519,7 @@ namespace ApostlesWar.Domain
             var nat = natureza ?? NaturezasDano.Ataque;
 
             bool critico = forcaCritico || Random.Shared.NextDouble() < TaxaCrit;
-            int danoBase = (int)(Ataque * multiplicador);
+            int danoBase = (int)(Ataque * multiplicador * MultiplicadorDePosicaoContra(alvo));
             int dano = critico ? (int)(danoBase * (1 + DanoCrit)) : danoBase;
 
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
@@ -508,8 +545,8 @@ namespace ApostlesWar.Domain
 
         /// <summary>
         /// Quanta VIDA este ataque tiraria do alvo, sem desferi-lo. Espelho puro do
-        /// <see cref="Atacar"/>: mesmo `Ataque × multiplicador`, mesma composição da lista de
-        /// ignorados, e daí a previsão do lado do alvo.
+        /// <see cref="Atacar"/>: mesmo `Ataque × multiplicador × posição`, mesma composição da lista
+        /// de ignorados, e daí a previsão do lado do alvo.
         ///
         /// O CRÍTICO entra como VALOR ESPERADO (`1 + TaxaCrit × DanoCrit`), não como sorteio — o bot
         /// não pode saber o resultado do dado. Entre alvos da MESMA habilidade o crit é um fator
@@ -524,7 +561,9 @@ namespace ApostlesWar.Domain
             var nat = natureza ?? NaturezasDano.Ataque;
 
             double fatorCritico = forcaCritico ? 1 + DanoCrit : 1 + (TaxaCrit * DanoCrit);
-            int dano = (int)((int)(Ataque * multiplicador) * fatorCritico);
+            // O (int) de dentro é o MESMO do Atacar, com o multiplicador de posição no mesmo lugar:
+            // truncar em ponto diferente faria o bot mirar por um número que a batalha não usa.
+            int dano = (int)((int)(Ataque * multiplicador * MultiplicadorDePosicaoContra(alvo)) * fatorCritico);
 
             var ignorarFinal = ComporListaIgnorar(ignorarStatus);
             int passaria = alvo.PreverDanoRecebido(dano, nat, ignorarFinal, ignorarDefesaPct);

@@ -47,6 +47,12 @@ e o `Esperado (4)` é cobrado pelos usos DELA, senão a sinergia sairia inventad
 DEF em área e martela em área colhe o malefício vezes o número de alvos — a diferença entre
 as duas colunas é o tamanho real desse composto.
 
+**⚠️ Parte da `Sinergia (4)` é GEOMETRIA, não composição.** Com 4 bonecos em campo as
+casas 1 a 4 existem, e o perfil de distância multiplica o golpe (o apóstolo é Combatente, então
+×1,00 na casa 1 e ×1,30 na 4 — média 1,15 quando o golpe pega todo mundo). A coluna de **1 alvo**
+é imune a isso: lá os dois estão na casa 1, distância 1, ×1,00. Compare apóstolos entre si na
+mesma coluna e o fator se cancela; ler a razão entre as duas colunas como composição, não.
+
 ---
 
 ## Linha 1 — por habilidade · boneco DEF 0 · imune a malefícios
@@ -60,37 +66,37 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 👷 Operário | 🔨 Marretada | 2 | 50 | 40000 | 800 | 40000 | 0 |
 | 🕵️ Detetive | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🕵️ Detetive | 🔎 Espionagem | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 32640 | 960 | 130560 | 0 |
+| 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 32640 | 960 | 150144 | 0 |
 | 👮 Policial | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 76160 | 2240 | 76160 | 0 |
+| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 76160 | 2240 | 82208 | 0 |
 | 👮 Policial | ⛓️ Prender | 3 | 34 | 0 | 0 | 0 | 0 |
 | 👲 Sushiman  | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 👲 Sushiman  | 🍣 Sushi | 3 | 34 | 0 | 0 | 0 | 20400 |
 | 👲 Sushiman  | 🍙 Nigiri | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
-| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 76160 | 2240 | 76160 | 0 |
+| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 76160 | 2240 | 81782 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 43520 | 1280 | 43520 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 43520 | 1280 | 46668 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 38080 | 1120 | 38080 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 32640 | 960 | 130560 | 0 |
-| 🧙 Mago | 🌋 Incêndio | 3 | 34 | 38080 | 1120 | 152320 | 0 |
+| 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 32640 | 960 | 150144 | 0 |
+| 🧙 Mago | 🌋 Incêndio | 3 | 34 | 38080 | 1120 | 175168 | 0 |
 | 🫅 Rei | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🫅 Rei | 🗳️ Democracia | 3 | 34 | 0 | 0 | 0 | 20400 |
 | 🫅 Rei | 🎖️ Lealdade | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💀 Caveira | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 💀 Caveira | 🦴 Ossinho | 3 | 34 | 32572 | 958 | 130288 | 0 |
+| 💀 Caveira | 🦴 Ossinho | 3 | 34 | 32572 | 958 | 149872 | 0 |
 | 💀 Caveira | 🦴 Osso Duro de Roer | 3 | 34 | 0 | 0 | 0 | 0 |
 | 👻 Fantasma | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 👻 Fantasma | 👻 Assombração | 3 | 34 | 38080 | 1120 | 152320 | 7616 |
+| 👻 Fantasma | 👻 Assombração | 3 | 34 | 38080 | 1120 | 175168 | 7616 |
 | 👻 Fantasma | 💀 Vindo do Além | 6 | 17 | 16320 | 960 | 16320 | 0 |
 | 🎃 Abóbora | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🎃 Abóbora | 🍬 Doces ou Travessuras | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🎃 Abóbora | 🍭 Doces de Abóbora | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧟 Zumbi | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🧟 Zumbi | 🤢 Vômito Tóxico | 3 | 34 | 32640 | 960 | 130560 | 0 |
-| 🧟 Zumbi | 💀 Putrefação | 3 | 34 | 32640 | 960 | 130560 | 6528 |
+| 🧟 Zumbi | 🤢 Vômito Tóxico | 3 | 34 | 32640 | 960 | 150144 | 0 |
+| 🧟 Zumbi | 💀 Putrefação | 3 | 34 | 32640 | 960 | 150144 | 6528 |
 | 👾 Invasor | ⚔️ Atacar | 0 | 100 | 36850 | 368 | 36850 | 0 |
 | 👾 Invasor | 📺 Glitch | 3 | 34 | 74580 | 2193 | 74580 | 0 |
 | 👾 Invasor | 🪳 Barata | 3 | 34 | 49720 | 1462 | 49720 | 0 |
@@ -101,46 +107,46 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 🤖 Robô | 🩻 Raio-X | 3 | 34 | 0 | 0 | 0 | 20400 |
 | 🤖 Robô | 🤖 Technology | 3 | 34 | 0 | 0 | 0 | 6800 |
 | 🧑‍🔬 Cientista | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🧑‍🔬 Cientista | 🧪 Química | 3 | 34 | 32640 | 960 | 130560 | 0 |
-| 🧑‍🔬 Cientista | ⚛️ Física | 3 | 34 | 32640 | 960 | 130560 | 0 |
+| 🧑‍🔬 Cientista | 🧪 Química | 3 | 34 | 32640 | 960 | 150144 | 0 |
+| 🧑‍🔬 Cientista | ⚛️ Física | 3 | 34 | 32640 | 960 | 150144 | 0 |
 | 👹 Ogro | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 👹 Ogro | 👊 Esmagar | 3 | 34 | 0 | 0 | 0 | 17000 |
-| 👹 Ogro | 💥 Quebrar | 3 | 34 | 32640 | 960 | 130560 | 0 |
+| 👹 Ogro | 💥 Quebrar | 3 | 34 | 32640 | 960 | 150144 | 0 |
 | 👺 Tengu | ⚔️ Atacar | 0 | 100 | 48000 | 480 | 48000 | 0 |
-| 👺 Tengu | 🌬️ Corte de Vento | 3 | 34 | 53040 | 1560 | 212160 | 0 |
+| 👺 Tengu | 🌬️ Corte de Vento | 3 | 34 | 53040 | 1560 | 243916 | 0 |
 | 👺 Tengu | 🌪️ Vendaval | 3 | 34 | 57120 | 1680 | 57120 | 0 |
 | 🤡 Palhaço | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🤡 Palhaço | 🃏 Coringa | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🤡 Palhaço | 🎪 Circo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧌 Troll | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🧌 Troll | 🤜 Pancada | 3 | 34 | 38080 | 1120 | 152320 | 0 |
-| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 48960 | 1440 | 48960 | 14688 |
+| 🧌 Troll | 🤜 Pancada | 3 | 34 | 38080 | 1120 | 175168 | 0 |
+| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 48960 | 1440 | 54938 | 14688 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🧞 Gênio | 🔮 Profecia | 3 | 34 | 32640 | 960 | 130560 | 0 |
+| 🧞 Gênio | 🔮 Profecia | 3 | 34 | 32640 | 960 | 150144 | 0 |
 | 🧜 Sereia | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🧜 Sereia | 🧜‍♀️ Canto de Sereia | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧜 Sereia | 🌊 Atlantis | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧚 Fada | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🧚 Fada | 🔔 Sininho | 3 | 34 | 43520 | 1280 | 43520 | 0 |
-| 🧚 Fada | ✨ Pó Mágico | 3 | 34 | 38080 | 1120 | 152320 | 0 |
+| 🧚 Fada | ✨ Pó Mágico | 3 | 34 | 38080 | 1120 | 175168 | 0 |
 | 🐲 Dragão | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 32640 | 960 | 130560 | 0 |
+| 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 32640 | 960 | 150144 | 0 |
 | 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 0 | 0 | 0 | 17000 |
 | 💩 Cocô | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 💩 Cocô | 🚽 Descarga | 3 | 34 | 48960 | 1440 | 48960 | 0 |
-| 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 38080 | 1120 | 152320 | 0 |
+| 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 38080 | 1120 | 175168 | 0 |
 | 🦸 Herói | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🦸 Herói | 💪 Super | 3 | 34 | 48960 | 1440 | 195840 | 0 |
+| 🦸 Herói | 💪 Super | 3 | 34 | 48960 | 1440 | 225216 | 0 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 21760 | 640 | 87040 | 0 |
-| 🦹 Vilão | 👿 Vilania | 3 | 34 | 54400 | 1600 | 54400 | 0 |
+| 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 21760 | 640 | 100096 | 0 |
+| 🦹 Vilão | 👿 Vilania | 3 | 34 | 54400 | 1600 | 58712 | 0 |
 | 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 35360 | 1040 | 141440 | 0 |
+| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 35360 | 1040 | 162656 | 0 |
 | 🦇 Morcego | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 4800 |
-| 🦇 Morcego | 🦇 Mordida | 3 | 34 | 21760 | 640 | 87040 | 3264 |
+| 🦇 Morcego | 🦇 Mordida | 3 | 34 | 21760 | 640 | 100096 | 3264 |
 | 🦇 Morcego | 🐀 Rato Voador | 4 | 25 | 0 | 0 | 0 | 0 |
 | 🧛 Vampiro | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🧛 Vampiro | 🩸 Controle de Sangue | 3 | 34 | 38080 | 1120 | 38080 | 0 |
@@ -149,20 +155,20 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧝 Elfo | 🌿 Natureza | 3 | 34 | 43520 | 1280 | 43520 | 0 |
 | 😈 Diabo | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 😈 Diabo | 🔥 Inferno | 3 | 34 | 32640 | 960 | 130560 | 0 |
+| 😈 Diabo | 🔥 Inferno | 3 | 34 | 32640 | 960 | 150144 | 0 |
 | 😈 Diabo | 😇 Anjo Caído | 3 | 34 | 0 | 0 | 0 | 20400 |
 | ⛄ Boneco de Neve | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | ⛄ Boneco de Neve | ⛄ Bola de Neve | 3 | 34 | 46240 | 1360 | 46240 | 0 |
-| ⛄ Boneco de Neve | ❄️ Gelado | 3 | 34 | 38080 | 1120 | 152320 | 0 |
+| ⛄ Boneco de Neve | ❄️ Gelado | 3 | 34 | 38080 | 1120 | 175168 | 0 |
 | 🎭 Mímico | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🎭 Mímico | 🎭 Imitação | 3 | 34 | 43520 | 1280 | 174080 | 0 |
+| 🎭 Mímico | 🎭 Imitação | 3 | 34 | 43520 | 1280 | 200192 | 0 |
 | 🎭 Mímico | 📋 Copiando | 4 | 25 | 0 | 0 | 0 | 0 |
 | 😇 Anjo | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 10000 |
 | 😇 Anjo | 🌟 Celestial | 3 | 34 | 0 | 0 | 0 | 30400 |
 | 😇 Anjo | ☁️ Céu | 3 | 34 | 0 | 0 | 0 | 10000 |
 | 🎅 Papai Noel | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 34 | 44166 | 1299 | 176664 | 0 |
-| 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 34 | 40800 | 1200 | 163200 | 0 |
+| 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 34 | 44166 | 1299 | 203184 | 0 |
+| 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 34 | 40800 | 1200 | 187680 | 0 |
 
 ## Linha 2 — por habilidade · boneco DEF no cap · imune a malefícios
 
@@ -175,37 +181,37 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 👷 Operário | 🔨 Marretada | 2 | 50 | 10000 | 200 | 10000 | 0 |
 | 🕵️ Detetive | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🕵️ Detetive | 🔎 Espionagem | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 8160 | 240 | 32640 | 0 |
+| 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 8160 | 240 | 37536 | 0 |
 | 👮 Policial | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 19040 | 560 | 19040 | 0 |
+| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 19040 | 560 | 20524 | 0 |
 | 👮 Policial | ⛓️ Prender | 3 | 34 | 0 | 0 | 0 | 0 |
 | 👲 Sushiman  | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 👲 Sushiman  | 🍣 Sushi | 3 | 34 | 0 | 0 | 0 | 20400 |
 | 👲 Sushiman  | 🍙 Nigiri | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
-| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 |
+| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 20381 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20920 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 22617 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 8160 | 240 | 32640 | 0 |
-| 🧙 Mago | 🌋 Incêndio | 3 | 34 | 9520 | 280 | 38080 | 0 |
+| 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 8160 | 240 | 37536 | 0 |
+| 🧙 Mago | 🌋 Incêndio | 3 | 34 | 9520 | 280 | 43792 | 0 |
 | 🫅 Rei | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🫅 Rei | 🗳️ Democracia | 3 | 34 | 0 | 0 | 0 | 20400 |
 | 🫅 Rei | 🎖️ Lealdade | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💀 Caveira | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 💀 Caveira | 🦴 Ossinho | 3 | 34 | 8126 | 239 | 32504 | 0 |
+| 💀 Caveira | 🦴 Ossinho | 3 | 34 | 8126 | 239 | 37400 | 0 |
 | 💀 Caveira | 🦴 Osso Duro de Roer | 3 | 34 | 0 | 0 | 0 | 0 |
 | 👻 Fantasma | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 👻 Fantasma | 👻 Assombração | 3 | 34 | 9520 | 280 | 38080 | 1904 |
+| 👻 Fantasma | 👻 Assombração | 3 | 34 | 9520 | 280 | 43792 | 1904 |
 | 👻 Fantasma | 💀 Vindo do Além | 6 | 17 | 16320 | 960 | 16320 | 0 |
 | 🎃 Abóbora | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🎃 Abóbora | 🍬 Doces ou Travessuras | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🎃 Abóbora | 🍭 Doces de Abóbora | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧟 Zumbi | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 🧟 Zumbi | 🤢 Vômito Tóxico | 3 | 34 | 8160 | 240 | 32640 | 0 |
-| 🧟 Zumbi | 💀 Putrefação | 3 | 34 | 8160 | 240 | 32640 | 1632 |
+| 🧟 Zumbi | 🤢 Vômito Tóxico | 3 | 34 | 8160 | 240 | 37536 | 0 |
+| 🧟 Zumbi | 💀 Putrefação | 3 | 34 | 8160 | 240 | 37536 | 1632 |
 | 👾 Invasor | ⚔️ Atacar | 0 | 100 | 9164 | 91 | 9164 | 0 |
 | 👾 Invasor | 📺 Glitch | 3 | 34 | 18645 | 548 | 18645 | 0 |
 | 👾 Invasor | 🪳 Barata | 3 | 34 | 12430 | 365 | 12430 | 0 |
@@ -216,46 +222,46 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🤖 Robô | 🩻 Raio-X | 3 | 34 | 0 | 0 | 0 | 20400 |
 | 🤖 Robô | 🤖 Technology | 3 | 34 | 0 | 0 | 0 | 6800 |
 | 🧑‍🔬 Cientista | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 🧑‍🔬 Cientista | 🧪 Química | 3 | 34 | 8160 | 240 | 32640 | 0 |
-| 🧑‍🔬 Cientista | ⚛️ Física | 3 | 34 | 8160 | 240 | 32640 | 0 |
+| 🧑‍🔬 Cientista | 🧪 Química | 3 | 34 | 8160 | 240 | 37536 | 0 |
+| 🧑‍🔬 Cientista | ⚛️ Física | 3 | 34 | 8160 | 240 | 37536 | 0 |
 | 👹 Ogro | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 👹 Ogro | 👊 Esmagar | 3 | 34 | 0 | 0 | 0 | 17000 |
-| 👹 Ogro | 💥 Quebrar | 3 | 34 | 8160 | 240 | 32640 | 0 |
+| 👹 Ogro | 💥 Quebrar | 3 | 34 | 8160 | 240 | 37536 | 0 |
 | 👺 Tengu | ⚔️ Atacar | 0 | 100 | 12000 | 120 | 12000 | 0 |
-| 👺 Tengu | 🌬️ Corte de Vento | 3 | 34 | 13260 | 390 | 53040 | 0 |
+| 👺 Tengu | 🌬️ Corte de Vento | 3 | 34 | 13260 | 390 | 60928 | 0 |
 | 👺 Tengu | 🌪️ Vendaval | 3 | 34 | 35700 | 1050 | 35700 | 0 |
 | 🤡 Palhaço | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🤡 Palhaço | 🃏 Coringa | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🤡 Palhaço | 🎪 Circo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧌 Troll | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 🧌 Troll | 🤜 Pancada | 3 | 34 | 9520 | 280 | 38080 | 0 |
-| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 12240 | 360 | 12240 | 3672 |
+| 🧌 Troll | 🤜 Pancada | 3 | 34 | 9520 | 280 | 43792 | 0 |
+| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 12240 | 360 | 13764 | 3672 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🧞 Gênio | 🔮 Profecia | 3 | 34 | 8160 | 240 | 32640 | 0 |
+| 🧞 Gênio | 🔮 Profecia | 3 | 34 | 8160 | 240 | 37536 | 0 |
 | 🧜 Sereia | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧜 Sereia | 🧜‍♀️ Canto de Sereia | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧜 Sereia | 🌊 Atlantis | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧚 Fada | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧚 Fada | 🔔 Sininho | 3 | 34 | 10880 | 320 | 10880 | 0 |
-| 🧚 Fada | ✨ Pó Mágico | 3 | 34 | 9520 | 280 | 38080 | 0 |
+| 🧚 Fada | ✨ Pó Mágico | 3 | 34 | 9520 | 280 | 43792 | 0 |
 | 🐲 Dragão | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 8160 | 240 | 32640 | 0 |
+| 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 8160 | 240 | 37536 | 0 |
 | 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 0 | 0 | 0 | 17000 |
 | 💩 Cocô | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 💩 Cocô | 🚽 Descarga | 3 | 34 | 12240 | 360 | 12240 | 0 |
-| 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 9520 | 280 | 38080 | 0 |
+| 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 9520 | 280 | 43792 | 0 |
 | 🦸 Herói | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🦸 Herói | 💪 Super | 3 | 34 | 12240 | 360 | 48960 | 0 |
+| 🦸 Herói | 💪 Super | 3 | 34 | 12240 | 360 | 56304 | 0 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 5440 | 160 | 21760 | 0 |
-| 🦹 Vilão | 👿 Vilania | 3 | 34 | 13600 | 400 | 13600 | 0 |
+| 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 5440 | 160 | 25024 | 0 |
+| 🦹 Vilão | 👿 Vilania | 3 | 34 | 13600 | 400 | 14598 | 0 |
 | 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 | 0 | 0 |
-| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 8840 | 260 | 35360 | 0 |
+| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 8840 | 260 | 40664 | 0 |
 | 🦇 Morcego | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 1200 |
-| 🦇 Morcego | 🦇 Mordida | 3 | 34 | 5440 | 160 | 21760 | 816 |
+| 🦇 Morcego | 🦇 Mordida | 3 | 34 | 5440 | 160 | 25024 | 816 |
 | 🦇 Morcego | 🐀 Rato Voador | 4 | 25 | 0 | 0 | 0 | 0 |
 | 🧛 Vampiro | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧛 Vampiro | 🩸 Controle de Sangue | 3 | 34 | 23800 | 700 | 23800 | 0 |
@@ -264,20 +270,20 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧝 Elfo | 🌿 Natureza | 3 | 34 | 10880 | 320 | 10880 | 0 |
 | 😈 Diabo | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 😈 Diabo | 🔥 Inferno | 3 | 34 | 8160 | 240 | 32640 | 0 |
+| 😈 Diabo | 🔥 Inferno | 3 | 34 | 8160 | 240 | 37536 | 0 |
 | 😈 Diabo | 😇 Anjo Caído | 3 | 34 | 0 | 0 | 0 | 20400 |
 | ⛄ Boneco de Neve | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | ⛄ Boneco de Neve | ⛄ Bola de Neve | 3 | 34 | 11560 | 340 | 11560 | 0 |
-| ⛄ Boneco de Neve | ❄️ Gelado | 3 | 34 | 9520 | 280 | 38080 | 0 |
+| ⛄ Boneco de Neve | ❄️ Gelado | 3 | 34 | 9520 | 280 | 43792 | 0 |
 | 🎭 Mímico | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 🎭 Mímico | 🎭 Imitação | 3 | 34 | 10880 | 320 | 43520 | 0 |
+| 🎭 Mímico | 🎭 Imitação | 3 | 34 | 10880 | 320 | 50048 | 0 |
 | 🎭 Mímico | 📋 Copiando | 4 | 25 | 0 | 0 | 0 | 0 |
 | 😇 Anjo | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 10000 |
 | 😇 Anjo | 🌟 Celestial | 3 | 34 | 0 | 0 | 0 | 30400 |
 | 😇 Anjo | ☁️ Céu | 3 | 34 | 0 | 0 | 0 | 10000 |
 | 🎅 Papai Noel | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 34 | 11016 | 324 | 44064 | 0 |
-| 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 34 | 10200 | 300 | 40800 | 0 |
+| 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 34 | 11016 | 324 | 50762 | 0 |
+| 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 34 | 10200 | 300 | 46920 | 0 |
 
 ## Linha 3 — apóstolo inteiro · boneco DEF no cap · imune a malefícios
 
@@ -285,42 +291,42 @@ O apóstolo jogando com o cérebro do bot. **Sinergia = real − esperado**, ond
 
 | Apóstolo | Dano | Esperado | Sinergia | Dano (4 alvos) | Esperado (4) | Sinergia (4) | Tick | Habilidades usadas |
 |---|--:|--:|--:|--:|--:|--:|--:|---|
-| 👷 Operário | 12640 | 12640 | 0 | 12640 | 12640 | 0 | 0 | Atacar 33×, Parede de Tijolos 17×, Marretada 50× |
-| 🕵️ Detetive | 10800 | 10800 | 0 | 35280 | 35280 | 0 | 0 | Atacar 33×, Espionagem 33×, Furtividade 34× |
-| 👮 Policial | 24320 | 24320 | 0 | 24320 | 24320 | 0 | 0 | Atacar 66×, Tiroteio 34×, Prender 0× |
-| 👲 Sushiman  | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
-| 💂 Guarda | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 57722 | 57387 | +335 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
-| 🧙 Mago | 20080 | 20080 | 0 | 72400 | 72400 | 0 | 0 | Atacar 33×, Bola de Fogo 33×, Incêndio 34× |
-| 🫅 Rei | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
-| 💀 Caveira | 10527 | 10527 | 0 | 34188 | 34188 | 0 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
-| 👻 Fantasma | 29760 | 29760 | 0 | 58320 | 58320 | 0 | 0 | Atacar 49×, Assombração 34×, Vindo do Além 17× |
-| 🎃 Abóbora | 5280 | 5280 | 0 | 5280 | 5280 | 0 | 0 | Atacar 66×, Doces ou Travessuras 0×, Doces de Abóbora 34× |
-| 🧟 Zumbi | 18720 | 18720 | 0 | 66960 | 66960 | 0 | 0 | Atacar 33×, Vômito Tóxico 33×, Putrefação 34× |
-| 👾 Invasor | 41548 | 33680 | +7868 | 41548 | 33680 | +7868 | 0 | Atacar 33×, Glitch 34×, Barata 33× |
-| 👽 Alien | 5280 | 5280 | 0 | 5280 | 5280 | 0 | 0 | Atacar 66×, Abduzir 0×, Galáxia 34× |
-| 🤖 Robô | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Raio-X 34×, Technology 33× |
-| 🧑‍🔬 Cientista | 18720 | 18720 | 0 | 66960 | 66960 | 0 | 0 | Atacar 33×, Química 34×, Física 33× |
-| 👹 Ogro | 10560 | 10560 | 0 | 34320 | 34320 | 0 | 0 | Atacar 33×, Esmagar 34×, Quebrar 33× |
-| 👺 Tengu | 51870 | 51870 | 0 | 91650 | 91650 | 0 | 0 | Atacar 33×, Corte de Vento 34×, Vendaval 33× |
-| 🤡 Palhaço | 5280 | 5280 | 0 | 5280 | 5280 | 0 | 0 | Atacar 66×, Coringa 34×, Circo 0× |
-| 🧌 Troll | 24120 | 24120 | 0 | 51840 | 51840 | 0 | 0 | Atacar 33×, Pancada 33×, Porradeiro 34× |
-| 🧞 Gênio | 10560 | 10560 | 0 | 34320 | 34320 | 0 | 0 | Atacar 33×, Desejo 34×, Profecia 33× |
-| 🧜 Sereia | 6600 | 5280 | +1320 | 6600 | 5280 | +1320 | 0 | Atacar 66×, Canto de Sereia 34×, Atlantis 0× |
-| 🧚 Fada | 22720 | 22720 | 0 | 51280 | 51280 | 0 | 0 | Atacar 33×, Sininho 33×, Pó Mágico 34× |
-| 🐲 Dragão | 10560 | 10560 | 0 | 34320 | 34320 | 0 | 0 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
-| 💩 Cocô | 24040 | 24040 | 0 | 52600 | 52600 | 0 | 0 | Atacar 33×, Descarga 33×, Desentupidor 34× |
-| 🦸 Herói | 16200 | 14880 | +1320 | 52920 | 51600 | +1320 | 0 | Atacar 33×, Salvando o Dia 33×, Super 34× |
-| 🦹 Vilão | 21280 | 21280 | 0 | 37600 | 37600 | 0 | 0 | Atacar 33×, Destruindo o Dia 34×, Vilania 33× |
-| 🦖 T-Rex | 11480 | 11480 | 0 | 38000 | 38000 | 0 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
-| 🦇 Morcego | 11000 | 8000 | +3000 | 29000 | 20000 | +9000 | 0 | Atacar 50×, Mordida 25×, Rato Voador 25× |
-| 🧛 Vampiro | 37980 | 37980 | 0 | 37980 | 37980 | 0 | 0 | Atacar 33×, Controle de Sangue 33×, Vampiro Primordial 34× |
-| 🧝 Elfo | 13200 | 13200 | 0 | 13200 | 13200 | 0 | 0 | Atacar 33×, Árvore do Mundo 34×, Natureza 33× |
-| 😈 Diabo | 10560 | 10560 | 0 | 34320 | 34320 | 0 | 0 | Atacar 33×, Inferno 33×, Anjo Caído 34× |
-| ⛄ Boneco de Neve | 23380 | 23380 | 0 | 51940 | 51940 | 0 | 0 | Atacar 33×, Bola de Neve 33×, Gelado 34× |
-| 🎭 Mímico | 12000 | 12000 | 0 | 36000 | 36000 | 0 | 0 | Atacar 50×, Imitação 25×, Copiando 25× |
-| 😇 Anjo | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Celestial 34×, Céu 33× |
-| 🎅 Papai Noel | 26658 | 23556 | +3102 | 96732 | 86304 | +10428 | 0 | Atacar 33×, Saco de Presente 34×, Fábrica de Presente 33× |
+| 👷 Operário | 12640 | 12640 | 0 | 16432 | 12640 | +3792 | 0 | Atacar 33×, Parede de Tijolos 17×, Marretada 50× |
+| 🕵️ Detetive | 10800 | 10800 | 0 | 40968 | 40176 | +792 | 0 | Atacar 33×, Espionagem 33×, Furtividade 34× |
+| 👮 Policial | 24320 | 24320 | 0 | 30238 | 25782 | +4456 | 0 | Atacar 66×, Tiroteio 34×, Prender 0× |
+| 👲 Sushiman  | 3960 | 2640 | +1320 | 5148 | 2640 | +2508 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
+| 💂 Guarda | 21120 | 21120 | 0 | 26039 | 22407 | +3632 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 73300 | 59037 | +14263 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 🧙 Mago | 20080 | 20080 | 0 | 83656 | 82864 | +792 | 0 | Atacar 33×, Bola de Fogo 33×, Incêndio 34× |
+| 🫅 Rei | 2640 | 2640 | 0 | 3432 | 2640 | +792 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
+| 💀 Caveira | 10527 | 10527 | 0 | 39732 | 38940 | +792 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
+| 👻 Fantasma | 29760 | 29760 | 0 | 70104 | 64032 | +6072 | 0 | Atacar 49×, Assombração 34×, Vindo do Além 17× |
+| 🎃 Abóbora | 5280 | 5280 | 0 | 6864 | 5280 | +1584 | 0 | Atacar 66×, Doces ou Travessuras 0×, Doces de Abóbora 34× |
+| 🧟 Zumbi | 18720 | 18720 | 0 | 77400 | 76608 | +792 | 0 | Atacar 33×, Vômito Tóxico 33×, Putrefação 34× |
+| 👾 Invasor | 41548 | 33680 | +7868 | 53999 | 33680 | +20319 | 0 | Atacar 33×, Glitch 34×, Barata 33× |
+| 👽 Alien | 5280 | 5280 | 0 | 6864 | 5280 | +1584 | 0 | Atacar 66×, Abduzir 0×, Galáxia 34× |
+| 🤖 Robô | 2640 | 2640 | 0 | 3432 | 2640 | +792 | 0 | Atacar 33×, Raio-X 34×, Technology 33× |
+| 🧑‍🔬 Cientista | 18720 | 18720 | 0 | 77400 | 76608 | +792 | 0 | Atacar 33×, Química 34×, Física 33× |
+| 👹 Ogro | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Esmagar 34×, Quebrar 33× |
+| 👺 Tengu | 51870 | 51870 | 0 | 111121 | 99538 | +11583 | 0 | Atacar 33×, Corte de Vento 34×, Vendaval 33× |
+| 🤡 Palhaço | 5280 | 5280 | 0 | 6864 | 5280 | +1584 | 0 | Atacar 66×, Coringa 34×, Circo 0× |
+| 🧌 Troll | 24120 | 24120 | 0 | 60322 | 58880 | +1442 | 0 | Atacar 33×, Pancada 33×, Porradeiro 34× |
+| 🧞 Gênio | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Desejo 34×, Profecia 33× |
+| 🧜 Sereia | 6600 | 5280 | +1320 | 8580 | 5280 | +3300 | 0 | Atacar 66×, Canto de Sereia 34×, Atlantis 0× |
+| 🧚 Fada | 22720 | 22720 | 0 | 60952 | 56992 | +3960 | 0 | Atacar 33×, Sininho 33×, Pó Mágico 34× |
+| 🐲 Dragão | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
+| 💩 Cocô | 24040 | 24040 | 0 | 62668 | 58312 | +4356 | 0 | Atacar 33×, Descarga 33×, Desentupidor 34× |
+| 🦸 Herói | 16200 | 14880 | +1320 | 61452 | 58944 | +2508 | 0 | Atacar 33×, Salvando o Dia 33×, Super 34× |
+| 🦹 Vilão | 21280 | 21280 | 0 | 44564 | 41821 | +2743 | 0 | Atacar 33×, Destruindo o Dia 34×, Vilania 33× |
+| 🦖 T-Rex | 11480 | 11480 | 0 | 44096 | 43304 | +792 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
+| 🦇 Morcego | 11000 | 8000 | +3000 | 34100 | 22400 | +11700 | 0 | Atacar 50×, Mordida 25×, Rato Voador 25× |
+| 🧛 Vampiro | 37980 | 37980 | 0 | 49374 | 37980 | +11394 | 0 | Atacar 33×, Controle de Sangue 33×, Vampiro Primordial 34× |
+| 🧝 Elfo | 13200 | 13200 | 0 | 17160 | 13200 | +3960 | 0 | Atacar 33×, Árvore do Mundo 34×, Natureza 33× |
+| 😈 Diabo | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Inferno 33×, Anjo Caído 34× |
+| ⛄ Boneco de Neve | 23380 | 23380 | 0 | 61810 | 57652 | +4158 | 0 | Atacar 33×, Bola de Neve 33×, Gelado 34× |
+| 🎭 Mímico | 12000 | 12000 | 0 | 42000 | 40800 | +1200 | 0 | Atacar 50×, Imitação 25×, Copiando 25× |
+| 😇 Anjo | 3960 | 2640 | +1320 | 5148 | 2640 | +2508 | 0 | Atacar 33×, Celestial 34×, Céu 33× |
+| 🎅 Papai Noel | 26658 | 23556 | +3102 | 111911 | 98942 | +12969 | 0 | Atacar 33×, Saco de Presente 34×, Fábrica de Presente 33× |
 
 ## Linha 4 — apóstolo inteiro · boneco DEF no cap · RECEBENDO malefícios
 
@@ -328,42 +334,42 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 
 | Apóstolo | Dano | Esperado | Sinergia | Dano (4 alvos) | Esperado (4) | Sinergia (4) | Tick | Habilidades usadas |
 |---|--:|--:|--:|--:|--:|--:|--:|---|
-| 👷 Operário | 12640 | 12640 | 0 | 12640 | 12640 | 0 | 0 | Atacar 33×, Parede de Tijolos 17×, Marretada 50× |
-| 🕵️ Detetive | 20304 | 10800 | +9504 | 66168 | 35280 | +30888 | 0 | Atacar 33×, Espionagem 33×, Furtividade 34× |
-| 👮 Policial | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Tiroteio 33×, Prender 34× |
-| 👲 Sushiman  | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
-| 💂 Guarda | 21120 | 21120 | 0 | 21120 | 21120 | 0 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 57733 | 57387 | +346 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
-| 🧙 Mago | 33010 | 20040 | +12970 | 122140 | 72240 | +49900 | 10000 | Atacar 33×, Bola de Fogo 34×, Incêndio 33× |
-| 🫅 Rei | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
-| 💀 Caveira | 10527 | 10527 | 0 | 34188 | 34188 | 0 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
-| 👻 Fantasma | 29760 | 29760 | 0 | 58320 | 58320 | 0 | 0 | Atacar 49×, Assombração 34×, Vindo do Além 17× |
-| 🎃 Abóbora | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Doces ou Travessuras 33×, Doces de Abóbora 34× |
-| 🧟 Zumbi | 31920 | 18720 | +13200 | 119760 | 66960 | +52800 | 6600 | Atacar 33×, Vômito Tóxico 33×, Putrefação 34× |
-| 👾 Invasor | 78935 | 33680 | +45255 | 78935 | 33680 | +45255 | 0 | Atacar 33×, Glitch 34×, Barata 33× |
-| 👽 Alien | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Abduzir 33×, Galáxia 34× |
-| 🤖 Robô | 2640 | 2640 | 0 | 2640 | 2640 | 0 | 0 | Atacar 33×, Raio-X 34×, Technology 33× |
-| 🧑‍🔬 Cientista | 36215 | 18720 | +17495 | 136940 | 66960 | +69980 | 17495 | Atacar 33×, Química 34×, Física 33× |
-| 👹 Ogro | 10560 | 10560 | 0 | 34320 | 34320 | 0 | 0 | Atacar 33×, Esmagar 34×, Quebrar 33× |
-| 👺 Tengu | 51870 | 51870 | 0 | 91650 | 91650 | 0 | 0 | Atacar 33×, Corte de Vento 34×, Vendaval 33× |
-| 🤡 Palhaço | 5280 | 5280 | 0 | 5280 | 5280 | 0 | 0 | Atacar 66×, Coringa 34×, Circo 0× |
-| 🧌 Troll | 24120 | 24120 | 0 | 51840 | 51840 | 0 | 0 | Atacar 33×, Pancada 33×, Porradeiro 34× |
-| 🧞 Gênio | 20064 | 10560 | +9504 | 65208 | 34320 | +30888 | 0 | Atacar 33×, Desejo 34×, Profecia 33× |
-| 🧜 Sereia | 6600 | 5280 | +1320 | 6600 | 5280 | +1320 | 0 | Atacar 66×, Canto de Sereia 34×, Atlantis 0× |
-| 🧚 Fada | 22720 | 22720 | 0 | 51280 | 51280 | 0 | 0 | Atacar 33×, Sininho 33×, Pó Mágico 34× |
-| 🐲 Dragão | 20460 | 10560 | +9900 | 73920 | 34320 | +39600 | 9900 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
-| 💩 Cocô | 34040 | 24040 | +10000 | 92600 | 52600 | +40000 | 10000 | Atacar 33×, Descarga 33×, Desentupidor 34× |
-| 🦸 Herói | 16200 | 14880 | +1320 | 52920 | 51600 | +1320 | 0 | Atacar 33×, Salvando o Dia 33×, Super 34× |
-| 🦹 Vilão | 21280 | 21280 | 0 | 37600 | 37600 | 0 | 0 | Atacar 33×, Destruindo o Dia 34×, Vilania 33× |
-| 🦖 T-Rex | 11480 | 11480 | 0 | 38000 | 38000 | 0 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
-| 🦇 Morcego | 11000 | 8000 | +3000 | 29000 | 20000 | +9000 | 0 | Atacar 50×, Mordida 25×, Rato Voador 25× |
-| 🧛 Vampiro | 37980 | 37980 | 0 | 37980 | 37980 | 0 | 0 | Atacar 33×, Controle de Sangue 33×, Vampiro Primordial 34× |
-| 🧝 Elfo | 13200 | 13200 | 0 | 13200 | 13200 | 0 | 0 | Atacar 33×, Árvore do Mundo 34×, Natureza 33× |
-| 😈 Diabo | 17160 | 10560 | +6600 | 60720 | 34320 | +26400 | 0 | Atacar 33×, Inferno 33×, Anjo Caído 34× |
-| ⛄ Boneco de Neve | 23380 | 23380 | 0 | 51940 | 51940 | 0 | 0 | Atacar 33×, Bola de Neve 33×, Gelado 34× |
-| 🎭 Mímico | 12000 | 12000 | 0 | 36000 | 36000 | 0 | 0 | Atacar 50×, Imitação 25×, Copiando 25× |
-| 😇 Anjo | 3960 | 2640 | +1320 | 3960 | 2640 | +1320 | 0 | Atacar 33×, Celestial 34×, Céu 33× |
-| 🎅 Papai Noel | 50451 | 23556 | +26895 | 182994 | 86304 | +96690 | 0 | Atacar 33×, Saco de Presente 34×, Fábrica de Presente 33× |
+| 👷 Operário | 12640 | 12640 | 0 | 16432 | 12640 | +3792 | 0 | Atacar 33×, Parede de Tijolos 17×, Marretada 50× |
+| 🕵️ Detetive | 20304 | 10800 | +9504 | 76773 | 40176 | +36597 | 0 | Atacar 33×, Espionagem 33×, Furtividade 34× |
+| 👮 Policial | 21120 | 21120 | 0 | 26033 | 22539 | +3494 | 0 | Atacar 33×, Tiroteio 33×, Prender 34× |
+| 👲 Sushiman  | 3960 | 2640 | +1320 | 5148 | 2640 | +2508 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
+| 💂 Guarda | 21120 | 21120 | 0 | 25924 | 22407 | +3517 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 73389 | 59037 | +14352 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 🧙 Mago | 33010 | 20040 | +12970 | 134890 | 82680 | +52210 | 10000 | Atacar 33×, Bola de Fogo 34×, Incêndio 33× |
+| 🫅 Rei | 2640 | 2640 | 0 | 3432 | 2640 | +792 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
+| 💀 Caveira | 10527 | 10527 | 0 | 39732 | 38940 | +792 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
+| 👻 Fantasma | 29760 | 29760 | 0 | 70104 | 64032 | +6072 | 0 | Atacar 49×, Assombração 34×, Vindo do Além 17× |
+| 🎃 Abóbora | 2640 | 2640 | 0 | 3432 | 2640 | +792 | 0 | Atacar 33×, Doces ou Travessuras 33×, Doces de Abóbora 34× |
+| 🧟 Zumbi | 31920 | 18720 | +13200 | 130200 | 76608 | +53592 | 6600 | Atacar 33×, Vômito Tóxico 33×, Putrefação 34× |
+| 👾 Invasor | 78935 | 33680 | +45255 | 102604 | 33680 | +68924 | 0 | Atacar 33×, Glitch 34×, Barata 33× |
+| 👽 Alien | 2640 | 2640 | 0 | 3432 | 2640 | +792 | 0 | Atacar 33×, Abduzir 33×, Galáxia 34× |
+| 🤖 Robô | 2640 | 2640 | 0 | 3432 | 2640 | +792 | 0 | Atacar 33×, Raio-X 34×, Technology 33× |
+| 🧑‍🔬 Cientista | 36215 | 18720 | +17495 | 147380 | 76608 | +70772 | 17495 | Atacar 33×, Química 34×, Física 33× |
+| 👹 Ogro | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Esmagar 34×, Quebrar 33× |
+| 👺 Tengu | 51870 | 51870 | 0 | 111121 | 99538 | +11583 | 0 | Atacar 33×, Corte de Vento 34×, Vendaval 33× |
+| 🤡 Palhaço | 5280 | 5280 | 0 | 6864 | 5280 | +1584 | 0 | Atacar 66×, Coringa 34×, Circo 0× |
+| 🧌 Troll | 24120 | 24120 | 0 | 60296 | 58880 | +1416 | 0 | Atacar 33×, Pancada 33×, Porradeiro 34× |
+| 🧞 Gênio | 20064 | 10560 | +9504 | 75669 | 39072 | +36597 | 0 | Atacar 33×, Desejo 34×, Profecia 33× |
+| 🧜 Sereia | 6600 | 5280 | +1320 | 8580 | 5280 | +3300 | 0 | Atacar 66×, Canto de Sereia 34×, Atlantis 0× |
+| 🧚 Fada | 22720 | 22720 | 0 | 60952 | 56992 | +3960 | 0 | Atacar 33×, Sininho 33×, Pó Mágico 34× |
+| 🐲 Dragão | 20460 | 10560 | +9900 | 79464 | 39072 | +40392 | 9900 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
+| 💩 Cocô | 34040 | 24040 | +10000 | 102668 | 58312 | +44356 | 10000 | Atacar 33×, Descarga 33×, Desentupidor 34× |
+| 🦸 Herói | 16200 | 14880 | +1320 | 61452 | 58944 | +2508 | 0 | Atacar 33×, Salvando o Dia 33×, Super 34× |
+| 🦹 Vilão | 21280 | 21280 | 0 | 44640 | 41821 | +2819 | 0 | Atacar 33×, Destruindo o Dia 34×, Vilania 33× |
+| 🦖 T-Rex | 11480 | 11480 | 0 | 44096 | 43304 | +792 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
+| 🦇 Morcego | 11000 | 8000 | +3000 | 34100 | 22400 | +11700 | 0 | Atacar 50×, Mordida 25×, Rato Voador 25× |
+| 🧛 Vampiro | 37980 | 37980 | 0 | 49374 | 37980 | +11394 | 0 | Atacar 33×, Controle de Sangue 33×, Vampiro Primordial 34× |
+| 🧝 Elfo | 13200 | 13200 | 0 | 17160 | 13200 | +3960 | 0 | Atacar 33×, Árvore do Mundo 34×, Natureza 33× |
+| 😈 Diabo | 17160 | 10560 | +6600 | 66264 | 39072 | +27192 | 0 | Atacar 33×, Inferno 33×, Anjo Caído 34× |
+| ⛄ Boneco de Neve | 23380 | 23380 | 0 | 61810 | 57652 | +4158 | 0 | Atacar 33×, Bola de Neve 33×, Gelado 34× |
+| 🎭 Mímico | 12000 | 12000 | 0 | 42000 | 40800 | +1200 | 0 | Atacar 50×, Imitação 25×, Copiando 25× |
+| 😇 Anjo | 3960 | 2640 | +1320 | 5148 | 2640 | +2508 | 0 | Atacar 33×, Celestial 34×, Céu 33× |
+| 🎅 Papai Noel | 50451 | 23556 | +26895 | 211373 | 98942 | +112431 | 0 | Atacar 33×, Saco de Presente 34×, Fábrica de Presente 33× |
 
 ## Linha 5 — por habilidade · boneco DEF no cap · RECEBENDO malefícios
 
@@ -376,37 +382,37 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 👷 Operário | 🔨 Marretada | 2 | 50 | 10000 | 200 | 10000 | 0 | 0 | 0 |
 | 🕵️ Detetive | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🕵️ Detetive | 🔎 Espionagem | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 8160 | 240 | 32640 | 0 | 0 | 0 |
+| 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 8160 | 240 | 37536 | 0 | 0 | 0 |
 | 👮 Policial | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 19040 | 560 | 19040 | 0 | 0 | 0 |
+| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 19040 | 560 | 20476 | 0 | 0 | 0 |
 | 👮 Policial | ⛓️ Prender | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 👲 Sushiman  | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 👲 Sushiman  | 🍣 Sushi | 3 | 34 | 0 | 0 | 0 | 20400 | 0 | 0 |
 | 👲 Sushiman  | 🍙 Nigiri | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 19040 | 0 | 0 | 0 |
+| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 20482 | 0 | 0 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 | 0 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 20923 | 0 | 0 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 22613 | 0 | 0 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 | 0 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |
-| 🧙 Mago | 🌋 Incêndio | 3 | 34 | 9520 | 280 | 38080 | 0 | 0 | 0 |
+| 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 18160 | 534 | 77536 | 0 | 10000 | +10000 |
+| 🧙 Mago | 🌋 Incêndio | 3 | 34 | 9520 | 280 | 43792 | 0 | 0 | 0 |
 | 🫅 Rei | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🫅 Rei | 🗳️ Democracia | 3 | 34 | 0 | 0 | 0 | 20400 | 0 | 0 |
 | 🫅 Rei | 🎖️ Lealdade | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 💀 Caveira | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 💀 Caveira | 🦴 Ossinho | 3 | 34 | 8126 | 239 | 32504 | 0 | 0 | 0 |
+| 💀 Caveira | 🦴 Ossinho | 3 | 34 | 8126 | 239 | 37400 | 0 | 0 | 0 |
 | 💀 Caveira | 🦴 Osso Duro de Roer | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 👻 Fantasma | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 👻 Fantasma | 👻 Assombração | 3 | 34 | 9520 | 280 | 38080 | 1904 | 0 | 0 |
+| 👻 Fantasma | 👻 Assombração | 3 | 34 | 9520 | 280 | 43792 | 1904 | 0 | 0 |
 | 👻 Fantasma | 💀 Vindo do Além | 6 | 17 | 16320 | 960 | 16320 | 0 | 0 | 0 |
 | 🎃 Abóbora | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🎃 Abóbora | 🍬 Doces ou Travessuras | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🎃 Abóbora | 🍭 Doces de Abóbora | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🧟 Zumbi | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 🧟 Zumbi | 🤢 Vômito Tóxico | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |
-| 🧟 Zumbi | 💀 Putrefação | 3 | 34 | 8160 | 240 | 32640 | 1632 | 0 | 0 |
+| 🧟 Zumbi | 🤢 Vômito Tóxico | 3 | 34 | 18160 | 534 | 77536 | 0 | 10000 | +10000 |
+| 🧟 Zumbi | 💀 Putrefação | 3 | 34 | 8160 | 240 | 37536 | 1632 | 0 | 0 |
 | 👾 Invasor | ⚔️ Atacar | 0 | 100 | 9164 | 91 | 9164 | 0 | 0 | 0 |
 | 👾 Invasor | 📺 Glitch | 3 | 34 | 35410 | 1041 | 35410 | 0 | 0 | +16765 |
 | 👾 Invasor | 🪳 Barata | 3 | 34 | 12430 | 365 | 12430 | 0 | 0 | 0 |
@@ -417,46 +423,46 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 🤖 Robô | 🩻 Raio-X | 3 | 34 | 0 | 0 | 0 | 20400 | 0 | 0 |
 | 🤖 Robô | 🤖 Technology | 3 | 34 | 0 | 0 | 0 | 6800 | 0 | 0 |
 | 🧑‍🔬 Cientista | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 🧑‍🔬 Cientista | 🧪 Química | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |
-| 🧑‍🔬 Cientista | ⚛️ Física | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |
+| 🧑‍🔬 Cientista | 🧪 Química | 3 | 34 | 18160 | 534 | 77536 | 0 | 10000 | +10000 |
+| 🧑‍🔬 Cientista | ⚛️ Física | 3 | 34 | 18160 | 534 | 77536 | 0 | 10000 | +10000 |
 | 👹 Ogro | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 👹 Ogro | 👊 Esmagar | 3 | 34 | 0 | 0 | 0 | 17000 | 0 | 0 |
-| 👹 Ogro | 💥 Quebrar | 3 | 34 | 8160 | 240 | 32640 | 0 | 0 | 0 |
+| 👹 Ogro | 💥 Quebrar | 3 | 34 | 8160 | 240 | 37536 | 0 | 0 | 0 |
 | 👺 Tengu | ⚔️ Atacar | 0 | 100 | 12000 | 120 | 12000 | 0 | 0 | 0 |
-| 👺 Tengu | 🌬️ Corte de Vento | 3 | 34 | 13260 | 390 | 53040 | 0 | 0 | 0 |
+| 👺 Tengu | 🌬️ Corte de Vento | 3 | 34 | 13260 | 390 | 60928 | 0 | 0 | 0 |
 | 👺 Tengu | 🌪️ Vendaval | 3 | 34 | 35700 | 1050 | 35700 | 0 | 0 | 0 |
 | 🤡 Palhaço | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🤡 Palhaço | 🃏 Coringa | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🤡 Palhaço | 🎪 Circo | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🧌 Troll | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 🧌 Troll | 🤜 Pancada | 3 | 34 | 9520 | 280 | 38080 | 0 | 0 | 0 |
-| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 12240 | 360 | 12240 | 3672 | 0 | 0 |
+| 🧌 Troll | 🤜 Pancada | 3 | 34 | 9520 | 280 | 43792 | 0 | 0 | 0 |
+| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 12240 | 360 | 13779 | 3672 | 0 | 0 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 🧞 Gênio | 🔮 Profecia | 3 | 34 | 15504 | 456 | 62016 | 0 | 0 | +7344 |
+| 🧞 Gênio | 🔮 Profecia | 3 | 34 | 15504 | 456 | 71264 | 0 | 0 | +7344 |
 | 🧜 Sereia | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧜 Sereia | 🧜‍♀️ Canto de Sereia | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🧜 Sereia | 🌊 Atlantis | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🧚 Fada | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧚 Fada | 🔔 Sininho | 3 | 34 | 10880 | 320 | 10880 | 0 | 0 | 0 |
-| 🧚 Fada | ✨ Pó Mágico | 3 | 34 | 9520 | 280 | 38080 | 0 | 0 | 0 |
+| 🧚 Fada | ✨ Pó Mágico | 3 | 34 | 9520 | 280 | 43792 | 0 | 0 | 0 |
 | 🐲 Dragão | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 18160 | 534 | 72640 | 0 | 10000 | +10000 |
+| 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 34 | 18160 | 534 | 77536 | 0 | 10000 | +10000 |
 | 🐲 Dragão | 🐲 Dragão Protetor | 3 | 34 | 0 | 0 | 0 | 17000 | 0 | 0 |
 | 💩 Cocô | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 💩 Cocô | 🚽 Descarga | 3 | 34 | 22240 | 654 | 22240 | 0 | 10000 | +10000 |
-| 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 19520 | 574 | 78080 | 0 | 10000 | +10000 |
+| 💩 Cocô | 🪠 Desentupidor | 3 | 34 | 19520 | 574 | 83792 | 0 | 10000 | +10000 |
 | 🦸 Herói | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🦸 Herói | 🦸 Salvando o Dia | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 🦸 Herói | 💪 Super | 3 | 34 | 12240 | 360 | 48960 | 0 | 0 | 0 |
+| 🦸 Herói | 💪 Super | 3 | 34 | 12240 | 360 | 56304 | 0 | 0 | 0 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 5440 | 160 | 21760 | 0 | 0 | 0 |
-| 🦹 Vilão | 👿 Vilania | 3 | 34 | 13600 | 400 | 13600 | 0 | 0 | 0 |
+| 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 5440 | 160 | 25024 | 0 | 0 | 0 |
+| 🦹 Vilão | 👿 Vilania | 3 | 34 | 13600 | 400 | 14616 | 0 | 0 | 0 |
 | 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 8840 | 260 | 35360 | 0 | 0 | 0 |
+| 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 8840 | 260 | 40664 | 0 | 0 | 0 |
 | 🦇 Morcego | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 1200 | 0 | 0 |
-| 🦇 Morcego | 🦇 Mordida | 3 | 34 | 5440 | 160 | 21760 | 1632 | 0 | 0 |
+| 🦇 Morcego | 🦇 Mordida | 3 | 34 | 5440 | 160 | 25024 | 1632 | 0 | 0 |
 | 🦇 Morcego | 🐀 Rato Voador | 4 | 25 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🧛 Vampiro | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧛 Vampiro | 🩸 Controle de Sangue | 3 | 34 | 23800 | 700 | 23800 | 0 | 0 | 0 |
@@ -465,20 +471,20 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 🧝 Elfo | 🌳 Árvore do Mundo | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🧝 Elfo | 🌿 Natureza | 3 | 34 | 10880 | 320 | 10880 | 0 | 0 | 0 |
 | 😈 Diabo | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 😈 Diabo | 🔥 Inferno | 3 | 34 | 14960 | 440 | 59840 | 0 | 0 | +6800 |
+| 😈 Diabo | 🔥 Inferno | 3 | 34 | 14960 | 440 | 64736 | 0 | 0 | +6800 |
 | 😈 Diabo | 😇 Anjo Caído | 3 | 34 | 0 | 0 | 0 | 20400 | 0 | 0 |
 | ⛄ Boneco de Neve | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | ⛄ Boneco de Neve | ⛄ Bola de Neve | 3 | 34 | 11560 | 340 | 11560 | 0 | 0 | 0 |
-| ⛄ Boneco de Neve | ❄️ Gelado | 3 | 34 | 9520 | 280 | 38080 | 0 | 0 | 0 |
+| ⛄ Boneco de Neve | ❄️ Gelado | 3 | 34 | 9520 | 280 | 43792 | 0 | 0 | 0 |
 | 🎭 Mímico | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 🎭 Mímico | 🎭 Imitação | 3 | 34 | 10880 | 320 | 43520 | 0 | 0 | 0 |
+| 🎭 Mímico | 🎭 Imitação | 3 | 34 | 10880 | 320 | 50048 | 0 | 0 | 0 |
 | 🎭 Mímico | 📋 Copiando | 4 | 25 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 😇 Anjo | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 10000 | 0 | 0 |
 | 😇 Anjo | 🌟 Celestial | 3 | 34 | 0 | 0 | 0 | 30400 | 0 | 0 |
 | 😇 Anjo | ☁️ Céu | 3 | 34 | 0 | 0 | 0 | 10000 | 0 | 0 |
 | 🎅 Papai Noel | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 34 | 11016 | 324 | 44064 | 0 | 0 | 0 |
-| 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 34 | 19380 | 570 | 77520 | 0 | 0 | +9180 |
+| 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 34 | 11016 | 324 | 50762 | 0 | 0 | 0 |
+| 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 34 | 19380 | 570 | 89148 | 0 | 0 | +9180 |
 
 ## Rankings (condições da linha 1: DEF 0, alvo imune)
 
@@ -572,43 +578,43 @@ Estas respondem "quem está fora da curva?".
 
 | # | Apóstolo | Habilidade | CD | Valor |
 |--:|---|---|--:|--:|
-| 1 | 👺 Tengu | 🌬️ Corte de Vento | 3 | 212160 |
-| 2 | 🦸 Herói | 💪 Super | 3 | 195840 |
-| 3 | 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 176664 |
-| 4 | 🎭 Mímico | 🎭 Imitação | 3 | 174080 |
-| 5 | 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 163200 |
-| 6 | 🧙 Mago | 🌋 Incêndio | 3 | 152320 |
-| 7 | 👻 Fantasma | 👻 Assombração | 3 | 152320 |
-| 8 | 🧌 Troll | 🤜 Pancada | 3 | 152320 |
-| 9 | 🧚 Fada | ✨ Pó Mágico | 3 | 152320 |
-| 10 | 💩 Cocô | 🪠 Desentupidor | 3 | 152320 |
-| 11 | ⛄ Boneco de Neve | ❄️ Gelado | 3 | 152320 |
-| 12 | 🦖 T-Rex | 🦶 Pisada | 3 | 141440 |
-| 13 | 🕵️ Detetive | 🕳️ Furtividade | 3 | 130560 |
-| 14 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 130560 |
-| 15 | 🧟 Zumbi | 🤢 Vômito Tóxico | 3 | 130560 |
-| 16 | 🧟 Zumbi | 💀 Putrefação | 3 | 130560 |
-| 17 | 🧑‍🔬 Cientista | 🧪 Química | 3 | 130560 |
-| 18 | 🧑‍🔬 Cientista | ⚛️ Física | 3 | 130560 |
-| 19 | 👹 Ogro | 💥 Quebrar | 3 | 130560 |
-| 20 | 🧞 Gênio | 🔮 Profecia | 3 | 130560 |
-| 21 | 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 130560 |
-| 22 | 😈 Diabo | 🔥 Inferno | 3 | 130560 |
-| 23 | 💀 Caveira | 🦴 Ossinho | 3 | 130288 |
-| 24 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 87040 |
-| 25 | 🦇 Morcego | 🦇 Mordida | 3 | 87040 |
-| 26 | 👮 Policial | 🔫 Tiroteio | 3 | 76160 |
-| 27 | 💂 Guarda | 🤺 Esgrima | 3 | 76160 |
+| 1 | 👺 Tengu | 🌬️ Corte de Vento | 3 | 243916 |
+| 2 | 🦸 Herói | 💪 Super | 3 | 225216 |
+| 3 | 🎅 Papai Noel | 🎅 Saco de Presente | 3 | 203184 |
+| 4 | 🎭 Mímico | 🎭 Imitação | 3 | 200192 |
+| 5 | 🎅 Papai Noel | 🏭 Fábrica de Presente | 3 | 187680 |
+| 6 | 🧙 Mago | 🌋 Incêndio | 3 | 175168 |
+| 7 | 👻 Fantasma | 👻 Assombração | 3 | 175168 |
+| 8 | 🧌 Troll | 🤜 Pancada | 3 | 175168 |
+| 9 | 🧚 Fada | ✨ Pó Mágico | 3 | 175168 |
+| 10 | 💩 Cocô | 🪠 Desentupidor | 3 | 175168 |
+| 11 | ⛄ Boneco de Neve | ❄️ Gelado | 3 | 175168 |
+| 12 | 🦖 T-Rex | 🦶 Pisada | 3 | 162656 |
+| 13 | 🕵️ Detetive | 🕳️ Furtividade | 3 | 150144 |
+| 14 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 150144 |
+| 15 | 🧟 Zumbi | 🤢 Vômito Tóxico | 3 | 150144 |
+| 16 | 🧟 Zumbi | 💀 Putrefação | 3 | 150144 |
+| 17 | 🧑‍🔬 Cientista | 🧪 Química | 3 | 150144 |
+| 18 | 🧑‍🔬 Cientista | ⚛️ Física | 3 | 150144 |
+| 19 | 👹 Ogro | 💥 Quebrar | 3 | 150144 |
+| 20 | 🧞 Gênio | 🔮 Profecia | 3 | 150144 |
+| 21 | 🐲 Dragão | 🔥 Sopro do Dragão | 3 | 150144 |
+| 22 | 😈 Diabo | 🔥 Inferno | 3 | 150144 |
+| 23 | 💀 Caveira | 🦴 Ossinho | 3 | 149872 |
+| 24 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 100096 |
+| 25 | 🦇 Morcego | 🦇 Mordida | 3 | 100096 |
+| 26 | 👮 Policial | 🔫 Tiroteio | 3 | 82208 |
+| 27 | 💂 Guarda | 🤺 Esgrima | 3 | 81782 |
 | 28 | 👾 Invasor | 📺 Glitch | 3 | 74580 |
-| 29 | 👺 Tengu | 🌪️ Vendaval | 3 | 57120 |
-| 30 | 🦹 Vilão | 👿 Vilania | 3 | 54400 |
-| 31 | 👾 Invasor | 🪳 Barata | 3 | 49720 |
-| 32 | 🧌 Troll | 🥊 Porradeiro | 3 | 48960 |
+| 29 | 🦹 Vilão | 👿 Vilania | 3 | 58712 |
+| 30 | 👺 Tengu | 🌪️ Vendaval | 3 | 57120 |
+| 31 | 🧌 Troll | 🥊 Porradeiro | 3 | 54938 |
+| 32 | 👾 Invasor | 🪳 Barata | 3 | 49720 |
 | 33 | 💩 Cocô | 🚽 Descarga | 3 | 48960 |
 | 34 | 🧛 Vampiro | 🌙 Vampiro Primordial | 3 | 48960 |
 | 35 | 👺 Tengu | ⚔️ Atacar | 0 | 48000 |
-| 36 | ⛄ Boneco de Neve | ⛄ Bola de Neve | 3 | 46240 |
-| 37 | 🥷 Ninja | 🌟 Shuriken | 3 | 43520 |
+| 36 | 🥷 Ninja | 🌟 Shuriken | 3 | 46668 |
+| 37 | ⛄ Boneco de Neve | ⛄ Bola de Neve | 3 | 46240 |
 | 38 | 🧚 Fada | 🔔 Sininho | 3 | 43520 |
 | 39 | 🧝 Elfo | 🌿 Natureza | 3 | 43520 |
 | 40 | 👷 Operário | 🔨 Marretada | 2 | 40000 |

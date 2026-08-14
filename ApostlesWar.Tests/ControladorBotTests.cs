@@ -27,7 +27,9 @@ namespace Tests
             var todas = new List<Habilidade> { new AtaqueBasico() };
             todas.AddRange(habs);
             var c = new Jogador(new Personagem(1, Faccao.Humanos, "T", "🧪", hp, atk, def, todas.ToArray()));
-            c.IniciarCombate();
+            // Fora do tabuleiro: aqui se mede a ESCOLHA do bot, e o perfil de distância mexeria nos
+            // números de todos os alvos ao mesmo tempo. A geometria tem teste próprio.
+            c.IniciarCombate(Combate.ForaDoTabuleiro);
             return c;
         }
 

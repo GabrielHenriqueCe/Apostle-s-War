@@ -7,6 +7,9 @@ namespace ApostlesWar.Domain
     /// Isto substitui os 108 números que viviam soltos nos 36 apóstolos (36 × HP/ATK/DEF). Agora são
     /// 4 fichas + 9 torções, e rebalancear deixou de ser "ajustar 36 arquivos".
     ///
+    /// Guarda também o PERFIL DE DISTÂNCIA (o d* de cada tipo): é ficha do tipo, igual ao HP e ao
+    /// ATK — a curva de distância é o gesto dele no tabuleiro, não uma regra do motor de combate.
+    ///
     /// Fonte: docs/GDD-progressao.md §2. Critério de aceitação da tabela, e ele é do Gabriel:
     /// <b>cada tipo é PRIMEIRO em dois stats</b> — Guardião HP/DEF · Combatente os dois de crítico ·
     /// Suporte Precisão/Resistência · Atirador ATK/Velocidade. Uma revisão que deixe um tipo sem
@@ -66,6 +69,58 @@ namespace ApostlesWar.Domain
 
         public const int NivelMinimo = 1;
         public const int NivelMaximo = 60;
+
+        // === O PERFIL DE DISTÂNCIA (GDD §2) ===
+        // Quatro casas por lado, as frentes se olhando: `distância = casa do atacante + casa do
+        // alvo − 1`, de 1 (frente × frente) a 7 (fundo × fundo). O multiplicador é máximo na
+        // distância ideal do TIPO e cai por casa de desvio, pros dois lados.
+
+        public const int CasaDaFrente = 1;
+        public const int CasaDoFundo = 4;
+        public const int DistanciaMinima = CasaDaFrente * 2 - 1;
+        public const int DistanciaMaxima = CasaDoFundo * 2 - 1;
+
+        // Em CENTÉSIMOS, e é de propósito: `1.30 - 0.10 * 3` em double dá 0,9999999999999999, e o
+        // (int) do dano transforma isso em 199 onde se esperava 200. A divisão por 100 no fim é
+        // exata pros sete valores da tabela.
+        private const int PicoEmCentesimos = 130;
+        private const int QuedaPorCasaEmCentesimos = 10;
+
+        /// <summary>
+        /// A distância em que cada tipo bate mais forte. O 💗 Suporte não tem — ele rende igual em
+        /// qualquer casa, e é o único assim (quem cura e limpa já tem com o que se preocupar).
+        ///
+        /// Mora aqui porque o d* é do TIPO: é ficha, ao lado do HP e do ATK, não regra de combate.
+        /// </summary>
+        private static readonly Dictionary<TipoDeApostolo, int> _distanciaIdeal = new()
+        {
+            [TipoDeApostolo.Guardiao] = 1,
+            [TipoDeApostolo.Combatente] = 4,
+            [TipoDeApostolo.Atirador] = 5,
+        };
+
+        /// <summary>A distância entre duas casas de fileiras opostas. Fora disso não há geometria.</summary>
+        public static int DistanciaEntreCasas(int casaAtacante, int casaAlvo)
+            => casaAtacante + casaAlvo - 1;
+
+        /// <summary>A distância ideal do tipo, ou <c>null</c> pra quem não tem perfil (o Suporte).</summary>
+        public static int? DistanciaIdeal(TipoDeApostolo tipo)
+            => _distanciaIdeal.TryGetValue(tipo, out int ideal) ? ideal : null;
+
+        /// <summary>
+        /// O multiplicador de dano do tipo NAQUELA distância: 1,30 no pico, −0,10 por casa de desvio.
+        /// Função pura — quem descobre as casas e aplica o resultado é o <c>Combate</c>.
+        ///
+        /// A distância é presa à fila de 7 porque um valor fora dela viraria multiplicador negativo,
+        /// e dano negativo cura.
+        /// </summary>
+        public static double MultiplicadorDePosicao(TipoDeApostolo tipo, int distancia)
+        {
+            if (DistanciaIdeal(tipo) is not int ideal) return 1.0;
+
+            int naFila = Math.Clamp(distancia, DistanciaMinima, DistanciaMaxima);
+            return (PicoEmCentesimos - QuedaPorCasaEmCentesimos * Math.Abs(naFila - ideal)) / 100.0;
+        }
 
         /// <summary>
         /// A curva é CONTÍNUA e vai de 1× a 30×: declaram-se as PONTAS e a taxa por nível é

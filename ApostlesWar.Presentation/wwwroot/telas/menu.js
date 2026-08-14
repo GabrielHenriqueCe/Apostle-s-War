@@ -6,6 +6,7 @@
 
 import { definirMenuRaiz } from '../nucleo/cena.js';
 import { mandar } from '../nucleo/ponte.js';
+import { confirmar } from '../ui/modal.js';
 
 let perfilAvatar = '🧭';   // avatar do jogador; vira o marcador que caminha no mapa
 

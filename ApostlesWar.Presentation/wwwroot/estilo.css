@@ -18,6 +18,18 @@
     --agindo: #7ee081;
     --alvo: #e0574f;
 
+    /* AS PARADAS DO MEDIDOR DE TURNO: uma rampa só, de 0 a 500, de 100 em 100. Cada faixa é o
+       segmento entre duas paradas vizinhas, então por construção nenhuma parece com outra.
+       ELA NÃO USA O OURO, e é decisão: o ouro fica a ΔE 12,7 do âmbar da parada 2, e aos 200% a
+       barra parecia ter voltado a ser o medidor normal. O ouro é o acento da UI; o medidor tem
+       escala PRÓPRIA — e por isso ele também não muda com o tema. */
+    --parada-0: #3a3446;  /*   0  : ferro apagado */
+    --parada-1: #fff3d4;  /* 100  : branco incandescente */
+    --parada-2: #ffc663;  /* 200  : âmbar */
+    --parada-3: #ff8a3d;  /* 300  : laranja de forja */
+    --parada-4: #ef4a26;  /* 400  : brasa */
+    --parada-5: #b81a0c;  /* 500+ : vermelho profundo, e pulsa */
+
     /* O TAMANHO DE UM TIME, e ele é UM só. A casa da montagem, o espaço entre elas, a fileira de
        quatro e a tela que precisa caber duas fileiras lado a lado — tudo daqui. Antes cada tela
        tinha a sua largura (760 na campanha, 900 na arena) e a casa era 25% do pai, então o mesmo
@@ -1591,6 +1603,37 @@ body {
     background: var(--escudo);
     opacity: .75;
     transition: width .35s ease;
+}
+
+/* O MEDIDOR DE TURNO (GDD §1) — mais fino que a barra de vida de propósito: são duas leituras
+   diferentes na mesma caixa, e a vida é a que decide a luta. As cores estão no `:root`. */
+.medidor {
+    position: relative;
+    height: 5px;
+    margin-top: 3px;
+    border-radius: 2px;
+    overflow: hidden;
+    /* o gradiente mora no TRILHO e não no preenchimento: assim a cor de cada posição é fixa */
+    background: linear-gradient(90deg, var(--parada-0) 0%, var(--parada-1) 100%);
+}
+/* o que FALTA é que se pinta de escuro — o metal já está quente por baixo */
+.medidor .medidorVazio {
+    position: absolute; top: 0; bottom: 0; right: 0;
+    background: #0d0b12;
+    transition: width .3s cubic-bezier(.2,.9,.25,1);
+}
+.medidor .medidorChao, .medidor .medidorSobra {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    transition: width .3s cubic-bezier(.2,.9,.25,1), background .3s;
+}
+/* `--chao` e `--topo` vêm do JS: são as duas paradas que cercam a faixa em que a sobra está. O chão
+   ocupa o trilho inteiro em cor CHEIA — pintá-lo esmaecido deixa a barra com cara de lavada. */
+.medidor .medidorChao { width: 100%; background: var(--chao); }
+.medidor .medidorSobra { background: linear-gradient(90deg, var(--chao) 0%, var(--topo) 100%); }
+
+@keyframes medidorBrasa { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.45); } }
+.medidor[data-faixa="5"] .medidorChao, .medidor[data-faixa="5"] .medidorSobra {
+    animation: medidorBrasa .9s ease-in-out infinite;
 }
 
 .numeroHP {

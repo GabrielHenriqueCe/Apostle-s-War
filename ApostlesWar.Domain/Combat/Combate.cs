@@ -66,6 +66,29 @@ namespace ApostlesWar.Domain
         public const int ForaDoTabuleiro = 0;
 
         /// <summary>
+        /// A Velocidade que enche o medidor deste combatente. Hoje vem crua do
+        /// <see cref="Personagem"/>: nada no motor a modifica, e o empurrão de medidor mexe na BARRA
+        /// (<see cref="Medidor"/>), não na Velocidade. Quando nascer a primeira habilidade que
+        /// acelera alguém, é AQUI que entram as camadas (base + itens + buff), no molde da Defesa —
+        /// e quem lê a barra não precisa saber que elas apareceram.
+        /// </summary>
+        public int Velocidade => Personagem.Velocidade;
+
+        /// <summary>
+        /// A BARRA DE TURNO (GDD §1): enche pela própria Velocidade e, ao cruzar 100, dá o direito de
+        /// agir. Quem manda nela é a <see cref="FilaDeTurnos"/> — este par de métodos existe pra que
+        /// a regra viva num lugar só e a barra não seja gravável de fora.
+        ///
+        /// A SOBRA acima de 100 é real e CARREGA de um turno pro outro: é isso que faz um empurrão de
+        /// medidor nunca se desperdiçar, mesmo dado a quem já estava pronto.
+        /// </summary>
+        public double Medidor { get; private set; }
+
+        public void AcumularMedidor(double quantia) => Medidor += quantia;
+
+        public void DescontarUmTurnoDoMedidor() => Medidor -= FilaDeTurnos.Limiar;
+
+        /// <summary>
         /// A casa deste combatente na fileira do time: <b>1 = frente, 4 = fundo</b> (GDD §2).
         /// Preenchida no <see cref="IniciarCombate"/> com o índice em <c>Equipe.Membros</c> + 1 — a
         /// ordem da lista É a formação, de ponta a ponta (o `int[] Time` do front vira essa ordem).
@@ -269,6 +292,7 @@ namespace ApostlesWar.Domain
         {
             Casa = casa;
             HPMaximoInicial = HPMaximo;
+            Medidor = 0;   // todo mundo larga do zero: a 1ª vez é a ordem das Velocidades, sem herança da rodada anterior
 
             // Aplica buffs iniciais permanentes de passivas (ex: Espectral -> Intocavel)
             foreach (var passiva in Personagem.Habilidades.OfType<IPassivaInicial>())

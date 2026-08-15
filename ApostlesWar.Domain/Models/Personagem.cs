@@ -92,6 +92,20 @@
             DanoCrit = CritCruDano;
         }
 
+        /// <summary>
+        /// Crava a Velocidade — <b>boneco só</b>, no mesmo espírito da ficha crua acima. Existe
+        /// porque a Velocidade decide QUEM JOGA (<see cref="FilaDeTurnos"/>), e sem cravá-la não há
+        /// como montar um combatente que joga o dobro dos turnos do outro.
+        ///
+        /// Apóstolo do jogo NÃO passa por aqui: a Velocidade dele sai do <see cref="Arquetipos"/>, e
+        /// o que vai modificá-la em combate são as camadas do <c>Combate</c> quando a Bota chegar.
+        /// </summary>
+        public Personagem ComVelocidade(int velocidade)
+        {
+            Velocidade = velocidade;
+            return this;
+        }
+
         /// <summary>Crítico da ficha crua. Era a constante global, antes de o crítico virar do TIPO.</summary>
         public const double CritCruTaxa = 0.15;
         public const double CritCruDano = 0.60;

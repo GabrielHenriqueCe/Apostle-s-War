@@ -165,8 +165,14 @@ namespace ApostlesWar.Presentation.Front
         string? Confirmar = null, bool? Marcado = null);
 
     /// <summary>Um apóstolo na grade de escolha de avatar. `Desbloqueado: false` = aparece em cinza,
-    /// não clicável (ainda não conquistado na campanha).</summary>
-    internal record ApostoloVisto(string Simbolo, string Nome, bool Desbloqueado);
+    /// não clicável (ainda não conquistado na campanha).
+    ///
+    /// <see cref="Posicao"/> é a grade 4×4 do perfil de distância dele: <c>Posicao[minhaCasa][casaDoAlvo]</c>,
+    /// as duas contadas de 0. Vem PRONTA do C# porque o front não pode ter cópia da tabela — duas
+    /// cópias de uma fórmula divergem como duas cópias de um número. É `null` em toda tela que não
+    /// põe apóstolo em casa nenhuma (avatar, recompensa, arena).</summary>
+    internal record ApostoloVisto(string Simbolo, string Nome, bool Desbloqueado,
+        List<List<double>>? Posicao = null);
 
     /// <summary>
     /// A tela de EDITAR PERFIL: o nome atual (pra pré-preencher), o avatar atual (pra pré-selecionar

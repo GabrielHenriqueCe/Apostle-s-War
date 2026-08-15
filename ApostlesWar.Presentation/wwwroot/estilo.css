@@ -849,6 +849,26 @@ body {
    informação e não buraco: mostra que a onda vem com menos de quatro, e em QUAIS casas. */
 .slot.inimigo { cursor: default; }
 
+/* O MAPA DE CALOR DA POSIÇÃO — quanto o apóstolo escolhido bate mais (ou menos) forte em cada casa
+   do inimigo. O `--calor-forca` (0…1) vem do JS e é o DESVIO do 1,00, não o multiplicador: 1,00 é o
+   repouso da escala e não pinta nada, e a cor diverge dele pros dois lados.
+   A mistura é por `color-mix` sobre o `--painel` do TEMA, e não uma cor cravada: os 8 cenários
+   retingem os painéis, e uma casa pintada por cima ficaria estrangeira em metade deles. */
+.slot.calor { border-style: solid; transition: background .12s, border-color .12s; }
+.slot.calor.quente {
+    background: color-mix(in srgb, #e08b2f calc(var(--calor-forca) * 55%), var(--painel));
+    border-color: color-mix(in srgb, #e08b2f calc(var(--calor-forca) * 80%), var(--borda));
+}
+.slot.calor.frio {
+    background: color-mix(in srgb, #3f6ea8 calc(var(--calor-forca) * 45%), var(--painel));
+    border-color: color-mix(in srgb, #3f6ea8 calc(var(--calor-forca) * 70%), var(--borda));
+}
+/* O NÚMERO é quem carrega a precisão — por isso a cor pode ser discreta sem a leitura piorar. */
+.slot .slotCalor {
+    font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+    color: var(--texto); letter-spacing: .5px;
+}
+
 /* O seu lado é o espelho: o título acompanha as casas, que encostam no `vs`. */
 #faseLadoMeu .faseGrupoTitulo { text-align: right; }
 .miniApostolo { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 56px; }

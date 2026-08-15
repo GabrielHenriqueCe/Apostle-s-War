@@ -6,7 +6,7 @@
 import { abrirTela } from '../nucleo/cena.js';
 import { compendioApostolo } from './compendio.js';
 import { avatarDoJogador } from './menu.js';
-import { configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPickerArrastavel } from '../ui/time.js';
+import { arrastando, configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPickerArrastavel } from '../ui/time.js';
 import { mandar } from '../nucleo/ponte.js';
 
 // ---------- Campanha: mapa ----------
@@ -103,6 +103,7 @@ export const campanhaFases = {
         campFases = f;
         campFaseSel = null;
         campSlotSel = null;
+        calorDe = null;
 
         // O time volta MONTADO da última vez (o C# manda os índices; quem guarda identidade é o save).
         // Sem isto, repetir uma fase custava quatro cliques de remontagem antes de qualquer coisa.
@@ -156,6 +157,7 @@ function selecionarFaseCampanha(fase, btn) {
     const stat = document.createElement('span'); stat.className = 'fiStat'; stat.textContent = `${it.stat} ${it.valor}`;
     item.append(emo, txt, stat);
 
+    pintarCalor();   // as casas do inimigo acabaram de ser refeitas: a leitura no ar volta com elas
     atualizarLutarFase();
 }
 
@@ -199,9 +201,65 @@ function desenharSlotsFase() {
             desenharSlotsFase();
         });
         configurarSlotDnD(slot, campTime, i, desenharSlotsFase);
+        // O calor é do par (apóstolo, casa): passar o mouse mostra a casa onde ele JÁ está;
+        // arrastar mostra a casa onde ele CAIRIA, que é a pergunta do momento do arraste.
+        slot.addEventListener('mouseenter', () => preverCalor(campTime[i], i));
+        slot.addEventListener('dragenter', () => preverCalor(apostoloArrastado(), i));
         return slot;
     }));
+    pintarCalor();
     atualizarLutarFase();
+}
+
+// ---------- O MAPA DE CALOR DA POSIÇÃO ----------
+// A pergunta da montagem é "onde eu ponho este?", e a resposta é GEOMETRIA: o multiplicador do
+// perfil de distância (GDD §2) em cada casa inimiga, pro apóstolo na casa que ele ocupa.
+//
+// A grade 4×4 vem PRONTA do C# (`apostolo.posicao[minhaCasa][casaDoAlvo]`, as duas contadas de 0):
+// o front não tem cópia da tabela, então arrastar entre casas é só trocar de LINHA. Duas cópias de
+// uma fórmula divergem como duas cópias de um número.
+let calorDe = null;   // { idx, casa } — de quem é a leitura no ar
+
+const CALOR_MAXIMO = .30;   // o maior desvio do 1,00 que a tabela produz (0,70 … 1,30)
+
+function apostoloArrastado() {
+    if (!arrastando) return null;
+    return arrastando.tipo === 'picker' ? arrastando.idx : arrastando.arr[arrastando.i];
+}
+
+function preverCalor(idx, casa) {
+    if (idx == null) return;   // casa vazia não tem o que prever: mantém a leitura anterior
+    calorDe = { idx, casa };
+    pintarCalor();
+}
+
+// Fica no ar depois que o mouse sai, DE PROPÓSITO: comparar duas casas exige olhar o tabuleiro, e
+// apagar no `mouseleave` levaria os números embora justo na hora de ler.
+function pintarCalor() {
+    if (calorDe && campTime[calorDe.casa] !== calorDe.idx) calorDe = null;   // saiu da casa: a leitura morre com ele
+
+    const grade = calorDe && (campFases.meusApostolos[calorDe.idx] || {}).posicao;
+    const linha = grade ? grade[calorDe.casa] : null;
+    document.querySelectorAll('#faseInimigos .faseCasas').forEach(fileira =>
+        [...fileira.children].forEach((slot, casaAlvo) =>
+            // Casa VAZIA não recebe leitura: ninguém está lá pra apanhar, e um ×1,30 numa casa sem
+            // dono leria como oportunidade que não existe. Por isso as duas rodadas podem divergir.
+            aplicarCalor(slot, linha && slot.classList.contains('preenchido') ? linha[casaAlvo] : null)));
+}
+
+function aplicarCalor(slot, mult) {
+    slot.classList.remove('calor', 'quente', 'frio', 'neutro');
+    const marca = slot.querySelector('.slotCalor');
+    if (mult == null) { if (marca) marca.remove(); return; }
+
+    // A força é o DESVIO do 1,00, não o valor: 1,00 é o repouso da escala, e é dele que a cor diverge.
+    slot.classList.add('calor', mult > 1 ? 'quente' : mult < 1 ? 'frio' : 'neutro');
+    slot.style.setProperty('--calor-forca', Math.min(1, Math.abs(mult - 1) / CALOR_MAXIMO).toFixed(3));
+
+    const alvo = marca || document.createElement('span');
+    alvo.className = 'slotCalor';
+    alvo.textContent = '×' + mult.toFixed(2).replace('.', ',');   // ×1,20 — vírgula, que é como o jogo escreve
+    if (!marca) slot.appendChild(alvo);
 }
 
 // Clique no picker = adiciona na casa selecionada (ou 1ª vazia). Não duplica.

@@ -536,12 +536,29 @@ namespace ApostlesWar.Presentation.Front
 
         private static Fases Proxima(Fases fase) => (Fases)((int)fase + 1);
 
+        /// <summary>
+        /// O perfil de distância deste apóstolo em TODAS as combinações de casa: linha = a casa onde
+        /// ele estaria, coluna = a casa do alvo (as duas de 0 a 3). O front recebe a grade inteira e
+        /// não a fórmula, então arrastar entre casas vira trocar de LINHA numa tabela que já está na
+        /// mão — sem ida e volta pelo C# a cada quadro, e sem uma segunda cópia da regra pra divergir.
+        /// </summary>
+        private static List<List<double>> GradeDePosicao(Personagem p) =>
+            Casas().Select(minha => Casas()
+                    .Select(dele => Arquetipos.MultiplicadorDePosicao(
+                        p.Tipo, Arquetipos.DistanciaEntreCasas(minha, dele)))
+                    .ToList())
+                .ToList();
+
+        private static IEnumerable<int> Casas() =>
+            Enumerable.Range(Arquetipos.CasaDaFrente, Arquetipos.CasaDoFundo - Arquetipos.CasaDaFrente + 1);
+
         private FasesVista MontarFases(Faccao faccao)
         {
             var fases = Enum.GetValues<Fases>().Select(f => MontarFase(faccao, f)).ToList();
             var desbloqueados = _apostolos.ObterDesbloqueados();
             var meus = desbloqueados
-                .Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+                .Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true, GradeDePosicao(p)))
+                .ToList();
 
             // O time salvo volta como ÍNDICES nesta lista, porque é isso que o clique devolve. A
             // tradução identidade→índice é do C#: o save guarda quem é o apóstolo (ver

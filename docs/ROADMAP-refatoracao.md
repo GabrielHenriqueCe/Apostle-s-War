@@ -1393,18 +1393,30 @@ as regras dos dois lados.
         um pouco:** parte da `Sinergia (4)` agora é geometria e não composição — está avisado no
         cabeçalho do próprio relatório.
 
-    **➡️ PRÓXIMO PR — OS DOIS BRILHOS** (só pintura; nenhuma regra nova):
-    - **onde ele PODE bater mais forte** — mapa de calor do multiplicador. Três gatilhos: passar o
-      mouse, selecionar (o clique, que é o que salva quem não usa hover) e **arrastar entre as
-      casas**. Cor + o número escrito (`×1,20`), escala divergindo no 1,00.
-    - **onde ele VAI bater mais forte** — com a habilidade já escolhida, o alvo que mais sofre
-      brilha e os outros apagam. Passa por DEF, escudo, resistências.
-    - **O front NÃO pode ter cópia da tabela:** o C# manda a **grade 4×4 por apóstolo** (casa onde
-      ele poderia estar × casa do alvo), e o arraste vira troca de linha numa grade que já está na
-      mão. *"Duas cópias de uma fórmula divergem como duas cópias de um número"* — essa já custou um
-      defeito mudo nos Decaídos.
+    **➡️ ESTE PR — O MAPA DE CALOR DA POSIÇÃO** (só pintura; nenhuma regra nova). Na PREPARAÇÃO da
+    fase, que é onde a casa ainda é decisão: passar o mouse numa casa sua acende as casas inimigas
+    com o multiplicador dele ali (cor + o número escrito, `×1,20`, escala divergindo no 1,00), e o
+    **arraste** troca a leitura ao vivo — é o instante em que a decisão está sendo tomada.
+    - **O front NÃO tem cópia da tabela:** o C# manda a **grade 4×4 por apóstolo**
+      (`ApostoloVisto.Posicao[minhaCasa][casaDoAlvo]`), e o arraste vira troca de LINHA numa grade
+      que já está na mão. *"Duas cópias de uma fórmula divergem como duas cópias de um número"* —
+      essa já custou um defeito mudo nos Decaídos.
+    - **Casa vazia não recebe leitura**: ninguém está lá pra apanhar, e um `×1,30` sem dono leria
+      como oportunidade que não existe. Por isso as duas rodadas podem acender diferente.
+    - **A leitura FICA no ar** depois que o mouse sai (só troca quando outra é pedida): comparar
+      duas casas exige olhar o tabuleiro, e apagar no `mouseleave` levaria o número embora justo na
+      hora de ler.
     - **🚫 NUNCA um NÚMERO de dano previsto** (decisão do Gabriel). Multiplicador é ficha e pode
-      aparecer; dano previsto é simulação. Brilho relativo sim, número não.
+      aparecer; dano previsto é simulação.
+
+    **⚰️ O 2º BRILHO ("onde ele VAI bater mais forte") MORREU ANTES DE NASCER — decisão do Gabriel.**
+    O desenho estava fechado e era barato: no passo de alvo, a **aura do CURSOR** ficava mais forte
+    sobre quem sofreria mais, lendo o `VidaRemovidaPor` que o bot já calcula (DEF, escudo, bloqueio,
+    Invencível e a geometria, tudo junto), normalizado no C# pra nenhum número de dano cruzar a
+    ponte. **O que o matou foi o TOQUE:** aura de cursor não existe em tela sensível ao toque, e um
+    clique ali significaria outra coisa. Se um dia o jogo for pra toque, o efeito volta como
+    destaque nas CAIXAS dos alvos — e aí ele precisa se distinguir deste mapa de calor, que é
+    exatamente a confusão que a versão do cursor evitava.
 
     **Depois, na ordem do GDD §7:** o **medidor de turno** (fila única — hoje a ordem é um `for`
     sobre `Equipe1.Membros ++ Equipe2.Membros` no `CombateService.ExecutarCombate`, e é esse `Concat`

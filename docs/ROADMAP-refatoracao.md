@@ -1442,10 +1442,24 @@ as regras dos dois lados.
         portado de propósito — quando for, tem de REUSAR as regras da `FilaDeTurnos` sobre uma
         cópia do estado, nunca reimplementá-las.
 
-    **Depois, na ordem do GDD §7:** **`DEF/(DEF+5000)` + Precisão × Resistência** (hoje a DEF é `DEF/1000` com cap 75% em
-    `Combate.cs`, e no nv 1 mitiga 2–5% — está inerte em jogo, e é esperado até esse PR; a Precisão
-    também não faz nada: o que existe é `AplicarDebuff(chance:)`, chance FIXA por habilidade, que
-    ignora quem aplica e em quem).
+    - ✅ **A DEF EM CURVA + PRECISÃO × RESISTÊNCIA** *(branch `feature/def-e-precisao`, o passo 4 do
+      GDD §7)*. Os dois stats que estavam inertes passaram a valer.
+      - **`DEF/(DEF+5000)`** no lugar de `min(DEF/1000 × 0,75; 0,75)`. A curva nunca satura e nunca
+        chega a 100%, então o ponto de DEF não vira lixo depois de um número — com o item valendo
+        `55 × capítulo`, DOIS deles saturavam a fórmula velha. `Combate.DefesaDeMeiaReducao` é o
+        joelho, e é **o único número a calibrar** no balanço de defesa.
+      - **DOIS PORTÕES no malefício, e são coisas diferentes** (decisão do Gabriel): a `chance` da
+        própria habilidade continua existindo — é o incremento diferencial do rebalanceamento, o
+        freio de habilidade roubada e o eixo por onde a RARIDADE vai diferenciar kits — e ela
+        MULTIPLICA a disputa `min(100%, Precisão ÷ (Resistência × 2))`. Auto-malefício não rola nada.
+      - **A segunda rolagem** apara 1 turno com `(1 − colar) ÷ 2`, com piso de 1 turno; ela morre
+        junto com a primeira, então quem chega a 100% de Precisão cola sempre E cola cheio.
+      - **A BANCADA MUDOU INTEIRA, e desta vez é sinal:** o boneco de defesa saiu do "cap" (1000, que
+        na curva nova vale 16,7%) pro **joelho** (5000 = 50%), senão a linha de defesa pesada deixava
+        de ser pesada. Os bonecos ganharam **Resistência 0** — mesmo motivo do crítico 100%: a
+        bancada mede o KIT, e chance de aplicar entre 0 e 1 mediria o dado.
+      - **Falta na TELA:** o `chance de aplicar: 75%` ao mirar, que **some** quando chega a 100%
+        (GDD §1). Nenhum número de dano previsto — só a chance.
 
 **Disciplina permanente (NÃO é PR):** varredura de camadas — se cruzar com código fora do
 lugar fazendo outra coisa, conserta no mesmo PR; nunca um PR só pra isso.

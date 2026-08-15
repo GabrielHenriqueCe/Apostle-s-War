@@ -21,10 +21,8 @@ namespace Tests
     /// </summary>
     public class ReceberDanoTests
     {
-        // Constantes de balance espelhadas do Combate (lá são private const): cada 1000 de DEF
-        // dá a redução MÁXIMA de 75%, proporcionalmente e com cap.
-        private const double DefesaPorPontoReducao = 1000.0;
-        private const double ReducaoMaximaPorDefesa = 0.75;
+        // A constante da curva vem do próprio Combate (`DEF / (DEF + k)`, GDD §1) — espelhar o
+        // número aqui faria os testes concordarem com uma cópia em vez de com o motor.
 
         private static Combate Novo(int hp = 100_000, int atk = 0, int def = 0)
             => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, def));
@@ -35,9 +33,7 @@ namespace Tests
         /// <summary>Redução esperada pra uma defesa efetiva — a mesma fórmula do ReceberDano.</summary>
         private static int DanoAposDefesa(int bruto, int defesaEfetiva)
         {
-            double reducao = Math.Min(
-                (defesaEfetiva / DefesaPorPontoReducao) * ReducaoMaximaPorDefesa,
-                ReducaoMaximaPorDefesa);
+            double reducao = defesaEfetiva / (defesaEfetiva + Combate.DefesaDeMeiaReducao);
             return (int)(bruto * (1 - reducao));
         }
 
@@ -50,23 +46,47 @@ namespace Tests
 
             var (efetivo, _) = alvo.ReceberDano(1000, NaturezasDano.Ataque);
 
-            // 500/1000 × 75% = 37,5% de redução → 1000 × 0,625
-            Assert.Equal(625, efetivo);
-            Assert.Equal(625, DanoAposDefesa(1000, 500));
-            Assert.Equal(100_000 - 625, alvo.HPAtual);
+            // 500 / (500 + 5000) = 9,09% de redução → 1000 × 0,9091
+            Assert.Equal(909, efetivo);
+            Assert.Equal(909, DanoAposDefesa(1000, 500));
+            Assert.Equal(100_000 - 909, alvo.HPAtual);
         }
 
+        /// <summary>
+        /// O JOELHO da curva tem leitura direta e é o único número a calibrar: a DEF que reduz
+        /// exatamente metade. Se este teste mudar de valor, o balanço inteiro do jogo mudou junto.
+        /// </summary>
         [Fact]
-        public void Defesa_TemCapDeReducao_DefesaAlemDoTetoNaoAjudaMais()
+        public void Defesa_NoJoelhoDaCurva_ReduzExatamenteMetade()
         {
-            var noTeto = Novo(def: 1000);      // exatamente no cap
-            var muitoAlem = Novo(def: 9999);   // muito além do cap
+            var alvo = Novo(def: (int)Combate.DefesaDeMeiaReducao);
 
-            var (efetivoTeto, _) = noTeto.ReceberDano(1000, NaturezasDano.Ataque);
-            var (efetivoAlem, _) = muitoAlem.ReceberDano(1000, NaturezasDano.Ataque);
+            var (efetivo, _) = alvo.ReceberDano(1000, NaturezasDano.Ataque);
 
-            Assert.Equal(250, efetivoTeto);            // 75% de redução (o máximo)
-            Assert.Equal(efetivoTeto, efetivoAlem);    // defesa extra não reduz mais nada
+            Assert.Equal(500, efetivo);
+        }
+
+        /// <summary>
+        /// A curva NÃO satura: cada ponto de DEF ainda vale alguma coisa, por mais alta que ela
+        /// esteja — é o que impede o item de defesa de virar lixo depois de um número. E ela nunca
+        /// chega a 100%: dano zero por defesa não existe.
+        /// </summary>
+        [Fact]
+        public void Defesa_NuncaSatura_ENuncaChegaAZero()
+        {
+            var (mil, _) = Novo(def: 1_000).ReceberDano(1000, NaturezasDano.Ataque);
+            var (dezMil, _) = Novo(def: 10_000).ReceberDano(1000, NaturezasDano.Ataque);
+
+            Assert.Equal(833, mil);        // 16,7% de redução
+            Assert.Equal(333, dezMil);     // 66,7% — dez vezes a DEF, quatro vezes a mitigação
+
+            // O golpe é grande de propósito: a fração nunca chega a 1, mas o dano é INT, e um golpe
+            // pequeno contra uma defesa absurda trunca pra zero. O que a curva promete é que sempre
+            // sobra alguma coisa — não que o int consiga representá-la.
+            var (absurdo, _) = Novo(def: 10_000_000).ReceberDano(1_000_000, NaturezasDano.Ataque);
+            Assert.True(absurdo > 0, "defesa nenhuma zera o dano");
+            Assert.True(dezMil > Novo(def: 100_000).ReceberDano(1000, NaturezasDano.Ataque).Item1,
+                "cada ponto de DEF ainda tem de valer alguma coisa");
         }
 
         [Fact]
@@ -77,7 +97,7 @@ namespace Tests
             // Furando 50% da defesa, ela vale 500 → mesma redução do teste de 500 de DEF.
             var (efetivo, _) = alvo.ReceberDano(1000, NaturezasDano.Ataque, ignorarDefesaPct: 0.5);
 
-            Assert.Equal(625, efetivo);
+            Assert.Equal(909, efetivo);
         }
 
         [Fact]
@@ -251,8 +271,8 @@ namespace Tests
         /// </summary>
         [Theory]
         [InlineData(0, 300)]      // sem defesa: paga os 30% cheios
-        [InlineData(500, 187)]    // 37,5% de redução → 300 × 0,625 = 187,5, trunca
-        [InlineData(2000, 75)]    // além do cap: 75% é o teto → 300 × 0,25
+        [InlineData(500, 272)]    // 9,1% de redução → 300 × 0,909 = 272,7, trunca
+        [InlineData(2000, 214)]   // 28,6% → 300 × 0,714; quatro vezes a DEF, três vezes a mitigação
         public void ProtecaoAliado_ADefesaDoProtetorAbateOQueEleRecebe(int defesaDoProtetor, int pagoPeloProtetor)
         {
             var protegido = Novo();

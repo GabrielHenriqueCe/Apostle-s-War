@@ -42,10 +42,16 @@ namespace ApostlesWar.Domain
 
     public abstract class Combate
     {
-        // Balanceamento de defesa: cada N pontos de DEF reduzem 1 ponto percentual
-        // de dano, com cap máximo. Modificar aqui afeta todos os combatentes.
-        private const double DefesaPorPontoReducao = 1000.0;
-        private const double ReducaoMaximaPorDefesa = 0.75;
+        /// <summary>
+        /// A DEF que reduz exatamente METADE do dano — o único número a calibrar na curva
+        /// <c>DEF / (DEF + k)</c> (GDD §1), e ela tem leitura direta: é o joelho.
+        ///
+        /// A curva NUNCA satura e NUNCA chega a 100%, então o ponto de DEF nunca vira lixo por ter
+        /// passado de um número. O que ela substituiu era `min(DEF/1000 × 0,75; 0,75)`: linear até
+        /// 1000 e valendo ZERO daí em diante — com o item de DEF valendo `55 × capítulo`, DOIS deles
+        /// já saturavam, e o slot de defesa morria sozinho no fim da progressão.
+        /// </summary>
+        public const double DefesaDeMeiaReducao = 5000.0;
         public abstract Personagem Personagem { get; }
         public Dictionary<Habilidade, SkillCooldown> Cooldowns { get; private set; }
         public Dictionary<Habilidade, object> EstadoHabilidades { get; private set; }
@@ -73,6 +79,42 @@ namespace ApostlesWar.Domain
         /// e quem lê a barra não precisa saber que elas apareceram.
         /// </summary>
         public int Velocidade => Personagem.Velocidade;
+
+        /// <summary>O quanto os malefícios DELE colam. Ver <see cref="ChanceDeColarEm"/>.</summary>
+        public int Precisao => Personagem.Precisao;
+
+        /// <summary>O quanto ele escapa dos malefícios dos outros. Ver <see cref="ChanceDeColarEm"/>.</summary>
+        public int Resistencia => Personagem.Resistencia;
+
+        /// <summary>
+        /// O quanto a Resistência do alvo vale contra a Precisão de quem aplica: com o fator em 2,
+        /// EMPATE dá 50% e o DOBRO da Resistência garante 100%. É o botão do balanço — 1,5 deixa o
+        /// controle fácil, 3 faz da Resistência um stat dominante.
+        /// </summary>
+        private const double FatorDaResistencia = 2.0;
+
+        /// <summary>
+        /// A chance de um malefício deste combatente COLAR no alvo (GDD §1).
+        ///
+        /// Satura em 100% de propósito, ao contrário da curva da DEF: na defesa se quer que nunca
+        /// sature; no malefício é preciso PODER aplicar o efeito cheio, senão nenhuma habilidade faz
+        /// o que está escrito nela. Sem PvP não há motivo pra negar a garantia a quem pagou por ela.
+        ///
+        /// Alvo sem Resistência nenhuma = sempre cola: é o caso dos bonecos de bancada, e é o que
+        /// mantém a medição do KIT livre do dado.
+        /// </summary>
+        public double ChanceDeColarEm(Combate alvo)
+        {
+            if (alvo.Resistencia <= 0) return 1.0;
+            return Math.Min(1.0, Precisao / (alvo.Resistencia * FatorDaResistencia));
+        }
+
+        /// <summary>
+        /// Tendo colado, a chance de o malefício vir com UM TURNO A MENOS: `(1 − chance de colar) ÷ 2`.
+        /// É a segunda rolagem, e ela morre junto com a primeira — quem chega a 100% de Precisão cola
+        /// sempre E cola cheio, sem precisar de regra separada pra isso.
+        /// </summary>
+        public double ChanceDeAparaUmTurnoEm(Combate alvo) => (1.0 - ChanceDeColarEm(alvo)) / 2.0;
 
         /// <summary>
         /// A BARRA DE TURNO (GDD §1): enche pela própria Velocidade e, ao cruzar 100, dá o direito de
@@ -403,9 +445,7 @@ namespace ApostlesWar.Domain
             defesaEfetiva = (int)(defesaEfetiva * (1.0 - ignorarDefesaPct));
             defesaEfetiva = Math.Max(0, defesaEfetiva);
 
-            double reducao = Math.Min(
-                (defesaEfetiva / DefesaPorPontoReducao) * ReducaoMaximaPorDefesa,
-                ReducaoMaximaPorDefesa);
+            double reducao = defesaEfetiva / (defesaEfetiva + DefesaDeMeiaReducao);
             return (int)(dano * (1 - reducao));
         }
 

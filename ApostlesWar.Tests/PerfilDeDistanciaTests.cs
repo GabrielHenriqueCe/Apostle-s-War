@@ -125,14 +125,14 @@ namespace Tests
         {
             var atacante = Atacante(casa: 1);
 
-            // DEF 500 → 37,5% de redução, os dois iguais: só a geometria os separa.
+            // DEF 500 → 9,09% de redução (a curva do GDD §1), a mesma nos dois: só a geometria os separa.
             var perto = atacante.Atacar(Alvo(casa: 1, def: 500), 1.0);
             var longe = atacante.Atacar(Alvo(casa: 4, def: 500), 1.0);
 
             Assert.Equal(200, perto.DanoBruto);
             Assert.Equal(260, longe.DanoBruto);
-            Assert.Equal(125, perto.DanoEfetivo);   // (int)(200 × 0,625)
-            Assert.Equal(162, longe.DanoEfetivo);   // (int)(260 × 0,625)
+            Assert.Equal(181, perto.DanoEfetivo);   // (int)(200 × 0,9091)
+            Assert.Equal(236, longe.DanoEfetivo);   // (int)(260 × 0,9091)
         }
 
         /// <summary>

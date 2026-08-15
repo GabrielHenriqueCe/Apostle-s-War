@@ -106,6 +106,24 @@
             return this;
         }
 
+        /// <summary>
+        /// Crava a Resistência — <b>boneco só</b>, e o cliente principal é `0`: alvo sem Resistência
+        /// nenhuma apanha TODO malefício (ver <c>Combate.ChanceDeColarEm</c>). É o mesmo espírito do
+        /// crítico 100% da bancada — quem mede mecânica não pode estar medindo o dado.
+        /// </summary>
+        public Personagem ComResistencia(int resistencia)
+        {
+            Resistencia = resistencia;
+            return this;
+        }
+
+        /// <summary>Crava a Precisão — <b>boneco só</b>, o gêmeo do <see cref="ComResistencia"/>.</summary>
+        public Personagem ComPrecisao(int precisao)
+        {
+            Precisao = precisao;
+            return this;
+        }
+
         /// <summary>Crítico da ficha crua. Era a constante global, antes de o crítico virar do TIPO.</summary>
         public const double CritCruTaxa = 0.15;
         public const double CritCruDano = 0.60;

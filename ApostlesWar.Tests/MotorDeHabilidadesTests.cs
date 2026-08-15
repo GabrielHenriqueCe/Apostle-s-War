@@ -20,11 +20,14 @@ namespace Tests
     {
         // ---------- helpers ----------
 
+        // Resistência ZERO em todo boneco daqui: estes testes medem a MECÂNICA do malefício (colou,
+        // durou, empilhou), não a disputa Precisão × Resistência — que tem arquivo próprio. Com a
+        // ficha crua os dois lados ficariam em ~44% de chance e metade destes testes viraria moeda.
         private static Combate Novo(int hp = 1000, int atk = 200)
-            => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, 0));
+            => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, 0).ComResistencia(0));
 
         private static Combate NovoComDefesa(int hp, int atk, int def)
-            => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, def));
+            => new Jogador(new Personagem(1, Faccao.Humanos, "Teste", "🧪", hp, atk, def).ComResistencia(0));
 
         private static HabilidadeAtiva Hab(List<Acao> acoes, int alvos,
             TipoLista lista = TipoLista.Inimigos, TipoAlvo modo = TipoAlvo.Explicito,
@@ -687,8 +690,8 @@ namespace Tests
             var (efFurado, _) = alvoFurado.ReceberDano(1000, NaturezasDano.Ataque,
                 ignorarStatus: new[] { typeof(BuffDefesa) });
 
-            Assert.Equal(550, efNormal);   // def 600 → 45% de redução
-            Assert.Equal(700, efFurado);   // buff furado → def 400 → 30% de redução
+            Assert.Equal(892, efNormal);   // def 600 → 10,7% de redução
+            Assert.Equal(925, efFurado);   // buff furado → def 400 → 7,4% de redução
         }
 
         // ---------- Contrato da semente do ResolverAlvos (FILA A #14) ----------

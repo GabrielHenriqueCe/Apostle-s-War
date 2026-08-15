@@ -1436,14 +1436,19 @@ as regras dos dois lados.
         que já oscilavam por sorteio de alvo. A fila só morde quando as Velocidades diferem — que é
         o ponto.
       - ✅ **O CORDÃO DE TURNOS** *(branch `feature/fila-na-tela`)*: a ordem dos 8 próximos turnos,
-        centralizada abaixo do topo, com as fichas pequenas — leitura de canto de olho, não a
-        atração da tela. O `Prever` roda as MESMAS funções do combate sobre um retrato copiado
-        (`Passo`), e o teste que justifica a peça existir é o que compara a previsão com o que a
-        batalha entrega de verdade. Entre as fichas, `+` = mesmo instante (sem intervalo) e `⏱` =
-        aqui o relógio anda, que é onde cabe alguém cortando a sequência.
-        - **Um desvio consciente da maquete:** lá o `dt` de cada vez soma o custo da ação anterior,
-          então com fração 10% ele nunca é zero e o `+` **nunca apareceria**. Aqui o sinal lê o
-          AVANÇO puro, que é o que dá a informação útil: houve espera ou não.
+        centralizada no alto do campo, com as fichas pequenas — leitura de canto de olho, não a
+        atração da tela. As duas primeiras inteiras; da 3ª em diante cada uma entra POR BAIXO da
+        anterior, metade escondida (a fila vem de trás), com o z-index descendo pela posição. O
+        `Prever` roda as MESMAS funções do combate sobre um retrato copiado (`Passo`), e o teste que
+        justifica a peça existir é o que compara a previsão com o que a batalha entrega de verdade.
+        - **ARMADILHA QUE JÁ MORDEU:** o `body` é um grid de TRÊS linhas (topo · arena · painel).
+          O cordão entrou como 4º item, virou a linha do `1fr` e empurrou a arena pra `auto` — o
+          campo encolheu, o canvas do cenário ficou com o tamanho velho e a cena aparecia **cortada
+          e subindo** a cada mudança de altura da fila. Peça nova entre o topo e o painel é
+          **absoluta dentro da arena**, ou o cenário paga.
+        - **O sinal de espera entre as fichas foi CORTADO** (pedido do Gabriel). O `Vez.Esperou`
+          continua no motor e testado — é a regra dizendo onde a ordem é frágil, que é onde um
+          empurrão de medidor vai valer —, mas não atravessa mais a ponte.
       - ✅ **A onda nova começa empatada** (decisão do Gabriel): o time do jogador tem o medidor
         zerado no início de cada rodada, como os inimigos — que já nasciam em 0 por serem
         posicionados de novo. Sem isso ele abria a 2ª onda com meio ciclo de vantagem.

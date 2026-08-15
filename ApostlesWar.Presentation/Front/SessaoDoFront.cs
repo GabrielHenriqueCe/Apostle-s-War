@@ -191,9 +191,9 @@ namespace ApostlesWar.Presentation.Front
         /// em vez de virar um id fantasma: a fila que o motor mandou é a do turno anterior nesse
         /// instante, e um id sem combatente na tela vira ficha em branco.
         /// </summary>
-        private List<VezVista> FilaVisivel() => _fila
+        private List<int> FilaVisivel() => _fila
             .Where(v => _board.Contains(v.Quem))
-            .Select(v => new VezVista(IdDe(v.Quem), v.Esperou))
+            .Select(v => IdDe(v.Quem))
             .ToList();
 
         public void Publicar(bool sincronizarVida = true)

@@ -56,8 +56,12 @@ namespace ApostlesWar.Domain
         /// Uma vez na fila PREVISTA. <see cref="Esperou"/> = o relógio teve de andar até alguém cruzar
         /// o limiar antes desta vez — ou seja, houve um intervalo aqui, e é dentro dele que um
         /// terceiro pode se enfiar. Falso = ele já estava acima de 100 e joga na sequência do
-        /// anterior, sem espera. É a diferença que a tela precisa mostrar: sem ela, a fila diz a
-        /// ordem mas não diz onde a ordem é frágil.
+        /// anterior, sem espera.
+        ///
+        /// <b>Hoje nada pinta isto</b> — o sinal que marcava a espera entre as fichas saiu do cordão
+        /// a pedido do Gabriel. Fica porque é a regra respondendo "onde a ordem é frágil", que é
+        /// justamente onde um empurrão de medidor vai valer alguma coisa; quem for desenhar isso de
+        /// novo tem a informação pronta em vez de recalculá-la na tela.
         /// </summary>
         public readonly record struct Vez(Combate Quem, bool Esperou);
 

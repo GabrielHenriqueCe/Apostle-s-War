@@ -18,11 +18,14 @@ namespace ApostlesWar.Presentation.Front
         List<CombatenteVisto> Equipe2,
         int? QuemAge,                       // índice global (Id) de quem está agindo — o contorno verde
         /// <summary>
-        /// A ORDEM DOS PRÓXIMOS TURNOS, do primeiro ao último, já calculada pelo motor. O front NÃO
-        /// deduz ordem nenhuma: quem joga quando sai da <c>FilaDeTurnos</c>, e uma segunda conta aqui
-        /// faria o cordão prometer o que a batalha não cumpre.
+        /// A ORDEM DOS PRÓXIMOS TURNOS (Ids), do primeiro ao último, já calculada pelo motor. O front
+        /// NÃO deduz ordem nenhuma: quem joga quando sai da <c>FilaDeTurnos</c>, e uma segunda conta
+        /// aqui faria o cordão prometer o que a batalha não cumpre.
+        ///
+        /// São só os Ids: o <c>Vez.Esperou</c> do motor (houve intervalo antes desta vez?) não
+        /// atravessa a ponte porque nada o pinta — o sinal que o mostrava foi cortado do cordão.
         /// </summary>
-        List<VezVista> Fila,
+        List<int> Fila,
         List<HabilidadeVista> Habilidades,  // as do QuemAge, quando é a vez de um humano
         List<int> AlvosValidos,             // Ids clicáveis agora (vazio = ninguém)
         string? Mensagem,                   // linha de narração (uso de habilidade, passiva...)
@@ -46,13 +49,6 @@ namespace ApostlesWar.Presentation.Front
         /// </summary>
         string Tema = ""
     );
-
-    /// <summary>
-    /// Uma vez na fila desenhada. <see cref="Esperou"/> = houve um INTERVALO antes dela (o relógio
-    /// teve de andar até alguém cruzar 100). Falso = quem joga aqui já estava pronto e entra na
-    /// sequência do anterior, sem espaço pra ninguém se enfiar no meio.
-    /// </summary>
-    internal record VezVista(int Id, bool Esperou);
 
     /// <summary>Os modos que o front distingue. String porque é o que atravessa a ponte.</summary>
     internal static class ModoDeBatalha

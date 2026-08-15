@@ -231,6 +231,7 @@ namespace ApostlesWar.Presentation.Front
             Ataque: c.Ataque,
             Defesa: c.Defesa,
             Velocidade: c.Velocidade,   // pelo Combate, não pelo Personagem: é onde as camadas vão nascer
+            Medidor: c.Medidor,
             Precisao: c.Personagem.Precisao,
             Resistencia: c.Personagem.Resistencia,
             TaxaCritPct: (int)(c.TaxaCrit * 100),

@@ -75,6 +75,13 @@ namespace ApostlesWar.Presentation.Front
         // quando a Bota chegar, e a tela não precisa saber que apareceram. Precisão e Resistência
         // seguem vindo do Personagem: nada no motor as modifica ainda.
         int Velocidade,
+        /// <summary>
+        /// A barra de turno, de 0 a 100 — e ela PASSA de 100: a sobra é real e carrega, então a tela
+        /// tem de saber desenhar acima da linha. Vem crua, sem capar: capar aqui faria três medidores
+        /// diferentes virarem três barras iguais, que é exatamente o que o modelo do Raid esconde e
+        /// este não quer esconder.
+        /// </summary>
+        double Medidor,
         int Precisao,
         int Resistencia,
         int TaxaCritPct,

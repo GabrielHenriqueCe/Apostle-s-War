@@ -249,6 +249,7 @@ function atualizarCombatente(el, c) {
     infos.appendChild(nome);
 
     infos.appendChild(criarBarra(c));
+    if (c.vivo) infos.appendChild(criarMedidor(c));
 
     // Números exatos são muleta de TESTE. Escondidos, sobra só a barra — que é como os jogos do
     // gênero fazem (o Gabriel citou o Raid): você lê a situação, não a planilha.
@@ -305,6 +306,46 @@ function criarBarra(c) {
         barra.appendChild(esc);
     }
     return barra;
+}
+
+// O MEDIDOR — a barra de turno (GDD §1). Enche pela Velocidade do dono e, ao cruzar 100, dá o
+// direito de agir; quem manda nele é a `FilaDeTurnos` do C#, aqui só se pinta o que ela produziu.
+//
+// A SOBRA acima de 100 é desenhada, e é a diferença que importa: capar a barra faria três medidores
+// diferentes virarem três barras iguais, e aí ninguém enxerga por que um empurrão comprou dois
+// turnos seguidos. Ela cresce da esquerda de novo — passar de 100 lê como uma SEGUNDA passada sobre
+// o mesmo trilho.
+const LIMIAR_MEDIDOR = 100;
+const PARADAS_DO_MEDIDOR = 5;   // 100→200, 200→300, … 500+; a última satura e pulsa
+
+function criarMedidor(c) {
+    const trilho = document.createElement('div');
+    trilho.className = 'medidor';
+
+    // O que FALTA é que se pinta de escuro: o metal já está quente por baixo (o gradiente mora no
+    // trilho). Assim a cor de cada posição é FIXA, em vez de a ponta ser sempre clara por reescala.
+    const vazio = document.createElement('div');
+    vazio.className = 'medidorVazio';
+    vazio.style.width = `${100 - Math.min(c.medidor, LIMIAR_MEDIDOR)}%`;
+    trilho.appendChild(vazio);
+
+    const sobra = Math.max(0, c.medidor - LIMIAR_MEDIDOR);
+    if (sobra <= 0) return trilho;
+
+    const faixa = Math.min(Math.floor(sobra / LIMIAR_MEDIDOR), PARADAS_DO_MEDIDOR - 1);
+    trilho.dataset.faixa = faixa + 1;
+    // A cor da parada de ENTRADA vai no trilho INTEIRO e em cor cheia — é ela que dá o tom da faixa,
+    // e é por isso que 245% lê como âmbar e não como o branco do marco anterior.
+    trilho.style.setProperty('--chao', `var(--parada-${faixa + 1})`);
+    trilho.style.setProperty('--topo', `var(--parada-${Math.min(faixa + 2, PARADAS_DO_MEDIDOR)})`);
+
+    const chao = document.createElement('div');
+    chao.className = 'medidorChao';
+    const acima = document.createElement('div');
+    acima.className = 'medidorSobra';
+    acima.style.width = `${faixa === PARADAS_DO_MEDIDOR - 1 ? 100 : sobra - faixa * LIMIAR_MEDIDOR}%`;
+    trilho.append(chao, acima);
+    return trilho;
 }
 
 // Duração "permanente" no motor é int.MaxValue (ex: a Sentença do Vilão) — mostrar o número cru

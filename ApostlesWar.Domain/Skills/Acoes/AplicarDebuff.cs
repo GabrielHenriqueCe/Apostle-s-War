@@ -36,10 +36,41 @@ namespace ApostlesWar.Domain
         public override bool TemEfeitoUtil(Combate atacante, IReadOnlyList<Combate> alvos)
             => alvos.Any(a => a.PodeReceber(_fabrica(atacante)));
 
+        /// <summary>
+        /// DOIS PORTÕES, e eles são coisas diferentes de propósito (decisão do Gabriel):
+        ///
+        /// 1. <b>a chance da PRÓPRIA habilidade</b> (`_chance`) — o incremento diferencial que o
+        ///    rebalanceamento usa pra segurar habilidade roubada, e o eixo por onde a RARIDADE vai
+        ///    diferenciar kits. É identidade da habilidade e não depende de quem a usa;
+        /// 2. <b>Precisão × Resistência</b> — a disputa entre quem aplica e quem apanha, que é a
+        ///    mesma pra todo malefício do jogo.
+        ///
+        /// Elas MULTIPLICAM: o Medo de 50% num alvo que resiste metade cola em 25% das vezes.
+        ///
+        /// <b>Auto-malefício não rola nada</b> — o que se impõe a si mesmo é escolha, não imposição,
+        /// e um custo de habilidade que às vezes não se paga seria outra mecânica. Se um dia nascer
+        /// um debuff aplicado em ALIADO, distingui-lo vai exigir a <c>Batalha</c> aqui dentro, que
+        /// hoje esta ação não tem — e aí o portão 2 tem de ficar de fora dele também.
+        /// </summary>
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
             if (_chance < 1.0 && Random.Shared.NextDouble() >= _chance) return;
-            _fabrica(atacante).Aplicar(alvo);
+
+            Debuff debuff = _fabrica(atacante);
+
+            if (alvo != atacante)
+            {
+                double colar = atacante.ChanceDeColarEm(alvo);
+                if (colar < 1.0 && Random.Shared.NextDouble() >= colar) return;   // resistiu inteiro
+
+                // O piso é 1 turno: já colou, então dura. Aparar um debuff de 1 turno o apagaria
+                // pela porta dos fundos, e aí "colou" deixaria de querer dizer alguma coisa.
+                if (debuff.DuracaoRestante > 1
+                    && Random.Shared.NextDouble() < atacante.ChanceDeAparaUmTurnoEm(alvo))
+                    debuff.ReduzirDuracao(1);
+            }
+
+            debuff.Aplicar(alvo);
         }
     }
 }

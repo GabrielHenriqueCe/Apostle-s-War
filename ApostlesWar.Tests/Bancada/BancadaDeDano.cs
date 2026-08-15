@@ -36,7 +36,10 @@ namespace Tests.Bancada
         // correspondente explodir e a comparação perder o sentido.
         private const int HPPadrao = 2_000;
         private const int AtkPadrao = 200;
-        private const int DefNoCap = 1000;      // 1000 de DEF = os 75% de redução, o teto da fórmula
+        // O JOELHO da curva `DEF/(DEF+5000)`: a DEF que reduz exatamente metade. Substituiu o antigo
+        // "DEF no cap" (1000), que na fórmula velha era o teto de 75% e na nova vale 16,7% — a linha
+        // de defesa pesada precisa de um boneco que continue sendo pesado.
+        private const int DefNoJoelho = 5000;
         private const int BonecosEmArea = 4;    // a coluna que dá voz às habilidades de área
 
         private sealed record Linha(string Titulo, string Explica, bool PorHab, int DefBoneco, bool Imune);
@@ -46,26 +49,26 @@ namespace Tests.Bancada
             new("1 — por habilidade · boneco DEF 0 · imune a malefícios",
                 "Dano cru. Sem defesa no alvo, quem \"fura defesa\" não distorce a comparação.",
                 PorHab: true, DefBoneco: 0, Imune: true),
-            new("2 — por habilidade · boneco DEF no cap · imune a malefícios",
+            new("2 — por habilidade · boneco DEF no joelho · imune a malefícios",
                 "Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**",
-                PorHab: true, DefBoneco: DefNoCap, Imune: true),
-            new("3 — apóstolo inteiro · boneco DEF no cap · imune a malefícios",
+                PorHab: true, DefBoneco: DefNoJoelho, Imune: true),
+            new("3 — apóstolo inteiro · boneco DEF no joelho · imune a malefícios",
                 "O apóstolo jogando com o cérebro do bot. **Sinergia = real − esperado**, onde o esperado " +
                 "aplica o dano-por-uso da linha 2 às ativações que de fato aconteceram aqui. Positivo = " +
                 "as habilidades valem mais juntas do que separadas.",
-                PorHab: false, DefBoneco: DefNoCap, Imune: true),
-            new("4 — apóstolo inteiro · boneco DEF no cap · RECEBENDO malefícios",
+                PorHab: false, DefBoneco: DefNoJoelho, Imune: true),
+            new("4 — apóstolo inteiro · boneco DEF no joelho · RECEBENDO malefícios",
                 "O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Sinergia aqui sai " +
                 "do MESMO esperado da linha 2 que a linha 3 usa — é o que mantém as duas colunas " +
                 "comparáveis, já que entre elas varia só a imunidade. Então **sinergia(4) − sinergia(3) " +
                 "= a sinergia que passa por malefício**: raspar DEF (`ReduçãoDefesa`, −30% sobre um " +
-                "boneco no cap) infla o golpe DIRETO e some do `Tick`, e a linha 3 não consegue " +
+                "boneco no joelho) infla o golpe DIRETO e some do `Tick`, e a linha 3 não consegue " +
                 "enxergar isso porque o boneco dela é imune.",
-                PorHab: false, DefBoneco: DefNoCap, Imune: false),
-            new("5 — por habilidade · boneco DEF no cap · RECEBENDO malefícios",
+                PorHab: false, DefBoneco: DefNoJoelho, Imune: false),
+            new("5 — por habilidade · boneco DEF no joelho · RECEBENDO malefícios",
                 "**(5) − (2) por habilidade = de quem é o mérito do malefício.** Sem esta linha, o DoT " +
                 "de uma habilidade (a Queima do Mago) não aparece em número nenhum por-habilidade.",
-                PorHab: true, DefBoneco: DefNoCap, Imune: false),
+                PorHab: true, DefBoneco: DefNoJoelho, Imune: false),
         };
 
         /// <summary>
@@ -109,7 +112,11 @@ namespace Tests.Bancada
                 new NuncaMorre(),   // sobrevive a habilidades que matam DENTRO de uma ativação
             };
             if (imune) habilidades.Add(new ImuneAMaleficios());
-            return new Personagem(1, Faccao.Humanos, "Boneco", "🎯", HPPadrao, 0, defesa, habilidades.ToArray());
+            // RESISTÊNCIA ZERO: o malefício que a habilidade promete SEMPRE cola. É o mesmo motivo do
+            // crítico 100% — a bancada mede o kit, e uma chance de aplicar entre 0 e 1 mediria o dado.
+            // Quem quiser saber o que a Precisão vale tem a fórmula, que é determinística.
+            return new Personagem(1, Faccao.Humanos, "Boneco", "🎯", HPPadrao, 0, defesa,
+                habilidades.ToArray()).ComResistencia(0);
         }
 
         private static Medicao Rodar(Personagem original, HabilidadeAtiva? habIsolada, Linha linha,
@@ -358,7 +365,7 @@ namespace Tests.Bancada
             md.AppendLine("- Na medição por habilidade, o apóstolo usa **só aquela** e **espera** durante o cooldown");
             md.AppendLine("  (não enche o buraco com A1 — se enchesse, o A1 dominaria e todas ficariam iguais).");
             md.AppendLine("- No apóstolo inteiro, quem decide é o **mesmo `ControladorBot`** da Arena e do modo Auto.");
-            md.AppendLine($"- Boneco: DEF 0 ou {DefNoCap} (o cap de 75% de redução), e **nunca age** — ele se cura.");
+            md.AppendLine($"- Boneco: DEF 0 ou {DefNoJoelho} (o joelho da curva: 50% de redução), e **nunca age** — ele se cura.");
             md.AppendLine("  O HP é REALISTA nos dois lados de propósito: a Queima tira 5% do HP máximo por turno e");
             md.AppendLine("  cura costuma ser % do HP máximo, então inflar qualquer um dos dois estoura o número.");
             md.AppendLine("  Ele volta ao HP cheio entre turnos e **não morre** — usa a prevenção-de-morte do Guarda");

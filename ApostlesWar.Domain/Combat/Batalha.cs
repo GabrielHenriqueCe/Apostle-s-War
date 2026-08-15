@@ -53,7 +53,8 @@ namespace ApostlesWar.Domain
             return (minha.Membros, OponenteDe(minha).Membros);
         }
 
-        /// <summary>Todos os combatentes na ordem de turno (Equipe1 depois Equipe2).</summary>
+        /// <summary>Todos os combatentes, Equipe1 depois Equipe2. É ordem de LISTA, não de turno:
+        /// quem joga quando é a <see cref="FilaDeTurnos"/> quem diz.</summary>
         public List<Combate> Combatentes => Equipe1.Membros.Concat(Equipe2.Membros).ToList();
     }
 }

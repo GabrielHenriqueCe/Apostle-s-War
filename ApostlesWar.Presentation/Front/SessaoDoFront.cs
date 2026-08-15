@@ -230,7 +230,7 @@ namespace ApostlesWar.Presentation.Front
             Escudo: c.StatusAtivos.OfType<Escudo>().FirstOrDefault()?.PontosRestantes ?? 0,
             Ataque: c.Ataque,
             Defesa: c.Defesa,
-            Velocidade: c.Personagem.Velocidade,
+            Velocidade: c.Velocidade,   // pelo Combate, não pelo Personagem: é onde as camadas vão nascer
             Precisao: c.Personagem.Precisao,
             Resistencia: c.Personagem.Resistencia,
             TaxaCritPct: (int)(c.TaxaCrit * 100),

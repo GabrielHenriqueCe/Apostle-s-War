@@ -71,9 +71,9 @@ namespace ApostlesWar.Presentation.Front
         int Escudo,
         int Ataque,
         int Defesa,
-        // Velocidade/Precisão/Resistência ainda vêm do Personagem, não de camadas do Combate: nada
-        // no motor os modifica hoje. Quando o medidor de turno chegar, a Velocidade ganha as camadas
-        // (base + buff) no molde da Defesa, e é ELA que passa a alimentar este campo.
+        // A Velocidade já vem pelo `Combate` — é lá que as camadas (base + itens + buff) vão nascer
+        // quando a Bota chegar, e a tela não precisa saber que apareceram. Precisão e Resistência
+        // seguem vindo do Personagem: nada no motor as modifica ainda.
         int Velocidade,
         int Precisao,
         int Resistencia,

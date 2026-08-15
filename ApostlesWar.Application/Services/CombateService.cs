@@ -69,31 +69,44 @@ namespace ApostlesWar.Application.Services
 
         #region Loop principal
 
+        /// <summary>
+        /// O laço da batalha: enquanto os dois lados tiverem vivos, a <see cref="FilaDeTurnos"/> diz
+        /// de quem é a vez e o turno acontece.
+        ///
+        /// Não existe mais RODADA — a fila não tem volta ao começo, e quem é rápido joga de novo
+        /// antes de o lento jogar a primeira vez. O que existia aqui era um `for` sobre
+        /// `Equipe1.Membros ++ Equipe2.Membros`, e ele dava à equipe 1 uma vantagem estrutural que
+        /// ninguém tinha desenhado.
+        /// </summary>
         private bool ExecutarCombate(Batalha batalha)
         {
             _batalha = batalha;
             _relogio.Reiniciar();   // nova batalha: zera o contador de turnos
-            var combatentes = batalha.Combatentes;
-            do
+            var fila = new FilaDeTurnos(batalha);
+
+            while (batalha.Equipe1.TemVivos() && batalha.Equipe2.TemVivos())
             {
-                for (int c = 0; c < combatentes.Count; c++)
+                if (fila.Proximo() is not Combate daVez) break;   // ninguém pode agir: a luta não tem como seguir
+
+                ExecutarTurnoCompleto(daVez);
+
+                // Turno extra: dispara enquanto a flag estiver setada.
+                // Loop teórico infinito é permitido por design (RNG decide quando para).
+                // Ele NÃO passa pela fila de propósito: não desconta medidor nem cobra o custo da
+                // ação. Se cobrasse, o prêmio de jogar de novo encheria a barra de todo mundo junto
+                // — inclusive a dos inimigos —, e o turno extra pagaria por si mesmo.
+                while (daVez.TemTurnoExtra)
                 {
-                    if (!combatentes[c].EstaVivo()) continue;
+                    daVez.ConsumirTurnoExtra();
+                    if (!daVez.EstaVivo()) break;
                     if (!batalha.Equipe1.TemVivos() || !batalha.Equipe2.TemVivos()) break;
-
-                    ExecutarTurnoCompleto(combatentes[c]);
-
-                    // Turno extra: dispara enquanto a flag estiver setada.
-                    // Loop teórico infinito é permitido por design (RNG decide quando para).
-                    while (combatentes[c].TemTurnoExtra)
-                    {
-                        combatentes[c].ConsumirTurnoExtra();
-                        if (!combatentes[c].EstaVivo()) break;
-                        if (!batalha.Equipe1.TemVivos() || !batalha.Equipe2.TemVivos()) break;
-                        ExecutarTurnoCompleto(combatentes[c]);
-                    }
+                    ExecutarTurnoCompleto(daVez);
                 }
-            } while (batalha.Equipe1.TemVivos() && batalha.Equipe2.TemVivos());
+
+                // Depois da ação, e não antes: um empurrão de medidor dado DURANTE o turno entra
+                // antes do desconto, que é o que quem lançou a habilidade espera.
+                fila.Consumir(daVez);
+            }
 
             return batalha.Equipe1.TemVivos();   // Equipe1 = jogador na campanha
         }

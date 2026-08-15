@@ -1418,10 +1418,31 @@ as regras dos dois lados.
     destaque nas CAIXAS dos alvos — e aí ele precisa se distinguir deste mapa de calor, que é
     exatamente a confusão que a versão do cursor evitava.
 
-    **Depois, na ordem do GDD §7:** o **medidor de turno** (fila única — hoje a ordem é um `for`
-    sobre `Equipe1.Membros ++ Equipe2.Membros` no `CombateService.ExecutarCombate`, e é esse `Concat`
-    que é a vantagem de time que o §1 quer matar; o desempate é por posição, que já existe agora) e
-    depois **`DEF/(DEF+5000)` + Precisão × Resistência** (hoje a DEF é `DEF/1000` com cap 75% em
+    - ✅ **O MEDIDOR DE TURNO — a fila única** *(branch `feature/medidor-de-turno`)*. O `for` sobre
+      `Equipe1.Membros ++ Equipe2.Membros` morreu, e com ele a vantagem de time que ninguém tinha
+      desenhado. **Não existe mais RODADA:** quem é rápido joga de novo antes de o lento jogar a
+      primeira vez.
+      - **A maquete VALIDADA foi a especificação**, e implementei literalmente
+        ([artefato](https://claude.ai/code/artifact/8ab74f17-3630-4cfa-80f7-974a7de2c9eb)): salto
+        EXATO até o próximo cruzamento (ninguém passa de 100 por avanço natural, então sobra só vem
+        de empurrão ou do custo), o mais CHEIO age, desempate posição → lado do jogador.
+      - **`FilaDeTurnos` (Domain)** guarda a regra inteira e as constantes; **`Combate.Medidor`** é a
+        barra, gravável só por `AcumularMedidor`/`DescontarUmTurnoDoMedidor`. A **fração é
+        adimensional** (10% do ciclo de referência) — o `0,05` seria o número certo na unidade errada.
+      - **O TURNO EXTRA não passa pela fila**: não desconta medidor nem paga o custo. Se pagasse, o
+        prêmio de jogar de novo encheria a barra de todo mundo — inclusive a dos inimigos.
+      - **A BANCADA É A PROVA de que a troca é conservadora onde tem de ser:** com Velocidades
+        iguais o desempate reproduz exatamente a ordem antiga, e o relatório só mexeu nas 5 linhas
+        que já oscilavam por sorteio de alvo. A fila só morde quando as Velocidades diferem — que é
+        o ponto.
+      - **Aberto, e é decisão do Gabriel:** na fase de 2 rodadas o time do jogador **carrega o
+        medidor** da rodada 1 pra rodada 2 (só os inimigos nascem em 0, porque só eles são
+        posicionados de novo). Hoje isso dá a ele a abertura da 2ª onda.
+      - **Falta a TELA:** o trilho de cada um e o cordão da ordem. O `Prever` da maquete não foi
+        portado de propósito — quando for, tem de REUSAR as regras da `FilaDeTurnos` sobre uma
+        cópia do estado, nunca reimplementá-las.
+
+    **Depois, na ordem do GDD §7:** **`DEF/(DEF+5000)` + Precisão × Resistência** (hoje a DEF é `DEF/1000` com cap 75% em
     `Combate.cs`, e no nv 1 mitiga 2–5% — está inerte em jogo, e é esperado até esse PR; a Precisão
     também não faz nada: o que existe é `AplicarDebuff(chance:)`, chance FIXA por habilidade, que
     ignora quem aplica e em quem).

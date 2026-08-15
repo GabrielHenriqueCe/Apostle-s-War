@@ -197,6 +197,58 @@ namespace Tests
             Assert.Equal(ordemNormal, ordemDobrada);
         }
 
+        // ---------- a previsão (o cordão na tela) ----------
+
+        /// <summary>
+        /// O TESTE QUE JUSTIFICA A PREVISÃO EXISTIR: o que ela promete tem de ser exatamente o que a
+        /// batalha entrega. Se um dia alguém reimplementar a regra no lado da previsão, é aqui que a
+        /// divergência aparece — e não em jogo, com o jogador vendo a fila mentir.
+        /// </summary>
+        [Fact]
+        public void Prever_DizExatamenteAOrdemQueAFilaVaiEntregar()
+        {
+            var (_, fila) = Campo(
+                new() { Boneco(150, 1, "a"), Boneco(90, 2, "b") },
+                new() { Boneco(120, 1, "c"), Boneco(203, 2, "d") });
+
+            var previsto = fila.Prever(12).Select(v => v.Quem.Personagem.Nome).ToList();
+            var aconteceu = Sequencia(fila, 12);
+
+            Assert.Equal(previsto, aconteceu);
+        }
+
+        [Fact]
+        public void Prever_NaoMexeNoEstadoDaBatalha()
+        {
+            var a = Boneco(150, 1, "a");
+            var b = Boneco(90, 1, "b");
+            var (_, fila) = Campo(new() { a }, new() { b });
+
+            fila.Prever(20);
+
+            Assert.Equal(0, a.Medidor, 6);
+            Assert.Equal(0, b.Medidor, 6);
+        }
+
+        /// <summary>
+        /// `Esperou` é o que faz o cordão dizer ONDE a ordem é frágil: false = os dois jogam na
+        /// sequência, sem intervalo; true = o relógio anda até alguém cruzar 100, e é dentro desse
+        /// intervalo que um terceiro pode se enfiar com um empurrão.
+        /// </summary>
+        [Fact]
+        public void Prever_MarcaEsperouSoQuandoORelogioPrecisaAndar()
+        {
+            var lento = Boneco(100, 1, "lento");
+            var rapido = Boneco(100, 1, "rápido");
+            var (_, fila) = Campo(new() { lento }, new() { rapido });
+
+            var previsto = fila.Prever(3);       // do zero: os dois chegam a 100 no mesmo salto
+
+            Assert.True(previsto[0].Esperou);    // do zero até o 1º cruzamento, o relógio andou
+            Assert.False(previsto[1].Esperou);   // o outro já estava pronto: mesmo instante
+            Assert.True(previsto[2].Esperou);    // daí em diante volta a haver espera
+        }
+
         private static List<string> Sequencia(FilaDeTurnos fila, int quantos)
         {
             var nomes = new List<string>();

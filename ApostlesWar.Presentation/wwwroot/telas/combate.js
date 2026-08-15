@@ -173,7 +173,53 @@ export function desenhar() {
 
     desenharLado('ladoEsquerdo', estado.equipe1);
     desenharLado('ladoDireito', estado.equipe2);
+    desenharCordao();
     desenharPainel();
+}
+
+// O CORDÃO DE TURNOS — a ordem de quem joga, do primeiro ao último. Ela vem PRONTA do C# (a
+// `FilaDeTurnos` prevê sobre uma cópia do estado); aqui não se calcula ordem nenhuma, senão o
+// desenho prometeria o que a batalha não cumpre.
+//
+// Entre duas fichas vai um sinal: `+` = **mesmo instante**, quem vem depois já estava acima de 100 e
+// entra na sequência sem espera; `⏱` = aqui o relógio anda, e é dentro desse intervalo que um
+// terceiro pode se enfiar. É o que torna o corte de turno legível — quando alguém fura sua sequência,
+// dá pra ver que o buraco estava desenhado ali.
+function desenharCordao() {
+    const alvo = document.getElementById('cordao');
+    const fila = estado.fila || [];
+    alvo.hidden = fila.length === 0 || nomeDaFase(estado) === 'Fim';
+    if (alvo.hidden) { alvo.replaceChildren(); return; }
+
+    const porId = new Map([...estado.equipe1, ...estado.equipe2].map(c => [c.id, c]));
+    const pecas = [];
+
+    fila.forEach((vez, i) => {
+        const c = porId.get(vez.id);
+        if (!c) return;   // saiu do board entre o cálculo e o retrato
+
+        if (i > 0) {
+            const sinal = document.createElement('div');
+            sinal.className = 'cordaoSinal ' + (vez.esperou ? 'esperou' : 'mesmoInstante');
+            sinal.textContent = vez.esperou ? '⏱' : '+';
+            sinal.title = vez.esperou
+                ? 'o relógio anda até o próximo cruzar 100% — cabe alguém no meio'
+                : 'mesmo instante: já estava com o turno na mão';
+            pecas.push(sinal);
+        }
+
+        const ficha = document.createElement('div');
+        ficha.className = 'cordaoFicha';
+        ficha.dataset.pos = i;
+        ficha.dataset.lado = estado.equipe1.some(x => x.id === vez.id) ? 1 : 2;
+        const emo = document.createElement('div'); emo.className = 'cordaoEmoji'; emo.textContent = c.simbolo;
+        const nom = document.createElement('div'); nom.className = 'cordaoNome'; nom.textContent = c.nome;
+        ficha.append(emo, nom);
+        ficha.title = `${c.nome} — ${i === 0 ? 'agora' : (i + 1) + 'º'}`;
+        pecas.push(ficha);
+    });
+
+    alvo.replaceChildren(...pecas);
 }
 
 // Classes de animação em curso — precisam SOBREVIVER a um redesenho (ver desenharLado). O `foco`

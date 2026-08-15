@@ -77,6 +77,7 @@ namespace Tests.Bancada
 
         public void LimparTela() { }
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos) { }
+        public void ExibirFilaDeTurnos(IReadOnlyList<FilaDeTurnos.Vez> fila) { }
         public void ExibirMensagemPassiva(string mensagem) { }
         public void ExibirPreparacaoAtaque(Combate atacante, List<Combate> defensores) { }
         public void ExibirUsoHabilidade(Combate atacante, Habilidade hab) { }

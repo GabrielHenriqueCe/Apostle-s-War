@@ -187,7 +187,7 @@ const TELAS = [
     }],
     ['compendio', { faccoes: [{ nome: 'Reino', simbolo: '👑', apostolos: [apostolo] }] }],
     ['compendioApostolo', apostolo],
-    ['estado', { turno: 1, fase: 'Assistindo', mensagem: '', equipe1: [apostolo], equipe2: [{ ...apostolo, id: 9 }], quemAge: null, habilidades: [], alvosValidos: [], selecionado: null, auto: false, modo: 'Campanha', tema: 'reino' }],
+    ['estado', { turno: 1, fase: 'Assistindo', mensagem: '', equipe1: [apostolo], equipe2: [{ ...apostolo, id: 9 }], quemAge: null, fila: [{ id: 1, esperou: true }, { id: 9, esperou: false }], habilidades: [], alvosValidos: [], selecionado: null, auto: false, modo: 'Campanha', tema: 'reino' }],
     ['evento', { tipo: 'dano', alvoId: 1, valor: 10, critico: false, absorvidoPeloEscudo: 0, texto: null }],
 ];
 

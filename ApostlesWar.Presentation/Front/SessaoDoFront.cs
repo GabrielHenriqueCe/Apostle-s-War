@@ -179,6 +179,23 @@ namespace ApostlesWar.Presentation.Front
         /// ponto já narrado — é o que o <see cref="TelaDeCombateWeb.ExibirUsoHabilidade"/> usa pra
         /// anunciar a habilidade sem entregar o dano antes da hora.
         /// </summary>
+        // A ordem prevista, como o motor a entregou no começo deste turno. Vive aqui e não no
+        // EstadoDeBatalha porque ela é a MESMA em todos os retratos do mesmo turno — o motor a
+        // recalcula uma vez, e cada publicação leva a cópia dela.
+        private IReadOnlyList<FilaDeTurnos.Vez> _fila = Array.Empty<FilaDeTurnos.Vez>();
+
+        public void GuardarFila(IReadOnlyList<FilaDeTurnos.Vez> fila) => _fila = fila;
+
+        /// <summary>
+        /// A fila como a tela a vê. Quem saiu do board (a rodada nova troca os inimigos) é DESCARTADO
+        /// em vez de virar um id fantasma: a fila que o motor mandou é a do turno anterior nesse
+        /// instante, e um id sem combatente na tela vira ficha em branco.
+        /// </summary>
+        private List<VezVista> FilaVisivel() => _fila
+            .Where(v => _board.Contains(v.Quem))
+            .Select(v => new VezVista(IdDe(v.Quem), v.Esperou))
+            .ToList();
+
         public void Publicar(bool sincronizarVida = true)
         {
             if (sincronizarVida) SincronizarVida();
@@ -190,6 +207,7 @@ namespace ApostlesWar.Presentation.Front
                 Equipe1: todos.Where(c => LadoDe(c) == 1).Select(Ver).ToList(),
                 Equipe2: todos.Where(c => LadoDe(c) == 2).Select(Ver).ToList(),
                 QuemAge: QuemAge is null ? null : IdDe(QuemAge),
+                Fila: FilaVisivel(),
                 Habilidades: HabilidadesDoTurno.Select(VerHabilidade).ToList(),
                 AlvosValidos: AlvosValidos.Select(IdDe).ToList(),
                 Mensagem: Mensagem,

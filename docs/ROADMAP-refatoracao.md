@@ -1435,12 +1435,18 @@ as regras dos dois lados.
         iguais o desempate reproduz exatamente a ordem antiga, e o relatório só mexeu nas 5 linhas
         que já oscilavam por sorteio de alvo. A fila só morde quando as Velocidades diferem — que é
         o ponto.
-      - **Aberto, e é decisão do Gabriel:** na fase de 2 rodadas o time do jogador **carrega o
-        medidor** da rodada 1 pra rodada 2 (só os inimigos nascem em 0, porque só eles são
-        posicionados de novo). Hoje isso dá a ele a abertura da 2ª onda.
-      - **Falta a TELA:** o trilho de cada um e o cordão da ordem. O `Prever` da maquete não foi
-        portado de propósito — quando for, tem de REUSAR as regras da `FilaDeTurnos` sobre uma
-        cópia do estado, nunca reimplementá-las.
+      - ✅ **O CORDÃO DE TURNOS** *(branch `feature/fila-na-tela`)*: a ordem dos 8 próximos turnos,
+        centralizada abaixo do topo, com as fichas pequenas — leitura de canto de olho, não a
+        atração da tela. O `Prever` roda as MESMAS funções do combate sobre um retrato copiado
+        (`Passo`), e o teste que justifica a peça existir é o que compara a previsão com o que a
+        batalha entrega de verdade. Entre as fichas, `+` = mesmo instante (sem intervalo) e `⏱` =
+        aqui o relógio anda, que é onde cabe alguém cortando a sequência.
+        - **Um desvio consciente da maquete:** lá o `dt` de cada vez soma o custo da ação anterior,
+          então com fração 10% ele nunca é zero e o `+` **nunca apareceria**. Aqui o sinal lê o
+          AVANÇO puro, que é o que dá a informação útil: houve espera ou não.
+      - ✅ **A onda nova começa empatada** (decisão do Gabriel): o time do jogador tem o medidor
+        zerado no início de cada rodada, como os inimigos — que já nasciam em 0 por serem
+        posicionados de novo. Sem isso ele abria a 2ª onda com meio ciclo de vantagem.
 
     - ✅ **A DEF EM CURVA + PRECISÃO × RESISTÊNCIA** *(branch `feature/def-e-precisao`, o passo 4 do
       GDD §7)*. Os dois stats que estavam inertes passaram a valer.

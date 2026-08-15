@@ -26,6 +26,14 @@ namespace ApostlesWar.Application.Portas
         void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos);
 
         /// <summary>
+        /// A ordem prevista dos próximos turnos, do primeiro ao último — vem pronta do motor, porque
+        /// a regra de quem joga quando é dele. Chega uma vez por turno, antes da ação.
+        ///
+        /// Uma tela que não desenha ordem nenhuma pode ignorar (no-op): o combate não depende disso.
+        /// </summary>
+        void ExibirFilaDeTurnos(IReadOnlyList<FilaDeTurnos.Vez> fila);
+
+        /// <summary>
         /// Início da Arena (PVP): a tela recebe os dois times NA ORDEM montada pra fixar os lados
         /// (equipe1=esquerda, equipe2=direita) independente de quem controla — na Arena os lados são
         /// como o jogador montou. A campanha (PVE) não chama isto: segue "o humano à esquerda".

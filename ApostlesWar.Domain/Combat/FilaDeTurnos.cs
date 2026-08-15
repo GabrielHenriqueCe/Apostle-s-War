@@ -53,15 +53,79 @@ namespace ApostlesWar.Domain
         private List<Combate> Vivos => _batalha.Combatentes.Where(c => c.EstaVivo()).ToList();
 
         /// <summary>
+        /// Uma vez na fila PREVISTA. <see cref="Esperou"/> = o relógio teve de andar até alguém cruzar
+        /// o limiar antes desta vez — ou seja, houve um intervalo aqui, e é dentro dele que um
+        /// terceiro pode se enfiar. Falso = ele já estava acima de 100 e joga na sequência do
+        /// anterior, sem espera. É a diferença que a tela precisa mostrar: sem ela, a fila diz a
+        /// ordem mas não diz onde a ordem é frágil.
+        /// </summary>
+        public readonly record struct Vez(Combate Quem, bool Esperou);
+
+        /// <summary>
+        /// O medidor de um combatente num instante SIMULADO. Existe pra que a previsão da fila rode
+        /// as MESMAS regras que o combate, sobre uma cópia — uma segunda implementação faria a tela
+        /// prometer uma ordem que o motor não cumpre, que é o defeito que este desenho existe pra
+        /// consertar.
+        /// </summary>
+        private readonly record struct Passo(Combate Quem, double Medidor)
+        {
+            public int Velocidade => Quem.Velocidade;
+        }
+
+        private List<Passo> Retrato() => Vivos.Select(c => new Passo(c, c.Medidor)).ToList();
+
+        /// <summary>
         /// De quem é a vez: adianta o relógio até o primeiro cruzar o limiar e devolve quem age.
-        /// <c>null</c> só quando não há mais ninguém que possa agir (ver <see cref="AvancarAteAlguemCruzar"/>).
+        /// <c>null</c> só quando não há mais ninguém que possa agir (ver <see cref="TempoAteAlguemCruzar"/>).
         /// Não consome nada — quem consome é o <see cref="Consumir"/>, DEPOIS que a ação aconteceu.
         /// </summary>
         public Combate? Proximo()
         {
-            AvancarAteAlguemCruzar();
-            return QuemAge();
+            double tempo = TempoAteAlguemCruzar(Retrato());
+            foreach (Combate c in Vivos.Where(c => c.Velocidade > 0))
+                c.AcumularMedidor(c.Velocidade * tempo);
+
+            return MaisCheio(Retrato());
         }
+
+        /// <summary>
+        /// A ordem dos próximos turnos, como ela seria se ninguém empurrasse medidor nem morresse.
+        /// Roda a simulação sobre um <see cref="Passo"/> por combatente — as mesmas funções que o
+        /// combate usa, sobre uma cópia do estado.
+        ///
+        /// É previsão, não promessa: qualquer habilidade que empurre medidor, mate alguém ou mexa em
+        /// Velocidade reescreve a fila no turno seguinte. É justamente por isso que ela é útil — o
+        /// jogador vê o que a jogada dele fez com a ordem.
+        /// </summary>
+        public IReadOnlyList<Vez> Prever(int quantos)
+        {
+            var retrato = Retrato();
+            var fila = new List<Vez>();
+
+            for (int i = 0; i < quantos; i++)
+            {
+                double tempo = TempoAteAlguemCruzar(retrato);
+                retrato = Encher(retrato, tempo);
+
+                Combate? quem = MaisCheio(retrato);
+                if (quem is null) break;
+
+                fila.Add(new Vez(quem, Esperou: tempo > Tolerancia));
+
+                // O turno que acabou de ser previsto: desconta o limiar de quem agiu e cobra de todos
+                // o tempo da ação — igual ao Consumir, e é isso que faz a fila prever DOIS turnos
+                // seguidos de quem tem sobra pra isso.
+                retrato = Encher(
+                    retrato.Select(p => p.Quem == quem ? p with { Medidor = p.Medidor - Limiar } : p).ToList(),
+                    CustoDaAcao);
+            }
+
+            return fila;
+        }
+
+        private static List<Passo> Encher(List<Passo> retrato, double tempo) => retrato
+            .Select(p => p.Velocidade > 0 ? p with { Medidor = p.Medidor + p.Velocidade * tempo } : p)
+            .ToList();
 
         /// <summary>
         /// Fecha o turno de quem agiu: desconta o limiar (a SOBRA carrega) e cobra o tempo da ação
@@ -86,17 +150,14 @@ namespace ApostlesWar.Domain
         /// ela daria infinito) mas continua na fila — um empurrão ainda o faz agir. Se NINGUÉM tiver
         /// Velocidade, o relógio não tem pra onde andar e a vez fica vazia.
         /// </summary>
-        private void AvancarAteAlguemCruzar()
+        private static double TempoAteAlguemCruzar(List<Passo> retrato)
         {
-            var vivos = Vivos;
-            if (vivos.Any(c => c.Medidor >= Limiar - Tolerancia)) return;
+            if (retrato.Any(p => p.Medidor >= Limiar - Tolerancia)) return 0;
 
-            var andando = vivos.Where(c => c.Velocidade > 0).ToList();
-            if (andando.Count == 0) return;
+            var andando = retrato.Where(p => p.Velocidade > 0).ToList();
+            if (andando.Count == 0) return 0;
 
-            double tempo = andando.Min(c => (Limiar - c.Medidor) / c.Velocidade);
-            foreach (Combate c in andando)
-                c.AcumularMedidor(c.Velocidade * tempo);
+            return andando.Min(p => (Limiar - p.Medidor) / p.Velocidade);
         }
 
         /// <summary>
@@ -112,18 +173,19 @@ namespace ApostlesWar.Domain
         /// que não pode existir é a mesma situação produzindo ordens diferentes — a prévia da fila
         /// prometeria o que o motor não cumpre.
         /// </summary>
-        private Combate? QuemAge()
+        private Combate? MaisCheio(List<Passo> retrato)
         {
-            var prontos = Vivos.Where(c => c.Medidor >= Limiar - Tolerancia).ToList();
+            var prontos = retrato.Where(p => p.Medidor >= Limiar - Tolerancia).ToList();
             if (prontos.Count == 0) return null;
 
             // O medidor é arredondado ANTES de ordenar: sem isso, dois que cruzaram no mesmo salto
             // se separariam pelo último bit da divisão, e o desempate por posição nunca rodaria.
             return prontos
-                .OrderByDescending(c => Math.Round(c.Medidor, 6))
-                .ThenBy(c => c.Casa)
-                .ThenBy(c => _batalha.EquipeDe(c) == _batalha.Equipe1 ? 0 : 1)
-                .First();
+                .OrderByDescending(p => Math.Round(p.Medidor, 6))
+                .ThenBy(p => p.Quem.Casa)
+                .ThenBy(p => _batalha.EquipeDe(p.Quem) == _batalha.Equipe1 ? 0 : 1)
+                .First()
+                .Quem;
         }
     }
 }

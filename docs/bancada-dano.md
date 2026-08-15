@@ -23,12 +23,22 @@
   Ele volta ao HP cheio entre turnos e **não morre** — usa a prevenção-de-morte do Guarda
   Real, restaurando tudo e sem cooldown, o que também o salva de habilidades que matam
   DENTRO de uma ativação (o Porradeiro do Troll dá 6 hits de 480 num alvo de 2.000).
-- **O 🥷 Ninja oscila ±1 entre rodadas, e isso é esperado — não é regressão.** A Shuriken
-  é `TipoAlvo.Aleatorio` com 2 alvos: o sorteio cai diferente a cada corrida, e com o
-  `ignorarDefesaPctSeAnteriorCritico` acoplando hit a hit, a média das repetições fecha
-  num centésimo diferente. Ele é o único apóstolo do relatório que faz isso, então um
-  `git diff` que mexe SÓ na linha dele (em ~58.000, com 10 repetições) é ruído do
-  sorteio — dá pra descartar sem investigar. Qualquer OUTRO apóstolo mudando é sinal.
+- **CINCO LINHAS OSCILAM A CADA EXECUÇÃO, E ISSO É COMPORTAMENTO — não ruído a consertar,
+  não regressão.** São 🔫 Tiroteio (Policial) · 🤺 Esgrima (Guarda) · 🌟 Shuriken (Ninja) ·
+  🥊 Porradeiro (Troll) · 👿 Vilania (Vilão): as habilidades de `TipoAlvo.Aleatorio` que
+  causam DANO. (As outras duas de alvo aleatório do jogo — 🍭 Doces de Abóbora e 🛸 Abduzir —
+  não dão dano, então não aparecem aqui.) O desvio fica na casa de **±0,5%**. Duas causas,
+  as duas de desenho:
+  **(1) sortear alvo virou sortear MULTIPLICADOR.** Com 4 bonecos as casas 1 a 4 existem e
+  o perfil de distância paga diferente em cada uma. Antes dele os bonecos eram
+  intercambiáveis e o sorteio não mudava número nenhum — por isso isto atinge a coluna de
+  **4 alvos**, e só ela, nas cinco.
+  **(2) encadeamento condicional por CRÍTICO**, e este é só do 🥷 Ninja: a Shuriken carrega
+  `ignorarDefesaPctSeAnteriorCritico`, o 2º hit depende do dado do 1º, e por isso ele é o
+  único que também oscila na coluna de **1 alvo**.
+  **A conclusão, e ela não se reabre: o relatório varia porque a BATALHA varia.** Semear o
+  RNG deixaria o arquivo quieto escondendo justamente o que ele mede. **O que É sinal:**
+  qualquer OUTRO apóstolo mudando, ou uma destas cinco mudando muito além de 1%.
 
 ### O que este relatório NÃO mede
 
@@ -68,16 +78,16 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 🕵️ Detetive | 🔎 Espionagem | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 32640 | 960 | 150144 | 0 |
 | 👮 Policial | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 76160 | 2240 | 82208 | 0 |
+| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 76160 | 2240 | 81860 | 0 |
 | 👮 Policial | ⛓️ Prender | 3 | 34 | 0 | 0 | 0 | 0 |
 | 👲 Sushiman  | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 👲 Sushiman  | 🍣 Sushi | 3 | 34 | 0 | 0 | 0 | 20400 |
 | 👲 Sushiman  | 🍙 Nigiri | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
-| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 76160 | 2240 | 81782 | 0 |
+| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 76160 | 2240 | 81894 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 43520 | 1280 | 46668 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 43520 | 1280 | 46700 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 38080 | 1120 | 38080 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 32640 | 960 | 150144 | 0 |
@@ -120,7 +130,7 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 🤡 Palhaço | 🎪 Circo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧌 Troll | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🧌 Troll | 🤜 Pancada | 3 | 34 | 38080 | 1120 | 175168 | 0 |
-| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 48960 | 1440 | 54938 | 14688 |
+| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 48960 | 1440 | 55072 | 14688 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧞 Gênio | 🔮 Profecia | 3 | 34 | 32640 | 960 | 150144 | 0 |
@@ -141,7 +151,7 @@ Dano cru. Sem defesa no alvo, quem "fura defesa" não distorce a comparação.
 | 🦸 Herói | 💪 Super | 3 | 34 | 48960 | 1440 | 225216 | 0 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 21760 | 640 | 100096 | 0 |
-| 🦹 Vilão | 👿 Vilania | 3 | 34 | 54400 | 1600 | 58712 | 0 |
+| 🦹 Vilão | 👿 Vilania | 3 | 34 | 54400 | 1600 | 58432 | 0 |
 | 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 32000 | 320 | 32000 | 0 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 35360 | 1040 | 162656 | 0 |
@@ -183,16 +193,16 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🕵️ Detetive | 🔎 Espionagem | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 8160 | 240 | 37536 | 0 |
 | 👮 Policial | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
-| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 19040 | 560 | 20524 | 0 |
+| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 19040 | 560 | 20428 | 0 |
 | 👮 Policial | ⛓️ Prender | 3 | 34 | 0 | 0 | 0 | 0 |
 | 👲 Sushiman  | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 👲 Sushiman  | 🍣 Sushi | 3 | 34 | 0 | 0 | 0 | 20400 |
 | 👲 Sushiman  | 🍙 Nigiri | 3 | 34 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 |
-| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 20381 | 0 |
+| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 20361 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 22617 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 22678 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 8160 | 240 | 37536 | 0 |
@@ -235,7 +245,7 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🤡 Palhaço | 🎪 Circo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧌 Troll | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧌 Troll | 🤜 Pancada | 3 | 34 | 9520 | 280 | 43792 | 0 |
-| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 12240 | 360 | 13764 | 3672 |
+| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 12240 | 360 | 13718 | 3672 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🧞 Gênio | 🔮 Profecia | 3 | 34 | 8160 | 240 | 37536 | 0 |
@@ -256,7 +266,7 @@ Mesma coisa com defesa. **(2) − (1) = o que furar/ignorar defesa vale.**
 | 🦸 Herói | 💪 Super | 3 | 34 | 12240 | 360 | 56304 | 0 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 5440 | 160 | 25024 | 0 |
-| 🦹 Vilão | 👿 Vilania | 3 | 34 | 13600 | 400 | 14598 | 0 |
+| 🦹 Vilão | 👿 Vilania | 3 | 34 | 13600 | 400 | 14622 | 0 |
 | 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 | 0 | 0 |
 | 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 8840 | 260 | 40664 | 0 |
@@ -293,10 +303,10 @@ O apóstolo jogando com o cérebro do bot. **Sinergia = real − esperado**, ond
 |---|--:|--:|--:|--:|--:|--:|--:|---|
 | 👷 Operário | 12640 | 12640 | 0 | 16432 | 12640 | +3792 | 0 | Atacar 33×, Parede de Tijolos 17×, Marretada 50× |
 | 🕵️ Detetive | 10800 | 10800 | 0 | 40968 | 40176 | +792 | 0 | Atacar 33×, Espionagem 33×, Furtividade 34× |
-| 👮 Policial | 24320 | 24320 | 0 | 30238 | 25782 | +4456 | 0 | Atacar 66×, Tiroteio 34×, Prender 0× |
+| 👮 Policial | 24320 | 24320 | 0 | 30182 | 25680 | +4502 | 0 | Atacar 66×, Tiroteio 34×, Prender 0× |
 | 👲 Sushiman  | 3960 | 2640 | +1320 | 5148 | 2640 | +2508 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
-| 💂 Guarda | 21120 | 21120 | 0 | 26039 | 22407 | +3632 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 73300 | 59037 | +14263 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 💂 Guarda | 21120 | 21120 | 0 | 26131 | 22374 | +3757 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 73359 | 59103 | +14256 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
 | 🧙 Mago | 20080 | 20080 | 0 | 83656 | 82864 | +792 | 0 | Atacar 33×, Bola de Fogo 33×, Incêndio 34× |
 | 🫅 Rei | 2640 | 2640 | 0 | 3432 | 2640 | +792 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
 | 💀 Caveira | 10527 | 10527 | 0 | 39732 | 38940 | +792 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
@@ -310,14 +320,14 @@ O apóstolo jogando com o cérebro do bot. **Sinergia = real − esperado**, ond
 | 👹 Ogro | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Esmagar 34×, Quebrar 33× |
 | 👺 Tengu | 51870 | 51870 | 0 | 111121 | 99538 | +11583 | 0 | Atacar 33×, Corte de Vento 34×, Vendaval 33× |
 | 🤡 Palhaço | 5280 | 5280 | 0 | 6864 | 5280 | +1584 | 0 | Atacar 66×, Coringa 34×, Circo 0× |
-| 🧌 Troll | 24120 | 24120 | 0 | 60322 | 58880 | +1442 | 0 | Atacar 33×, Pancada 33×, Porradeiro 34× |
+| 🧌 Troll | 24120 | 24120 | 0 | 60333 | 58846 | +1487 | 0 | Atacar 33×, Pancada 33×, Porradeiro 34× |
 | 🧞 Gênio | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Desejo 34×, Profecia 33× |
 | 🧜 Sereia | 6600 | 5280 | +1320 | 8580 | 5280 | +3300 | 0 | Atacar 66×, Canto de Sereia 34×, Atlantis 0× |
 | 🧚 Fada | 22720 | 22720 | 0 | 60952 | 56992 | +3960 | 0 | Atacar 33×, Sininho 33×, Pó Mágico 34× |
 | 🐲 Dragão | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
 | 💩 Cocô | 24040 | 24040 | 0 | 62668 | 58312 | +4356 | 0 | Atacar 33×, Descarga 33×, Desentupidor 34× |
 | 🦸 Herói | 16200 | 14880 | +1320 | 61452 | 58944 | +2508 | 0 | Atacar 33×, Salvando o Dia 33×, Super 34× |
-| 🦹 Vilão | 21280 | 21280 | 0 | 44564 | 41821 | +2743 | 0 | Atacar 33×, Destruindo o Dia 34×, Vilania 33× |
+| 🦹 Vilão | 21280 | 21280 | 0 | 44632 | 41854 | +2778 | 0 | Atacar 33×, Destruindo o Dia 34×, Vilania 33× |
 | 🦖 T-Rex | 11480 | 11480 | 0 | 44096 | 43304 | +792 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
 | 🦇 Morcego | 11000 | 8000 | +3000 | 34100 | 22400 | +11700 | 0 | Atacar 50×, Mordida 25×, Rato Voador 25× |
 | 🧛 Vampiro | 37980 | 37980 | 0 | 49374 | 37980 | +11394 | 0 | Atacar 33×, Controle de Sangue 33×, Vampiro Primordial 34× |
@@ -336,10 +346,10 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 |---|--:|--:|--:|--:|--:|--:|--:|---|
 | 👷 Operário | 12640 | 12640 | 0 | 16432 | 12640 | +3792 | 0 | Atacar 33×, Parede de Tijolos 17×, Marretada 50× |
 | 🕵️ Detetive | 20304 | 10800 | +9504 | 76773 | 40176 | +36597 | 0 | Atacar 33×, Espionagem 33×, Furtividade 34× |
-| 👮 Policial | 21120 | 21120 | 0 | 26033 | 22539 | +3494 | 0 | Atacar 33×, Tiroteio 33×, Prender 34× |
+| 👮 Policial | 21120 | 21120 | 0 | 26084 | 22440 | +3644 | 0 | Atacar 33×, Tiroteio 33×, Prender 34× |
 | 👲 Sushiman  | 3960 | 2640 | +1320 | 5148 | 2640 | +2508 | 0 | Atacar 33×, Sushi 34×, Nigiri 33× |
-| 💂 Guarda | 21120 | 21120 | 0 | 25924 | 22407 | +3517 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
-| 🥷 Ninja | 58524 | 58146 | +378 | 73389 | 59037 | +14352 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
+| 💂 Guarda | 21120 | 21120 | 0 | 26210 | 22374 | +3836 | 0 | Atacar 33×, Protetor 34×, Esgrima 33× |
+| 🥷 Ninja | 58524 | 58146 | +378 | 73349 | 59103 | +14246 | 0 | Atacar 33×, Shuriken 33×, Kunai 34× |
 | 🧙 Mago | 33010 | 20040 | +12970 | 134890 | 82680 | +52210 | 10000 | Atacar 33×, Bola de Fogo 34×, Incêndio 33× |
 | 🫅 Rei | 2640 | 2640 | 0 | 3432 | 2640 | +792 | 0 | Atacar 33×, Democracia 34×, Lealdade 33× |
 | 💀 Caveira | 10527 | 10527 | 0 | 39732 | 38940 | +792 | 0 | Atacar 33×, Ossinho 33×, Osso Duro de Roer 34× |
@@ -353,14 +363,14 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 👹 Ogro | 10560 | 10560 | 0 | 39864 | 39072 | +792 | 0 | Atacar 33×, Esmagar 34×, Quebrar 33× |
 | 👺 Tengu | 51870 | 51870 | 0 | 111121 | 99538 | +11583 | 0 | Atacar 33×, Corte de Vento 34×, Vendaval 33× |
 | 🤡 Palhaço | 5280 | 5280 | 0 | 6864 | 5280 | +1584 | 0 | Atacar 66×, Coringa 34×, Circo 0× |
-| 🧌 Troll | 24120 | 24120 | 0 | 60296 | 58880 | +1416 | 0 | Atacar 33×, Pancada 33×, Porradeiro 34× |
+| 🧌 Troll | 24120 | 24120 | 0 | 60291 | 58846 | +1445 | 0 | Atacar 33×, Pancada 33×, Porradeiro 34× |
 | 🧞 Gênio | 20064 | 10560 | +9504 | 75669 | 39072 | +36597 | 0 | Atacar 33×, Desejo 34×, Profecia 33× |
 | 🧜 Sereia | 6600 | 5280 | +1320 | 8580 | 5280 | +3300 | 0 | Atacar 66×, Canto de Sereia 34×, Atlantis 0× |
 | 🧚 Fada | 22720 | 22720 | 0 | 60952 | 56992 | +3960 | 0 | Atacar 33×, Sininho 33×, Pó Mágico 34× |
 | 🐲 Dragão | 20460 | 10560 | +9900 | 79464 | 39072 | +40392 | 9900 | Atacar 33×, Sopro do Dragão 33×, Dragão Protetor 34× |
 | 💩 Cocô | 34040 | 24040 | +10000 | 102668 | 58312 | +44356 | 10000 | Atacar 33×, Descarga 33×, Desentupidor 34× |
 | 🦸 Herói | 16200 | 14880 | +1320 | 61452 | 58944 | +2508 | 0 | Atacar 33×, Salvando o Dia 33×, Super 34× |
-| 🦹 Vilão | 21280 | 21280 | 0 | 44640 | 41821 | +2819 | 0 | Atacar 33×, Destruindo o Dia 34×, Vilania 33× |
+| 🦹 Vilão | 21280 | 21280 | 0 | 44616 | 41854 | +2762 | 0 | Atacar 33×, Destruindo o Dia 34×, Vilania 33× |
 | 🦖 T-Rex | 11480 | 11480 | 0 | 44096 | 43304 | +792 | 0 | Atacar 33×, Rugido 33×, Pisada 34× |
 | 🦇 Morcego | 11000 | 8000 | +3000 | 34100 | 22400 | +11700 | 0 | Atacar 50×, Mordida 25×, Rato Voador 25× |
 | 🧛 Vampiro | 37980 | 37980 | 0 | 49374 | 37980 | +11394 | 0 | Atacar 33×, Controle de Sangue 33×, Vampiro Primordial 34× |
@@ -384,16 +394,16 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 🕵️ Detetive | 🔎 Espionagem | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🕵️ Detetive | 🕳️ Furtividade | 3 | 34 | 8160 | 240 | 37536 | 0 | 0 | 0 |
 | 👮 Policial | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
-| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 19040 | 560 | 20476 | 0 | 0 | 0 |
+| 👮 Policial | 🔫 Tiroteio | 3 | 34 | 19040 | 560 | 20608 | 0 | 0 | 0 |
 | 👮 Policial | ⛓️ Prender | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 👲 Sushiman  | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 👲 Sushiman  | 🍣 Sushi | 3 | 34 | 0 | 0 | 0 | 20400 | 0 | 0 |
 | 👲 Sushiman  | 🍙 Nigiri | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 💂 Guarda | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 💂 Guarda | 🛡️ Protetor | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 20482 | 0 | 0 | 0 |
+| 💂 Guarda | 🤺 Esgrima | 3 | 34 | 19040 | 560 | 20529 | 0 | 0 | 0 |
 | 🥷 Ninja | ⚔️ Atacar | 0 | 100 | 13818 | 138 | 13818 | 0 | 0 | 0 |
-| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 22613 | 0 | 0 | 0 |
+| 🥷 Ninja | 🌟 Shuriken | 3 | 34 | 21719 | 638 | 22609 | 0 | 0 | 0 |
 | 🥷 Ninja | 🗡️ Kunai | 3 | 34 | 32552 | 957 | 32552 | 0 | 0 | 0 |
 | 🧙 Mago | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧙 Mago | 🔥 Bola de Fogo | 3 | 34 | 18160 | 534 | 77536 | 0 | 10000 | +10000 |
@@ -436,7 +446,7 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 🤡 Palhaço | 🎪 Circo | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🧌 Troll | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧌 Troll | 🤜 Pancada | 3 | 34 | 9520 | 280 | 43792 | 0 | 0 | 0 |
-| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 12240 | 360 | 13779 | 3672 | 0 | 0 |
+| 🧌 Troll | 🥊 Porradeiro | 3 | 34 | 12240 | 360 | 13728 | 3672 | 0 | 0 |
 | 🧞 Gênio | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🧞 Gênio | 🪔 Desejo | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🧞 Gênio | 🔮 Profecia | 3 | 34 | 15504 | 456 | 71264 | 0 | 0 | +7344 |
@@ -457,7 +467,7 @@ O apóstolo completo. **(4) − (3) = o que os malefícios dele valem.** A Siner
 | 🦸 Herói | 💪 Super | 3 | 34 | 12240 | 360 | 56304 | 0 | 0 | 0 |
 | 🦹 Vilão | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 34 | 5440 | 160 | 25024 | 0 | 0 | 0 |
-| 🦹 Vilão | 👿 Vilania | 3 | 34 | 13600 | 400 | 14616 | 0 | 0 | 0 |
+| 🦹 Vilão | 👿 Vilania | 3 | 34 | 13600 | 400 | 14564 | 0 | 0 | 0 |
 | 🦖 T-Rex | ⚔️ Atacar | 0 | 100 | 8000 | 80 | 8000 | 0 | 0 | 0 |
 | 🦖 T-Rex | 🦖 Rugido | 3 | 34 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 🦖 T-Rex | 🦶 Pisada | 3 | 34 | 8840 | 260 | 40664 | 0 | 0 | 0 |
@@ -603,17 +613,17 @@ Estas respondem "quem está fora da curva?".
 | 23 | 💀 Caveira | 🦴 Ossinho | 3 | 149872 |
 | 24 | 🦹 Vilão | 🦹 Destruindo o Dia | 3 | 100096 |
 | 25 | 🦇 Morcego | 🦇 Mordida | 3 | 100096 |
-| 26 | 👮 Policial | 🔫 Tiroteio | 3 | 82208 |
-| 27 | 💂 Guarda | 🤺 Esgrima | 3 | 81782 |
+| 26 | 💂 Guarda | 🤺 Esgrima | 3 | 81894 |
+| 27 | 👮 Policial | 🔫 Tiroteio | 3 | 81860 |
 | 28 | 👾 Invasor | 📺 Glitch | 3 | 74580 |
-| 29 | 🦹 Vilão | 👿 Vilania | 3 | 58712 |
+| 29 | 🦹 Vilão | 👿 Vilania | 3 | 58432 |
 | 30 | 👺 Tengu | 🌪️ Vendaval | 3 | 57120 |
-| 31 | 🧌 Troll | 🥊 Porradeiro | 3 | 54938 |
+| 31 | 🧌 Troll | 🥊 Porradeiro | 3 | 55072 |
 | 32 | 👾 Invasor | 🪳 Barata | 3 | 49720 |
 | 33 | 💩 Cocô | 🚽 Descarga | 3 | 48960 |
 | 34 | 🧛 Vampiro | 🌙 Vampiro Primordial | 3 | 48960 |
 | 35 | 👺 Tengu | ⚔️ Atacar | 0 | 48000 |
-| 36 | 🥷 Ninja | 🌟 Shuriken | 3 | 46668 |
+| 36 | 🥷 Ninja | 🌟 Shuriken | 3 | 46700 |
 | 37 | ⛄ Boneco de Neve | ⛄ Bola de Neve | 3 | 46240 |
 | 38 | 🧚 Fada | 🔔 Sininho | 3 | 43520 |
 | 39 | 🧝 Elfo | 🌿 Natureza | 3 | 43520 |

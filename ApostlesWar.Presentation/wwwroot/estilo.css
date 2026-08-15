@@ -1605,6 +1605,63 @@ body {
     transition: width .35s ease;
 }
 
+/* O CORDÃO DE TURNOS — a ordem de quem joga, centralizada no alto do campo.
+
+   ELE FLUTUA (absoluto) e NÃO ocupa linha nenhuma: como item do grid do `body` (que tem exatamente
+   três linhas — topo, arena, painel) ele criava uma quarta, o campo encolhia, o canvas do cenário
+   continuava com o tamanho antigo e a cena aparecia cortada e subindo a cada vez que a fila mudava
+   de altura. Peça nova aqui em cima: absoluta, ou o cenário paga.
+
+   `pointer-events: none` porque ele passa por cima do campo: um clique que morre numa ficha da fila
+   seria um clique que o jogador acha que deu no combatente. Custa os tooltips — vale. */
+#cordao {
+    position: absolute;
+    top: 6px; left: 50%; transform: translateX(-50%);
+    z-index: 4;                  /* acima do #particulas (3), que já está na frente dos combatentes */
+    pointer-events: none;
+    display: flex;
+    align-items: flex-end;
+    max-width: 100%;
+}
+.cordaoFicha {
+    position: relative;   /* o z-index do empilhamento vem do JS (o de trás fica ATRÁS) */
+    flex: 0 0 auto;
+    width: 42px;
+    text-align: center;
+    padding: 3px 2px 2px;
+    background: var(--painel);
+    border: 1px solid var(--borda);
+    border-radius: 7px 0 7px 0;
+    corner-shape: bevel;
+    transition: opacity .2s, border-color .2s;
+}
+/* A FILA VEM DE TRÁS: da terceira em diante cada ficha entra por baixo da anterior, metade
+   escondida. É o que faz a fila LER como profundidade em vez de como uma lista — e é também o que
+   deixa 8 turnos caberem sem atravessar a tela. As duas primeiras ficam inteiras porque são as que
+   se lê de verdade: quem joga agora e quem joga em seguida.
+   (A 2ª regra tem 3 classes contra 2, então vence a do respiro sem precisar de ordem.) */
+.cordaoFicha + .cordaoFicha { margin-left: 5px; }
+.cordaoFicha + .cordaoFicha + .cordaoFicha { margin-left: -21px; }
+/* De que lado ele é, na mesma linguagem do campo: verde é quem age, vermelho é alvo. */
+.cordaoFicha[data-lado="1"] { border-color: color-mix(in srgb, var(--agindo) 55%, var(--borda)); }
+.cordaoFicha[data-lado="2"] { border-color: color-mix(in srgb, var(--alvo) 55%, var(--borda)); }
+/* O PRIMEIRO é quem está com o turno na mão: maior e em ouro. O resto vai apagando conforme se
+   afasta — a fila inteira estar igualmente nítida faria o "agora" competir com o "daqui a 7". */
+.cordaoFicha[data-pos="0"] {
+    width: 54px;
+    border-color: var(--ouro);
+    box-shadow: 0 0 10px rgba(217,180,91,.20);
+}
+.cordaoFicha[data-pos="0"] .cordaoEmoji { font-size: 22px; }
+.cordaoFicha[data-pos="4"] { opacity: .8; }
+.cordaoFicha[data-pos="5"] { opacity: .66; }
+.cordaoFicha[data-pos="6"] { opacity: .52; }
+.cordaoFicha[data-pos="7"] { opacity: .4; }
+.cordaoEmoji { font-size: 17px; line-height: 1.1; }
+.cordaoNome {
+    font-size: 8px; color: var(--apagado);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 /* O MEDIDOR DE TURNO (GDD §1) — mais fino que a barra de vida de propósito: são duas leituras
    diferentes na mesma caixa, e a vida é a que decide a luta. As cores estão no `:root`. */
 .medidor {

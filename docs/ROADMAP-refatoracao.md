@@ -1435,12 +1435,23 @@ as regras dos dois lados.
         iguais o desempate reproduz exatamente a ordem antiga, e o relatório só mexeu nas 5 linhas
         que já oscilavam por sorteio de alvo. A fila só morde quando as Velocidades diferem — que é
         o ponto.
-      - **Aberto, e é decisão do Gabriel:** na fase de 2 rodadas o time do jogador **carrega o
-        medidor** da rodada 1 pra rodada 2 (só os inimigos nascem em 0, porque só eles são
-        posicionados de novo). Hoje isso dá a ele a abertura da 2ª onda.
-      - **Falta a TELA:** o trilho de cada um e o cordão da ordem. O `Prever` da maquete não foi
-        portado de propósito — quando for, tem de REUSAR as regras da `FilaDeTurnos` sobre uma
-        cópia do estado, nunca reimplementá-las.
+      - ✅ **O CORDÃO DE TURNOS** *(branch `feature/fila-na-tela`)*: a ordem dos 8 próximos turnos,
+        centralizada no alto do campo, com as fichas pequenas — leitura de canto de olho, não a
+        atração da tela. As duas primeiras inteiras; da 3ª em diante cada uma entra POR BAIXO da
+        anterior, metade escondida (a fila vem de trás), com o z-index descendo pela posição. O
+        `Prever` roda as MESMAS funções do combate sobre um retrato copiado (`Passo`), e o teste que
+        justifica a peça existir é o que compara a previsão com o que a batalha entrega de verdade.
+        - **ARMADILHA QUE JÁ MORDEU:** o `body` é um grid de TRÊS linhas (topo · arena · painel).
+          O cordão entrou como 4º item, virou a linha do `1fr` e empurrou a arena pra `auto` — o
+          campo encolheu, o canvas do cenário ficou com o tamanho velho e a cena aparecia **cortada
+          e subindo** a cada mudança de altura da fila. Peça nova entre o topo e o painel é
+          **absoluta dentro da arena**, ou o cenário paga.
+        - **O sinal de espera entre as fichas foi CORTADO** (pedido do Gabriel). O `Vez.Esperou`
+          continua no motor e testado — é a regra dizendo onde a ordem é frágil, que é onde um
+          empurrão de medidor vai valer —, mas não atravessa mais a ponte.
+      - ✅ **A onda nova começa empatada** (decisão do Gabriel): o time do jogador tem o medidor
+        zerado no início de cada rodada, como os inimigos — que já nasciam em 0 por serem
+        posicionados de novo. Sem isso ele abria a 2ª onda com meio ciclo de vantagem.
 
     - ✅ **A DEF EM CURVA + PRECISÃO × RESISTÊNCIA** *(branch `feature/def-e-precisao`, o passo 4 do
       GDD §7)*. Os dois stats que estavam inertes passaram a valer.

@@ -78,6 +78,10 @@ namespace ApostlesWar.Application.Services
         /// `Equipe1.Membros ++ Equipe2.Membros`, e ele dava à equipe 1 uma vantagem estrutural que
         /// ninguém tinha desenhado.
         /// </summary>
+        // Quantas vezes a fila mostra. Oito é o campo cheio (4×4): a leitura interessante é "quem joga
+        // antes de mim de novo", e ela cabe numa volta do tabuleiro.
+        private const int VezesPrevistas = 8;
+
         private bool ExecutarCombate(Batalha batalha)
         {
             _batalha = batalha;
@@ -87,6 +91,10 @@ namespace ApostlesWar.Application.Services
             while (batalha.Equipe1.TemVivos() && batalha.Equipe2.TemVivos())
             {
                 if (fila.Proximo() is not Combate daVez) break;   // ninguém pode agir: a luta não tem como seguir
+
+                // A ordem vai pra tela ANTES da ação: é a fila de agora, com o dono do turno na
+                // frente. Depois da ação ela já é outra — e é isso que o jogador precisa ver.
+                _tela.ExibirFilaDeTurnos(fila.Prever(VezesPrevistas));
 
                 ExecutarTurnoCompleto(daVez);
 
@@ -652,6 +660,11 @@ namespace ApostlesWar.Application.Services
                 inimigo.Add(new Inimigo(_personagemService.ObterPersonagem(capitulo, slot), mult));
 
             Posicionar(inimigo);   // snapshot do HP máximo desta rodada + a casa de cada um
+
+            // A ONDA NOVA COMEÇA EMPATADA. Os inimigos já nascem com a barra em 0 (o Posicionar acima);
+            // sem esta linha o time do jogador entraria com o medidor de onde parou na onda anterior,
+            // e abriria a 2ª onda com meio ciclo de vantagem que ninguém desenhou.
+            foreach (Combate c in jogador) c.ZerarMedidor();
 
             var batalha = new Batalha(new Equipe(jogador), new Equipe(inimigo));
 

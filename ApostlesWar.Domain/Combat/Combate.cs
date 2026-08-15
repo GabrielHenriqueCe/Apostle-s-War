@@ -131,6 +131,16 @@ namespace ApostlesWar.Domain
         public void DescontarUmTurnoDoMedidor() => Medidor -= FilaDeTurnos.Limiar;
 
         /// <summary>
+        /// Zera a barra sem mexer em mais nada. É o que a ONDA NOVA da campanha usa: os inimigos
+        /// nascem em 0 porque são posicionados de novo, e sem isto o time do jogador entraria na 2ª
+        /// onda com a barra de onde parou — meio ciclo de vantagem que ninguém desenhou.
+        ///
+        /// Não dá pra reusar o <see cref="IniciarCombate"/> pra isso: ele reaplica os buffs iniciais
+        /// das passivas, e chamá-lo duas vezes empilharia Espectral e afins.
+        /// </summary>
+        public void ZerarMedidor() => Medidor = 0;
+
+        /// <summary>
         /// A casa deste combatente na fileira do time: <b>1 = frente, 4 = fundo</b> (GDD §2).
         /// Preenchida no <see cref="IniciarCombate"/> com o índice em <c>Equipe.Membros</c> + 1 — a
         /// ordem da lista É a formação, de ponta a ponta (o `int[] Time` do front vira essa ordem).

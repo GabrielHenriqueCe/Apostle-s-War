@@ -55,6 +55,9 @@ export function mostrarCena(cena) {
     document.getElementById('turno').style.visibility = emCombate ? 'visible' : 'hidden';
     // O overlay de fim só existe em combate; ao trocar de cena garante que sumiu.
     if (!emCombate) document.getElementById('fimBatalha').hidden = true;
+    // O cordão idem — fora da batalha não há ordem de turno nenhuma pra dizer. Quem o MOSTRA é o
+    // desenhar (precisa da fila do estado novo); aqui só se garante que ele não sobre na tela.
+    if (!emCombate) document.getElementById('cordao').hidden = true;
     // O tema é do CAMPO DE BATALHA: fora dele, nenhum. Quem o LIGA é o desenhar (precisa do estado
     // novo); aqui só se garante que ele não vaze pras telas de menu.
     if (!emCombate) aplicarTema('');

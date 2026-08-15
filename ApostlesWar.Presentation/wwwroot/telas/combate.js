@@ -173,7 +173,40 @@ export function desenhar() {
 
     desenharLado('ladoEsquerdo', estado.equipe1);
     desenharLado('ladoDireito', estado.equipe2);
+    desenharCordao();
     desenharPainel();
+}
+
+// O CORDÃO DE TURNOS — a ordem de quem joga, do primeiro ao último. Ela vem PRONTA do C# (a
+// `FilaDeTurnos` prevê sobre uma cópia do estado); aqui não se calcula ordem nenhuma, senão o
+// desenho prometeria o que a batalha não cumpre.
+//
+// As duas primeiras fichas ficam inteiras — quem joga agora e quem joga em seguida são as que se lê
+// de verdade —, e da terceira em diante cada uma entra POR BAIXO da anterior, metade escondida: a
+// fila vem de trás. O empilhamento é o JS que manda (o z-index desce com a posição), porque na ordem
+// natural do DOM a última é que ficaria por cima, e aí a fila leria de trás pra frente.
+function desenharCordao() {
+    const alvo = document.getElementById('cordao');
+    const fila = estado.fila || [];
+    alvo.hidden = fila.length === 0 || nomeDaFase(estado) === 'Fim';
+    if (alvo.hidden) { alvo.replaceChildren(); return; }
+
+    const porId = new Map([...estado.equipe1, ...estado.equipe2].map(c => [c.id, c]));
+
+    alvo.replaceChildren(...fila.flatMap((id, i) => {
+        const c = porId.get(id);
+        if (!c) return [];   // saiu do board entre o cálculo e o retrato
+
+        const ficha = document.createElement('div');
+        ficha.className = 'cordaoFicha';
+        ficha.dataset.pos = i;
+        ficha.dataset.lado = estado.equipe1.some(x => x.id === id) ? 1 : 2;
+        ficha.style.zIndex = String(fila.length - i);
+        const emo = document.createElement('div'); emo.className = 'cordaoEmoji'; emo.textContent = c.simbolo;
+        const nom = document.createElement('div'); nom.className = 'cordaoNome'; nom.textContent = c.nome;
+        ficha.append(emo, nom);
+        return [ficha];
+    }));
 }
 
 // Classes de animação em curso — precisam SOBREVIVER a um redesenho (ver desenharLado). O `foco`

@@ -31,6 +31,10 @@ namespace ApostlesWar.Presentation.Front
             _sessao.Publicar();
         }
 
+        // A fila não publica sozinha: ela guarda e entra no PRÓXIMO retrato, que vem logo em seguida
+        // (o anúncio do turno). Publicar aqui seria um quadro a mais dizendo a mesma coisa.
+        public void ExibirFilaDeTurnos(IReadOnlyList<FilaDeTurnos.Vez> fila) => _sessao.GuardarFila(fila);
+
         // Arena (PVP): fixa os lados na ordem montada, antes do 1º retrato.
         public void ExibirInicioArena(List<Combate> equipe1, List<Combate> equipe2)
             => _sessao.FixarLados(equipe1, equipe2);

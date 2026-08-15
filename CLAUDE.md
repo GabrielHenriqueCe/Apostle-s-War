@@ -5,19 +5,15 @@ ponta a ponta: menu, perfil, campanha, arena, arsenal. Projeto de estudo/portfó
 
 ## Orientação — faça no início da sessão e quando o Gabriel perguntar "onde estamos"
 Não precisa o Gabriel pedir; oriente-se sozinho:
-- A **memória** (`MEMORY.md` + arquivos em `memory/`) carrega automática — é o ESTADO VIVO (o que está
-  feito, o que vem, decisões). Leia o `project_estado.md` (topo = mais recente).
-- **`docs/ROADMAP-refatoracao.md`** → a seção **FILA DE EXECUÇÃO** é a fila mestra.
-- `git log --oneline -15` → os commits recentes.
-- **🔄 O QUE ESTÁ ACONTECENDO AGORA (ago/2026): a PROGRESSÃO está saindo do papel.** Mergeados
-  #228 (tipos + status base do tipo), #229 (o modelo da posição no GDD), #230 (o campo virou fileira
-  com as frentes se olhando) e #231 (a preparação da fase virou tabuleiro). O **perfil de distância
-  no motor** saiu na branch `feature/perfil-de-distancia` (`Arquetipos.MultiplicadorDePosicao` +
-  `Combate.Casa`); **o próximo são OS DOIS BRILHOS** — a pintura do mapa de calor, com a grade 4×4
-  vindo do C# (o front NÃO pode ter cópia da tabela). **Onde está escrito o quê:** o MODELO em
-  `docs/GDD-progressao.md` §2 (a distância ideal por tipo) e §7 (a ordem dos passos); a EXECUÇÃO no
-  `docs/ROADMAP-refatoracao.md` §FILA A item 19, que lista arquivo por arquivo o que fazer. Ler os
-  dois antes de escrever qualquer linha — nada disso se re-deduz do código.
+- **1º: `docs/CONTEXTO.md`** — o resumo comprimido da última sessão: onde paramos, o que está
+  aberto, o que foi decidido e as armadilhas que acabaram de morder. **É o ponto de partida**, e ele
+  é reescrito do zero ao FIM de cada sessão (é foto, não diário — o histórico é do `git log`).
+- A **memória** (`MEMORY.md` + arquivos em `memory/`) carrega automática — as preferências de
+  trabalho dele e o porquê das decisões antigas.
+- **`docs/ROADMAP-refatoracao.md`** → a seção **FILA DE EXECUÇÃO** é a fila mestra; o
+  **`docs/GDD-progressao.md`** é o MODELO (o §7 tem a ordem dos passos, e ela não é negociável).
+- `git log --oneline -15` → os commits recentes. **Nada disso se re-deduz do código:** ler antes de
+  escrever qualquer linha.
 - **Fase atual:** FRONT feito, console REMOVIDO (#179), camadas ajustadas (#180), `PreverDano` (#181),
   **bot inteligente** (#182), **botão Auto** (#183), a **ordem do pipeline de dano** (`OrdemDeMitigacao`
   — fechou o bug do bloqueio × escudo, #185) e a **DEF do protetor** no `ProtecaoAliado` (doc mentia; a
@@ -47,6 +43,9 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   (`View`/`Controller`/`Service`). Nome de capacidade = COMPORTAMENTO, nunca identidade de classe.
 - **YAGNI, mas:** quando o Gabriel NOMEIA um futuro (Arena, front, medidor de velocidade), desenhar o seam
   agora vale — não é especulação. Verificar-antes-de-fundir ("o grep mente").
+- **Fechar a sessão = reescrever o `docs/CONTEXTO.md`** do zero, com o estado do momento. Ele
+  SUBSTITUI o anterior (não acumula), e só carrega ponteiro + o que ainda está no ar — o que já mora
+  no GDD, no ROADMAP ou numa mensagem de commit não se repete lá.
 - **1 PR, 1 tema.** Mergeado antes do próximo começar — e **uma branch por vez**: nada de empilhar
   branch nem de adiantar o tema seguinte no working tree enquanto um PR espera. Avisar ao criar a branch.
 

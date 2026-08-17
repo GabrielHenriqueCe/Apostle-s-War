@@ -694,7 +694,7 @@ namespace Tests
             Assert.Equal(925, efFurado);   // buff furado → def 400 → 7,4% de redução
         }
 
-        // ---------- Contrato da semente do ResolverAlvos (FILA A #14) ----------
+        // ---------- Contrato da semente do ResolverAlvos ----------
         //
         // A semente (o alvo escolhido no menu/bot) TEM que ser um dos candidatos — já filtrada pelo
         // mesmo EstadoAlvo que a habilidade declara. Violar isso colocava a semente inválida no

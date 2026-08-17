@@ -20,7 +20,6 @@ namespace ApostlesWar.Application.Services
         // 7 slots de equipamento (um por fase), null = vazio
         private Item?[] equipados = new Item?[7];
 
-        // Itens obtidos ao longo da campanha
         private List<Item> obtidos = new List<Item>();
 
         #endregion

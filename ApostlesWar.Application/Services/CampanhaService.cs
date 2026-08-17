@@ -14,8 +14,8 @@ namespace ApostlesWar.Application.Services
     {
         // ONDE O JOGADOR PAROU — capítulo, fase e time. Mora aqui e não no front porque "onde eu
         // estava" é PROGRESSÃO, não estado de tela: some junto com a conta (o ResetarProgresso apaga
-        // esta chave) e sobrevive a fechar o jogo. Enquanto o front gravava direto na porta, esta
-        // chave tinha dois donos — um que a escrevia e outro que a apagava.
+        // esta chave) e sobrevive a fechar o jogo. O front NÃO grava direto na porta: dois donos
+        // pra esta chave é um que escreve e outro que apaga.
         private const string ChaveOndeParou = "campanha";
 
         private readonly ArsenalService _arsenal;

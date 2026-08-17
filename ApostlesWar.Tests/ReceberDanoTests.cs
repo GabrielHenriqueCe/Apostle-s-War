@@ -8,7 +8,7 @@ namespace Tests
     /// Testes ponta-a-ponta do <c>Combate.ReceberDano</c> — o FUNIL ÚNICO por onde passa TODO dano
     /// do jogo (ataque, veneno, queima, explosão, reflexo). Cobre o pipeline na ordem em que ele
     /// roda: defesa → passiva-pura → status (escudo/bloqueio) → HP → acumuladores → piso de HP →
-    /// confirmação de morte (FILA A #14).
+    /// confirmação de morte.
     ///
     /// O que já vive em MotorDeHabilidadesTests (não duplicar aqui): a gramática de IGNORAR
     /// (natureza/golpe/apostolo), o Invencível em 1 HP e o GuardaReal preservando status. Aqui entram

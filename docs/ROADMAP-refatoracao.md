@@ -391,7 +391,7 @@ PRs #204–#213, que guardam melhor e datado. O mapa e o contrato finais do fron
     que trocaram são a fala do ritual no `LORE.md`, que é o conceito e não o personagem.
 
 19. 🔄 **A PROGRESSÃO EM CÓDIGO** *(ago/2026 — em andamento)*. O desenho inteiro está no
-    **`docs/GDD-progressao.md`**; aqui fica só a EXECUÇÃO. **Ler o GDD §2 antes de tocar em posição
+    **`docs/GDD-progressao.md`**; aqui fica só a EXECUÇÃO. **Ler o `GDD-combate.md` §2 antes de tocar em posição
     e o §7 pra ordem — não re-deduzir o modelo daqui.**
 
     **Feito e mergeado:**
@@ -582,7 +582,9 @@ entrada dos sprites).
 | as regras vivas do motor (dano, reações, turno, bot, bancada) | `MANUAL-combate.md` |
 | a ponte, o contrato de tela e as camadas | `MANUAL-front.md` |
 | como se faz uma pele de facção | `MANUAL-cenario.md` |
-| o modelo do jogo (números, curvas, progressão) | `GDD-progressao.md` |
+| o modelo do combate (stats, barra de turno, posição) | `GDD-combate.md` |
+| o modelo da progressão (nível, campanha, o PLANO no §7) | `GDD-progressao.md` |
+| o modelo dos itens (slots, subs, evolução) | `GDD-itens.md` |
 | o que ainda é ideia (itens, arena, morte-como-sistema) | `GDD-expansao.md` |
 | o DESENHO de cada decisão grande | os `ADR-*.md` |
 | o que foi tentado e MORREU, e quando | `git log` |

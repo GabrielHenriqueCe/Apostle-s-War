@@ -22,7 +22,7 @@ namespace ApostlesWar.Domain
     /// <summary>
     /// O arquétipo do apóstolo, e a ÚNICA fonte do status base dele: dois apóstolos do mesmo tipo
     /// nascem com a mesma ficha, e o que os separa é o kit e o equipamento. Cada facção tem
-    /// exatamente um de cada. Ver <see cref="Arquetipos"/> e docs/GDD-progressao.md §2.
+    /// exatamente um de cada. Ver <see cref="Arquetipos"/> e docs/GDD-combate.md §2.
     /// </summary>
     public enum TipoDeApostolo
     {

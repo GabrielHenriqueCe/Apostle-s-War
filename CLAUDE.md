@@ -112,7 +112,8 @@ camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição d
   enquanto o VS estiver com a solução antiga carregada.
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`,
-  `docs/GDD-progressao.md` (o plano que muda quase todo número), **`docs/LORE.md`**.
+  `docs/GDD-progressao.md` + `GDD-combate.md` + `GDD-itens.md` (o modelo que muda quase todo
+  número), **`docs/LORE.md`**.
 
 ## A LORE, e as duas renomeações que ela obrigou — AS DUAS FEITAS (ago/2026)
 **Os apóstolos são peças de brinquedo dos deuses; a guerra é entre apóstolos — e o JOGADOR não é um

@@ -10,7 +10,7 @@ namespace ApostlesWar.Domain
     /// Guarda também o PERFIL DE DISTÂNCIA (o d* de cada tipo): é ficha do tipo, igual ao HP e ao
     /// ATK — a curva de distância é o gesto dele no tabuleiro, não uma regra do motor de combate.
     ///
-    /// Fonte: docs/GDD-progressao.md §2. Critério de aceitação da tabela, e ele é do Gabriel:
+    /// Fonte: docs/GDD-combate.md §2. Critério de aceitação da tabela, e ele é do Gabriel:
     /// <b>cada tipo é PRIMEIRO em dois stats</b> — Guardião HP/DEF · Combatente os dois de crítico ·
     /// Suporte Precisão/Resistência · Atirador ATK/Velocidade. Uma revisão que deixe um tipo sem
     /// primeiro lugar quebrou a regra.

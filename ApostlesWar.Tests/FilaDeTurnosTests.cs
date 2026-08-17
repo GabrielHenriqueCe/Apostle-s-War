@@ -3,7 +3,7 @@ using ApostlesWar.Domain;
 namespace Tests
 {
     /// <summary>
-    /// A FILA DE TURNOS (GDD-progressao §1). Aqui se testa a REGRA da ordem, não o combate: os
+    /// A FILA DE TURNOS (GDD-combate §1). Aqui se testa a REGRA da ordem, não o combate: os
     /// bonecos não agem, só ocupam a fila — o que se lê é quem ela entrega e em que sequência.
     ///
     /// O contrato de uso é `Proximo()` → a ação acontece → `Consumir(quem)`. Os testes chamam os

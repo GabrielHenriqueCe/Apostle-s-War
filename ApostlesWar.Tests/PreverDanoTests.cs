@@ -136,8 +136,9 @@ namespace Tests
         }
 
         /// <summary>
-        /// Invencível não reduz dano (de propósito — ver o fix do bug do lifesteal), ele põe um PISO
-        /// de HP. Então quem mede "vida removida" o enxerga sozinho: sobra HPAtual − 1. É o que faz
+        /// Invencível não reduz dano — de propósito, porque o lifesteal precisa enxergar o golpe
+        /// cheio —, ele põe um PISO de HP. Então quem mede "vida removida" o enxerga sozinho:
+        /// sobra HPAtual − 1. É o que faz
         /// "evitar alvo invencível" não precisar de regra nenhuma no bot.
         /// </summary>
         [Fact]

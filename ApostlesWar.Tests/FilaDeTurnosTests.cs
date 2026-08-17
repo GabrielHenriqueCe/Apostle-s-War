@@ -70,9 +70,9 @@ namespace Tests
         }
 
         /// <summary>
-        /// O antigo `for` sobre `Equipe1 ++ Equipe2` dava à equipe 1 o turno de abertura sempre. Com
-        /// Velocidades iguais o desempate ainda é dela — mas por REGRA declarada, e só depois da
-        /// posição.
+        /// Com Velocidades iguais o desempate é do lado do jogador — mas por REGRA declarada, e só
+        /// DEPOIS da posição. Varrer as equipes na ordem em que estão declaradas daria a abertura à
+        /// equipe 1 sempre, e passaria neste teste pelo motivo errado.
         /// </summary>
         [Fact]
         public void EquipesIguais_ODesempateEhAPosicaoEDepoisOLadoDoJogador()

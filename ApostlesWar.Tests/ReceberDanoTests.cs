@@ -262,10 +262,9 @@ namespace Tests
         }
 
         /// <summary>
-        /// REGRA DECIDIDA (jul/2026): o redirecionamento passa pela defesa do protetor, então tanque
-        /// protege mais barato. O doc da classe dizia "sem defesa" e contradizia a implementação; o
-        /// Gabriel bateu o martelo de que a IMPLEMENTAÇÃO é a certa (DEF alta obviamente defende mais)
-        /// e o doc foi corrigido. Estava invisível porque todo teste de proteção dava def 0 ao protetor.
+        /// REGRA DECIDIDA: o redirecionamento passa pela defesa do protetor, então tanque protege
+        /// mais barato. Este teste é o que a torna visível — dar def 0 ao protetor, como fazem os
+        /// outros testes de proteção, esconde a regra inteira.
         ///
         /// O que o PROTEGIDO desconta não muda: são sempre os 30%, independente de quem o protege.
         /// </summary>
@@ -359,7 +358,7 @@ namespace Tests
             alvo.ReceberDano(500, NaturezasDano.Ataque);
 
             // O piso segura o HP, mas o dano contabilizado é integral — é o que faz o lifesteal
-            // enxergar o golpe (fix do #151).
+            // enxergar o golpe.
             Assert.Equal(1, alvo.HPAtual);
             Assert.Equal(999 + 500, alvo.DanoRecebido);
         }

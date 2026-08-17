@@ -117,7 +117,7 @@ namespace Tests
 
         /// <summary>
         /// A posição é do lado do ATACANTE e chega ANTES da mitigação — é irmã do ATK, não da DEF.
-        /// Se um dia ela escorregar pra dentro da OrdemDeMitigacao (#185), a razão entre os dois
+        /// Se um dia ela escorregar pra dentro da OrdemDeMitigacao, a razão entre os dois
         /// alvos deixa de ser exatamente a razão dos multiplicadores.
         /// </summary>
         [Fact]

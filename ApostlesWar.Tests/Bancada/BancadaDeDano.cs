@@ -6,7 +6,7 @@ using ApostlesWar.Domain;
 namespace Tests.Bancada
 {
     /// <summary>
-    /// A BANCADA DE DANO — o instrumento do REBALANCE (#16). Roda os 36 apóstolos contra um boneco de
+    /// A BANCADA DE DANO — o instrumento do REBALANCE. Roda os 36 apóstolos contra um boneco de
     /// pancada padronizado e escreve <c>docs/bancada-dano.md</c>, que é VERSIONADO: cada tweak de
     /// número vira um `git diff` legível, que é a entrega de verdade (não "ajustar valores").
     ///
@@ -36,9 +36,9 @@ namespace Tests.Bancada
         // correspondente explodir e a comparação perder o sentido.
         private const int HPPadrao = 2_000;
         private const int AtkPadrao = 200;
-        // O JOELHO da curva `DEF/(DEF+5000)`: a DEF que reduz exatamente metade. Substituiu o antigo
-        // "DEF no cap" (1000), que na fórmula velha era o teto de 75% e na nova vale 16,7% — a linha
-        // de defesa pesada precisa de um boneco que continue sendo pesado.
+        // O JOELHO da curva `DEF/(DEF+5000)`: a DEF que reduz exatamente metade. Ancorar este boneco
+        // em qualquer outro número (1000, p.ex., vale só 16,7%) tira o peso da linha de defesa
+        // pesada, que existe justamente pra medir contra um alvo duro. Anda com a fórmula.
         private const int DefNoJoelho = 5000;
         private const int BonecosEmArea = 4;    // a coluna que dá voz às habilidades de área
 

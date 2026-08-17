@@ -5,9 +5,9 @@ namespace Tests
 {
     /// <summary>
     /// Testes da regra ESTÁTICA <see cref="HabilidadeAtiva.PedeAlvoDoJogador"/> — a "essa habilidade
-    /// abre o passo de escolha de alvo?" que ANTES era recalculada no front (SessaoDoFront) e agora
-    /// mora no domínio, usada também pelo CombateService.ResolverAlvoInicial. Prova que a fonte única
-    /// bate com a regra: inimigos sempre; aliados só finito; Self/hit-all-aliado nunca.
+    /// abre o passo de escolha de alvo?". Mora no domínio, e o front não a recalcula: quem pergunta
+    /// é a tela E o CombateService.ResolverAlvoInicial, pela mesma fonte. Prova que ela bate com a
+    /// regra: inimigos sempre; aliados só finito; Self/hit-all-aliado nunca.
     /// </summary>
     public class PedeAlvoDoJogadorTests
     {

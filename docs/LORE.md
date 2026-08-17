@@ -44,7 +44,7 @@ que já está lá**.
 | **a campanha escurece capítulo a capítulo** | você se afasta de quem te acolheu |
 
 > **O que a lore NÃO explica, e é bom deixar dito:** o 👑 Reino ser a única cena de DIA é **decisão
-> de design**, não de história. Como assinatura visual ela vale (ver ROADMAP §CENÁRIO POR CAPÍTULO);
+> de design**, não de história. Como assinatura visual ela vale (ver `docs/MANUAL-cenario.md`);
 > como enredo, não há nada ali. Tentar amarrar as duas coisas foi uma invenção que não se sustenta.
 
 ---
@@ -81,7 +81,7 @@ Nove, na ordem da campanha. Os Humanos são o time inicial, não um capítulo.
 | 🔱 | Decaídos | a vila élfica queimada, e o Elfo que **vendeu os próprios** pros demônios |
 | ❄️ | **Ascendentes** | era "Apóstolos" — renomeada porque **todos são apóstolos**. Já **não têm** relação com a deusa do vento |
 
-> **Lore que já existe em jogo, e não se contradiz:** os cenários (§CENÁRIO POR CAPÍTULO do ROADMAP)
+> **Lore que já existe em jogo, e não se contradiz:** os cenários (`docs/MANUAL-cenario.md`)
 > afirmam coisas. A traição do Elfo, a invasão tecnológica e o dia do Reino já são canônicos porque
 > o jogador os vê.
 

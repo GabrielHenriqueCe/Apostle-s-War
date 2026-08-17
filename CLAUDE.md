@@ -26,7 +26,7 @@ Não precisa o Gabriel pedir; oriente-se sozinho:
   "O FRONT, depois da separação" no fim deste arquivo — mapa de pastas, o contrato de tela, as duas
   injeções e o que os harnesses NÃO cobrem.
 - **A 9ª pele (Humanos) está BLOQUEADA de propósito** — não há capítulo Humanos, então ela não teria
-  onde aparecer. Quem cria a vaga é o fundo de facção no COMPÊNDIO. Ver ROADMAP §CENÁRIO POR CAPÍTULO.
+  onde aparecer. Quem cria a vaga é o fundo de facção no COMPÊNDIO. Ver `docs/MANUAL-cenario.md`.
   A **Arena** também vai ganhar cenário próprio — é o 1º tema que não é facção.
 
 ## Como trabalhamos
@@ -145,7 +145,7 @@ Pros Humanos não sobra HORA nenhuma — o caminho é o mesmo do ⭐ Especial e 
 vez de uma hora, ou um enquadramento.
 **Não invente processo: já existe manual, e ele é caro — cada linha dele custou uma rodada de "ficou
 ruim" em jogo.**
-1. **`docs/ROADMAP-refatoracao.md` → §CENÁRIO POR CAPÍTULO.** É O manual: as três camadas e o que
+1. **`docs/MANUAL-cenario.md`.** É O manual: as três camadas e o que
    decide em qual entrar, ladrilho × canvas × endereço, o MAESTRO (dado compartilhado), os motores
    já extraídos, a lista de ARMADILHAS (cada uma já custou tempo — leia todas antes de desenhar) e as
    LIÇÕES DE DESENHO. Se for contra alguma delas, seja de propósito e diga por quê.

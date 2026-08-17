@@ -2,8 +2,7 @@ namespace ApostlesWar.Domain
 {
     /// <summary>
     /// Estrutura estática da campanha: as 7 fases, cada uma com a composição de Slots dos inimigos
-    /// por rodada. Era o `CampanhaService` (tabela pura); virou dado. `ObterFase(numero)` é 1-based
-    /// (a Fase 1 é o índice 0).
+    /// por rodada. `ObterFase(numero)` é 1-based (a Fase 1 é o índice 0).
     /// </summary>
     public static class Campanha
     {

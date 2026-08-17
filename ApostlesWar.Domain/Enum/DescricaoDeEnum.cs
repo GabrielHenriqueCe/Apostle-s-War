@@ -9,9 +9,8 @@ namespace ApostlesWar.Domain
     /// (Enum/Enums.cs): o nome de uma facção é DADO do jogo, não formatação de uma tela — por isso
     /// qualquer pele alcança sem depender da outra.
     ///
-    /// Veio do projeto externo GHUtils (`Helper.GetDescricao`), dissolvido em jul/2026: era o último
-    /// membro daquela biblioteca ainda em uso. Extensão (e não `Helper.X(valor)`) pra chamada ler
-    /// como frase: `faccao.Descricao()`.
+    /// Extensão, e não método estático de um "Helper": a chamada precisa ler como frase —
+    /// `faccao.Descricao()`.
     /// </summary>
     public static class DescricaoDeEnum
     {

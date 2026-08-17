@@ -7,7 +7,7 @@ namespace ApostlesWar.Domain.Skills.Buffs
     /// Buff: 1x por agressor por turno, o atacante recebe Veneno (1 stack) e Queima (1 stack).
     /// Reage via IReageAoSerAtacado (dispara mesmo com dano 0 — reage ao ATO de ser atacado, não
     /// ao dano: o espinho fere quem encosta mesmo se o golpe foi bloqueado). O gate 1x-por-agressor
-    /// vem do orçamento do Turno (TentarReagir); antes era por-hit.
+    /// vem do orçamento do Turno (TentarReagir), não daqui.
     /// Usado pela Espinhos (aplicado permanente via IPassivaInicial).
     /// </summary>
     public class EspinhosVenenosos : Buff, IReageAoSerAtacado, IPuneQuemAtaca

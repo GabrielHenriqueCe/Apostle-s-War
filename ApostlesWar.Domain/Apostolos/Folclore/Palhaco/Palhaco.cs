@@ -5,10 +5,9 @@ namespace ApostlesWar.Domain.Apostolos.Folclore
 {
     /// <summary>
     /// Palhaço — apóstolo como DADO. Coringa é o 1º cliente do RemoverDebuffs (cleanse total dos
-    /// aliados + ImunidadeDebuffs). Circo é o 4º da família do revive: dá Intocável **só nos
-    /// revividos** via o parâmetro `buffNoRevivido` do Reviver (bugfix — antes aplicava em TODOS
-    /// os outros vivos, que sempre foi errado vs a intenção; ver Reviver.cs e ADR §8.1). Passiva:
-    /// PiadaDeMauGosto.Passiva.cs.
+    /// aliados + ImunidadeDebuffs). Circo é o 4º da família do revive: dá Intocável só nos
+    /// REVIVIDOS, via o parâmetro `buffNoRevivido` do Reviver — não nos outros vivos (ver
+    /// Reviver.cs e ADR §8.1). Passiva: PiadaDeMauGosto.Passiva.cs.
     /// </summary>
     public static class Palhaco
     {

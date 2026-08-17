@@ -3,19 +3,18 @@
     /// <summary>
     /// Status que modifica o dano recebido durante o cálculo (Escudo, Bloqueio, Proteção, Redução).
     ///
-    /// Se o modificador AGE neste golpe é decidido fora, por UMA língua só (unificação
-    /// jul/2026): o ReceberDano pergunta "este status está na lista de ignorados?" — a lista
-    /// unida de natureza.Ignora + ignorarStatus (golpe) + IIgnoraStatusNoAtaque (apóstolo). Não há
-    /// mais `DeveAgir` por-status lendo flags da natureza; as regras que eram flags viraram
-    /// entradas na lista `NaturezasDano` (ex: QueimaDano fura Escudo; todo dano sem reação fura
-    /// ProtecaoAliado — o anti-loop de proteção mútua).
+    /// Se o modificador AGE neste golpe é decidido FORA dele, por UMA língua só: o ReceberDano
+    /// pergunta "este status está na lista de ignorados?" — a lista unida de natureza.Ignora +
+    /// ignorarStatus (golpe) + IIgnoraStatusNoAtaque (apóstolo). Quem não participa entra como
+    /// entrada na lista `NaturezasDano` (ex: QueimaDano fura Escudo; todo dano sem reação fura
+    /// ProtecaoAliado — o anti-loop de proteção mútua), nunca como flag lida pelo próprio status.
     ///
     /// DOIS MÉTODOS, porque a capacidade responde a DUAS perguntas que não são a mesma:
     /// "quanto passa?" (<see cref="PreverDanoRecebido"/>) e "quanto passa E gaste o que tiver de
-    /// gastar" (<see cref="ModificarDanoRecebido"/>). Elas coincidiam enquanto só o golpe real
-    /// perguntava; separaram-se quando o bot passou a precisar ESPIAR o resultado sem provocá-lo —
-    /// o Escudo consome pontos e se remove, e o ProtecaoAliado chega a causar dano no protetor.
-    /// Prever chamando o Modificar machucaria um aliado de verdade.
+    /// gastar" (<see cref="ModificarDanoRecebido"/>). Não fundir: quem só ESPIA o resultado (o bot,
+    /// comparando alvos) não pode provocá-lo — o Escudo consome pontos e se remove, e o
+    /// ProtecaoAliado chega a causar dano no protetor. Prever chamando o Modificar machucaria um
+    /// aliado de verdade.
     ///
     /// INVARIANTE: `Prever(dano) == Modificar(dano)` para o mesmo estado — o Prever é o valor que o
     /// Modificar devolveria, só que sem os efeitos. Há teste genérico varrendo as implementações.
@@ -28,8 +27,7 @@
         /// Em que ORDEM este modificador entra no cálculo — ver <see cref="Domain.OrdemDeMitigacao"/>.
         ///
         /// Sem default de propósito, igual aos dois métodos acima: um modificador novo que herdasse
-        /// "de graça" em silêncio desperdiçaria recurso alheio sem ninguém notar. Foi exatamente o
-        /// bug que criou esta propriedade.
+        /// "de graça" em silêncio desperdiçaria recurso alheio sem ninguém notar.
         /// </summary>
         OrdemDeMitigacao OrdemDeMitigacao { get; }
 
@@ -48,11 +46,11 @@
     /// de quem GASTA RECURSO. **A ordem de declaração destes valores É a ordem de execução** — o
     /// ReceberDano/PreverDanoRecebido ordenam por este enum.
     ///
-    /// O princípio já existia e estava testado, mas só valia pra passiva-pura (a Sereia roda fora do
-    /// laço de status; `PassivaPura_RodaANTESDosStatus...` prova pelo número). Entre os status a ordem
-    /// era a de APLICAÇÃO — quem tivesse aplicado Escudo antes de Bloqueio Total gastava os pontos do
-    /// escudo num golpe que o bloqueio ia zerar de qualquer jeito. Recurso queimado à toa, e a
-    /// `NaturezaDano` não resolvia: ela declara QUEM participa (`Ignora`), nunca em que ORDEM.
+    /// Ordenar pela APLICAÇÃO (quem entrou primeiro) queima recurso à toa: com Escudo aplicado antes
+    /// de Bloqueio Total, o escudo gastava pontos num golpe que o bloqueio ia zerar de qualquer jeito.
+    /// A `NaturezaDano` não cobre isto: ela declara QUEM participa (`Ignora`), nunca em que ORDEM.
+    /// Prova pelo número, na passiva-pura (a Sereia roda fora do laço de status):
+    /// `ReceberDanoTests.PassivaPura_RodaANTESDosStatus_EOEscudoVeODanoJaReduzido`.
     ///
     /// Não confundir com "participa deste golpe?" — isso segue sendo a lista de ignorados, uma língua
     /// só. Este eixo só decide QUANDO.

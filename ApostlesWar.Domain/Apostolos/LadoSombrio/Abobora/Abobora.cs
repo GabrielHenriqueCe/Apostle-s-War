@@ -8,9 +8,8 @@ namespace ApostlesWar.Domain.Apostolos.LadoSombrio
     /// Abóbora — apóstolo como DADO (ver ADR-composicao-de-acoes §10). DocesOuTravessuras estreia
     /// RemoverBuffs/Seletor (§5.4/§9). DocesDeAbobora é o 2º cliente de Reviver (dos 7 da
     /// família — §9) e o 1º revive-de-N: o jogador ESCOLHE o morto (pick real por estado,
-    /// ADR-selecao-por-estado §2.4 — antes era "primeiro da lista", que aquele ADR já apontava
-    /// como dor). Era EstadoAlvo.Ambos + Ativar bespoke; vira duas ações de estados diferentes
-    /// (Mortos → Vivos), na ordem — segue o precedente do Nigiri (Apostolos/Humanos/Sushiman/).
+    /// ADR-selecao-por-estado §2.4). Duas ações de estados diferentes (Mortos → Vivos), nesta
+    /// ORDEM — segue o precedente do Nigiri (Apostolos/Humanos/Sushiman/).
     /// Passiva: CascaDura.Passiva.cs.
     /// </summary>
     public static class Abobora

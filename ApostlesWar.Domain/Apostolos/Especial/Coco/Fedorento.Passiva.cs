@@ -6,7 +6,7 @@ namespace ApostlesWar.Domain.Apostolos.Especial
     /// <summary>
     /// 1x por agressor por turno, aplica 2 stacks de Veneno no atacante. Modelo de reação
     /// (IReageAoSerAtacado). Mais agressiva que o Vômito Tóxico do Zumbi (1 stack). O gate
-    /// 1x-por-agressor vem do Turno (TentarReagir); antes era por-hit.
+    /// 1x-por-agressor vem do Turno (TentarReagir), não daqui.
     /// </summary>
     public class Fedorento : HabilidadePassiva, IReageAoSerAtacado
     {

@@ -5,9 +5,8 @@ namespace ApostlesWar.Domain.Apostolos.Ascendentes
 {
     /// <summary>
     /// Anjo — apóstolo como DADO. Celestial limpa debuffs e cura os aliados (molde Coringa+Sushi).
-    /// Céu é o 7º e ÚLTIMO da família do revive: revive os mortos e buffa os vivos (incluindo os
-    /// recém-revividos, pela ordem das ações) — era `EstadoAlvo.Ambos`, agora Reviver(Mortos) +
-    /// buffs(Vivos), o que mata o último `Ambos` de apóstolo do jogo. Passiva: Bencao.Passiva.cs.
+    /// Céu é o 7º e ÚLTIMO da família do revive: Reviver(Mortos) + buffs(Vivos), nesta ORDEM — é
+    /// ela que faz os recém-revividos entrarem no buff. Passiva: Bencao.Passiva.cs.
     /// </summary>
     public static class Anjo
     {

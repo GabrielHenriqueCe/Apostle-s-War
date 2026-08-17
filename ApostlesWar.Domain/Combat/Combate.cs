@@ -567,7 +567,7 @@ namespace ApostlesWar.Domain
         /// um dos dois estiver <see cref="ForaDoTabuleiro"/>.
         ///
         /// Entra do lado do ATACANTE, antes da mitigação — é irmão do ATK, não da DEF, e por isso
-        /// NÃO tem nada a ver com a <c>OrdemDeMitigacao</c> (#185).
+        /// NÃO tem nada a ver com a <c>OrdemDeMitigacao</c>.
         ///
         /// A distância pressupõe as duas frentes se olhando, que é a única geometria que o jogo tem.
         /// Golpe em ALIADO não passa por aqui: quem fere o próprio time (AutoDano, redirecionamento,

@@ -7,7 +7,7 @@ namespace ApostlesWar.Domain.Skills.Buffs
     ///
     /// O redirecionamento viaja como <c>DanoIndireto</c>, que passa por defesa e escudo normalmente
     /// — então a DEF do protetor abate o que ele recebe: quanto mais tanque, mais barato sai
-    /// proteger. Isso é REGRA DECIDIDA (jul/2026), não acidente da natureza escolhida: é a fantasia
+    /// proteger. Isso é REGRA DECIDIDA, não acidente da natureza escolhida: é a fantasia
     /// do tanque que se põe na frente. O que o PROTEGIDO desconta não muda com isso — são sempre os
     /// 30% cheios. Fixado em ProtecaoAliado_ADefesaDoProtetorAbateOQueEleRecebe.
     ///

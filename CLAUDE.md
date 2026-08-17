@@ -3,31 +3,32 @@
 RPG por turnos em C# (`net10.0`, `OutputType Exe`). Roda numa **janela webview** (WebView2), jogável de
 ponta a ponta: menu, perfil, campanha, arena, arsenal. Projeto de estudo/portfólio do Gabriel.
 
-## Orientação — faça no início da sessão e quando o Gabriel perguntar "onde estamos"
-Não precisa o Gabriel pedir; oriente-se sozinho:
-- **1º: `docs/CONTEXTO.md`** — o resumo comprimido da última sessão: onde paramos, o que está
-  aberto, o que foi decidido e as armadilhas que acabaram de morder. **É o ponto de partida**, e ele
-  é reescrito do zero ao FIM de cada sessão (é foto, não diário — o histórico é do `git log`).
-- A **memória** (`MEMORY.md` + arquivos em `memory/`) carrega automática — as preferências de
-  trabalho dele e o porquê das decisões antigas.
-- **`docs/ROADMAP-refatoracao.md`** → a seção **FILA DE EXECUÇÃO** é a fila mestra; o
-  **`docs/GDD-progressao.md`** é o MODELO (o §7 tem a ordem dos passos, e ela não é negociável).
-- `git log --oneline -15` → os commits recentes. **Nada disso se re-deduz do código:** ler antes de
-  escrever qualquer linha.
-- **Fase atual:** FRONT feito, console REMOVIDO (#179), camadas ajustadas (#180), `PreverDano` (#181),
-  **bot inteligente** (#182), **botão Auto** (#183), a **ordem do pipeline de dano** (`OrdemDeMitigacao`
-  — fechou o bug do bloqueio × escudo, #185) e a **DEF do protetor** no `ProtecaoAliado` (doc mentia; a
-  impl é a certa — tanque protege mais barato). A **bancada de dano ✅ está construída**
-  (`ApostlesWar.Tests/Bancada/`, ~35s no `dotnet test`, escreve `docs/bancada-dano.md` versionado): 5
-  linhas variando UM fator por vez — por-habilidade e apóstolo-inteiro × alvo imune/não-imune a malefícios
-  × DEF 0/no cap. Zero mudança no motor. A seguir: **LER os números e rebalancear (#16)** — a bancada é
-  o instrumento, o ajuste é o trabalho. Aberto: o #15 (faxina de comentários).
-- **O front foi SEPARADO e está FECHADO (ago/2026): `jogo.js` 11.921 → 192 linhas.** Ver a seção
-  "O FRONT, depois da separação" no fim deste arquivo — mapa de pastas, o contrato de tela, as duas
-  injeções e o que os harnesses NÃO cobrem.
-- **A 9ª pele (Humanos) está BLOQUEADA de propósito** — não há capítulo Humanos, então ela não teria
-  onde aparecer. Quem cria a vaga é o fundo de facção no COMPÊNDIO. Ver `docs/MANUAL-cenario.md`.
-  A **Arena** também vai ganhar cenário próprio — é o 1º tema que não é facção.
+## Abertura — o protocolo, e ele é ORÇAMENTO, não checklist
+Oriente-se sozinho, sem o Gabriel pedir — e **pare quando o protocolo acabar**:
+
+1. **`docs/CONTEXTO.md`, inteiro** (~1k tokens). É a foto da última sessão: onde paramos, o que está
+   no ar, o que foi decidido e as armadilhas que acabaram de morder. É reescrito do zero ao FIM de
+   cada sessão, e é o **ÚNICO dono do estado** — não existe segunda foto, nem aqui nem na memória.
+2. **NÃO abrir os documentos que ele cita.** Ler o ponteiro não é ler o alvo; o alvo se abre quando
+   a TAREFA for dele.
+3. **O `gitStatus` da abertura já traz o branch e os commits recentes** — repetir `git log`/
+   `git branch` é contexto jogado fora.
+4. **Saudação sem tarefa = passo 1, responder onde estamos, e PARAR.**
+
+A **memória** (`MEMORY.md` + `memory/`) carrega sozinha. O resto vem pela tarefa — ver a última
+seção deste arquivo.
+
+**O orçamento, medido (ago/2026).** Nada abaixo se lê inteiro sem um motivo dito em voz alta; abrir
+**por seção**, com `Grep` ou `offset`/`limit`:
+
+| arquivo | ~tokens | quando |
+|---|---:|---|
+| `ROADMAP-refatoracao.md` | 20k | a FILA A, quando for escolher o que fazer |
+| `MANUAL-cenario.md` | 19k | só fazendo pele de facção |
+| `bancada-dano.md` | 13k | é RELATÓRIO gerado — ler o `git diff`, não o arquivo |
+| `GDD-itens.md` | 12k | o passo mais distante da fila |
+| `ADR-composicao-de-acoes.md` | 10k | mexendo em Ação/habilidade |
+| `GDD-combate.md` · `GDD-progressao.md` · `MANUAL-combate.md` | 9k · 8k · 7k | pelo § do assunto |
 
 ## Como trabalhamos
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar

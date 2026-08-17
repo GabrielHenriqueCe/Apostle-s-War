@@ -34,9 +34,9 @@ Mergeado em sequência de PRs:
   `ITelaDeMenu` e `IEntrada` (+`Comando`/`Navegacao`, vocabulário de cursor), as versões sem-time do
   `ExecutarFase`/`ExecutarArena` e o `ResultadoFase.Cancelou`. −1.645 linhas.
 - **Camadas ajustadas** (#180): auditoria achou 7 decisões na camada errada e as devolveu ao dono —
-  ver §CADA DECISÃO NA SUA CAMADA.
+  ver `docs/MANUAL-front.md`.
 - **Rebalanceamento, 1ª passada** (#189): o primeiro ajuste feito **com número na mão** em vez de
-  intuição, lendo a bancada (§BANCADA DE DANO). Dois eixos: **cooldown padronizado em 3** (os de 4
+  intuição, lendo a bancada (`docs/MANUAL-combate.md`). Dois eixos: **cooldown padronizado em 3** (os de 4
   turnos eram penalidade escondida — a habilidade boa aparecia menos, e a coluna `Usos` denunciava) e
   **multiplicadores de dano subindo de faixa** (a maioria de 1.5–3.0 pra 3.0–4.5, porque o boneco com
   DEF no cap engolia os golpes baixos: eles apareciam como se não existissem nas linhas 2 e 5). 36
@@ -84,7 +84,7 @@ Mergeado em sequência de PRs:
   trouxe o **maestro**: uma CAUSA COMUM que as peças leem, em vez de cada uma só com o seu relógio.
   Ver `docs/MANUAL-cenario.md`.
 
-**Arquitetura (detalhe em §FRONT abaixo):** ponte de mensagens LOCAL in-process (JS↔C# pela webview,
+**Arquitetura (detalhe em `docs/MANUAL-front.md`):** ponte de mensagens LOCAL in-process (JS↔C# pela webview,
 sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos seams `ITelaDeCombate`/
 `IControladorDeTurno`/`IApresentacao`/`IRepositorioDeSave`. Padrão consolidado: cada modo entra por um
 `Executar...ComTime(s)` (a casca pica o time e chama), e a lógica META (recompensa/save da campanha)
@@ -92,11 +92,9 @@ mora na Application (`CampanhaService`), nunca no front.
 
 **REBALANCE (#16): EM ITERAÇÃO, não fechado.** A bancada é o instrumento e a 1ª passada (#189) já
 entrou; o trabalho agora é o laço `editar número → dotnet test → git diff docs/bancada-dano.md`,
-quantas voltas o Gabriel achar que precisa. Fios de combate ainda abertos: ver §OS FIOS QUE FALTAM
-(sweep de composição por facção, turno-resto, passiva-conta-mortos).
-
-> As seções §FRONT §Fatiamento e a FILA B abaixo descreviam o front como PLANO — ficam como registro do
-> desenho, com o estado real marcado ✅.
+quantas voltas o Gabriel achar que precisa. Os fios de combate que aquele parágrafo listava como
+abertos (sweep de composição, turno-resto, passiva-conta-mortos) estão TODOS fechados — ver §OS FIOS
+QUE FALTAM, que é o índice do que resta.
 
 ---
 
@@ -319,7 +317,7 @@ PRs #204–#213, que guardam melhor e datado. O mapa e o contrato finais do fron
     justamente onde o comentário é o produto — as interfaces de capacidade no C#, os builders de
     canvas no front. Faxinar por ranking destrói o melhor primeiro.
 16. 🔄 **REBALANCEAMENTO — EM ITERAÇÃO** (1ª passada mergeada no #189). Não é um item que "termina":
-    a bancada (§BANCADA DE DANO) é o instrumento, e cada volta é ler os números e mexer numa
+    a bancada (`docs/MANUAL-combate.md`) é o instrumento, e cada volta é ler os números e mexer numa
     alavanca. A passada 1 padronizou o cooldown em 3 e subiu os multiplicadores de faixa.
     **Passo 0 (centralizar as constantes) — NÃO é mais item próprio.** Ele foi ABSORVIDO pelo PR de
     DIFICULDADE (decisão do Gabriel, ago/2026): reunir as constantes agora e mexer nelas depois é
@@ -558,340 +556,21 @@ arena, campanha e arsenal. O texto abaixo fica como registro do desenho original
 
 ---
 
-## FRONT (webview desktop) — ARQUITETURA DECIDIDA (jul/2026)
+## As regras do motor → `docs/MANUAL-combate.md`
 
-**Ordem:** o front vem ANTES do REBALANCE #16 (decisão do Gabriel — quer balancear numa interface
-amigável, não no console). É uma FASE (várias fatias), não 1 PR.
-
-### Método — NÃO é MVC nem REST
-É uma **ponte de mensagens LOCAL, in-process, orientada a eventos.** O JS (tela) e o C# (motor) rodam
-no **MESMO processo** (o `.exe`) e trocam mensagens **direto pela webview** — sem HTTP, sem servidor,
-sem rede, offline. Analogia: não é "cliente e servidor pela internet", é "duas partes do mesmo programa
-passando bilhetes" (padrão de app desktop com webview — VS Code / Discord / Spotify desktop por dentro).
-- **REST/servidor foi DESCARTADO** (= FILA C): precisa hospedar, não é grátis/offline.
-- **Encaixa nos seams já prontos:** `IEntrada` recebe o clique-do-JS → `Comando`; `IApresentacao`
-  empurra o estado/eventos pro JS desenhar. O motor C# **não sabe** que é webview.
-- **MVC "de leve" (só a separação natural):** View = HTML/CSS/JS; Model = domínio C#; cola = o host
-  webview. NÃO é o framework ASP.NET MVC. Existe um "protocolo" (formato dos bilhetes, provavelmente
-  JSON), mas é um **contrato interno do app**, não uma API.
-
-### Ferramenta — **WebView2** (jul/2026: o Photino FOI TENTADO E DESCARTADO)
-O **HTML/CSS/JS mora NESTE repo** (sobe pro GitHub junto — não é site/serviço à parte).
-Distribuição: `dotnet publish` self-contained → **`.exe` no GitHub Releases**. C# roda NATIVO (não
-WASM) → zero carregamento.
-
-**Photino descartado por evidência, não por preferência.** Ele sobe em `net10.0` sem problema
-(o NuGet resolve `net8.0` como compatível; os binários nativos são por RID) — mas a **janela abre
-PRETA**: o título é setado, o processo não crasha, e nada é renderizado. Reproduzido com
-`LoadRawString` (HTML embutido, sem arquivo) E com `Load` de arquivo, com pasta de dados explícita,
-na última versão existente (Photino.NET 4.0.16 + Native 4.0.22). O WebView2 Runtime da máquina está
-instalado e íntegro (150.0.4078.83) — o **WebView2 direto renderizou de primeira** no mesmo runtime.
-Suspeita: shim nativo do Photino velho demais pro runtime atual. **Não vale investigar mais fundo:
-o Photino não expõe `CoreWebView2InitializationCompleted`/`NavigationCompleted`, então não dá pra
-instrumentar a falha — e essa opacidade é, por si só, o argumento contra ele.**
-
-**Preço do WebView2:** exige host WinForms → TFM `net10.0-windows`. Resolvido SEM contaminar o motor:
-o projeto foi partido em **`ApostlesWar` (biblioteca, `net10.0` puro — motor + views de console)** e
-**`App/ApostlesWar.App` (Exe, `net10.0-windows` — composition root + front)**. Os Tests seguem
-`net10.0` intocados. A separação de camadas que as portas já faziam no código agora aparece também na
-estrutura de projetos. *(Gotcha registrado: o pacote do WebView2 referencia as variantes WinForms E
-WPF sem condição — `build/Common.targets:133` — e a WPF arrasta outro `WindowsBase`, gerando MSB3277;
-removida num Target no csproj do App, já que é referência morta aqui.)*
-
-### Visual — emoji é PLACEHOLDER, não o teto
-v1 = emojis + CSS (dano pulando) pra o loop andar rápido sem depender de arte. **Teto real = sprites
-pixel ANIMADOS** (sprite sheets + CSS `steps()` ou `<canvas>`; `image-rendering: pixelated` mantém o
-pixel nítido; arte do **Pixelab** pluga direto). O motor só EMITE eventos (o stream `EventoCombate`/
-`EventoDano` = o gancho de animação); o front decide o quão rico renderiza. **Emoji → sprite = troca de
-render no JS, SEM tocar no motor.** Sem susto de performance (é por turnos, não ação 60fps).
-
-### Fatiamento (seam primeiro, sempre)
-- **Fatia 0 — casca + ponte: ✅ FEITA.** Janela WebView2 + round-trip JS→C#→JS provado.
-- **Fatia 1 — tela de combate: ✅ FEITA** (`--front` cai direto numa Arena com times sorteados).
-  - **Descoberta que mudou o desenho:** `IApresentacao` **NÃO era** porta de render — só encapsula a
-    ESPERA (`AguardarAnimacao`). O render era `Console.WriteLine` dentro da `CombateView`, concreta
-    dentro do `CombateService`. A porta de verdade nasceu agora: **`View/ITelaDeCombate`**.
-  - **O contrato é GATILHO, não desenho.** Os nomes são imperativos por herança do console
-    (`Exibir...`), mas a impl web traduz cada chamada em (a) um RETRATO do estado serializado ou
-    (b) um EVENTO pra animar. A tela se redesenha do estado; nunca recebe ordem de desenho. É isso
-    que faz emoji→sprite ser troca só de front.
-  - **O laço síncrono foi PRESERVADO INTEIRO** — nada virou async. A UI fica na thread principal
-    (`Application.Run`) e o jogo numa thread de fundo; `IEntrada.Ler()` bloqueia num
-    `BlockingCollection.Take()` que o clique do JS alimenta. Foi a `IEntrada` bloqueante (que parecia
-    um problema pro porte) que salvou o motor de qualquer cirurgia.
-  - **Menu de ação e de alvo ficaram FORA da porta:** são navegação por CURSOR, formato do console.
-    Quem decide ação/alvo é o `IControladorDeTurno`, e o front tem o seu (`ControladorJogadorWeb`,
-    clique-na-habilidade → clique-no-alvo). Botá-los na porta obrigaria a impl web a carregar
-    método morto.
-  - **Carona ainda em aberto (do #14):** com a apresentação agora injetável, o **teste da ordem
-    crítica de morte** (Sentença antes de Necromancia) virou possível com uma tela no-op. Não feito
-    neste PR (1 PR, 1 tema) — é o próximo candidato.
-- **Fatias seguintes — ✅ FEITAS** (ver §ESTADO ATUAL no topo): menu principal + perfil (#172),
-  Arena com seleção de time (#173), montagem de time com arrastar-e-soltar (#175), campanha com mapa
-  de facções (#174), arsenal (#176/#177). Configurações (som/tela-cheia) ficaram como placeholder
-  "em breve"; falas dos apóstolos e sprites seguem em aberto (o front emite/renderiza, o motor não muda).
+Saíram daqui, porque não eram fila — eram regra que continua valendo: a ordem do pipeline de dano
+(`OrdemDeMitigacao`), a DEF do protetor no `ProtecaoAliado`, a língua única do ignorar-status, os 3
+contextos, a ordem crítica de morte, os dois sabores do lado atacante, o cérebro do bot e a bancada
+de dano. O DESENHO de cada uma está nos ADRs; o histórico dos PRs, no `git log`.
 
 ---
 
-## BOT INTELIGENTE + MODO AUTO (jul/2026)
+## A ponte e as camadas do front → `docs/MANUAL-front.md`
 
-O `ControladorBot` só usava A1, o que deixava o inimigo burro e — pior — fazia o **Bot×Bot não
-exercitar habilidade nenhuma**, cegando a Arena como laboratório do REBALANCE (#16). Decisão do
-Gabriel: **um cérebro só**, o mesmo que joga pelo inimigo joga pelo jogador no **modo Auto
-assistido** (botão na batalha, interruptor lido entre turnos, sem mudar o ritmo — é pra assistir).
-Simular N batalhas e grindar ficaram nomeados e adiados.
-
-### PR-A ✅ — `PreverDano`: a fórmula de dano ganhou um espelho puro (#181)
-
-Pra comparar alvos o bot precisa da fórmula REAL. O plano dizia "extrair a parte pura do
-`ReceberDano`" — **não havia parte pura**: o `Escudo` consome pontos e se remove, e o
-`ProtecaoAliado` chama `Aplicador.ReceberDano(...)`, então prever chamando o modificador **feriria
-um aliado de verdade**. A `IModificaDanoRecebido` passou a ter DOIS métodos (`Modificar` aplica,
-`Prever` é puro), sem default — capacidade nova é obrigada pelo compilador a responder as duas.
-Nasceram `Combate.PreverDanoRecebido`, `PreverAtaque` (crit como VALOR ESPERADO, senão a Kunai com
-`forcaCritico` seria subestimada) e **`PreverVidaRemovida`** = `clamp(dano, 0, HPAtual − pisoDeHP)`,
-que resolve sozinha "evitar bloqueio de dano" e "evitar Invencível" (ambos dão ~0) e ainda sinaliza
-o ABATE (`== HPAtual`). Comportamento idêntico, provado pelos 14 `ReceberDanoTests` intocados.
-
-### PR-B ✅ — o cérebro tático
-
-**A habilidade é DADO, então dá pra lê-la sem executá-la.** Cada `Acao` passou a declarar duas
-coisas sobre si: a `Utilidade` (que bem faz — FATO) e `TemEfeitoUtil` (tem trabalho a fazer agora?).
-O cérebro nunca pergunta `is Dano` — seria reabrir o dispatch por tipo concreto que o #9 fechou.
-
-- **Fila ABSOLUTA** (a única opinião tática, num array só):
-  `Reviver > Curar > LimparDebuffs > Reforcar > TirarBuffs > Enfraquecer > TurnoExtra > Ferir`.
-  Nada de pontuação: o Gabriel citou jogos onde score emergente virou estratégia degenerada.
-  **TurnoExtra fica embaixo de propósito** — com ele no topo, o Copiando do Mímico dispararia sem
-  buff nenhum pra roubar, gastando a habilidade pelo turno extra. A habilidade é julgada pelo RESTO.
-  `Utilidade.Custo` (AutoDano do Fantasma) nunca conta: é preço, não entrega.
-- **Desempates:** área > aleatório > único → mais ações úteis → mais vida removida.
-- **Alvo (lexicográfico):** abate → menor punição → mais vida removida. O abate **não fura a fila**
-  de habilidade.
-- **`IPuneQuemAtaca`** (`Domain/Combat/`) — nova capacidade: `AplicaStatus` (Espinhos) >
-  `ContraAtaca` > `RefleteDano`, na ordem de fuga. Não deu pra reusar `IReageAoSerAtacado` porque
-  **reagir ≠ punir** (a passiva do Ogro reage se buffando, o que não custa nada a quem atacou). Só
-  BUFF conta: passiva é identidade permanente e fugir dela deixaria Herói/Elfo/Zumbi/Cocô
-  inatacáveis.
-- **Achado durante os testes:** um `OfType<Dano>()` no cérebro lia a explosão como inofensiva (o bot
-  preferia o A1 a detonar um alvo envenenado). Virou `Acao.PreverVidaRemovida` virtual, com
-  `IStatusComTick.PreverDetonacao` como espelho puro do `Detonar` — mesmo par do PR-A. O dispatch por
-  tipo concreto **volta a se infiltrar sempre que se pergunta "quanto isto faz?"** de fora da peça.
-
-+20 testes headless. **É o primeiro pedaço do JOGO que roda sem tela:** decidir é puro, então dá pra
-provar comportamento ("não cura quem está inteiro", "prefere o abate"), não só mecanismo.
-
-### PR-C ✅ — o botão Auto no front
-
-`🤖 auto` na barra da batalha, ao lado da velocidade. Espelha o Sair: flag `volatile` na ponte
-(thread da UI escreve, thread do jogo lê). **Diferença que importa:** o `_sairPedido` é zerado pelo
-`LimparPendentes()` a cada turno porque é um PEDIDO; o auto é ESTADO e tem que atravessar os turnos.
-
-- **Lido no começo de cada decisão** — é isso que faz ligar/desligar valerem "entre turnos": o turno
-  que o cérebro já começou termina, e o controle volta na PRÓXIMA pergunta.
-- **A mensagem `auto` vira flag E entra na fila.** A fila é o que ACORDA um turno humano já parado
-  esperando clique — sem ela, ligar o automático no meio da escolha travaria o jogo pra sempre.
-- **O botão se desenha do `estado.auto`**, como todo o resto da tela. É o que o mantém honesto quando
-  o C# desliga o modo sozinho — o que acontece a cada batalha nova (`DesligarAuto()` ao lado do
-  `SessaoDoFront.Reiniciar()`), pra ninguém entrar numa luta sem o controle que achava que tinha.
-- **Duas instâncias de `ControladorBot`**: o adversário e o automático do jogador. Mesmo cérebro,
-  instâncias separadas — cada um memoriza o próprio alvo entre escolher-ação e escolher-alvo.
-- **Ritmo NÃO muda** (é auto *assistido*, o ponto é ver acontecer) e o **Sair continua funcionando**
-  com o automático ligado: ele é detectado na espera entre eventos, caminho independente do controlador.
-
----
-
-## ✅ ORDEM DO PIPELINE DE DANO — bloqueio total desperdiçava o escudo (achado e CONSERTADO jul/2026)
-
-**Era, reproduzido em jogo** (Rei + Operário): com `Escudo` e `BloqueioTotal` no mesmo alvo, o escudo
-era CONSUMIDO mesmo com o dano sendo integralmente bloqueado — e dependia da ordem de APLICAÇÃO (escudo
-aplicado antes gastava pontos; na ordem inversa sobrevivia). **Mesmo estado de jogo, resultado
-diferente.** De quebra o `absorvidoPeloEscudo` reportava como "absorvido" o que foi bloqueado.
-
-A `NaturezaDano` não resolvia: ela declara **quem participa** (a lista `Ignora`), nunca **em que
-ordem**. O conserto **generalizou o princípio que já existia e estava testado** pra passiva-pura
-(`PassivaPura_RodaANTESDosStatus_EOEscudoVeODanoJaReduzido`): quem REDUZ de graça roda antes de quem
-GASTA recurso.
-
-**Feito:** `IModificaDanoRecebido` ganhou **`OrdemDeMitigacao`** (enum `ReduzDeGraca`/`ConsomeRecurso`,
-Combat/) — **sem default**, como os 2 métodos que a interface já tinha: um modificador novo que
-herdasse "de graça" em silêncio desperdiçaria recurso alheio sem ninguém notar. A ordem virou
-CAPACIDADE DECLARADA, não `OfType<Escudo>()` no meio do cálculo (o dispatch por tipo concreto que o #9
-e o #181 tiraram do motor). `ReceberDano` e `PreverDanoRecebido` passaram a ordenar pelo helper
-compartilhado `Combate.OrdenarPorMitigacao` — os dois juntos de propósito: se divergirem, o bot mira
-errado em silêncio. `OrderBy` é **estável**, então dentro do mesmo balde a ordem de aplicação segue
-valendo (Escudo × ProtecaoAliado não têm ordem "certa" entre si, e não foi este PR que inventou uma).
-
-**Classificação:** `BloqueioTotal` + `ReducaoDanoFixo` + `Aquagirl` (passiva) = `ReduzDeGraca`; `Escudo`
-(pontos) + `ProtecaoAliado` (HP do aliado) = `ConsomeRecurso`. **`Invencivel` NÃO entrou**: o #151 já o
-tinha movido pra `IDefineHPMinimo` (piso de HP ≠ mitigação) — o grep pegava só o comentário histórico.
-
-**Carona:** o `ProtecaoAliado` parou de cobrar do protetor quando o bloqueio já zerou o dano (antes o
-aliado comia 30% de um golpe que não ia acontecer).
-
-**Números mudaram, era o esperado** (é o motivo de ter vindo ANTES do rebalance, não junto): escudo +
-redução contra 1000 com Escudo 400 e −15% dá 450, não 510. +4 testes (123 → 127): o par de ordens
-nos dois sentidos provando que a ordem de aplicação deixou de importar, o Prever amarrado ao Receber, e
-o protetor. **Verificados falhando sem o conserto** (3 dos 4 — o 4º é o controle: a ordem que já
-funcionava).
-
----
-
-## ✅ BANCADA DE DANO — o instrumento do REBALANCE (#16) (jul/2026)
-
-A dor que o Gabriel nomeou: pra saber qual habilidade está quebrada, teria que jogar 36 apóstolos × ~4
-habilidades à mão. A bancada roda isso sozinha e escreve **`docs/bancada-dano.md`**, VERSIONADO — cada
-tweak de número vira um `git diff` legível. A entrega é o RELATÓRIO, não ajustar valores.
-
-**Ela só foi possível porque habilidade é DADO.** O `Detetive.Espionagem()` é uma fábrica PRIVADA — a
-bancada nunca a chama e nem poderia. Mas o `Definir()` já executou a fábrica e guardou a instância em
-`Personagem.Habilidades`, então varrer os 36 apóstolos é um `foreach` sobre `TodosOsApostolos()`. Se as
-habilidades fossem métodos, seria reflection ou uma lista de 144 nomes escrita à mão, que envelheceria
-no primeiro apóstolo novo. **O refactor pra dados pagou por si aqui.**
-
-**Colunas** (pedido do Gabriel na 2ª rodada): além de `Usos`/`Dano`/`Dano por uso`, cada linha por
-habilidade traz **`Dano (4 alvos)`** — a mesma medição com 4 bonecos, que é o que dá voz às habilidades
-de ÁREA (contra alvo único elas ficam indistinguíveis de single-target; agora medem 4,0× exatos,
-enquanto as de alvo único seguem 1,0×) — e **`Cura`**, que exigiu uma condição nova: **o apóstolo começa
-cada turno com 1 de vida.** Sem isso a coluna seria toda zero (cura não cura quem está cheio). De
-quebra é a condição em que aparece quem fica mais FORTE ferido: a Caveira escala `2.0 − HP%` e o
-Ossinho dela mede 638 = 200 × **1,99** × 1,6. O apóstolo carrega a mesma prevenção-de-morte do boneco pra
-não morrer de auto-dano em 1 de HP. **O HP virou IGUAL nos dois lados** (2.000): cura costuma ser % do
-HP máximo, então inflar o apóstolo estouraria a cura pelo mesmo motivo que inflar o boneco estourava o DoT.
-
-**Duas vistas dos mesmos dados:** a tabela agrupada por apóstolo responde "como é o kit deste
-personagem?"; os **rankings** no fim (burst, sustentado com área, cura) respondem "quem está fora da
-curva?" sem obrigar a varrer 144 linhas com o olho.
-
-**Cinco linhas, variando UM fator por vez** (desenho do Gabriel) — é o que torna as subtrações legíveis:
-
-| # | Modo | DEF do alvo | Recebe malefício? | O que a subtração isola |
-|---|---|---|---|---|
-| 1 | por habilidade | 0 | não | dano cru |
-| 2 | por habilidade | cap | não | **(2)−(1) = o que furar/reduzir DEF vale** |
-| 3 | apóstolo inteiro | cap | não | **real − esperado = a SINERGIA do kit** |
-| 4 | apóstolo inteiro | cap | **sim** | **(4)−(3) = o que os malefícios valem** |
-| 5 | por habilidade | cap | **sim** | **(5)−(2) = de quem é o mérito do malefício** |
-
-**Zero mudança no motor.** Tudo saiu de seam que já existia: o horizonte de 100 turnos é o controlador
-devolvendo `null` na 101ª chamada (cai no `BatalhaAbortada`); a imunidade do boneco é uma passiva
-`IBloqueiaStatus` (o MESMO mecanismo da `CascaDura`); o crítico 100% é um `BuffTaxaCrit` de duração
-infinita; e o `ExibirInicioArena` da porta de tela é o que entrega os `Combate` construídos lá dentro.
-
-**Decisões que os NÚMEROS forçaram (as primeiras versões estavam erradas — rodar o instrumento É o
-que o valida):**
-- **Boneco com HP gigante não funciona.** A `Queima` tira **5% do HP máximo** por turno — com 100M de
-  HP o tick virava 5 milhões e o boneco se matava (o Mago aparecia com 7 usos em vez de 25). O HP tem
-  que ser REALISTA; o boneco volta ao HP cheio entre turnos.
-- **Reset entre turnos não salva de quem mata DENTRO de uma ativação.** O Porradeiro do Troll dá 6
-  hits de 480 = 2880 num boneco de 2000: matava no 5º e a corrida parava com **1 uso em vez de 25**.
-  Solução do Gabriel: dar ao boneco a **prevenção-de-morte do Guarda Real** (`IPrevineMorte`,
-  consultada pelo `ConfirmarMorte` dentro do funil), com duas mudanças — restaura o HP **cheio** em
-  vez de 1, e **cooldown 0**, que o `SkillCooldown` traduz em sempre-disponível (`Usar()` faz
-  `restante = total = 0`), inclusive entre hits da mesma ativação. **Melhor que pôr `Invencivel`:**
-  com piso de HP o alvo ficaria em 1 de vida e o próprio bot documenta que "evitar Invencível cai
-  sozinho de `PreverVidaRemovida`, que devolve ~0" — ele leria o boneco como inútil de bater. Voltando
-  ao HP cheio, a previsão segue honesta e a regra vale pras CINCO linhas, uniforme.
-- **O boneco não pode nem ATACAR de mentira.** Dar-lhe ataque 0 não basta: um golpe de dano zero ainda
-  dispara `IReageAoSerAtacado`, e a bancada passava a medir a passiva reagindo ao próprio andaime. O
-  Troll terminava 25% mais forte (a Ambição conta as pancadas do saco) e a **Parede de Tijolos do
-  Operário — que não causa dano nenhum — media 235 por uso**, que era 100% contra-ataque. Agora o
-  boneco **se cura** no turno dele (ideia do Gabriel: ação de jogo de verdade em vez de turno oco).
-  Depois disso todo número bate com a conta à mão: Porradeiro 2880 = 6 × (200 × 1,5 × 1,6), Pancada
-  560 = 200 × 1,75 × 1,6, A1 320 = 200 × 1,6.
-- **Sinergia não é "combinado − soma dos isolados".** Cada isolado gastou 100 turnos SÓ naquela
-  habilidade; somar N deles e comparar com UMA corrida de 100 turnos é laranja com maçã (dava negativo
-  pra todo mundo). O certo é **real − esperado**, com esperado = dano-por-uso isolado × ativações que
-  de fato aconteceram.
-- **Durante o cooldown o apóstolo ESPERA, não usa A1.** Se enchesse o buraco com A1, toda habilidade
-  carregaria ~75 ataques básicos junto e todas ficariam parecidas.
-
-**Validação:** o A1 mede 320 = ATK 200 × 1,60 (o `DanoCritBase`), provando que o crítico está cravado.
-E a história do Mago sai decomposta: Bola de Fogo isolada com alvo imune = 4000; com malefício = 11500
-(7500 são o tick da Queima); o apóstolo inteiro salta de 11000 pra 19750, e o ~1250 que sobra é a passiva
-Piromancer — que só rende quando OUTRA habilidade bate no alvo já queimado, e por isso o isolado nunca
-a veria.
-
-**Limitação declarada no próprio relatório:** o boneco **nunca age**, então contra-ataque, espinhos,
-revide e passivas de apanhar (Herói, Operário, Zumbi, Troll) medem ZERO. É bancada de dano CAUSADO, não
-de duelo — apóstolo com número baixo pode ser reativo, não fraco. A coluna **Usos** é diagnóstico do BOT:
-habilidade que dispara 0× no apóstolo inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
-
-Roda em ~37s dentro do `dotnet test`.
-
----
-
-## ✅ PROTEÇÃO DE ALIADO — a DEF do protetor abate o redirecionado (jul/2026)
-
-Continuação direta da seção acima: ao perguntar "qual o melhor teste pro `ProtecaoAliado`", a leitura
-achou uma **contradição entre doc e implementação**. O doc da classe dizia que os 30% iam pro aplicador
-*"(sem defesa)"*; mas o redirecionamento viaja como `NaturezasDano.DanoIndireto`, que tem
-`IgnoraDefesa: false` — ou seja, passa pela defesa E pelo escudo do protetor. **Mesmo formato do bug do
-Invencível (#151), onde o doc do buff dizia uma coisa e a impl fazia outra.**
-
-**Decisão do Gabriel: a IMPLEMENTAÇÃO é a certa** — "se o tanque tem def alta ele obviamente defende
-mais". Proteger sai mais barato pra quem aguenta, que é a fantasia do personagem que se põe na frente.
-Corrigido o DOC, fixada a regra em teste, **nenhum número do jogo mudou**. O que o PROTEGIDO desconta
-não muda com isso: são sempre os 30%, não importa quem o protege.
-
-**Por que estava invisível:** todo teste de proteção dava **def 0 ao protetor**. A regra existia e
-ninguém a exercitava.
-
-**Carona — a conta estava duplicada à mão** no `ModificarDanoRecebido` e no `PreverDanoRecebido`
-(`(int)(dano * Valor)` copiado nos dois). Virou um `Redirecionado(dano)` privado compartilhado, pelo
-mesmo motivo que fez o `OrdenarPorMitigacao` nascer no PR acima: duas cópias da mesma fórmula divergem
-caladas e o bot passa a mirar com um número que o golpe real não reproduz.
-
-**+8 testes (127 → 135):** a DEF do protetor nas 3 faixas (0 → paga 300; 500 → 187; 2000, além do cap →
-75); o protetor MORTO (único ramo dos dois métodos que ninguém exercitava — há janela real, o status só
-se autoremove na expiração do turno seguinte); e o round-trip Prever×Aplicar.
-
-**MÉTODO, de novo:** o round-trip passa hoje por construção, então ele foi **verificado sabotando** o
-`Prever` com `Math.Round` — os 4 casos novos falharam e os **outros 7 testes de proteção passaram
-tranquilos**. Isso É o furo que ele fecha: o resto da suíte usa número REDONDO (`1000 × 0,30 = 300`
-exato), então um arredondamento trocado passaria verde. Os casos novos usam parte fracionária ≥ 0,5
-(`999 × 0,30 = 299,7`).
-
----
-
-## CADA DECISÃO NA SUA CAMADA (#180, jul/2026)
-
-Com o console fora, uma auditoria do front achou 7 decisões na camada errada. A lição geral: **o
-vazamento não é teórico — ele APODRECE.** A prova foi o nome do slot do arsenal, duplicado no front
-e no `ArsenalService`, que já tinha divergido (a tela dizia "Acessório", o item que cai nela nasce
-"Manopla"); a tela mostrava um nome que o item não tem.
-
-**Front decidindo regra → devolvido ao service:**
-- `ArsenalService.NomeDoSlot(fase)` — nomeia o slot E o item que cai nele, uma tabela só (a tela
-  precisa nomear slot VAZIO, que é por isso que ela tinha a cópia). Teste trava os dois juntos.
-- `CapitulosService.FaccoesDaCampanha()` — o mapa É a lista de capítulos, na ordem. O front deduzia
-  ("todas as facções menos Humanos") e acertava por coincidência da ordem do enum.
-- `CampanhaService.PosicaoNoMapa()`/`SalvarPosicao()` — o "último lugar" é PROGRESSÃO. O front
-  gravava direto na porta de save (única gravação do jogo fora de um service), enquanto o
-  `PerfilService` já apagava a mesma chave no wipe de conta: dois donos.
-- `ArsenalService.EquiparItem` **persiste sozinho** — quando havia duas cascas, cada uma escolheu
-  sua política de quando salvar. Quem manda no dado decide quando ele é durável.
-- `PerfilService.AvatarInicial()`/`PodeUsarAvatar()` — a cara do jogador é troféu de campanha. O
-  front segue validando o clique, mas como FRONTEIRA, não como fonte da regra.
-
-**Motor decidindo pele → devolvido à tela:**
-- `Item.ValorFormatado()`/`NomeStat()` **saíram do Domain**: `:F0` e sufixo `%` são exibição. O Item
-  guarda `Valor` + `TipoStat`; cada pele escreve do seu jeito.
-- **`IApresentacao.AguardarAnimacao(Momento)`** no lugar de `(int ms)`. O motor mandava `1500` em 10
-  lugares e a pele *dividia* o número pra corrigir — sintoma de quem não devia escolher, escolhendo.
-  Agora o motor diz a BATIDA (`Tick`/`Narracao`/`Golpe`/`Preparacao`) e a pele dá a duração (todas em
-  1500 hoje, de propósito: mudou o dono, não o sentimento). **É o seam do MODO AUTOMÁTICO** — uma
-  pele que devolve ~0 e o motor não sabe de nada.
-
-**NÃO mexido, porque está certo:** a validação duplicada (front valida pra UX, back valida porque não
-confia na tela) e a `SessaoDoFront` inteira (ids, lado esquerdo/direito, o `_mostrado` que segura a
-barra de vida até o número ser narrado) — presentation pura, no lugar certo.
-
-**Dívida registrada, não paga — emoji no Domain.** `Personagem.Simbolo`, `Habilidade.Simbolo`,
-`Item.Simbolo` e `Faccoes.simbolos` são RENDER dentro do domínio de regras. Fica como está: pagar
-isso hoje custa tocar os 36 apóstolos e todas as skills por uma dor que só chega **quando os sprites
-entrarem** — aí o emoji deixa de ser "o visual" e vira "um dos visuais", e o Domain vira o lugar
-errado pra ele. Gatilho nomeado, sem data.
+A arquitetura da pele saiu daqui: a ponte de mensagens local (não é MVC nem REST), o WebView2 e o
+preço dele, o contrato de tela que é GATILHO e não desenho, e as 7 decisões que o #180 devolveu à
+camada dona — inclusive a dívida do emoji no Domain, que segue registrada e NÃO paga (o gatilho é a
+entrada dos sprites).
 
 ---
 
@@ -1058,64 +737,8 @@ design (verificar em jogo com cuidado extra), não sweep mecânico.
 
 ## C5 — padrão de reações das passivas (✅ COMPLETO)
 
-**Status:** ✅ COMPLETO. Todas as 36 passivas migradas do DeveAtivar/enum para o modelo
-de interfaces (IReageAo*), ao lado dos buffs reativos (PR-C). Strangler Fig concluído:
-nenhuma passiva usa mais o sistema velho. A Guarda foi a última (migrada pro IReageAoMorrer
-com hack provisório — ver "Estado morto" / [sistema-morte-como-estado]).
-
-**PRÓXIMO (consequência direta):** aposentar o sistema velho — agora ÓRFÃO. Remover
-ExecutarPassivasReativas, HabilidadePassiva.Revive()/MensagemSobreviveu/MensagemMorreu/
-DeveAtivar, o enum EventoCombate, DispararEvento/DispararEventoInicioDeTurno (a parte velha).
-Confirmar que tudo está sem uso antes de remover. Branch de limpeza (junto da exclusão de
-documentação/ADRs mortos).
-
-### As 36 passivas — mapa de status
-
-**JÁ MIGRADAS pro modelo de reação (17):**
-- Lado "ao ser atacado" (IReageAoSerAtacado): Zumbi, Coco, Palhaco, Cientista,
-  Mimico, Ogro, PapaiNoel, TRex, CoroaDoSoberano, Ambicao, Diabo.
-- Lado atacante: OlhoClinico, Virus (IReageAoAtacar — 1x por ataque, segue TipoAtaque);
-  Sorrateiro, Policial (IReagePorAtaque — Nx por alvo atingido).
-- Ao matar (IReageAoMatar): Fada, Vilao.
-
-**Fora do C5 — outro padrão, JÁ PRONTAS, NÃO migram (10):**
-- IPassivaInicial (aplicam buff no IniciarCombate, o buff é que reage): Fantasma,
-  Tengu, Heroi, Morcego, Sereia, Dragao, Elfo, Anjo.
-- Interface própria não-reativa (consulta direta, sem evento): Piromancer (MultExtra
-  no cálculo de dano), Vampiro (IIgnoraStatusNoAtaque no Atacar).
-
-**FALTAM migrar: NENHUMA (C5 completo).** A Guarda foi migrada pra IReageAntesDeMorrer
-(hack provisório removido — ver Passo 4 no CONCLUÍDO). O Operario perdeu o provisório
-do revide (ver "Fio do revide" no CONCLUÍDO) — hoje declara Revide igual ao ContraAtaque.
-
-### Interfaces de reação — estado
-- IReageAoSerAtacado, IReageAoReceberDano, IReageAoCausarDano — existem (PR-C).
-- IReageAoAtacar (1x por ataque, segue TipoAtaque), IReagePorAtaque (Nx por alvo),
-  IReageAoMatar — CRIADAS.
-- IReageAoMorrer (pós-morte, Necromancia), IReageAoInicioTurno (início de turno, recebe
-  ContextoCombate — Genio/BonecoDeNeve/Tengu/Elfo) — CRIADAS.
-- IReageAntesDeMorrer (pré-morte, gancho de morte-iminente) — CRIADA (Passo 4).
-
-### Dois sabores do lado atacante (decisão firmada)
-- **IReageAoAtacar** = efeito no PRÓPRIO atacante. Segue TipoAtaque: AoE = 1x, Sequencial
-  = por hit. Lado a lado com ProcessarPassivasAtacante. [OlhoClinico, Virus]
-- **IReagePorAtaque** = efeito POR ALVO atingido. Nx sempre. Dentro do foreach. [Sorrateiro,
-  Policial]
-ProcessarReacoesAtacante dividido em PorAlvo (dentro do foreach) e PorAtaque (segue
-TipoAtaque). Ver "Dívidas" — a repetição do loop vira helper ColetarReacoes<T>.
-
-### Ordem crítica preservada (morte/revive)
-**ATUALIZADO (jul/2026 — fix do bug do Guarda):** prevent-death (`IPrevineMorte`, no `ConfirmarMorte`
-dentro do `ReceberDano`) → IReageAoMatar (Vilao) → IReageAoMorrer (Necromancia). O Guarda **EVITA a
-morte** (não reverte): consultado como CAPACIDADE no instante do golpe fatal, o portador segue Vivo
-**com os status intactos** (nunca vira Morto). Se não previne, o Vilão bloqueia o revive antes da
-Necromância tentar. **Bug corrigido:** antes o Guarda usava `AplicarRevive` (Vivo novo) e perdia todos
-os debuffs/buffs; `IReageAntesDeMorrer` (só o Guarda implementava) foi REMOVIDA junto — código morto.
-Ver ADR-estado-de-vida-e-atos §11.
-
-### Aposentar o sistema velho
-DeveAtivar/Ativar virtual e o enum EventoCombate só saem quando a ÚLTIMA passiva migrar.
-
+As 36 passivas migradas pro modelo de interfaces `IReageAo*`, sistema velho aposentado. A ordem
+crítica de morte e os dois sabores do lado atacante estão em `docs/MANUAL-combate.md`.
 ---
 
 ## Buff-permanente vs passiva-pura vs buff-não-removível (FIO NOVO — descoberto ao migrar início-de-turno)
@@ -1179,86 +802,14 @@ explicar ("aparou", "imune", "reduziu de X pra Y").
 
 ## EventoDano — o registro rico do golpe (✅ FATIA 1 + FATIA 2 FEITAS)
 
-**Status:** ✅ COMPLETO. O EventoDano existe e é produzido pelo combate; o ContextoReacao já
-foi enriquecido (FoiCritico, Aliados, Inimigos). Só falta a passiva-conta-mortos (1b) como
-cliente futuro do contexto rico (seção própria).
-
-**O que é:** o tipo canônico que descreve um golpe — o "Model do golpe" que a apresentação
-consome (console hoje, **Unity amanhã**). Convergiu o antigo ResultadoAtaque.
-
-**Propósito B (decisão de Gabriel):** investir cedo na fundação de exibição, não só na lógica.
-No porte **Unity**, o EventoDano é a linguagem entre a lógica (calcula) e a apresentação
-(desenha) — a camada de eventos consome uma stream de EventoDano e a transforma em animação
-(UnityEvents/coroutines). Mesmo princípio das reações (declaram, o orquestrador exibe), levado
-ao combate inteiro. Aceito refatorar depois. (Ver `EventoDano por ID` na FILA B.)
-
-### Fatia 1 — FEITA (record + produção)
-- **EventoDano** (record em Combate.cs): Atacante, Alvo, DanoBruto, DanoEfetivo,
-  AbsorvidoPeloEscudo, Critico, HPRestante, Natureza. Renomeou ResultadoAtaque; campo Dano
-  virou DanoEfetivo. Rename propagou pra habilidades, ResultadoReacao.Dano e exibição.
-- **ReceberDano** retorna (Efetivo, AbsorvidoPeloEscudo) em vez de int. Captura o
-  escudo-absorvido medindo antes/depois de cada modificador (sem tocar a classe Escudo).
-- **Atacar** monta o EventoDano com bruto + efetivo/absorvido + crítico.
-- **RefletirDano** ajustado (desestrutura a tupla, monta EventoDano).
-- Descartado conscientemente: "aparado pela defesa" (nunca tem cliente). DanoBruto e
-  AbsorvidoPeloEscudo entram pela exibição/porte (Propósito B), sem efeito que REAJA a eles hoje.
-
-### Fatia 2 — FEITA (enriquecer o ContextoReacao)
-O ContextoReacao era magro (Portador, Contraparte, DanoCausado, Natureza). A Fatia 2 levou pras
-reações a visão de times que o ContextoCombate já dava pras habilidades:
-- ContextoReacao ganhou: **FoiCritico** (de r.Critico), **Aliados**, **Inimigos** (do Portador).
-- Os métodos de reação (ProcessarReacoesAlvo e afins) recebem os times (que o CombateService já
-  calcula nos call sites) e montam o contexto rico. Aliados/Inimigos = do PORTADOR (inverte no
-  lado do alvo, como ProcessarPassivasAlvo já faz; não inverte no lado atacante).
-- **Robo** (lê ctx.Aliados, cura o de menor HP) e **Sushiman** (lê ctx.Aliados + ctx.FoiCritico,
-  reflexo a todos) migrados. Destravou também a **passiva-conta-mortos** (ver seção, ainda não
-  implementada).
-ContextoReacao atual: (Portador, Contraparte, DanoCausado, Natureza, FoiCritico, Aliados, Inimigos).
-
-### Os 3 contextos — não confundir (esclarecido)
-- **ContextoCombate** (Atacante, Aliados, Inimigos) — das HABILIDADES.
-- **ContextoReacao** (Portador, Contraparte, ...) — das REAÇÕES. Enriquecido na Fatia 2.
-- **EventoDano** — descreve o GOLPE (não é contexto de quem reage).
+O record do golpe existe e o `ContextoReacao` já é rico (FoiCritico, Aliados, Inimigos). A distinção
+dos 3 contextos está em `docs/MANUAL-combate.md`; o `EventoDano` por ID segue na FILA B.
 
 ---
 
-## Unificar os 3 mecanismos de ignorar status (✅ CONCLUÍDO — jul/2026)
+## Unificar os 3 mecanismos de ignorar status — ✅ CONCLUÍDO (jul/2026)
 
-**Status:** ✅ FEITO. Uma língua só de ignorar; o `DeveAgir` morreu.
-
-**A descoberta (original):** "ignorar um status" tinha TRÊS caminhos sem padrão único:
-1. **Por natureza** — flags no NaturezaDano (IgnoraEscudo, IgnoraBloqueio, IgnoraDefesa).
-2. **Por lista na chamada** — `ignorarStatus: Type[]` (PóMágico, CorteDeVento, Vendaval).
-3. **Por passiva permanente** — `IIgnoraStatusNoAtaque` (Drenagem/Vampiro), unida no Atacar.
-
-A inconsistência: a MESMA coisa (furar Escudo) podia ser natureza (Queima) OU lista (CorteDeVento),
-sem critério — o "monte de ignorar que ninguém sabia qual usar".
-
-### A resolução — a natureza passou a falar a língua da LISTA
-- `NaturezaDano` trocou os bools de STATUS (`IgnoraEscudo`/`IgnoraBloqueio`) por
-  `Ignora: IReadOnlyCollection<Type>` (default `[]`, molde da Drenagem). `IgnoraDefesa` FICOU bool
-  (defesa é STAT, não status). `NaturezasDano.Direto` foi DELETADO (zero clientes + doc mentirosa).
-- Perfis: QueimaDano `Ignora = [Escudo, ProtecaoAliado]`; Veneno/DanoIndireto `= [ProtecaoAliado]`;
-  Ataque `= []`.
-- `IModificaDanoRecebido.DeveAgir` **DELETADO** (interface + as 6 implementações). O ReceberDano
-  agora tem **1 gate só**: `ignorados` = natureza.Ignora ∪ golpe ∪ apóstolo; o status pergunta "fui
-  listado?". Nenhum número de dano mudou (tradução flag→lista fiel; provada por 5 testes de paridade).
-- **Anti-StackOverflow de proteção mútua agora ESTRUTURAL:** `DanoIndireto.Ignora ∋ ProtecaoAliado`
-  → o redirect (que usa DanoIndireto) não re-redireciona. Numa linha, sem depender de disciplina de
-  perfil. (Era o `DeveAgir => Reacao != Nenhuma`.)
-
-### Critério de autoria (o produto pro usuário — no CATALOGO)
-De quem é a perfuração? essência do dano → perfil de `NaturezaDano`; só o golpe → `ignorarStatus`
-no `Dano`; o apóstolo sempre → passiva `IIgnoraStatusNoAtaque`; % do stat DEF → `ignorarDefesaPct`.
-
-### Resíduo — ✅ FEITO (PR limpeza-e-robustez pós-sweep, jul/2026)
-- **Defesa montada limpa:** a etapa 1 do ReceberDano agora monta `defesaEfetiva = DefesaComStacks +
-  soma dos IContribuiDefesa NÃO-ignorados`, em vez de somar tudo (getter `Defesa`) e descontar os
-  ignorados. Paridade exata (ContribuicaoDefesa já vem com sinal: BuffDefesa +, ReducaoDefesa −).
-  Teste novo cobriu o buraco (nenhum teste exercitava a etapa 1 com ignore): def 400 + BuffDefesa
-  furado = 700 de dano vs 550 sem furar.
-- **ATENÇÃO (resolvido):** IContribuiDefesa não era "mina dual-source" (usa tipos concretos; passivas
-  não entram na lista `ignorados`) — a montagem-limpa lidou com isso sem varrer passivas.
+A regra que ficou está em `docs/MANUAL-combate.md`.
 
 ---
 

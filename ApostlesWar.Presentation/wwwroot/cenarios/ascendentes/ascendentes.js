@@ -67,9 +67,8 @@ export const ar = {
     janela: {
         x: .5, y: .42, largura: .32, altura: .46,
         colunas: 2, linhas: 1,
-        // O CÉU é o mesmo gradiente de seis paradas que era do CSS na pele externa: escuro no alto
-        // e clareando pra baixo, sem estrela e sem lua. Ele ficou porque foi a única coisa que o
-        // Gabriel aprovou nas três rodadas — só passou a ser visto por um buraco na parede.
+        // O CÉU é o mesmo gradiente de seis paradas da pele externa: escuro no alto e clareando pra
+        // baixo, sem estrela e sem lua — aqui ele só passa a ser visto por um buraco na parede.
         ceu: ['#0b1020', '#141c33', '#222c49', '#38416a', '#55608c', '#6d789f'],
         clarao: '246, 204, 132',
         neve: '#a9b7d4', neveSombra: '#8b9cbb',
@@ -180,8 +179,7 @@ export const ar = {
 /// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
 ///
 /// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
-/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
-/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+/// prontas.
 export function montar({ fundo, frente, maestro }) {
     // O QUINTO dado compartilhado, e o primeiro que é um ROTEIRO: a noite de Natal dos ❄️ Ascendentes.
     // Um escritor só (o `criarRoteiroDaNoite`, que não desenha nada) e quatro leitores espalhados pela

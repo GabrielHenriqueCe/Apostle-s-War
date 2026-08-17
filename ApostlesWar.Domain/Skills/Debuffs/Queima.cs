@@ -52,9 +52,8 @@ namespace ApostlesWar.Domain.Skills.Debuffs
             int valor = (int)(portador.HPMaximoInicial * DanoPorTurno);
             // Dano à vida: ignora defesa e escudo, mas BloquearDano ainda bloqueia.
             var (efetivo, absorvido) = portador.ReceberDano(valor, NaturezasDano.QueimaDano);
-            // (a ReduzirHPMaximo abaixo continua igual — ignora tudo)
 
-            // Redução só se cap próprio não foi atingido
+            // A redução de HP máximo abaixo ignora tudo — e só entra se o cap próprio não estourou.
             int capAbsoluto = (int)(portador.HPMaximoInicial * CapPropio);
             int aindaPodeReduzir = capAbsoluto - portador.HPMaximoReduzidoTotal;
 
@@ -74,11 +73,6 @@ namespace ApostlesWar.Domain.Skills.Debuffs
         }
 
         /// <summary>
-        /// IStatusComTick: aplica imediatamente todo o efeito remanescente FAZENDO O QUE A
-        /// QUEIMA FAZ (dano + redução de HP máximo, respeitando o cap próprio), remove a Queima
-        /// e devolve o EventoDano da detonação. Dano = stacks × 5% HPMaximoInicial.
-        /// </summary>
-        /// <summary>
         /// Só a parcela que sai da VIDA. A redução de HP máximo que a detonação também causa não
         /// entra: ela encolhe o teto, não tira vida agora — e é vida agora que decide o alvo.
         /// </summary>
@@ -87,6 +81,11 @@ namespace ApostlesWar.Domain.Skills.Debuffs
                 portador.PreverDanoRecebido(
                     (int)(portador.HPMaximoInicial * DanoPorTurno * Stacks), NaturezasDano.QueimaDano));
 
+        /// <summary>
+        /// IStatusComTick: aplica imediatamente todo o efeito remanescente FAZENDO O QUE A
+        /// QUEIMA FAZ (dano + redução de HP máximo, respeitando o cap próprio), remove a Queima
+        /// e devolve o EventoDano da detonação. Dano = stacks × 5% HPMaximoInicial.
+        /// </summary>
         public EventoDano Detonar(Combate portador, Combate detonador)
         {
             int bruto = (int)(portador.HPMaximoInicial * DanoPorTurno * Stacks);

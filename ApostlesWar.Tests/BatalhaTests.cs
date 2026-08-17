@@ -3,7 +3,7 @@ using ApostlesWar.Domain;
 namespace Tests
 {
     /// <summary>
-    /// Testes da estrutura de Batalha/Equipe (FILA A #11 Fatia C). O "um só caminho" de perspectiva:
+    /// Testes da estrutura de Batalha/Equipe. O "um só caminho" de perspectiva:
     /// PerspectivaDe(portador) deriva aliados/inimigos da ESTRUTURA (qual equipe), não do tipo. Puro/headless.
     /// </summary>
     public class BatalhaTests

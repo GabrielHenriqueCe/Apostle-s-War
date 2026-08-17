@@ -7,8 +7,8 @@ using ApostlesWar.Domain;
 /// modificadores do atacante são dobrados sozinhos (varrendo Habilidades + StatusAtivos).
 ///
 /// Forma MULTIPLICADOR (1.0 = neutro): dobra ANTES do único (int) do Atacar, então a passiva
-/// não muda os números das habilidades (paridade exata com o antigo fiado-à-mão). É o molde
-/// pra passivas futuras "causa X% mais dano se o alvo tem Y".
+/// não mexe nos números declarados pelas habilidades. É o molde pra passivas futuras
+/// "causa X% mais dano se o alvo tem Y".
 /// Implementadores: Piromancer (25% a mais contra alvo com Queima).
 /// </summary>
 public interface IModificaDanoCausado

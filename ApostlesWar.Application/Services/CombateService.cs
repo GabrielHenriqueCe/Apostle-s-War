@@ -482,7 +482,7 @@ namespace ApostlesWar.Application.Services
         /// respeitando o cooldown (passivas têm Cooldowns; buffs/status não). Consome o
         /// cooldown ao coletar — a passiva "usou" sua reação neste disparo. Passivas com
         /// cooldown 0 (a maioria das reativas) estão sempre disponíveis.
-        /// ATENÇÃO (contrato, auditoria jul/2026): o consumo acontece AO COLETAR, antes de
+        /// ATENÇÃO (contrato): o consumo acontece AO COLETAR, antes de
         /// saber se a passiva vai agir. Com cooldown 0 é inofensivo; ao criar passiva
         /// reativa com cooldown E condição interna, mover o consumo pra depois da decisão.
         /// </summary>
@@ -668,8 +668,8 @@ namespace ApostlesWar.Application.Services
 
             var batalha = new Batalha(new Equipe(jogador), new Equipe(inimigo));
 
-            // Mostra o board da rodada ANTES de lutar. No console é um redraw a mais (inofensivo); no
-            // front é o que troca o board pros inimigos NOVOS (senão a rodada 2 mostraria os da 1 mortos).
+            // Mostra o board da rodada ANTES de lutar: é o que troca o board pros inimigos NOVOS
+            // (sem isto a rodada 2 mostraria os da 1, mortos).
             _tela.ExibirPartida(jogador, inimigo);
 
             // Campanha: Equipe1 (jogador) = humano, Equipe2 (inimigos) = bot. No Versus, o ponto de
@@ -709,7 +709,7 @@ namespace ApostlesWar.Application.Services
             };
 
             // Arena é PVP: a tela fixa os lados na ordem montada (equipe1=esquerda, equipe2=direita),
-            // não importa quem controla. No console é no-op.
+            // não importa quem controla.
             _tela.ExibirInicioArena(equipe1.Membros, equipe2.Membros);
 
             try

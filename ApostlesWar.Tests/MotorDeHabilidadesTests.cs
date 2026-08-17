@@ -251,7 +251,7 @@ namespace Tests
             Assert.Equal(5000, inimigo2.HPAtual);
         }
 
-        // ---------- Prevent-death (Guarda) — fix do bug: sobreviver preserva os status ----------
+        // ---------- Prevent-death (Guarda) — sobreviver preserva os status ----------
 
         [Fact]
         public void GuardaReal_EvitaAMorte_MantendoOsStatus()
@@ -590,7 +590,7 @@ namespace Tests
             var alvo = Novo(hp: 2000);
             new Escudo(500, duracao: 2).Aplicar(alvo);
 
-            // QueimaDano.Ignora ∋ Escudo → o escudo é pulado (era DeveAgir => !IgnoraEscudo).
+            // QueimaDano.Ignora ∋ Escudo → o escudo é pulado.
             var (efetivo, absorvido) = alvo.ReceberDano(300, NaturezasDano.QueimaDano);
 
             Assert.Equal(0, absorvido);                              // escudo furado
@@ -618,8 +618,8 @@ namespace Tests
             var portador = Novo(hp: 2000);
             new ProtecaoAliado(aplicador, duracao: 2, percentual: 0.30).Aplicar(portador);
 
-            // Todo dano sem reação (Veneno/Queima/DanoIndireto) lista ProtecaoAliado → NÃO redireciona
-            // (era DeveAgir => Reacao != Nenhuma). O portador toma tudo, o aplicador não recebe nada.
+            // Todo dano sem reação (Veneno/Queima/DanoIndireto) lista ProtecaoAliado → NÃO
+            // redireciona. O portador toma tudo, o aplicador não recebe nada.
             portador.ReceberDano(1000, NaturezasDano.Veneno);
 
             Assert.Equal(2000, aplicador.HPAtual);          // nada redirecionado
@@ -694,7 +694,7 @@ namespace Tests
             Assert.Equal(925, efFurado);   // buff furado → def 400 → 7,4% de redução
         }
 
-        // ---------- Contrato da semente do ResolverAlvos (FILA A #14) ----------
+        // ---------- Contrato da semente do ResolverAlvos ----------
         //
         // A semente (o alvo escolhido no menu/bot) TEM que ser um dos candidatos — já filtrada pelo
         // mesmo EstadoAlvo que a habilidade declara. Violar isso colocava a semente inválida no

@@ -234,9 +234,8 @@ namespace ApostlesWar.Presentation.Front
 
     /// <summary>
     /// O fim de uma fase — vitória e derrota na MESMA tela, porque a pergunta que vem depois das duas
-    /// é a mesma: e agora? Antes eram duas telas que só sabiam dizer "clique pra continuar", e
-    /// continuar significava voltar pra lista de fases mesmo quando o jogador só queria tentar de
-    /// novo com o mesmo time.
+    /// é a mesma: e agora? Daí as opções serem do fim da fase, e não um "clique pra continuar" que
+    /// só sabe devolver o jogador pra lista.
     ///
     /// <see cref="ComOpcoes"/> false = é a passagem da recompensa (o item em destaque, os apóstolos
     /// novos a caminho), que pede um clique e segue pras conquistas; true = é a tela de decisão.

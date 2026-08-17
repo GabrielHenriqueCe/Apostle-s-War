@@ -14,69 +14,54 @@
 
 ## Onde paramos (17/ago/2026)
 
-**Branch `docs/arrumacao-de-contexto`, 7 commits, working tree limpo. NÃO mergeada — o PR é do
-Gabriel.** A sessão não tocou regra de jogo: foi a arrumação dos documentos inteira, os 4 passos do
-plano `~/.claude/plans/o-ctx-apenas-dando-pure-pearl.md`, que agora está **cumprido**.
+**DUAS branches empilhadas, nenhuma mergeada — e a ordem importa:**
 
-**O que mudou de tamanho:**
+1. **`docs/arrumacao-de-contexto`** (7 commits) — a arrumação dos documentos. **O PR não foi aberto**;
+   o Gabriel disse que estava com problema no git.
+2. **`chore/faxina-de-comentarios`** (7 commits) — sai de CIMA da 1ª, de propósito e a pedido dele:
+   assim, quando a de baixo mergear, esta não conflita. **Mergear na ordem.**
 
-| | antes | depois |
-|---|---:|---:|
-| `ROADMAP-refatoracao.md` | 2.849 l (~63k tok) | **936 l (~20k)** |
-| `GDD-progressao.md` | 1.715 l | **476 l** (+ combate 584 + itens 715) |
-| `CLAUDE.md` | 253 l | **137 l** |
-| memória (maior arquivo) | 9,3 KB | **< 4 KB** |
+Empilhar branch contraria o *"uma branch por vez"* do `CLAUDE.md`. Foi decisão dele, com motivo dito.
 
-**Os documentos novos:** `MANUAL-cenario.md` (como se faz uma pele) · `MANUAL-combate.md` (as regras
-vivas do motor) · `MANUAL-front.md` (a ponte, o contrato de tela, as camadas) · `GDD-combate.md`
-(§1+§2) · `GDD-itens.md` (§4). Mais **quatro skills** em `.claude/skills/` — cenario, front, combate,
-progressao — que carregam o manual do assunto **pela tarefa**, em vez de por eu lembrar de ler.
+## A faxina de comentários (#15) — FEITA, as duas metades
 
-**A regra que guiou os três cortes do ROADMAP:** pendente fica na fila · **referência viva** vai pro
-doc do assunto · **histórico sai** (o `git log` guarda melhor). Cortar por `✅ feito` × `pendente`
-teria perdido as armadilhas, que nasceram de itens já feitos.
+O front já fora fechado pela medição; **o C# nunca tinha sido faxinado**. Agora foi: 239 arquivos
+medidos, **59 tocados**, 7 commits por camada, `dotnet build` limpo e **198 testes verdes** o tempo
+todo. O resultado por categoria está no `ROADMAP-refatoracao.md` §Faxina — não se repete aqui.
 
-## O que fica pendente desta arrumação
+**O que a próxima sessão precisa não reabrir:**
 
-1. **O PR.** Sete commits esperando o Gabriel abrir e mergear.
-2. **A prova do passo 4 é a PRÓXIMA sessão:** abrir com "oi" e comparar a % de contexto com os 28%
-   que dispararam tudo isto.
-3. **A faxina de comentários (#15) segue aberta** e agora sem desculpa: o `jogo.js` já foi separado,
-   que era o pré-requisito que o próprio Gabriel pôs na frente dela.
+- **O número "138 linhas de narração histórica" era INFLADO.** O filtro conta `morto/morreu`, que
+  neste jogo é vocabulário do DOMÍNIO (`EstadoAlvo.Mortos`, o estado `Morto`, a família do revive).
+  Com marcadores fortes só, o estoque real era **36 no C# e 41 no `wwwroot`**.
+- **`nucleo/` e `ui/` não perderam uma linha**, e as ~28 linhas restantes nos cenários FICAM: são
+  mina (a esfera violeta do Reino some se virar azul) ou âncora de número (o "58% do vão").
+- **O saldo é ~zero linha** (215 inserções contra 214 remoções) e isso é o esperado: o trabalho foi
+  reescrever no PRESENTE o que estava no passado, não apagar.
 
-## O trabalho de JOGO, que volta a valer agora
+## Pendências
 
-A ordem do `GDD-progressao.md` §7 não é negociável: **nível (curva do tipo) + raridade** → **raridade
-→ passiva que escala** → **item equipado**. Menores em aberto: o `chance de aplicar: 75%` ao mirar, o
-**empurrão de medidor** como efeito, a **pele da Arena** (item 20 da FILA A) e a **9ª pele, Humanos**
-(item 21, bloqueada até o fundo de facção no compêndio). A dívida do
-`docs/RELEITURA-backend-pendente.md` continua de pé.
-
-## Decisões desta sessão que NÃO se reabrem
-
-- **Instrução de assunto chega por SKILL, não por ponteiro no `CLAUDE.md`.** Ponteiro põe em mim a
-  decisão de ler, e ela já falhou. Mesmo princípio das duas injeções do front: quem sabe ENTREGA.
-- **O §Revogado do GDD ficou** (o plano mandava apagar). A forma dele parece história, mas a função é
-  impedir que decisão morta seja reaberta — corta-se a moral, nunca o fato e a consequência.
-- **A numeração dos §s do GDD ficou FURADA de propósito** (§1 §2 num arquivo, §3 §5 §6 §7 noutro, §4
-  no terceiro). Renumerar quebraria dezenas de referências cruzadas, cada uma em silêncio. No lugar,
-  os três arquivos abrem com a mesma bússola dizendo qual § mora onde.
-- **Mapa de código escrito à mão não se mantém** — o mapa das 36 passivas por interface saiu do
-  ROADMAP porque envelhece MENTINDO, e o código responde por `grep`.
+1. **Os dois PRs**, na ordem acima.
+2. **O trabalho de JOGO volta a valer** — `GDD-progressao.md` §7, na ordem: **nível (curva do tipo) +
+   raridade** → **raridade → passiva que escala** → **item equipado**. Menores: o `chance de aplicar:
+   75%` ao mirar, o **empurrão de medidor**, a **pele da Arena** (FILA A #20) e a **9ª pele, Humanos**
+   (#21, bloqueada até o fundo de facção no compêndio). A dívida do
+   `docs/RELEITURA-backend-pendente.md` segue de pé.
 
 ## Armadilhas que morderam nesta sessão (não repetir)
 
-- **Ponteiro quebrado não dá erro nenhum**, e quatro deles estavam em CÓDIGO (`FilaDeTurnos.cs`,
-  `Enums.cs`, `Arquetipos.cs`, `FilaDeTurnosTests.cs` citavam "GDD-progressao §1/§2"). Ao mover
-  qualquer seção, o `grep` pelos ponteiros vai no MESMO commit.
-- **A ferramenta `Write` grava LF puro**, e este repo é CRLF na cópia de trabalho — deu **1 LF puro**
-  no `CLAUDE.md`, que é exatamente a mistura que já grudou um `else if` num comentário. Conferir
-  sempre: `(match /\n/) − (match /\r\n/)` tem de dar 0.
-- **`python` não existe nesta máquina** (só o stub da Microsoft Store). Script de apoio é `node`.
-- **O `cd` do Bash PERSISTE entre chamadas** — um `cd docs` deixou o `git add docs/CONTEXTO.md`
-  falhando por caminho duplicado.
-- **`dotnet test` reescreve o `docs/bancada-dano.md`**, e cinco linhas OSCILAM entre corridas (é
-  comportamento, ver #235). Depois de rodar a suíte sem mexer em número, `git checkout --` nele.
+- **Carregar a skill `claude-api` custa ~100k tokens** — uma pergunta sobre preço comeu 20% da janela
+  de 5 horas. Ela é o caminho certo quando a resposta precisa de número exato, mas é decisão cara e
+  dá pra prever antes.
+- **A ferramenta `Edit` grava LF puro em arquivo CRLF**, e o `-replace` do PowerShell reescreve o
+  arquivo INTEIRO em LF. O `git diff --numstat` denuncia (arquivo todo alterado em vez de 2 linhas);
+  a conferência é `(match /\n/) − (match /\r\n/) == 0`, e vale rodar em TODOS os tocados antes de
+  commitar.
+- **Comentário pode estar no MEMBRO ERRADO** — dois `<summary>` empilhados deixavam o vizinho sem doc
+  e descreviam o método errado (`Queima.Detonar`, um teste do bot). Acha-se por grep:
+  `</summary>` seguido de `<summary>`.
+- **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas OSCILAM entre corridas. Depois
+  de rodar a suíte sem mexer em número: `git checkout -- docs/bancada-dano.md`.
 
 ## O que o Gabriel confere, sempre
 

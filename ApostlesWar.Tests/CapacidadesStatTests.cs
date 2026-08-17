@@ -8,7 +8,7 @@ namespace Tests
     /// Testes da Capacidade C (contribuição de stat via IContribui*). Cada stat
     /// (Ataque/Defesa/TaxaCrit/DanoCrit) calcula buff/debuff somando a INTERFACE de
     /// contribuição com sinal — não por tipo concreto. Provado aqui pelo movimento dos
-    /// getters, que são puros (sem Console → headless-safe).
+    /// getters, que são puros: não tocam na tela, logo rodam headless.
     ///
     /// AtaqueComStacks = 200 e DefesaComStacks = 100 nos combatentes de teste (Jogador,
     /// multiplicador 1.0, sem itens). TaxaCrit base = 0.15, DanoCrit base = 0.60

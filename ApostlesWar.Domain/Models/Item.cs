@@ -50,8 +50,8 @@
         }
 
         // COMO o valor é ESCRITO na tela ("5%" vs "0,05", o rótulo "Dano Crit") não mora aqui: o Item
-        // guarda o número e o tipo, e cada pele decide a apresentação. Havia um `ValorFormatado()` e um
-        // `NomeStat()` neste arquivo — formatação com `:F0` e sufixo `%` dentro do domínio de regras.
+        // guarda o número e o tipo, e cada pele decide a apresentação. Formatar aqui dentro põe `:F0`
+        // e sufixo `%` no domínio de regras.
     }
 
     #endregion

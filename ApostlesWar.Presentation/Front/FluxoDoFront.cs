@@ -148,9 +148,9 @@ namespace ApostlesWar.Presentation.Front
                     new("Arsenal",      "🎒", Habilitado: true),
                     new("Compêndio",    "📖", Habilitado: true),
                     new("Configurações", "⚙️", Habilitado: true),
-                    // Não há opção "Sair" na lista: quem sai do jogo é o 🚪 do canto superior direito,
-                    // o mesmo botão de todas as outras telas. Duas portas pro mesmo lugar, uma delas
-                    // só no menu, era exatamente o que a padronização veio desfazer.
+                    // Não há opção "Sair" na lista: quem sai do jogo é o 🚪 do canto superior
+                    // direito, o mesmo botão de todas as outras telas. Duas portas pro mesmo lugar,
+                    // uma delas só aqui, é o que a padronização desfez.
                 },
                 Raiz: true,
                 Avatar: perfil?.Avatar,
@@ -726,7 +726,7 @@ namespace ApostlesWar.Presentation.Front
             apostolo.Tipo.Descricao(), apostolo.Nivel,
             apostolo.HP, apostolo.Ataque, apostolo.Defesa,
             apostolo.Velocidade, apostolo.Precisao, apostolo.Resistencia,
-            // O crit passou a vir do TIPO (o Combatente é o dono dos dois), então sai do apóstolo.
+            // O crit vem do TIPO (o Combatente é dono dos dois), não do apóstolo.
             (int)(apostolo.TaxaCrit * 100), (int)(apostolo.DanoCrit * 100),
             // Sem dono: fora da luta não há turno correndo, então o cooldown é o DECLARADO — que é
             // justamente o que se compara entre apóstolos num catálogo. Ver VistaDeHabilidade.

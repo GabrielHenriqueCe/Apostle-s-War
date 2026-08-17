@@ -8,15 +8,14 @@ namespace ApostlesWar.Application.Services
     /// <summary>
     /// O META da campanha, FORA da luta: carregar os saves e processar a recompensa da vitória
     /// (desbloqueios + drop + save). Não desenha nada — devolve o resultado, e a casca (o FluxoDoFront)
-    /// mostra do seu jeito. Nasceu porque HAVIA duas cascas duplicando isto; a lição sobrevive à
-    /// segunda: a lógica meta mora na Application, nunca no front.
+    /// mostra do seu jeito: a lógica meta mora na Application, nunca no front.
     /// </summary>
     public class CampanhaService
     {
         // ONDE O JOGADOR PAROU — capítulo, fase e time. Mora aqui e não no front porque "onde eu
         // estava" é PROGRESSÃO, não estado de tela: some junto com a conta (o ResetarProgresso apaga
-        // esta chave) e sobrevive a fechar o jogo. Enquanto o front gravava direto na porta, esta
-        // chave tinha dois donos — um que a escrevia e outro que a apagava.
+        // esta chave) e sobrevive a fechar o jogo. O front NÃO grava direto na porta: dois donos
+        // pra esta chave é um que escreve e outro que apaga.
         private const string ChaveOndeParou = "campanha";
 
         private readonly ArsenalService _arsenal;

@@ -118,6 +118,11 @@ namespace Tests
             Assert.Same(limpar, Bot().EscolherAcao(bot, new() { bot, aliado }, new() { inimigo }));
         }
 
+        /// <summary>
+        /// A explosão só ganha do ataque básico se detonar MAIS vida que ele — e o bot compara os
+        /// dois números de verdade. Como o veneno é % do HP máximo, um alvo grande com vários stacks
+        /// vale muito mais que o A1; com 1 stack num alvo pequeno, bater é a escolha certa.
+        /// </summary>
         [Fact]
         public void NaoExplode_SemOStatusDetonavel()
         {
@@ -129,14 +134,8 @@ namespace Tests
         }
 
         /// <summary>
-        /// A explosão só ganha do ataque básico se detonar MAIS vida que ele — e o bot compara os
-        /// dois números de verdade. Como o veneno é % do HP máximo, um alvo grande com vários stacks
-        /// vale muito mais que o A1; foi assim que este teste pegou o bot preferindo bater quando o
-        /// veneno era 1 stack num alvo pequeno (ele estava certo, o teste é que pedia a coisa errada).
-        /// </summary>
-        /// <summary>
-        /// A pergunta do Gabriel: se a habilidade de explosão faz MAIS coisas, o bot ainda prefere o
-        /// A1? Não — e as duas explosões reais do jogo ganham por motivos diferentes.
+        /// Se a habilidade de explosão faz MAIS coisas, o bot ainda prefere o A1? Não — e as duas
+        /// explosões reais do jogo ganham por motivos diferentes.
         ///
         /// Putrefação (Zumbi) = Dano + Explodir + Cura, em ÁREA: mesmo sem veneno no campo (explosão
         /// prevendo 0) e com o time inteiro (cura sem serventia), ela empata com o A1 em "Ferir" e

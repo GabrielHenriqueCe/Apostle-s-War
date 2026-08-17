@@ -17,7 +17,7 @@ namespace ApostlesWar.Application.Controllers
     /// O alvo nunca fura a fila: se a prioridade manda curar, cura, mesmo com um abate na mesa.
     ///
     /// Por que o cérebro não sabe o que é "um Dano" ou "uma Cura": porque perguntar `is Dano` seria
-    /// reabrir o dispatch por tipo concreto que o modelo de capacidades fechou (#9). Ação nova
+    /// reabrir o dispatch por tipo concreto que o modelo de capacidades fechou. Ação nova
     /// classifica a si mesma e o cérebro continua igual — inclusive as bespoke dos apóstolos.
     /// </summary>
     public class ControladorBot : IControladorDeTurno

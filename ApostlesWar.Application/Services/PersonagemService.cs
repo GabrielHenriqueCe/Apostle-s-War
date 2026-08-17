@@ -20,61 +20,64 @@ namespace ApostlesWar.Application.Services
     {
         #region Personagem
 
+        // O ROSTER, agrupado por facção na ordem da campanha. Cada apóstolo é um arquivo em
+        // Apostolos/<Faccao>/, e o `Definir()` dele é a view: quem mexe num apóstolo mexe lá, não
+        // aqui — esta lista só diz quem existe e em que ordem.
         List<Personagem> personagens = new List<Personagem>
         {
-            // Humanos — facção migrada pra forma final (Apostolos/Humanos/), cada arquivo é a view.
+            // Humanos
             Operario.Definir(),
             Detetive.Definir(),
             Policial.Definir(),
             Sushiman.Definir(),
 
 
-            // O Reino — facção migrada pra forma final (Apostolos/Reino/), cada arquivo é a view.
+            // O Reino
             Guarda.Definir(),
             Ninja.Definir(),
             Mago.Definir(),
             Rei.Definir(),
 
 
-            // Lado Sombrio — facção migrada pra forma final (Apostolos/LadoSombrio/), cada arquivo é a view.
+            // Lado Sombrio
             Caveira.Definir(),
             Fantasma.Definir(),
             Abobora.Definir(),
             Zumbi.Definir(),
 
-            // Tecnológicos — facção migrada pra forma final (Apostolos/Tecnologicos/), cada arquivo é a view.
+            // Tecnológicos
             Invasor.Definir(),
             Alien.Definir(),
             Robo.Definir(),
             Cientista.Definir(),
 
-            // Folclore — facção migrada pra forma final (Apostolos/Folclore/), cada arquivo é a view.
+            // Folclore
             Ogro.Definir(),
             Tengu.Definir(),
             Palhaco.Definir(),
             Troll.Definir(),
  
 
-            // Místicos — facção migrada pra forma final (Apostolos/Misticos/), cada arquivo é a view.
+            // Místicos
             Genio.Definir(),
             Sereia.Definir(),
             Fada.Definir(),
             Dragao.Definir(),
 
-            // Especial — facção migrada pra forma final (Apostolos/Especial/), cada arquivo é a view.
+            // Especial
             Coco.Definir(),
             Heroi.Definir(),
             Vilao.Definir(),
             TRex.Definir(),
 
-            // Decaídos — facção migrada pra forma final (Apostolos/Decaidos/), cada arquivo é a view.
+            // Decaídos
             Morcego.Definir(),
             Vampiro.Definir(),
             Elfo.Definir(),
             Diabo.Definir(),
 
 
-            // Ascendentes — facção migrada pra forma final (Apostolos/Ascendentes/), cada arquivo é a view.
+            // Ascendentes
             BonecoDeNeve.Definir(),
             Mimico.Definir(),
             Anjo.Definir(),

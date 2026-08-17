@@ -71,8 +71,7 @@ namespace ApostlesWar.Domain
     /// Vivos: maioria (ataques, curas, buffs). Mortos: revive de N fixo (seleção
     /// única sobre os mortos). Uma habilidade que "mira dois estados" (ex: revive mortos
     /// E buffa vivos) NÃO usa um valor especial — é só duas ações com EstadoAlvo diferente
-    /// na mesma lista (cada ação filtra o seu estado na execução). Por isso o antigo `Ambos`
-    /// morreu (jul/2026): quando o sweep migrou o último cliente — o Céu — ele deixou de existir.
+    /// na mesma lista (cada ação filtra o seu estado na execução).
     /// </summary>
     public enum EstadoAlvo { Vivos, Mortos }
 
@@ -108,10 +107,8 @@ namespace ApostlesWar.Domain
     /// <summary>
     /// Desfecho de uma tentativa de fase: quem chama decide qual tela mostrar. Perdeu cobre tanto a
     /// batalha perdida quanto a encerrada no meio (as duas viram derrota, sem recompensa).
-    ///
-    /// Houve um terceiro valor, `Cancelou` — "desistiu na seleção de time, ANTES da luta" —, de quando
-    /// o próprio motor abria a tela de pick. Hoje quem monta o time é a casca, que só chama a fase com
-    /// o time pronto: desistir nem chega aqui.
+    /// Não há valor para "desistiu": quem monta o time é a casca, e a fase só é chamada com o
+    /// time pronto — desistir na seleção nem chega aqui.
     /// </summary>
     public enum ResultadoFase { Venceu, Perdeu }
 

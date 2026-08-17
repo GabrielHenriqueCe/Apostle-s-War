@@ -5,8 +5,8 @@ namespace ApostlesWar.Domain.Apostolos.Humanos
 {
     /// <summary>
     /// Sushiman — apóstolo como DADO. Comportamento real: CodigoDoSushi.Passiva.cs.
-    /// O Nigiri é o 1º cliente do Reviver: era EstadoAlvo.Ambos + Ativar bespoke; virou duas
-    /// ações de estados diferentes (Mortos → Vivos), na ordem — os revividos pegam o buff.
+    /// O Nigiri é o 1º cliente do Reviver: duas ações de estados diferentes (Mortos → Vivos), nesta
+    /// ORDEM — é ela que faz os recém-revividos pegarem o buff.
     /// </summary>
     public static class Sushiman
     {

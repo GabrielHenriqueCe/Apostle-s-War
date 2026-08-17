@@ -14,9 +14,9 @@ import { criarPo } from '../cenarios/comum/ar.js';
 // num monitor de 60Hz e num de 144Hz.
 //
 // ESTA FUNÇÃO NÃO CONHECE TEMA NENHUM. Ela recebe o módulo do cenário e pede a cena; quem sabe o que
-// desenhar, em que ordem e com que config é o próprio capítulo. Até ago/2026 era o contrário: uma
-// lista única aqui dentro citava os builders dos oito temas, cada item guardado por um
-// `config.X &&` — e os guardas eram exatamente o preço de a lista não ser de ninguém.
+// desenhar, em que ordem e com que config é o próprio capítulo. Uma lista de builders aqui dentro
+// volta a precisar de um `config.X &&` guardando cada item — os guardas são o preço de a lista não
+// ser de ninguém.
 let arFrame = null;
 
 export function iniciarAr(cenario) {

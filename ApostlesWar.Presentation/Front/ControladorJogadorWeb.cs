@@ -109,9 +109,9 @@ namespace ApostlesWar.Presentation.Front
             if (_ponte.AutoLigado)
                 return _automatico.EscolherAlvo(disponiveis, aliados, defensores);
 
-            // Antes havia um atalho aqui: alvo único ⇒ escolhia sozinho. Removido — o passo de alvo
-            // é também o de CONFIRMAÇÃO (o jogador vê quem vai levar e ainda pode desistir com Esc),
-            // e pular isso fazia a habilidade disparar sem direito a mudar de ideia.
+            // Não pôr atalho de "alvo único ⇒ escolhe sozinho" aqui: o passo de alvo é também o de
+            // CONFIRMAÇÃO (o jogador vê quem vai levar e ainda pode desistir com Esc), e pulá-lo faz
+            // a habilidade disparar sem direito a mudar de ideia.
             _sessao.Fase = FaseDaTela.EscolhendoAlvo;
             _sessao.AlvosValidos = disponiveis;
             _sessao.Mensagem = "Escolha o alvo";
@@ -128,7 +128,7 @@ namespace ApostlesWar.Presentation.Front
                 // EscolherAcao abortar. O jogador vê o menu de ação piscar e a batalha encerra.
                 if (msg.Tipo == "sair") { _sairSolicitado = true; return null; }
 
-                // Direito de arrependimento: volta pro menu de habilidades (o Esc do console).
+                // Direito de arrependimento: volta pro menu de habilidades.
                 if (msg.Tipo == "cancelar") return null;
 
                 if (msg.Tipo == "alvo")

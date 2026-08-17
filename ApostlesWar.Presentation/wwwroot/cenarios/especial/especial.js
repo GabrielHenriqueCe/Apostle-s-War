@@ -169,8 +169,7 @@ export const ar = {
 /// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
 ///
 /// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
-/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
-/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+/// prontas.
 export function montar({ fundo, frente, maestro }) {
     // O TERCEIRO dado compartilhado, e o primeiro que é um MAPA em vez de um número: as portas das
     // cabines do ⭐ Especial, uma entrada por apóstolo que mora atrás de uma. O banheiro ESCREVE (é ele

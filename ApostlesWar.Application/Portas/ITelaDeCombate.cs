@@ -4,11 +4,11 @@ namespace ApostlesWar.Application.Portas
     /// <summary>
     /// Porta de APRESENTAÇÃO DA PARTIDA — o que o fluxo de combate (CombateService) precisa mostrar.
     /// Irmã do <see cref="IApresentacao"/> (a espera): juntas, fecham o isolamento do motor em relação
-    /// à tela. Hoje a webview é a única impl; nasceu com duas (a outra era o console), e é por isso que
-    /// o motor não sabe desenhar nada.
+    /// à tela. A webview é a única impl hoje, e o motor segue sem saber desenhar nada — é o que
+    /// mantém uma pele nova a distância de só implementar as portas.
     ///
-    /// O CONTRATO É UM GATILHO, NÃO UM DESENHO. Os nomes são imperativos ("Exibir...") por herança da
-    /// primeira impl, mas nenhuma impl é obrigada a desenhar imperativamente: a do front traduz cada
+    /// O CONTRATO É UM GATILHO, NÃO UM DESENHO. Os nomes são imperativos ("Exibir..."), mas nenhuma
+    /// impl é obrigada a desenhar imperativamente: a do front traduz cada
     /// chamada em (a) um retrato do estado serializado e (b) um evento pra animar. É isso que deixa a
     /// tela declarativa — e que faz trocar emoji por sprite ser mexida só de front, sem tocar no motor.
     ///

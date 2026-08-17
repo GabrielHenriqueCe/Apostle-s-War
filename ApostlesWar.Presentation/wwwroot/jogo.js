@@ -45,10 +45,10 @@ export { aplicarTema };   // o seam por onde o harness entra (ferramentas/rodar-
 // A chave no mapa abaixo é o `tipo` da mensagem — a unidade é a MENSAGEM, não o arquivo: o
 // compêndio exporta duas telas, porque o C# manda duas mensagens.
 //
-// É o mesmo desenho do ADR-composicao-de-acoes: a habilidade virou DADO rodada por um interpretador
-// único, com zero `Ativar` override. Aqui a tela virou dado e o laço abaixo é o interpretador. Antes
-// isto era uma escada de 13 `else if`, e a escada é o que permite treze jeitos diferentes de fazer a
-// mesma coisa — que é exatamente a origem do "funciona nesta tela e não naquela".
+// É o mesmo desenho do ADR-composicao-de-acoes: lá a habilidade é DADO rodado por um interpretador
+// único, com zero `Ativar` override; aqui a tela é o dado e o laço abaixo é o interpretador. Não
+// devolver isto a uma escada de `else if`: é a escada que permite treze jeitos diferentes de fazer a
+// mesma coisa — a origem do "funciona nesta tela e não naquela".
 //
 // Tela nova = uma linha aqui, igual capítulo novo virou uma linha no CENARIOS.
 const TELAS = {
@@ -82,8 +82,8 @@ document.getElementById('compendioApostolo').addEventListener('click', sairDaTel
 
 // ---------- sair da tela ----------
 // UMA função pra "voltar um nível", e os dois gestos que a disparam: a tecla Esc e o botão 🚪 Sair
-// do canto superior direito. Antes cada tela tinha o próprio "Voltar" no rodapé, cada um num lugar
-// diferente, e a tecla era a única coisa consistente — agora o botão é o espelho VISÍVEL dela.
+// do canto superior direito. O botão é o espelho VISÍVEL da tecla — não voltar a dar a cada tela o
+// próprio "Voltar" de rodapé, que é como se chega a um lugar diferente por tela.
 //
 // O que "um nível" quer dizer muda com a cena, e é aqui que a tabela mora:
 //  - modal aberto → cancela o modal (ele é o nível mais raso)

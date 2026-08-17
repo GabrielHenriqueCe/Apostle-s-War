@@ -11,9 +11,8 @@ namespace ApostlesWar.Presentation.Front
     /// <summary>
     /// Sobe o jogo. É o composition root — monta os services e pluga as impls das portas
     /// (<see cref="TelaDeCombateWeb"/>, <see cref="ControladorJogadorWeb"/>,
-    /// <see cref="ApresentacaoWebview"/>). Houve um irmão deste arquivo no Program.cs, que montava as
-    /// mesmas peças com adapters de console; ele morreu com a pele de console. O motor é o mesmo de
-    /// sempre, sem um `if` sequer sabendo que existe front.
+    /// <see cref="ApresentacaoWebview"/>). Trocar de pele é trocar as impls montadas aqui: o motor
+    /// não tem um `if` sequer sabendo que existe front.
     /// </summary>
     internal static class AppFront
     {

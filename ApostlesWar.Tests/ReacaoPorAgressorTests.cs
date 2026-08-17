@@ -3,9 +3,9 @@ using ApostlesWar.Domain;
 namespace Tests
 {
     /// <summary>
-    /// Testes do orçamento de reação "1x por agressor por turno" (FILA A #11 Fatia B). O estado
-    /// mora no TurnoDoPersonagem persistente; o Combate expõe as fachadas TentarReagir (por chave)
-    /// e TentarContraAtacar (chave compartilhada). Puro/headless — sem Console.
+    /// Testes do orçamento de reação "1x por agressor por turno". O estado mora no
+    /// TurnoDoPersonagem persistente; o Combate expõe as fachadas TentarReagir (por chave)
+    /// e TentarContraAtacar (chave compartilhada). Puro: não toca na tela, roda headless.
     /// </summary>
     public class ReacaoPorAgressorTests
     {

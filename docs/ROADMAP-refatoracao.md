@@ -295,8 +295,12 @@ PRs #204–#213, que guardam melhor e datado. O mapa e o contrato finais do fron
       teste é que escolheria a ordem, não o fluxo). O teste real nasce quando a Fatia 1 do front
       tornar a apresentação injetável — evita desenhar 2× o seam que o front vai redesenhar.
       Até lá a ordem é guardada pelo comentário no `ProcessarReacoesAoMorrer` + ADR.
-15. ✅ **Faxina de comentários — FECHADA PELA MEDIÇÃO** (ago/2026), e não pelo corte. A separação
-    terminou; a medição de novo, arquivo por arquivo, diz que **não há gordura pra tirar**:
+15. ✅ **Faxina de comentários — FECHADA nas duas metades** (ago/2026). Ela tinha duas: o FRONT,
+    fechado pela medição (abaixo), e o **C#, fechado pelo corte** — ver §Faxina de comentários no
+    fim deste arquivo, que carrega o resultado da segunda passada.
+
+    **A metade do front, fechada pela medição** e não pelo corte. A separação terminou; a medição
+    de novo, arquivo por arquivo, diz que **não há gordura pra tirar**:
 
     | | comentário |
     |---|---|
@@ -872,20 +876,44 @@ identidade — Nome/Simbolo/Descricao — herdada por `Habilidade` E `StatusEffe
 `ElementoDeJogo` (`Skills/ElementoDeJogo.cs`). No mesmo PR morreu o homônimo `Turnos`
 (cooldown/duração viraram `Cooldown`/`DuracaoRestante`, libertando "Turno").
 
-### Faxina de comentários — 🔜 VAI ACONTECER, e agora tem ORDEM e BRIEFING (ago/2026)
+### Faxina de comentários — ✅ FEITA, nas duas metades (ago/2026)
 
-Era "último da fila, bisturi, branch própria", sem data e sem números. **Continua valendo — o Gabriel
-foi explícito: *"vai ser feito isso primeiro e depois voltamos nos outros arquivos e vamos ajustar
-SIM"*.** O que mudou é que ela deixou de ser um item vago e ganhou ordem, medição e uma regra que
-impede a vazão de repor o que ela tirar.
+**A ORDEM (decisão do Gabriel), cumprida:**
+1. **Separar o `jogo.js`** ✅ — cada cenário saiu reduzido no próprio movimento.
+2. **Depois, os OUTROS arquivos** ✅ — o C# e o que sobrou do front, como trabalho próprio.
 
-**A ORDEM (decisão do Gabriel):**
-1. **Separar o `jogo.js`** (✅ feita em ago/2026). Cada cenário que se move **já sai reduzido** — a faxina
-   dos 29% pega carona no movimento, em vez de ser um segundo passe pelos mesmos arquivos.
-2. **Depois, os OUTROS arquivos** — o C# e o que sobrar do front. Aí sim como trabalho próprio.
+**O RESULTADO DA 2ª PASSADA (o C#).** 239 arquivos medidos, 29.152 linhas, 8.256 de comentário
+(28,3%). Saíram **−25 linhas líquidas** em 39 arquivos, mais uma 2ª rodada por leitura. Nenhum
+teste tocado; 198 verdes o tempo todo.
 
-Fazer o C# antes seria trabalhar contra a ordem: 29% dos comentários vivem no `jogo.js`, que vai ser
-picado de qualquer jeito, e limpá-los antes do movimento é fazer duas vezes.
+**O achado que muda o próximo briefing: o número dos "138" estava INFLADO.** O filtro que o
+produziu conta `morto/morreu`, e neste jogo isso é vocabulário do DOMÍNIO (`EstadoAlvo.Mortos`, o
+estado `Morto`, a família do revive) — mecanismo, não história. Com marcadores fortes só (data,
+"antes era", "virou", `#NNN`), o estoque real era **36 no C# e 41 no `wwwroot`**, cerca de um quarto
+do anunciado. É a mesma lição do item 15 numa segunda métrica: **um filtro que não conhece o
+vocabulário do domínio mede a língua, não a gordura.**
+
+**O que de fato saiu, por categoria:**
+- **MENTIRA** — `Faccoes.cs` mandando procurar `Helper.GetDescricao` (morreu com o GHUtils);
+  `DeveAgir` (deletado da interface e das 6 impls) citado em 4 comentários; e **13 comentários
+  descrevendo a pele de CONSOLE**, removida no #179, dois deles afirmando comportamento dela
+  ("no console é no-op") ao lado da única impl que existe.
+- **O obstáculo errado** — três testes diziam não rodar headless "sem Console". Não é o Console, é
+  a TELA; e como o `ITelaDeCombate` já é injetável, o comentário escondia que o teste de fluxo que
+  falta (a ordem crítica de morte) está ao alcance.
+- **DUPLICAÇÃO, que a 1ª passada não procurava** — o mesmo parágrafo em NOVE lugares (os 8 cenários
+  + `nucleo/ar.js`) e a mesma frase NOVE vezes no `PersonagemService`. O dono ficou com a regra em
+  forma de mina; as cópias saíram.
+- **DOC NO MEMBRO ERRADO** — dois `<summary>` empilhados (`Queima.Detonar` e um teste do bot), cada
+  um deixando o membro vizinho sem doc e descrevendo o errado. Acha-se por grep; não há um terceiro.
+- **Narração histórica** — "era `EstadoAlvo.Ambos`", "antes era por-hit", "nasceu com duas impls".
+  Onde havia regra viva embaixo, ela virou imperativo ("nesta ORDEM — é ela que faz os revividos
+  pegarem o buff") em vez de relato.
+
+**O que NÃO saiu, e por quê.** Toda mina. A esfera violeta do Reino ("era azul-clara e sumia contra
+o céu") fica: trocar a cor a faz sumir de novo. O "nasceu com 58% do vão" fica: é o que ancora o
+casaco em 1.05. Amostrei três blocos de cenário e **dois se defenderam sozinhos** — o veredito
+"cortar ali não enxuga, cega" se confirma. `nucleo/` e `ui/` não tiveram uma linha cortada.
 
 **A REGRA DE ESCRITA, que é a outra metade** (`CLAUDE.md` §Comentário): sem ela a faxina se refaz
 sozinha. A conta que provou: no PR da cura em área (#207) eu escrevi **28 linhas de comentário pra 11
@@ -909,11 +937,13 @@ linhas: 11 de comentário, 2 de código), `IAtaquePrimario.cs`, `ICapacidadesSta
 capacidade cujo valor inteiro é a prosa que diz quando disparam e por que não são a mesma família da
 vizinha. **Faxinar por ranking destrói o melhor primeiro.**
 
-**COMO fatiar, quando chegar a vez** — o risco desta faxina não é o corte, é o TAMANHO do diff: 209
-arquivos, ZERO verificação possível (nenhum teste pega comentário apagado errado) e perda
-irrecuperável se a mão pesar, porque os becos sem saída são o conhecimento mais caro daqui e os que
-mais parecem supérfluos pra quem não os viveu. Então: **por camada ou por pasta, um PR por fatia**,
-nunca tudo de uma vez — e o critério é a tabela do `CLAUDE.md`, não o olho.
+**COMO se fatiou** — o risco desta faxina nunca foi o corte, foi o TAMANHO do diff: 209 arquivos,
+ZERO verificação possível (nenhum teste pega comentário apagado errado) e perda irrecuperável se a
+mão pesar, porque os becos sem saída são o conhecimento mais caro daqui e os que mais parecem
+supérfluos pra quem não os viveu. Foi **por camada, um commit por fatia**, com o critério na tabela
+do `CLAUDE.md` e não no olho. O que substituiu a verificação impossível foram **três medidores, cada
+um provado por sabotagem** (arquivo-isca com contagem conhecida) antes de valer: um de estoque, um
+de mentira (identificador citado que não existe no código) e um de história.
 
 **As três categorias de gordura, em ordem de custo** — a primeira dá pra atacar a qualquer momento,
 inclusive antes da separação, porque é verificável:

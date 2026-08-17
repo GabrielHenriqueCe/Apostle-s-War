@@ -5,7 +5,7 @@ using ApostlesWar.Domain.Skills.Debuffs;
 namespace Tests
 {
     /// <summary>
-    /// Testes do IModificaDanoCausado (modificador de dano do ATACANTE — FILA A #10). A passiva
+    /// Testes do IModificaDanoCausado (modificador de dano do ATACANTE). A passiva
     /// (Piromancer) é consultada pela Ação Dano, que dobra o multiplicador antes do (int) do Atacar.
     /// Crítico zerado com ReducaoTaxaCrit (0.15 base → 0) pra o DanoBruto ser determinístico.
     /// </summary>

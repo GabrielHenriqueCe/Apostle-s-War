@@ -6,9 +6,9 @@ namespace Tests
     /// <summary>
     /// Testes da Capacidade D (comportamento de turno via IPulaTurno / IForcaAcao /
     /// IParalisaAcao). O CombateService deixou de decidir por tipo concreto — cada status
-    /// carrega a própria capacidade. A fiação no fluxo do turno (pular/forçar/paralisar) não
-    /// roda headless (precisa de Console); aqui provamos que os status EXPÕEM a capacidade
-    /// certa, que é o contrato que o fluxo passa a consultar.
+    /// carrega a própria capacidade. A fiação no fluxo do turno (pular/forçar/paralisar) não roda
+    /// headless — o loop chama a tela —, então aqui provamos que os status EXPÕEM a capacidade
+    /// certa, que é o contrato que o fluxo consulta.
     /// </summary>
     public class CapacidadesTurnoTests
     {

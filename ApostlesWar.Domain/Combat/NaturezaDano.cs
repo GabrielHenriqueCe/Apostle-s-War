@@ -13,11 +13,10 @@ namespace ApostlesWar.Domain
     /// retaliação de contra-ataque. Não executa nada — é só a descrição das regras;
     /// o ReceberDano consulta esses campos pra decidir o que aplicar.
     ///
-    /// "Ignorar status" tem UMA língua só (unificação jul/2026): a lista `Ignora` de tipos de
-    /// StatusEffect que o dano fura — é a MESMA gramática de `ignorarStatus` (por golpe) e
-    /// `IIgnoraStatusNoAtaque` (por apóstolo). O ReceberDano une as três numa lista e cada status
-    /// pergunta "fui listado?" (não há mais `DeveAgir` por-status lendo flags). `IgnoraDefesa`
-    /// segue bool porque DEFESA é um STAT, não um status na lista.
+    /// "Ignorar status" tem UMA língua só: a lista `Ignora` de tipos de StatusEffect que o dano
+    /// fura — é a MESMA gramática de `ignorarStatus` (por golpe) e `IIgnoraStatusNoAtaque` (por
+    /// apóstolo). O ReceberDano une as três numa lista e cada status pergunta "fui listado?".
+    /// `IgnoraDefesa` segue bool porque DEFESA é um STAT, não um status na lista.
     ///
     /// Use os perfis prontos em NaturezasDano em vez de montar manualmente.
     /// </summary>

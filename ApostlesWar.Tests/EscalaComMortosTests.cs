@@ -5,7 +5,7 @@ using ApostlesWar.Domain.Skills.Passivas;
 namespace Tests
 {
     /// <summary>
-    /// Testes da capacidade EscalaComMortos (FILA A #12 — passiva-conta-mortos, cliente Zumbi).
+    /// Testes da capacidade EscalaComMortos (passiva-conta-mortos, cliente Zumbi).
     /// A passiva lê o tabuleiro (ContextoCombate.Aliados/Inimigos) e aplica um buff proporcional aos
     /// mortos do escopo. Puro/headless: monta o contexto à mão e assere o BuffAtaque no portador.
     /// </summary>

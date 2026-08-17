@@ -14,8 +14,8 @@ let arenaSlotSel = null;                                           // { lado, i 
 
 export const montagemArena = {
     cena: 'arenaSetup',
-    // Desestrutura porque `montar` recebe o `conteudo` da mensagem INTEIRO — o despacho antigo
-    // passava `msg.conteudo.apostolos` à mão, e essa foi a única tela em que ele fazia isso.
+    // Desestrutura porque `montar` recebe o `conteudo` da mensagem INTEIRO: quem abre a tela não
+    // escolhe campo nenhum por ela.
     montar({ apostolos }) {
         arenaApostolos = apostolos;
         arenaTimes = { esq: [null, null, null, null], dir: [null, null, null, null] };

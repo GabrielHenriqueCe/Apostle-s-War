@@ -216,9 +216,9 @@ const ANIMACOES = ['batendo', 'ferido', 'curado', 'ganhouEscudo', 'ganhouBuff', 
 // O redesenho REAPROVEITA as caixas existentes (casadas por id) em vez de recriá-las.
 //
 // Isso não é otimização, é CORREÇÃO: o C# publica o estado logo depois de mandar o evento de
-// dano (ver TelaDeCombateWeb.ExibirResultadoAtaque). O `replaceChildren` antigo destruía a caixa
-// milissegundos depois da animação começar — o tremor sumia e o número flutuante, que é filho
-// dela, nunca chegava a aparecer. Mantendo o nó vivo, a animação roda até o fim.
+// dano (ver TelaDeCombateWeb.ExibirResultadoAtaque). Recriar as caixas (um `replaceChildren`)
+// destrói a caixa milissegundos depois de a animação começar — o tremor some e o número flutuante,
+// que é filho dela, nunca chega a aparecer. Com o nó vivo, a animação roda até o fim.
 function desenharLado(idElemento, combatentes) {
     const container = document.getElementById(idElemento);
     const existentes = new Map([...container.children].map(el => [el.dataset.id, el]));

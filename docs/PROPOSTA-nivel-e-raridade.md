@@ -1,10 +1,12 @@
 # PROPOSTA — nível e raridade: item e apóstolo sem estrela (ago/2026)
 
-> **NADA AQUI ESTÁ DECIDIDO.** O `GDD-itens.md` e o `GDD-progressao.md` seguem sendo a versão oficial
-> até o Gabriel escolher. Este arquivo guarda **duas versões vivas** — a **V1** e a **V2**. A V2 é a
-> mais nova e a mais enxuta; a **V1 não está descartada**.
+> **A V2 VENCEU** — decisão do Gabriel, 17/ago/2026. **Mas o corpo deste arquivo ainda está escrito
+> como se as duas estivessem em aberto**, e a reescrita é pendência: promover a V2 a modelo, rebaixar a
+> V1 a *"considerado, e por que não"*, e acrescentar o endgame (reforjar um mítico re-sorteia as 5
+> subs). Até isso acontecer, o `GDD-itens.md` e o `GDD-progressao.md` seguem sendo a versão oficial.
 >
-> O tronco (§O TRONCO) vale nas duas. A diferença é uma só, e está no §A BIFURCAÇÃO.
+> O tronco (§O TRONCO) vale nas duas — **o material entra nas duas igual**. A diferença está só no
+> §A BIFURCAÇÃO, e só no **ITEM**: o apóstolo é idêntico nas duas versões.
 
 ## De onde isso veio
 

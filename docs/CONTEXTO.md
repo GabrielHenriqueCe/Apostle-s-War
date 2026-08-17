@@ -14,57 +14,65 @@
 
 ## Onde paramos (17/ago/2026)
 
-**DUAS branches empilhadas, nenhuma mergeada — e a ordem importa:**
+**A fila de PRs zerou** — três merges no mesmo dia: `#239` a arrumação dos docs, `#240` a faxina de
+comentários, `#241` a proposta de progressão. A `main` está em dia e **não há branch pendente** além
+da que traz este arquivo.
 
-1. **`docs/arrumacao-de-contexto`** (7 commits) — a arrumação dos documentos. **O PR não foi aberto**;
-   o Gabriel disse que estava com problema no git.
-2. **`chore/faxina-de-comentarios`** (7 commits) — sai de CIMA da 1ª, de propósito e a pedido dele:
-   assim, quando a de baixo mergear, esta não conflita. **Mergear na ordem.**
+**A sessão foi inteira de DESIGN — zero linha de código.** Saiu dela o
+`docs/PROPOSTA-nivel-e-raridade.md`, que é o único lugar onde o modelo novo está escrito.
 
-Empilhar branch contraria o *"uma branch por vez"* do `CLAUDE.md`. Foi decisão dele, com motivo dito.
+## O modelo novo de progressão — e a V2 já venceu
 
-## A faxina de comentários (#15) — FEITA, as duas metades
+Item e apóstolo passam a ter **dois eixos só**: **raridade = quantas · nível = quanto**. Caíram por
+estarem VAZIOS a **estrela** (era o nível medido em passos de 10), o **marco de fase** (a âncora de
+LUGAR que ele dava sobrevive no sacrifício) e o **aprimoramento**. Entrou **material com raridade
+própria** — pó pro item, alma pro apóstolo — como pedágio a cada dezena de nível e como parte do
+degrau de raridade.
 
-O front já fora fechado pela medição; **o C# nunca tinha sido faxinado**. Agora foi: 239 arquivos
-medidos, **59 tocados**, 7 commits por camada, `dotnet build` limpo e **198 testes verdes** o tempo
-todo. O resultado por categoria está no `ROADMAP-refatoracao.md` §Faxina — não se repete aqui.
+**O doc ainda diz "nada decidido", e isso já é drift:** no fim da sessão o Gabriel escolheu a **V2**
+(sem aprimoramento; o mítico ganha 5 subs direto). Ficou só um aviso no topo do arquivo — a reescrita
+de verdade é a pendência 1.
 
-**O que a próxima sessão precisa não reabrir:**
+**O que a reescrita precisa levar, e que não está em lugar nenhum ainda:**
 
-- **O número "138 linhas de narração histórica" era INFLADO.** O filtro conta `morto/morreu`, que
-  neste jogo é vocabulário do DOMÍNIO (`EstadoAlvo.Mortos`, o estado `Morto`, a família do revive).
-  Com marcadores fortes só, o estoque real era **36 no C# e 41 no `wwwroot`**.
-- **`nucleo/` e `ui/` não perderam uma linha**, e as ~28 linhas restantes nos cenários FICAM: são
-  mina (a esfera violeta do Reino some se virar azul) ou âncora de número (o "58% do vão").
-- **O saldo é ~zero linha** (215 inserções contra 214 remoções) e isso é o esperado: o trabalho foi
-  reescrever no PRESENTE o que estava no passado, não apagar.
+- **o argumento que decidiu** — o endgame da V1 não é o que o GDD prometia: com a estrela morta sobra
+  **uma** unidade excedente, então o reset dela vira um sorteio de 1 em 4, pago com um subsistema
+  inteiro;
+- **o resgate do endgame na V2, sem eixo novo** — reforjar um mítico re-sorteia as **5 subs**, com as
+  mesmas 3 opções e a mesma recusa por slot da promoção;
+- **que o pedágio não é imposto** — cada dezena de nível compra **+15 pontos de principal**.
 
 ## Pendências
 
-1. **Os dois PRs**, na ordem acima.
-2. **O trabalho de JOGO volta a valer** — `GDD-progressao.md` §7, na ordem: **nível (curva do tipo) +
-   raridade** → **raridade → passiva que escala** → **item equipado**. Menores: o `chance de aplicar:
-   75%` ao mirar, o **empurrão de medidor**, a **pele da Arena** (FILA A #20) e a **9ª pele, Humanos**
-   (#21, bloqueada até o fundo de facção no compêndio). A dívida do
-   `docs/RELEITURA-backend-pendente.md` segue de pé.
+1. **Reescrever o `PROPOSTA-nivel-e-raridade.md`:** V2 promovida a modelo, V1 rebaixada a *"considerado,
+   e por que não"*, o reforge do mítico como seção de endgame.
+2. **Os cinco números** que o doc deixou marcados — material por pedágio, `N` do sacrifício, XP por
+   faixa de material, curva de pontos por rodada, e a demanda de alma contra **36 apóstolos** (é o
+   maior risco de calibragem do desenho).
+3. **Aí o `GDD-progressao.md` §7 volta a andar** — ele estava parado esperando exatamente nível e
+   raridade. A dívida do `docs/RELEITURA-backend-pendente.md` segue de pé.
+4. Menores que continuam: o `chance de aplicar: 75%` ao mirar, o **empurrão de medidor**, a **pele da
+   Arena** (FILA A #20) e a **9ª pele, Humanos** (#21, bloqueada até o fundo de facção no compêndio).
 
-## Armadilhas que morderam nesta sessão (não repetir)
+## Armadilhas desta sessão
 
-- **Carregar a skill `claude-api` custa ~100k tokens** — uma pergunta sobre preço comeu 20% da janela
-  de 5 horas. Ela é o caminho certo quando a resposta precisa de número exato, mas é decisão cara e
-  dá pra prever antes.
-- **A ferramenta `Edit` grava LF puro em arquivo CRLF**, e o `-replace` do PowerShell reescreve o
-  arquivo INTEIRO em LF. O `git diff --numstat` denuncia (arquivo todo alterado em vez de 2 linhas);
-  a conferência é `(match /\n/) − (match /\r\n/) == 0`, e vale rodar em TODOS os tocados antes de
-  commitar.
-- **Comentário pode estar no MEMBRO ERRADO** — dois `<summary>` empilhados deixavam o vizinho sem doc
-  e descreviam o método errado (`Queima.Detonar`, um teste do bot). Acha-se por grep:
-  `</summary>` seguido de `<summary>`.
-- **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas OSCILAM entre corridas. Depois
-  de rodar a suíte sem mexer em número: `git checkout -- docs/bancada-dano.md`.
+- **Squash-merge de branch EMPILHADA gera conflito falso.** A `faxina` saía da `arrumacao`; quando a
+  de baixo entrou comprimida num commit só, a de cima seguia carregando os 7 originais. Não se resolve
+  à mão — **branch nova da `main` + cherry-pick** só dos commits próprios. Feito e conferido nesta
+  sessão.
+- **`git diff main <branch>` NÃO prova que o merge entrou** quando há outra branch em jogo: ela aparece
+  como "diferença" só por não ter o trabalho da vizinha. A prova é diffar **apenas os arquivos que a
+  branch toca**.
+- **Devolvi como fala dele duas invenções minhas** na mesma rodada de design (rebaixar o sacrifício a
+  enfeite, tirar o "evoluir jogando"). Em conversa longa isso vira premissa e o erro compõe.
+- **O `GDD-itens.md` se contradiz sozinho** sobre a 5ª unidade do mítico: *"o bônus de nascença"* numa
+  linha e *"não cai no drop, só se conquista evoluindo"* quinze linhas abaixo. Mítico cai no drop — a
+  segunda é a velha.
 
-## O que o Gabriel confere, sempre
+## Gotchas que continuam valendo
 
-Hover, arraste, clique e tudo que acontece DURANTE a batalha. Os dois harnesses
-(`ferramentas/rodar-telas.js` e `rodar-tema.js`) publicam mensagem e montam tela — **eles não clicam
-em nada**. Verde deles nunca quer dizer "o jogo funciona".
+- **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas oscilam entre corridas. Depois de
+  rodar a suíte sem ter mexido em número: `git checkout -- docs/bancada-dano.md`.
+- Os harnesses `ferramentas/rodar-telas.js` e `rodar-tema.js` publicam mensagem e montam tela — **eles
+  não clicam em nada**. Verde deles nunca quer dizer "o jogo funciona": hover, arraste, clique e tudo
+  que acontece DURANTE a batalha quem confere é o Gabriel.

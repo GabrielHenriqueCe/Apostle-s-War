@@ -8,6 +8,61 @@
 
 ---
 
+## O mapa de `wwwroot/`, o contrato de tela e as duas injeções
+
+```
+wwwroot/
+  jogo.js            COMPOSITION ROOT (192 linhas). Imports, a tabela TELAS, o interpretador,
+                     o Esc/botão-sair, o registro CENARIOS e o boot. NÃO desenha nada.
+  index.html · estilo.css
+  nucleo/   ponte.js (o único que sabe do C#) · cena.js (quem está na tela + abrirTela)
+            ar.js (canvas, maestro, laço, aplicarTema)
+  ui/       modal.js · time.js (picker+slots+arrastar) · animacao.js
+  telas/    menu · perfil · arena · campanha · arsenal · compendio · combate
+  cenarios/ comum/ + 8 facções (cada pasta: <faccao>.js + <faccao>.css)
+```
+
+**O paralelo com o back, e ele é do Gabriel:** `jogo.js` = `Program.cs` · `nucleo/` =
+`CombateService` · `telas/` = as habilidades (dado: carga → pinta) · `ui/` = `Acao` compartilhada.
+
+**O CONTRATO DE TELA.** Toda tela é isto, e nada além:
+```js
+export const compendio = { cena: 'compendio', montar(dados, anterior) { /* preenche o DOM */ } };
+```
+A chave no mapa `TELAS` é o **`tipo` da mensagem** — a unidade é a MENSAGEM, não o arquivo (o
+compêndio exporta duas). Tela nova = uma linha na tabela. **Abrir tela é SEMPRE `abrirTela(...)`**,
+inclusive de dentro do código (a ficha do apóstolo pela conquista usa outra `cena` que a do compêndio,
+porque o Esc tem de voltar pra lugares diferentes).
+**`estado` e `evento` ficam FORA da tabela de propósito** — não navegam, atualizam a cena no ar.
+
+**AS DUAS INJEÇÕES seguram a direção da dependência.** O núcleo não pode importar quem depende dele,
+então o composition root ENTREGA: `registrarCenarios(CENARIOS)` e `aoTrocarCena(atualizarBotaoSair)`.
+Regra: **quando um módulo interno precisa de algo do externo, o externo INJETA ou a coisa DESCE.
+Nunca o interno importa pra cima.** Estado que cruza fronteira vira ACESSADOR (`cenaAgora()`,
+`estadoAtual()`, `menuEhRaiz()`, `avatarDoJogador()`, `fimDeFaseTemOpcoes()`) — `export let` é lido
+ao vivo mas NÃO é gravável de fora.
+
+**Verificar SEMPRE que tocar no front** (os dois passam em ~1 min):
+```
+node --experimental-vm-modules ferramentas/rodar-telas.js   # as 13 mensagens montam
+node --experimental-vm-modules ferramentas/rodar-tema.js "" 120   # 8 temas x 120s de cena
+```
+Mais `ferramentas/medir-donos.js` (grafo de donos, com `--porque <tema> <funcao>`) quando for mover
+função de cenário.
+
+**O QUE OS HARNESSES NÃO COBREM — e verde deles não é "o jogo funciona":** eles publicam mensagem,
+**não clicam em nada.** Duplo-clique, clique em slot, arrastar, teclado e tudo que roda DURANTE a
+batalha em resposta a isso estão fora. Na separação, QUATRO bugs saíram exatamente daí e os quatro
+foram achados pelo Gabriel jogando. **Conferência em jogo continua sendo dele, sempre.**
+
+**Terminação de linha:** o `.gitattributes` IMPEDE (LF no repo, CRLF na cópia de trabalho) e o
+`rodar-telas.js` ACUSA se algo escapar. Arquivo misto não é cosmético — já grudou um `else if` num
+comentário e virou código comentado.
+
+**A armadilha do CSS por tema:** a escada de `@media` que encolhe os ladrilhos tem de vir DEPOIS do
+bloco base do tema. `ferramentas/separar-css.js` prova as duas coisas (empate de especificidade e
+contagem de regras) antes de escrever — CSS pode ficar válido e semanticamente MORTO.
+
 ## O método — NÃO é MVC nem REST
 
 É uma **ponte de mensagens LOCAL, in-process, orientada a eventos.** O JS (tela) e o C# (motor) rodam

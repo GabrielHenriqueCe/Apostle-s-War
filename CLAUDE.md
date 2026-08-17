@@ -115,138 +115,22 @@ camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição d
   `docs/GDD-progressao.md` + `GDD-combate.md` + `GDD-itens.md` (o modelo que muda quase todo
   número), **`docs/LORE.md`**.
 
-## A LORE, e as duas renomeações que ela obrigou — AS DUAS FEITAS (ago/2026)
+## A LORE, em uma frase
 **Os apóstolos são peças de brinquedo dos deuses; a guerra é entre apóstolos — e o JOGADOR não é um
-apóstolo, é um jogador no nível dos deuses, convidado pela deusa Cindy.** Ler `docs/LORE.md` antes
-de mexer em nome de facção, de apóstolo ou em texto de tela.
+apóstolo, é um jogador no nível dos deuses, convidado pela deusa Cindy.** Ler `docs/LORE.md` antes de
+mexer em nome de facção, de apóstolo ou em texto de tela. **Em identificador é `apostolo`; em PROSA é
+`apóstolo`** — vale pra comentário, doc e string que vira documento gerado. O 🦸 Herói ficou Herói: é
+nome próprio, par do 🦹 Vilão.
 
-- ✅ **#17:** a facção `Apostolos` virou **`Ascendentes`** e o 🌬️ virou ❄️. O 🌬️ era o símbolo da
-  **Cindy** — não da facção.
-- ✅ **#18:** o herói jogável passou a se chamar **`apóstolo`** em todo o repo (904 trocas, 136
-  arquivos; nasceram `Domain/Apostolos/` e o `ApostolosService`). Nesta ordem porque o inverso
-  criaria pasta dentro de pasta homônima. **Os nomes velhos ficaram só na mensagem do commit.**
-- **O 🦸 Herói ficou Herói** — é nome próprio, par do 🦹 Vilão. "Apóstolo" é o conceito, não o
-  personagem.
-- **Em identificador é `apostolo`; em PROSA é `apóstolo`.** Vale pra comentário, doc e string que
-  vira documento gerado.
+## O resto é carregado pela TAREFA, não por esta página
+Cada assunto tem um doc próprio em `docs/`, e uma skill em `.claude/skills/` que dispara quando a
+tarefa é daquele assunto. Ponteiro aqui não bastava: punha em mim a decisão de ler, e ela falhava.
 
-**Ao renomear uma facção, o que é derivado e o que não é:** a chave de tema NASCE do enum
-(`FluxoDoFront.cs:431`, `faccao.ToString().ToLowerInvariant()`), então o `body[data-tema]`, a pasta
-`wwwroot/cenarios/<tema>/`, os dois arquivos dela, o `<link>` do index e a entrada do `AR_DO_TEMA`
-têm de mudar no MESMO commit ou o tema some sem erro nenhum. **O save NÃO quebra:** não há
-`JsonStringEnumConverter`, então enum vira NÚMERO no JSON — renomear o membro é seguro desde que a
-ORDEM da lista não mude.
-
-## Fazer o CENÁRIO de uma facção (falta Humanos) — leia nesta ordem
-Oito peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos · ⭐ Especial ·
-🔱 Decaídos · ❄️ Ascendentes), falta 1. **A conta das assinaturas está fechada:** dia claro (Reino), lua
-(cemitério), estrelas (invasão), âmbar de fogo (Folclore), crepúsculo (praia), interior sem céu
-(Especial), luz vinda de baixo (Inferno) e a paisagem vista por um RECORTE (a janela dos Ascendentes).
-Pros Humanos não sobra HORA nenhuma — o caminho é o mesmo do ⭐ Especial e dos ❄️ Ascendentes: um LUGAR em
-vez de uma hora, ou um enquadramento.
-**Não invente processo: já existe manual, e ele é caro — cada linha dele custou uma rodada de "ficou
-ruim" em jogo.**
-1. **`docs/MANUAL-cenario.md`.** É O manual: as três camadas e o que
-   decide em qual entrar, ladrilho × canvas × endereço, o MAESTRO (dado compartilhado), os motores
-   já extraídos, a lista de ARMADILHAS (cada uma já custou tempo — leia todas antes de desenhar) e as
-   LIÇÕES DE DESENHO. Se for contra alguma delas, seja de propósito e diga por quê.
-2. **Uma pele pronta INTEIRA, das duas pontas:** o bloco `body[data-tema="misticos"]` no `estilo.css`
-   e a entrada `misticos` do `AR_DO_TEMA` no `jogo.js` (a mais completa: mar, dragão em três
-   distâncias, lâmpada, aparições, moldura em canvas). O ⭐ Especial é a segunda melhor referência, e
-   a única com INTERIOR, com peças que se ocultam entre si (porta × sentado, anel × cocô) e com o
-   `comListras` — o padrão de "monta o caminho UMA vez, usa pra preencher E recortar". O 🔱 Decaídos
-   é a mais barata de imitar em peça grande: ela é montada de MEMBROS sorteados num caminho
-   só (`tracarMembro`, com o sentido do traço garantido por construção), o maestro sendo LUZ e não
-   vento (`inferno.pulso`), e uma HISTÓRIA amarrando as peças umas nas outras. O ❄️ Ascendentes é a mais
-   NOVA, e a de imitar quando a cena tiver um ROTEIRO: a noite inteira dele é uma sequência de passos
-   (`criarRoteiroDaNoite`) escrita num maestro por uma camada que **não desenha nada**, e lida por
-   quatro peças em cantos diferentes da tela. É também a única em que a paisagem é vista por um
-   RECORTE, e ela custou TRÊS versões — as duas que morreram estão contadas no ROADMAP, que é onde o
-   que não deu certo fica registrado.
-3. **`git log --oneline` dos PRs de cenário** (#195, #197, #198, #199, #200, #201, #202, #203) — as
-   mensagens contam o que foi tentado e MORREU, que é a parte que o código não mostra.
-
-**A receita, em uma linha:** o tema é `faccao.ToString().ToLowerInvariant()` → `body[data-tema]`, e
-custa **zero C#** — um bloco de CSS mais uma entrada de configuração. Tema sem CSS e sem entrada no
-`AR_DO_TEMA` simplesmente luta no visual padrão (foi assim que o Folclore saiu inteiro no #199).
-
-**Depois da separação (ago/2026) isso virou:** criar `wwwroot/cenarios/<faccao>/<faccao>.js` com
-`export const ar = {...}` e os builders, e pôr **uma linha** no registro `AR_DO_TEMA` do `jogo.js`.
-Mais o `<faccao>.css` na mesma pasta (e o `<link>` no index.html). **E rodar
-`node --experimental-vm-modules ferramentas/rodar-tema.js` antes de pedir conferência em jogo.**
-
-**As decisões que vêm ANTES de desenhar qualquer coisa:**
-- **Que assinatura sobrou.** Dia claro é do Reino, lua do cemitério, estrelas da invasão, âmbar do
-  fogo, crepúsculo da praia. Escolha o que SOBROU antes de escolher o que é bonito — é o que faz o
-  capítulo ser reconhecível de relance.
-- **Os 4 apóstolos entram pelo SINAL, não pela figura.** Nada de corpo humano (fica esquisito em canvas);
-  o gênio é a lâmpada, a sereia é a cauda, a fada é o vaga-lume maior. E o gesto tem que ser do sinal:
-  cauda sozinha fazendo salto de golfinho lê como pedaço arremessado.
-- **Uma peça CENTRAL, uma fonte de luz.** Fogueira, lâmpada. E o que mais acontece na cena responde a
-  ela ou ao maestro.
-- **Verificação:** `node --check jogo.js`, chaves do `estilo.css` batendo, todo builder do
-  `noFundo`/`naFrente` com definição, nenhuma chave de config sem uso, e `dotnet build` limpo. Raio
-  negativo num `arc`/`ellipse` LANÇA e mata o `requestAnimationFrame` — a cena congela em silêncio.
-  **Pior ainda: NaN em coordenada NÃO lança**, só não desenha (`Math.pow(negativo, fracionário)` é a
-  fonte clássica). Vale montar a **bancada headless** do tema — extrair os builders com `eval` + um
-  `ctx` de mentira que VALIDA cada argumento (raio ≥ 0, tudo finito, `save`/`restore` batendo) e
-  rodar ~900s de `dt` fixo. Ela já pegou bug fatal em três peles seguidas.
-- **A conferência em jogo é do Gabriel**, sempre: quase todo acerto deste front veio de ele olhar
-  rodando e apontar o defeito exato. E **quando ele descreve um MECANISMO, implementar LITERALMENTE**
-  — no ⭐ Especial eu interpretei quatro vezes e errei as quatro; o desenho dele estava certo desde a
-  primeira frase.
-
-## O FRONT, depois da separação (ago/2026) — leia antes de tocar em `wwwroot/`
-
-```
-wwwroot/
-  jogo.js            COMPOSITION ROOT (192 linhas). Imports, a tabela TELAS, o interpretador,
-                     o Esc/botão-sair, o registro CENARIOS e o boot. NÃO desenha nada.
-  index.html · estilo.css
-  nucleo/   ponte.js (o único que sabe do C#) · cena.js (quem está na tela + abrirTela)
-            ar.js (canvas, maestro, laço, aplicarTema)
-  ui/       modal.js · time.js (picker+slots+arrastar) · animacao.js
-  telas/    menu · perfil · arena · campanha · arsenal · compendio · combate
-  cenarios/ comum/ + 8 facções (cada pasta: <faccao>.js + <faccao>.css)
-```
-
-**O paralelo com o back, e ele é do Gabriel:** `jogo.js` = `Program.cs` · `nucleo/` =
-`CombateService` · `telas/` = as habilidades (dado: carga → pinta) · `ui/` = `Acao` compartilhada.
-
-**O CONTRATO DE TELA.** Toda tela é isto, e nada além:
-```js
-export const compendio = { cena: 'compendio', montar(dados, anterior) { /* preenche o DOM */ } };
-```
-A chave no mapa `TELAS` é o **`tipo` da mensagem** — a unidade é a MENSAGEM, não o arquivo (o
-compêndio exporta duas). Tela nova = uma linha na tabela. **Abrir tela é SEMPRE `abrirTela(...)`**,
-inclusive de dentro do código (a ficha do apóstolo pela conquista usa outra `cena` que a do compêndio,
-porque o Esc tem de voltar pra lugares diferentes).
-**`estado` e `evento` ficam FORA da tabela de propósito** — não navegam, atualizam a cena no ar.
-
-**AS DUAS INJEÇÕES seguram a direção da dependência.** O núcleo não pode importar quem depende dele,
-então o composition root ENTREGA: `registrarCenarios(CENARIOS)` e `aoTrocarCena(atualizarBotaoSair)`.
-Regra: **quando um módulo interno precisa de algo do externo, o externo INJETA ou a coisa DESCE.
-Nunca o interno importa pra cima.** Estado que cruza fronteira vira ACESSADOR (`cenaAgora()`,
-`estadoAtual()`, `menuEhRaiz()`, `avatarDoJogador()`, `fimDeFaseTemOpcoes()`) — `export let` é lido
-ao vivo mas NÃO é gravável de fora.
-
-**Verificar SEMPRE que tocar no front** (os dois passam em ~1 min):
-```
-node --experimental-vm-modules ferramentas/rodar-telas.js   # as 13 mensagens montam
-node --experimental-vm-modules ferramentas/rodar-tema.js "" 120   # 8 temas x 120s de cena
-```
-Mais `ferramentas/medir-donos.js` (grafo de donos, com `--porque <tema> <funcao>`) quando for mover
-função de cenário.
-
-**O QUE OS HARNESSES NÃO COBREM — e verde deles não é "o jogo funciona":** eles publicam mensagem,
-**não clicam em nada.** Duplo-clique, clique em slot, arrastar, teclado e tudo que roda DURANTE a
-batalha em resposta a isso estão fora. Na separação, QUATRO bugs saíram exatamente daí e os quatro
-foram achados pelo Gabriel jogando. **Conferência em jogo continua sendo dele, sempre.**
-
-**Terminação de linha:** o `.gitattributes` IMPEDE (LF no repo, CRLF na cópia de trabalho) e o
-`rodar-telas.js` ACUSA se algo escapar. Arquivo misto não é cosmético — já grudou um `else if` num
-comentário e virou código comentado.
-
-**A armadilha do CSS por tema:** a escada de `@media` que encolhe os ladrilhos tem de vir DEPOIS do
-bloco base do tema. `ferramentas/separar-css.js` prova as duas coisas (empate de especificidade e
-contagem de regras) antes de escrever — CSS pode ficar válido e semanticamente MORTO.
+| quando a tarefa for | leia |
+|---|---|
+| pele de facção / cenário de batalha | `docs/MANUAL-cenario.md` |
+| `wwwroot/`, telas, a ponte C#↔JS | `docs/MANUAL-front.md` |
+| motor de combate: dano, reações, turno, bot, bancada | `docs/MANUAL-combate.md` |
+| implementar um passo da progressão | `docs/GDD-progressao.md` §7, depois o `GDD-combate.md` |
+| o desenho de uma decisão grande | os `docs/ADR-*.md` |
+| o que foi tentado e MORREU | `git log` |

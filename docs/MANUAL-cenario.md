@@ -10,6 +10,74 @@
 
 ---
 
+## Por onde começar — leia nesta ordem
+Oito peles prontas (👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos · ⭐ Especial ·
+🔱 Decaídos · ❄️ Ascendentes), falta 1. **A conta das assinaturas está fechada:** dia claro (Reino), lua
+(cemitério), estrelas (invasão), âmbar de fogo (Folclore), crepúsculo (praia), interior sem céu
+(Especial), luz vinda de baixo (Inferno) e a paisagem vista por um RECORTE (a janela dos Ascendentes).
+Pros Humanos não sobra HORA nenhuma — o caminho é o mesmo do ⭐ Especial e dos ❄️ Ascendentes: um LUGAR em
+vez de uma hora, ou um enquadramento.
+**Não invente processo: já existe manual, e ele é caro — cada linha dele custou uma rodada de "ficou
+ruim" em jogo.**
+1. **`docs/MANUAL-cenario.md`.** É O manual: as três camadas e o que
+   decide em qual entrar, ladrilho × canvas × endereço, o MAESTRO (dado compartilhado), os motores
+   já extraídos, a lista de ARMADILHAS (cada uma já custou tempo — leia todas antes de desenhar) e as
+   LIÇÕES DE DESENHO. Se for contra alguma delas, seja de propósito e diga por quê.
+2. **Uma pele pronta INTEIRA, das duas pontas:** o bloco `body[data-tema="misticos"]` no `estilo.css`
+   e a entrada `misticos` do `AR_DO_TEMA` no `jogo.js` (a mais completa: mar, dragão em três
+   distâncias, lâmpada, aparições, moldura em canvas). O ⭐ Especial é a segunda melhor referência, e
+   a única com INTERIOR, com peças que se ocultam entre si (porta × sentado, anel × cocô) e com o
+   `comListras` — o padrão de "monta o caminho UMA vez, usa pra preencher E recortar". O 🔱 Decaídos
+   é a mais barata de imitar em peça grande: ela é montada de MEMBROS sorteados num caminho
+   só (`tracarMembro`, com o sentido do traço garantido por construção), o maestro sendo LUZ e não
+   vento (`inferno.pulso`), e uma HISTÓRIA amarrando as peças umas nas outras. O ❄️ Ascendentes é a mais
+   NOVA, e a de imitar quando a cena tiver um ROTEIRO: a noite inteira dele é uma sequência de passos
+   (`criarRoteiroDaNoite`) escrita num maestro por uma camada que **não desenha nada**, e lida por
+   quatro peças em cantos diferentes da tela. É também a única em que a paisagem é vista por um
+   RECORTE, e ela custou TRÊS versões — as duas que morreram estão contadas no ROADMAP, que é onde o
+   que não deu certo fica registrado.
+3. **`git log --oneline` dos PRs de cenário** (#195, #197, #198, #199, #200, #201, #202, #203) — as
+   mensagens contam o que foi tentado e MORREU, que é a parte que o código não mostra.
+
+**A receita, em uma linha:** o tema é `faccao.ToString().ToLowerInvariant()` → `body[data-tema]`, e
+custa **zero C#** — um bloco de CSS mais uma entrada de configuração. Tema sem CSS e sem entrada no
+`AR_DO_TEMA` simplesmente luta no visual padrão (foi assim que o Folclore saiu inteiro no #199).
+
+**Depois da separação (ago/2026) isso virou:** criar `wwwroot/cenarios/<faccao>/<faccao>.js` com
+`export const ar = {...}` e os builders, e pôr **uma linha** no registro `AR_DO_TEMA` do `jogo.js`.
+Mais o `<faccao>.css` na mesma pasta (e o `<link>` no index.html). **E rodar
+`node --experimental-vm-modules ferramentas/rodar-tema.js` antes de pedir conferência em jogo.**
+
+**As decisões que vêm ANTES de desenhar qualquer coisa:**
+- **Que assinatura sobrou.** Dia claro é do Reino, lua do cemitério, estrelas da invasão, âmbar do
+  fogo, crepúsculo da praia. Escolha o que SOBROU antes de escolher o que é bonito — é o que faz o
+  capítulo ser reconhecível de relance.
+- **Os 4 apóstolos entram pelo SINAL, não pela figura.** Nada de corpo humano (fica esquisito em canvas);
+  o gênio é a lâmpada, a sereia é a cauda, a fada é o vaga-lume maior. E o gesto tem que ser do sinal:
+  cauda sozinha fazendo salto de golfinho lê como pedaço arremessado.
+- **Uma peça CENTRAL, uma fonte de luz.** Fogueira, lâmpada. E o que mais acontece na cena responde a
+  ela ou ao maestro.
+- **Verificação:** `node --check jogo.js`, chaves do `estilo.css` batendo, todo builder do
+  `noFundo`/`naFrente` com definição, nenhuma chave de config sem uso, e `dotnet build` limpo. Raio
+  negativo num `arc`/`ellipse` LANÇA e mata o `requestAnimationFrame` — a cena congela em silêncio.
+  **Pior ainda: NaN em coordenada NÃO lança**, só não desenha (`Math.pow(negativo, fracionário)` é a
+  fonte clássica). Vale montar a **bancada headless** do tema — extrair os builders com `eval` + um
+  `ctx` de mentira que VALIDA cada argumento (raio ≥ 0, tudo finito, `save`/`restore` batendo) e
+  rodar ~900s de `dt` fixo. Ela já pegou bug fatal em três peles seguidas.
+- **A conferência em jogo é do Gabriel**, sempre: quase todo acerto deste front veio de ele olhar
+  rodando e apontar o defeito exato. E **quando ele descreve um MECANISMO, implementar LITERALMENTE**
+  — no ⭐ Especial eu interpretei quatro vezes e errei as quatro; o desenho dele estava certo desde a
+  primeira frase.
+
+
+## Ao renomear uma facção: o que é derivado e o que não é
+
+A chave de tema NASCE do enum (`FluxoDoFront.cs`, `faccao.ToString().ToLowerInvariant()`), então o
+`body[data-tema]`, a pasta `wwwroot/cenarios/<tema>/`, os dois arquivos dela, o `<link>` do index e a
+entrada do `AR_DO_TEMA` têm de mudar no MESMO commit ou o tema some sem erro nenhum. **O save NÃO
+quebra:** não há `JsonStringEnumConverter`, então enum vira NÚMERO no JSON — renomear o membro é
+seguro desde que a ORDEM da lista não mude.
+
 O capítulo em que se luta dá o LUGAR da batalha. `EstadoDeBatalha.Tema` → `body[data-tema]` → CSS +
 canvas. Capítulo sem tema luta no visual padrão; a Arena nunca tem tema (é laboratório, não lugar).
 

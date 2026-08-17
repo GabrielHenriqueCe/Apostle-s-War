@@ -14,63 +14,96 @@
 
 ---
 
-## Onde paramos (15/ago/2026)
+## Onde paramos (17/ago/2026)
 
-**Main em `18cd926`.** Sete PRs mergeados nas duas últimas sessões, todos da **PROGRESSÃO** saindo do
-papel — a ordem é a do `GDD-progressao.md` §7, e ela não é negociável (status e turno ANTES de nível
-e raridade):
+**Main em `6d62f67`, working tree limpo fora este arquivo. Nenhum PR aberto.** A sessão não tocou
+código do jogo: foi inteira sobre **o custo de contexto e a arrumação dos documentos**.
 
-| # | o que entrou |
-|---|---|
-| #232 | o handoff da progressão em doc |
-| #233 | o **perfil de distância** no motor (`Arquetipos.MultiplicadorDePosicao` + `Combate.Casa`) |
-| #234 | o **mapa de calor** da posição na preparação da fase |
-| #235 | o aviso do RNG da bancada (as 5 linhas que oscilam são COMPORTAMENTO) |
-| #236 | o **medidor de turno** — a `FilaDeTurnos` matou o `for` sobre `Equipe1 ++ Equipe2` — e a barra na tela |
-| #237 | **`DEF/(DEF+5000)`** + **Precisão × Resistência** (o passo 4 do GDD) |
+O gatilho: um "oi" sem tarefa nenhuma deixou o contexto em 28%. Medimos em vez de chutar, e o
+diagnóstico virou um plano de 5 passos, salvo em
+`~/.claude/plans/o-ctx-apenas-dando-pure-pearl.md` (aprovado, com só o Passo 1 executado).
 
-**PR ABERTO, esperando o merge dele:** branch `feature/fila-na-tela` (`a0f39e5` + `cd062d9`) — o
-**cordão de turnos** (a ordem dos 8 próximos, flutuando no alto do campo) e o **medidor zerando nas
-duas pontas a cada onda**. Ele já conferiu em jogo: *"tá ótimo"*.
+**Feito nesta sessão (fora do repo, sem PR):**
+- **A mina de 46k tokens foi desarmada.** A memória `project_estado.md` tinha virado diário de
+  **165 KB / 1.829 linhas** acumulado desde o PR #110 (a main já no #238) — e era uma segunda foto
+  concorrente DESTE arquivo. Apagada. O diretório de memória caiu de **216 KB → 55 KB**.
+- Salvei só o que não estava em outro lugar: a **ordem crítica de morte**
+  (`IReageAntesDeMorrer` → `IReageAoMatar` → `IReageAoMorrer`, em `Combat/Reacoes/IReacoes.cs`),
+  verificada contra o código antes de gravar.
+- Nasceu a memória do **orçamento de contexto**.
+- Um **mapa visual** do projeto foi publicado como artefato e **descartado de propósito** pelo
+  Gabriel — ele só queria ver uma vez. Não há mapa a manter; ver a decisão abaixo.
 
-## O que vem depois (na ordem do GDD §7)
+## O que vem — a fila desta arrumação (Passos 2 a 4 do plano)
 
-1. **Nível (curva do tipo) + Raridade** nos apóstolos — sem estrela.
-2. **Raridade → passiva que escala.**
-3. **Item equipado no apóstolo.**
+1. **Partir o `ROADMAP-refatoracao.md` (222 KB) em TRÊS baldes, não dois.** O corte por
+   `✅ feito` × `pendente` perde a parte mais cara: as ARMADILHAS e LIÇÕES DE DESENHO nasceram de
+   itens **já feitos**. Os baldes: **pendente** fica na fila · **histórico** sai (o `git log` guarda
+   melhor) · **referência viva** vai pro doc do assunto. O primeiro recorte é óbvio: a
+   `## CENÁRIO POR CAPÍTULO` ocupa as **linhas 103–1080 — 977 linhas, ~40% do arquivo**, e é um
+   manual morando dentro de uma fila → `docs/MANUAL-cenario.md`. Das 26 seções, ≥12 estão marcadas
+   ✅ FEITO. A fila de verdade são 392 linhas (1121–1512).
+2. **Partir o `GDD-progressao.md` (1.715 linhas) — mas por ASSUNTO + DISTÂNCIA NA FILA, não por
+   feito/pendente.** O GDD é MODELO: `DEF/(DEF+5000)` segue sendo a referência depois de
+   implementada, e apagá-la deixaria o código como única fonte da regra. O peso real:
 
-**Também em aberto, menores:** o `chance de aplicar: 75%` ao mirar (GDD §1 — e ele ficou *necessário*
-depois do #237, porque o texto da habilidade agora conta só metade da história); o **empurrão de
-medidor** como efeito de habilidade (a tabela está no GDD §1 — enquanto não existir, a barra quase
-nunca passa de 100 e as faixas 2–5 da rampa são código dormindo); e a **9ª pele (Humanos)**, que
-segue bloqueada de propósito até o fundo de facção no compêndio.
+   | seção | linhas | % |
+   |---|---:|---:|
+   | §4 ITENS | **696** | **40,6%** |
+   | §2 posição e tipo | 303 | 17,7% |
+   | §1 stats novos | 263 | 15,3% |
+   | §3 nível e raridade | 136 | 7,9% |
+   | §5 campanha | 121 | 7,1% |
+   | §Decisões fechadas | 104 | 6,1% |
+   | §7 o plano | 42 | 2,4% |
+   | §Revogado | 20 | 1,2% |
+
+   O corte: **`GDD-itens.md`** ← §4 (o passo mais distante da fila) · **`GDD-combate.md`** ← §1+§2
+   (o modelo vivo) · o **`GDD-progressao.md`** fica com §3+§5+§6+§7+decisões (~410 l, o que está em
+   curso) · §Revogado sai (é mensagem de commit por definição).
+3. **Instrução por assunto, carregada pela TAREFA.** O conteúdo mora em `docs/` (seu, portátil, no
+   GitHub, passa por PR); uma **skill de ~10 linhas** em `.claude/skills/` aponta pra ele e dispara
+   pela descrição. Ponteiro no `CLAUDE.md` não basta: põe a decisão de ler no assistente, e ela
+   falhou nesta sessão. Com isso o `CLAUDE.md` perde as 59 linhas do §CENÁRIO, as 27 do §FRONT e as
+   22 da §LORE (concluída; sobram ~6 acionáveis): **224 → ~140 linhas**.
+4. **A §Orientação do `CLAUDE.md` vira protocolo com orçamento** — ver "armadilhas" abaixo.
+
+**O trabalho de JOGO segue parado onde estava**, e ele volta a valer assim que a arrumação fechar:
+**nível (curva do tipo) + raridade**, depois **raridade → passiva que escala**, depois **item
+equipado**. Menores em aberto: o `chance de aplicar: 75%` ao mirar, o **empurrão de medidor** como
+efeito, e a **9ª pele (Humanos)**, bloqueada até o fundo de facção no compêndio. E a dívida do
+`docs/RELEITURA-backend-pendente.md` continua de pé.
 
 ## Decisões desta sessão que NÃO se reabrem
 
-- **A `chance` da habilidade e Precisão × Resistência são coisas SEPARADAS** e ambas ficam. Palavras
-  dele: *"cada hab vai ter a sua, é pra dar o incremento diferencial no rebalanceamento, ainda mais
-  em habs roubadas, e vai servir após haver diferença nas habs por raridade"*. São duas rolagens em
-  sequência — o que dá no mesmo que multiplicar as probabilidades, mas separadas elas permitem
-  distinguir *"a habilidade nem tentou"* de *"o alvo resistiu"* quando isso for pintado.
-- **A onda nova começa EMPATADA:** os dois lados zeram o medidor a cada rodada.
-- **O 2º brilho (a aura do cursor no passo de alvo) está MORTO** — aura de cursor não existe em tela
-  sensível ao toque. Se voltar, volta como destaque nas CAIXAS.
-- **O sinal de espera entre as fichas do cordão foi cortado**; o `Vez.Esperou` fica no motor.
-- **A bancada oscila por DESENHO, não por ruído** — está documentado no cabeçalho do próprio
-  relatório. Semear o RNG está descartado.
+- **O `docs/CONTEXTO.md` é o ÚNICO dono do estado da sessão.** Nada de uma segunda foto em memória.
+  Memória é **um arquivo, um fato**; passou de ~4 KB, virou diário.
+- **O mapa visual não será mantido.** Ele cumpriu o papel de orientar e foi descartado. Se um dia
+  voltar, volta **GERADO por ferramenta** (como a bancada escreve o `bancada-dano.md`), nunca
+  mantido à mão — mapa à mão apodrece igual ao ROADMAP, que é a doença que estamos curando.
+- **No ROADMAP, item feito vence; no GDD, não.** Um descreve trabalho, o outro descreve regra.
+- Os **4 ADRs já são o formato-alvo** (um assunto, um arquivo, 69 KB somados). O padrão não é novo —
+  é o que o ROADMAP deixou de seguir.
 
 ## Armadilhas que morderam nesta sessão (não repetir)
 
-- **O `body` é um grid de TRÊS linhas** (topo · arena · painel). Peça nova entre o topo e o painel
-  entra como quarto item, rouba a linha do `1fr` e o campo encolhe — o canvas do cenário fica com o
-  tamanho velho e a cena aparece **cortada e subindo**. Peça nova ali é **absoluta dentro da arena**.
-- **Mensagem de commit multilinha:** escrever o arquivo com a ferramenta de escrita, nunca com
-  `Out-File -Encoding utf8` do PowerShell — ele grava BOM e o BOM entra no assunto do commit.
-- **Squash-merge deixa a branch "não mergeada" pro git.** Conferir com `git diff main <branch>`
-  vazio antes do `-D`, e recriar branch nova com `git switch -C <nome> origin/main` (o working tree
-  passa junto).
-- **Rodar `dotnet test` suja o `docs/bancada-dano.md`** em 5 linhas. Reverter quando a mudança do PR
-  não for de balanço.
+- **O `gitStatus` da abertura da conversa já traz os commits recentes e o branch** — repetir
+  `git log`/`git branch` é contexto jogado fora.
+- **Não abrir documento inteiro por curiosidade.** `ROADMAP` = ~63k tokens (um terço da janela num
+  `Read` cru); `GDD` = ~29k. **Só por seção**, com `Grep` ou `offset`/`limit`. Saudação sem tarefa =
+  ler este arquivo e PARAR.
+- **`Measure-Object -Line` do PowerShell engole linha vazia e subconta** — deu 1.341 num arquivo de
+  1.715 linhas. Pra contar linha de verdade, contar `\n` no texto cru.
+- **Ao partir GDD ou ROADMAP, mover os PONTEIROS no mesmo commit.** O `CLAUDE.md` cita
+  "`GDD-progressao.md` §7" e este arquivo cita §1 e §7; é a mesma mina da renomeação de facção —
+  o ponteiro quebra sem erro nenhum.
+- **Memória velha mente com confiança:** a `project_estado.md` dava o Guarda como dono do
+  `IReageAntesDeMorrer`, e o código mostra `Fada/Voar`. Conferir antes de gravar como fato.
+
+## Pendência menor herdada
+
+`memory/feedback_colaboracao.md` tem 9,3 KB — é o único arquivo de memória acima de 4 KB agora.
+Vale conferir se virou diário também, na mesma passada da arrumação.
 
 ## O que o Gabriel confere, sempre
 

@@ -22,7 +22,7 @@ namespace ApostlesWar.Presentation.Front
     /// pra si. O jogo, por outro lado, é um laço SÍNCRONO que bloqueia esperando o input do jogador.
     /// Se rodassem juntos, um congelaria o outro. A solução: a UI fica na thread principal e o jogo roda
     /// numa thread de fundo; a espera do jogo vira `_mensagens.Take()`, que dorme até um clique chegar.
-    /// É por isso que NADA do motor precisou virar async — o laço continua exatamente como no console.
+    /// É por isso que NADA do motor precisa ser async: pra ele, esperar um clique é esperar, e ponto.
     /// </summary>
     internal class PonteWebView2
     {

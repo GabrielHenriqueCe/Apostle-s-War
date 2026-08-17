@@ -8,7 +8,7 @@ namespace ApostlesWar.Domain
 
     /// <summary>
     /// Base dos EVENTOS de combate — o "fato" do que aconteceu, produzido pelo motor/ticks e
-    /// consumido pela exibição (console hoje, porte amanhã). É um STREAM ordenado: dano e cura são
+    /// consumido por quem exibe, seja qual for a pele. É um STREAM ordenado: dano e cura são
     /// irmãos (EventoDano/EventoCura). Embrião do log/stream da FILA B (ADR). As reações olham só os
     /// EventoDano (`.OfType<EventoDano>()`).
     /// </summary>

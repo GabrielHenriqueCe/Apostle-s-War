@@ -5,7 +5,7 @@ namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
     /// A impl WEB da porta <see cref="ITelaDeCombate"/>. Note o que ela NÃO faz: desenhar. Cada chamada
-    /// imperativa que vinha do console ("exiba isto") é traduzida em uma de duas coisas:
+    /// imperativa da porta ("exiba isto") é traduzida em uma de duas coisas:
     ///   - um RETRATO novo do estado (a tela se redesenha sozinha a partir dele), ou
     ///   - um EVENTO (o número que pula, o alvo que treme).
     /// Essa inversão é o que torna a tela declarativa e o que permite trocar emoji por sprite depois
@@ -22,7 +22,7 @@ namespace ApostlesWar.Presentation.Front
             _ponte = ponte;
         }
 
-        /// <summary>No console isso apagava a tela. Aqui a tela se redesenha do estado — nada a fazer.</summary>
+        /// <summary>Vazio de propósito: a tela se redesenha a partir do estado, não há o que apagar.</summary>
         public void LimparTela() { }
 
         public void ExibirPartida(List<Combate> jogadores, List<Combate> inimigos)

@@ -303,3 +303,100 @@ de duelo — apóstolo com número baixo pode ser reativo, não fraco. A coluna 
 habilidade que dispara 0× no apóstolo inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
 
 Roda em ~37s dentro do `dotnet test`.
+
+---
+
+## O turno do personagem — e os DOIS relógios
+
+O `Combate` POSSUI o seu `Turno` (`Combate.Turno`, criado no ctor, vive o combate todo). Estado
+turn-scoped mora nele; duração e cooldown são do COMBATENTE (persistem, o turno só avança).
+
+**Reset "1x por agressor por turno" do CONTRA-ATAQUE — ✅ FEITO.** O registro de quem já foi
+contra-atacado saiu dos HashSets privados (ContraAtaque tinha o seu, Operário nem tinha) e virou a
+regra única `TentarContraAtacar(agressor, chance)` (chance + "1x por agressor", registra no sucesso),
+limpa no Finalizar. Fonte única — buff ContraAtaque, PassivaHeroi e PassivaOperario passam TODOS por
+ela, então o gap multi-fonte (Herói com buff do Dragão + passiva) morreu: o primeiro registra, o
+segundo vê que já contra-atacou. O hook `StatusEffect.AoPassarTurno` (virtual usado só pelo
+ContraAtaque, o único "capaz virtual sem irmã interface") foi REMOVIDO. Herói virou passiva-pura
+(IReageAoSerAtacado, sem buff via IPassivaInicial); Operário ganhou o limite 1x/agressor.
+
+- **(Fatia B) Reset 1x-por-agressor das OUTRAS reações — ✅ FEITO (jul/2026).** O `_jaContraAtacou`
+  (HashSet) virou `_jaReagiu` (`Dictionary<object, HashSet<Combate>>` POR CHAVE) no Turno +
+  `TentarReagir(chave, agressor, chance)`; contra-ataque usa uma CHAVE compartilhada (sentinel), cada
+  reação de veneno keya por `GetType()`. `EspinhosVenenosos`/`PutrefacaoContagiosa`/`Fedorento` migradas
+  (gate no início do `AoSerAtacado`) — de por-hit → 1x por agressor por turno. **As duas frequências são
+  first-class:** `TentarReagir` é OPT-IN (por-agressor); por-hit dispara direto (sem orçamento) — regra
+  "só cria método quando há estado" (documentado no `TentarReagir`). 5 testes headless do mecanismo.
+
+- **(Fatia C) — ✅ FEITO (RENASCIDA como `Equipe`/`Batalha`, jul/2026).** A ideia original
+  ("times no combatente / TimeAtualDoTurno") MORREU na investigação: a premissa ("cada ponto recalcula
+  `is Jogador`") era drift (é 1×, threaded como param) e os CONTEXTOS já são a fonte de perspectiva que
+  o domínio consome. Renasceu por um futuro NOVO que o Gabriel nomeou — o modo **VERSUS**, que virou a Arena. O
+  que se fez: `Combat/Batalha.cs` (`Equipe { Membros }` + `Batalha { Equipe1/2, EquipeDe, OponenteDe,
+  PerspectivaDe, Combatentes }`), mora no CombateService (rebuild por rodada, como o RelogioDoCombate).
+  `PerspectivaDe(portador)` é o "um só caminho": derivada da ESTRUTURA (qual equipe), matou os 3 flips
+  manuais (`aliadosDoAlvo = inimigosDoAtacante` + a recursão do revide colapsou numa pergunta só). O
+  `is Jogador`/`is Inimigo` do fluxo saiu: **time** = `PerspectivaDe`; **controle** = mapa
+  `Dictionary<Equipe, IControladorDeTurno>` (campanha: E1→humano, E2→bot; Versus troca o mapa);
+  **apresentação** (UX de preparação) = "controlador é bot". As 5 `ProcessarReacoes*` + `ExecutarAtos`
+  perderam os params de perspectiva. Refactor PURO (54 testes). Sobrou o `is Jogador` em `AtaqueBasico`
+  (contexto próprio) — não é fluxo, fica.
+
+**NÃO confundir com o `RelogioDoCombate`**, que é o contador GLOBAL de rodadas, um nível acima ("boss
+mata todos após X turnos"). São dois relógios em níveis diferentes.
+
+---
+
+## O revide carrega a HABILIDADE
+
+**Status:** ✅ COMPLETO. `ResultadoReacao.RevidarAlvo: Combate?` era uma "request" disfarçada
+de "declaration" — o executor decidia sozinho o HOW (1.0x hardcoded, qual natureza). Virou
+`Revide? Revide` onde:
+
+```csharp
+record Revide(IAtivavelComNatureza Habilidade, Combate Alvo);
+interface IAtivavelComNatureza { EventoDano AtivarComNatureza(Combate atacante, Combate alvo, NaturezaDano natureza); }
+```
+
+`IAtivavelComNatureza` é ISP — só A1 (AtaqueBasico) e Marretada implementam. O executor chama
+`Revide.Habilidade.AtivarComNatureza(alvo, Revide.Alvo, natureza)` polimorficamente, sem saber
+qual skill é. **Sem ContextoCombate na assinatura** (desvio da ideia original) — o revide não
+precisa de Aliados/Inimigos, só do atacante fixo; carregar `ctx` seria parâmetro sem uso.
+
+Cada reação que declara revide busca a skill do portador via `IAtaquePrimario`/tipo concreto
+(não hardcoda `AtaqueBasico` cru — pensando em A1 customizada futura, que pode ser AoE ou
+aleatória):
+- ContraAtaque: `portador.Personagem.Habilidades.OfType<IAtaquePrimario>().OfType<IAtivavelComNatureza>().First()`
+- Operário: `portador.Personagem.Habilidades.OfType<Marretada>().First()`
+
+**EspinhosVenenosos NÃO é cliente** (correção: o ROADMAP antigo listava errado — Espinhos só
+aplica Veneno+Queima no atacante, nunca revidou com dano).
+
+**Quebra do loop A↔B: profundidade, não Natureza (mudou do desenho original).** A ideia inicial
+usava `NaturezasDano.Revide` com `TipoReacao.SemContraAtaque` só pra sinalizar "não gera outro
+contra-ataque" — auditoria mostrou que `SemContraAtaque` só era lido em UM lugar (dentro do
+próprio ContraAtaque), um enum value inteiro existindo só pra carregar controle de fluxo
+disfarçado de tipo de dano. Trocado por **profundidade explícita** em `ProcessarReacoesAlvo`
+(`int profundidade = 0`, incrementado na recursão): só processa `res.Revide` quando
+`profundidade == 0`. `TipoReacao.SemContraAtaque` e `NaturezasDano.Revide` foram REMOVIDOS —
+`TipoReacao` agora é só `{ Completa, Nenhuma }`; o revide usa `NaturezasDano.Ataque` (mecanicamente
+é um ataque igual qualquer outro). Se um dia o revide precisar de comportamento distinto de um
+ataque normal, o lugar certo é metadado no `EventoDano` (ver "Proveniência de status"), não uma
+Natureza nova.
+
+**Operário:** aceita o gap de multi-fonte conscientemente. Se o mesmo personagem tiver, ao mesmo
+tempo, o buff genérico ContraAtaque (ex: aplicado por DragaoProtetor) E a passiva própria (10%
+Marretada), as duas podem contra-atacar no mesmo golpe — cada uma com seu próprio limite "1x por
+agressor" independente, sem tracker compartilhado. Resolver isso de vez é o "reset 1x-por-agressor
+reutilizável" já registrado em Turno (resto); não vale puxar pra cá sem um caso real doendo.
+
+**Ideia futura registrada:** um personagem cuja habilidade é ativa-e-passiva ("eu sempre
+contra-ataco com ESTA habilidade", sem RNG) já é suportado de graça pelo desenho atual — só
+precisa declarar `Revide(suaHabilidade, contraparte)` como o Operário faz. A interação desse
+personagem com o ContraAtaque genérico do Dragão (qual prevalece?) fica em aberto pro dia que
+existir.
+
+**Depois:** quando um personagem novo quiser revidar com outra skill, basta implementar
+`IAtivavelComNatureza` nela. Zero mudança no executor.
+
+---

@@ -92,9 +92,9 @@ mora na Application (`CampanhaService`), nunca no front.
 
 **REBALANCE (#16): EM ITERAÇÃO, não fechado.** A bancada é o instrumento e a 1ª passada (#189) já
 entrou; o trabalho agora é o laço `editar número → dotnet test → git diff docs/bancada-dano.md`,
-quantas voltas o Gabriel achar que precisa. Os fios de combate que aquele parágrafo listava como
-abertos (sweep de composição, turno-resto, passiva-conta-mortos) estão TODOS fechados — ver §OS FIOS
-QUE FALTAM, que é o índice do que resta.
+quantas voltas o Gabriel achar que precisa. Os fios de combate que este parágrafo listava como
+abertos (sweep de composição, turno-resto, passiva-conta-mortos) estão TODOS fechados — ver
+§ONDE ESTÁ CADA COISA, que é o índice do que resta.
 
 ---
 
@@ -259,7 +259,7 @@ PRs #204–#213, que guardam melhor e datado. O mapa e o contrato finais do fron
     morreu (premissa velha: contexto já é a fonte de perspectiva); virou **`Equipe`/`Batalha`** (Combat/):
     a perspectiva nasce num só lugar (`Batalha.PerspectivaDe`) derivada da ESTRUTURA (qual equipe), não
     do tipo `is Jogador`. Matou os 3 flips manuais (incl. a recursão do revide) e desacoplou
-    time×controle×classe → **seam do modo VERSUS** (§Versus). Refactor puro, 54 testes. Medidor de
+    time×controle×classe → **seam do modo VERSUS** (hoje a Arena). Refactor puro, 54 testes. Medidor de
     velocidade = habilitado, fora do #11.
 12. ✅ **Passiva-conta-mortos** — FEITO. Capacidade genérica `EscalaComMortos` (Skills/Passivas/):
     `IReageAoInicioTurno` que renova um buff proporcional aos mortos no campo (molde da Ventania;
@@ -574,203 +574,37 @@ entrada dos sprites).
 
 ---
 
-## OS FIOS QUE FALTAM (visão de alto nível)
+## ONDE ESTÁ CADA COISA (o índice, depois da arrumação de ago/2026)
 
-Resumo do que resta no combate. **C5 COMPLETO** (todas as passivas migradas, sistema
-velho aposentado). O que resta:
+| assunto | onde |
+|---|---|
+| o que fazer a seguir | a **FILA DE EXECUÇÃO** acima |
+| as regras vivas do motor (dano, reações, turno, bot, bancada) | `MANUAL-combate.md` |
+| a ponte, o contrato de tela e as camadas | `MANUAL-front.md` |
+| como se faz uma pele de facção | `MANUAL-cenario.md` |
+| o modelo do jogo (números, curvas, progressão) | `GDD-progressao.md` |
+| o que ainda é ideia (itens, arena, morte-como-sistema) | `GDD-expansao.md` |
+| o DESENHO de cada decisão grande | os `ADR-*.md` |
+| o que foi tentado e MORREU, e quando | `git log` |
 
-1. **EventoDano / contexto rico** — Fatia 1 e Fatia 2 FEITAS. Falta só a passiva-conta-mortos
-   (1b) como cliente futuro do contexto rico.
-2. **Estado de Vida (Vivo/Morto) + Atos do turno** — ✅ **Passos 1-5 FEITOS** (State Pattern,
-   status no Morto, Atos, Guarda limpa, seleção de alvo por estado — PR #111). Falta só a
-   passiva-conta-mortos (1b), que é do EventoDano.
-3. **Turno (resto)** — ✅ **FEITO** *(verificado no código em ago/2026; o texto abaixo estava velho e
-   me fez listar como pendente algo pronto)*. O reset 1x-por-agressor do CONTRA-ATAQUE veio no #112, e
-   as OUTRAS reações também já usam o mesmo orçamento: `TurnoDoPersonagem.TentarReagir(chave, agressor,
-   chance)`, chamado pelo `EspinhosVenenosos` e pelo `Fedorento` do Cocô, coberto por
-   `ReacaoPorAgressorTests.cs` (mesmo agressor não repete no turno · agressor diferente dispara · chave
-   diferente dispara · vira o turno e reabre). O **Zumbi saiu da lista** porque não tem mais reação de
-   apanhar: a `PutrefacaoContagiosa` morreu no #12 e ele ganhou a Horda (`EscalaComMortos`). E o
-   **`TimeAtualDoTurno` não vai existir** — ele foi substituído no #11 pelo `Batalha.PerspectivaDe`,
-   que deriva aliados/inimigos da ESTRUTURA (qual equipe) em vez de guardar times no combatente.
-4. **Buff-permanente vs passiva-pura** — ✅ **FEITO** (#111/#112): 6 passivas puras + Fantasma
-   (Removivel=false). Ver seção própria (marcada concluída).
-5. **Composição de Ações + Motor de Habilidades** — ✅ **SWEEP CONCLUÍDO** *(verificado no código em
-   ago/2026; o texto que dizia "agora: sweep por facção" era resíduo do meio da migração)*. Habilidade
-   é DADO (lista de Ações) rodada por um interpretador único. A conferência: os **76 arquivos de apóstolo
-   estão todos em `Apostolos/<Faccao>/<Apostolo>/`** (nenhum solto), e os únicos `override Ativar` que
-   restam são **8 arquivos `.Passiva.cs`** devolvendo `SemDano()` ou um efeito próprio — que é a forma
-   NORMAL de passiva, não sobra de ativa. **Nenhuma habilidade ATIVA tem `Ativar` override.**
-   Ver **ADR-composicao-de-acoes.md**. Era predecessor do Rebalanceamento, e por isso o #16 pôde
-   começar: mexer em número virou editar dado.
-6. **Rebalanceamento** — design de jogo (Sereia A3, Morcego→Vampiro, durações). FASE própria,
-   pós-composição.
+**O que resta no combate:** a passiva-conta-mortos tem a IRMÃ `EscalaComAbates` desenhada e não
+construída (seção própria), a proveniência de status está registrada sem cliente, e o rebalance
+(#16) segue em iteração. O resto dos fios fechou.
+## Composição de Ações, C5 e capacidades — ✅ FEITOS
 
-A **unificação dos mecanismos de ignorar** ✅ CONCLUÍDA (jul/2026) — a natureza virou lista, o
-`DeveAgir` morreu, 1 gate só. Ver a seção própria abaixo.
+O sweep das 9 facções está COMPLETO: habilidade é DADO (lista de `Acao` rodada por um interpretador
+único), **nenhuma ativa sobrescreve `Ativar`** (os 8 `override` que restam são `.Passiva.cs`, que é a
+forma normal de passiva), o vocabulário mapeado esgotou e o `EstadoAlvo.Ambos` morreu. As 36 passivas
+migraram pro modelo `IReageAo*` e o sistema velho foi aposentado; os 6 buffs-permanentes-por-contorno
+viraram passiva pura e o Fantasma ganhou `Removivel = false`.
 
----
+O desenho mora nos ADRs (`ADR-composicao-de-acoes.md`, `ADR-modelo-de-capacidades.md`); o
+**vocabulário de Ações pra reusar** está no `CATALOGO-de-acoes.md` — ler antes de criar habilidade
+nova, verbo compartilhado primeiro, bespoke só no 2º cliente.
 
-## Composição de Ações + Motor de Habilidades (MOTOR FEITO — SWEEP POR FACÇÃO)
-
-> **Índice das Ações (o que já existe pra reusar): `CATALOGO-de-acoes.md`.** Ler antes de criar
-> habilidade nova — verbo compartilhado 1º, promover bespoke no 2º cliente, não duplicar.
-
-**Status:** MOTOR IMPLEMENTADO (#116, verificado em jogo: Furtividade/Sushi/Prender + regressão
-do Mago) e **forma-construtor + apóstolo-como-arquivo FEITOS** (Mago piloto em `Apostolos/Reino/Mago/`).
-Ver **ADR-composicao-de-acoes.md**. É a "Auditoria das ativas" com dor real: ~70% das ativas
-são só dado (loop + lista fixa de efeitos), reinventando boilerplate. Predecessor do
-Rebalanceamento (mexer em número/efeito vira editar dado, não 74 classes).
-
-**Decisões novas (jul/2026, pós-motor):**
-- **Fusão do Nível A no sweep:** cada PR de facção migra os apóstolos direto pra FORMA FINAL
-  (pasta `Apostolos/<Faccao>/<Apostolo>/`, habilidades como métodos `static HabilidadeAtiva X() =>
-  new(...)`, passiva movida junto, classes velhas deletadas, linha do `PersonagemService` vira
-  `Apostolo.Definir()`). Uma passada por apóstolo em vez de duas — e a VIEW do apóstolo chega facção a
-  facção. O `PersonagemService` encolhe até virar o `Roster`.
-- **Família do revive mapeada (7 clientes de `Reviver`):** Nigiri, Céu, Tecnology, AnjoCaído,
-  DocesDeAbobora (revive SÓ 1), Circo (Intocável exceto self) e Atlantis (Intocável só nos
-  revividos — pipeline, segue 1 cliente, bespoke). `Reviver` precisa de percentualHP + quantos.
-  Todos os 7 são os únicos usuários de `EstadoAlvo.Ambos` (+ 1 check no CombateService) — o
-  `Ambos` morre quando o 7º migrar.
-- **`Escopo.OutrosAliados` tem 2 clientes** (OssoDuroDeRoer + Circo) — entra no vocabulário
-  quando o 1º migrar.
-- **Testes do motor ANTES do sweep — ✅ FEITO** (projeto `Tests/`, xUnit, 10 testes verdes):
-  escopo (próprio/todos-inimigos/todos-aliados), EstadoAlvo na execução (recém-morto pulado /
-  Mortos pega recém-morto / Ambos sem filtro), agregação+ordem (PorDanoCausado lê o eventos
-  completo), fragmento PorHP com cap, Aleatorio com duplicata, Strangler (Democracia override).
-  Rede de regressão de cada PR de facção: `dotnet test`. O "xUnit do JOGO" continua pra depois.
-- **Regra de processo:** todo PR de código que fecha um marco carrega o bump do ROADMAP/ADR
-  NO MESMO DIFF. Chega de PR de docs correndo atrás (drift aconteceu em #115 e #116).
-
-**Núcleo:** um interpretador ÚNICO (`HabilidadeAtiva.Ativar`) roda uma lista de **Ações**;
-**nenhuma habilidade sobrescreve `Ativar`**. Três níveis, todos pelo motor: (1) vocabulário
-puro, (2) vocabulário + 1 ação custom, (3) ação custom inteira — "único" vira uma `Acao`
-especial, não uma habilidade especial. A unidade de reúso é o **FRAGMENTO** (correção: NÃO a
-Ação inteira — Cura/Escudo compartilham o fragmento de valor e diferem só no verbo).
-
-**O motor (detalhe no ADR):**
-- **Loop-flip:** ação-por-fora; cada ação resolve seu **Escopo** + **EstadoAlvo** no momento
-  em que roda. Isso dissolve "escopo próprio" e "condição de estado" — não eram paredes.
-- **`AcaoSobreConjunto`:** 2º formato de ação (recebe o conjunto inteiro) pra agregação
-  cross-alvo. CONSTRUÍDA E REMOVIDA no sweep LadoSombrio (ADR §3.4) — o único cliente (média
-  da Putrefação) morreu no rebalance (cura por dano total = `PorDanoCausado` lê o `eventos`).
-  Desenho registrado; reconstrói se agregação real aparecer (candidata: Atlantis §8.1).
-- Ações ORDENADAS; cada uma vê o estado da anterior (AnjoCaído: revive→cura os revividos).
-- `EstadoAlvo` DESCE pra ação, avaliado NA EXECUÇÃO → o `Ambos` MORRE; a categoria "ao-matar"
-  se dissolve no fluxo normal (Sentença = `AplicarDebuff(Mortos)`).
-- Eixos da ação: **Operação × Escopo × EstadoAlvo × Valor(fragmento) × Seletor**.
-- Vocabulário mapeado: Dano, Cura, AplicarEscudo, AplicarBuff, AplicarDebuff, Reviver,
-  RemoverBuffs, RemoverDebuffs, MoverBuffs, ConcederTurnoExtra, **Explodir** (+ `IStatusComTick`,
-  `Seletor`). Implementados: Dano/Cura/AplicarEscudo/AplicarBuff/AplicarDebuff/Reviver/
-  RemoverBuffs/**Explodir** (genérico, `Seletor` + `IStatusComTick.Detonar → EventoDano`;
-  1º cliente Putrefação; Inferno no shim até Decaídos)/IStatusComTick/Seletor. Faltam:
-  RemoverDebuffs, MoverBuffs, ConcederTurnoExtra. *(Vocabulário esgotado desde os Ascendentes.)*
-- **Toda `Acao` declara `Utilidade` + `TemEfeitoUtil` + `PreverVidaRemovida`** (jul/2026, PR do bot):
-  o que ela FAZ, se tem trabalho agora e quanto machuca — tudo respondido pela própria ação. É o que
-  permite AVALIAR uma habilidade sem executá-la. `Utilidade` é abstrata: ação nova (inclusive bespoke
-  de apóstolo) é obrigada pelo compilador a se classificar, em vez de o avaliador dar `switch` no tipo.
-- Disciplina: promove no 2º cliente REAL; verificar-antes-de-fundir (o grep mente — **Copiando
-  era Balde 3 e é vocabulário puro**; **Atlantis** revelou o boundary de "pipeline / conjunto
-  afetado", 1 cliente, registrado sem construir).
-- Invariantes: `TipoAtaque` alimenta dispatch de passivas-atacante; o interpretador agrega os
-  `EventoDano` das ações de dano.
-
-**Sequência:** #115 piloto per-alvo ✅ → #116 motor (loop-flip) ✅ → #117 forma-construtor +
-Mago apóstolo-arquivo + rename passivas ✅ → #118 testes do motor ✅ → **Humanos ✅** (4 apóstolos na
-forma final em `Apostolos/Humanos/`; `Reviver` nasceu no Nigiri — 1º da família dos 7; Marretada
-é a 1ª híbrida `.Ativa.cs`; o Nigiri deixou de usar `Ambos`) → **Reino ✅** (Guarda/Ninja/Rei
-migrados em `Apostolos/Reino/`, ao lado do Mago piloto; `AplicarEscudo` nasceu Ação de
-vocabulário — Lealdade, já estava mapeada em §5.1 (como "Escudo") mas sem cliente até agora
-(nome `AplicarEscudo`, não `Escudo`, pra não colidir com `Skills.Buffs.Escudo` — o namespace
-raiz `ApostlesWar` é envolvente de quase todo o código); `Dano` ganhou
-`ignorarDefesaPct`/`forcaCritico` opcionais — Kunai; Shuriken estreou a 1ª Ação bespoke Nível 3,
-`GolpeSeguidor`, acoplamento hit-a-hit lido via `eventos`) → **LadoSombrio ✅** (Caveira/
-Fantasma/Abóbora/Zumbi migrados em `Apostolos/LadoSombrio/` — momento de design, estreou 4
-mecanismos novos do motor, com duas rodadas de revisão de Gabriel por cima do sweep:
-**regra do revive firmada** (ADR §9): `Reviver` per-alvo só com `percentualHP` — revive-de-N
-usa o pick do motor (habilidade declara `numeroDeAlvos: N` + `TipoAlvo.Aleatorio` +
-`EstadoAlvo.Mortos`, ação herda `AlvosResolvidos`; selecionado + extras sorteados).
-**DocesDeAbobora** (2º da família dos 7) é o 1º revive-de-N com pick REAL de morto (a dor do
-"primeiro da lista" do ADR-selecao-por-estado morreu); `CombateService` ganhou guard pra pick
-sem candidato (revive sem mortos ainda vale pelo Reflexo). **Rebalance da Putrefação** (cura
-20% do dano TOTAL, não média — a cura é EXTRA da hab, ação separada): matou o único cliente da
-`AcaoSobreConjunto` (construída e removida no mesmo sweep) e fez nascer o **`Explodir`
-genérico** (molde único das explosões: `Seletor.Tipo<Veneno>()` hoje, `Seletor.Tipo<Queima>()`
-quando o Inferno migrar em Decaídos; `IStatusComTick.Detonar(portador, detonador)` devolve o
-`EventoDano` — a explosão aparece na exibição, conta no `PorDanoCausado` e morte-por-explosão
-passa pelos Atos de morte, furo antigo fechado; Inferno segue no shim `Queima.Explodir`);
-**`Escopo.OutrosAliados`** real, 1º cliente OssoDuroDeRoer (Circo é o 2º, Folclore);
-**`RemoverBuffs`/`Seletor`** reais, 1º cliente DocesOuTravessuras. De quebra, `AplicarBuff`
-ganhou a sobrecarga `Func&lt;Combate,Buff&gt;` pra buffs com proveniência
-(ProtecaoAliado.Aplicador). 14 testes xUnit (3 novos: OutrosAliados, revive-de-N via pick,
-Explodir + cura-por-dano)) → **Tecnológicos ✅** (Invasor/Alien/Robô/Cientista — Barata estreou
-estado/ao-matar via `Dano`+`AplicarDebuff(Mortos)`, sem condicional; Tecnology 3º do Reviver;
-`EstenderBuffs` bespoke-local no Robô/RaioX, espelho do `RemoverBuffs` (§9); Galáxia = novo
-cliente de `OutrosAliados`; `EstenderTurno`→`AumentarDuracao` consolidado; princípio DECOMPOR
-firmado — ADR §3.3) → **Folclore ✅** (Ogro/Tengu/Palhaço/Troll — `RemoverDebuffs` nasceu [Coringa,
-gêmeo do RemoverBuffs]; `Dano`+`ignorarStatus` [CorteDeVento/Vendaval]; `AplicarDebuff`+`chance`
-[Pancada] + overload de proveniência [Irritar/Quebrar]; Circo 4º do revive + cliente de
-`OutrosAliados`; Porradeiro = molde do Tiroteio + cura do Zumbi; ZERO bespoke) → **Místicos ✅**
-(Gênio/Sereia/Fada/Dragão — pipeline §8.1 DISSOLVIDO: `Reviver` ganhou `buffNoRevivido` [Intocável só
-nos revividos], fez o Atlantis (5º do revive) e CONSERTOU o Circo (bug: pegava todos os outros vivos);
-PoMágico = vocabulário puro [`ignorarStatus` casa por tipo-BASE, `typeof(Buff)`=todos os buffs];
-`RestaurarHPMaximo` bespoke no Dragão; unificar-ignorar fica pra tema próprio no Vampiro/Decaídos) →
-**Especial ✅** (Cocô/Herói/Vilão/T-Rex — 100% vocabulário puro, ZERO bespoke, 1ª facção totalmente
-mecânica; DestruindoDia = 2º cliente do `RemoverDebuffs`, SalvandoDia = mais um de `OutrosAliados`) →
-**Decaídos ✅** (Morcego/Vampiro/Elfo/Diabo — 100% vocabulário puro, ZERO bespoke; `ConcederTurnoExtra`
-construído [1º cliente = Rato Voador, não o Copiando]; Inferno migrou pro `Explodir` genérico e o shim
-`Queima.Explodir` morreu [explosão agora entra no pipeline]; Anjo Caído = 6º do revive
-[`RemoverDebuffs`(Sentença,Mortos)+`Reviver`+`Cura`, a ordem quebra a Sentença antes de reviver];
-renomes do Vampiro: "Controle de Sangue" 🩸 + "Vampiro Primordial" 🌙; colisão "Espinhos" resolvida
-[passiva do Elfo → `EspinhosCorrompidos`]; unificar-ignorar NÃO feito aqui — vira PR próprio a seguir) →
-**Ascendentes ✅ — SWEEP DAS 9 FACÇÕES COMPLETO** (Boneco de Neve/Mímico/Anjo/Papai Noel — 100%
-vocabulário puro, ZERO bespoke; `MoverBuffs` construído [gêmeo do RemoverBuffs, cliente Copiando] e
-com ele o vocabulário mapeado esgotou; Imitação = `Dano(Func)` [molde Tengu]; Céu = 7º/último do revive
-e último apóstolo com `Ambos` → agora NENHUM apóstolo usa `Ambos`; fio §9 fechado com Repetindo deixada como
-está [3ª de 3, igual AnáliseCrítica/Policial]) → **sweep segue** (unificar-ignorar → pick do menu/§8.2
-quando o `Ambos` morrer). Revive 7/7 (Nigiri, DocesDeAbobora, Tecnology, Circo, Atlantis, AnjoCaído,
-Céu). Quando uma facção ESTREIA um mecanismo, o apóstolo é momento de
-design (verificar em jogo com cuidado extra), não sweep mecânico.
-
----
-
-## C5 — padrão de reações das passivas (✅ COMPLETO)
-
-As 36 passivas migradas pro modelo de interfaces `IReageAo*`, sistema velho aposentado. A ordem
-crítica de morte e os dois sabores do lado atacante estão em `docs/MANUAL-combate.md`.
----
-
-## Buff-permanente vs passiva-pura vs buff-não-removível (FIO NOVO — descoberto ao migrar início-de-turno)
-
-**Status:** ✅ **FEITO** (PRs #111/#112). Os 6 viraram passiva-pura (capacidade direta) e o
-Fantasma ganhou `Removivel = false` (segue buff, só protegido). Herói veio junto no #112. O
-texto abaixo fica como registro da decisão. Gabriel
-identificou: vários personagens aplicam um BUFF PERMANENTE (int.MaxValue) via IPassivaInicial
-"pra contornar" — quando o certo seria a passiva SER a capacidade diretamente. Foi a gambiarra
-que originou a refatoração. Três categorias distintas (não "buff vs passiva"):
-
-1. **Buff permanente NÃO-REMOVÍVEL** — só o **Fantasma** (Intocável permanente que NÃO deve
-   ser dispelável). Hoje é buff comum (removível). Falta o conceito "buff não-removível" —
-   provavelmente uma flag `Removivel = false` no StatusEffect (pequena, geral), em vez de
-   converter pra passiva pura. O Fantasma continua com buff, só protegido de remoção.
-2. **Passiva PURA** (a passiva É a capacidade, sem buff intermediário) — **Abóbora**
-   (IBloqueiaStatus, hoje ImunidadeDebuffs), **Dragão** (bloqueio Veneno/Queima, hoje
-   ImunidadeEspecifica — pode deletar o buff depois), **Herói** (IReageAoSerAtacado /
-   contra-ataque, hoje ContraAtaque), **Morcego** (IReageAoCausarDano / cura 15%, hoje
-   Sedento), **Anjo** (IReageAoInicioTurno / cura 5%, hoje CuraContinua), **Sereia**
-   (IModificaDanoRecebido / -15%, hoje ReducaoDanoFixo). Cada um passa a implementar a
-   interface da sua capacidade direto — é o modelo de capacidades do ADR. É DOR (o buff é
-   contorno), não pureza. Os buffs cuja MECÂNICA Gabriel gostou (ReducaoDanoFixo "Couraça",
-   Sedento) ficam pra reuso em habilidades ativas (ver Rebalanceamento), só somem de serem o
-   meio da passiva.
-3. **Reaplica buff no início do turno** — Tengu, Elfo (FEITO — viraram IReageAoInicioTurno
-   2t/turno), Genio (já era). Categoria resolvida.
-
-Agrupar B (passivas puras) numa branch; o Fantasma (C) pode ir junto ou virar detalhe.
-
----
-
+**A disciplina que sobrevive ao sweep:** promover no 2º cliente REAL, e verificar antes de fundir
+(o grep mente). Quando uma facção ESTREIA um mecanismo, aquele apóstolo é momento de DESIGN —
+conferir em jogo com cuidado extra —, não sweep mecânico.
 ## Rebalanceamento de personagens (FASE PRÓPRIA, pós-estrutura)
 
 **Status:** BACKLOG DE DESIGN (não refactor). Só DEPOIS do C5/estrutura estabilizar — mudar
@@ -800,167 +634,16 @@ explicar ("aparou", "imune", "reduziu de X pra Y").
 
 ---
 
-## EventoDano — o registro rico do golpe (✅ FATIA 1 + FATIA 2 FEITAS)
+## EventoDano e a unificação do ignorar — ✅ FEITOS
 
-O record do golpe existe e o `ContextoReacao` já é rico (FoiCritico, Aliados, Inimigos). A distinção
-dos 3 contextos está em `docs/MANUAL-combate.md`; o `EventoDano` por ID segue na FILA B.
+O record rico do golpe, o `ContextoReacao` enriquecido, a natureza falando a língua da LISTA e o
+`DeveAgir` morto. As regras estão em `docs/MANUAL-combate.md`; o `EventoDano` por ID segue na FILA B.
+## Conceito de Turno — ✅ FEITO
 
----
-
-## Unificar os 3 mecanismos de ignorar status — ✅ CONCLUÍDO (jul/2026)
-
-A regra que ficou está em `docs/MANUAL-combate.md`.
-
----
-
-## Conceito de Turno (TurnoDoPersonagem) — PARCIALMENTE FEITO
-
-**Status:** RELÓGIO FEITO. TurnoDoPersonagem extraído (ADR em docs/ADR-conceito-de-turno.md):
-Iniciar() (tick dos status) e Finalizar() (avança duração + remove expirados + avança cooldowns
-+ limpa contra-ataques do turno).
-
-**Reset "1x por agressor por turno" do CONTRA-ATAQUE — ✅ FEITO.** O registro de quem já foi
-contra-atacado saiu dos HashSets privados (ContraAtaque tinha o seu, Operário nem tinha) e virou a
-regra única `TentarContraAtacar(agressor, chance)` (chance + "1x por agressor", registra no sucesso),
-limpa no Finalizar. Fonte única — buff ContraAtaque, PassivaHeroi e PassivaOperario passam TODOS por
-ela, então o gap multi-fonte (Herói com buff do Dragão + passiva) morreu: o primeiro registra, o
-segundo vê que já contra-atacou. O hook `StatusEffect.AoPassarTurno` (virtual usado só pelo
-ContraAtaque, o único "capaz virtual sem irmã interface") foi REMOVIDO. Herói virou passiva-pura
-(IReageAoSerAtacado, sem buff via IPassivaInicial); Operário ganhou o limite 1x/agressor.
-
-**Caminho B — TurnoDoPersonagem PERSISTENTE — ✅ FEITO (FILA A #11 Fatia A, jul/2026).** O
-TurnoDoPersonagem deixou de ser TRANSIENTE (`new` a cada turno): o `Combate` agora POSSUI o seu
-`Turno` (`Combate.Turno`, criado no ctor, vive o combate todo). O estado turn-scoped
-`_jaContraAtacou` + `TentarContraAtacar` MUDOU DE CASA (Combate → Turno); o `Combate.TentarContraAtacar`
-virou FACHADA que delega ao Turno (as passivas chamam `ctx.Portador.TentarContraAtacar` — não mudaram
-nada). O `Finalizar` limpa o próprio set (o `Combate.LimparContraAtaques` sumiu). Foi feito PRIMEIRO,
-como fundação, pra as fatias B/C nascerem na casa certa. Refactor puro: 45/45 testes, zero mudança de
-comportamento. Habilita ideias de Gabriel: medidor de turno / velocidade nos stats (feature à parte).
-
-**FALTA (Turno resto):**
-- **(Fatia B) Reset 1x-por-agressor das OUTRAS reações — ✅ FEITO (jul/2026).** O `_jaContraAtacou`
-  (HashSet) virou `_jaReagiu` (`Dictionary<object, HashSet<Combate>>` POR CHAVE) no Turno +
-  `TentarReagir(chave, agressor, chance)`; contra-ataque usa uma CHAVE compartilhada (sentinel), cada
-  reação de veneno keya por `GetType()`. `EspinhosVenenosos`/`PutrefacaoContagiosa`/`Fedorento` migradas
-  (gate no início do `AoSerAtacado`) — de por-hit → 1x por agressor por turno. **As duas frequências são
-  first-class:** `TentarReagir` é OPT-IN (por-agressor); por-hit dispara direto (sem orçamento) — regra
-  "só cria método quando há estado" (documentado no `TentarReagir`). 5 testes headless do mecanismo.
-- **(Fatia C) — ✅ FEITO (RENASCIDA como `Equipe`/`Batalha`, jul/2026).** A ideia original
-  ("times no combatente / TimeAtualDoTurno") MORREU na investigação: a premissa ("cada ponto recalcula
-  `is Jogador`") era drift (é 1×, threaded como param) e os CONTEXTOS já são a fonte de perspectiva que
-  o domínio consome. Renasceu por um futuro NOVO que o Gabriel nomeou — o modo **VERSUS** (§Versus). O
-  que se fez: `Combat/Batalha.cs` (`Equipe { Membros }` + `Batalha { Equipe1/2, EquipeDe, OponenteDe,
-  PerspectivaDe, Combatentes }`), mora no CombateService (rebuild por rodada, como o RelogioDoCombate).
-  `PerspectivaDe(portador)` é o "um só caminho": derivada da ESTRUTURA (qual equipe), matou os 3 flips
-  manuais (`aliadosDoAlvo = inimigosDoAtacante` + a recursão do revide colapsou numa pergunta só). O
-  `is Jogador`/`is Inimigo` do fluxo saiu: **time** = `PerspectivaDe`; **controle** = mapa
-  `Dictionary<Equipe, IControladorDeTurno>` (campanha: E1→humano, E2→bot; Versus troca o mapa);
-  **apresentação** (UX de preparação) = "controlador é bot". As 5 `ProcessarReacoes*` + `ExecutarAtos`
-  perderam os params de perspectiva. Refactor PURO (54 testes). Sobrou o `is Jogador` em `AtaqueBasico`
-  (contexto próprio) — não é fluxo, fica.
-- O disparo do evento InicioDoTurno das passivas — hoje em DispararEventoInicioDeTurno no
-  CombateService. Reavaliar se migra pro Turno (boy-scout futuro).
-
-**(histórico) Motivação do Caminho B:** o `_jaContraAtacou` foi posto no Combate por pragmatismo
-(Caminho A) — mas é conceitualmente estado DE TURNO (nasce e morre no turno), diferente de
-duração/cooldown que são do COMBATENTE (persistem, o turno só avança). Habilita ideias de Gabriel:
-medidor de turno /
-velocidade nos stats. NÃO confundir com o RelógioDoCombate (contador GLOBAL de rodadas, nível
-acima — "boss mata todos após X turnos") — são dois relógios em níveis diferentes.
-
----
-
-## Modo ARENA (SEAM na Fatia C; MODO ✅ FEITO) — instrumento do REBALANCE #16
-
-**Motivação (Gabriel):** "pro rebalanceamento vou PRECISAR desse Versus". ✅ **FEITO (jul/2026):**
-"⚔️ Arena" (3ª opção do menu principal) → menu de 4 modos de controle (**Você×Bot, Bot×Você,
-Você×Você hotseat, Bot×Bot**) → monta os 2 times com **TODOS os 36 apóstolos** (pool independente do
-progresso — qualquer matchup) → `CombateService.ExecutarArena(bot1, bot2)` (irmão do `ExecutarFase`:
-monta Equipes + o mapa `Dictionary<Equipe, IControladorDeTurno>` conforme o modo; o loop de combate
-NÃO muda — o seam faz tudo funcionar). Ambos os times são classe `Jogador` (a ESTRUTURA define quem é
-inimigo). SEM mult de fase, itens, recompensa ou save. `CombateView.ExibirResumoArena` mostra os 2
-times + vencedor (#7a mede dano/cura por personagem = o instrumento).
-- **CAVEAT do rebalance (importante):** o `ControladorBot` **só usa A1** (não as habilidades) — é o
-  bot da campanha, class-agnostic mas burro. Então **Bot×Bot NÃO exercita as skills**; pra testar
-  matchups de habilidades, o **hotseat (Você×Você)** é o modo forte (humano dirige os 2 lados). Bot
-  inteligente (escolher entre habilidades) = melhoria própria do ControladorBot, desacoplada.
-- **B×B headless** (simular N batalhas sem TTY, coletar números) segue na FILA B (precisa do seam de
-  View concreto) e depende também do bot inteligente pra ser representativo.
-- **Descobertas:** hotseat J×J sai quase de graça (a View já mostra "Seu time" da perspectiva de quem
-  age, estilo xadrez); a vitória-bool já serve ("Equipe1 sobreviveu?").
-- **B×B headless** (simular N batalhas e coletar números sem TTY) → depende do seam de View concreto →
-  **FILA B** (conecta com #14 xUnit e o próprio #16).
-
----
-
-## Fio do revide — revide carrega a HABILIDADE (✅ FEITO)
-
-**Status:** ✅ COMPLETO. `ResultadoReacao.RevidarAlvo: Combate?` era uma "request" disfarçada
-de "declaration" — o executor decidia sozinho o HOW (1.0x hardcoded, qual natureza). Virou
-`Revide? Revide` onde:
-
-```csharp
-record Revide(IAtivavelComNatureza Habilidade, Combate Alvo);
-interface IAtivavelComNatureza { EventoDano AtivarComNatureza(Combate atacante, Combate alvo, NaturezaDano natureza); }
-```
-
-`IAtivavelComNatureza` é ISP — só A1 (AtaqueBasico) e Marretada implementam. O executor chama
-`Revide.Habilidade.AtivarComNatureza(alvo, Revide.Alvo, natureza)` polimorficamente, sem saber
-qual skill é. **Sem ContextoCombate na assinatura** (desvio da ideia original) — o revide não
-precisa de Aliados/Inimigos, só do atacante fixo; carregar `ctx` seria parâmetro sem uso.
-
-Cada reação que declara revide busca a skill do portador via `IAtaquePrimario`/tipo concreto
-(não hardcoda `AtaqueBasico` cru — pensando em A1 customizada futura, que pode ser AoE ou
-aleatória):
-- ContraAtaque: `portador.Personagem.Habilidades.OfType<IAtaquePrimario>().OfType<IAtivavelComNatureza>().First()`
-- Operário: `portador.Personagem.Habilidades.OfType<Marretada>().First()`
-
-**EspinhosVenenosos NÃO é cliente** (correção: o ROADMAP antigo listava errado — Espinhos só
-aplica Veneno+Queima no atacante, nunca revidou com dano).
-
-**Quebra do loop A↔B: profundidade, não Natureza (mudou do desenho original).** A ideia inicial
-usava `NaturezasDano.Revide` com `TipoReacao.SemContraAtaque` só pra sinalizar "não gera outro
-contra-ataque" — auditoria mostrou que `SemContraAtaque` só era lido em UM lugar (dentro do
-próprio ContraAtaque), um enum value inteiro existindo só pra carregar controle de fluxo
-disfarçado de tipo de dano. Trocado por **profundidade explícita** em `ProcessarReacoesAlvo`
-(`int profundidade = 0`, incrementado na recursão): só processa `res.Revide` quando
-`profundidade == 0`. `TipoReacao.SemContraAtaque` e `NaturezasDano.Revide` foram REMOVIDOS —
-`TipoReacao` agora é só `{ Completa, Nenhuma }`; o revide usa `NaturezasDano.Ataque` (mecanicamente
-é um ataque igual qualquer outro). Se um dia o revide precisar de comportamento distinto de um
-ataque normal, o lugar certo é metadado no `EventoDano` (ver "Proveniência de status"), não uma
-Natureza nova.
-
-**Operário:** aceita o gap de multi-fonte conscientemente. Se o mesmo personagem tiver, ao mesmo
-tempo, o buff genérico ContraAtaque (ex: aplicado por DragaoProtetor) E a passiva própria (10%
-Marretada), as duas podem contra-atacar no mesmo golpe — cada uma com seu próprio limite "1x por
-agressor" independente, sem tracker compartilhado. Resolver isso de vez é o "reset 1x-por-agressor
-reutilizável" já registrado em Turno (resto); não vale puxar pra cá sem um caso real doendo.
-
-**Ideia futura registrada:** um personagem cuja habilidade é ativa-e-passiva ("eu sempre
-contra-ataco com ESTA habilidade", sem RNG) já é suportado de graça pelo desenho atual — só
-precisa declarar `Revide(suaHabilidade, contraparte)` como o Operário faz. A interação desse
-personagem com o ContraAtaque genérico do Dragão (qual prevalece?) fica em aberto pro dia que
-existir.
-
-**Depois:** quando um personagem novo quiser revidar com outra skill, basta implementar
-`IAtivavelComNatureza` nela. Zero mudança no executor.
-
----
-
-## Auditoria das habilidades ATIVAS — ✅ ENCERRADA SEM AÇÃO (ago/2026)
-
-**Status:** FECHADA. Era "avaliar UMA vez se há dívida; se não houver dor, encerrar como sem ação" —
-e a avaliação foi feita pelos fatos, não por opinião: a **Composição de Ações** (fio 5) passou por
-cima deste item e resolveu a dúvida por construção. As ativas não são mais "modelo data-driven
-decente com `Ativar`" — elas são DADO puro, lista de `Acao` rodada pelo interpretador, com **zero
-`Ativar` override** entre elas. Não há o que auditar: a pergunta "essas classes escondem dívida?"
-deixou de ter sujeito.
-
-O fio do revide-com-habilidade, que dependia parcialmente disto, já tinha se resolvido sozinho sem
-tocar a base de `HabilidadeAtiva` (`IAtivavelComNatureza` é ISP à parte).
-
----
-
+`TurnoDoPersonagem` persistente, orçamento de reação por chave/agressor, `Equipe`/`Batalha` com
+`PerspectivaDe`. A regra que ficou está em `docs/MANUAL-combate.md`; o desenho, no
+`ADR-conceito-de-turno.md`. **Resta um boy-scout:** o disparo do evento InicioDoTurno das passivas
+ainda mora no `DispararEventoInicioDeTurno` do CombateService — reavaliar se migra pro Turno.
 ## Proveniência de status — quem criou o status (FIO NOVO)
 
 **Status:** REGISTRADO, futuro. Implementar quando o primeiro efeito que precisa aparecer.
@@ -976,135 +659,6 @@ sempre cresce e nunca acaba → dano refletido cresce junto. Precisa de: (1) Esc
 Aplicador, (2) passiva filtra por origem, (3) regra "maior prevalece" (já existe).
 
 **Precedente:** ProtecaoAliado.Aplicador, Irritar.Aplicador — alguns status JÁ rastreiam origem.
-
----
-
-## Estado de Vida (Vivo/Morto) + Atos do turno — Passos 1-4 FEITOS, falta seleção por estado
-
-**Status:** ✅ Passos 1-**5** IMPLEMENTADOS (State Pattern Vivo/Morto, status separados no
-Morto, Atos do Turno, Guarda limpa, **seleção de alvo por estado — PR #111**; ver
-ADR-selecao-por-estado.md). Só a passiva-conta-mortos (1b) segue pendente, e é do EventoDano.
-Ver **ADR-estado-de-vida-e-atos.md**
-(conceitos fechados). Este foi o fio que UNIFICOU o que antes eram dois: "estado morto" e
-"separação de fases do turno" — o Ato de Morte é a transição de estado. **Falta só o Passo
-5 (seleção de alvo por estado)**, detalhado abaixo.
-
-**Resumo da decisão (detalhe no ADR):**
-- **Estado de vida como objeto (State Pattern):** Combate tem um `EstadoVida` interno
-  (Vivo/Morto), delega interações que dependem de estado (Reviver/Curar/etc) — sem
-  `if (estaVivo)` espalhado. O Combate mantém a identidade; troca o objeto de estado na
-  transição.
-- **Status de morto vivem no objeto Morto** (lista separada da do vivo). Isola dos
-  cleanses/bloqueios do vivo. O bloquear-revive volta a ser DEBUFF (símbolo, removível
-  pelo Diabo) — agora possível porque (1) ganha removedor e (2) vive no Morto, fora do
-  alcance da ImunidadeDebuffs. Resolve o histórico do MortePermanente.
-- **Atos do turno:** ExecutarHabilidade vira 5 Atos nomeados (AtoExecucao,
-  AtoReacaoDoAlvo, AtoMorte, AtoReacaoDoAtacante, AtoEncerramento). "Ato" e não "Fase"
-  (Fase = campanha). O AtoMorte é onde o modelo de estado encaixa.
-- **Cálculo vs fluxo entre classes JÁ está certo** (Combate=domínio calcula,
-  CombateService=orquestra). NÃO se move cálculo nem se cria classe de cálculo. O
-  refactor é dar Atos ao fluxo + o modelo de estado fornecendo o AtoMorte.
-
-**Já destravado (Passos 1-4 feitos):** a Guarda limpa (saiu do hack, vira prevenção no
-AtoMorte) e o bloquear-revive com dono (ImpedirRessurreicao, debuff no Morto). **Ainda
-falta consumir a última destrava:** seleção de alvo por estado (reviver→morto, curar→vivo).
-
-**Sequência de implementação (no ADR §10):** ✅ modelo de estado → ✅ status no morto →
-✅ Atos → ✅ Guarda limpa → **seleção por estado (falta, é o Passo 5)**. Cada passo
-buildável, Strangler-friendly — a sequência entregou exatamente nessa ordem.
-
-**REFATORAÇÃO DAS ATIVAS — seleção de alvo por estado (dor REAL detectada, fio próprio):**
-Hoje cada ativa checa EstaVivo() de forma INCONSISTENTE — umas filtram `.Where(EstaVivo())`,
-o AnjoCaido filtra `!EstaVivo()`, as de dano não checam. Não há padrão; cada Ativar decide na
-mão se mira vivo ou morto. Agora que Morto é estado de primeira classe, a bagunça fica
-explícita. SOLUÇÃO (ideia de Gabriel, análoga ao que fizemos com NaturezaDano): uma INTERFACE
-declarativa onde a habilidade DECLARA quem mira (VIVOS / MORTOS / AMBOS), e a seleção de alvo
-respeita automaticamente — em vez do filtro manual em cada Ativar. "Make illegal states
-unrepresentable" (uma cura não consegue nem mirar um morto). Conecta com o Passo 5 do ADR
-("seleção de alvo por estado") — agora com FORMA (interface declarativa). É refactor das
-ativas, dói de verdade (não pureza), GRANDE — fio próprio, não cabe no Passo 2.
-
-EXEMPLOS pra desenhar a interface (mapeados): a maioria mira UM estado (cura→vivos,
-revive→mortos, ataque→vivos). Casos ricos que miram OS DOIS: **AnjoCaido (Diabo)** revive
-mortos E cura vivos — duas seleções de listas diferentes na mesma habilidade. **Barata
-(Glitch)** é ativa que mira VIVO (ataque) e, como CONSEQUÊNCIA do golpe (matou→virou morto),
-aplica bloqueio no morto resultante — uma seleção (vivo) + consequência no morto, não duas
-seleções. A interface precisa distinguir "mira os dois" (Diabo) de "mira um, consequência no
-outro" (Glitch). NOTA: bloqueadores de revive são de DOIS tipos — PassivaVilao é REAÇÃO
-(IReageAoMatar), Barata/Glitch é ATIVA (seleção). Os dois migram no Passo 2 (aplicam o debuff),
-mas só o Glitch é cliente da interface de seleção.
-
-**SEMENTE FUTURA — mecânica de "Vida de Alma" (lore + mecânica grande, NÃO desenvolver agora):**
-ideias cruas de Gabriel pra maturar: o morto teria uma "Vida de Alma" (a vida REAL pós-morte);
-atacar a alma e zerá-la = morte PERMANENTE de verdade (nem o Diabo revive — matou a alma).
-Possível atacar o morto direto na Vida de Alma. Almas atacando almas (um morto inimigo ataca
-as almas vivas, afetando o vivo?) — Gabriel inclinou que talvez não generalize, mas uma facção/
-personagem TEMÁTICO poderia ter "sobrevida" e atacar como alma (vantagem temporária vs a
-desvantagem de decompor). Questão em aberto: a decomposição TIRA a Vida de Alma (uma coisa só)
-ou são dois sistemas (provavelmente uma só). Status no morto poderiam mirar a alma (reduzir
-"defesa da alma" pra matá-la mais rápido?).
-
-**SACADA ARQUITETURAL (Gabriel) — Alma como TERCEIRO ESTADO:** se a Alma precisar de
-comportamento próprio (atacar, ser atacada na vida-de-alma, interagir), ela vira uma TERCEIRA
-filha de EstadoVida (Vivo / Morto / Alma) — o State Pattern já suporta, é só criar a classe sem
-mexer nas outras. Transição possível Vivo→Morto→Alma (decompôs vira alma) ou Vivo→Alma (facções
-que morrem direto pra alma). Isso resolveria as dúvidas (morto passivo não ataca; Alma é estado
-ATIVO que ataca/é atacada). O modelo NÃO fecha portas — a Alma entra como estado quando a
-mecânica amadurecer. TUDO futuro — Gabriel vai maturar e trazer depois.
-
-**DECISÃO (Passo 2):** ImpedirRessurreicao fica como **Debuff** por ora (não tipo próprio). É
-seguro — vive na lista do Morto, e os cleanses genéricos filtram EstaVivo() (só vivos), então
-nunca alcançam ele. O isolamento vem da SEPARAÇÃO DE LISTAS (Forma 2), não do tipo. Só vira
-decisão se/quando a Alma mudar como cleanses rodam em mortos — aí Gabriel reavalia.
-
-**Gameplay futuro que o modelo HABILITA (NÃO no refactor — design de balanceamento, matura
-JOGANDO):** o estado Morto vira um SISTEMA tático rico. Visão de Gabriel (registrada pra não
-perder; números NÃO cravados — afinar em playtest, são alavancas interdependentes):
-
-- **Decomposição (penalidade por não reviver):** a cada turno morto, acumula um tick de
-  decomposição que tira % PERMANENTE (na partida) dos stats TOTAIS — vida, def, atk (ex:
-  ~5%/tick). Incide sobre o total: passivas que alteram o total vão junto; buffs de atk somam
-  SOBRE o novo total já penalizado. Debuff NÃO-removível e VISÍVEL (o jogador vê quantos ticks
-  de penalidade acumulou).
-- **Explosão (clímax da decomposição):** ao atingir N ticks (ex: ~10), o corpo EXPLODE —
-  causa dano no PRÓPRIO time (penalidade por abandonar o morto) e CONTAMINA os vivos (aplica
-  ~2 ticks de um debuff de contaminação NELES — o mesmo debuff transicionando vivo↔morto).
-  Após explodir, é MORTE PERMANENTE DE VERDADE: nem o Diabo revive. ESTA é a "morte
-  permanente" real — reservar o nome pra ela.
-- **Renomeação (decisão de AGORA, afeta o Passo 2):** a "morte permanente" do Vilão NÃO é a
-  permanente de verdade — é só um BLOQUEIO removível. Vira **ImpedirRessurreicao** (debuff do
-  Vilão, removível pelo Diabo). "Morte permanente" fica reservado pra explosão-da-decomposição.
-- **Diabo com penalidade (ponderar):** pra reviver alguém com ImpedirRessurreicao, o Diabo
-  paga um preço — duas opções a ponderar: (a) ADICIONA ~2 ticks de decomposição ao reviver
-  (mais agressivo — pode empurrar pra explosão), ou (b) ROUBA metade dos ticks pra si (menos
-  agressivo, mas ainda custoso). Decidir jogando.
-- **Limpeza de ticks (ponderar):** formas de reduzir decomposição — a cada cura recebida, a
-  cada ~2 turnos vivo, ou ao matar um inimigo. Decidir jogando.
-- **fraqueza-por-revive:** caso mais simples do mesmo princípio — cada morte+revive deixa uma
-  marca acumulativa. Pode ser a própria decomposição ou um efeito à parte.
-
-Tudo são status de MORTO (e contaminação que transiciona vivo↔morto) que rodam sobre o
-modelo via a view StatusAtivos — REÚSO dos mesmos mecanismos de tick/processamento, sem
-duplicação. O refactor (Passo 2) entrega só o ImpedirRessurreicao (Vilão aplica, Diabo
-remove). A mecânica completa valida que o desenho não fecha portas, mas só vira código na
-fase de balanceamento.
-
-**Identidade / lore (semente):** esta mecânica de morte-como-sistema é um DIFERENCIAL — Gabriel
-não conhece jogo com algo assim (Void Hunters tem penalidades, mas natureza diferente). Dá
-identidade própria ao Apostle's War. Possível resgate da lore criada no Campo Minado (a Deusa
-e os apóstolos) pra justificar a mecânica na ficção — por que mortos decompõem/explodem/
-contaminam. Fio de NARRATIVA, futuro.
-
-**Conexão com Arena (design, ver GDD §6):** a decomposição serve como **enrage timer natural**
-do Modo Arena — quando dois times entram em loop e ninguém morre, os ticks de decomposição
-forçam resolução sem timer externo artificial. O mesmo sistema que pune negligenciar mortos na
-campanha resolve o anti-stall da Arena. Um fio técnico, dois problemas de design.
-
-**Comportamento-BASE (já decidido):** status de vivo SOMEM ao morrer (Opção X); as
-consequências de morte/revive entram depois como status de morto, sem retrabalho estrutural.
-
-**1b) Passiva-conta-mortos** (passiva do VIVO que conta mortos pra ganhar força) — NÃO é
-estado morto, consulta o tabuleiro. Depende do contexto rico (Fatia 2). Seção própria.
 
 ---
 
@@ -1298,19 +852,6 @@ propósito:** `Combat/` fica (subsistema, não modelo solto); `Fases` enum fica 
 mantém o nome (serviço da área-de-domínio no plural é ok, o MODELO é que ficou singular). **Falta:**
 quando o alvo (web/Unity) for escolhido, o input de MOUSE. Portfólio: recrutador lê o repo.
 
-### Cancelamento de batalha (Esc → encerra → perde) ✅ FEITO (jul/2026) — o payoff dos seams
-O jogador ficava preso no turno do inimigo/animações sem poder sair. Agora Esc durante a batalha →
-"Encerrar? Você perde a fase" → Sim → a fase vira derrota (sem recompensa). **Forma 1 (espera
-interrompível), decidida PROVANDO** contra a async: no console, a Forma 2 (async+CancellationToken)
-COLAPSA no mesmo poll da Forma 1 (o console tem UM consumidor de input — um listener de Esc em
-background brigaria com o `ReadKey` dos menus), pagando cascata async por ~20 métodos por ZERO ganho;
-e o porte web/Unity re-arquiteta o loop de qualquer jeito e reaproveita os SEAMS, não a async-ness.
-Mecânica: `IApresentacao.AguardarAnimacao` retorna `bool` (Esc na espera; poll em fatias no
-`ApresentacaoConsole`); `CombateView.ConfirmarEncerramento()` (diálogo auto-contido); `CombateService.
-Aguardar(ms)` reage e lança `BatalhaAbortada`, capturada em `ExecutarFase` → `false` (desenrola a
-cadeia profunda sem threading de flag). **Escopo:** só nas ESPERAS (a dor real); Esc-nos-menus-de-ação
-fica como follow-up trivial. Não testável headless → verificação em jogo do Gabriel.
-
 ### EventoDano por ID (desacoplar dos objetos vivos) — FILA B
 **Status:** registrado (FILA B, junto da camada de eventos do porte). O `EventoDano` carrega hoje
 `Combate Atacante`/`Combate Alvo` (objetos vivos). Pra ser um registro limpo do golpe (log/stream
@@ -1374,67 +915,14 @@ nunca tudo de uma vez — e o critério é a tabela do `CLAUDE.md`, não o olho.
 
 **As três categorias de gordura, em ordem de custo** — a primeira dá pra atacar a qualquer momento,
 inclusive antes da separação, porque é verificável:
-1. **Comentário que MENTE.** Custa mais que cinquenta verbosos: em ago/2026 o §OS FIOS QUE FALTAM
-   dizia que 3 fios estavam abertos, e eu apresentei ao Gabriel trabalho pronto como pendência.
+1. **Comentário que MENTE.** Custa mais que cinquenta verbosos: em ago/2026 o índice de fios deste
+   arquivo dizia que 3 fios estavam abertos, e eu apresentei ao Gabriel trabalho pronto como
+   pendência.
    Um PR de caça a MENTIRA (comentário citando `#NNN` já mergeado, nome de classe/método que não
    existe mais, TODO de coisa feita) é barato e **verificável** — o nome existe ou não —, ao
    contrário de "esse comentário é supérfluo", que é gosto e vira discussão infinita.
 2. **Narração histórica** — 138 linhas no C# + 178 no `jogo.js`. Destino: mensagem de commit.
 3. **Narrar o óbvio** — a menor das três.
-
----
-
-## CONCLUÍDO (referência)
-
-- **Revide-com-habilidade:** `ResultadoReacao.Revide` (Habilidade + Alvo) substitui
-  `RevidarAlvo: Combate?`. `IAtivavelComNatureza` (A1, Marretada) executa o revide
-  polimorficamente. Loop A↔B quebrado por profundidade explícita no executor (não mais por
-  `NaturezasDano.Revide`/`TipoReacao.SemContraAtaque`, removidos — enum virou só
-  `{ Completa, Nenhuma }`). Operário unificado com ContraAtaque (mesmo fluxo, troca A1 por
-  Marretada); gap de multi-fonte (buff + passiva simultâneos) aceito conscientemente.
-- **Sistema de Natureza do Dano** (NaturezaDano + TipoReacao + perfis). Base de tudo.
-- **ContextoCombate** (Atacante/Aliados/Inimigos) — habilidades recebem o contexto rico.
-- **PR-C — reações via interface** (C1-C6): Sedento, Reflexo, Sangramento, Espinhos, ContraAtaque
-  migrados pra IReageAo*. Revide orquestrado (Forma 1, profundidade 1).
-- **C7 — limpeza:** removidos os 3 hooks mortos do StatusEffect + EventoCombate.AntesDeReceberDano.
-- **C5 completo — todas as passivas migradas:** lado "ao ser atacado"; lado atacante (OlhoClinico,
-  Virus, Sorrateiro, Policial); ao matar (Fada, Vilao); Robo + Sushiman; Necromancia (IReageAoMorrer);
-  Genio, BonecoDeNeve, Tengu, Elfo (IReageAoInicioTurno); Guarda (IReageAntesDeMorrer — Passo 4).
-  Operario migrado (revide unificado com ContraAtaque, ver "Revide-com-habilidade"). Sistema
-  velho aposentado.
-- **Atos do Turno [Passo 3]:** ExecutarAtos centraliza o fluxo pós-Ativar. Ordem: AtoReacaoDoAlvo
-  → IReageAntesDeMorrer → AtoMorte (IReageAoMatar + IReageAoMorrer) → AtoReacaoDoAtacante →
-  AtoEncerramento. Irritar unificado (passava só AtoMorte, agora passa todos os Atos).
-- **Guarda limpa [Passo 4]:** IReageAntesDeMorrer criada; Guarda migrada do hack IReageAoMorrer;
-  ProcessarReacoesAntesDeMorrer inserido em ExecutarAtos antes do Vilão. Bug Vilao+Guarda corrigido.
-  ContextoReacao.Outro renomeado para Contraparte (19 arquivos).
-- **Crítico exige dano:** golpe cujo dano efetivo total (HP + escudo) deu 0 não é crítico no
-  EventoDano — foi negado (bloqueio total). Escudo consumido conta (é vida). Beneficia todos os
-  consumidores de FoiCritico na fonte.
-- **EventoDano (Fatia 2):** ContextoReacao enriquecido (FoiCritico, Aliados, Inimigos do portador).
-  Os 4 métodos de reação recebem os times; ProcessarReacoesAlvo inverte a perspectiva.
-- **EventoDano (Fatia 1):** ResultadoAtaque convergiu em EventoDano (record rico do golpe).
-  ReceberDano retorna (Efetivo, AbsorvidoPeloEscudo). Atacar monta o evento. Base da exibição
-  rica no porte (Propósito B).
-- **Unificação do ignorar (✅ jul/2026):** a natureza virou lista (`NaturezaDano.Ignora`), o
-  `DeveAgir` foi REMOVIDO (interface + 6 impl), o ReceberDano ficou com 1 gate de lista só
-  (natureza ∪ golpe ∪ apóstolo). Anti-StackOverflow de proteção mútua agora estrutural
-  (`DanoIndireto.Ignora ∋ ProtecaoAliado`). `NaturezasDano.Direto` deletado (órfão). Paridade
-  provada por 5 testes. (Antes: o passo 1 introduziu o `DeveAgir`; agora ele morreu no passo final.)
-- **Capacidade C (IContribui*, generalizada FILA A #8):** os 4 stats (Ataque/Defesa/TaxaCrit/
-  DanoCrit) somam a interface de contribuição com sinal; matriz de status simétrica (buff+debuff
-  por stat). Sem inconsistência (camadas distintas; `Sum` == `FirstOrDefault` pois não-empilham).
-- **fix Veneno tick:** dano do tick é 5% fixo (não × Stacks); acúmulo só na Explosão.
-- **fix Save defensivo:** trata JSON corrompido com fallback, no limite de I/O.
-- **TurnoDoPersonagem (relógio)** extraído. ADR em docs/. Falta reset 1x-por-agressor + evento de
-  início + TimeAtualDoTurno (cruzam C5).
-- **Seleção de Alvo:** regra → SelecaoDeAlvoService; UI → MenuService; bot → EscolherAlvoBot. ADR
-  em docs/.
-- **Capacidades B + E:** IModificaDanoRecebido e IBloqueiaStatus.
-- **Stats em Camadas** (Ataque/Defesa/Crit sob demanda).
-- **Bloquear-revive promovido a flag** (PodeReviver/BloquearRevive). Vilao migrado pra
-  IReageAoMatar. (Ver "Estado morto" — a modelagem evolui no rebalanceamento.)
-- **Limpeza de branches remotas** (GitHub) + auto-delete ativado.
 
 ---
 

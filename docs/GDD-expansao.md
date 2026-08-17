@@ -359,7 +359,81 @@ Esta é a conexão entre a mecânica de morte (fio técnico) e o design da Arena
 
 ---
 
-## 10. Escopo — o que NÃO fazer agora
+---
+
+## 10. Morte como sistema — decomposição, explosão e a Alma (ideia, matura JOGANDO)
+
+> Estava no `ROADMAP-refatoracao.md`, dentro do fio TÉCNICO do Estado de Vida — que já está feito.
+> Isto aqui nunca foi refatoração: é design de jogo, e o modelo de estado (State Pattern
+> Vivo/Morto, ver `ADR-estado-de-vida-e-atos.md`) já não fecha nenhuma destas portas.
+> A §6 deste documento já usa a decomposição como enrage timer da Arena.
+
+**Gameplay futuro que o modelo HABILITA (NÃO no refactor — design de balanceamento, matura
+JOGANDO):** o estado Morto vira um SISTEMA tático rico. Visão de Gabriel (registrada pra não
+perder; números NÃO cravados — afinar em playtest, são alavancas interdependentes):
+
+- **Decomposição (penalidade por não reviver):** a cada turno morto, acumula um tick de
+  decomposição que tira % PERMANENTE (na partida) dos stats TOTAIS — vida, def, atk (ex:
+  ~5%/tick). Incide sobre o total: passivas que alteram o total vão junto; buffs de atk somam
+  SOBRE o novo total já penalizado. Debuff NÃO-removível e VISÍVEL (o jogador vê quantos ticks
+  de penalidade acumulou).
+- **Explosão (clímax da decomposição):** ao atingir N ticks (ex: ~10), o corpo EXPLODE —
+  causa dano no PRÓPRIO time (penalidade por abandonar o morto) e CONTAMINA os vivos (aplica
+  ~2 ticks de um debuff de contaminação NELES — o mesmo debuff transicionando vivo↔morto).
+  Após explodir, é MORTE PERMANENTE DE VERDADE: nem o Diabo revive. ESTA é a "morte
+  permanente" real — reservar o nome pra ela.
+- **Renomeação (decisão de AGORA, afeta o Passo 2):** a "morte permanente" do Vilão NÃO é a
+  permanente de verdade — é só um BLOQUEIO removível. Vira **ImpedirRessurreicao** (debuff do
+  Vilão, removível pelo Diabo). "Morte permanente" fica reservado pra explosão-da-decomposição.
+- **Diabo com penalidade (ponderar):** pra reviver alguém com ImpedirRessurreicao, o Diabo
+  paga um preço — duas opções a ponderar: (a) ADICIONA ~2 ticks de decomposição ao reviver
+  (mais agressivo — pode empurrar pra explosão), ou (b) ROUBA metade dos ticks pra si (menos
+  agressivo, mas ainda custoso). Decidir jogando.
+- **Limpeza de ticks (ponderar):** formas de reduzir decomposição — a cada cura recebida, a
+  cada ~2 turnos vivo, ou ao matar um inimigo. Decidir jogando.
+- **fraqueza-por-revive:** caso mais simples do mesmo princípio — cada morte+revive deixa uma
+  marca acumulativa. Pode ser a própria decomposição ou um efeito à parte.
+
+Tudo são status de MORTO (e contaminação que transiciona vivo↔morto) que rodam sobre o
+modelo via a view StatusAtivos — REÚSO dos mesmos mecanismos de tick/processamento, sem
+duplicação. O refactor (Passo 2) entrega só o ImpedirRessurreicao (Vilão aplica, Diabo
+remove). A mecânica completa valida que o desenho não fecha portas, mas só vira código na
+fase de balanceamento.
+
+**Identidade / lore (semente):** esta mecânica de morte-como-sistema é um DIFERENCIAL — Gabriel
+não conhece jogo com algo assim (Void Hunters tem penalidades, mas natureza diferente). Dá
+identidade própria ao Apostle's War. Possível resgate da lore criada no Campo Minado (a Deusa
+e os apóstolos) pra justificar a mecânica na ficção — por que mortos decompõem/explodem/
+contaminam. Fio de NARRATIVA, futuro.
+
+**Conexão com Arena (design, ver GDD §6):** a decomposição serve como **enrage timer natural**
+do Modo Arena — quando dois times entram em loop e ninguém morre, os ticks de decomposição
+forçam resolução sem timer externo artificial. O mesmo sistema que pune negligenciar mortos na
+campanha resolve o anti-stall da Arena. Um fio técnico, dois problemas de design.
+
+**SEMENTE FUTURA — mecânica de "Vida de Alma" (lore + mecânica grande, NÃO desenvolver agora):**
+ideias cruas de Gabriel pra maturar: o morto teria uma "Vida de Alma" (a vida REAL pós-morte);
+atacar a alma e zerá-la = morte PERMANENTE de verdade (nem o Diabo revive — matou a alma).
+Possível atacar o morto direto na Vida de Alma. Almas atacando almas (um morto inimigo ataca
+as almas vivas, afetando o vivo?) — Gabriel inclinou que talvez não generalize, mas uma facção/
+personagem TEMÁTICO poderia ter "sobrevida" e atacar como alma (vantagem temporária vs a
+desvantagem de decompor). Questão em aberto: a decomposição TIRA a Vida de Alma (uma coisa só)
+ou são dois sistemas (provavelmente uma só). Status no morto poderiam mirar a alma (reduzir
+"defesa da alma" pra matá-la mais rápido?).
+
+**SACADA ARQUITETURAL (Gabriel) — Alma como TERCEIRO ESTADO:** se a Alma precisar de
+comportamento próprio (atacar, ser atacada na vida-de-alma, interagir), ela vira uma TERCEIRA
+filha de EstadoVida (Vivo / Morto / Alma) — o State Pattern já suporta, é só criar a classe sem
+mexer nas outras. Transição possível Vivo→Morto→Alma (decompôs vira alma) ou Vivo→Alma (facções
+que morrem direto pra alma). Isso resolveria as dúvidas (morto passivo não ataca; Alma é estado
+ATIVO que ataca/é atacada). O modelo NÃO fecha portas — a Alma entra como estado quando a
+mecânica amadurecer. TUDO futuro — Gabriel vai maturar e trazer depois.
+
+**Comportamento-BASE (já decidido):** status de vivo SOMEM ao morrer (Opção X); as
+consequências de morte/revive entram depois como status de morto, sem retrabalho estrutural.
+
+
+## 11. Escopo — o que NÃO fazer agora
 
 - NAO implementar itens com estrela/nível/raridade no console
 - NAO implementar XP/níveis de personagem no console

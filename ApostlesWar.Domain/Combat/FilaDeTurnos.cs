@@ -1,7 +1,7 @@
 namespace ApostlesWar.Domain
 {
     /// <summary>
-    /// QUEM JOGA AGORA (GDD-progressao §1). Cada combatente enche a PRÓPRIA barra de 0 a 100 pela
+    /// QUEM JOGA AGORA (GDD-combate §1). Cada combatente enche a PRÓPRIA barra de 0 a 100 pela
     /// própria Velocidade; age quem cruzou 100 e, entre os prontos, o mais CHEIO. Ao agir desconta
     /// 100 e a sobra carrega — empurrão de medidor nunca se desperdiça.
     ///

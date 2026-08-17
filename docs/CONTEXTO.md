@@ -4,73 +4,79 @@
 > decidido e o que vem. Ele é **SUBSTITUÍDO** a cada sessão, não acrescentado — é uma FOTO do agora,
 > não um diário. Quem quer histórico tem o `git log`, que guarda melhor e datado.
 >
-> **COMO USAR (Claude):** ler no início de toda sessão, logo depois do `CLAUDE.md`. E ao fim da
-> sessão, reescrever este arquivo do zero com o estado novo.
+> **COMO USAR (Claude):** ler no início de toda sessão, logo depois do `CLAUDE.md` — e **não abrir os
+> documentos que ele CITA**. Ao fim da sessão, reescrever este arquivo do zero com o estado novo.
 >
-> **O QUE NÃO ENTRA AQUI:** o que já está escrito em outro lugar. O modelo do jogo está no
-> `docs/GDD-progressao.md`, a fila de execução no `docs/ROADMAP-refatoracao.md`, as regras de
-> trabalho no `CLAUDE.md`, e o que foi tentado e morreu nas mensagens de commit. Aqui ficam só
-> **ponteiros e o que ainda está no ar**.
+> **O QUE NÃO ENTRA AQUI:** o que já está escrito em outro lugar. Aqui ficam só **ponteiros e o que
+> ainda está no ar**.
 
 ---
 
-## Onde paramos (15/ago/2026)
+## Onde paramos (17/ago/2026)
 
-**Main em `18cd926`.** Sete PRs mergeados nas duas últimas sessões, todos da **PROGRESSÃO** saindo do
-papel — a ordem é a do `GDD-progressao.md` §7, e ela não é negociável (status e turno ANTES de nível
-e raridade):
+**Branch `docs/arrumacao-de-contexto`, 7 commits, working tree limpo. NÃO mergeada — o PR é do
+Gabriel.** A sessão não tocou regra de jogo: foi a arrumação dos documentos inteira, os 4 passos do
+plano `~/.claude/plans/o-ctx-apenas-dando-pure-pearl.md`, que agora está **cumprido**.
 
-| # | o que entrou |
-|---|---|
-| #232 | o handoff da progressão em doc |
-| #233 | o **perfil de distância** no motor (`Arquetipos.MultiplicadorDePosicao` + `Combate.Casa`) |
-| #234 | o **mapa de calor** da posição na preparação da fase |
-| #235 | o aviso do RNG da bancada (as 5 linhas que oscilam são COMPORTAMENTO) |
-| #236 | o **medidor de turno** — a `FilaDeTurnos` matou o `for` sobre `Equipe1 ++ Equipe2` — e a barra na tela |
-| #237 | **`DEF/(DEF+5000)`** + **Precisão × Resistência** (o passo 4 do GDD) |
+**O que mudou de tamanho:**
 
-**PR ABERTO, esperando o merge dele:** branch `feature/fila-na-tela` (`a0f39e5` + `cd062d9`) — o
-**cordão de turnos** (a ordem dos 8 próximos, flutuando no alto do campo) e o **medidor zerando nas
-duas pontas a cada onda**. Ele já conferiu em jogo: *"tá ótimo"*.
+| | antes | depois |
+|---|---:|---:|
+| `ROADMAP-refatoracao.md` | 2.849 l (~63k tok) | **936 l (~20k)** |
+| `GDD-progressao.md` | 1.715 l | **476 l** (+ combate 584 + itens 715) |
+| `CLAUDE.md` | 253 l | **137 l** |
+| memória (maior arquivo) | 9,3 KB | **< 4 KB** |
 
-## O que vem depois (na ordem do GDD §7)
+**Os documentos novos:** `MANUAL-cenario.md` (como se faz uma pele) · `MANUAL-combate.md` (as regras
+vivas do motor) · `MANUAL-front.md` (a ponte, o contrato de tela, as camadas) · `GDD-combate.md`
+(§1+§2) · `GDD-itens.md` (§4). Mais **quatro skills** em `.claude/skills/` — cenario, front, combate,
+progressao — que carregam o manual do assunto **pela tarefa**, em vez de por eu lembrar de ler.
 
-1. **Nível (curva do tipo) + Raridade** nos apóstolos — sem estrela.
-2. **Raridade → passiva que escala.**
-3. **Item equipado no apóstolo.**
+**A regra que guiou os três cortes do ROADMAP:** pendente fica na fila · **referência viva** vai pro
+doc do assunto · **histórico sai** (o `git log` guarda melhor). Cortar por `✅ feito` × `pendente`
+teria perdido as armadilhas, que nasceram de itens já feitos.
 
-**Também em aberto, menores:** o `chance de aplicar: 75%` ao mirar (GDD §1 — e ele ficou *necessário*
-depois do #237, porque o texto da habilidade agora conta só metade da história); o **empurrão de
-medidor** como efeito de habilidade (a tabela está no GDD §1 — enquanto não existir, a barra quase
-nunca passa de 100 e as faixas 2–5 da rampa são código dormindo); e a **9ª pele (Humanos)**, que
-segue bloqueada de propósito até o fundo de facção no compêndio.
+## O que fica pendente desta arrumação
+
+1. **O PR.** Sete commits esperando o Gabriel abrir e mergear.
+2. **A prova do passo 4 é a PRÓXIMA sessão:** abrir com "oi" e comparar a % de contexto com os 28%
+   que dispararam tudo isto.
+3. **A faxina de comentários (#15) segue aberta** e agora sem desculpa: o `jogo.js` já foi separado,
+   que era o pré-requisito que o próprio Gabriel pôs na frente dela.
+
+## O trabalho de JOGO, que volta a valer agora
+
+A ordem do `GDD-progressao.md` §7 não é negociável: **nível (curva do tipo) + raridade** → **raridade
+→ passiva que escala** → **item equipado**. Menores em aberto: o `chance de aplicar: 75%` ao mirar, o
+**empurrão de medidor** como efeito, a **pele da Arena** (item 20 da FILA A) e a **9ª pele, Humanos**
+(item 21, bloqueada até o fundo de facção no compêndio). A dívida do
+`docs/RELEITURA-backend-pendente.md` continua de pé.
 
 ## Decisões desta sessão que NÃO se reabrem
 
-- **A `chance` da habilidade e Precisão × Resistência são coisas SEPARADAS** e ambas ficam. Palavras
-  dele: *"cada hab vai ter a sua, é pra dar o incremento diferencial no rebalanceamento, ainda mais
-  em habs roubadas, e vai servir após haver diferença nas habs por raridade"*. São duas rolagens em
-  sequência — o que dá no mesmo que multiplicar as probabilidades, mas separadas elas permitem
-  distinguir *"a habilidade nem tentou"* de *"o alvo resistiu"* quando isso for pintado.
-- **A onda nova começa EMPATADA:** os dois lados zeram o medidor a cada rodada.
-- **O 2º brilho (a aura do cursor no passo de alvo) está MORTO** — aura de cursor não existe em tela
-  sensível ao toque. Se voltar, volta como destaque nas CAIXAS.
-- **O sinal de espera entre as fichas do cordão foi cortado**; o `Vez.Esperou` fica no motor.
-- **A bancada oscila por DESENHO, não por ruído** — está documentado no cabeçalho do próprio
-  relatório. Semear o RNG está descartado.
+- **Instrução de assunto chega por SKILL, não por ponteiro no `CLAUDE.md`.** Ponteiro põe em mim a
+  decisão de ler, e ela já falhou. Mesmo princípio das duas injeções do front: quem sabe ENTREGA.
+- **O §Revogado do GDD ficou** (o plano mandava apagar). A forma dele parece história, mas a função é
+  impedir que decisão morta seja reaberta — corta-se a moral, nunca o fato e a consequência.
+- **A numeração dos §s do GDD ficou FURADA de propósito** (§1 §2 num arquivo, §3 §5 §6 §7 noutro, §4
+  no terceiro). Renumerar quebraria dezenas de referências cruzadas, cada uma em silêncio. No lugar,
+  os três arquivos abrem com a mesma bússola dizendo qual § mora onde.
+- **Mapa de código escrito à mão não se mantém** — o mapa das 36 passivas por interface saiu do
+  ROADMAP porque envelhece MENTINDO, e o código responde por `grep`.
 
 ## Armadilhas que morderam nesta sessão (não repetir)
 
-- **O `body` é um grid de TRÊS linhas** (topo · arena · painel). Peça nova entre o topo e o painel
-  entra como quarto item, rouba a linha do `1fr` e o campo encolhe — o canvas do cenário fica com o
-  tamanho velho e a cena aparece **cortada e subindo**. Peça nova ali é **absoluta dentro da arena**.
-- **Mensagem de commit multilinha:** escrever o arquivo com a ferramenta de escrita, nunca com
-  `Out-File -Encoding utf8` do PowerShell — ele grava BOM e o BOM entra no assunto do commit.
-- **Squash-merge deixa a branch "não mergeada" pro git.** Conferir com `git diff main <branch>`
-  vazio antes do `-D`, e recriar branch nova com `git switch -C <nome> origin/main` (o working tree
-  passa junto).
-- **Rodar `dotnet test` suja o `docs/bancada-dano.md`** em 5 linhas. Reverter quando a mudança do PR
-  não for de balanço.
+- **Ponteiro quebrado não dá erro nenhum**, e quatro deles estavam em CÓDIGO (`FilaDeTurnos.cs`,
+  `Enums.cs`, `Arquetipos.cs`, `FilaDeTurnosTests.cs` citavam "GDD-progressao §1/§2"). Ao mover
+  qualquer seção, o `grep` pelos ponteiros vai no MESMO commit.
+- **A ferramenta `Write` grava LF puro**, e este repo é CRLF na cópia de trabalho — deu **1 LF puro**
+  no `CLAUDE.md`, que é exatamente a mistura que já grudou um `else if` num comentário. Conferir
+  sempre: `(match /\n/) − (match /\r\n/)` tem de dar 0.
+- **`python` não existe nesta máquina** (só o stub da Microsoft Store). Script de apoio é `node`.
+- **O `cd` do Bash PERSISTE entre chamadas** — um `cd docs` deixou o `git add docs/CONTEXTO.md`
+  falhando por caminho duplicado.
+- **`dotnet test` reescreve o `docs/bancada-dano.md`**, e cinco linhas OSCILAM entre corridas (é
+  comportamento, ver #235). Depois de rodar a suíte sem mexer em número, `git checkout --` nele.
 
 ## O que o Gabriel confere, sempre
 

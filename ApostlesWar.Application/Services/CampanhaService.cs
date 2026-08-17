@@ -8,8 +8,7 @@ namespace ApostlesWar.Application.Services
     /// <summary>
     /// O META da campanha, FORA da luta: carregar os saves e processar a recompensa da vitória
     /// (desbloqueios + drop + save). Não desenha nada — devolve o resultado, e a casca (o FluxoDoFront)
-    /// mostra do seu jeito. Nasceu porque HAVIA duas cascas duplicando isto; a lição sobrevive à
-    /// segunda: a lógica meta mora na Application, nunca no front.
+    /// mostra do seu jeito: a lógica meta mora na Application, nunca no front.
     /// </summary>
     public class CampanhaService
     {

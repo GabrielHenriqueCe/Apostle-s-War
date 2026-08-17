@@ -9,9 +9,8 @@ namespace ApostlesWar.Application.Services
     /// o progresso, não o gosto de quem está sentado na cadeira. Quem some junto com a conta é o que
     /// o <see cref="CampanhaService.ResetarProgresso"/> lista; esta chave não está lá de propósito.
     ///
-    /// Nasceu com um campo só (tela cheia) porque é o primeiro que existe — som e as outras opções
-    /// "em breve" do menu caem aqui quando chegarem, e é pra isso que o dado é um record e não um
-    /// bool solto na porta.
+    /// Um campo só (tela cheia) por enquanto — som e as outras opções "em breve" do menu caem aqui
+    /// quando chegarem, e é pra isso que o dado é um record e não um bool solto na porta.
     /// </summary>
     public class ConfiguracaoService
     {

@@ -482,7 +482,7 @@ namespace ApostlesWar.Application.Services
         /// respeitando o cooldown (passivas têm Cooldowns; buffs/status não). Consome o
         /// cooldown ao coletar — a passiva "usou" sua reação neste disparo. Passivas com
         /// cooldown 0 (a maioria das reativas) estão sempre disponíveis.
-        /// ATENÇÃO (contrato, auditoria jul/2026): o consumo acontece AO COLETAR, antes de
+        /// ATENÇÃO (contrato): o consumo acontece AO COLETAR, antes de
         /// saber se a passiva vai agir. Com cooldown 0 é inofensivo; ao criar passiva
         /// reativa com cooldown E condição interna, mover o consumo pra depois da decisão.
         /// </summary>

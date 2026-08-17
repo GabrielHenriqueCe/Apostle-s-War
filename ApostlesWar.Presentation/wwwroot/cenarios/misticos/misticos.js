@@ -227,8 +227,7 @@ export const ar = {
 /// Monta a cena deste capítulo. A ORDEM É A PROFUNDIDADE — o que vem antes fica atrás.
 ///
 /// O núcleo (`iniciarAr`) não sabe que este tema existe: ele chama `montar` e recebe as camadas
-/// prontas. Era o contrário até ago/2026, quando UMA lista no núcleo servia os 8 temas e cada
-/// item vinha guardado por `config.X &&` — os guardas eram o preço de a lista não ser de ninguém.
+/// prontas.
 export function montar({ fundo, frente, maestro }) {
     return {
         noFundo: [
@@ -1509,9 +1508,9 @@ export function criarVagalumes(cfg, canvas, vento) {
 /// e o motivo é o vento: elas vergam quando o dragão passa raspando, e pseudo-elemento não lê JS. Foi
 /// o cenário pedindo a camada, e não a camada procurando serviço.
 ///
-/// Elas ficam no canvas do FUNDO, atrás dos combatentes. Moldura de PRIMEIRO PLANO já foi tentada duas
-/// vezes neste front (a gruta de pedra e o pórtico de templo do #197) e as duas morreram: coisa grande
-/// e perto obriga a acertar o traço, e traço errado em cima da luta é pior que cenário nenhum.
+/// Elas ficam no canvas do FUNDO, atrás dos combatentes. Moldura de PRIMEIRO PLANO não vinga aqui —
+/// já foi tentada e caiu duas vezes: coisa grande e perto obriga a acertar o traço, e traço errado
+/// em cima da luta é pior que cenário nenhum.
 ///
 /// O tronco verga por u² — o pé está fincado na areia e quem passeia é a copa. É a mesma conta da
 /// coluna de fumaça e do eixo do redemoinho; é sempre essa a forma de uma coisa presa embaixo.

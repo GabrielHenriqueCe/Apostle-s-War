@@ -214,8 +214,9 @@ cola cheio. A build perfeita compra as duas certezas de uma vez, sem regra separ
 > arena. **Sem PvP, não há motivo pra negar 100% a quem pagou.**
 >
 > **Na tela é UM número.** A habilidade continua dizendo o que sempre disse (valores íntegros, nada de
-> efeito pela metade); ao mirar, aparece `chance de aplicar: 75%` — e essa linha **some** quando chega
-> a 100%, que é o estado que o jogador persegue.
+> efeito pela metade); ao **clicar** nela, cada alvo válido mostra o seu `chance de aplicar: 75%` — e
+> essa linha **some** quando chega a 100%, que é o estado que o jogador persegue. **É no clique e em
+> todos os alvos, nunca no hover de um só:** em touch não existe hover.
 >
 > **O `× 2` é o botão:** baixa pra 1,5 e o controle fica fácil; sobe pra 3 e Resistência vira muito
 > forte. **Precisão × Evasão não existe** — a esquiva está cortada, e `Precisão` assumiu o nome.

@@ -508,8 +508,10 @@ PRs #204–#213, que guardam melhor e datado. O mapa e o contrato finais do fron
         na curva nova vale 16,7%) pro **joelho** (5000 = 50%), senão a linha de defesa pesada deixava
         de ser pesada. Os bonecos ganharam **Resistência 0** — mesmo motivo do crítico 100%: a
         bancada mede o KIT, e chance de aplicar entre 0 e 1 mediria o dado.
-      - **Falta na TELA:** o `chance de aplicar: 75%` ao mirar, que **some** quando chega a 100%
-        (GDD §1). Nenhum número de dano previsto — só a chance.
+      - **Falta na TELA:** ao **CLICAR na habilidade**, cada alvo válido mostra a sua `chance de
+        aplicar: 75%`, que **some** quando chega a 100% (GDD §1). **É no clique, e em TODOS os alvos,
+        não no hover de um:** em touch não existe hover, e a % não apareceria pra ninguém. Nenhum
+        número de dano previsto — só a chance.
 
 20. 🔜 **A pele da ARENA** — o 1º tema que NÃO é facção, e é isso que ele custa: a chave do tema
     deixa de ser `faccao.ToString()` e passa a ser só um NOME. Uma linha de C# (`FluxoDoFront.cs`, o

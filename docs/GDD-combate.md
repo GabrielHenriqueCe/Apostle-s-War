@@ -130,7 +130,7 @@ malefício ao mesmo tempo.
 
 **E o inimigo fica parado nesse eixo.** Ele não tem item (§5) e Velocidade não escala com nível
 (§4), então a Velocidade inimiga é **85–115 no jogo inteiro** enquanto a do jogador chega a 315 (nv
-60, Atirador, 6★ mítico +20 com a Bota e as subs). No fim da progressão o time joga **~3 turnos para
+60, Atirador, com a Bota mítica no nível 60 e as subs). No fim da progressão o time joga **~3 turnos para
 cada 1** do inimigo, para sempre. Vale saber ao calibrar dificuldade: é vantagem estrutural, não
 curva.
 
@@ -277,6 +277,30 @@ duração antes de o status ser adicionado.
 > ficha, seis fontes em item e seis números pra calibrar. **Uma Resistência única no stat**, com a
 > variedade vindo de traço/passiva de apóstolo, dá a mesma decisão de time por muito menos. O encaixe é o
 > `StatusEffect` (que já tem tipo), **NÃO** a `NaturezaDano` — esta descreve o golpe, não o efeito.
+
+### Nenhuma habilidade pode ser INÚTIL numa batalha inteira
+
+**A regra é do Gabriel** *(ago/2026)*: cada habilidade tem de fazer alguma coisa em qualquer batalha, e
+ele topa reescrever as que não fizerem. Uma habilidade que só serve numa situação é um slot que o
+jogador não pode bancar — e um kit de quatro em que uma é condicional joga com três.
+
+**A saída NÃO é dar um efeito extra separado; é mover o MESMO efeito no tempo.** O caso que originou a
+regra é o revive:
+
+> **Revive reativo** (tem alguém morto): levanta com X% de HP.
+> **Revive preventivo** (ninguém morto): marca um aliado por N turnos — se ele fosse morrer, ele não
+> morre, e a marca é consumida.
+
+É a mesma fantasia (trapacear a morte) nos dois lados, então não é habilidade nova nem exceção: é a
+versão *antes* da situação. E **não recompensa apanhar de propósito**, que é o que um efeito extra
+qualquer faria.
+
+> **O motor já tem o gancho:** é um `StatusEffect` com `IReageAntesDeMorrer`, o primeiro elo da ordem
+> crítica de morte (`IReageAntesDeMorrer` → `IReageAoMatar` → `IReageAoMorrer`). Zero mecânica nova.
+
+O mesmo desenho vale pro resto do kit condicional: limpar malefício vira **imunidade curta** quando não
+há o que limpar; escudar quem vai morrer vira **escudo em quem vai apanhar**. A situacional continua
+situacional — ela só passa a ter o que fazer enquanto a situação não chega.
 
 ---
 

@@ -12,62 +12,73 @@
 
 ---
 
-## Onde paramos (17/ago/2026)
+## Onde paramos (18/ago/2026)
 
-**A fila de PRs zerou** — três merges no mesmo dia: `#239` a arrumação dos docs, `#240` a faxina de
-comentários, `#241` a proposta de progressão. A `main` está em dia e **não há branch pendente** além
-da que traz este arquivo.
+**Sessão inteira de design, e o modelo de progressão mudou de forma.** A branch
+`docs/limpeza-nivel-raridade` carrega tudo o que foi decidido; **a fonte da raridade do apóstolo é a
+única coisa que ficou de fora, de propósito** — ela continua em debate e está guardada aqui embaixo.
 
-**A sessão foi inteira de DESIGN — zero linha de código.** Saiu dela o
-`docs/PROPOSTA-nivel-e-raridade.md`, que é o único lugar onde o modelo novo está escrito.
+O que os GDDs passaram a dizer, e não diziam ontem:
 
-## O modelo novo de progressão — e a V2 já venceu
+- **Os dois eixos são INDEPENDENTES.** A raridade não trava mais o nível — quem trava é o **pedágio**,
+  pelo material da dificuldade. **Comum nível 60 existe e é legítimo.**
+- **A ESTRELA voltou, como VISOR do nível** — uma por dezena, ☆ na queda, ★★★★★★ no 60, no item e no
+  apóstolo. Ela não é eixo: não tem fonte nem efeito próprio, e por isso não duplica ninguém. Os seis
+  valores batem exatos com o `fatorEstrela` antigo.
+- **Todo slot de campanha nasce aberto** (*"item que cai tem de poder ser usado"*). Os **2 acessórios**
+  de dungeon são a exceção e destravam em **4★ e 6★**.
+- **A XP é POTE dividido por quem está em campo** — solo leva tudo, quatro levam um quarto.
+- **As subs iguais aparecem SEPARADAS na ficha**, uma linha por slot.
+- **Nenhuma habilidade pode ser inútil numa batalha** (`GDD-combate.md`): a situacional ganha a versão
+  *antes* da situação — o revive preventivo é o caso que originou a regra.
+- **A alma paga nível/estrela e NÃO paga raridade.** Separar as duas fontes é o que desarma o risco dos
+  36 apóstolos.
 
-Item e apóstolo passam a ter **dois eixos só**: **raridade = quantas · nível = quanto**. Caíram por
-estarem VAZIOS a **estrela** (era o nível medido em passos de 10), o **marco de fase** (a âncora de
-LUGAR que ele dava sobrevive no sacrifício) e o **aprimoramento**. Entrou **material com raridade
-própria** — pó pro item, alma pro apóstolo — como pedágio a cada dezena de nível e como parte do
-degrau de raridade.
+## A raridade do apóstolo — o fio que ficou aberto
 
-**O doc ainda diz "nada decidido", e isso já é drift:** no fim da sessão o Gabriel escolheu a **V2**
-(sem aprimoramento; o mítico ganha 5 subs direto). Ficou só um aviso no topo do arquivo — a reescrita
-de verdade é a pendência 1.
+**O efeito está fechado** (a raridade move a HABILIDADE) e o **teto por dificuldade** também. **A FONTE
+não.** Caíram, com motivo: *alma* (foi pro nível), *missão por apóstolo* (180 instâncias), *uso de
+habilidade* (o kit decide quem sobe, e dá farm de morte), *desafio-espelho 1×1* (bot esperto + cura =
+empate), *matar N vezes a versão dele* (a oferta vira efeito colateral da tabela de inimigos).
 
-**O que a reescrita precisa levar, e que não está em lugar nenhum ainda:**
+**A proposta viva, e é onde a conversa parou:** a promoção vem do **capítulo**, não de atividade nova.
 
-- **o argumento que decidiu** — o endgame da V1 não é o que o GDD prometia: com a estrela morta sobra
-  **uma** unidade excedente, então o reset dela vira um sorteio de 1 em 4, pago com um subsistema
-  inteiro;
-- **o resgate do endgame na V2, sem eixo novo** — reforjar um mítico re-sorteia as **5 subs**, com as
-  mesmas 3 opções e a mesma recusa por slot da promoção;
-- **que o pedágio não é imposto** — cada dezena de nível compra **+15 pontos de principal**.
+- **Fechar a fase 7 do capítulo da facção, numa dificuldade, pela primeira vez → N emblemas daquela
+  facção.** O ícone já existe: `Faccoes.Simbolo()` (👑 Reino, 🌑 Lado Sombrio, ⚙️ Tecnológicos, 🪬
+  Folclore, 🐉 Místicos, ⭐ Especial, 🔱 Decaídos, ❄️ Ascendentes, 🛠️ Humanos).
+- **Custo escalonado:** 1 · 2 · 3 · 4 · 5 por degrau — 15 pra um mítico, 60 pra os quatro da facção.
+  Espalhar é barato, concentrar é caro, e é aí que mora a decisão.
+- **Emblema não tem tier**; quem trava é a dificuldade vencida, e o que sobra acumula.
+- **Humanos:** o emblema 🛠️ vem de fechar todos os 8 capítulos de uma dificuldade — o mesmo ato que
+  entrega o humano novo — e vêm junto os emblemas que faltam pros antigos alcançarem o degrau dele.
+  **O gasto é na mão, um por um** (decisão do Gabriel: a tarefa é o que dá sentido ao acontecimento).
+- **Onde acontece:** na ficha do apóstolo, botão *Promover*, mostrando custo, saldo e o que muda na
+  habilidade. Sem tela nova.
+- **Sem chance de falha, sem material extra, sem desfazer.**
+
+**O `N` por capítulo/dificuldade é o número que decide se o elenco sobe junto ou se você tem
+favoritos** — e ele não entrou na lista dos oito porque o sistema inteiro ainda pode cair.
 
 ## Pendências
 
-1. **Reescrever o `PROPOSTA-nivel-e-raridade.md`:** V2 promovida a modelo, V1 rebaixada a *"considerado,
-   e por que não"*, o reforge do mítico como seção de endgame.
-2. **Os cinco números** que o doc deixou marcados — material por pedágio, `N` do sacrifício, XP por
-   faixa de material, curva de pontos por rodada, e a demanda de alma contra **36 apóstolos** (é o
-   maior risco de calibragem do desenho).
-3. **Aí o `GDD-progressao.md` §7 volta a andar** — ele estava parado esperando exatamente nível e
-   raridade. A dívida do `docs/RELEITURA-backend-pendente.md` segue de pé.
-4. Menores que continuam: o `chance de aplicar: 75%` ao mirar, o **empurrão de medidor**, a **pele da
-   Arena** (FILA A #20) e a **9ª pele, Humanos** (#21, bloqueada até o fundo de facção no compêndio).
+1. **Voltar ao debate da raridade** (acima). É o que trava o §7.
+2. **Os oito números** (`GDD-progressao.md` §Os números que faltam). O #8 é novo: a XP por fase agora
+   que ela divide — ou o pote vira `4×`, ou a tabela de nível por capítulo cai por quatro.
+3. **O `GDD-progressao.md` §7 volta a andar** quando a raridade fechar. A dívida do
+   `docs/RELEITURA-backend-pendente.md` segue de pé.
+4. Menores que continuam: o **empurrão de medidor**, a **pele da Arena** (FILA A #20) e a **9ª pele,
+   Humanos** (#21, bloqueada até o fundo de facção no compêndio).
 
-## Armadilhas desta sessão
+## Anotações desta sessão
 
-- **Squash-merge de branch EMPILHADA gera conflito falso.** A `faxina` saía da `arrumacao`; quando a
-  de baixo entrou comprimida num commit só, a de cima seguia carregando os 7 originais. Não se resolve
-  à mão — **branch nova da `main` + cherry-pick** só dos commits próprios. Feito e conferido nesta
-  sessão.
-- **`git diff main <branch>` NÃO prova que o merge entrou** quando há outra branch em jogo: ela aparece
-  como "diferença" só por não ter o trabalho da vizinha. A prova é diffar **apenas os arquivos que a
-  branch toca**.
-- **Devolvi como fala dele duas invenções minhas** na mesma rodada de design (rebaixar o sacrifício a
-  enfeite, tirar o "evoluir jogando"). Em conversa longa isso vira premissa e o erro compõe.
-- **O `GDD-itens.md` se contradiz sozinho** sobre a 5ª unidade do mítico: *"o bônus de nascença"* numa
-  linha e *"não cai no drop, só se conquista evoluindo"* quinze linhas abaixo. Mítico cai no drop — a
-  segunda é a velha.
+- **Guerra de facção** (ideia do Gabriel, vinda do Raid): conteúdo futuro onde a facção ganha razão
+  mecânica de existir. O lugar dela é **material de forja e sub de item** — nunca raridade de apóstolo.
+- **Forja não FABRICA.** Materiais promovem e aceleram; criar um mítico do zero mataria o drop e a
+  campanha viraria mineração.
+- **As 9 facções têm exatamente um apóstolo de cada função** (9 × 4 = 36, verificado no
+  `Apostolos/`). É uma grade perfeita, e vale lembrar dela antes de desenhar qualquer regra de time.
+- **Regra nova no `CLAUDE.md`:** é **apóstolo**, nunca "champ"/"hero" — e quando o Gabriel escrever
+  assim, corrigir.
 
 ## Gotchas que continuam valendo
 
@@ -76,3 +87,5 @@ de verdade é a pendência 1.
 - Os harnesses `ferramentas/rodar-telas.js` e `rodar-tema.js` publicam mensagem e montam tela — **eles
   não clicam em nada**. Verde deles nunca quer dizer "o jogo funciona": hover, arraste, clique e tudo
   que acontece DURANTE a batalha quem confere é o Gabriel.
+- **Splice por faixa de linha em doc CRLF:** converter o bloco novo (`sed -i 's/\r*$/\r/'`) antes de
+  concatenar, e **conferir a emenda** — errar a linha final apaga meia frase sem o build reclamar.

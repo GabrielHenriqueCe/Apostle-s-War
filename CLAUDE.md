@@ -123,6 +123,10 @@ mexer em nome de facção, de apóstolo ou em texto de tela. **Em identificador 
 `apóstolo`** — vale pra comentário, doc e string que vira documento gerado. O 🦸 Herói ficou Herói: é
 nome próprio, par do 🦹 Vilão.
 
+**NUNCA "champ", "campeão", "hero", "herói genérico" ou "unidade" — é APÓSTOLO, sempre.** São vícios
+de outros jogos e não descrevem o que estas peças são. Vale em conversa, código, doc e tela — e **se o
+Gabriel escrever "champ" ou "hero", corrigir na resposta**, foi ele quem pediu.
+
 ## O resto é carregado pela TAREFA, não por esta página
 Cada assunto tem um doc próprio em `docs/`, e uma skill em `.claude/skills/` que dispara quando a
 tarefa é daquele assunto. Ponteiro aqui não bastava: punha em mim a decisão de ler, e ela falhava.

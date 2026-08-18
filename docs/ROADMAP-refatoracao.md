@@ -432,7 +432,7 @@ PRs #204–#213, que guardam melhor e datado. O mapa e o contrato finais do fron
         um pouco:** parte da `Sinergia (4)` agora é geometria e não composição — está avisado no
         cabeçalho do próprio relatório.
 
-    **➡️ ESTE PR — O MAPA DE CALOR DA POSIÇÃO** (só pintura; nenhuma regra nova). Na PREPARAÇÃO da
+    - ✅ **O MAPA DE CALOR DA POSIÇÃO** *(#234)* (só pintura; nenhuma regra nova). Na PREPARAÇÃO da
     fase, que é onde a casa ainda é decisão: passar o mouse numa casa sua acende as casas inimigas
     com o multiplicador dele ali (cor + o número escrito, `×1,20`, escala divergindo no 1,00), e o
     **arraste** troca a leitura ao vivo — é o instante em que a decisão está sendo tomada.
@@ -508,10 +508,26 @@ PRs #204–#213, que guardam melhor e datado. O mapa e o contrato finais do fron
         na curva nova vale 16,7%) pro **joelho** (5000 = 50%), senão a linha de defesa pesada deixava
         de ser pesada. Os bonecos ganharam **Resistência 0** — mesmo motivo do crítico 100%: a
         bancada mede o KIT, e chance de aplicar entre 0 e 1 mediria o dado.
-      - **Falta na TELA:** ao **CLICAR na habilidade**, cada alvo válido mostra a sua `chance de
-        aplicar: 75%`, que **some** quando chega a 100% (GDD §1). **É no clique, e em TODOS os alvos,
-        não no hover de um:** em touch não existe hover, e a % não apareceria pra ninguém. Nenhum
-        número de dano previsto — só a chance.
+      - ✅ **NA TELA: o 🧲** *(#245)* — ao CLICAR na habilidade, cada alvo em disputa mostra a chance
+        dela COLAR nele, já com os dois portões multiplicados. Some em 100%, que é o estado que o
+        jogador persegue. Nasceu a `Acao.PreverChanceDeAplicar` (gêmea da `PreverVidaRemovida`) e a
+        `HabilidadeAtiva.ChanceDeAplicarEm`, que agrega pelo MENOR entre as ações que alcançam o alvo
+        — e o escopo filtra, senão o Desejo do Gênio mostraria a chance da Maldição nos aliados. De
+        quebra, os dois dados da `AplicarDebuff` viraram UM, contra o mesmo número que a tela mostra.
+        **O símbolo é 🧲 e não 🎲 porque o 🎲 já é a Taxa de Crítico neste front** (e o 🎯, a Precisão).
+
+    **➡️ COM ISSO O PASSO 4 DO GDD §7 FECHOU INTEIRO.** O próximo é o **passo 5: nível (curva do
+    tipo) + raridade**, e ele são dois PRs — nível+XP primeiro (o `Personagem.Nivel` e o
+    `Arquetipos.FatorDoNivel` já existem; falta o que faz o número ANDAR: a XP como pote dividido por
+    quem está em campo, caindo por inimigo morto e sem banco), raridade como DADO depois. O passo 6 é
+    o efeito dela (a passiva que escala).
+
+    - ✅ **A VELOCIDADE ANDA NA ESTRELA** *(#247)* — +2 por estrela (2·4·6·8·10·12), o único stat em
+      degrau. O `VelocidadeNv60` da ficha morreu: só o nv 1 é declarado e o topo é consequência da
+      regra. Foi isso que matou a divergência §1×§2 em que o Suporte ficava parado em 105 a vida
+      inteira — **enquanto as duas pontas eram escritas à mão, um comentário registrava o impasse em
+      vez de alguém decidir**. O inimigo escala pela mesma regra e trava no 60 (decisão do Gabriel),
+      então a vantagem de ~3 turnos para 1 no fim da progressão é do ITEM, não do nível.
 
 20. 🔜 **A pele da ARENA** — o 1º tema que NÃO é facção, e é isso que ele custa: a chave do tema
     deixa de ser `faccao.ToString()` e passa a ser só um NOME. Uma linha de C# (`FluxoDoFront.cs`, o

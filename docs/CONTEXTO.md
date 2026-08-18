@@ -14,75 +14,65 @@
 
 ## Onde paramos (18/ago/2026)
 
-**O modelo de progressão fechou inteiro** — nível, raridade e as duas economias — e está escrito nos
-GDDs. Foi uma sessão só de design, zero linha de código. A branch `docs/limpeza-nivel-raridade` tem
-tudo, em três commits.
+**O passo 4 do `GDD-progressao.md` §7 fechou inteiro**, e com ele a dívida de releitura do back-end.
+Três PRs mergeados nesta sessão: **#245** (o 🧲 na tela), **#246** (`Combat/Capacidades/`) e **#247**
+(a Velocidade por estrela). A `main` está em `fcc314f`, sem branch pendurada.
 
-**Não há decisão pendente no modelo.** O que sobrou são os sete números de calibragem
-(`GDD-progressao.md` §Os números que faltam) e a execução, que é o §7.
+**O próximo é o passo 5.** Não há decisão de modelo travando ele.
 
-## O modelo, em cinco linhas
+## O passo 5, e ele são dois PRs
 
-- **Dois eixos INDEPENDENTES nos dois objetos:** **raridade = quantas · nível = quanto.** Um não trava
-  o outro — **comum nível 60 existe**. Quem trava o nível é o **pedágio** (material da dificuldade).
-- **A estrela é o VISOR do nível** — uma por dezena, ☆ na queda, ★★★★★★ no 60. Não é eixo. Ela destrava
-  os 2 slots de acessório, em 4★ e 6★; os 7 slots de campanha nascem abertos.
-- **Item:** raridade = quantas subs (forja: sacrifício + material) · nível = magnitude
-  (`fatorNível = 10 + 1,5 × nível`).
-- **Apóstolo:** raridade = a HABILIDADE, e **não mexe em stat nenhum** — comum e mítico do mesmo nível
-  têm os mesmos números. Nível = os números, por XP.
-- **Duas moedas que não se trocam:** **alma** paga nível/estrela (cai de inimigo, sempre) · **emblema**
-  paga raridade (cai de fechar capítulo, uma vez). É isso que acaba com o *"não sei em qual investir"*.
+- **5a — nível + XP.** Metade já está no repo: `Personagem.Nivel`, `Arquetipos.FatorDoNivel` e a
+  ficha na tela. Falta o que faz o número **andar** — a XP como pote dividido por quem está em campo,
+  caindo por inimigo morto, sem banco — mais o save e a tela.
+- **5b — raridade como DADO.** Só o eixo: campo, save, cor na ficha. O efeito é o passo 6.
 
-## O EMBLEMA — a peça que fechou a sessão
+**Consequência aceita:** sem o pedágio (que é material, e material é o bloco DEPOIS do §7), o nível
+sobe livre até 60 — **o teto por dificuldade não existe até a forja chegar**. Está na ordem do GDD.
 
-Fechar a **fase 7 do capítulo da facção**, em cada dificuldade, **pela primeira vez**. Ícone = o símbolo
-da própria facção, que já existe em `Faccoes.cs`.
+## Decisões desta sessão
 
-```
-colheita   Fácil 4 · Normal 8 · Difícil 16 · Pesadelo 32   =  60
-custo      1 · 2 · 3 · 4 · 5  =  15 por apóstolo  =  60 pelos 4 da facção
-```
+- **A Velocidade anda na ESTRELA, +2 por estrela** (2·4·6·8·10·12, +12 do nv 1 ao 60). É o único stat
+  em degrau. **O inimigo escala pela mesma regra e trava no 60** — a vantagem de ~3 turnos para 1 no
+  fim da progressão é do **ITEM**, não do nível. Morreu no caminho a versão "+1 por estrela e +5 na
+  sexta": a quebra de cadência custava um caso especial pra entregar o que a cadência única entrega.
+- **Só o nv 1 da Velocidade é declarado; o topo é consequência.** Foi o que dissolveu a divergência
+  em que o Suporte ficava parado em 105 — **duas pontas escritas à mão, e um comentário registrando o
+  impasse em vez de alguém decidir**. Regra do Gabriel: *acha o errado e apaga, não comenta.*
+- **O 🧲 é 🧲 e não 🎲** — o 🎲 já é a Taxa de Crítico neste front, e o 🎯 já é a Precisão.
+- **`Combat/` fica em inglês.** A regra do `CLAUDE.md` (domínio em português) é sobre nome de TIPO e
+  nunca chegou nas pastas; renomear as quatro (`Skills`, `Models`, `Enum`, `Combat`) é tema próprio.
 
-**Oferta = demanda.** O destino é sempre os quatro míticos; o que se escolhe é a **ORDEM**. Não é
-farmável, não tem teto de raridade por dificuldade, não falha e não se desfaz.
+## A RELEITURA do back-end — PAGA, e o arquivo morreu
+
+O `docs/RELEITURA-backend-pendente.md` foi deletado neste PR. O Gabriel percorreu as §1, §2 e §3 (a
+estrutura, os services e as regras do motor) e passou os olhos no resto, sem achar inconsistência
+além do que já foi consertado — **o que a releitura pegou está nos PRs desta sessão**. Um arquivo que
+ainda listasse a dívida como aberta seria o mesmo defeito que ele foi criado pra combater.
 
 ## Pendências
 
-1. **Os sete números** (`GDD-progressao.md` §Os números que faltam). O maior risco continua sendo o
-   **#5**, a demanda de alma contra 36 apóstolos.
-2. **O `GDD-progressao.md` §7 volta a andar** — ele estava parado esperando nível e raridade, e agora
-   não está mais. A dívida do `docs/RELEITURA-backend-pendente.md` segue de pé.
-3. Menores que continuam: o **empurrão de medidor**, a **pele da Arena** (FILA A #20) e a **9ª pele,
-   Humanos** (#21, bloqueada até o fundo de facção no compêndio).
+1. **Os sete números** (`GDD-progressao.md` §Os números que faltam). Eles **não bloqueiam o passo 5**
+   — são de material, pedágio, forja, sub e drop, tudo no bloco DEPOIS. O maior risco segue o **#5**,
+   a demanda de alma contra 36 apóstolos.
+2. Menores que continuam: o **empurrão de medidor** (a `FilaDeTurnos` já tem os ganchos —
+   `Vez.Esperou` e o "Velocidade ≤ 0 não cruza sozinho mas continua na fila"), a **pele da Arena**
+   (FILA A #20) e a **9ª pele, Humanos** (#21, bloqueada até o fundo de facção no compêndio).
 
 ## Ideias parqueadas (não são pendência)
 
-- **Guerra de facção** (do Raid): time mono-facção, e o prêmio é **material de forja e sub de item** —
-  nunca raridade de apóstolo. É onde a facção ganharia razão mecânica de existir.
-- **A Arena segue sem economia própria.** A cauda de emblemas que chegou a ser proposta foi descartada:
-  a oferta já fecha em 60 e não há déficit pra ela cobrir.
-- **5ª dificuldade: não.** O número 4 está costurado no jogo (ponto por rodada, XP, tetos de nível,
-  `4·8·16·32`), e a identidade que fecha a economia é de quatro parcelas.
-- **Se o 1º degrau parecer barato demais**, a alavanca é redistribuir dentro dos mesmos 15
-  (`2·3·3·3·4`) — um número, nada mais.
-
-## Anotações desta sessão
-
-- **As 9 facções têm exatamente um apóstolo de cada função** (9 × 4 = 36, verificado em `Apostolos/`).
-  Grade perfeita — vale lembrar antes de desenhar qualquer regra de time.
-- **Regra nova no `CLAUDE.md`:** é **apóstolo**, nunca "champ"/"hero" — e quando o Gabriel escrever
-  assim, corrigir.
-- **Duas invenções minhas que ele teve de derrubar:** o "comum veste 3, mítico veste 9" (nunca foi
-  decisão dele) e o `(5)` do aprimoramento voltando na ficha de subs. O que ele não citou, se preserva.
+- **Guerra de facção** (do Raid): time mono-facção, prêmio em material de forja e sub de item — nunca
+  raridade de apóstolo.
+- **A Arena segue sem economia própria**, e **a 5ª dificuldade continua descartada**.
+- **Teto de estabilidade da fila:** `FracaoDoCiclo < 100 ÷ (nº em campo)`, ou 12,5% num 4×4. Os 10%
+  de hoje têm um quinto de folga — **um combate 5×5 derruba o teto pra 10% e encosta**.
 
 ## Gotchas que continuam valendo
 
-- **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas oscilam entre corridas. Depois de
-  rodar a suíte sem ter mexido em número: `git checkout -- docs/bancada-dano.md`.
+- **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas oscilam entre corridas
+  (Tiroteio, Esgrima, Shuriken, Porradeiro, Vilania — todas na coluna de Sinergia 4). Depois de rodar
+  a suíte sem ter mexido em número: `git checkout -- docs/bancada-dano.md`.
 - Os harnesses `ferramentas/rodar-telas.js` e `rodar-tema.js` publicam mensagem e montam tela — **eles
-  não clicam em nada**. Verde deles nunca quer dizer "o jogo funciona": hover, arraste, clique e tudo
-  que acontece DURANTE a batalha quem confere é o Gabriel.
-- **Splice por faixa de linha em doc CRLF:** converter o bloco novo (`sed -i 's/\r*$/\r/'`) antes de
-  concatenar e **conferir a emenda**. Errei a linha final quatro vezes nesta sessão — cada erro apaga
-  meia frase em silêncio, e nenhum build reclama. Conferir com `sed -n` DEPOIS de cada splice.
+  não clicam em nada**. Hover, arraste, clique e tudo que acontece DURANTE a batalha quem confere é o
+  Gabriel.
+- **Não há Python nesta máquina.** Splice em doc CRLF vai pelas ferramentas de edição, não por script.

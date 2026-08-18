@@ -36,12 +36,12 @@ stats base dos 4 tipos. São 566 linhas de MODELO — o que fica valendo depois 
 
 ## 4. ITENS → `docs/GDD-itens.md`
 
-696 linhas, 40% do documento original, e o passo mais distante da fila (o item equipado é o último
+597 linhas, e o passo mais distante da fila (o item equipado é o último
 do §7). Slots, subs, escala, drop, evolução e dungeons.
 
 ---
 
-## 3. O APÓSTOLO — NÍVEL E RARIDADE (não tem estrela)
+## 3. O APÓSTOLO — NÍVEL E RARIDADE
 
 **A separação é do Gabriel e é coerente:** número cresce por nível; **comportamento** muda por
 raridade.
@@ -49,27 +49,56 @@ raridade.
 - **Raridade**: comum (cinza) · incomum (verde) · raro (azul) · épico (roxo) · lendário (dourado) ·
   mítico (vermelho). **Sobe** (não é fixa no drop).
 - **Nível sobe por XP de batalha** — igual ao item, que também sobe de nível jogando.
-- **Raridade sobe por MISSÃO do apóstolo** + teto da dificuldade.
+- **Raridade sobe por EMBLEMA da facção** (§O EMBLEMA), e por mais nada.
 - **Subir raridade NÃO zera o nível.**
+- **A raridade muda a HABILIDADE** — é o efeito dela, e é só ele (§Raridade → habilidade).
+
+**Raridade = quantas · nível = quanto**, a mesma frase do item (§4) — e **os dois eixos são
+independentes**. A raridade não trava o nível: um **comum nível 60** existe e é legítimo, com stat
+cheio e a habilidade no primeiro degrau. Quem trava o nível é o **pedágio** (§O PEDÁGIO), pelo
+material da dificuldade.
+
+> **E a raridade não mexe em NÚMERO nenhum.** Um comum e um mítico do mesmo nível têm **os mesmos
+> stats** — o que muda é a qualidade do kit. É isso que torna aceitável ter apóstolos atrasados no
+> elenco: eles batem igual, só com a versão crua das habilidades.
 
 ### A CURVA DE XP — e ela foi calibrada pra não obrigar a farmar
 
 ```
 custo do nível N → N+1   =   100 × N
-XP de uma fase           =   22 × (capítulo × 7 + fase)   ×   multiplicador da dificuldade
+XP que a FASE põe na mesa =  88 × (capítulo × 7 + fase)   ×   multiplicador da dificuldade
                              Fácil 1 · Normal 2 · Difícil 3 · Pesadelo 4
 ```
 
-**O critério foi um só: jogar cada fase UMA vez, em ordem, tem de bastar.** No Fácil isso fecha
-cravado no teto da dificuldade:
+**Como ela é paga:**
+
+- **Por inimigo morto nas ondas**, não por vitória — perder a fase só deixa de ganhar o resto do que
+  ainda ia cair.
+- **É um POTE, dividido igual entre quem está em campo**, independente de quem bateu. **Sozinho, ele
+  leva tudo; em quatro, cada um leva um quarto.** Isso faz do solo o jeito mais rápido de subir UM
+  apóstolo, e do time cheio o jeito de subir quatro — uma escolha de verdade, sem regra nova.
+- **Não existe banco.** Pra subir, o fraco tem de **estar em campo**, mesmo atrapalhando: carregar um
+  recruta custa um dos 4 slots, e é esse o preço. É o carry de sempre — dois fortes puxando dois fracos
+  no Pesadelo — e ele **para no teto do pedágio**: quem destrava mais nível é o material, não a XP.
+
+**O critério da calibragem foi um só: jogar cada fase UMA vez, em ordem, tem de bastar.** No Fácil isso
+fecha cravado no teto da dificuldade:
 
 | ao terminar o capítulo | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
 |---|--:|--:|--:|--:|--:|--:|--:|--:|
 | **nível** | 6 | 9 | 13 | 16 | 20 | 23 | 26 | **30** |
 
-Nível **30** ao fim do capítulo 8, que é exatamente o teto do raro — o teto do Fácil. **Zero repetição
-obrigatória.** E como a XP cresce dentro do capítulo e entre capítulos, a **8-7 vale 8× uma 1-1**:
-quem quiser repetir tem onde, e o lugar é o mais difícil.
+Nível **30** ao fim do capítulo 8, que é exatamente o teto do Fácil. **Zero repetição obrigatória.** E
+como a XP cresce dentro do capítulo e entre capítulos, a **8-7 vale 8× uma 1-1**: quem quiser repetir
+tem onde, e o lugar é o mais difícil.
+
+> **O `88` é o `22` de sempre, vezes os quatro em campo.** A tabela acima é o que **cada apóstolo**
+> acumula num time cheio, que é a situação normal do jogo — a calibragem original vale intacta.
+>
+> **E jogar com menos gente não é atalho:** solando, um apóstolo recebe quatro vezes isso e encosta no
+> teto do pedágio no meio da passada. Dali em diante a XP dele **se perde** — o pote não guarda, e o
+> teto não cede. Quem espalha aproveita tudo; quem concentra troca alcance por velocidade e paga em
+> desperdício.
 
 **O que cada dificuldade custa** (o total do jogo é `100 × (1+…+59)` = **177.000**):
 
@@ -95,61 +124,172 @@ quem quiser repetir tem onde, e o lugar é o mais difícil.
 > pela XP"*; sem bônus de recuperação isso é **falso por 5 níveis**. Decidir se entra um bônus ou se a
 > promessa muda de texto.
 
-### O APÓSTOLO NÃO TEM ESTRELA — e não se perde nada
+### A ESTRELA — o visor do nível, e ela vale igual pros dois
 
-**O eixo estava vazio.** A estrela do apóstolo não tinha fonte de custo que não fosse *sacrificar
-cópias*, e duplicata está descartada (ver §4, offline). Eixo sem fonte própria não é eixo, é peça
-esperando um sistema que não se quer construir.
+**A cada dezena de nível, uma estrela.** O apóstolo recém-descoberto tem **nenhuma**; no nível 60 tem
+**seis** — exatamente como o item (§4):
 
-**E ela já duplicava a raridade.** O que a estrela fazia era ser **teto de nível** (*1★ até 10, 2★ até
-20…*) — exatamente o papel que a raridade tem no item. Passando a função pra frente, **nenhum número
-muda, só o dono**:
+| nível | 1–9 | 10 | 20 | 30 | 40 | 50 | 60 |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| **estrela** | ☆☆☆☆☆☆ | ★ | ★★ | ★★★ | ★★★★ | ★★★★★ | ★★★★★★ |
 
-| raridade do apóstolo | nível máx |
-|---|---|
-| comum | 10 |
-| incomum | 20 |
-| raro | 30 |
-| épico | 40 |
-| lendário | 50 |
-| mítico | 60 |
+- **Ela não é um eixo** — não tem fonte de custo própria nem efeito próprio. É leitura do nível, e por
+  isso pode existir sem competir com nada.
+- **O pedágio senta entre as estrelas:** 6 estrelas, 5 pedágios. Ganha-se a ★, bate-se na parede,
+  paga-se pra continuar (§O PEDÁGIO).
+- **Ela destrava os 2 slots de acessório**, em 4★ e 6★ (`GDD-itens.md` §OS 9 SLOTS). É o único
+  desbloqueio de slot do jogo — os 7 da campanha nascem abertos.
+- **Estrela e raridade dizem coisas diferentes na mesma ficha:** a estrela é o quanto ele cresceu; a
+  cor é o que ele faz. Um `comum 6★` é um veterano de stat cheio e habilidade crua.
 
-Mesmo `6 × 10 = 60` que a estrela dava. E a simetria com o item fica exata: **raridade destrava nível,
-nível dá os números.** De quebra, o teto de raridade por dificuldade passa a limitar o nível do
-apóstolo **de graça** — no Fácil não se passa de raro, logo não se passa do nível 30.
+### O MATERIAL — pó pro item, alma pro apóstolo
 
-> **A estrela continua existindo no jogo** — no ITEM, onde ela tem fonte própria (o nível de uso) e
-> função própria (magnitude). Não se perde a sensação; para-se de pagar por ela duas vezes.
+**Seis raridades, as mesmas do resto do jogo.** O material paga o eixo do **NÍVEL** nos dois objetos:
+acelera a subida e é cobrado no pedágio a cada dezena.
 
-### As missões, e por que o nível avisa a hora
+- **Pó cai na fase**, junto com os itens. **Alma cai por INIMIGO derrotado**, não por fase — a oferta
+  escala com o quanto se joga, e a **Arena alimenta o elenco** sem precisar de regra nova.
+- **Fusão 10:1 pra cima**, travada pelo **teto de raridade da dificuldade mais alta vencida**: não se
+  fabrica pó mítico farmando o Fácil.
+- **Diluição 1:5 pra baixo.** As duas pontas perdem, então o ida-e-volta perde metade — **ter a moeda
+  certa vale mais que ter volume**.
+- **Desmontar** item devolve material da raridade dele, com perda, e nunca acima do que a peça poderia
+  produzir. É o que mantém o drop comum valendo no Pesadelo.
+- **Material acelera o nível** (vale XP, mais por faixa), e não precisa de trava anti-abuso: o material
+  que mais acelera é o mesmo que os pedágios exigem, então queimá-lo como atalho **rouba do próprio
+  teto**.
 
-**Missão é conteúdo; duplicata é imposto de tempo.** Uma missão boa usa o que já existe e prova
-domínio do apóstolo — *"passar a fase 7 do capítulo dele sozinho"*.
+> **A alma NÃO compra raridade** *(ago/2026)*. Ela é a moeda do nível/estrela, e só. Se pagasse os dois
+> eixos, a demanda contra **36 apóstolos** explodiria — e esse era o maior risco de calibragem do
+> documento. Separar as duas fontes é o que conserta o risco: a raridade se paga em EMBLEMA
+> (§O EMBLEMA), que não é farmável e não compete com a alma em nada.
 
-E o encaixe com a escada é automático: **o apóstolo trava no teto e a barra encosta na parede**, o que
-avisa o jogador sozinho, sem tela de tutorial.
+### O PEDÁGIO — material a cada 10 níveis, e é ele que trava o nível
 
-```
-comum, bate no nível 10   →  parou  →  missão  →  incomum, destrava até 20
-incomum, bate no nível 20 →  parou  →  missão  →  raro, destrava até 30
-raro                      →  parou de vez: o Fácil não vai além
-```
+| pedágio no nível | custo | destrava até |
+|:-:|---|:-:|
+| **10** | comum + incomum | 20 |
+| **20** | incomum + raro | 30 |
+| **30** | raro + épico | 40 |
+| **40** | épico + lendário | 50 |
+| **50** | lendário + mítico | **60** |
 
-> Por isso **duas missões dentro do Fácil** (comum→incomum→raro), e não uma.
+A receita é **muito da faixa atual + pouco da próxima**, e o material mais alto de cada linha é o que
+prende o pedágio à dificuldade — não se paga o @30 sem pó épico, e pó épico não cai no Fácil.
+
+**É este o único teto do nível.** A raridade não participa: um comum sobe exatamente como um mítico,
+pagando o mesmo pedágio. É por isso que os dois eixos podem ser soltos sem que o teto por dificuldade
+se perca.
+
+**E o pedágio não é imposto:** cada dezena comprada entrega **+15 pontos de principal** no item — a
+maior compra que existe na peça — e uma estrela na ficha.
+
+> **Não trava no 59:** o pedágio do 50 compra a dezena inteira. Um custo próprio pra pisar no 60 cabe e
+> não quebra nada — custaria mítico puro, e pó mítico só cai no Pesadelo, onde o 60 já é permitido. É
+> sabor, não estrutura.
+
+### O TETO DE DIFICULDADE — o que a dificuldade governa
+
+| dificuldade | material que cai até | último pedágio pagável | teto de nível | raridade que o DROP alcança |
+|---|---|:-:|:-:|:-:|
+| Fácil | raro | @20 | **30** | raro |
+| Normal | épico | @30 | **40** | épico |
+| Difícil | lendário | @40 | **50** | lendário |
+| Pesadelo | mítico | @50 | **60** | mítico |
+
+**O teto de nível não é regra escrita — é consequência do material.** Não se paga o pedágio @30 sem pó
+épico, e pó épico não cai no Fácil. Vale igual pro apóstolo e pro item.
+
+**A última coluna é só do ITEM**, e é a faixa do drop (`GDD-itens.md` §O drop). A promoção pela forja
+se trava sozinha pela receita, que pede *pouco da raridade alvo*.
+
+> **NÃO existe teto de raridade pro APÓSTOLO** *(decisão de ago/2026)*. Ele foi removido porque a
+> **oferta de emblemas já faz o trabalho** (§O EMBLEMA): com 4 emblemas no Fácil não se compra nem um
+> épico. Quem junta tudo num favorito consegue **lendário ao fim do Normal e mítico ao fim do Difícil**
+> — um degrau adiantado, pago com o resto da facção parado. É build de fanático, não furo.
+
+### O EMBLEMA — a fonte da raridade do apóstolo
+
+**Fechar o capítulo da facção — a fase 7 — numa dificuldade, PELA PRIMEIRA VEZ, entrega emblemas
+daquela facção.** É a única fonte, e ela não se repete: quatro colheitas por facção no jogo inteiro,
+uma por dificuldade.
+
+> **O ícone já existe e é o símbolo da própria facção:** `Faccoes.Simbolo()` —
+> 👑 Reino · 🌑 Lado Sombrio · ⚙️ Tecnológicos · 🪬 Folclore · 🐉 Místicos · ⭐ Especial ·
+> 🔱 Decaídos · ❄️ Ascendentes · 🛠️ Humanos. Nenhuma arte nova, e o jogador já lê o ícone antes de o
+> item existir.
+
+**O emblema é TRANCADO na facção** — emblema do Reino só promove apóstolo do Reino.
+
+| degrau | custo | acumulado por apóstolo |
+|---|:-:|:-:|
+| comum → incomum | 1 | 1 |
+| incomum → raro | 2 | 3 |
+| raro → épico | 3 | 6 |
+| épico → lendário | 4 | 10 |
+| lendário → mítico | 5 | **15** |
+
+| colheita | Fácil | Normal | Difícil | Pesadelo | total |
+|---|:-:|:-:|:-:|:-:|:-:|
+| **emblemas** | 4 | 8 | 16 | 32 | **60** |
+
+**Oferta e demanda são o MESMO número:** 4 apóstolos × 15 = **60** por facção, e `4+8+16+32` = **60**.
+Isso é o desenho inteiro numa frase: **você escolhe a ORDEM, nunca o destino.** Ao fim do Pesadelo os
+quatro estão míticos em qualquer caminho, nenhum emblema sobra, e nenhuma escolha vira arrependimento
+permanente.
+
+**A colheita DOBRA** porque parcela igual não teria decisão nenhuma: 15 por dificuldade já passa do que
+o começo consegue gastar. Crescendo, a escassez fica no começo — onde ela é interessante — e a
+generosidade no fim, onde ela é o troféu de ter terminado a facção no Pesadelo.
+
+**Distribuir × concentrar, dificuldade por dificuldade** (👑 Reino: Rei · Mago · Ninja · Guarda):
+
+| | distribuído | focado no Rei |
+|---|---|---|
+| **Fácil** (4) | 1+1+1+1 → **4 incomuns** | 3 no Rei · 1 no Mago → **1 raro · 1 incomum · 2 comuns** |
+| **Normal** (8) | 2×4 → **4 raros** | 7 no Rei · 1 no Ninja → **1 lendário · 2 incomuns · 1 comum** |
+| **Difícil** (16) | 12 + 4 → **1 lendário · 3 épicos** | 5 (Rei vira **mítico**) · 9 · 2 → **1 mítico · 1 lendário · 1 raro · 1 comum** |
+| **Pesadelo** (32) | 5 + 27 → **4 míticos** | 5 + 12 + 15 → **4 míticos** |
+
+Os dois caminhos consomem os 32 do Pesadelo **exatamente**, e qualquer mistura entre eles também fecha
+em zero. O que muda não é o fim: é **com quem você joga durante três dificuldades** — quatro kits
+medianos, ou um monstro e três passageiros.
+
+**Onde acontece:** na ficha do apóstolo, botão **Promover**, com o custo, o saldo e **o que muda na
+habilidade**. Sem tela nova — o sistema não cria lugar pra visitar uma vez e nunca mais.
+
+**Sem chance de falha, sem material extra, sem desfazer.** Promoveu, promoveu.
+
+> **Repetir a fase 7 NÃO dá emblema, e isso é estrutural.** Farmável, a oferta vira infinita, o `N` deixa
+> de significar qualquer coisa e sobra só quanto tempo alguém aguenta repetir a mesma fase — o
+> *"imposto de tempo"* que a duplicata já tinha perdido. O emblema é a única peça do desenho cuja
+> escassez cria decisão.
+
+> **Ritmo, e é bom estar dito:** a colheita chega ao fechar o capítulo **daquela** facção, então o
+> 👑 Reino (capítulo 1) recebe os primeiros emblemas no começo do Fácil e a facção do capítulo 8 só
+> recebe os dela no fim. **A facção inicial fica quase uma dificuldade à frente do elenco o jogo
+> inteiro** — o que combina com ela ser a que treina o jogador, mas não é acidente e não é bug.
+
+> **Se o primeiro degrau um dia parecer barato demais:** ele custa **25% da colheita do Fácil**, e
+> promover os quatro consome a colheita inteira — não é de graça no momento em que acontece. Se ainda
+> assim incomodar, a alavanca é redistribuir dentro dos mesmos 15 (`2·3·3·3·4`), sem tocar em mais
+> nada.
 
 ### Os HUMANOS — a exceção, e ela é de propósito
 
-- **Começam INCOMUM** (teto de nível 20 contra os 10 de todo mundo). É a vantagem do time inicial, e
-  ela se lê direto na escada, sem número inventado.
+- **Começam INCOMUM** — a vantagem do time inicial, e ela se lê direto na cor, sem número inventado.
 - **O jogador escolhe UM ao criar a conta.** Fechar **todos** os capítulos de uma dificuldade dá
   **+1 humano** para escolher, já na raridade máxima daquela dificuldade (Fácil → raro, Normal →
   épico, Difícil → lendário). No Pesadelo não vem mais nenhum: são 4 no total.
-- **São os únicos que sobem raridade por progressão de campanha**, não por missão individual — e sobem
-  mesmo sem serem usados.
+- **O emblema 🛠️ deles vem de fechar TODOS os 8 capítulos de uma dificuldade** — não há capítulo dos
+  Humanos —, e é o mesmo ato que entrega o humano novo. Junto com ele vêm **os emblemas que faltam pros
+  humanos antigos alcançarem o degrau do recém-chegado**, contados na hora, pela diferença.
+- **O gasto é NA MÃO, um por um** (decisão do Gabriel). A subida não é automática de propósito: apertar
+  o botão é o que transforma a chegada do novo em acontecimento, em vez de um número mudando sozinho.
 
-> **Um humano *raro nível 1* é normal e não é problema:** ele tem o **teto aberto** e status nenhum.
-> Quem adotar um protagonista novo lá pelo capítulo 5 alcança rápido pela XP. Os humanos são o **slot
-> flexível** do elenco.
+> **Um humano *raro nível 1* é normal e não é problema:** ele chega cru, com a habilidade forte e
+> número nenhum. Quem adota um protagonista novo lá pelo capítulo 5 alcança rápido pela XP — os
+> humanos são o **slot flexível** do elenco.
 >
 > **Nada de forçar o uso deles pra passar da 8-7.** Obrigar um apóstolo específico na fase final é
 > gargalo: invalida o time que o jogador montou, justo onde ele mais quer usá-lo.
@@ -329,7 +469,7 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
    hoje a ordem é um `for` sobre `Equipe1.Membros ++ Equipe2.Membros`, e é esse `Concat` que é a
    vantagem de time que o §1 quer matar.
 4. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
-5. **Nível (curva do tipo) + Raridade** nos apóstolos. Sem estrela.
+5. **Nível (curva do tipo) + Raridade** nos apóstolos.
 6. **Raridade → passiva que escala.**
 7. **Item equipado no apóstolo.**
 
@@ -341,13 +481,29 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
 
 ### DEPOIS
 
-Subestatísticas e aprimoramento · conjuntos 2/4/6 · drop por fase e dificuldade · a tela do "o que cai
-onde" · escolher 1 apóstolo inicial · **as barras de uso, os marcos e a forja** · **missões por apóstolo**
-· a fase 1 entregando um apóstolo só · **a dificuldade, agora calibrada contra a progressão** · **a
-bancada 2.0** · e só então o **#16**.
+Subestatísticas · conjuntos 2/4/6 · drop por fase e dificuldade · a tela do "o que cai
+onde" · escolher 1 apóstolo inicial · **o material, o pedágio e a forja** · **o emblema e o botão
+Promover na ficha** · a fase 1 entregando um apóstolo só · **a dificuldade, agora calibrada contra a
+progressão** · **a bancada 2.0** · e só então o **#16**.
 
 Sem data e sem plataforma: cloud save · os 3 acessórios (9 peças de conjunto) · conquistas e
 telemetria · **Precisão × Evasão**, se o combate pedir.
+
+---
+
+## Os números que faltam
+
+O modelo está fechado. Estes sete números não:
+
+1. **Quanto material por pedágio**, e a curva entre eles — o @50 é o mais caro do jogo.
+2. **O `N` do sacrifício** por degrau de raridade do ITEM. Com 4 drops por corrida e 5 degraus, o chute
+   antigo de 2–3 dá ~3 corridas por peça: barato demais pro topo.
+3. **Quanto XP cada faixa de material vale** ao ser queimada como acelerador.
+4. **A curva de custo do nível do item** — a intenção é dobrar por faixa de 10, com o ponto por rodada
+   escalando com a dificuldade.
+5. **A demanda de alma** contra **36 apóstolos** — o maior risco de calibragem do desenho (§O MATERIAL).
+6. **A taxa de drop do mítico**, que precisa CAIR agora que o reforge o consome (`GDD-itens.md` §O drop).
+7. **A rolagem da sub** — `principal ÷ 6`, ainda não passada pelos principais já calibrados dos 9 slots.
 
 ---
 
@@ -372,8 +528,19 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - O save atual é **descartado**.
 - **Não** implementar esquiva agora.
 - A raridade **sobe**; não é fixa no drop.
+- **A RARIDADE DO APÓSTOLO VEM DO EMBLEMA DA FACÇÃO**, e de mais nada. Fechar a fase 7 do capítulo
+  daquela facção, em cada dificuldade, **pela primeira vez**: `4 · 8 · 16 · 32` = **60**. Custo por
+  degrau `1 · 2 · 3 · 4 · 5` = 15 por apóstolo, 60 pelos quatro da facção. **Oferta = demanda**, então
+  o destino é sempre os 4 míticos e o que se escolhe é a ORDEM.
+- **Repetir a fase NÃO dá emblema.** Farmável, a oferta vira infinita e a decisão morre.
+- **NÃO há teto de raridade por dificuldade pro apóstolo** — a oferta de emblema já faz o trabalho.
+  Concentrar tudo num favorito entrega lendário ao fim do Normal e mítico ao fim do Difícil, pago com o
+  resto da facção parado. É build, não furo.
+- **A raridade NÃO mexe em stat** — comum e mítico do mesmo nível têm os mesmos números. Ela muda só a
+  qualidade do kit, e é isso que permite ter apóstolos atrasados sem que eles virem peso morto.
+- **A promoção não falha, não pede material extra e não se desfaz**, e acontece na ficha do apóstolo —
+  sem tela nova.
 - Não tentar impedir save editado — tornar inútil, não impossível.
-- **O apóstolo não tem estrela.** A raridade é o teto de nível dele.
 - **Stat base é do tipo**, não do apóstolo; o nível sobe por **curva do tipo**, sem pontos distribuíveis.
 - **A TABELA DE STATS BASE dos 4 tipos está calibrada** (§2) — do nv 60 pra trás, com a grade antiga
   descartada. Critério de aceitação: **cada tipo é 1º em dois stats**. Guardião HP/DEF · Combatente
@@ -385,8 +552,9 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
   Consequência aceita: do Normal em diante o teto de nível chega por volta do capítulo 3, e o resto da
   passada é jogo de ITEM.
 - **Dano Crítico tem piso de 60%** pra todos — nenhum item pode ser lixo pra um tipo inteiro.
-- **OS PRINCIPAIS DOS 9 SLOTS ESTÃO CALIBRADOS** (§4), no 6★ +20. A **Velocidade tem fonte ÚNICA** (a
-  Bota, +50); os outros quatro especiais têm DUAS, sempre com um acessório de dungeon como segunda.
+- **OS PRINCIPAIS DOS 9 SLOTS ESTÃO CALIBRADOS** (§4), no **mítico nível 60**. A **Velocidade tem fonte
+  ÚNICA** (a Bota, +50); os outros quatro especiais têm DUAS, sempre com um acessório de dungeon como
+  segunda.
 - **A proporção Manopla:Pulseira é 2:1** nos dois stats de crítico (50/25 e 100/50). É ela que faz cada
   degrau custar 5 rolos de sub e pagar +0,50 de multiplicador — **nenhuma opção de luva domina**, que é
   o defeito conhecido do Raid.
@@ -394,28 +562,39 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
   mataria o item duas vezes.
 - **A sub tem a mesma FORMA que o principal do slot** (cheio com cheio, % com %). Acessório não dá
   Velocidade, nem principal nem sub.
-- **NOMENCLATURA (corrigida, ago/2026):** o que sobe **jogando** é o **NÍVEL** — igual ao apóstolo, e é
-  essa simetria que dá o nome. O que sobe **pagando** na forja é o **APRIMORAMENTO** (`+0…+20`), que é
-  o `(1)`…`(5)` ao lado da sub. O doc chamava os dois ao contrário.
-- **UM NÍVEL SÓ, e ele dá a ESTRELA.** A raridade não tem trilha: é destravada por ATOS (sacrifício +
-  marco + `raridade ≤ estrela`). A versão de duas barras morreu pelo argumento que o próprio doc já
-  dava — duas trilhas que enchem juntas, da mesma fonte, sem escolha entre elas, são uma trilha só.
+- **NOMENCLATURA:** o que sobe **jogando** é o **NÍVEL**, no item e no apóstolo — os dois ganham nível
+  sendo usados, e é essa simetria que dá o nome.
+- **DOIS EIXOS INDEPENDENTES:** **raridade = quantas · nível = quanto**, iguais nos dois objetos, e um
+  não trava o outro. **Comum nível 60 existe.** Quem trava o nível é o pedágio; quem trava a raridade é
+  a dificuldade.
+- **A ESTRELA é o VISOR do nível** — uma por dezena, ☆ na queda, ★★★★★★ no 60. Não é eixo: não tem
+  fonte nem efeito próprio. Vale pro item e pro apóstolo.
+- **Os 7 slots da campanha nascem ABERTOS** — item que cai tem de poder ser usado. Os 2 acessórios de
+  dungeon são a exceção, e destravam em **4★ e 6★**.
 - **A rodada vale mais onde dói:** 1 ponto no Fácil, 2 Normal, 3 Difícil, 4 Pesadelo. Sem isso, o jeito
-  ótimo de estrelar item seria repetir a **Fácil 1-1** — o teto por batalha impede arrastar a luta, não
+  ótimo de subir item seria repetir a **Fácil 1-1** — o teto por batalha impede arrastar a luta, não
   repetir a luta curta.
-- **A estrela custa `100 · 200 · 400 · 800 · 1.600` pontos**, dobrando. Cada teto de dificuldade cabe
-  em 30–60% de uma passada dela: nenhum obriga a repetir fase, nenhum é de graça.
-- **O marco é POR PEÇA** — terminar o capítulo 1 no Normal destrava as 7 peças do Reino e mais nada.
-- **Evoluir não atropela o drop:** estrela e raridade o drop também dá; **só o aprimoramento é
-  exclusivo de quem persiste**.
-- **A ESCALA é `principal = MÁXIMO × estrela`** — só a estrela, `25→100%`. **O aprimoramento NÃO toca
-  o principal**; ele entrega unidades de sub. Um `6★ +0` e um `6★ +20` têm o mesmo principal.
-- **A sub escala pela ESTRELA também**, junto com o principal — é o que trava a sub em **metade** do
-  principal, em qualquer estrela, sem calibragem nenhuma.
-- **A raridade não multiplica nada** — ela trava o teto de aprimoramento (`+4 … +20`) e com ele a
-  contagem de subs (0 a 5).
-- **Unidade de sub = aprimoramento**, um pra um. O `(5)` do mítico é o bônus que **só a evolução dá**.
-- **Resetar mexe só no APRIMORAMENTO** — o nível ganho jogando não é tocado.
+- **A ESCALA é `principal = MÁXIMO × fatorNível`**, com `fatorNível = 10 + 1,5 × nível`. As seis dezenas
+  caem nos seis valores da grade (25 · 40 · 55 · 70 · 85 · 100%), e nenhum número dos 9 slots muda.
+- **A sub escala pelo NÍVEL também**, junto com o principal — é o que mantém a razão entre os dois fixa
+  em qualquer nível, sem calibragem nenhuma.
+- **A raridade não multiplica nada e não trava nada** — ela abre subs (0 a 5) no item e move a
+  habilidade no apóstolo.
+- **A mesma sub pode REPETIR no item**, sem teto de cópias, e o freio da concentração é **custo**, não
+  RNG: quem paga o sacrifício certo chega nas 5 iguais de propósito. **As cópias aparecem separadas na
+  ficha**, uma linha por slot — somar esconderia o que a concentração custou.
+- **Todo item cai no NÍVEL 1, sem estrela.** O drop sorteia raridade; magnitude se conquista jogando.
+- **Evoluir não atropela o drop:** a raridade o drop também dá; **as subs escolhidas são o que só a
+  evolução entrega**.
+- **O reforge é o endgame da peça** — mítico em cima de mítico re-sorteia as 5 subs, com as mesmas 3
+  opções e a mesma recusa por slot da promoção.
+- **A XP é um POTE dividido por quem está em campo** — solo leva tudo, quatro levam um quarto —, cai por
+  inimigo morto e **não tem banco**: pra subir, o fraco tem de estar em campo.
+- **O material é pedágio a cada dezena de nível**, e a receita é sempre *muito da faixa atual + pouco da
+  próxima*. **A alma paga nível/estrela e NÃO paga raridade.**
+- **Nenhuma habilidade pode ser inútil numa batalha inteira** — a situacional ganha a versão *antes* da
+  situação (`GDD-combate.md` §Nenhuma habilidade inútil).
+  próxima* — a mesma frase do degrau de raridade.
 - **A ficha mostra 2 CASAS DECIMAIS.** Arredondar esconderia justo a Taxa Crítica perto do teto, que é
   o número que o jogador mais precisa conferir — é o defeito conhecido do Raid.
 - **O INIMIGO ESCALA POR NÍVEL, não por multiplicador** (§5) — mesma curva e mesma tabela de tipo do
@@ -433,44 +612,3 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 - **Cada fase dropa SÓ o slot dela**, inclusive a 7. O que a fase difícil paga é **XP**.
 - **Velocidade não escala com nível** — vem de equipamento (só +5 do nv 1 ao 60, por tipo).
 - **Subestatísticas iguais** no drop e na evolução; nenhum privilégio de nascença pro drop.
-- ~~Duas barras (estrela e raridade)~~ — **revogado**: virou UM nível, e a raridade sai de atos.
-- A barra é do **item**, não do apóstolo.
-- **Derrota também progride** a barra; a vitória dá bônus.
-- **Quem escolhe o slot do aprimoramento é o RNG.**
-- **O marco do item é por FASE**, não por capítulo — vencer a fase de origem dele naquela dificuldade.
-  Isso fecha a cadeia sozinho: não existe item com estrela acima do próprio marco.
-- **A DEF usa `DEF/(DEF+5000)`** — sem cap, sem penhasco, e o item de DEF nunca vira lixo.
-- **`Aptidão` virou `Precisão`**, na escala 0–1.000 (típico 400–600). A esquiva segue cortada.
-- **Malefício é CHANCE**, não potência reduzida: `min(100%, P ÷ 2R)` pra colar, mais `(1−chance)÷2` de
-  perder 1 turno, com piso de 1. **O dobro da Resistência garante 100%** — o RNG é comprável.
-- **Sem retornos decrescentes globais.** Quem trava controle é **passiva do BOSS**, escrita na ficha
-  dele — conteúdo em vez de regra, e zero exceção no motor.
-- **Percentuais SOMAM entre si** e incidem sobre `base + valores cheios`.
-- **Subs em % na armadura, em valor cheio nos acessórios** — assim as duas formas do mesmo stat nunca
-  aparecem lado a lado, e nenhuma escolha do jogador é aritmética.
-- **Conjunto de 9 peças, bônus em 3/6/9.**
-- **Variação por facção de ±5%, soma zero**, com a Velocidade fora da matriz.
-- **Dano pode escalar com DEF/HP SOMANDO ao ATK**, nunca substituindo.
-- **Não há restrição temática de sub por slot** (arma pode ter `DEF%`).
-- **Apóstolo dropa garantido** na fase dele.
-- Nada de **forçar o uso** de um apóstolo específico pra passar de fase.
-
-### Revogado nesta rodada (estava escrito aqui e não vale mais)
-
-| dizia | vale agora | por quê |
-|---|---|---|
-| *"a posição mora na HABILIDADE"* — `posicoesDeUso`/`posicoesAlvo`, o portão do DD | **a posição MODULA o dano** por distância ideal do tipo (§2) | o portão desliga metade do kit de quem está na casa errada; aqui **nenhuma habilidade morre**, e a decisão vira dial em vez de penhasco. Custo: perde-se o castigo duro do DD, ganha-se que todo apóstolo sempre tem o que fazer |
-| *"empurrar e puxar viram ataque porque desligam o kit"* | empurrar e puxar **deslocam o pico**, não desligam nada | com o portão fora, tirar o arqueiro da casa 4 não o cala — muda em quem ele bate mais forte |
-| *"compactar as fileiras quando alguém morre"* (proposta) | **o morto fica na casa** | existem apóstolos que revivem, então a casa tem que estar lá esperando. Some junto o **⚔️ Atacar universal**, que era o remendo pra ninguém ficar travado |
-| *"o tipo é identidade, NÃO geometria"* | o tipo é identidade **e** geometria (§2) | a curva de distância é do TIPO — é o gesto dele no tabuleiro, e é o que separa dois apóstolos de fichas iguais |
-| *"na campanha só caem comuns"* | qualquer raridade cai em qualquer dificuldade | reservar raridade pra loja é desenho de gacha, e aqui não há loja |
-| *"a fonte decide o teto de raridade"* (Fácil até Incomum…) | a **estrela** é o teto | virou redundante — a estrela já limita, e piso por dificuldade não acrescentava nada |
-| *"fusão com semente"* | **sacrifício da raridade atual** alimentando 3 opções de sub | o sacrifício dá custo, liga o drop à evolução e ainda decide as opções |
-| *"subir estrela não zera o nível"* | **subir raridade** não zera o nível | o apóstolo perdeu a estrela; some uma exceção, porque essa já era a regra do item |
-| *"apóstolo tem chance de cair"* | cai **garantido** | apaga junto a pergunta "e se cair de novo?" |
-| *"a ordem dos inimigos nas fases muda"* | **a composição foi redesenhada** (§5) | com posição e tipo, quem está em cada casa passou a significar algo — a tabela velha era arbitrária |
-| *"a partir do capítulo 2, toda fase é contra 4 inimigos"* | **só o Fácil descobre um por vez**; Normal+ é sempre 4 | resolvia por CAPÍTULO o que é por DIFICULDADE — nas outras você já achou todos |
-| *"a fase 7 dropa mais itens e de TODOS os tipos"* | cada fase dropa **só o slot dela**; a 7 paga em **XP** | a variedade na 7 fazia as outras seis morrerem depois de uma passada |
-| *"o inimigo é `0,5×cap + 0,1×fase` de status"* | o inimigo tem **NÍVEL**, na mesma curva do jogador | o multiplicador foi escrito contra um jogador sem progressão; e duas fórmulas de poder divergem |
-| *"duas barras, uma pra estrela e uma pra raridade"* | **um nível só**; a raridade vem de ATOS (sacrifício + marco) | o próprio doc dizia que não era escolha — duas trilhas que enchem juntas, sem escolha entre elas, são uma trilha só |
-| *"a barra enche por rodada"* (valor único) | a rodada vale **1·2·3·4** por dificuldade | valor único fazia o ótimo ser repetir a Fácil 1-1; o teto por batalha impede arrastar a luta, não repetir a luta curta |

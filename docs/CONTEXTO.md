@@ -12,62 +12,69 @@
 
 ---
 
-## Onde paramos (17/ago/2026)
+## Onde paramos (18/ago/2026)
 
-**A fila de PRs zerou** — três merges no mesmo dia: `#239` a arrumação dos docs, `#240` a faxina de
-comentários, `#241` a proposta de progressão. A `main` está em dia e **não há branch pendente** além
-da que traz este arquivo.
+**O modelo de progressão fechou inteiro** — nível, raridade e as duas economias — e está escrito nos
+GDDs. Foi uma sessão só de design, zero linha de código. A branch `docs/limpeza-nivel-raridade` tem
+tudo, em três commits.
 
-**A sessão foi inteira de DESIGN — zero linha de código.** Saiu dela o
-`docs/PROPOSTA-nivel-e-raridade.md`, que é o único lugar onde o modelo novo está escrito.
+**Não há decisão pendente no modelo.** O que sobrou são os sete números de calibragem
+(`GDD-progressao.md` §Os números que faltam) e a execução, que é o §7.
 
-## O modelo novo de progressão — e a V2 já venceu
+## O modelo, em cinco linhas
 
-Item e apóstolo passam a ter **dois eixos só**: **raridade = quantas · nível = quanto**. Caíram por
-estarem VAZIOS a **estrela** (era o nível medido em passos de 10), o **marco de fase** (a âncora de
-LUGAR que ele dava sobrevive no sacrifício) e o **aprimoramento**. Entrou **material com raridade
-própria** — pó pro item, alma pro apóstolo — como pedágio a cada dezena de nível e como parte do
-degrau de raridade.
+- **Dois eixos INDEPENDENTES nos dois objetos:** **raridade = quantas · nível = quanto.** Um não trava
+  o outro — **comum nível 60 existe**. Quem trava o nível é o **pedágio** (material da dificuldade).
+- **A estrela é o VISOR do nível** — uma por dezena, ☆ na queda, ★★★★★★ no 60. Não é eixo. Ela destrava
+  os 2 slots de acessório, em 4★ e 6★; os 7 slots de campanha nascem abertos.
+- **Item:** raridade = quantas subs (forja: sacrifício + material) · nível = magnitude
+  (`fatorNível = 10 + 1,5 × nível`).
+- **Apóstolo:** raridade = a HABILIDADE, e **não mexe em stat nenhum** — comum e mítico do mesmo nível
+  têm os mesmos números. Nível = os números, por XP.
+- **Duas moedas que não se trocam:** **alma** paga nível/estrela (cai de inimigo, sempre) · **emblema**
+  paga raridade (cai de fechar capítulo, uma vez). É isso que acaba com o *"não sei em qual investir"*.
 
-**O doc ainda diz "nada decidido", e isso já é drift:** no fim da sessão o Gabriel escolheu a **V2**
-(sem aprimoramento; o mítico ganha 5 subs direto). Ficou só um aviso no topo do arquivo — a reescrita
-de verdade é a pendência 1.
+## O EMBLEMA — a peça que fechou a sessão
 
-**O que a reescrita precisa levar, e que não está em lugar nenhum ainda:**
+Fechar a **fase 7 do capítulo da facção**, em cada dificuldade, **pela primeira vez**. Ícone = o símbolo
+da própria facção, que já existe em `Faccoes.cs`.
 
-- **o argumento que decidiu** — o endgame da V1 não é o que o GDD prometia: com a estrela morta sobra
-  **uma** unidade excedente, então o reset dela vira um sorteio de 1 em 4, pago com um subsistema
-  inteiro;
-- **o resgate do endgame na V2, sem eixo novo** — reforjar um mítico re-sorteia as **5 subs**, com as
-  mesmas 3 opções e a mesma recusa por slot da promoção;
-- **que o pedágio não é imposto** — cada dezena de nível compra **+15 pontos de principal**.
+```
+colheita   Fácil 4 · Normal 8 · Difícil 16 · Pesadelo 32   =  60
+custo      1 · 2 · 3 · 4 · 5  =  15 por apóstolo  =  60 pelos 4 da facção
+```
+
+**Oferta = demanda.** O destino é sempre os quatro míticos; o que se escolhe é a **ORDEM**. Não é
+farmável, não tem teto de raridade por dificuldade, não falha e não se desfaz.
 
 ## Pendências
 
-1. **Reescrever o `PROPOSTA-nivel-e-raridade.md`:** V2 promovida a modelo, V1 rebaixada a *"considerado,
-   e por que não"*, o reforge do mítico como seção de endgame.
-2. **Os cinco números** que o doc deixou marcados — material por pedágio, `N` do sacrifício, XP por
-   faixa de material, curva de pontos por rodada, e a demanda de alma contra **36 apóstolos** (é o
-   maior risco de calibragem do desenho).
-3. **Aí o `GDD-progressao.md` §7 volta a andar** — ele estava parado esperando exatamente nível e
-   raridade. A dívida do `docs/RELEITURA-backend-pendente.md` segue de pé.
-4. Menores que continuam: o `chance de aplicar: 75%` ao mirar, o **empurrão de medidor**, a **pele da
-   Arena** (FILA A #20) e a **9ª pele, Humanos** (#21, bloqueada até o fundo de facção no compêndio).
+1. **Os sete números** (`GDD-progressao.md` §Os números que faltam). O maior risco continua sendo o
+   **#5**, a demanda de alma contra 36 apóstolos.
+2. **O `GDD-progressao.md` §7 volta a andar** — ele estava parado esperando nível e raridade, e agora
+   não está mais. A dívida do `docs/RELEITURA-backend-pendente.md` segue de pé.
+3. Menores que continuam: o **empurrão de medidor**, a **pele da Arena** (FILA A #20) e a **9ª pele,
+   Humanos** (#21, bloqueada até o fundo de facção no compêndio).
 
-## Armadilhas desta sessão
+## Ideias parqueadas (não são pendência)
 
-- **Squash-merge de branch EMPILHADA gera conflito falso.** A `faxina` saía da `arrumacao`; quando a
-  de baixo entrou comprimida num commit só, a de cima seguia carregando os 7 originais. Não se resolve
-  à mão — **branch nova da `main` + cherry-pick** só dos commits próprios. Feito e conferido nesta
-  sessão.
-- **`git diff main <branch>` NÃO prova que o merge entrou** quando há outra branch em jogo: ela aparece
-  como "diferença" só por não ter o trabalho da vizinha. A prova é diffar **apenas os arquivos que a
-  branch toca**.
-- **Devolvi como fala dele duas invenções minhas** na mesma rodada de design (rebaixar o sacrifício a
-  enfeite, tirar o "evoluir jogando"). Em conversa longa isso vira premissa e o erro compõe.
-- **O `GDD-itens.md` se contradiz sozinho** sobre a 5ª unidade do mítico: *"o bônus de nascença"* numa
-  linha e *"não cai no drop, só se conquista evoluindo"* quinze linhas abaixo. Mítico cai no drop — a
-  segunda é a velha.
+- **Guerra de facção** (do Raid): time mono-facção, e o prêmio é **material de forja e sub de item** —
+  nunca raridade de apóstolo. É onde a facção ganharia razão mecânica de existir.
+- **A Arena segue sem economia própria.** A cauda de emblemas que chegou a ser proposta foi descartada:
+  a oferta já fecha em 60 e não há déficit pra ela cobrir.
+- **5ª dificuldade: não.** O número 4 está costurado no jogo (ponto por rodada, XP, tetos de nível,
+  `4·8·16·32`), e a identidade que fecha a economia é de quatro parcelas.
+- **Se o 1º degrau parecer barato demais**, a alavanca é redistribuir dentro dos mesmos 15
+  (`2·3·3·3·4`) — um número, nada mais.
+
+## Anotações desta sessão
+
+- **As 9 facções têm exatamente um apóstolo de cada função** (9 × 4 = 36, verificado em `Apostolos/`).
+  Grade perfeita — vale lembrar antes de desenhar qualquer regra de time.
+- **Regra nova no `CLAUDE.md`:** é **apóstolo**, nunca "champ"/"hero" — e quando o Gabriel escrever
+  assim, corrigir.
+- **Duas invenções minhas que ele teve de derrubar:** o "comum veste 3, mítico veste 9" (nunca foi
+  decisão dele) e o `(5)` do aprimoramento voltando na ficha de subs. O que ele não citou, se preserva.
 
 ## Gotchas que continuam valendo
 
@@ -76,3 +83,6 @@ de verdade é a pendência 1.
 - Os harnesses `ferramentas/rodar-telas.js` e `rodar-tema.js` publicam mensagem e montam tela — **eles
   não clicam em nada**. Verde deles nunca quer dizer "o jogo funciona": hover, arraste, clique e tudo
   que acontece DURANTE a batalha quem confere é o Gabriel.
+- **Splice por faixa de linha em doc CRLF:** converter o bloco novo (`sed -i 's/\r*$/\r/'`) antes de
+  concatenar e **conferir a emenda**. Errei a linha final quatro vezes nesta sessão — cada erro apaga
+  meia frase em silêncio, e nenhum build reclama. Conferir com `sed -n` DEPOIS de cada splice.

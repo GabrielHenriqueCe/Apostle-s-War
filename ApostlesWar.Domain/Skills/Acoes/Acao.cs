@@ -64,6 +64,17 @@ namespace ApostlesWar.Domain
         public virtual int PreverVidaRemovida(Combate atacante, Combate alvo) => 0;
 
         /// <summary>
+        /// Com que chance esta ação COLA no alvo, sem executá-la. Gêmea do
+        /// <see cref="PreverVidaRemovida"/>, e existe pelo mesmo motivo: quem precisa saber o que a
+        /// ação faria não pode descobrir executando.
+        ///
+        /// O default 1,0 vale pra tudo que não é malefício — e é ele que faz a leitura da tela
+        /// funcionar sem caso especial: habilidade sem malefício nenhum dá 100%, e 100% é
+        /// exatamente o estado em que a linha da chance SOME (GDD-combate §1).
+        /// </summary>
+        public virtual double PreverChanceDeAplicar(Combate atacante, Combate alvo) => 1.0;
+
+        /// <summary>
         /// Executa a ação sobre UM combatente já resolvido (escopo + estado filtrados pelo
         /// interpretador). Ações que causam dano acrescentam o EventoDano à lista — consumida
         /// pelas reações-do-atacante e pela exibição.

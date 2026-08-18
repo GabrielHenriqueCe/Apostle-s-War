@@ -1573,6 +1573,18 @@ body {
     text-overflow: ellipsis;
 }
 
+/* A chance de o malefício da habilidade armada COLAR neste alvo. Mora entre o nome e a barra e só
+   existe enquanto uma habilidade está armada — a caixa cresce e encolhe com ela. Sem `margin`
+   própria: o espaço vem da `margin-top` da barra, que já separa tudo o que vier antes dela. */
+.chanceAplicar {
+    font-size: 10px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--ouro);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
 /* ---------- barra de vida ---------- */
 .barra {
     position: relative;

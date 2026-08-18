@@ -37,19 +37,28 @@ o stat mais forte que existe; se o nível a empurrasse junto com HP/ATK/DEF, o a
 dominaria os dois eixos ao mesmo tempo e não haveria calibragem que salvasse. Deixando-a no
 equipamento ela vira **escolha de build**, e não consequência de investimento.
 
-**A base vem do TIPO e mexe pouco** — **+5 no total** entre o nv 1 e o nv 60, e nada mais:
+**A base vem do TIPO** — os quatro números do nv 1 estão na tabela de §2, que é a autoritativa.
+Aqui fica só a REGRA de como ela anda:
 
-| tipo | nv 1 | nv 60 |
-|---|--:|--:|
-| Guardião | 85 | 90 |
-| Combatente | 95 | 100 |
-| Suporte | 105 | 110 |
-| Atirador | 110 | 115 |
+```
++2 por ESTRELA  →  2 · 4 · 6 · 8 · 10 · 12   (nv 10 · 20 · 30 · 40 · 50 · 60)
+= +12 do nv 1 ao 60, igual pros quatro tipos
+```
 
-> **⚠️ Esta tabela DIVERGE da de §2, que é a autoritativa** (a calibrada do nv 60 pra trás). Lá o
-> Suporte no nv 60 é **105**, não 110 — ele é o único dos quatro que não sobe +5. Ou é engano de
-> digitação aqui, ou o +5 dele foi cortado de propósito e esta tabela ficou velha. **Pendente de
-> decisão**; até lá, §2 manda. Duplicar a tabela foi o que permitiu a divergência existir.
+**A Velocidade é o único stat em DEGRAU** — HP, ATK e DEF sobem por curva contínua (§4); ela anda na
+estrela, e por isso o ganho é visível no momento em que se conquista.
+
+**Toda estrela vale o mesmo, inclusive a do teto** *(decisão do Gabriel)*. Uma versão anterior desta
+regra dava +1 por estrela e +5 na sexta; caiu porque a quebra de cadência custava um caso especial no
+cálculo pra entregar o que uma cadência única já entrega. O ganho não desequilibra ninguém: cai igual
+nos quatro tipos — e no inimigo também, que escala pela mesma regra e para no 60, já que ali a
+progressão de nível acaba.
+
+> **Esta seção NÃO repete a tabela** — e é por isso. Ela existia aqui em cópia e as duas discordaram:
+> §1 dizia que o Suporte ia de 105 a 110, §2 dizia 105 nas duas pontas, e o código seguia §2, então o
+> Suporte era o único tipo que não ganhava nada. Nada quebrava, porque não havia regra pra
+> contradizer. **Hoje só o nv 1 é declarado e o topo é consequência** — no doc e no
+> `Arquetipos.Velocidade`, que também deixou de ter uma segunda ponta escrita à mão.
 
 Uma faixa de ~28% — pequena o bastante pra não decidir a luta sozinha, grande o bastante pra ser
 identidade. **A Velocidade fica FORA da variação por facção** (§2): sendo o stat que decide quem
@@ -128,11 +137,12 @@ Isso torna o item de Velocidade o único que **multiplica todo o resto**: ATK au
 golpe; a Bota aumenta quantos golpes se dá, e portanto multiplica ATK, crítico, cura e aplicação de
 malefício ao mesmo tempo.
 
-**E o inimigo fica parado nesse eixo.** Ele não tem item (§5) e Velocidade não escala com nível
-(§4), então a Velocidade inimiga é **85–115 no jogo inteiro** enquanto a do jogador chega a 315 (nv
-60, Atirador, com a Bota mítica no nível 60 e as subs). No fim da progressão o time joga **~3 turnos para
-cada 1** do inimigo, para sempre. Vale saber ao calibrar dificuldade: é vantagem estrutural, não
-curva.
+**E o inimigo acompanha só até o 60.** Ele escala pela MESMA regra de estrela (§1) — o bônus do teto
+não é privilégio do jogador —, mas para ali, porque ali a progressão de nível acaba e ele não tem
+item (§5). Então a Velocidade inimiga vai de **85 a 122** e trava, enquanto a do jogador chega a 315
+(nv 60, Atirador, com a Bota mítica no nível 60 e as subs). No fim da progressão o time joga **~3
+turnos para cada 1** do inimigo, para sempre. Vale saber ao calibrar dificuldade: **a vantagem é do
+ITEM, não do nível** — os dois lados sobem igual pela estrela, e é a Bota que abre a distância.
 
 #### O EMPURRÃO DE MEDIDOR — a tabela de consulta
 
@@ -471,12 +481,16 @@ ficha que o jogo inteiro tem de servir; o nv 1 é ela dividida por 30.
 
 | tipo | pos | HP | ATK | DEF | Vel | Precisão | Resist. | Taxa Crít. | Dano Crít. |
 |---|---|--:|--:|--:|--:|--:|--:|--:|--:|
-| **Guardião** | 1–2 | **30.000** | 510 | **1.500** | 90 | 50 | 120 | 5% | 60% |
-| **Combatente** | 1–2 | 25.200 | 1.350 | 1.200 | 100 | 80 | 90 | **25%** | **90%** |
-| **Suporte** | 3–4 | 20.100 | 810 | 960 | 105 | **150** | **150** | 10% | 70% |
-| **Atirador** | 3–4 | 15.000 | **1.500** | 510 | **115** | 120 | 50 | 15% | 80% |
+| **Guardião** | 1–2 | **30.000** | 510 | **1.500** | 97 | 50 | 120 | 5% | 60% |
+| **Combatente** | 1–2 | 25.200 | 1.350 | 1.200 | 107 | 80 | 90 | **25%** | **90%** |
+| **Suporte** | 3–4 | 20.100 | 810 | 960 | 117 | **150** | **150** | 10% | 70% |
+| **Atirador** | 3–4 | 15.000 | **1.500** | 510 | **122** | 120 | 50 | 15% | 80% |
 
-**nv 1 — a mesma ficha ÷ 30:**
+> **A coluna Vel do nv 60 é DERIVADA**, não calibrada: é a do nv 1 mais os +12 da regra de estrela
+> (§1). É a única coluna desta tabela que não se edita aqui — mexer nela sem mexer no nv 1 recria a
+> divergência que o §1 conta.
+
+**nv 1 — a mesma ficha ÷ 30** (a Vel não: ela é a BASE declarada, e é daqui que o nv 60 sai)**:**
 
 | tipo | pos | HP | ATK | DEF | Vel | Precisão | Resist. | Taxa Crít. | Dano Crít. |
 |---|---|--:|--:|--:|--:|--:|--:|--:|--:|
@@ -528,8 +542,9 @@ sozinha** — ninguém a escolhe, e por isso ela não pode divergir das pontas. 
 **A curva é CONTÍNUA, não escada** (decisão do Gabriel): sobe todo nível, e não em saltos a cada 10.
 O jogador tem retorno a cada batalha em vez de ficar parado entre marcos.
 
-**Só HP, ATK e DEF escalam com nível.** A Velocidade sobe 5 no total (§1). Precisão, Resistência e os
-dois de crítico **não sobem com nível** — vêm do tipo e do item.
+**Só HP, ATK e DEF escalam POR CURVA.** A Velocidade sobe +12 no total, mas em DEGRAU, na estrela
+(§1) — é a exceção à frase acima e a única do jogo. Precisão, Resistência e os dois de crítico **não
+sobem com nível** — vêm do tipo e do item.
 
 > **Consequência que fecha um buraco:** como o ÷30 é uniforme, a razão HP:ATK é a mesma nas duas
 > pontas, e **a luta dura o mesmo tanto no nv 1 e no nv 60**. Um escalonamento desigual (HP ×20, ATK

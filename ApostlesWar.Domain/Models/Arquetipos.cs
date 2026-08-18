@@ -23,7 +23,7 @@ namespace ApostlesWar.Domain
         /// </summary>
         public readonly record struct Ficha(
             int HP, int Ataque, int Defesa,
-            int VelocidadeNv1, int VelocidadeNv60,
+            int VelocidadeNv1,
             int Precisao, int Resistencia,
             double TaxaCrit, double DanoCrit);
 
@@ -34,10 +34,10 @@ namespace ApostlesWar.Domain
         /// </summary>
         private static readonly Dictionary<TipoDeApostolo, Ficha> _fichas = new()
         {
-            [TipoDeApostolo.Guardiao]   = new(1000, 17, 50, 85,  90,  50, 120, 0.05, 0.60),
-            [TipoDeApostolo.Combatente] = new( 840, 45, 40, 95, 100,  80,  90, 0.25, 0.90),
-            [TipoDeApostolo.Suporte]    = new( 670, 27, 32, 105, 105, 150, 150, 0.10, 0.70),
-            [TipoDeApostolo.Atirador]   = new( 500, 50, 17, 110, 115, 120,  50, 0.15, 0.80),
+            [TipoDeApostolo.Guardiao]   = new(1000, 17, 50,  85,  50, 120, 0.05, 0.60),
+            [TipoDeApostolo.Combatente] = new( 840, 45, 40,  95,  80,  90, 0.25, 0.90),
+            [TipoDeApostolo.Suporte]    = new( 670, 27, 32, 105, 150, 150, 0.10, 0.70),
+            [TipoDeApostolo.Atirador]   = new( 500, 50, 17, 110, 120,  50, 0.15, 0.80),
         };
 
         /// <summary>
@@ -147,19 +147,22 @@ namespace ApostlesWar.Domain
         }
 
         /// <summary>
-        /// A Velocidade não usa a curva de 30×: ela anda uns poucos pontos entre o nv 1 e o nv 60, e
-        /// por isso é INTERPOLADA entre as duas pontas declaradas na ficha.
+        /// A Velocidade não usa a curva de 30× e não é interpolada: ela anda em DEGRAU, na ESTRELA
+        /// — <b>+2 por estrela</b>, então 2·4·6·8·10·12 do nv 10 ao 60 (GDD-combate §1). O ganho é o
+        /// mesmo pros quatro tipos, então a ordem entre eles é a da ficha do nv 1 e não muda nunca.
         ///
-        /// ⚠️ Divergência conhecida no GDD, e ela cai aqui: §1 diz que o Suporte vai de 105 a 110 e
-        /// §2 — a tabela autoritativa — diz 105 nas duas pontas. Estes números seguem §2, então hoje
-        /// o Suporte é o único que não ganha nada. Está marcado como pendente no doc.
+        /// Só o nv 1 é declarado; o topo é CONSEQUÊNCIA da regra. É isso que impede a divergência
+        /// que existia aqui: enquanto as duas pontas eram escritas à mão, o Suporte ficou com 105
+        /// nas duas e virou o único tipo que não ganhava nada — sem que nada quebrasse.
+        ///
+        /// O <c>nivel / 10</c> é a MESMA expressão que conta a estrela na ficha. Trocar por uma
+        /// tabela de faixas seria uma segunda fonte pra "quantas estrelas ele tem".
         /// </summary>
         public static int Velocidade(TipoDeApostolo tipo, int nivel)
-        {
-            Ficha f = Base(tipo);
-            double t = (double)(Math.Clamp(nivel, NivelMinimo, NivelMaximo) - 1) / (NivelMaximo - 1);
-            return (int)Math.Round(f.VelocidadeNv1 + (f.VelocidadeNv60 - f.VelocidadeNv1) * t);
-        }
+            => Base(tipo).VelocidadeNv1 + (Math.Clamp(nivel, NivelMinimo, NivelMaximo) / 10) * GanhoPorEstrela;
+
+        /// <summary>O que cada estrela entrega de Velocidade. Ver <see cref="Velocidade"/>.</summary>
+        public const int GanhoPorEstrela = 2;
 
         private static int Escalar(int baseNv1, double fatorNivel, int variacaoPct) =>
             (int)Math.Round(baseNv1 * fatorNivel * (1 + variacaoPct / 100.0));

@@ -92,6 +92,52 @@ namespace ApostlesWar.Domain
         public virtual List<Acao> Acoes => _acoes;
 
         /// <summary>
+        /// A chance de esta habilidade COLAR neste alvo — o número do 🎲 na tela (GDD-combate §1).
+        /// 1,0 quando ela não impõe nada a ele, e é aí que a tela some com a linha: habilidade sem
+        /// malefício, alvo sem Resistência e alvo fora do escopo do malefício caem todos no mesmo
+        /// 100%, sem que ninguém precise perguntar qual dos três é.
+        ///
+        /// <b>O MENOR entre as ações que alcançam o alvo</b>, e não o produto nem a média: são
+        /// tentativas INDEPENDENTES (cada malefício rola o seu dado), então nenhum número único as
+        /// descreve — e o menor é o único que nunca promete mais do que a parte mais frágil entrega.
+        /// Hoje é exato, porque nenhuma habilidade tem dois malefícios de chances diferentes; quando
+        /// a RARIDADE começar a mexer no `chance` de cada ação isso deixa de ser verdade, e aí a
+        /// escolha entre um número e uma linha por malefício volta à mesa (o GDD crava UM número).
+        ///
+        /// <paramref name="alvoEhInimigo"/> vem de fora porque quem sabe de que lado alguém está é a
+        /// estrutura da batalha, não a habilidade. Sem ele o Desejo do Gênio (buff nos aliados,
+        /// Maldição nos inimigos) mostraria a chance da Maldição também nos aliados.
+        /// </summary>
+        public double ChanceDeAplicarEm(Combate atacante, Combate alvo, bool alvoEhInimigo)
+        {
+            double menor = 1.0;
+            foreach (Acao acao in Acoes)
+                if (Alcanca(acao.Escopo, atacante, alvo, alvoEhInimigo))
+                    menor = Math.Min(menor, acao.PreverChanceDeAplicar(atacante, alvo));
+            return menor;
+        }
+
+        /// <summary>
+        /// Este escopo cai neste alvo? É a mesma pergunta que o <see cref="Ativar"/> responde
+        /// montando LISTAS; aqui ela é feita de um alvo só, porque quem pergunta já tem o campo
+        /// inteiro na mão e quer a resposta por combatente.
+        /// </summary>
+        private bool Alcanca(Escopo escopo, Combate atacante, Combate alvo, bool alvoEhInimigo) => escopo switch
+        {
+            Escopo.ProprioAtacante => alvo == atacante,
+            Escopo.TodosAliados => !alvoEhInimigo,
+            Escopo.OutrosAliados => !alvoEhInimigo && alvo != atacante,
+            Escopo.TodosInimigos => alvoEhInimigo,
+            // AlvosResolvidos herda a mira da habilidade: é o escopo que diz "onde ela já estava mirando".
+            _ => TipoLista switch
+            {
+                TipoLista.Inimigos => alvoEhInimigo,
+                TipoLista.Aliados => !alvoEhInimigo,
+                _ => alvo == atacante,
+            },
+        };
+
+        /// <summary>
         /// Interpretador default (o MOTOR — ver ADR-composicao-de-acoes §3): roda cada Acao na
         /// ordem declarada, resolvendo o Escopo de cada uma e filtrando pelo EstadoAlvo NO
         /// MOMENTO em que ela executa. É "ação-por-fora": uma ação termina toda a sua passada

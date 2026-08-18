@@ -136,7 +136,18 @@ namespace ApostlesWar.Presentation.Front
         /// combatentes válidos brilham e clicar num deles confirma — clicar em si mesmo pro buff
         /// próprio, num aliado pro buff de aliado. O duplo-clique na habilidade segue valendo.
         /// </summary>
-        string Escopo
+        string Escopo,
+        /// <summary>
+        /// O 🎲 — quanto esta habilidade tem de chance de COLAR em cada alvo, por Id, já com os dois
+        /// portões multiplicados (a `chance` declarada × Precisão ÷ Resistência). Só vêm as entradas
+        /// <b>abaixo de 100%</b>: a linha some na garantia, que é o estado que o jogador persegue
+        /// (GDD-combate §1), e mandar o 100 pra tela decidir seria pedir a ela que soubesse a regra.
+        /// <c>null</c> = nenhum alvo em disputa, a tela não desenha nada.
+        ///
+        /// O % é truncado, nunca arredondado: 99,7% aparece como 99 porque arredondar pra cima
+        /// escreveria "garantido" em cima de um dado que ainda pode falhar.
+        /// </summary>
+        Dictionary<int, int>? ChanceDeAplicar = null
     );
 
     /// <summary>

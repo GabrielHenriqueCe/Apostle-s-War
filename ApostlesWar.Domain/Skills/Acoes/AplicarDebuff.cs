@@ -47,28 +47,31 @@ namespace ApostlesWar.Domain
         ///
         /// Elas MULTIPLICAM: o Medo de 50% num alvo que resiste metade cola em 25% das vezes.
         ///
-        /// <b>Auto-malefício não rola nada</b> — o que se impõe a si mesmo é escolha, não imposição,
-        /// e um custo de habilidade que às vezes não se paga seria outra mecânica. Se um dia nascer
-        /// um debuff aplicado em ALIADO, distingui-lo vai exigir a <c>Batalha</c> aqui dentro, que
-        /// hoje esta ação não tem — e aí o portão 2 tem de ficar de fora dele também.
+        /// <b>Auto-malefício não rola o portão 2</b> — o que se impõe a si mesmo é escolha, não
+        /// imposição. O portão 1 continua valendo: ele é identidade da habilidade, não disputa. Se um
+        /// dia nascer um debuff aplicado em ALIADO, distingui-lo vai exigir a <c>Batalha</c> aqui
+        /// dentro, que hoje esta ação não tem — e aí o portão 2 tem de ficar de fora dele também.
+        /// </summary>
+        public override double PreverChanceDeAplicar(Combate atacante, Combate alvo)
+            => alvo == atacante ? _chance : _chance * atacante.ChanceDeColarEm(alvo);
+
+        /// <summary>
+        /// UM dado só, contra o número que a tela mostra. Rolar os dois portões separados dava a
+        /// mesma probabilidade, mas deixava a conta do 🎲 sendo uma SEGUNDA cópia dela — e duas
+        /// cópias de uma fórmula divergem como duas cópias de um número.
         /// </summary>
         public override void Executar(Combate atacante, Combate alvo, List<EventoCombate> eventos)
         {
-            if (_chance < 1.0 && Random.Shared.NextDouble() >= _chance) return;
+            double chance = PreverChanceDeAplicar(atacante, alvo);
+            if (chance < 1.0 && Random.Shared.NextDouble() >= chance) return;   // resistiu inteiro
 
             Debuff debuff = _fabrica(atacante);
 
-            if (alvo != atacante)
-            {
-                double colar = atacante.ChanceDeColarEm(alvo);
-                if (colar < 1.0 && Random.Shared.NextDouble() >= colar) return;   // resistiu inteiro
-
-                // O piso é 1 turno: já colou, então dura. Aparar um debuff de 1 turno o apagaria
-                // pela porta dos fundos, e aí "colou" deixaria de querer dizer alguma coisa.
-                if (debuff.DuracaoRestante > 1
-                    && Random.Shared.NextDouble() < atacante.ChanceDeAparaUmTurnoEm(alvo))
-                    debuff.ReduzirDuracao(1);
-            }
+            // O piso é 1 turno: já colou, então dura. Aparar um debuff de 1 turno o apagaria
+            // pela porta dos fundos, e aí "colou" deixaria de querer dizer alguma coisa.
+            if (alvo != atacante && debuff.DuracaoRestante > 1
+                && Random.Shared.NextDouble() < atacante.ChanceDeAparaUmTurnoEm(alvo))
+                debuff.ReduzirDuracao(1);
 
             debuff.Aplicar(alvo);
         }

@@ -275,7 +275,27 @@ namespace ApostlesWar.Presentation.Front
                 CooldownRestante: cooldown?.CooldownRestante ?? 0,
                 Disponivel: cooldown?.Disponivel ?? true,
                 PedeAlvo: h.PedeAlvoDoJogador,
-                Escopo: h.TipoLista.ToString());
+                Escopo: h.TipoLista.ToString(),
+                ChanceDeAplicar: ChancesDe(h, dono));
+        }
+
+        /// <summary>
+        /// O 🎲 de cada combatente do campo pra esta habilidade (ver <see cref="HabilidadeVista"/>).
+        /// Roda sobre o board inteiro, não sobre os alvos válidos: o passo de alvo ainda nem
+        /// aconteceu quando o jogador clica na habilidade, e quem decide se cada um entra é o escopo
+        /// do malefício — o Desejo do Gênio mira aliados e amaldiçoa inimigos.
+        /// </summary>
+        private Dictionary<int, int>? ChancesDe(HabilidadeAtiva h, Combate? dono)
+        {
+            if (dono is null) return null;
+
+            var mapa = new Dictionary<int, int>();
+            foreach (Combate c in _board)
+            {
+                double chance = h.ChanceDeAplicarEm(dono, c, alvoEhInimigo: LadoDe(c) != LadoDe(dono));
+                if (chance < 1.0) mapa[IdDe(c)] = (int)(chance * 100);
+            }
+            return mapa.Count == 0 ? null : mapa;
         }
     }
 }

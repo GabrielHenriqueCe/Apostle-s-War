@@ -114,6 +114,11 @@ export const nomeDaFase = e => typeof e.fase === 'number' ? NOMES_FASE[e.fase] :
 const habArmada = () => habilidadeEscolhida == null ? null
     : (estado?.habilidades || []).find(h => h.indice === habilidadeEscolhida) || null;
 
+// Quanto a habilidade armada tem de chance de COLAR neste combatente, ou null pra não desenhar
+// nada. O C# manda o mapa pronto e só com quem está em disputa: quem não está lá é garantia (100%),
+// alvo errado ou habilidade sem malefício — três casos que a tela não precisa saber distinguir.
+const chanceDeAplicarEm = id => habArmada()?.chanceDeAplicar?.[id] ?? null;
+
 // O time (lista de combatentes) a que um id pertence.
 function ladoDe(id) {
     const e1 = estado?.equipe1 || [], e2 = estado?.equipe2 || [];
@@ -281,6 +286,14 @@ function atualizarCombatente(el, c) {
     nome.textContent = c.nome;
     infos.appendChild(nome);
 
+    const chance = chanceDeAplicarEm(c.id);
+    if (chance !== null) {
+        const aplicar = document.createElement('div');
+        aplicar.className = 'chanceAplicar';
+        aplicar.textContent = `🧲 ${chance}%`;
+        infos.appendChild(aplicar);
+    }
+
     infos.appendChild(criarBarra(c));
     if (c.vivo) infos.appendChild(criarMedidor(c));
 
@@ -301,6 +314,10 @@ function atualizarCombatente(el, c) {
             ['ATK', c.ataque],
             ['DEF', c.defesa],
             ['⚡', c.velocidade],
+            // A dupla que decide o 🧲: a Precisão de quem aplica contra a Resistência de quem
+            // apanha. Sem elas o card mostrava a chance sem mostrar de onde ela vem.
+            ['🎯', c.precisao],
+            ['🧿', c.resistencia],
             ['🎲', `${c.taxaCritPct}%`],
             ['💥', `${c.danoCritPct}%`],
         ].map(([rotulo, valor]) => {

@@ -16,9 +16,9 @@
 
 **O modelo de progressão fechou inteiro** — nível, raridade e as duas economias — e está escrito nos
 GDDs. Foi uma sessão só de design, zero linha de código. A branch `docs/limpeza-nivel-raridade` tem
-tudo, em dois commits.
+tudo, em três commits.
 
-**Não há decisão pendente no modelo.** O que sobrou são os oito números de calibragem
+**Não há decisão pendente no modelo.** O que sobrou são os sete números de calibragem
 (`GDD-progressao.md` §Os números que faltam) e a execução, que é o §7.
 
 ## O modelo, em cinco linhas
@@ -49,9 +49,8 @@ farmável, não tem teto de raridade por dificuldade, não falha e não se desfa
 
 ## Pendências
 
-1. **Os oito números** (`GDD-progressao.md` §Os números que faltam). O mais urgente é o **#8**: a XP
-   virou pote dividido por quem está em campo, e a tabela de nível por capítulo foi calibrada como se
-   um apóstolo recebesse tudo. Ou o pote vira `4×`, ou a curva muda.
+1. **Os sete números** (`GDD-progressao.md` §Os números que faltam). O maior risco continua sendo o
+   **#5**, a demanda de alma contra 36 apóstolos.
 2. **O `GDD-progressao.md` §7 volta a andar** — ele estava parado esperando nível e raridade, e agora
    não está mais. A dívida do `docs/RELEITURA-backend-pendente.md` segue de pé.
 3. Menores que continuam: o **empurrão de medidor**, a **pele da Arena** (FILA A #20) e a **9ª pele,

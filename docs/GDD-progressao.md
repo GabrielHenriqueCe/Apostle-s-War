@@ -66,7 +66,7 @@ material da dificuldade.
 
 ```
 custo do nível N → N+1   =   100 × N
-XP que a FASE põe na mesa =  22 × (capítulo × 7 + fase)   ×   multiplicador da dificuldade
+XP que a FASE põe na mesa =  88 × (capítulo × 7 + fase)   ×   multiplicador da dificuldade
                              Fácil 1 · Normal 2 · Difícil 3 · Pesadelo 4
 ```
 
@@ -92,9 +92,13 @@ Nível **30** ao fim do capítulo 8, que é exatamente o teto do Fácil. **Zero 
 como a XP cresce dentro do capítulo e entre capítulos, a **8-7 vale 8× uma 1-1**: quem quiser repetir
 tem onde, e o lugar é o mais difícil.
 
-> **ESTA TABELA PRECISA SER REFEITA, e o motivo é o pote.** Ela foi calculada com o apóstolo recebendo
-> a fórmula inteira; dividindo entre quatro, cada um recebe um quarto e a passada do Fácil não fecha
-> mais no 30. Ou o pote vira `4×` a fórmula, ou a curva muda — está na lista dos números que faltam.
+> **O `88` é o `22` de sempre, vezes os quatro em campo.** A tabela acima é o que **cada apóstolo**
+> acumula num time cheio, que é a situação normal do jogo — a calibragem original vale intacta.
+>
+> **E jogar com menos gente não é atalho:** solando, um apóstolo recebe quatro vezes isso e encosta no
+> teto do pedágio no meio da passada. Dali em diante a XP dele **se perde** — o pote não guarda, e o
+> teto não cede. Quem espalha aproveita tudo; quem concentra troca alcance por velocidade e paga em
+> desperdício.
 
 **O que cada dificuldade custa** (o total do jogo é `100 × (1+…+59)` = **177.000**):
 
@@ -489,7 +493,7 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 
 ## Os números que faltam
 
-O modelo do NÍVEL está fechado (a fonte da raridade não — ver §3). Estes oito números não:
+O modelo está fechado. Estes sete números não:
 
 1. **Quanto material por pedágio**, e a curva entre eles — o @50 é o mais caro do jogo.
 2. **O `N` do sacrifício** por degrau de raridade do ITEM. Com 4 drops por corrida e 5 degraus, o chute
@@ -500,8 +504,6 @@ O modelo do NÍVEL está fechado (a fonte da raridade não — ver §3). Estes o
 5. **A demanda de alma** contra **36 apóstolos** — o maior risco de calibragem do desenho (§O MATERIAL).
 6. **A taxa de drop do mítico**, que precisa CAIR agora que o reforge o consome (`GDD-itens.md` §O drop).
 7. **A rolagem da sub** — `principal ÷ 6`, ainda não passada pelos principais já calibrados dos 9 slots.
-8. **A XP por fase, agora que ela é POTE dividido** entre quem está em campo — ou o pote vira `4×` a
-   fórmula, ou a tabela de nível por capítulo cai por quatro (§A CURVA DE XP).
 
 ---
 

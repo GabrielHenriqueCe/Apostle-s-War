@@ -14,67 +14,68 @@
 
 ## Onde paramos (19/ago/2026)
 
-**Duas sessões de CÓDIGO, dois PRs mergeados** — a `main` está em `7e67053`, sem branch pendurada.
+**Uma sessão de código, um PR grande esperando merge.** A branch **`feat/alma-e-estrela`** está no
+GitHub, 31 arquivos, ~2.400 linhas. O Gabriel abre e mergeia; depois é a limpeza de sempre
+(`git checkout main && git pull && git branch -d … && git fetch --prune`).
 
-- **#250 `feat/composicao-por-tipo`** — as fases da campanha falam PAPEL (`TipoDeApostolo`) em vez de
-  `Slot`, o tipo virou primeira classe (`Tipos.Simbolo`: 🛡️ ⚔️ 🏹 💗) e a fase 1 voltou a entregar
-  **um** apóstolo. O `Slot` continua sendo identidade de save; ele só deixou de significar papel.
-- **#251 `feat/progressao`** — o bloco 5→8 do `GDD-progressao.md` §7 INTEIRO: dificuldade, XP/nível do
-  jogador e nível do inimigo. **Os passos 5 a 8 estão marcados ✅ no §7**, com o registro de por que os
-  três últimos saíram num PR só.
+**O tema é a ALMA e a estrela comprada** — o modelo, os números e a tela. O `docs/GDD-progressao.md`
+está atualizado com tudo (§A ESTRELA, §O MATERIAL, §O PEDÁGIO, §O TETO DE DIFICULDADE) e três dos
+sete "números que faltam" fecharam. **Não repetir aqui o que está lá.**
 
-**A ordem de estreia do capítulo mudou no #250, e foi decisão do Gabriel:** a fase 1 abre com o
-**Guardião** (era o Combatente no desenho escrito), e a ordem virou `G → C → A → S` — a mesma do
-roster. O GDD §5 já está corrigido.
+O que precisa ser sabido e NÃO está no GDD:
 
-## O que está no ar (e é sabido)
+- **A estrela agora é a COMPRA e o nível deriva dela** (`teto = 10 × estrelas + 9`). O único teto de
+  nível do jogo passou a ser esse — o Fácil para no 30 porque a ★★★★ cobra Épico, sem uma linha de
+  código dizendo "teto".
+- **Nasceu a CATEDRAL**, a tela onde o apóstolo se aprimora, com quatro estações: 🎒 **Forja**
+  (itens) · ⬆️ **Santuário** (nível, queimando alma) · ★ **Altar** (estrela) · 🔥 **Oferenda**
+  (fundir alma). O antigo Arsenal virou ela; `arsenal.js` virou `catedral.js` e os ids acompanharam.
+- **Peças novas de `ui/` que a próxima tela deve REUSAR em vez de recriar:** `quantidade.js` (a barra
+  `0 ——[47]—— 150`, e a regra do Gabriel é *"sempre que for pra aumentar número, é esta peça"*),
+  `alma.js` (o 🔥 tingido por raridade), `ficha.js` (os painéis de stat/habilidade, compartilhados
+  com o compêndio) e o `contar()` do `animacao.js`.
+- **O `ArsenalService` manteve o nome de propósito** — ele é o ACERVO de equipamento; a Forja é a
+  estação onde ele se usa. Está comentado no código.
 
-**O jogo está jogável e desbalanceado de propósito.** O Gabriel aceitou os dois buracos: *"se não
-tiver como passar, o bloqueio seria 'sou fraco demais' — e vem atualização por aí"*.
+## O que está no ar
 
-1. **Não existe PEDÁGIO**, então o único teto de nível é o 60: dá pra farmar o Fácil até lá e entrar
-   no Normal forte demais.
-2. **Não existe a grade de itens do `GDD-itens.md`**, e o Pesadelo pede um inimigo nv 428 contra um
-   jogador sem arsenal de verdade.
-
-Os dois somem com o **material + pedágio + forja**, que é o bloco natural a seguir.
-
-**O save de campanha foi descartado** (formato novo da chave `"save"`). Perfil e itens sobrevivem;
-capítulos e apóstolos voltam do zero na primeira vez que ele abrir o jogo.
-
-## O que vem — as duas escolhas na mesa
-
-1. **Material, pedágio e forja** — fecha os dois buracos acima, e é o que o `GDD-progressao.md`
-   §O MATERIAL / §O PEDÁGIO já descreve. Antes dele, os **sete números que faltam** (§Os números que
-   faltam) precisam ser fechados; o maior risco segue o **#5**, a demanda de alma contra 36 apóstolos.
-2. **Raridade + a passiva que escala** — o passo 9 do §7. O desenho está fechado (§O EMBLEMA e
-   §Raridade → habilidade): emblema por fechar a fase 7 numa dificuldade, oferta = demanda = 60 por
-   facção, e o efeito é **uma passiva por apóstolo** que ganha degraus, no molde do Piromancer.
-
-Menores de sempre: os **Humanos começando com UM escolhido** (PR próprio, casa com a XP), o
-**empurrão de medidor** (a `FilaDeTurnos` já tem os ganchos), a **pele da Arena** (FILA A #20) e a
-**9ª pele, Humanos** (#21, bloqueada até o fundo de facção no compêndio).
+1. **Nada do PR foi visto rodando.** O harness monta as telas e clica os botões das estações, mas
+   não julga layout, cor nem animação. **A lista de verificação em jogo é a maior dívida desta
+   sessão** — ver abaixo.
+2. **Os itens continuam GLOBAIS**, não por apóstolo (é o passo 10 do §7). Na Catedral, trocar o
+   apóstolo do meio não muda a Forja — pode parecer bug antes de parecer "ainda não existe".
+3. **A 💎 Raridade é um botão desabilitado** (passo 9). O lugar está reservado, a mecânica não existe.
+4. **O pó e a forja de item não existem**: o `Item` de hoje não tem NÍVEL pra o pó pagar. É o que
+   trava o outro meio do §O MATERIAL.
+5. **A mudança do Mago é do Gabriel** e pegou carona no PR: a Bola de Fogo virou `AreaDeEfeito`. Está
+   correta e **não muda número nenhum hoje** — o `TipoAtaque` só governa quantas vezes o
+   `DepoisDeAtacar` dispara, e a única passiva dele é `IModificaDanoCausado`.
 
 ## Verificação em jogo que ainda não aconteceu
 
-Nada do #251 foi visto rodando — os harnesses publicam mensagem e montam tela, **não clicam em nada**.
-O que precisa do Gabriel:
-
-- **A barra de nível dentro do slot de 68px** durante o arraste: é o único lugar apertado de verdade.
-- A troca de dificuldade **no mapa e dentro da tela da fase**, e o Normal abrindo ao fechar a 8-7.
-- O card do inimigo mostrando `nv 64` sem trilho, e a XP aparecendo **também na derrota**.
+- A Catedral inteira em 1920×1080 e em janela menor: as 4 colunas (`518 · 330 · 172 · 330`), o elenco
+  em grade de 4, e se ainda precisa rolar a página.
+- **As seis cores da alminha** — o roxo do épico e o azul do raro são os dois suspeitos de ficarem
+  parecidos no fundo escuro.
+- Subir alguém até o **9**: a XP continua entrando com o nível parado, e a ★ só libera com a **barra
+  cheia** (não é chegar no 9, é encher).
+- A barra de XP do fim de fase atravessando nível (enche · zera · enche) e o ritmo dela — 900ms de
+  enchimento e 140ms de cascata são chute meu, ficam em duas constantes no topo do bloco.
+- **Reabrir com o save que já existe: ninguém pode ter caído pro nível 9** (a migração do `Estrelas`
+  nulo).
 
 ## Gotchas que continuam valendo
 
-- **A `main` local costuma ficar 1 commit à frente** por causa deste arquivo (ele é commitado local e
-  sobe junto no PR seguinte). Depois do squash-merge, `git pull --ff-only` recusa. **Antes de qualquer
-  reset:** `git diff main origin/main` — se o delta for só o PR mergeado, `git reset --hard
-  origin/main` é seguro. Pelo mesmo motivo, `git branch -d` recusa a branch mergeada por squash;
-  provar com `git diff --stat main <branch>` vazio e usar `-D`.
+- **`sed -i` reescreve CRLF→LF em TODO arquivo que toca**, não só nos que casam com o padrão — sujou
+  39 arquivos sem uma linha de conteúdo diferente. Prefira a ferramenta de edição; se usar `sed`,
+  confira com `git diff --name-only` (conteúdo) contra `git status --porcelain` (sujos) e restaure a
+  diferença.
 - **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas oscilam entre corridas
   (Tiroteio, Esgrima, Shuriken, Porradeiro, Vilania) → `git checkout -- docs/bancada-dano.md`.
-  **Agora que o nível existe, mudança ALÉM dessas cinco é vazamento de nível pros bonecos.**
-- **As ferramentas de edição gravam LF** e o repo trabalha em CRLF; o `rodar-telas.js` acusa arquivo
-  misto (só em `wwwroot/`). Depois de mexer, normalizar os arquivos tocados.
+  Mudança ALÉM dessas cinco é vazamento de nível pros bonecos.
+- **O harness das telas precisa da flag**: `node --experimental-vm-modules ferramentas/rodar-telas.js`.
+  Ele agora também CLICA nas portas da Catedral e nos botões que o painel abre.
 - O jogo ABERTO trava o build (lock do `.exe`) — pedir pra fechar antes de buildar/testar.
+- **Este arquivo subiu DENTRO do PR desta vez** (o Gabriel pediu), então a `main` local não deve
+  ficar à frente depois do merge.
 - **Não há Python nesta máquina**, e não há `gh` CLI: o PR é o Gabriel quem abre e mergeia.

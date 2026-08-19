@@ -9,6 +9,8 @@ import { avatarDoJogador } from './menu.js';
 import { arrastando, configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPickerArrastavel } from '../ui/time.js';
 import { mandar } from '../nucleo/ponte.js';
 import { montarBarraDificuldade } from '../ui/dificuldade.js';
+import { contar, esperar } from '../ui/animacao.js';
+import { almaIcone } from '../ui/alma.js';
 
 // ---------- Campanha: mapa ----------
 const ESPACO_NO = 210;   // distância horizontal entre facções
@@ -323,14 +325,25 @@ export const fimDeFase = {
             cont.append(p);
         }
 
-        // A XP vem ANTES do item: ela cai por inimigo morto, então aparece também na derrota — e é a
-        // única recompensa que o jogador leva de uma fase perdida.
-        if (f.xp > 0) {
+        // A XP e a alma vêm ANTES do item: as duas caem por inimigo morto, então aparecem também na
+        // derrota — e são a única recompensa que o jogador leva de uma fase perdida.
+        //
+        // A mesma tela é enviada DUAS vezes quando a fase solta apóstolo novo (a passagem da
+        // recompensa e a tela de decisão). A assinatura evita animar o mesmo ganho de novo na
+        // segunda: repetir a contagem faria parecer que ele ganhou tudo outra vez.
+        const assinatura = JSON.stringify([f.xp, f.ganhos, f.alma]);
+        const animar = assinatura !== ultimaAssinatura;
+        ultimaAssinatura = assinatura;
+
+        if (f.ganhos && f.ganhos.length) cont.append(blocoDeGanhos(f.ganhos, animar));
+        else if (f.xp > 0) {
             const xp = document.createElement('div');
             xp.className = 'fimFaseXp';
             xp.textContent = `+${f.xp} XP para cada apóstolo em campo`;
             cont.append(xp);
         }
+
+        if (f.alma && f.alma.length) cont.append(blocoDeAlmas(f.alma, animar));
 
         const r = f.recompensa;
         if (r && r.item) {
@@ -375,6 +388,122 @@ export const fimDeFase = {
 
 // Índices casados com o enum DecisaoDeFim do C# — a ponte carrega um int, então a ordem é contrato.
 const DECISAO = { jogarNovamente: 0, editarEquipe: 1, proximaFase: 2 };
+
+// ---------- o que a fase entregou ----------
+
+let ultimaAssinatura = null;
+
+const MS_DO_GANHO = 900;    // o tempo do enchimento inteiro de um apóstolo, atravessando ou não nível
+const MS_ENTRE = 140;       // o atraso de um apóstolo pro seguinte, pra a leitura ser em cascata
+
+function blocoDeGanhos(ganhos, animar) {
+    const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
+    const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Experiência';
+
+    const lista = document.createElement('div'); lista.className = 'ganhoLista';
+    lista.replaceChildren(...ganhos.map((g, i) => linhaDeGanho(g, animar, i * MS_ENTRE)));
+
+    bloco.append(t, lista);
+    return bloco;
+}
+
+function linhaDeGanho(g, animar, atraso) {
+    const linha = document.createElement('div'); linha.className = 'ganhoLinha';
+
+    const em = document.createElement('span'); em.className = 'glEmoji'; em.textContent = g.simbolo;
+    const nome = document.createElement('span'); nome.className = 'glNome'; nome.textContent = g.nome;
+
+    const nivel = document.createElement('span'); nivel.className = 'glNivel';
+    const trilho = document.createElement('span'); trilho.className = 'bnTrilho glTrilho';
+    const cheio = document.createElement('span'); cheio.className = 'bnCheio';
+    trilho.append(cheio);
+
+    const xp = document.createElement('span'); xp.className = 'glXp';
+
+    const primeiro = g.trechos[0] || { nivel: 1, de: 0, ate: 0 };
+    const ultimo = g.trechos[g.trechos.length - 1] || primeiro;
+
+    linha.append(em, nome, nivel, trilho, xp);
+
+    // Os stats entram como filhos da MESMA linha e só existem se algo mudou — a lista vem do C# já
+    // filtrada, então uma linha sem subida de nível não ganha bloco vazio.
+    if (g.stats && g.stats.length) linha.append(blocoDeStats(g.stats));
+
+    if (!animar) {
+        nivel.textContent = `nv ${ultimo.nivel}`;
+        cheio.style.width = `${ultimo.ate}%`;
+        xp.textContent = `+${g.xpGanha.toLocaleString('pt-BR')} XP`;
+        if (g.travou) cheio.classList.add('travada');
+        return linha;
+    }
+
+    nivel.textContent = `nv ${primeiro.nivel}`;
+    cheio.style.width = `${primeiro.de}%`;
+    xp.textContent = '+0 XP';
+    animarGanho({ nivel, cheio, xp }, g, atraso);
+    return linha;
+}
+
+// Encher · zerar · encher o próximo, um trecho por nível atravessado. Os trechos vêm PRONTOS do C#
+// (`TrechoDeNivel`) — descobrir onde cada nível vira exige a curva de XP, que não tem cópia aqui.
+async function animarGanho(el, g, atraso) {
+    await esperar(atraso);
+
+    const fatia = MS_DO_GANHO / Math.max(g.trechos.length, 1);
+    contar(el.xp, 0, g.xpGanha, MS_DO_GANHO, v => `+${v.toLocaleString('pt-BR')} XP`);
+
+    for (const t of g.trechos) {
+        el.nivel.textContent = `nv ${t.nivel}`;
+        // Sem transição pra POSICIONAR e com transição pra ANDAR: o reflow no meio é o que impede o
+        // navegador de juntar as duas escritas e o trilho voar do 0 ao 100 sem passar pelo caminho.
+        el.cheio.style.transition = 'none';
+        el.cheio.style.width = `${t.de}%`;
+        void el.cheio.offsetWidth;
+        el.cheio.style.transition = `width ${fatia}ms linear`;
+        el.cheio.style.width = `${t.ate}%`;
+        await esperar(fatia);
+    }
+
+    // Travado = a barra fica cheia e ACESA. É aqui que o jogador descobre que agora precisa de
+    // estrela, no instante em que isso passou a valer pra ele.
+    if (g.travou) el.cheio.classList.add('travada');
+}
+
+function blocoDeStats(stats) {
+    const cont = document.createElement('div'); cont.className = 'glStats';
+    cont.replaceChildren(...stats.map(s => {
+        const l = document.createElement('span'); l.className = 'glStat';
+        const ic = document.createElement('span'); ic.className = 'gsIcone'; ic.textContent = s.icone;
+        const rot = document.createElement('span'); rot.className = 'gsRotulo'; rot.textContent = s.rotulo;
+        const v = document.createElement('span'); v.className = 'gsValor';
+        v.textContent = `${s.de.toLocaleString('pt-BR')} → ${s.ate.toLocaleString('pt-BR')}`;
+        l.append(ic, rot, v);
+        return l;
+    }));
+    return cont;
+}
+
+function blocoDeAlmas(almas, animar) {
+    const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
+    const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Almas';
+
+    const lista = document.createElement('div'); lista.className = 'almaGanhaLista';
+    lista.replaceChildren(...almas.map((a, i) => {
+        const l = document.createElement('div'); l.className = 'almaGanhaLinha';
+        const n = document.createElement('span'); n.className = 'agNome'; n.textContent = a.nome;
+        const v = document.createElement('span'); v.className = 'agValor';
+
+        if (animar) contar(v, 0, a.quantidade, MS_DO_GANHO, x => `+${x.toLocaleString('pt-BR')}`)
+            .catch(() => { });
+        else v.textContent = `+${a.quantidade.toLocaleString('pt-BR')}`;
+
+        l.append(almaIcone(a.raridade, 22), n, v);
+        return l;
+    }));
+
+    bloco.append(t, lista);
+    return bloco;
+}
 
 document.getElementById('fimJogarNovamente').addEventListener('click', () => mandar('fimDeFase', DECISAO.jogarNovamente));
 document.getElementById('fimEditarEquipe').addEventListener('click', () => mandar('fimDeFase', DECISAO.editarEquipe));

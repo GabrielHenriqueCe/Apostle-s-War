@@ -17,7 +17,14 @@ export function marcaDeTipo(simbolo) {
 //
 // `pct` negativo = sem trilho, só o número: é o caso do INIMIGO, que tem nível mas não acumula XP —
 // um trilho vazio nele diria "quase subindo", que é mentira.
-export function barraDeNivel(nivel, pct) {
+// `previsao` = o quanto a barra ficaria SE o jogador confirmasse o que está montando (queimar alma,
+// por enquanto). Ela entra em brasa por cima do âmbar do que já está lá: o mesmo gesto de "isto é
+// teu" × "isto seria teu" que a barra de custo de qualquer jogo faz.
+//
+// Ela satura em 100 de propósito. Se o ganho atravessa nível a barra não tem como mostrar "três
+// níveis à frente" — quem diz isso é o RÓTULO (`nv 7 → nv 10`), e o enche-zera-enche acontece na
+// confirmação, com a mesma animação do fim de fase.
+export function barraDeNivel(nivel, pct, previsao = -1) {
     const b = document.createElement('span');
     b.className = 'barraNivel';
 
@@ -29,10 +36,20 @@ export function barraDeNivel(nivel, pct) {
     if (pct >= 0) {
         const trilho = document.createElement('span');
         trilho.className = 'bnTrilho';
+
+        const atual = Math.max(0, Math.min(100, pct));
         const cheio = document.createElement('span');
         cheio.className = 'bnCheio';
-        cheio.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+        cheio.style.width = `${atual}%`;
         trilho.append(cheio);
+
+        if (previsao > atual) {
+            const p = document.createElement('span');
+            p.className = 'bnPrevisao';
+            p.style.left = `${atual}%`;
+            p.style.width = `${Math.min(100, previsao) - atual}%`;
+            trilho.append(p);
+        }
         b.append(trilho);
     }
     return b;

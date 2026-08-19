@@ -68,7 +68,13 @@ function criarElemento(id = '', tag = 'DIV') {
             toggle(c, f) { const v = f ?? !this._s.has(c); v ? this._s.add(c) : this._s.delete(c); return v; },
             contains(c) { return this._s.has(c); },
         },
-        addEventListener() {}, removeEventListener() {}, focus() {}, blur() {}, select() {}, click() {},
+        // Os ouvintes ficam GUARDADOS (antes eram descartados) pra o harness poder disparar um
+        // clique — ver `clicar`. Continua não havendo varredura automática: quem clica é a tela
+        // que pediu, uma por uma.
+        _ev: {},
+        addEventListener(tipo, fn) { (el._ev[tipo] ||= []).push(fn); },
+        removeEventListener() {}, focus() {}, blur() {}, select() {},
+        click() { for (const fn of el._ev.click || []) fn({ preventDefault() {}, stopPropagation() {} }); },
         setAttribute(k, v) { if (k.startsWith('data-')) el.dataset[k.slice(5)] = v; },
         removeAttribute(k) { if (k === 'data-tema') delete el.dataset.tema; },
         getAttribute() { return null; }, hasAttribute() { return false; },
@@ -168,6 +174,19 @@ async function carregar(arquivo) {
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
 const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', simbolo: '🗡️', stat: 'ATK', valor: '+5', valorNum: 5, equipado: true };
 const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', faccao: 'Reino', tipo: 'Guardião', nivel: 1, hp: 100, hpMax: 100, ataque: 10, defesa: 10, velocidade: 85, medidor: 137, precisao: 50, resistencia: 120, taxaCrit: 15, danoCrit: 60, status: [], habilidades: [], liberado: true, vivo: true };
+/// Os elementos da árvore com esta classe. O shim não tem querySelectorAll de verdade.
+function procurar(raiz, classe) {
+    if (!raiz) return [];
+    const achados = [];
+    (function descer(el) {
+        if (typeof el.className === 'string' && el.className.split(' ').includes(classe)) achados.push(el);
+        for (const f of el.children || []) descer(f);
+    })(raiz);
+    return achados;
+}
+
+const ALMA = ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Mítico']
+    .map((nome, i) => ({ raridade: i, nome, quantidade: 100, xpPorUnidade: 5 ** i, max: i < 3 ? 100 : 0, podeFundir: i < 3 }));
 const TELAS = [
     ['menu', { titulo: 'Apostle\'s War', subtitulo: '', opcoes: ['Jogar', 'Sair'], raiz: true, perfil: { nome: 'G', avatar: '🧭' } }],
     ['criarPerfil', {}],
@@ -175,15 +194,41 @@ const TELAS = [
     ['montagemArena', { apostolos: [apostolo, { ...apostolo, id: 2 }] }],
     ['campanhaMapa', { capitulos: [{ nome: 'Reino', simbolo: '👑', liberado: true, fases: 7 }], atual: 0 }],
     ['campanhaFases', { faccao: 'Reino', simbolo: '👑', fases: [{ numero: 1, nome: 'Arma', liberada: true, rodada1: [apostolo], rodada2: [apostolo], item: null }], apostolos: [apostolo], faseSelecionada: 1, time: [], meusApostolos: [apostolo] }],
-    ['fimDeFase', { venceu: true, titulo: 'Vitória', faccao: 'Reino', fase: 1, recompensa: null, temProxima: false, comOpcoes: true }],
+    // Os GANHOS com dois trechos e stats: um apóstolo que atravessou nível é o caminho longo da
+    // animação (encher · zerar · encher), e é o que a carga precisa exercitar.
+    ['fimDeFase', {
+        venceu: true, titulo: 'Vitória', faccao: 'Reino', fase: 1, recompensa: null,
+        temProxima: false, comOpcoes: true, xp: 2870,
+        ganhos: [{
+            simbolo: '🧙', tipoSimbolo: '🏹', nome: 'Mago', xpGanha: 2870, travou: true,
+            trechos: [{ nivel: 8, de: 40, ate: 100 }, { nivel: 9, de: 0, ate: 62 }],
+            stats: [{ icone: '❤️', rotulo: 'HP', de: 1240, ate: 1380 }],
+        }],
+        alma: ALMA.slice(0, 3),
+    }],
     ['conquista', apostolo],
     // COM CONTEÚDO, e não vazio: um `slots: []` faz o `.map` não rodar nenhuma vez, e o corpo do
     // laço é justamente onde mora o que quebra. Foi assim que o harness deu verde com o
     // `ARSENAL_AREAS` esquecido no jogo.js — lista vazia não exercita nada.
-    ['arsenal', {
+    ['catedral', {
         slots: [0, 1, 2, 3, 4, 5, 6].map(s => ({ slot: s, nome: `Slot ${s}`, equipado: s === 0 ? item : null })),
         obtidos: [item, { ...item, equipado: false, valorNum: 3 }],
         totais: [{ stat: 'ATK', valor: '+10' }],
+        roster: [apostolo, { ...apostolo, id: 2 }],
+        selecionado: 0,
+        // naParede E podeQueimar ligados ao mesmo tempo NÃO é um estado que o C# produz — é o que
+        // faz os DOIS painéis renderizarem o corpo inteiro numa corrida só. Carga de cobertura;
+        // quem diz quando cada um vale é o ProgressaoService, e isso tem teste em C#.
+        apostolo: {
+            ficha: { ...apostolo, nivel: 8 }, estrelas: 2, teto: 9, naParede: true,
+            receita: [{ raridade: 1, nome: 'Incomum', quantidade: 150, xpPorUnidade: 5 }],
+            faltando: [{ raridade: 2, nome: 'Raro', quantidade: 72, xpPorUnidade: 25 }],
+            podeComprarEstrela: false, podeQueimar: true, motivo: 'Falta 72 de Raro.',
+            xpAtual: 3600, xpAteAParede: 900,
+            limiares: [{ nivel: 9, xp: 3600 }, { nivel: 10, xp: 4500 }],
+            porNivel: [8, 9].map(n => ({ nivel: n, hp: 1200 + n * 40, ataque: 200 + n * 4, defesa: 90 + n * 2, velocidade: 85, precisao: 50, resistencia: 120 })),
+        },
+        alma: ALMA, tetoDeFusao: 2,
     }],
     ['compendio', { faccoes: [{ nome: 'Reino', simbolo: '👑', apostolos: [apostolo] }] }],
     ['compendioApostolo', apostolo],
@@ -224,6 +269,28 @@ const TELAS = [
         } catch (e) {
             console.log(`  ✗ ${tipo} — ${e.message}`);
             queixar(`${tipo}: ${e.stack.split('\n').slice(0, 3).join(' | ')}`);
+        }
+    }
+
+    // ---------- os painéis que SÓ abrem por clique ----------
+    // O harness monta o que a mensagem do C# desenha, e os painéis de aprimorar não estão nisso:
+    // eles nascem do clique num botão. Sem esta parte, "Evoluir nível" e "Evoluir estrela" chegam
+    // ao jogo sem nunca terem rodado — que é o buraco que este harness existe pra não ter.
+    console.log('\n  painéis por clique:');
+    for (const b of procurar(porId.get('catedralPortas'), 'afBotao')) {
+        const rotulo = (b.children.find(f => f.className === 'abRotulo') || {}).textContent || '?';
+        try {
+            b.click();
+            // E os botões QUE O PAINEL abriu: o Máximo e o confirmar só existem depois do primeiro
+            // clique, então são dois níveis de gesto — nenhum deles roda sem isto.
+            let dentro = 0;
+            for (const c of ['qlBotao', 'acaoConfirmar']) {
+                for (const alvo of procurar(porId.get('catedralEstacao'), c)) { alvo.click(); dentro++; }
+            }
+            console.log(`  ✓ ${rotulo}${dentro ? ` · ${dentro} botão(ões) do painel` : ''}`);
+        } catch (e) {
+            console.log(`  ✗ ${rotulo} — ${e.message}`);
+            queixar(`${rotulo}: ${e.stack.split('\n').slice(0, 3).join(' | ')}`);
         }
     }
 

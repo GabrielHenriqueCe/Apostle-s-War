@@ -1,4 +1,35 @@
-// As duas animações que qualquer tela pode pedir: reiniciar uma classe e cuspir um número.
+// As animações que qualquer tela pode pedir: reiniciar uma classe, cuspir um número, e contar.
+
+// O CONTADOR de cronômetro: escreve os números entre `de` e `ate` ao longo de `ms`.
+//
+// Escreve o `de` na hora e só então agenda o resto — assim a tela nunca aparece em branco esperando
+// o primeiro quadro, e num ambiente sem requestAnimationFrame (o harness) ela fica no valor inicial
+// em vez de quebrar.
+//
+// A desaceleração é a mesma da barra: os dois animam o MESMO ganho, e ritmos diferentes fariam o
+// número chegar antes ou depois do trilho encher.
+export function contar(el, de, ate, ms, escrever = (v) => `${v}`) {
+    el.textContent = escrever(de);
+    if (de === ate || ms <= 0) { el.textContent = escrever(ate); return Promise.resolve(); }
+
+    return new Promise(resolve => {
+        const inicio = performance.now();
+        const passo = (agora) => {
+            const t = Math.min((agora - inicio) / ms, 1);
+            el.textContent = escrever(Math.round(de + (ate - de) * suavizar(t)));
+            if (t < 1) requestAnimationFrame(passo);
+            else resolve();
+        };
+        requestAnimationFrame(passo);
+    });
+}
+
+// Começa rápido e freia no fim (ease-out). É o que faz o número "assentar" em vez de estancar.
+export const suavizar = (t) => 1 - Math.pow(1 - t, 3);
+
+// Espera `ms`, como promessa — pra encadear trecho após trecho sem aninhar setTimeout.
+export const esperar = (ms) => new Promise(r => setTimeout(r, ms));
+
 
 // Reinicia a animação mesmo se a classe já estiver lá (dois golpes seguidos no mesmo alvo).
 export function reanimar(el, classe) {

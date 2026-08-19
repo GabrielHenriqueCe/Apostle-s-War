@@ -19,15 +19,63 @@ namespace ApostlesWar.Domain
         /// <summary>
         /// O nível que esta XP paga, preso ao teto de <see cref="Arquetipos.NivelMaximo"/>.
         ///
+        /// Esta sobrecarga é a do INIMIGO e a de quem não tem estrela pra consultar: o
+        /// <see cref="NivelDoInimigo"/> chega a 428 e travá-lo no 9 esvaziaria a campanha.
+        /// </summary>
+        public static int NivelPorXp(int xp) => NivelPorXp(xp, Arquetipos.NivelMaximo);
+
+        /// <summary>
+        /// O nível que esta XP paga, preso ao <paramref name="teto"/> que as estrelas compradas
+        /// permitem (<see cref="TetoPorEstrelas"/>).
+        ///
+        /// A XP que passa do teto NÃO se perde: quem guarda é o save, que grava a XP crua. Parar aqui
+        /// é só deixar de APLICAR — comprar a estrela reaplica e o nível salta de uma vez.
+        ///
         /// LAÇO INTEIRO, e não a inversa da quadrática: com `q = 19` a passada do Fácil erra o nível
         /// 28 por 28 pontos de XP, e nessa margem um `sqrt` em ponto flutuante decide o teto pelo
         /// arredondamento. Sessenta iterações no pior caso não são gargalo de nada.
         /// </summary>
-        public static int NivelPorXp(int xp)
+        public static int NivelPorXp(int xp, int teto)
         {
             int nivel = Arquetipos.NivelMinimo;
-            while (nivel < Arquetipos.NivelMaximo && XpParaNivel(nivel + 1) <= xp) nivel++;
+            while (nivel < teto && XpParaNivel(nivel + 1) <= xp) nivel++;
             return nivel;
+        }
+
+        /// <summary>
+        /// Até onde as estrelas COMPRADAS deixam subir: sem nenhuma trava no 9, e cada estrela abre a
+        /// dezena seguinte. Seis estrelas, seis paredes — 9, 19, 29, 39, 49, 59 —, e a sexta é a que
+        /// abre o 60 (docs/GDD-progressao.md §A ESTRELA).
+        ///
+        /// É ESTE o único teto de nível do jogo. Não existe regra escrita dizendo "o Fácil para no
+        /// 30": a receita da 4ª estrela cobra Épico, e Épico não cai no Fácil (<see cref="Alma"/>).
+        /// </summary>
+        public static int TetoPorEstrelas(int estrelas)
+            => Math.Min(10 * Math.Max(estrelas, 0) + 9, Arquetipos.NivelMaximo);
+
+        /// <summary>Onde <paramref name="xp"/> cai DENTRO da faixa deste nível, em 0..100.</summary>
+        public static int PctNaFaixa(int nivel, int xp)
+        {
+            int piso = XpParaNivel(nivel);
+            int total = XpParaNivel(nivel + 1) - piso;
+            if (total <= 0) return 100;
+            return Math.Clamp((int)(100L * (xp - piso) / total), 0, 100);
+        }
+
+        /// <summary>
+        /// A subida fatiada por NÍVEL, pra a barra da tela animar: um trecho por nível atravessado,
+        /// cada um dizendo de onde até onde encher (0..100). Três níveis = encher, zerar, encher,
+        /// zerar, encher.
+        ///
+        /// Mora aqui e não na tela porque saber ONDE um nível vira é a curva de XP — e uma segunda
+        /// cópia dela do outro lado da ponte divergiria como duas cópias de um número.
+        /// </summary>
+        public static List<TrechoDeXp> Trechos(int nivelAntes, int xpAntes, int nivelDepois, int xpDepois)
+        {
+            var trechos = new List<TrechoDeXp>();
+            for (int nivel = nivelAntes; nivel <= nivelDepois; nivel++)
+                trechos.Add(new TrechoDeXp(nivel, PctNaFaixa(nivel, xpAntes), PctNaFaixa(nivel, xpDepois)));
+            return trechos;
         }
 
         /// <summary>
@@ -48,9 +96,12 @@ namespace ApostlesWar.Domain
             => 72 * IndiceDaFase(capitulo, fase) * (int)dificuldade;
 
         /// <summary>
-        /// Quantas estrelas a ficha mostra: uma a cada 10 níveis. Mesma expressão que o
-        /// <see cref="Arquetipos.Velocidade"/> usa pra contar o degrau — de propósito, senão viram
-        /// duas respostas pra "quantas estrelas ele tem".
+        /// Quantas estrelas um nível IMPLICA. Quem manda na ficha é a estrela COMPRADA, que vive no
+        /// save — esta função deixou de ser a definição e virou a identidade que CONFERE.
+        ///
+        /// Ela vale porque a compra é a única forma de passar da parede: pra estar no 10 você comprou
+        /// a 1ª, pra estar no 20 comprou a 2ª. O <see cref="Arquetipos.Velocidade"/> conta o degrau
+        /// com a mesma expressão, e é por isso que ele não precisou trocar de fonte.
         /// </summary>
         public static int Estrelas(int nivel) => nivel / 10;
 

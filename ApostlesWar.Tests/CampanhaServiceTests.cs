@@ -27,7 +27,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
-            return (new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo), capitulos, apostolos);
+            return (new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo), capitulos, apostolos);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo);
+            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo);
 
             campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
 
@@ -261,10 +261,10 @@ namespace Tests
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var time = apostolos.ObterDesbloqueados().Take(3).ToList();
 
-            new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo)
+            new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo)
                 .SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil, time);
 
-            var outro = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo);
+            var outro = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo);
             Assert.Equal(time.Select(p => p.Nome), outro.UltimoTime().Select(p => p.Nome));
         }
 

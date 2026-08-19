@@ -161,18 +161,31 @@
         <div class="continuarDica" id="conquistaDica">novo apóstolo! · 2 cliques pulam</div>
     </section>
 
-    <!-- Cena do ARSENAL: boneco com os 7 slots equipados (global), o que o conjunto dá SOMADO, e os
-         itens obtidos pra equipar. O #arsenalTotais responde "no total, quanto eu ganho com isso?" —
-         antes só dava pra montar de cabeça abrindo os 7 slots um a um. -->
-    <section id="arsenal" hidden>
-        <h1>🎒 Arsenal</h1>
-        <div id="arsenalCorpo">
-            <div id="boneco"></div>
-            <aside id="arsenalTotais"></aside>
-        </div>
-        <div id="arsenalDetalhe" hidden>
-            <div id="arsenalSlotNome"></div>
-            <div id="arsenalItens"></div>
+    <!-- Cena do ARSENAL: a bancada de APRIMORAR o apóstolo, em três colunas — o roster pra escolher,
+         o escolhido no meio com o que dá pra comprar nele, e os itens à direita.
+         O #catedralEstacao ocupa a MESMA célula do #forja: abrir uma ação esconde os itens, que
+         não têm o que dizer naquele momento. -->
+    <section id="catedral" hidden>
+        <h1>⛪ Catedral</h1>
+        <!-- QUATRO colunas, com o apóstolo no centro óptico: o elenco de um lado, as portas e a estação
+             do outro, somando a mesma largura.
+             A última é compartilhada: #forja (a Forja, em repouso) e #catedralEstacao (a
+             estação aberta) caem na MESMA célula, e só um dos dois aparece por vez. -->
+        <div id="catedralCorpo">
+            <aside id="catedralElenco"></aside>
+            <div id="catedralFicha"></div>
+            <div id="catedralEstacoes">
+                <div id="catedralPortas"></div>
+            </div>
+            <div id="forja">
+                <div id="boneco"></div>
+                <aside id="forjaTotais"></aside>
+                <div id="forjaDetalhe" hidden>
+                    <div id="forjaSlotNome"></div>
+                    <div id="forjaItens"></div>
+                </div>
+            </div>
+            <div id="catedralEstacao" hidden></div>
         </div>
     </section>
 

@@ -140,7 +140,8 @@ namespace Tests.Bancada
             var combate = new CombateService(
                 new ArsenalService(capitulos, repo),
                 new ApostolosService(personagens, capitulos),
-                personagens, new ProgressaoService(personagens, repo), tela, selecao,
+                personagens, new ProgressaoService(personagens, new AlmaService(repo), repo),
+                new AlmaService(repo), tela, selecao,
                 controladorJogador: controlador,
                 // Só o BONECO cai neste slot: o cérebro do bot que joga pelo apóstolo na medição de
                 // apóstolo-inteiro é uma instância própria, dentro do ControladorDeBancada.

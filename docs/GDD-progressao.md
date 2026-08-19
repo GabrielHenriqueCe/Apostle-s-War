@@ -139,19 +139,31 @@ repete tem onde, e o lugar é o mais difícil.
 > o veterano trava no teto e para de ganhar, o atrasado continua ganhando, e a repetição que fecha os
 > três últimos níveis do Fácil é a mesma que fecha os cinco dele. **Nenhuma regra nova.**
 
-### A ESTRELA — o visor do nível, e ela vale igual pros dois
+### A ESTRELA — a COMPRA que destrava o nível *(implementada, ago/2026)*
 
-**A cada dezena de nível, uma estrela.** O apóstolo recém-descoberto tem **nenhuma**; no nível 60 tem
-**seis** — exatamente como o item (§4):
+**A estrela é comprada, e é ela que abre a dezena seguinte.** O apóstolo trava no **9**, o jogador
+paga alma, e ele entra no 10: `teto = 10 × estrelas + 9`. Seis estrelas, **seis paredes** — 9, 19,
+29, 39, 49, 59 —, e a sexta é a que abre o 60.
 
 | nível | 1–9 | 10 | 20 | 30 | 40 | 50 | 60 |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | **estrela** | ☆☆☆☆☆☆ | ★ | ★★ | ★★★ | ★★★★ | ★★★★★ | ★★★★★★ |
 
-- **Ela não é um eixo** — não tem fonte de custo própria nem efeito próprio. É leitura do nível, e por
-  isso pode existir sem competir com nada.
-- **O pedágio senta entre as estrelas:** 6 estrelas, 5 pedágios. Ganha-se a ★, bate-se na parede,
-  paga-se pra continuar (§O PEDÁGIO).
+> **A inversão** *(decisão do Gabriel, ago/2026)*: antes a estrela era DERIVADA do nível (`nivel/10`)
+> e o pedágio cobrava por algo que o jogador já tinha ganhado de graça. Agora ela é a compra, e o
+> nível é que deriva dela. A tabela acima não mudou um número — o que mudou é quem é a causa.
+>
+> E a identidade `nivel / 10 == estrelas` **continua valendo em todo nível alcançável**, porque
+> comprar é a única forma de passar da parede. É isso que deixa a `Arquetipos.Velocidade` seguir
+> contando o degrau com a mesma expressão sem virar segunda fonte. Há teste em C# só pra isso.
+
+- **A XP ACUMULA na parede.** O save guarda a XP crua e só deixa de APLICAR o nível; comprar a
+  estrela reaplica, e ele salta de uma vez. Farmar travado nunca é tempo jogado fora.
+- **Queimar alma como XP é RECUSADO na parede** (§O MATERIAL): ali a XP não move nível nenhum, e a
+  alma queimada é a mesma que a estrela cobra.
+- **O time de 4 bate nos muros na MESMA fase**, porque o pote de XP é dividido igual entre quem está
+  em campo. Não são quatro contas espalhadas: é uma conta quádrupla num instante só, e é ela que
+  produz o "parar e farmar".
 - **Ela destrava os 2 slots de acessório**, em 4★ e 6★ (`GDD-itens.md` §OS 9 SLOTS). É o único
   desbloqueio de slot do jogo — os 7 da campanha nascem abertos.
 - **Estrela e raridade dizem coisas diferentes na mesma ficha:** a estrela é o quanto ele cresceu; a
@@ -164,8 +176,28 @@ acelera a subida e é cobrado no pedágio a cada dezena.
 
 - **Pó cai na fase**, junto com os itens. **Alma cai por INIMIGO derrotado**, não por fase — a oferta
   escala com o quanto se joga, e a **Arena alimenta o elenco** sem precisar de regra nova.
-- **Fusão 10:1 pra cima**, travada pelo **teto de raridade da dificuldade mais alta vencida**: não se
-  fabrica pó mítico farmando o Fácil.
+
+> **QUANTO cai** *(fechado e implementado, ago/2026 — era o número que faltava)*. Uma regra só,
+> deslizando uma faixa por dificuldade. A faixa de `1/inimigo` é a que aperta; as outras duas nunca
+> são o gargalo.
+>
+> | dificuldade | 15/inimigo | 5/inimigo | 1/inimigo |
+> |---|---|---|---|
+> | Fácil | Comum | Incomum | **Raro** |
+> | Normal | Incomum | Raro | **Épico** |
+> | Difícil | Raro | Épico | **Lendário** |
+> | Pesadelo | Épico | Lendário | **Mítico** |
+>
+> **Nenhuma dificuldade derruba as faixas ABAIXO da sua**, e é daí que a diluição deixa de ser
+> conforto: o Pesadelo não produz Comum, e a 1ª estrela é Comum puro. Sem diluir, quem sobe um
+> apóstolo novo lá em cima fica travado no 9 com o bolso cheio de mítico.
+>
+> **Quanto vale QUEIMADA** *(o outro número que faltava)*: `1 · 5 · 25 · 125 · 625 · 3.125`, a
+> mesma escada de 5. Ela pode ser generosa porque **XP sem estrela não anda** — despejar mítico num
+> recruta sem estrela para no 9. A queima é o elevador do RECRUTA, não atalho do veterano.
+- ✅ **Fusão 10:1 pra cima**, travada pelo **teto de raridade da dificuldade mais alta aberta**: não se
+  fabrica alma mítica farmando o Fácil (`Alma.TetoDeFusao`, implementada em ago/2026). Só o que fecha
+  grupo de 10 é cobrado — o resto fica no bolso.
 - **Diluição 1:5 pra baixo.** As duas pontas perdem, então o ida-e-volta perde metade — **ter a moeda
   certa vale mais que ter volume**.
 - **Desmontar** item devolve material da raridade dele, com perda, e nunca acima do que a peça poderia
@@ -179,18 +211,39 @@ acelera a subida e é cobrado no pedágio a cada dezena.
 > documento. Separar as duas fontes é o que conserta o risco: a raridade se paga em EMBLEMA
 > (§O EMBLEMA), que não é farmável e não compete com a alma em nada.
 
-### O PEDÁGIO — material a cada 10 níveis, e é ele que trava o nível
+### O PEDÁGIO — o preço da estrela, e é ele que trava o nível *(implementado, ago/2026)*
 
-| pedágio no nível | custo | destrava até |
-|:-:|---|:-:|
-| **10** | comum + incomum | 20 |
-| **20** | incomum + raro | 30 |
-| **30** | raro + épico | 40 |
-| **40** | épico + lendário | 50 |
-| **50** | lendário + mítico | **60** |
+**São SEIS**, uma por estrela, e a parede fica no nível anterior à dezena:
+
+| estrela | trava em | entra no | custo | último pagável em |
+|:-:|:-:|:-:|---|---|
+| ★ | 9 | 10 | 250 Comum | — |
+| ★★ | 19 | 20 | 150 Comum + 100 Incomum | — |
+| ★★★ | 29 | 30 | 150 Incomum + 100 Raro | **Fácil** |
+| ★★★★ | 39 | 40 | 150 Raro + 100 Épico | **Normal** |
+| ★★★★★ | 49 | 50 | 150 Épico + 100 Lendário | **Difícil** |
+| ★★★★★★ | 59 | 60 | 150 Lendário + 100 Mítico | **Pesadelo** |
+
+Duas constantes governam a tabela inteira — `Alma.CustoDaFaixa = 150` e `Alma.CustoDaProxima = 100`.
+**A segunda é o dial de dificuldade do jogo**: ela é a faixa que cai a 1/inimigo, então é sempre ela
+que aperta, e mexer nela move o farm das quatro paredes de cima de uma vez.
 
 A receita é **muito da faixa atual + pouco da próxima**, e o material mais alto de cada linha é o que
-prende o pedágio à dificuldade — não se paga o @30 sem pó épico, e pó épico não cai no Fácil.
+prende a estrela à dificuldade — não se paga a ★★★★ sem pó épico, e pó épico não cai no Fácil.
+
+**O que os números produzem** — time de 4, comprando na hora em que a parede aparece:
+
+| parede | onde cai | faixa alta no bolso | custo (4 × 100) | farm |
+|---|---|--:|--:|---|
+| ★★★ → 30 | fim do Fácil | 328 Raro | 400 | **~70 inimigos** |
+| ★★★★ → 40 | c6 do Normal | 336 Épico | 400 | ~65 inimigos |
+| ★★★★★ → 50 | c5–c6 do Difícil | 300 Lendário | 400 | ~100 inimigos |
+| ★★★★★★ → 60 | c5 do Pesadelo | 280 Mítico | 400 | **~120 inimigos** |
+
+**A última é a mais cara sem receita escalada**: quanto mais alta a dificuldade, mais cedo se bate no
+muro e menos tempo houve pra juntar a faixa de cima. A curva sai da POSIÇÃO da parede, não do preço —
+e é por isso que a receita pode ser plana. O `AlmaTests.PassadaDoFacil_ParaNa3aParedeFaltando72DeRaro`
+roda a passada inteira e trava esses números.
 
 **É este o único teto do nível.** A raridade não participa: um comum sobe exatamente como um mítico,
 pagando o mesmo pedágio. É por isso que os dois eixos podem ser soltos sem que o teto por dificuldade
@@ -199,21 +252,21 @@ se perca.
 **E o pedágio não é imposto:** cada dezena comprada entrega **+15 pontos de principal** no item — a
 maior compra que existe na peça — e uma estrela na ficha.
 
-> **Não trava no 59:** o pedágio do 50 compra a dezena inteira. Um custo próprio pra pisar no 60 cabe e
-> não quebra nada — custaria mítico puro, e pó mítico só cai no Pesadelo, onde o 60 já é permitido. É
-> sabor, não estrutura.
+> **O 60 tem preço próprio**, e ele resolveu sozinho a pergunta antiga de "5 pedágios e 6 estrelas":
+> a ★★★★★★ trava no 59 e cobra lendário + mítico, como todas as outras. Não sobra caso especial.
 
 ### O TETO DE DIFICULDADE — o que a dificuldade governa
 
-| dificuldade | material que cai até | último pedágio pagável | teto de nível | raridade que o DROP alcança |
+| dificuldade | material que cai até | última estrela pagável | teto de nível | raridade que o DROP alcança |
 |---|---|:-:|:-:|:-:|
-| Fácil | raro | @20 | **30** | raro |
-| Normal | épico | @30 | **40** | épico |
-| Difícil | lendário | @40 | **50** | lendário |
-| Pesadelo | mítico | @50 | **60** | mítico |
+| Fácil | raro | ★★★ | **30** | raro |
+| Normal | épico | ★★★★ | **40** | épico |
+| Difícil | lendário | ★★★★★ | **50** | lendário |
+| Pesadelo | mítico | ★★★★★★ | **60** | mítico |
 
-**O teto de nível não é regra escrita — é consequência do material.** Não se paga o pedágio @30 sem pó
-épico, e pó épico não cai no Fácil. Vale igual pro apóstolo e pro item.
+**O teto de nível não é regra escrita — é consequência do material**, e agora isso é literal: não
+existe nenhuma linha de código dizendo "o Fácil para no 30". A ★★★★ cobra Épico, o Fácil não derruba
+Épico, e pronto. Vale igual pro apóstolo e pro item. Há um teste por dificuldade cuidando disso.
 
 > **A coluna do teto tem um SEGUNDO papel** (ago/2026): é ela que define onde o jogador está ao entrar
 > em cada dificuldade, e portanto as âncoras do inimigo (§Os inimigos não têm itens). Mexer em 30/40/
@@ -551,15 +604,16 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
 > **O 6→8 saiu num PR só** *(ago/2026, decisão do Gabriel)*: os três dividem o save e a mesma
 > coordenada (dificuldade, capítulo, fase), e o desbalanceamento dos estados intermediários foi
 > aceito de propósito — *"se não tiver como passar, o bloqueio seria 'sou fraco demais'"*, e o
-> material/forja que faz o teto de verdade vem logo atrás. **Falta o PEDÁGIO:** enquanto ele não
-> existe, o único teto de nível é o 60, então o Fácil deixa farmar até lá.
+> material/forja que faz o teto de verdade vem logo atrás. ✅ **O PEDÁGIO chegou** (ago/2026): a
+> estrela virou compra, e o teto por dificuldade existe sem uma linha que o diga.
 
 > **O save atual é DESCARTADO** (decisão do Gabriel: *"descarta, não me importo"*). Sem migração.
 
 ### DEPOIS
 
 Subestatísticas · conjuntos 2/4/6 · drop por fase e dificuldade · a tela do "o que cai
-onde" · escolher 1 apóstolo inicial · **o material, o pedágio e a forja** · **o emblema e o botão
+onde" · escolher 1 apóstolo inicial · **a forja e o pó** (a alma e o pedágio saíram em ago/2026;
+o pó espera o item ter NÍVEL, que é o passo 10) · **o emblema e o botão
 Promover na ficha** · a fase 1 entregando um apóstolo só · **a dificuldade, agora calibrada contra a
 progressão** · **a bancada 2.0** · e só então o **#16**.
 
@@ -570,15 +624,19 @@ telemetria · **Precisão × Evasão**, se o combate pedir.
 
 ## Os números que faltam
 
-O modelo está fechado. Estes sete números não:
+O modelo está fechado. **Três dos sete fecharam em ago/2026** — os que sobram são todos do ITEM:
 
-1. **Quanto material por pedágio**, e a curva entre eles — o @50 é o mais caro do jogo.
+1. ✅ **Quanto material por pedágio** — `150 da faixa + 100 da próxima`, plano nas seis (§O PEDÁGIO).
+   A curva que o @50 pedia sai da POSIÇÃO da parede, não do preço.
 2. **O `N` do sacrifício** por degrau de raridade do ITEM. Com 4 drops por corrida e 5 degraus, o chute
    antigo de 2–3 dá ~3 corridas por peça: barato demais pro topo.
-3. **Quanto XP cada faixa de material vale** ao ser queimada como acelerador.
+3. ✅ **Quanto XP cada faixa de material vale** queimada — `1 · 5 · 25 · 125 · 625 · 3.125`
+   (§O MATERIAL). Pôde ser generoso porque XP sem estrela não anda.
 4. **A curva de custo do nível do item** — a intenção é dobrar por faixa de 10, com o ponto por rodada
    escalando com a dificuldade.
-5. **A demanda de alma** contra **36 apóstolos** — o maior risco de calibragem do desenho (§O MATERIAL).
+5. ✅ **A demanda de alma contra 36 apóstolos** — era "o maior risco de calibragem do desenho", e a
+   conta desarmou: a alma pede 3,2–4,4 passadas contra 3,4–10,9 da XP. **A XP já era a parede, e
+   continua sendo**; o pedágio é lombada, não muro.
 6. **A taxa de drop do mítico**, que precisa CAIR agora que o reforge o consome (`GDD-itens.md` §O drop).
 7. **A rolagem da sub** — `principal ÷ 6`, ainda não passada pelos principais já calibrados dos 9 slots.
 

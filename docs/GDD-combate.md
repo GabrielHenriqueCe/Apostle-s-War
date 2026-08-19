@@ -572,10 +572,11 @@ aparecem jogando.
 apóstolos do mesmo papel (o Reino tem Ninja e Mago, ambos de dano). Adequar significa **sobrescrever
 habilidade** — trabalho de implementação, não decisão em aberto.
 
-> **Ideia barata quando for implementar:** o `Slot` pode VIRAR o tipo (Slot1 = Guardião, Slot2 =
-> Combatente…). Zero campo novo — o slot já é identidade no save (`Faccao+Slot`) e já comanda a ordem
-> de drop, então o jogador ganharia os papéis sempre na mesma ordem e teria time completo cedo. O
-> preço é engessar a ordem de descoberta. Não decidido.
+> **✅ Resolvido, e por outro caminho:** o `Slot` NÃO virou o tipo — ele continua sendo só identidade
+> no save (`Faccao+Slot`). Quem passou a falar em papel foi a composição das fases
+> (`GDD-progressao.md` §A COMPOSIÇÃO DAS FASES), e a ordem de descoberta ficou fixa em `G → C → A → S`
+> de qualquer jeito, porque é a ordem em que os quatro estão no roster. Ganhou-se o time completo cedo
+> sem fundir os dois conceitos.
 
 ### A VARIAÇÃO POR FACÇÃO — ±5%, soma zero
 

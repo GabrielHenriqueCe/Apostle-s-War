@@ -358,9 +358,9 @@ apóstolo é.
 
 | | | pos 1 | pos 2 | pos 3 | pos 4 | estreia |
 |---|---|:-:|:-:|:-:|:-:|---|
-| **FASE 1** | r1 | · | C | · | · | **C** |
-| | r2 | C | · | · | · | |
-| **FASE 2** | r1 | C | · | · | · | **G** |
+| **FASE 1** | r1 | G | · | · | · | **G** |
+| | r2 | G | · | · | · | |
+| **FASE 2** | r1 | G | · | · | · | **C** |
 | | r2 | G | C | · | · | |
 | **FASE 3** | r1 | G | C | · | · | **A** |
 | | r2 | G | C | A | · | |
@@ -396,14 +396,24 @@ apóstolo é.
    guardiões é uma muralha, dois combatentes é dano sem parede, dois suportes é uma luta que não
    acaba. Cada formação é um problema diferente, e nenhuma é "o mesmo inimigo mal arrumado".
 2. **A estreia é sempre na rodada 2.** A rodada 1 é com quem você já conhece; a 2 apresenta o novo.
+   A **fase 1 é a exceção**, e não tem como não ser: não existe rodada anterior, então o primeiro
+   apóstolo do capítulo estreia já na r1.
+
+> **A ordem de estreia é `G → C → A → S`, e ela não é gosto:** é a mesma ordem em que os quatro estão
+> no roster de toda facção (Guarda · Ninja · Mago · Rei, no 👑 Reino), então compêndio e campanha se
+> leem na mesma sequência. E abrir com o **Guardião** dá ao time inicial de humanos uma PAREDE como
+> primeiro reforço, que é mais útil do que um segundo batedor. O preço é a luta 1 ser ~30% mais longa
+> (8,2 rodadas contra 6,3 pra derrubar, `GDD-combate.md` §2) — com um inimigo só contra quatro, isso
+> é uma rodada a mais.
 
 > **O time completo fecha na FASE 4, não na 7.** A primeira versão desta tabela dava o Suporte só na
 > última rodada do capítulo — ele aparecia **uma vez na vida**, e as fases 5–7 eram a mesma luta com
 > nível maior. Puxando as estreias pra frente, o Suporte aparece em 7 rodadas e o jogador **joga
 > metade do capítulo com quatro apóstolos** em vez de receber o quarto quando o capítulo acabou.
 
-> **Isto corrige o bug de a fase 1 entregar DOIS apóstolos.** `Campanha.cs:12` monta a fase 1 como
-> `[Slot1]` / `[Slot2]` e o `DesbloquearApostolos` varre as duas rodadas — por isso saem dois.
+> **✅ Isto corrigiu o bug de a fase 1 entregar DOIS apóstolos.** A fase montava `[Slot1]` / `[Slot2]`
+> e o `DesbloquearApostolos` varre as duas rodadas — por isso saíam dois. Com as duas rodadas sendo o
+> mesmo papel, sai um.
 
 > **✅ RESOLVIDO — o que acontece quando alguém MORRE: nada. O corpo fica na casa** (§2). A pergunta
 > existia porque o modelo antigo tinha PORTÃO de alcance, e aí um buraco podia travar a luta (um

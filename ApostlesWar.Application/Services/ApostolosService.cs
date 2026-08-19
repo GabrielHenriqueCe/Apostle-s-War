@@ -67,16 +67,9 @@ namespace ApostlesWar.Application.Services
         {
             Fase fas = Campanha.ObterFase((int)fase);
 
-            foreach (Slot slot in fas.Rodada1)
+            foreach (TipoDeApostolo tipo in fas.Rodada1.Concat(fas.Rodada2))
             {
-                Personagem p = _personagemService.ObterPersonagem(faccao, slot);
-                if (!desbloqueados.Contains(p))
-                    desbloqueados.Add(p);
-            }
-
-            foreach (Slot slot in fas.Rodada2)
-            {
-                Personagem p = _personagemService.ObterPersonagem(faccao, slot);
+                Personagem p = _personagemService.ObterPorTipo(faccao, tipo);
                 if (!desbloqueados.Contains(p))
                     desbloqueados.Add(p);
             }

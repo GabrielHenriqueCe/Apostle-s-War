@@ -7,6 +7,8 @@
 // picker = a grade de apóstolos (de onde escolhe); slot = as casas do time montado.
 // Cliques: picker → adiciona na casa selecionada/1ª vazia; casa vazia → seleciona; casa cheia → remove.
 // Arrastar: picker→casa substitui; casa→casa troca de posição; casa→fora dos slots remove.
+import { marcaDeTipo } from './marcas.js';
+
 export let arrastando = null;   // { tipo:'picker', idx } | { tipo:'slot', arr, i }
 
 export function criarCelulaPicker(c) {
@@ -14,7 +16,7 @@ export function criarCelulaPicker(c) {
     cel.className = 'avatarCelula';
     const em = document.createElement('span'); em.className = 'aEmoji'; em.textContent = c.simbolo;
     const nm = document.createElement('span'); nm.className = 'aNome'; nm.textContent = c.nome;
-    cel.append(em, nm);
+    cel.append(marcaDeTipo(c.tipoSimbolo), em, nm);
     return cel;
 }
 
@@ -42,7 +44,7 @@ export function criarSlot(apostolos, idx, selecionado, casa) {
         const c = apostolos[idx];
         const em = document.createElement('span'); em.className = 'slotEmoji'; em.textContent = c.simbolo;
         const nm = document.createElement('span'); nm.className = 'slotNome'; nm.textContent = c.nome;
-        slot.append(em, nm);
+        slot.append(marcaDeTipo(c.tipoSimbolo), em, nm);
     } else {
         const v = document.createElement('span'); v.className = 'slotVazio'; v.textContent = 'clique e escolha';
         slot.append(v);

@@ -169,7 +169,8 @@ namespace Tests
             var (servico, _, apostolos, _, _) = MontarCompleto(repo);
             var personagens = new PersonagemService();
 
-            Personagem doReino = personagens.ObterPersonagem(Faccao.Reino, Slot.Slot1);
+            // O Guardião: é ele que a fase 1 entrega (a estreia é um por fase, GDD §5).
+            Personagem doReino = personagens.ObterPorTipo(Faccao.Reino, TipoDeApostolo.Guardiao);
             Assert.False(servico.PodeUsarAvatar(doReino));
 
             apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1);   // venceu a 1ª fase do Reino

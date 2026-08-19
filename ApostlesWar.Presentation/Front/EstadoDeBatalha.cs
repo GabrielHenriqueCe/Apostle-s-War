@@ -194,11 +194,14 @@ namespace ApostlesWar.Presentation.Front
     /// <summary>Um apóstolo na grade de escolha de avatar. `Desbloqueado: false` = aparece em cinza,
     /// não clicável (ainda não conquistado na campanha).
     ///
+    /// <see cref="TipoSimbolo"/> é o emoji do PAPEL (`Tipos.Simbolo`), que o card mostra no canto —
+    /// vem pronto do C# pelo mesmo motivo da posição: tabela duplicada no front diverge.
+    ///
     /// <see cref="Posicao"/> é a grade 4×4 do perfil de distância dele: <c>Posicao[minhaCasa][casaDoAlvo]</c>,
     /// as duas contadas de 0. Vem PRONTA do C# porque o front não pode ter cópia da tabela — duas
     /// cópias de uma fórmula divergem como duas cópias de um número. É `null` em toda tela que não
     /// põe apóstolo em casa nenhuma (avatar, recompensa, arena).</summary>
-    internal record ApostoloVisto(string Simbolo, string Nome, bool Desbloqueado,
+    internal record ApostoloVisto(string Simbolo, string TipoSimbolo, string Nome, bool Desbloqueado,
         List<List<double>>? Posicao = null);
 
     /// <summary>
@@ -340,7 +343,7 @@ namespace ApostlesWar.Presentation.Front
     /// catálogo que esconde o que você ainda não tem não serve pra planejar a campanha.
     /// </summary>
     internal record ApostoloDetalheVista(string Nome, string Simbolo, string Faccao, bool Desbloqueado,
-        string Tipo, int Nivel,
+        string Tipo, string TipoSimbolo, int Nivel,
         int HP, int Ataque, int Defesa, int Velocidade, int Precisao, int Resistencia,
         int TaxaCritPct, int DanoCritPct,
         List<HabilidadeDoApostoloVista> Habilidades);

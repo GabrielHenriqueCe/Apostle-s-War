@@ -101,6 +101,16 @@ namespace ApostlesWar.Application.Services
             return personagens.First(p => p.Faccao == faccao && p.Slot == (int)slot);
         }
 
+        /// <summary>
+        /// O apóstolo de um PAPEL dentro da facção — é assim que a campanha monta os inimigos
+        /// (`Campanha`, que fala em tipo e não em slot). Só existe resposta porque cada facção tem
+        /// exatamente um de cada tipo; o `CampanhaTests` guarda essa premissa.
+        /// </summary>
+        public Personagem ObterPorTipo(Faccao faccao, TipoDeApostolo tipo)
+        {
+            return personagens.First(p => p.Faccao == faccao && p.Tipo == tipo);
+        }
+
         #endregion
     }
 }

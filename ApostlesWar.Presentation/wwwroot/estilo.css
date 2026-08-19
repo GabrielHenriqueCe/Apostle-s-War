@@ -285,6 +285,17 @@ body {
     box-shadow: var(--placa-brilho);
 }
 
+/* O SELO DO PAPEL — 🛡️ ⚔️ 🏹 💗 no canto do card, em toda tela que desenha apóstolo. Fica FORA do
+   fluxo pra não empurrar o nome nem mudar a altura do card, e à esquerda porque a direita já é do
+   cadeado do compêndio. O espaço ACIMA do card é de propósito o das estrelas de nível. */
+.cantoTipo {
+    position: absolute; top: 5px; left: 7px;
+    font-size: 12px; line-height: 1;
+    opacity: .85; pointer-events: none;
+}
+.compApostolo .cantoTipo { font-size: 14px; top: 6px; left: 8px; }
+.compApostolo.travado .cantoTipo { filter: grayscale(1); opacity: .45; }
+
 /* ---------- A LETRA DE TÍTULO, aplicada ----------
    Todo nome próprio e todo título de tela em serifa. O corpo (descrição de habilidade, log, dica,
    stat) NÃO entra: Palatino a 11px vira mingau, e é onde se lê de verdade.
@@ -546,6 +557,7 @@ body {
 }
 
 .avatarCelula {
+    position: relative;   /* âncora do .cantoTipo */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -663,6 +675,7 @@ body {
 /* A CASA da montagem é um RETRATO, igual à caixa do combatente em campo — montar o time tem que
    parecer com jogar, senão o jogador arruma uma coisa e vê outra. */
 .slot {
+    position: relative;   /* âncora do .cantoTipo */
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
     min-height: 84px; padding: 8px 6px;
     background: var(--painel); border: 2px dashed var(--borda);

@@ -453,6 +453,12 @@ no tabuleiro. As duas juntas é que fazem o jogador ler o time antes de montar.
 | 🏹 **Atirador** | 4 | o maior alcance do campo |
 | 💗 **Suporte** | 3 | cura, buff e malefício — e rende igual em qualquer casa |
 
+> **O EMOJI DO TIPO É DADO, não enfeite de doc** *(ago/2026)*. Estes quatro — 🛡️ ⚔️ 🏹 💗 — são os
+> mesmos que o jogo mostra, num canto da ficha do apóstolo, pra dizer o que ele é sem gastar uma
+> linha de texto. Mora numa tabela estática (`Tipos.Simbolo`, o molde do `Faccoes.Simbolo` que já
+> existe), e o NOME continua no `[Description]` do enum. **As estrelas do nível ficam ACIMA do card**
+> — os dois não disputam o mesmo canto.
+
 > **A MAESTRIA, ideia guardada.** No WoW ela faz **coisa diferente por especialização** — mesmo
 > número, efeito distinto. Se um dia quiser um eixo a mais sem inchar a ficha: um stat só, quatro
 > leituras (Guardião converte em redução, Combatente em dano, Suporte em potência de cura). Não é

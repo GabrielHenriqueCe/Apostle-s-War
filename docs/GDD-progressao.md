@@ -62,11 +62,11 @@ material da dificuldade.
 > stats** — o que muda é a qualidade do kit. É isso que torna aceitável ter apóstolos atrasados no
 > elenco: eles batem igual, só com a versão crua das habilidades.
 
-### A CURVA DE XP — e ela foi calibrada pra não obrigar a farmar
+### A CURVA DE XP — e os três últimos níveis do Fácil são REPETIÇÃO
 
 ```
-custo do nível N → N+1   =   100 × N
-XP que a FASE põe na mesa =  88 × (capítulo × 7 + fase)   ×   multiplicador da dificuldade
+custo do nível N → N+1   =   100 × N          →  estar no nível L custa 50 × L × (L−1)
+XP que a FASE põe na mesa =  72 × (capítulo × 7 + fase)   ×   multiplicador da dificuldade
                              Fácil 1 · Normal 2 · Difícil 3 · Pesadelo 4
 ```
 
@@ -81,24 +81,35 @@ XP que a FASE põe na mesa =  88 × (capítulo × 7 + fase)   ×   multiplicador
   recruta custa um dos 4 slots, e é esse o preço. É o carry de sempre — dois fortes puxando dois fracos
   no Pesadelo — e ele **para no teto do pedágio**: quem destrava mais nível é o material, não a XP.
 
-**O critério da calibragem foi um só: jogar cada fase UMA vez, em ordem, tem de bastar.** No Fácil isso
-fecha cravado no teto da dificuldade:
+**O critério da calibragem: uma passada suave NÃO chega ao teto.** Jogar cada fase uma vez, em ordem,
+leva ao **27** — e os três níveis que faltam pro teto do Fácil só saem repetindo fase.
 
-| ao terminar o capítulo | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
-|---|--:|--:|--:|--:|--:|--:|--:|--:|
-| **nível** | 6 | 9 | 13 | 16 | 20 | 23 | 26 | **30** |
+**O nível do jogador ao ENTRAR em cada capítulo** — a mesma tabela é a régua contra a qual o inimigo é
+calibrado (§Os inimigos não têm itens), então ela é uma só:
 
-Nível **30** ao fim do capítulo 8, que é exatamente o teto do Fácil. **Zero repetição obrigatória.** E
-como a XP cresce dentro do capítulo e entre capítulos, a **8-7 vale 8× uma 1-1**: quem quiser repetir
-tem onde, e o lugar é o mais difícil.
+| dificuldade | c1 | c2 | c3 | c4 | c5 | c6 | c7 | c8 | fim |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| Fácil | 1 | 5 | 9 | 12 | 15 | 18 | 21 | 24 | **27** → 30 repetindo |
+| Normal | 30 | 30 | 32 | 34 | 36 | 39 | 40 | 40 | **40** |
+| Difícil | 40 | 41 | 42 | 44 | 47 | 50 | 50 | 50 | **50** |
+| Pesadelo | 50 | 51 | 52 | 55 | 58 | 60 | 60 | 60 | **60** |
 
-> **O `88` é o `22` de sempre, vezes os quatro em campo.** A tabela acima é o que **cada apóstolo**
-> acumula num time cheio, que é a situação normal do jogo — a calibragem original vale intacta.
+No Fácil são **três níveis por capítulo**, do 2º ao 8º — a cadência é uma frase, e o jogador consegue
+prever onde vai estar. Do 27 ao 30 faltam **7.716** de XP: **7 repetições da 8-7 com o time cheio, ou
+2 solando.** E como a XP cresce dentro do capítulo e entre capítulos, a **8-7 vale 8× uma 1-1** — quem
+repete tem onde, e o lugar é o mais difícil.
+
+> **O `72` é o `18` de cada apóstolo, vezes os quatro em campo.** A tabela acima é o que **cada um**
+> acumula num time cheio, que é a situação normal do jogo.
+>
+> **Por que 18 e não 20 ou 19.** Ele é o único que produz a cadência inteira: o 20 termina em 28 mas
+> mete um degrau de 4 no meio da tabela, sem motivo; o 19 termina em 27 **por 28 pontos de XP**, e aí
+> qualquer arredondamento de divisão inteira decide o teto da passada. O `22` de antes fechava em 30
+> cravado, com 0,5% de sobra e **zero repetição** — era a calibragem de um jogo sem cauda.
 >
 > **E jogar com menos gente não é atalho:** solando, um apóstolo recebe quatro vezes isso e encosta no
-> teto do pedágio no meio da passada. Dali em diante a XP dele **se perde** — o pote não guarda, e o
-> teto não cede. Quem espalha aproveita tudo; quem concentra troca alcance por velocidade e paga em
-> desperdício.
+> teto do pedágio antes do fim. Dali em diante a XP dele **se perde** — o pote não guarda, e o teto não
+> cede. Quem espalha aproveita tudo; quem concentra troca alcance por velocidade e paga em desperdício.
 
 **O que cada dificuldade custa** (o total do jogo é `100 × (1+…+59)` = **177.000**):
 
@@ -113,16 +124,20 @@ tem onde, e o lugar é o mais difícil.
 > Fácil entrega **29 níveis** e o Pesadelo **10**, e mesmo assim o Pesadelo custa **mais**. As quatro
 > etapas se equalizam sozinhas.
 
-> **DO NORMAL EM DIANTE VOCÊ BATE O TETO DE NÍVEL NA METADE DA PASSADA** — por volta do capítulo 3 —
-> e os cinco capítulos restantes não dão mais nível nenhum. **Isso é o desenho, não um furo:** é a
-> medição do §2 aparecendo, onde o crescimento do jogador deixa de vir do nível e passa a vir do item
-> (`1,11×` de nível contra `1,71×` de item no Pesadelo). O nível é o eixo do começo; o item é o do fim,
-> e a XP entrega a passagem de bastão sem precisar de regra pra isso.
+> **DO NORMAL EM DIANTE VOCÊ BATE O TETO DE NÍVEL ANTES DO FIM DA PASSADA** — capítulo 7 no Normal,
+> capítulo 6 no Difícil e no Pesadelo — e o resto não dá mais nível nenhum. **Isso é o desenho, não um
+> furo:** é a medição do §2 aparecendo, onde o crescimento do jogador deixa de vir do nível e passa a
+> vir do item (`1,11×` de nível contra `1,71×` de item no Pesadelo). O nível é o eixo do começo; o item
+> é o do fim, e a XP entrega a passagem de bastão sem precisar de regra pra isso.
+>
+> **O Fácil é a exceção, e é ele que tem cauda:** lá o teto NÃO chega sozinho, e é justamente esse
+> pedaço que a repetição paga.
 
-> **O apóstolo que entra tarde não alcança — chega perto.** Quem é descoberto no capítulo 5 do Fácil
-> acumula ~30.400 e termina em **nv 25** contra os 30 do veterano. O doc promete que *"alcança rápido
-> pela XP"*; sem bônus de recuperação isso é **falso por 5 níveis**. Decidir se entra um bônus ou se a
-> promessa muda de texto.
+> **O apóstolo que entra tarde não alcança sozinho — a CAUDA é que o traz.** Quem é descoberto no
+> capítulo 5 do Fácil acumula ~24.900 e termina em **nv 22** contra os 27 do veterano. A pergunta que
+> este doc deixava em aberto (*"entra um bônus de recuperação ou muda o texto?"*) **morreu com o `18`**:
+> o veterano trava no teto e para de ganhar, o atrasado continua ganhando, e a repetição que fecha os
+> três últimos níveis do Fácil é a mesma que fecha os cinco dele. **Nenhuma regra nova.**
 
 ### A ESTRELA — o visor do nível, e ela vale igual pros dois
 
@@ -199,6 +214,11 @@ maior compra que existe na peça — e uma estrela na ficha.
 
 **O teto de nível não é regra escrita — é consequência do material.** Não se paga o pedágio @30 sem pó
 épico, e pó épico não cai no Fácil. Vale igual pro apóstolo e pro item.
+
+> **A coluna do teto tem um SEGUNDO papel** (ago/2026): é ela que define onde o jogador está ao entrar
+> em cada dificuldade, e portanto as âncoras do inimigo (§Os inimigos não têm itens). Mexer em 30/40/
+> 50/60 é mexer nos oito números de lá. **Continua não existindo teto em código** — quem trava é o
+> material, e é ele que tem de chegar pra o Fácil parar de subir livre até 60.
 
 **A última coluna é só do ITEM**, e é a faixa do drop (`GDD-itens.md` §O drop). A promoção pela forja
 se trava sozinha pela receita, que pede *pouco da raridade alvo*.
@@ -395,46 +415,75 @@ apóstolo é.
 ### Os inimigos não têm itens — e isso resolve a calibragem
 
 **O inimigo escala por NÍVEL, e o multiplicador de fase MORRE.** Decisão do Gabriel: nada de
-`0,5×capítulo + 0,1×fase` multiplicando status. O inimigo usa a **mesma curva de nível do jogador**
-(§2) sobre a mesma tabela de tipo — **uma fórmula só pros dois lados**, e some a armadilha das "duas
-cópias de um número" que o multiplicador criava.
+`0,5×capítulo + 0,1×fase` multiplicando status. O inimigo usa a **mesma curva** (§2) sobre a **mesma
+tabela de tipo** que o jogador — some a armadilha das "duas cópias de um número" que o multiplicador
+criava, e um inimigo passa a ser lido como qualquer apóstolo: *"é um Guardião nível tanto"*.
+
+> **Mesma curva não é mesmo NÍVEL.** O que muda entre os dois lados é só qual nível cada um tem — e o
+> do inimigo é bem mais alto, porque é ele que compensa o item que o jogador tem e ele não.
 
 > O doc antes alertava pra manter a conta como multiplicador e **não** como nível de verdade. Vale o
 > contrário: é justamente ser nível de verdade que garante que jogador e inimigo nunca divirjam.
 
-**A CALIBRAGEM É POR DIFICULDADE**, e tem de ser: a raridade do apóstolo trava o nível dele, então no
-Fácil ele para em **30** e só no Pesadelo chega a **60**. Uma tabela só serviria a uma dificuldade.
+**A CALIBRAGEM É POR DIFICULDADE**, e tem de ser: o material trava o nível do jogador, então no Fácil
+ele para em **30** e só no Pesadelo chega a **60**. Uma tabela só serviria a uma dificuldade.
 
-Medido em simulação 4×4 com barra de turno (ago/2026). Lê-se *"jogador nv X enfrenta inimigo nv Y"*:
+**É uma RETA, com duas âncoras por dificuldade** — oito números pro jogo inteiro:
 
-| cap | Fácil | Normal | Difícil | Pesadelo |
-|--:|--:|--:|--:|--:|
-| 1 | 1 → **14** | 30 → **63** | 40 → **97** | 50 → **145** |
-| 2 | 4 → **17** | 31 → **67** | 41 → **107** | 51 → **157** |
-| 3 | 7 → **30** | 32 → **84** | 42 → **129** | 52 → **184** |
-| 4 | 10 → **37** | 33 → **86** | 43 → **130** | 53 → **186** |
-| 5 | 14 → **42** | 35 → **97** | 45 → **148** | 55 → **191** |
-| 6 | 17 → **63** | 36 → **120** | 46 → **171** | 56 → **225** |
-| 7 | 20 → **67** | 37 → **121** | 47 → **173** | 57 → **227** |
-| 8 | 23 → **71** | 38 → **122** | 48 → **175** | 58 → **228** |
+```
+k = 7 × capítulo + fase                                    (8 na 1-1, 63 na 8-7)
+nível do inimigo = início + (fim − início) × (k − 8) / 55
+```
 
-**A regra que sobrevive aos números: o inimigo vale ~3× o nível do jogador, subindo pra ~4× no
-Pesadelo.** A razão cresce **porque o item do jogador cresce** — o inimigo não tem item, então precisa
-de nível extra pra compensar o equipamento. É o mesmo fato de outro jeito: *não tem problema o inimigo
-ser muito mais forte depois que eu começar a me equipar*.
+| dificuldade | início (1-1) | fim (8-7) | o jogador na faixa | razão no fim |
+|---|--:|--:|:-:|--:|
+| Fácil | **5** | **64** | 1 → 27 | 2,6× |
+| Normal | **84** | **138** | 30 → 40 | 3,5× |
+| Difícil | **156** | **226** | 40 → 50 | 4,5× |
+| Pesadelo | **256** | **428** | 50 → 60 | 7,1× |
 
-> **Trocar de dificuldade dá um respiro, e ele é de graça.** O capítulo 1 de cada dificuldade é mais
-> fraco que o capítulo 8 da anterior (71 → 63, 122 → 97, 175 → 145). Ninguém desenhou isso: cai de o
-> jogador ganhar 10 níveis e um degrau de raridade ao virar a página.
+**A razão sobe porque o ITEM do jogador sobe** — o inimigo não tem item, então precisa de nível extra
+pra compensar o equipamento. É o mesmo fato de outro jeito: *não tem problema o inimigo ser muito mais
+forte depois que eu começar a me equipar*.
 
-> **O chute do Gabriel foi "nível 250".** O 1×1 deu 254 e o 4×4 — que é o jogo de verdade — baixou pra
-> 228, porque o Guardião e o Suporte puxam o dano do time pra baixo. O 1×1 acerta a FORMA da curva e
-> erra a escala por um fator estável de ~`0,7`, então serve de instrumento barato pra ver o efeito de
-> um número sem rodar o time inteiro.
+**Como as âncoras foram produzidas** (`ferramentas/calibrar-inimigo.js`, ago/2026): cada uma é o nível
+em que o poder do time inimigo **sem item nenhum** iguala o do time do jogador com o arsenal que o
+`GDD-itens.md` projeta pra aquele ponto — item subindo de nível junto com o apóstolo, raridade do drop
+pela dificuldade, Pulseira em 4★, Colar em 6★, as subs contadas. O poder é
+`(Σ ATK × (1 + taxa × dcrit) × Velocidade) × (Σ HP × (DEF+5000)/5000)` — dano por tempo vezes HP
+efetivo, que é o mesmo que dizer "os dois times se matam no mesmo número de turnos".
+
+**A calibragem é de PARIDADE, de propósito.** A margem do jogador não é um desconto no inimigo: é o
+KIT — o time que ele monta, o stun, a ordem de turno, a escolha de quem entra. O bot não escolhe nada
+disso. E se nascer habilidade de Velocidade, **o inimigo também ganha**: o que é simétrico se cancela
+nos dois lados, e sobra o item, que é o que estas âncoras compensam.
+
+**O QUE FAZ NÍVEL 428 SER INOFENSIVO** — e é isto que precisa continuar verdade:
+
+- **HP/ATK/DEF** escalam linear e **sem teto** (`1 + 29(n−1)/59`): 30× no nv 60, **211× no nv 428**.
+- **Velocidade anda em degrau de estrela e PARA no nível 60.** É o único freio: sem ele, o inimigo do
+  Pesadelo agiria quatro vezes por turno do jogador e a barra de turno viraria decoração. Com ele, os
+  dois lados ficam em ~111 de média e o combate continua legível.
+- **Precisão, Resistência, Taxa e Dano Crítico não escalam com nível nenhum** — vêm da ficha do tipo.
+  É por isso que inimigo alto não fica imune a malefício nem crita o tempo todo.
+- A **Bota `+50`** é a única fonte de Velocidade do jogo e vale ~1,45× de turnos no topo. O inimigo
+  não tem resposta pra ela em nível nenhum, e ela já está dentro das âncoras. **Buff de Velocidade só
+  do lado do jogador tira as oito do lugar.**
+
+> **O chute do Gabriel foi "nível 250" — e estava certo, na linha errada.** O 228 da medição antiga é
+> quase exatamente o topo do **Difícil** (226), não do Pesadelo. A tabela velha errava as duas pontas:
+> generosa demais no capítulo 1 do Fácil (**14** contra um jogador sem item nenhum, que é 57× de poder)
+> e baixa demais no Pesadelo (**228** onde o arsenal mítico completo pede **428**).
+
+> **O que o modelo NÃO tem:** habilidade, cura e posição. Os dois lados perdem o mesmo, então a forma
+> sobrevive — **a escala não**. Estes níveis vão mudar quando as habilidades entrarem na conta.
 >
-> **O que a simulação NÃO tinha:** habilidade nenhuma, cura nenhuma, e as posições fora da conta. Os
-> dois lados perdem o mesmo, então a forma deve sobreviver — **a escala não**. Estes níveis vão mudar
-> quando as habilidades entrarem, e provavelmente pra CIMA, porque o jogador é quem escolhe o time.
+> **E a reta perde curvatura de propósito.** Contra os 56 pontos calibrados de cada dificuldade ela
+> erra no máximo **12–17%**, em fases isoladas do miolo. A curvatura que ela descarta é artefato: o
+> jogador travando no teto do material no meio da passada, e o salto discreto de quando a Pulseira e o
+> Colar destravam. Se alguma faixa ficar torta em jogo, o conserto é uma terceira âncora naquela
+> dificuldade (início · meio · fim, duas retas) — **não uma tabela de 224 números**, que ninguém mantém
+> e que envelhece calada na primeira vez que a grade de itens mudar.
 
 ---
 
@@ -469,13 +518,27 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
    hoje a ordem é um `for` sobre `Equipe1.Membros ++ Equipe2.Membros`, e é esse `Concat` que é a
    vantagem de time que o §1 quer matar.
 4. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
-5. **Nível (curva do tipo) + Raridade** nos apóstolos.
-6. **Raridade → passiva que escala.**
-7. **Item equipado no apóstolo.**
+5. **A COMPOSIÇÃO por TIPO** — as tabelas do §5 saem de `Slot` e passam a falar em papel
+   (`G`/`C`/`A`/`S`), e o tipo ganha emoji (🛡️ ⚔️ 🏹 💗) na ficha. É o que destrava as outras
+   dificuldades, e corrige o bug de a fase 1 entregar dois apóstolos.
+6. **A DIFICULDADE** — o enum (cujo valor É o multiplicador de XP), progresso por dificuldade,
+   desbloqueio ao fechar a 8-7, e a escolha do jogador no mapa **e dentro da tela da fase**. Voltar
+   pro Fácil pra farmar é jogada legítima.
+7. **A XP e o NÍVEL do jogador** — a curva do §A CURVA DE XP, o pote por inimigo morto, o save (que
+   guarda XP; o nível é derivado) e as estrelas na ficha.
+8. **O NÍVEL DO INIMIGO** — a reta e as oito âncoras; o multiplicador de fase morre aqui. Vem DEPOIS
+   do 7 de propósito: com o jogador subindo e o inimigo ainda no multiplicador o jogo fica fácil, e
+   fácil é o intermediário aceitável — o contrário seria impossível.
+9. **Raridade** nos apóstolos, e **raridade → passiva que escala**.
+10. **Item equipado no apóstolo.**
 
-> **A ordem de 3 e 4 continua não sendo negociável** em relação a 5 e 6: status e turno ANTES de nível
-> e raridade. Subir status antes de mudar quem joga quando é calibrar contra uma ordem de turno que
-> ainda vai mudar.
+> **A ordem de 3 e 4 continua não sendo negociável** em relação ao resto: status e turno ANTES de
+> nível e raridade. Subir status antes de mudar quem joga quando é calibrar contra uma ordem de turno
+> que ainda vai mudar.
+>
+> **E o 5→8 é um bloco, não quatro escolhas** (ago/2026): a XP é indexada por dificuldade, o inimigo é
+> calibrado por dificuldade, e a dificuldade precisa da composição por tipo pra existir. Fazer a XP
+> antes da dificuldade é calibrar contra um eixo que ainda não tem eixo.
 
 > **O save atual é DESCARTADO** (decisão do Gabriel: *"descarta, não me importo"*). Sem migração.
 

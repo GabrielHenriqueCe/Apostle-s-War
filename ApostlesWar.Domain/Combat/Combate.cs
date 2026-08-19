@@ -78,13 +78,20 @@ namespace ApostlesWar.Domain
         /// acelera alguém, é AQUI que entram as camadas (base + itens + buff), no molde da Defesa —
         /// e quem lê a barra não precisa saber que elas apareceram.
         /// </summary>
-        public int Velocidade => Personagem.Velocidade;
+        public int Velocidade => Personagem.Velocidade + ItensVelocidade;
 
         /// <summary>O quanto os malefícios DELE colam. Ver <see cref="ChanceDeColarEm"/>.</summary>
-        public int Precisao => Personagem.Precisao;
+        public int Precisao => Personagem.Precisao + ItensPrecisao;
 
         /// <summary>O quanto ele escapa dos malefícios dos outros. Ver <see cref="ChanceDeColarEm"/>.</summary>
-        public int Resistencia => Personagem.Resistencia;
+        public int Resistencia => Personagem.Resistencia + ItensResistencia;
+
+        // Os três só têm forma CHEIA — não existe "Velocidade%" no jogo (§AS SUBESTATÍSTICAS). Em %
+        // o Atirador (base 115) ganharia mais Velocidade absoluta que o Guardião (base 90) com a
+        // mesma peça, e a faixa de 30 pontos entre os arquétipos explodiria sozinha.
+        public int ItensVelocidade { get; private set; }
+        public int ItensPrecisao { get; private set; }
+        public int ItensResistencia { get; private set; }
 
         /// <summary>
         /// O quanto a Resistência do alvo vale contra a Precisão de quem aplica: com o fator em 2,
@@ -185,7 +192,7 @@ namespace ApostlesWar.Domain
             get
             {
                 int comMult = (int)(AtaqueBase * MultiplicadorAtaque);
-                return comMult + ItensAtaqueFlat + (int)(comMult * ItensAtaquePct);
+                return (int)((comMult + ItensAtaqueFlat) * (1 + ItensAtaquePct));
             }
         }
 
@@ -236,7 +243,7 @@ namespace ApostlesWar.Domain
             get
             {
                 int comMult = (int)(DefesaBase * MultiplicadorDefesa);
-                return comMult + ItensDefesaFlat + (int)(comMult * ItensDefesaPct);
+                return (int)((comMult + ItensDefesaFlat) * (1 + ItensDefesaPct));
             }
         }
 
@@ -763,24 +770,45 @@ namespace ApostlesWar.Domain
             HPMaximo += restaurar;
         }
 
-        public void AplicarItem(Item item)
+        /// <summary>
+        /// Veste o conjunto inteiro de uma vez. <b>De uma vez, e não peça por peça</b>, por causa da
+        /// fórmula do GDD-itens §A FÓRMULA: <c>(base + cheios) × (1 + Σ%)</c>. Aplicada item a item,
+        /// a conta dependeria da ORDEM em que as peças chegam — o % que entra antes do cheio
+        /// multiplica menos —, e o mesmo conjunto daria números diferentes conforme a lista.
+        ///
+        /// <b>Os percentuais SOMAM entre si; nunca compõem.</b> Três peças de 3% dão 9%, não 1,03³.
+        /// Compor tira a previsibilidade (somar os %s da ficha é conta de cabeça) e faz o valor de
+        /// uma peça depender das outras, o que torna comparar dois itens impossível.
+        /// </summary>
+        public void AplicarItens(IEnumerable<Item> itens)
         {
-            switch (item.TipoStat)
+            int hpFlat = 0;
+            double hpPct = 0;
+
+            foreach (Item item in itens)
             {
-                case TipoStat.ATKFlat: ItensAtaqueFlat += (int)item.Valor; break;
-                case TipoStat.HPFlat:
-                    HPMaximo += (int)item.Valor;
-                    HPAtual += (int)item.Valor;
-                    break;
-                case TipoStat.DEFFlat: ItensDefesaFlat += (int)item.Valor; break;
-                case TipoStat.HPPct:
-                    HPMaximo += (int)(HPBase * item.Valor);
-                    HPAtual += (int)(HPBase * item.Valor);
-                    break;
-                case TipoStat.DEFPct: ItensDefesaPct += item.Valor; break;
-                case TipoStat.TaxaCritPct: ItensTaxaCrit += item.Valor; break;
-                case TipoStat.DanoCritPct: ItensDanoCrit += item.Valor; break;
+                switch (item.TipoStat)
+                {
+                    case TipoStat.ATKFlat: ItensAtaqueFlat += (int)item.Valor; break;
+                    case TipoStat.ATKPct: ItensAtaquePct += item.Valor; break;
+                    case TipoStat.DEFFlat: ItensDefesaFlat += (int)item.Valor; break;
+                    case TipoStat.DEFPct: ItensDefesaPct += item.Valor; break;
+                    case TipoStat.HPFlat: hpFlat += (int)item.Valor; break;
+                    case TipoStat.HPPct: hpPct += item.Valor; break;
+                    case TipoStat.TaxaCritPct: ItensTaxaCrit += item.Valor; break;
+                    case TipoStat.DanoCritPct: ItensDanoCrit += item.Valor; break;
+                    case TipoStat.VelocidadeFlat: ItensVelocidade += (int)item.Valor; break;
+                    case TipoStat.PrecisaoFlat: ItensPrecisao += (int)item.Valor; break;
+                    case TipoStat.ResistenciaFlat: ItensResistencia += (int)item.Valor; break;
+                }
             }
+
+            // O HP não tem getter por camadas como ATK e DEF: HPMaximo é estado MUTÁVEL (dano, cura,
+            // redução de máximo mexem nele), então a conta se resolve aqui e o resultado é escrito.
+            // O HPAtual acompanha o delta — vestir equipamento não pode largar o apóstolo ferido.
+            int novoMaximo = (int)((HPBase + hpFlat) * (1 + hpPct));
+            HPAtual += novoMaximo - HPMaximo;
+            HPMaximo = novoMaximo;
         }
 
         /// <summary>

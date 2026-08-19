@@ -154,12 +154,14 @@ function selecionarFaseCampanha(fase, btn) {
     document.getElementById('faseInimigos').replaceChildren(
         grupoRodada('Rodada 1', fase.rodada1), grupoRodada('Rodada 2', fase.rodada2));
 
-    const it = fase.item;
+    // O que se promete aqui é o SLOT, não uma peça: o principal é sorteado no drop, então dizer um
+    // stat mentiria em quatro dos sete slots. Diz-se quantas caem e entre o que o principal sai.
+    const it = fase.drop;
     const item = document.getElementById('faseItem');
     item.replaceChildren();
     const emo = document.createElement('span'); emo.className = 'fiEmoji'; emo.textContent = it.simbolo;
-    const txt = document.createElement('span'); txt.textContent = `${it.nome} · `;
-    const stat = document.createElement('span'); stat.className = 'fiStat'; stat.textContent = `${it.stat} ${it.valor}`;
+    const txt = document.createElement('span'); txt.textContent = `${it.nome} ×${it.quantidade} · `;
+    const stat = document.createElement('span'); stat.className = 'fiStat'; stat.textContent = it.principais;
     item.append(emo, txt, stat);
 
     pintarCalor();   // as casas do inimigo acabaram de ser refeitas: a leitura no ar volta com elas
@@ -346,21 +348,27 @@ export const fimDeFase = {
         if (f.alma && f.alma.length) cont.append(blocoDeAlmas(f.alma, animar));
 
         const r = f.recompensa;
-        if (r && r.item) {
-            // O item ganha CARD, não uma linha de texto: é a recompensa que o jogador veio buscar, e
-            // antes ela passava despercebida no meio da tela.
+        if (r && r.itens && r.itens.length) {
+            // Os itens ganham CARD, não uma linha de texto: é a recompensa que o jogador veio buscar,
+            // e antes ela passava despercebida no meio da tela. São QUATRO agora, e cada uma pode ter
+            // sorteado um principal diferente — por isso cada peça tem o card dela.
             const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
-            const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Novo item';
+            const t = document.createElement('div'); t.className = 'recompensaTitulo';
+            t.textContent = r.itens.length === 1 ? 'Novo item' : 'Novos itens';
 
-            const card = document.createElement('div'); card.className = 'itemPremio';
-            const em = document.createElement('span'); em.className = 'ipEmoji'; em.textContent = r.item.simbolo;
-            const info = document.createElement('div'); info.className = 'ipInfo';
-            const nm = document.createElement('div'); nm.className = 'ipNome'; nm.textContent = r.item.nome;
-            const st = document.createElement('div'); st.className = 'ipStat'; st.textContent = `${r.item.stat} +${r.item.valor}`;
-            info.append(nm, st);
-            card.append(em, info);
+            const lista = document.createElement('div'); lista.className = 'recompensaItens';
+            lista.replaceChildren(...r.itens.map(it => {
+                const card = document.createElement('div'); card.className = 'itemPremio';
+                const em = document.createElement('span'); em.className = 'ipEmoji'; em.textContent = it.simbolo;
+                const info = document.createElement('div'); info.className = 'ipInfo';
+                const nm = document.createElement('div'); nm.className = 'ipNome'; nm.textContent = it.nome;
+                const st = document.createElement('div'); st.className = 'ipStat'; st.textContent = `${it.stat} +${it.valor}`;
+                info.append(nm, st);
+                card.append(em, info);
+                return card;
+            }));
 
-            bloco.append(t, card); cont.append(bloco);
+            bloco.append(t, lista); cont.append(bloco);
         }
         if (r && r.novos && r.novos.length) {
             const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';

@@ -250,10 +250,19 @@ namespace ApostlesWar.Presentation.Front
     /// <summary>Um item pra mostrar (drop da fase / recompensa).</summary>
     internal record ItemVista(string Simbolo, string Nome, string Stat, string Valor);
 
+    /// <summary>
+    /// O que a fase VAI largar, mostrado antes de lutar. Não é um item: é o SLOT.
+    ///
+    /// A peça só existe depois da luta, e o principal dela é sorteado no drop entre as opções do
+    /// slot — prometer um stat aqui seria mentir em três dos sete slots. Então a tela promete o que
+    /// é verdade: qual peça cai, quantas, e entre o que o principal vai sair.
+    /// </summary>
+    internal record DropVista(string Simbolo, string Nome, string Principais, int Quantidade);
+
     /// <summary>Uma fase: número (1..7), nome (do item), status, inimigos das 2 rodadas, o NÍVEL em que
     /// eles entram (a leitura do peso da dificuldade, antes de apertar Lutar) e o item que dropa.</summary>
     internal record FaseVista(int Numero, string Nome, bool Desbloqueado, bool Concluido,
-        List<ApostoloVisto> Rodada1, List<ApostoloVisto> Rodada2, int NivelDoInimigo, ItemVista Item);
+        List<ApostoloVisto> Rodada1, List<ApostoloVisto> Rodada2, int NivelDoInimigo, DropVista Drop);
 
     /// <summary>
     /// A tela de fases de uma facção: as 7 fases + o pool de apóstolos desbloqueados pra montar o time.
@@ -267,8 +276,8 @@ namespace ApostlesWar.Presentation.Front
         List<ApostoloVisto> MeusApostolos, int FaseSelecionada, List<int> TimeMontado,
         List<DificuldadeVista> Dificuldades, int Dificuldade);
 
-    /// <summary>Recompensa da vitória: os apóstolos novos desbloqueados + o item dropado (null se já tinha).</summary>
-    internal record RecompensaVista(List<ApostoloVisto> Novos, ItemVista? Item);
+    /// <summary>Recompensa da vitória: os apóstolos novos desbloqueados + as peças que a fase largou.</summary>
+    internal record RecompensaVista(List<ApostoloVisto> Novos, List<ItemVista> Itens);
 
     /// <summary>
     /// O fim de uma fase — vitória e derrota na MESMA tela, porque a pergunta que vem depois das duas
@@ -371,7 +380,22 @@ namespace ApostlesWar.Presentation.Front
         string Tipo, string TipoSimbolo, int Nivel, int XpPct,
         int HP, int Ataque, int Defesa, int Velocidade, int Precisao, int Resistencia,
         int TaxaCritPct, int DanoCritPct,
-        List<HabilidadeDoApostoloVista> Habilidades);
+        List<HabilidadeDoApostoloVista> Habilidades,
+        /// <summary>
+        /// O que o equipamento soma a este apóstolo. Vem SEMPRE, e é a tela que decide se mostra a
+        /// conta aberta (na Catedral, onde se está montando) ou só o resultado (em todo o resto).
+        /// </summary>
+        BonusDoEquipamento Bonus);
+
+    /// <summary>
+    /// O que os itens equipados somam a UM apóstolo, stat a stat — já resolvido contra a base dele.
+    ///
+    /// É por apóstolo, e não uma lista solta de (stat, valor), porque "+5% de HP" não é um número
+    /// até haver um HP pra multiplicar. O painel de totais do arsenal mostrava justamente o número
+    /// solto, e ele não dizia 5% de quê.
+    /// </summary>
+    internal record BonusDoEquipamento(int HP, int Ataque, int Defesa, int Velocidade,
+        int Precisao, int Resistencia, int TaxaCritPct, int DanoCritPct);
 
     // ---------- Arsenal ----------
 
@@ -381,17 +405,16 @@ namespace ApostlesWar.Presentation.Front
     /// <see cref="ValorNum"/> = valor cru pra a diferença (equipado × novo) ser calculada no front.
     /// </summary>
     internal record ItemArsenalVista(int Indice, string Simbolo, string Nome, string Faccao, int Slot,
-        string Stat, string Valor, double ValorNum, bool Equipado);
+        string Stat, string Valor, double ValorNum, bool Equipado,
+        /// <summary>
+        /// O eixo do NÍVEL da peça: em que nível está, quantas estrelas já foram pagas e o quanto da
+        /// faixa atual encheu (0..100). Sem os três na tela o eixo é invisível — o jogador veria dois
+        /// itens com números diferentes e nenhuma pista do porquê.
+        /// </summary>
+        int Nivel, int Estrelas, int Pct, string StatChave, string FaccaoSimbolo);
 
     /// <summary>Um dos 7 slots do boneco: nome do tipo + o item equipado (null = vazio).</summary>
     internal record SlotArsenalVista(int Slot, string Nome, ItemArsenalVista? Equipado);
-
-    /// <summary>
-    /// Uma linha do painel de totais: o que o conjunto equipado dá naquele stat, já escrito
-    /// (<c>"ATK"</c> / <c>"+240"</c>). Quem soma é o <see cref="ArsenalService.TotaisEquipados"/>;
-    /// aqui só chega o número virado texto.
-    /// </summary>
-    internal record BonusVista(string Stat, string Valor);
 
     /// <summary>
     /// Uma quantia de alma: a faixa escrita, quanto, e o que UMA unidade dela vale queimada. O front
@@ -464,8 +487,19 @@ namespace ApostlesWar.Presentation.Front
     /// trocar quem está no centro não muda a coluna da direita. O vínculo item↔apóstolo é o passo 10
     /// do GDD §7 e ainda não existe no modelo.
     /// </summary>
-    internal record CatedralVista(List<SlotArsenalVista> Slots, List<BonusVista> Totais,
+    internal record CatedralVista(List<SlotArsenalVista> Slots,
         List<ItemArsenalVista> Obtidos,
         List<ApostoloVisto> Roster, int Selecionado, AprimorarVista? Apostolo, List<AlmaVista> Alma,
-        int TetoDeFusao);
+        int TetoDeFusao,
+        /// <summary>A peça que o jogador está comparando na troca, ou null quando não há nenhuma.</summary>
+        PreviaDeTrocaVista? Previa);
+
+    /// <summary>
+    /// O que trocar uma peça faria com a ficha do apóstolo selecionado. Só as linhas que MUDAM —
+    /// oito linhas com seis zeros escondem as duas que importam.
+    /// </summary>
+    internal record PreviaDeTrocaVista(int Indice, List<DeltaVista> Deltas);
+
+    /// <summary>Um stat antes e depois da troca, com a diferença já feita e o sufixo de exibição.</summary>
+    internal record DeltaVista(string Rotulo, int Antes, int Depois, int Delta, string Sufixo);
 }

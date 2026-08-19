@@ -703,7 +703,13 @@ namespace ApostlesWar.Presentation.Front
         {
             // qualificado: o const Campanha sombreia a classe
             Fase dados = ApostlesWar.Domain.Campanha.ObterFase((int)fase, dificuldade);
-            Item item = _arsenal.PreverItem(faccao, fase);
+            // O que cai é o SLOT, não uma peça: o principal é sorteado no drop, então prometer um
+            // stat aqui mentiria em três dos sete slots. Ver DropVista.
+            var drop = new DropVista(
+                _arsenal.SimboloDoSlot(faccao, fase),
+                Equipamento.NomeDoSlot(fase),
+                string.Join(" · ", Equipamento.OpcoesDoSlot(fase).Select(NomeDoStat)),
+                ArsenalService.ItensPorFase);
 
             // O inimigo é mostrado NO NÍVEL em que vai entrar — é a única leitura que o jogador tem
             // do quanto aquela dificuldade pesa antes de apertar Lutar.
@@ -714,7 +720,7 @@ namespace ApostlesWar.Presentation.Front
                 _capitulos.EstaDesbloqueado(faccao, fase, dificuldade),
                 _capitulos.FaseConcluida(faccao, fase, dificuldade),
                 Inimigos(faccao, dados.Rodada1, nivel), Inimigos(faccao, dados.Rodada2, nivel), nivel,
-                new ItemVista(item.Simbolo, item.Nome, NomeDoStat(item.TipoStat), ValorFormatado(item)));
+                drop);
         }
 
         // A estrela do inimigo é CAPADA em 6: ele passa de 400 no Pesadelo, e 42 estrelas não caberiam
@@ -724,7 +730,7 @@ namespace ApostlesWar.Presentation.Front
         private List<ApostoloVisto> Inimigos(Faccao faccao, List<TipoDeApostolo> tipos, int nivel) => tipos
             .Select(t => _personagens.ObterPorTipo(faccao, t))
             .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true,
-                Estrelas: Math.Min(Progressao.Estrelas(nivel), Alma.EstrelaMaxima), Nivel: nivel))
+                Estrelas: Math.Min(Progressao.Estrelas(nivel), Material.EstrelaMaxima), Nivel: nivel))
             .ToList();
 
         /// <summary>
@@ -741,9 +747,10 @@ namespace ApostlesWar.Presentation.Front
         {
             var novos = r.NovosApostolos.Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome,
                 Desbloqueado: true, _progressao.EstrelasDe(p), p.Nivel)).ToList();
-            ItemVista? item = r.Item is null ? null
-                : new ItemVista(r.Item.Simbolo, r.Item.Nome, NomeDoStat(r.Item.TipoStat), ValorFormatado(r.Item));
-            return new RecompensaVista(novos, item);
+            var itens = r.Itens
+                .Select(i => new ItemVista(i.Simbolo, i.Nome, NomeDoStat(i.TipoStat), ValorFormatado(i)))
+                .ToList();
+            return new RecompensaVista(novos, itens);
         }
 
         /// <summary>Valida o iniciarFase: fase liberada + time de 1 a 4 dos desbloqueados. Mapeia os índices.</summary>
@@ -869,6 +876,32 @@ namespace ApostlesWar.Presentation.Front
             return new CompendioVista(faccoes);
         }
 
+        /// <summary>
+        /// O que o arsenal equipado soma a ESTE apóstolo, stat a stat.
+        ///
+        /// Sai da DIFERENÇA entre um <see cref="Jogador"/> cru e um vestido, e não de uma conta
+        /// própria: os percentuais incidem sobre a base DELE e a fórmula é
+        /// `(base + cheios) × (1 + Σ%)` (<see cref="Combate.AplicarItens"/>). Qualquer segunda
+        /// implementação aqui faria a ficha prometer um número que a luta não cumpre — que é o mesmo
+        /// defeito que o painel de totais tinha, mostrando "+5%" solto sem dizer 5% de quê.
+        /// </summary>
+        private BonusDoEquipamento BonusDe(Personagem apostolo)
+        {
+            var cru = new Jogador(apostolo);
+            var vestido = new Jogador(apostolo);
+            _arsenal.AplicarItens(vestido);
+
+            return new BonusDoEquipamento(
+                vestido.HPMaximo - cru.HPMaximo,
+                vestido.Ataque - cru.Ataque,
+                vestido.Defesa - cru.Defesa,
+                vestido.Velocidade - cru.Velocidade,
+                vestido.Precisao - cru.Precisao,
+                vestido.Resistencia - cru.Resistencia,
+                (int)(vestido.TaxaCrit * 100) - (int)(cru.TaxaCrit * 100),
+                (int)(vestido.DanoCrit * 100) - (int)(cru.DanoCrit * 100));
+        }
+
         private ApostoloDetalheVista MontarDetalhe(Personagem apostolo) => new(
             apostolo.Nome, apostolo.Simbolo, apostolo.Faccao.Descricao(),
             _apostolos.EstaDesbloqueado(apostolo),
@@ -879,7 +912,8 @@ namespace ApostlesWar.Presentation.Front
             (int)(apostolo.TaxaCrit * 100), (int)(apostolo.DanoCrit * 100),
             // Sem dono: fora da luta não há turno correndo, então o cooldown é o DECLARADO — que é
             // justamente o que se compara entre apóstolos num catálogo. Ver VistaDeHabilidade.
-            apostolo.Habilidades.Select(h => VistaDeHabilidade.De(h)).ToList());
+            apostolo.Habilidades.Select(h => VistaDeHabilidade.De(h)).ToList(),
+            BonusDe(apostolo));
 
         // ---------- Arsenal ----------
 
@@ -897,13 +931,18 @@ namespace ApostlesWar.Presentation.Front
         {
             int selecionado = 0;
 
+            // A peça que o jogador está OLHANDO na troca (índice no acervo), pra a coluna do meio
+            // mostrar o que ela mudaria. Só um índice: a conta é refeita a cada volta, porque ela
+            // depende do apóstolo selecionado e do resto do conjunto vestido.
+            int candidato = -1;
+
             while (true)
             {
                 var roster = _apostolos.ObterDesbloqueados();
                 selecionado = Math.Clamp(selecionado, 0, Math.Max(roster.Count - 1, 0));
 
                 _ponte.LimparPendentes();
-                _ponte.EnviarCatedral(MontarCatedral(roster, selecionado));
+                _ponte.EnviarCatedral(MontarCatedral(roster, selecionado, candidato));
 
                 MensagemDoFront msg = _ponte.Esperar();
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
@@ -916,10 +955,19 @@ namespace ApostlesWar.Presentation.Front
                     var obtidos = _arsenal.ObterObtidos();
                     if (msg.Valor < 0 || msg.Valor >= obtidos.Count) continue;
                     _arsenal.EquiparItem(obtidos[msg.Valor]);
+                    candidato = -1;   // vestiu: não há mais o que comparar
+                }
+                else if (msg.Tipo == "preverItem")
+                {
+                    // -1 = fechou a comparação. O índice inválido também zera, em vez de continuar
+                    // apontando pra uma peça que o acervo já não tem.
+                    var obtidos = _arsenal.ObterObtidos();
+                    candidato = msg.Valor >= 0 && msg.Valor < obtidos.Count ? msg.Valor : -1;
                 }
                 else if (msg.Tipo == "selecionarApostolo")
                 {
                     if (msg.Valor >= 0 && msg.Valor < roster.Count) selecionado = msg.Valor;
+                    candidato = -1;   // trocou de apóstolo: a comparação era com a ficha do outro
                 }
                 else if (msg.Tipo == "comprarEstrela")
                 {
@@ -971,7 +1019,7 @@ namespace ApostlesWar.Presentation.Front
             int estrelas = _progressao.EstrelasDe(apostolo);
             int teto = _progressao.TetoDe(apostolo);
             bool naParede = _progressao.NaParede(apostolo);
-            bool temProxima = estrelas < Alma.EstrelaMaxima;
+            bool temProxima = estrelas < Material.EstrelaMaxima;
 
             var receita = temProxima ? Alma.Receita(estrelas + 1) : new List<Custo>();
             var faltando = temProxima ? _alma.Faltando(receita) : new List<Custo>();
@@ -1021,13 +1069,21 @@ namespace ApostlesWar.Presentation.Front
         private static string Escrever(IReadOnlyList<Custo> custos)
             => string.Join(" e ", custos.Select(c => $"{c.Quantidade} de {c.Raridade.Descricao()}"));
 
-        private CatedralVista MontarCatedral(List<Personagem> roster, int selecionado)
+        private CatedralVista MontarCatedral(List<Personagem> roster, int selecionado, int candidato = -1)
         {
             var equipados = _arsenal.ObterEquipados();
 
-            ItemArsenalVista Ver(Item it, int indice, bool equipado) => new(
-                indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
-                NomeDoStat(it.TipoStat), ValorFormatado(it), it.Valor, equipado);
+            ItemArsenalVista Ver(Item it, int indice, bool equipado)
+            {
+                var (feito, total) = _arsenal.FaixaDoNivel(it);
+                return new(
+                    indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
+                    NomeDoStat(it.TipoStat), ValorFormatado(it), it.Valor, equipado,
+                    it.Nivel, it.Estrelas, total <= 0 ? 100 : (int)(100L * feito / total),
+                    // A CHAVE do stat vai crua junto com o rótulo: "ATK" é o que se lê, mas o filtro
+                    // precisa distinguir ATKFlat de ATKPct, e os dois se escrevem "ATK".
+                    it.TipoStat.ToString(), Faccoes.Simbolo(it.Faccao));
+            }
 
             var obtidos = _arsenal.ObterObtidos().Select((it, i) => Ver(it, i, _arsenal.EstaEquipado(it))).ToList();
 
@@ -1038,14 +1094,9 @@ namespace ApostlesWar.Presentation.Front
                 Item? eq = equipados[s];
                 // O nome do slot vem do ArsenalService: ele nomeia o slot E o item que cai nele, então
                 // um boneco vazio e o item que o preenche não podem discordar (já discordaram).
-                slots.Add(new SlotArsenalVista(s, ArsenalService.NomeDoSlot(fase),
+                slots.Add(new SlotArsenalVista(s, Equipamento.NomeDoSlot(fase),
                     eq is null ? null : Ver(eq, -1, true)));
             }
-
-            var totais = _arsenal.TotaisEquipados()
-                .OrderBy(b => Array.IndexOf(OrdemDeLeituraDosStats, b.Stat))
-                .Select(b => new BonusVista(NomeDoStat(b.Stat), $"+{ValorFormatado(b.Stat, b.Valor)}"))
-                .ToList();
 
             var lista = roster
                 .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true,
@@ -1066,38 +1117,72 @@ namespace ApostlesWar.Presentation.Front
                         : (aprimorar.XpAteAParede + xp - 1) / xp;   // teto da divisão: o último pedaço conta
                     return new AlmaVista((int)r, r.Descricao(), _alma.SaldoDe(r), xp,
                         Math.Min(_alma.SaldoDe(r), cabe),
-                        PodeFundir: _alma.SaldoDe(r) >= Alma.PorFusao && r < Alma.TetoDeFusao(MaiorDificuldade()));
+                        PodeFundir: _alma.SaldoDe(r) >= Material.PorFusao && r < Material.TetoDeFusao(MaiorDificuldade()));
                 })
                 .ToList();
 
-            return new CatedralVista(slots, totais, obtidos, lista, selecionado, aprimorar, saldo,
-                (int)Alma.TetoDeFusao(MaiorDificuldade()));
+            return new CatedralVista(slots, obtidos, lista, selecionado, aprimorar, saldo,
+                (int)Material.TetoDeFusao(MaiorDificuldade()),
+                PreviaDeTroca(candidato, roster.Count > 0 ? roster[selecionado] : null));
         }
 
         /// <summary>
-        /// A dificuldade mais alta já ABERTA. É ela que trava a fusão (<see cref="Alma.TetoDeFusao"/>):
+        /// O que trocar a peça <paramref name="candidato"/> faria com a ficha DESTE apóstolo, stat a
+        /// stat — e é a resposta à única pergunta que se faz na frente de duas armas: "essa é melhor?".
+        ///
+        /// A conta é a diferença entre vestir o conjunto de hoje e vestir o conjunto COM a troca, pelo
+        /// mesmo <see cref="Combate.AplicarItens"/> da luta. Não dá pra comparar as duas peças
+        /// isoladas: elas podem dar stats DIFERENTES (uma Manopla de Taxa contra uma de ATK%), e o %
+        /// só vira número em cima da base de alguém. Comparar `valor` com `valor` mentiria nos dois
+        /// casos.
+        /// </summary>
+        private PreviaDeTrocaVista? PreviaDeTroca(int candidato, Personagem? apostolo)
+        {
+            if (candidato < 0 || apostolo == null) return null;
+
+            var obtidos = _arsenal.ObterObtidos();
+            if (candidato >= obtidos.Count) return null;
+
+            Item nova = obtidos[candidato];
+            if (_arsenal.EstaEquipado(nova)) return null;   // comparar a peça consigo mesma não diz nada
+
+            Item?[] hoje = _arsenal.ObterEquipados();
+            var depois = hoje.ToArray();
+            depois[(int)nova.Fase - 1] = nova;
+
+            var antes = new Jogador(apostolo);
+            antes.AplicarItens(hoje.Where(i => i != null).Select(i => i!));
+
+            var comATroca = new Jogador(apostolo);
+            comATroca.AplicarItens(depois.Where(i => i != null).Select(i => i!));
+
+            var deltas = new List<DeltaVista>
+            {
+                Delta("HP", antes.HPMaximo, comATroca.HPMaximo),
+                Delta("Ataque", antes.Ataque, comATroca.Ataque),
+                Delta("Defesa", antes.Defesa, comATroca.Defesa),
+                Delta("Velocidade", antes.Velocidade, comATroca.Velocidade),
+                Delta("Precisão", antes.Precisao, comATroca.Precisao),
+                Delta("Resistência", antes.Resistencia, comATroca.Resistencia),
+                Delta("Taxa de crítico", (int)(antes.TaxaCrit * 100), (int)(comATroca.TaxaCrit * 100), "%"),
+                Delta("Dano crítico", (int)(antes.DanoCrit * 100), (int)(comATroca.DanoCrit * 100), "%"),
+            };
+
+            // Só o que MUDA: uma lista de oito linhas com seis zeros esconde as duas que importam.
+            return new PreviaDeTrocaVista(candidato, deltas.Where(d => d.Delta != 0).ToList());
+        }
+
+        private static DeltaVista Delta(string rotulo, int antes, int depois, string sufixo = "")
+            => new(rotulo, antes, depois, depois - antes, sufixo);
+
+        /// <summary>
+        /// A dificuldade mais alta já ABERTA. É ela que trava a fusão (<see cref="Material.TetoDeFusao"/>):
         /// sem isso, 10.000 Comuns farmados no Fácil viram a alma mítica que só o Pesadelo paga.
         /// </summary>
         private Dificuldade MaiorDificuldade() => Enum.GetValues<Dificuldade>()
             .Where(_capitulos.DificuldadeDesbloqueada)
             .DefaultIfEmpty(Dificuldade.Facil)
             .Max();
-
-        /// <summary>
-        /// A ordem em que os totais são LIDOS — e é por isso que ela mora aqui e não no service.
-        ///
-        /// Não é a ordem do enum nem a dos slots: HP vem de DOIS slots (o plano e o percentual) e DEF
-        /// também, e o <see cref="NomeDoStat"/> chama os dois de "HP" e "DEF" — como deve, é o mesmo
-        /// stat. Longe uma da outra, as duas linhas parecem repetição; lado a lado, leem-se como uma
-        /// coisa só ("HP +300, HP +15%"), que é o que elas são.
-        /// </summary>
-        private static readonly TipoStat[] OrdemDeLeituraDosStats =
-        {
-            TipoStat.ATKFlat,
-            TipoStat.HPFlat, TipoStat.HPPct,
-            TipoStat.DEFFlat, TipoStat.DEFPct,
-            TipoStat.TaxaCritPct, TipoStat.DanoCritPct,
-        };
 
         // ---------- Formatação de stat (é PELE) ----------
         //
@@ -1109,13 +1194,14 @@ namespace ApostlesWar.Presentation.Front
         /// <summary>Rótulo curto do stat, como aparece no card do item.</summary>
         private static string NomeDoStat(TipoStat stat) => stat switch
         {
-            TipoStat.ATKFlat => "ATK",
-            TipoStat.HPFlat => "HP",
-            TipoStat.DEFFlat => "DEF",
-            TipoStat.HPPct => "HP",
-            TipoStat.DEFPct => "DEF",
+            TipoStat.ATKFlat or TipoStat.ATKPct => "ATK",
+            TipoStat.HPFlat or TipoStat.HPPct => "HP",
+            TipoStat.DEFFlat or TipoStat.DEFPct => "DEF",
             TipoStat.TaxaCritPct => "Crit",
             TipoStat.DanoCritPct => "Dano Crit",
+            TipoStat.VelocidadeFlat => "Velocidade",
+            TipoStat.PrecisaoFlat => "Precisão",
+            TipoStat.ResistenciaFlat => "Resistência",
             _ => ""
         };
 
@@ -1127,10 +1213,20 @@ namespace ApostlesWar.Presentation.Front
         /// porque uma soma de itens não é um item. A sobrecarga acima delega pra cá, pra o card do
         /// item e a linha do total nunca escreverem o mesmo número de dois jeitos.
         /// </summary>
+        /// <b>Os CHEIOS são listados um a um, e não por exclusão.</b> Este switch já teve
+        /// `_ => porcentagem` como padrão, e os quatro stats cheios que chegaram com o item (Velocidade,
+        /// Precisão, Resistência, e o ATK%) caíram calados nessa fresta: a Bota do Reino dá 5,75 de
+        /// Velocidade no nível 1 e a tela escreveu <c>+575%</c>. Stat novo tem de aparecer aqui — no
+        /// default ele volta a mentir sem quebrar nada.
         private static string ValorFormatado(TipoStat stat, double valor) => stat switch
         {
-            TipoStat.ATKFlat or TipoStat.HPFlat or TipoStat.DEFFlat => $"{(int)valor}",
-            _ => $"{valor * 100:F0}%"
+            TipoStat.ATKFlat or TipoStat.HPFlat or TipoStat.DEFFlat
+                or TipoStat.VelocidadeFlat or TipoStat.PrecisaoFlat or TipoStat.ResistenciaFlat
+                => $"{(int)valor}",
+            TipoStat.ATKPct or TipoStat.HPPct or TipoStat.DEFPct
+                or TipoStat.TaxaCritPct or TipoStat.DanoCritPct
+                => $"{valor * 100:F0}%",
+            _ => $"{valor:F0}"
         };
     }
 }

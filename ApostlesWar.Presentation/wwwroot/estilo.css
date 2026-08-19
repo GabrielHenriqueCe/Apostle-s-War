@@ -263,6 +263,7 @@ body {
 .opcaoMenu, .faseBtn, .itemCard, .habilidade,
 .avatarCelula, .compApostolo, .bonecoSlot, .apostoloHab, .itemPremio,
 .rosterCard, .afBotao, .qlBotao,
+.itemFicha, .acervoItem, .trocarItem, .acervoVoltar, .flChip,
 #velocidade, #auto, #alternarLog, #alternarEstatisticas,
 #faseSortear, .setupSortear, #editarNomeBtn,
 #modalBotoes button, #fasesRodape button, #setupRodape button,
@@ -279,6 +280,7 @@ body {
 .habilidade:hover:not(:disabled), .avatarCelula:hover:not(.bloqueado),
 .compApostolo:hover, .bonecoSlot:hover,
 .rosterCard:hover, .afBotao:hover:not(:disabled), .qlBotao:hover:not(:disabled),
+.acervoItem:hover, .trocarItem:hover, .acervoVoltar:hover, .flChip:hover,
 #velocidade:hover, #auto:hover, #alternarLog:hover, #alternarEstatisticas:hover,
 #faseSortear:hover, .setupSortear:hover, #editarNomeBtn:hover,
 #modalBotoes button:hover, #fasesRodape button:hover, #setupRodape button:hover,
@@ -383,7 +385,7 @@ body {
    e some a cunha, que é justamente o que dá o ar forjado. */
 #menuTitulo, #criarPerfil h1, #compendio h1, #fasesTitulo, #fimFaseTitulo,
 #apostoloNome, #conquistaNome, #forjaSlotNome, #retratoNome,
-.compFaccaoNome, .faseGrupoTitulo, .recompensaTitulo, .atTitulo,
+.compFaccaoNome, .faseGrupoTitulo, .recompensaTitulo,
 .opcaoMenu .opRotulo, .faseBtn .faseNome, .itemCard .icNome, .habilidade .hNome,
 .compApostolo .ccNome, .avatarCelula .aNome, .nome {
     font-family: var(--titulo);
@@ -398,7 +400,7 @@ body {
 
 /* `#menuNomeBox` fica FORA: ele é pílula (`border-radius: 23px`) porque casa com a curva do círculo
    do avatar ao emergir de trás dele. Chanfro ali brigaria com o círculo — a curva é o ponto. */
-#setupPicker, #fasePicker, #forjaDetalhe, #forjaTotais, #modalCaixa,
+#setupPicker, #fasePicker, #forjaDetalhe, #modalCaixa,
 #apostoloArte, #apostoloStats, #apostoloHabilidades, #nomePerfil,
 #catedralFicha, #catedralEstacao, #catedralElenco, .qTrilho,
 #nomeEditar {
@@ -1026,6 +1028,14 @@ body {
 .recompensaTitulo { font-size: 13px; color: var(--apagado); text-transform: uppercase; letter-spacing: 1px; }
 .recompensaApostolos { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
+/* As QUATRO peças da fase, lado a lado. O `wrap` e o `max-width` são o que impede o layout de
+   estourar a janela quando as quatro entram — em tela estreita elas quebram em duas linhas em vez de
+   empurrar a tela pra fora. */
+.recompensaItens {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    max-width: 100%;
+}
+
 /* O item ganho: CARD, não uma linha de texto. É a recompensa que o jogador veio buscar e antes
    passava despercebida no meio da tela. */
 .itemPremio {
@@ -1040,6 +1050,13 @@ body {
 .itemPremio .ipEmoji { font-size: 40px; line-height: 1; }
 .itemPremio .ipNome { font-size: 18px; font-weight: 700; color: var(--texto); }
 .itemPremio .ipStat { font-size: 15px; font-weight: 700; color: var(--vida); }
+
+/* Em leva de quatro o card ENCOLHE. O tamanho de gala é pra prêmio único; mantê-lo com quatro peças
+   faria a fileira passar da largura da tela, que é o defeito que este bloco existe pra não ter. */
+.recompensaItens .itemPremio { gap: 10px; padding: 10px 14px; }
+.recompensaItens .ipEmoji { font-size: 30px; }
+.recompensaItens .ipNome { font-size: 15px; }
+.recompensaItens .ipStat { font-size: 13px; }
 
 /* As opções ficam embaixo à DIREITA (pedido do Gabriel): a leitura da tela desce pelo desfecho e
    pelas recompensas e termina onde se decide. */
@@ -1291,6 +1308,17 @@ body {
     max-height: 74vh; overflow-y: auto;
     padding: 8px 6px;
 }
+/* Trocando peça, a MESMA coluna vira uma pilha: cabeçalho, filtro e lista. Sem isto os três caem
+   nas células da grade de 4 e o filtro se espalha em quatro pedaços. A altura continua presa em
+   74vh — é ela que garante que o acervo grande role por dentro em vez de esticar a Catedral. */
+#catedralElenco.modoAcervo {
+    display: flex; flex-direction: column;
+    /* ALTURA CRAVADA, não só teto: é ela que dá à `.acervoLista` um espaço definido pra rolar por
+       dentro. Com `max-height` sozinho a coluna encolheria com o acervo pequeno e a grade grande
+       empurraria a página — quem tem de rolar são os itens, nunca a tela. */
+    height: 74vh;
+    overflow: hidden;   /* quem rola é a .acervoLista, pra o cabeçalho e o filtro ficarem parados */
+}
 .rosterCard {
     position: relative;   /* as marcas (tipo/estrelas) são absolute: sem isto elas fogem pro canto da TELA */
     display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -1307,6 +1335,12 @@ body {
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     padding: 10px 12px;
 }
+/* A coluna CENTRALIZA (a arte, o nome, a barra), e é isso que se quer pra elas. Mas linha de stat
+   centralizada encolhe pra largura do próprio texto: cada uma fica com uma largura diferente e as
+   colunas da grade não se alinham entre si — "HP 12.340" e "Precisão 100" saem tortas uma em
+   relação à outra. O `stretch` devolve a largura da coluna a elas, e só a elas. */
+#catedralFicha .apostoloStat,
+#catedralFicha .apostoloSecao { align-self: stretch; }
 #catedralArte { font-size: 62px; line-height: 1; }
 .afNome { font-family: var(--titulo); font-size: 20px; letter-spacing: .06em; color: var(--ouro); }
 .afFaccao { font-size: 12px; color: var(--apagado); }
@@ -1356,20 +1390,6 @@ body {
 .qlBotao { padding: 4px 12px; cursor: pointer; font: inherit; font-size: 12px; color: inherit; }
 .acaoConfirmar { margin-top: 2px; padding: 9px 14px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
 .qlBotao:disabled, .acaoConfirmar:disabled { opacity: .35; cursor: default; }
-#forjaTotais {
-    width: 210px;
-    display: flex; flex-direction: column; gap: 6px;
-    padding: 12px 14px;
-}
-.atTitulo {
-    font-size: 12px; font-weight: 700; color: var(--ouro);
-    text-transform: uppercase; letter-spacing: 1px;
-    border-bottom: 1px solid var(--borda); padding-bottom: 6px; margin-bottom: 2px;
-}
-.atVazio { font-size: 12px; color: var(--apagado); font-style: italic; }
-.atLinha { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.atStat { font-size: 13px; color: var(--apagado); }
-.atValor { font-size: 14px; font-weight: 700; color: var(--vida); font-variant-numeric: tabular-nums; }
 
 /* 7 slots num grid 3x3: arma/elmo/escudo · acessório/peitoral/calça · bota (centralizada). */
 #boneco {
@@ -1432,6 +1452,149 @@ body {
 .itemCard .icInfo { flex: 1; min-width: 0; }
 .itemCard .icNome { font-size: 13px; font-weight: 600; color: var(--texto); }
 .itemCard .icStat { font-size: 12px; color: var(--ouro); }
+
+/* ---------- a TROCA de peça ---------- */
+
+/* A ficha de UMA peça. São no máximo duas na tela (a de hoje e a candidata), empilhadas: a decisão
+   é entre duas, e é por isso que a lista de catorze fichas saiu daqui pra coluna da esquerda. */
+.itemFicha {
+    position: relative;
+    display: flex; flex-direction: column; gap: 4px;
+    --corte: 10px; padding: 10px 12px;
+    background: var(--placa); box-shadow: var(--placa-bisel);
+}
+.itemFicha.candidata { background: var(--placa-acesa); }
+.ifTag {
+    position: absolute; top: 6px; right: 10px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--apagado);
+}
+.ifTopo { display: flex; align-items: center; gap: 8px; }
+.ifEmoji { font-size: 26px; line-height: 1; }
+.ifNome { font-size: 13px; font-weight: 600; color: var(--texto); }
+.ifStat { font-size: 14px; font-weight: 700; color: var(--ouro); }
+.ifNivel { display: flex; align-items: baseline; gap: 6px; }
+.ifEstrelas { font-size: 10px; color: var(--ouro); letter-spacing: 1px; }
+.ifLv { font-size: 11px; color: var(--apagado); }
+.ifTrilho { height: 3px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; }
+.ifTrilhoCheio { height: 100%; background: var(--ouro); }
+
+.trocarItem {
+    padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 700;
+    color: inherit; cursor: pointer;
+}
+.trocarItem.ativo { color: var(--ouro); }
+
+/* A DIFERENÇA na ficha do apóstolo. Grade de cinco colunas fixas pelo mesmo motivo da conta do
+   equipamento: em flex, "HP" e "Velocidade" empurram os números pra posições diferentes e a coluna
+   do delta — que é a que se lê — serrilha. */
+.itemDelta { display: flex; flex-direction: column; gap: 2px; padding: 2px 4px; }
+.idLinha {
+    display: grid; grid-template-columns: 1fr 4.5em 1em 4.5em 4em;
+    align-items: baseline; gap: 0 6px;
+    font-size: 12px; font-variant-numeric: tabular-nums;
+}
+.idRotulo { color: var(--apagado); }
+.idAntes, .idDepois { text-align: right; }
+.idAntes { color: var(--apagado); }
+.idSeta { color: var(--apagado); text-align: center; }
+.idDepois { font-weight: 700; color: var(--texto); }
+.idDelta { text-align: right; font-weight: 700; }
+.idLinha.sobe .idDelta { color: var(--vida); }
+.idLinha.desce .idDelta { color: var(--perigo, #d96b6b); }
+
+/* ---------- o ACERVO na coluna do elenco ---------- */
+
+/* A coluna tem altura FIXA e rola por dentro. É o que impede o filtro + a lista de empurrarem o
+   layout da Catedral pra fora da janela quando o acervo passa de cem peças. */
+#catedralElenco .acervoTopo {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+}
+.acervoVoltar {
+    padding: 3px 8px; font: inherit; font-size: 12px; color: inherit; cursor: pointer;
+}
+.acervoTitulo { font-size: 12px; font-weight: 700; color: var(--ouro); text-transform: uppercase; letter-spacing: 1px; }
+
+/* O filtro em CHIPS. Nada de `<select>`/`<checkbox>`: nativos eles vêm com a cara do Windows —
+   caixa branca, borda cinza — e num painel escuro isso lê como planilha em vez de jogo. O chip é o
+   mesmo botão-placa do resto da tela e mostra as opções todas de uma vez, sem abrir menu. */
+.acervoFiltro {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 8px; padding: 8px;
+    background: rgba(0,0,0,.18);
+}
+.flGrupo { display: flex; flex-direction: column; gap: 3px; }
+.flRotulo {
+    font-size: 10px; color: var(--apagado);
+    text-transform: uppercase; letter-spacing: 1px;
+}
+/* `wrap` é o que segura o filtro DENTRO da coluna: oito conjuntos viram três fileiras em vez de
+   uma fileira que empurra a Catedral pra fora da janela. */
+.flFila { display: flex; flex-wrap: wrap; gap: 3px; }
+.flChip {
+    --corte: 6px;
+    padding: 3px 7px; cursor: pointer;
+    font: inherit; font-size: 10px; color: var(--apagado);
+}
+.flChip.ligado { background: var(--placa-acesa); box-shadow: var(--placa-brilho); color: var(--ouro); font-weight: 700; }
+
+/* A GRADE das peças — quatro por linha, igual ao elenco, e pelo mesmo motivo: um acervo de centenas
+   se lê batendo o olho, não lendo ficha por ficha. É ela que ROLA (`overflow-y`), e só ela: o
+   `min-height: 0` é o que permite o filho de um flex encolher abaixo do conteúdo, sem ele a lista
+   cresceria pra fora e quem rolaria seria a página inteira. */
+.acervoLista {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    flex: 1 1 auto;              /* toma a altura que sobra depois do cabeçalho e do filtro */
+    overflow-y: auto; min-height: 0;
+    padding-right: 2px;
+
+    /* AS FILEIRAS FICAM NO TOPO E NO TAMANHO DELAS. A grade tem altura de sobra (é ela que ocupa o
+       resto da coluna), e o padrão do CSS é ESTICAR as fileiras automáticas pra preencher esse
+       espaço: com um conjunto só, o cabeçalho e a única fileira de itens inchavam, e a peça
+       aparecia despencada do nome dela. `start` nos dois eixos mata isso. */
+    align-content: start;
+    align-items: start;
+}
+/* O cabeçalho da facção atravessa as quatro colunas: sem isto ele vira mais um cartão da grade e a
+   fileira do grupo começa torta. */
+/* O ar mora ACIMA do cabeçalho, nunca abaixo: é a distância entre um conjunto e o outro que agrupa,
+   e as peças coladas no próprio título é o que diz de quem elas são. Com o mesmo espaço dos dois
+   lados, o cabeçalho flutua no meio e a leitura fica ambígua — parece pertencer ao grupo de cima.
+   O `-3px` come parte do `gap` da grade; o `:first-child` tira o buraco do topo da lista. */
+.acervoGrupo {
+    grid-column: 1 / -1;
+    /* O ar vai TODO pra cima: é a distância entre um conjunto e o outro que separa os grupos, e as
+       peças coladas no próprio nome é o que diz de quem elas são. O `-5px` anula o `gap` de 5px da
+       grade, então a primeira fileira encosta no nome. */
+    margin: 14px 0 -5px;
+    /* Os 3px casam com o padding lateral do `.acervoItem`: assim o nome começa na mesma vertical do
+       conteúdo do primeiro cartão, e não deslocado dele. */
+    padding-left: 3px;
+    font-size: 10px; color: var(--apagado);
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.acervoGrupo:first-child { margin-top: 0; }
+.acervoItem {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    --corte: 8px; padding: 7px 3px; cursor: pointer;
+    font: inherit; color: inherit;
+}
+.acervoItem.olhando { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
+.aiEmoji { font-size: 26px; line-height: 1; }
+.aiEstrelas { font-size: 8px; color: var(--ouro); letter-spacing: .5px; line-height: 1; }
+.aiLv { font-size: 10px; color: var(--apagado); }
+
+/* O eixo do NÍVEL da peça. A estrela é o visor (uma por dezena) e o trilho é a faixa atual — o
+   mesmo par que o apóstolo usa, porque é a mesma regra nos dois objetos. */
+.itemCard .icNivel { display: flex; align-items: baseline; gap: 6px; margin-top: 2px; }
+.itemCard .icEstrelas { font-size: 10px; color: var(--ouro); letter-spacing: 1px; }
+.itemCard .icLv { font-size: 11px; color: var(--apagado); }
+.itemCard .icTrilho {
+    height: 3px; margin-top: 3px; border-radius: 2px;
+    background: rgba(255,255,255,.12); overflow: hidden;
+}
+.itemCard .icTrilhoCheio { height: 100%; background: var(--ouro); }
 .itemCard .icDiff { font-size: 16px; font-weight: 800; }
 .itemCard .icDiff.sobe { color: var(--vida); }
 .itemCard .icDiff.desce { color: var(--alvo); }
@@ -1516,10 +1679,53 @@ body {
     letter-spacing: 1px; text-transform: uppercase;
 }
 
-.apostoloStat { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+/* A linha de stat é uma GRADE, não um flex, e as duas variantes usam as MESMAS colunas: o ícone e
+   o rótulo à esquerda, o número encostado à direita. Em flex cada linha alinhava pelo próprio texto
+   e a coluna dos números serrilhava — "Velocidade 100" e "HP 12.340" não começavam no mesmo lugar.
+   O `tabular-nums` fecha o serviço: sem ele o "1" é mais estreito que o "8" e a coluna dança. */
+.apostoloStat {
+    display: grid;
+    grid-template-columns: 1.4em 1fr 6em;
+    align-items: baseline; gap: 0 8px; font-size: 14px;
+}
 .apostoloStat .csIcone { font-size: 16px; }
-.apostoloStat .csRotulo { flex: 1; color: var(--apagado); }
-.apostoloStat .csValor { font-weight: 700; color: var(--texto); }
+.apostoloStat .csRotulo { color: var(--apagado); }
+.apostoloStat .csValor {
+    font-weight: 700; color: var(--texto);
+    text-align: right; font-variant-numeric: tabular-nums;
+}
+
+/* A CONTA do equipamento, só na Catedral: `200  +58  =  258`. Três colunas a mais, todas de largura
+   FIXA — é o que mantém o "=" e o total retos de cima a baixo mesmo quando uma linha não tem bônus.
+
+   Isto substituiu o painel "Bônus do arsenal", que somava os itens sozinho ao lado do boneco: ele
+   mostrava "+5%" sem dizer 5% de quê, e o número que interessa é o do apóstolo já somado. */
+/* Os EIXOS são o `+` e o `=`: cada um tem coluna própria e largura fixa, então ficam cravados na
+   mesma vertical em toda linha. Grudados no número (`+58`) eles viajariam com o texto — `+58` e
+   `+1.265` põem o sinal em lugares diferentes, e é isso que serrilhava a coluna inteira.
+   Os números seguem alinhados à DIREITA dentro das colunas deles, pra os dígitos baterem também. */
+/* AS LARGURAS SÃO EM PX E CABEM NUMA CONTA, e isso não é preciosismo: a coluna do meio da Catedral
+   tem 330px fixos (`#catedralCorpo`), 306px de conteúdo. Escrita em `em`, esta grade somava 307px
+   de colunas FIXAS — o `1fr` do rótulo colapsava pra ZERO e "Taxa de crítico" transbordava por cima
+   dos números. Cada rótulo tem um comprimento, então a linha inteira parecia torta com a grade
+   tecnicamente certa. Somatório de hoje: 20+52+10+42+10+56 = 190, mais 6 gaps de 5px = 220px, e
+   sobram 86px pro rótulo. Mexer numa destas larguras exige refazer a soma. */
+.apostoloStat.comConta {
+    grid-template-columns: 20px 1fr 52px 10px 42px 10px 56px;
+    gap: 0 5px;
+    font-size: 13px;
+}
+/* O rótulo ENCOLHE e corta com reticências em vez de empurrar os números. `min-width: 0` porque o
+   padrão de um item de grade é `auto`, e `auto` se recusa a ficar menor que o texto. */
+.apostoloStat.comConta .csRotulo {
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.apostoloStat.comConta .csBase,
+.apostoloStat.comConta .csBonus { text-align: right; font-variant-numeric: tabular-nums; }
+.apostoloStat.comConta .csBase { color: var(--apagado); }
+.apostoloStat.comConta .csBonus { color: var(--vida); font-weight: 600; }
+.apostoloStat.comConta .csMais,
+.apostoloStat.comConta .csIgual { color: var(--apagado); text-align: center; }
 
 .apostoloHab {
     --corte: 10px;

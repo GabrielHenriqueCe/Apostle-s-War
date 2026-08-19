@@ -82,7 +82,20 @@ namespace ApostlesWar.Domain
         [Description("Não")] Nao = 2
     }
 
-    public enum TipoStat { ATKFlat, HPFlat, DEFFlat, HPPct, DEFPct, TaxaCritPct, DanoCritPct }
+    /// <summary>
+    /// O que um item pode dar. <b>Só se ACRESCENTA no fim</b>: a posição é o que o save grava, e
+    /// reordenar troca o stat de todo item já dropado.
+    ///
+    /// <c>ATK</c>, <c>HP</c> e <c>DEF</c> são os únicos com DUAS caras (cheio e %); os outros cinco
+    /// existem de um jeito só. É essa assimetria que o §AS SUBESTATÍSTICAS usa pra separar as formas
+    /// por slot — cheio com cheio, % com % — e evitar que o jogador escolha entre duas caras do mesmo
+    /// stat, que é conta e não decisão.
+    /// </summary>
+    public enum TipoStat
+    {
+        ATKFlat, HPFlat, DEFFlat, HPPct, DEFPct, TaxaCritPct, DanoCritPct,
+        ATKPct, VelocidadeFlat, PrecisaoFlat, ResistenciaFlat
+    }
 
     /// <summary>
     /// Define como os alvos adicionais são selecionados.

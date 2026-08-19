@@ -1,4 +1,4 @@
-﻿# CONTEXTO — o estado vivo entre uma sessão e a outra
+# CONTEXTO — o estado vivo entre uma sessão e a outra
 
 > **O QUE ESTE ARQUIVO É.** O resumo comprimido da última sessão de trabalho: onde paramos, o que foi
 > decidido e o que vem. Ele é **SUBSTITUÍDO** a cada sessão, não acrescentado — é uma FOTO do agora,
@@ -14,68 +14,71 @@
 
 ## Onde paramos (19/ago/2026)
 
-**Uma sessão de código, um PR grande esperando merge.** A branch **`feat/alma-e-estrela`** está no
-GitHub, 31 arquivos, ~2.400 linhas. O Gabriel abre e mergeia; depois é a limpeza de sempre
-(`git checkout main && git pull && git branch -d … && git fetch --prune`).
+**A branch `feat/item-nivel-e-po` está no GitHub**, 31 arquivos. O Gabriel abre e mergeia; depois é a
+limpeza de sempre (`git checkout main && git pull && git branch -d … && git fetch --prune`).
 
-**O tema é a ALMA e a estrela comprada** — o modelo, os números e a tela. O `docs/GDD-progressao.md`
-está atualizado com tudo (§A ESTRELA, §O MATERIAL, §O PEDÁGIO, §O TETO DE DIFICULDADE) e três dos
-sete "números que faltam" fecharam. **Não repetir aqui o que está lá.**
+**O tema é o PASSO 10(a): o eixo do NÍVEL do item.** O `docs/GDD-progressao.md` §7 e o
+`docs/GDD-itens.md` já estão atualizados — o passo 10 virou três PRs e o §O ACERVO nasceu. **Não
+repetir aqui o que está lá.**
 
-O que precisa ser sabido e NÃO está no GDD:
+O que precisa ser sabido e NÃO está nos docs:
 
-- **A estrela agora é a COMPRA e o nível deriva dela** (`teto = 10 × estrelas + 9`). O único teto de
-  nível do jogo passou a ser esse — o Fácil para no 30 porque a ★★★★ cobra Épico, sem uma linha de
-  código dizendo "teto".
-- **Nasceu a CATEDRAL**, a tela onde o apóstolo se aprimora, com quatro estações: 🎒 **Forja**
-  (itens) · ⬆️ **Santuário** (nível, queimando alma) · ★ **Altar** (estrela) · 🔥 **Oferenda**
-  (fundir alma). O antigo Arsenal virou ela; `arsenal.js` virou `catedral.js` e os ids acompanharam.
-- **Peças novas de `ui/` que a próxima tela deve REUSAR em vez de recriar:** `quantidade.js` (a barra
-  `0 ——[47]—— 150`, e a regra do Gabriel é *"sempre que for pra aumentar número, é esta peça"*),
-  `alma.js` (o 🔥 tingido por raridade), `ficha.js` (os painéis de stat/habilidade, compartilhados
-  com o compêndio) e o `contar()` do `animacao.js`.
-- **O `ArsenalService` manteve o nome de propósito** — ele é o ACERVO de equipamento; a Forja é a
-  estação onde ele se usa. Está comentado no código.
+- **A ordem dos três PRs é do Gabriel:** (a) o nível ✅ · (b) o item vai pro **apóstolo** + raridade +
+  subs + o filtro completo · (c) a forja. A **raridade do APÓSTOLO (passo 9) foi adiada** — ela se
+  paga em emblema e não encosta em pó nem em alma, então não trava nada.
+- **`Material` virou o tronco de alma e pó** ("são quase irmãos mesmo", decisão dele): a escada, a
+  fusão, a diluição e a forma da receita moram lá; `Alma` e `Po` guardam só a torneira e as
+  constantes. O bolso virou `CarteiraDeMaterial`, e o `AlmaService` caiu de 120 pra 25 linhas.
+- **O pó tem constantes PRÓPRIAS** (50/30/20 contra 150/100 da alma) porque são **7 peças por
+  apóstolo contra 1** — com o preço da alma, cada parede custaria sete vezes mais.
+- **Os passos 2, 3 e 4 do §7 já estavam FEITOS em código** (a `FilaDeTurnos` roda o laço da batalha,
+  o `ChanceDeColarEm` é usado pelo `AplicarDebuff`, a DEF já é `DEF/(DEF+5000)`) e o doc mostrava os
+  três em aberto. Corrigido no PR.
 
 ## O que está no ar
 
-1. **Nada do PR foi visto rodando.** O harness monta as telas e clica os botões das estações, mas
-   não julga layout, cor nem animação. **A lista de verificação em jogo é a maior dívida desta
-   sessão** — ver abaixo.
-2. **Os itens continuam GLOBAIS**, não por apóstolo (é o passo 10 do §7). Na Catedral, trocar o
-   apóstolo do meio não muda a Forja — pode parecer bug antes de parecer "ainda não existe".
-3. **A 💎 Raridade é um botão desabilitado** (passo 9). O lugar está reservado, a mecânica não existe.
-4. **O pó e a forja de item não existem**: o `Item` de hoje não tem NÍVEL pra o pó pagar. É o que
-   trava o outro meio do §O MATERIAL.
-5. **A mudança do Mago é do Gabriel** e pegou carona no PR: a Bola de Fogo virou `AreaDeEfeito`. Está
-   correta e **não muda número nenhum hoje** — o `TipoAtaque` só governa quantas vezes o
-   `DepoisDeAtacar` dispara, e a única passiva dele é `IModificaDanoCausado`.
+1. **Os itens continuam GLOBAIS**, não por apóstolo — é o PR (b). Na Forja, trocar o apóstolo do meio
+   não muda o equipamento.
+2. **Raridade e subestatísticas não existem**, então **dois eixos do filtro faltam**: sub CONTENDO /
+   SEM CONTER e raridade. Os seis que existem (conjunto · principal · nível ≥ · estrela ≥ · ordenar ·
+   misturar) estão na coluna do acervo.
+3. **A ordenação "quanto dá" só é honesta dentro do MESMO stat** — 57,5 de ATK contra 0,0575 de HP%
+   não se comparam. Está comentado no código; a tela ainda não avisa isso ao jogador.
+4. **Existe batalha que NÃO TERMINA.** Medido: 169.430 ciclos numa fase do capítulo 4, bot × bot,
+   ninguém consegue matar ninguém — o laço do `ExecutarCombate` não tem limite. **Decisão do Gabriel:
+   NÃO pôr limite de turnos; sair da batalha quando não dá pra vencer.** Isso é item próprio (tema de
+   laço de combate) e ainda não foi feito. O teto de 60 ciclos por fase já impede o exploit de nível
+   de item, mas a batalha continua pendurando o jogo.
+5. **A campanha ficou mais dura**: todo item nasce valendo 11,5% do teto (a Arma dá +57 de ATK em vez
+   dos +120 de antes). É o desenho, mas é a primeira coisa que se sente jogando.
 
-## Verificação em jogo que ainda não aconteceu
+## Verificação em jogo — o que JÁ foi conferido e o que não
 
-- A Catedral inteira em 1920×1080 e em janela menor: as 4 colunas (`518 · 330 · 172 · 330`), o elenco
-  em grade de 4, e se ainda precisa rolar a página.
-- **As seis cores da alminha** — o roxo do épico e o azul do raro são os dois suspeitos de ficarem
-  parecidos no fundo escuro.
-- Subir alguém até o **9**: a XP continua entrando com o nível parado, e a ★ só libera com a **barra
-  cheia** (não é chegar no 9, é encher).
-- A barra de XP do fim de fase atravessando nível (enche · zera · enche) e o ritmo dela — 900ms de
-  enchimento e 140ms de cascata são chute meu, ficam em duas constantes no topo do bloco.
-- **Reabrir com o save que já existe: ninguém pode ter caído pro nível 9** (a migração do `Estrelas`
-  nulo).
+**Conferido pelo Gabriel:** o alinhamento da ficha, a Catedral, a troca de item e o acervo.
+
+**Não conferido:** a tela de FASE (agora promete o slot e "×4" em vez de um stat), os quatro cards de
+recompensa no fim da fase, e o que acontece **ao abrir com o save antigo** — sem inventário, o acervo
+se reconstrói das fases concluídas, uma peça por fase, no nível 1, e o que estava equipado se perde.
 
 ## Gotchas que continuam valendo
 
-- **`sed -i` reescreve CRLF→LF em TODO arquivo que toca**, não só nos que casam com o padrão — sujou
-  39 arquivos sem uma linha de conteúdo diferente. Prefira a ferramenta de edição; se usar `sed`,
-  confira com `git diff --name-only` (conteúdo) contra `git status --porcelain` (sujos) e restaure a
-  diferença.
-- **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas oscilam entre corridas
-  (Tiroteio, Esgrima, Shuriken, Porradeiro, Vilania) → `git checkout -- docs/bancada-dano.md`.
-  Mudança ALÉM dessas cinco é vazamento de nível pros bonecos.
-- **O harness das telas precisa da flag**: `node --experimental-vm-modules ferramentas/rodar-telas.js`.
-  Ele agora também CLICA nas portas da Catedral e nos botões que o painel abre.
+- **CSS: conferir o CONTAINER antes de culpar a regra.** Três bugs de layout seguidos nesta sessão
+  vieram do que estava em volta, não do que eu escrevi: uma regra base depois da minha na cascata
+  (`display: flex` ganhando do `grid`), o `align-items: center` do `#catedralFicha` encolhendo as
+  linhas, e o `align-content: stretch` inflando as fileiras da grade.
+- **Largura de grade se CONFERE NA SOMA.** A coluna do meio da Catedral tem 330px fixos (306 de
+  conteúdo); colunas escritas em `em` somaram 307px, o `1fr` do rótulo colapsou e o texto transbordou
+  por cima dos números. As larguras agora são px com a conta escrita no comentário.
+- **Controle nativo (`<select>`, `<checkbox>`) aparece com a cara do Windows** e destoa do tema —
+  usar os chips/placa do projeto. E elemento novo tem de ENTRAR na lista de seletores da placa
+  (`estilo.css`), senão vira botão branco.
+- **`sed -i` reescreve CRLF→LF em TODO arquivo que toca.** Prefira a ferramenta de edição; se usar
+  `sed`/`perl`, confira `git diff --numstat`.
+- **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas oscilam entre corridas →
+  `git checkout -- docs/bancada-dano.md`. Mudança ALÉM dessas cinco é vazamento de nível pros bonecos.
 - O jogo ABERTO trava o build (lock do `.exe`) — pedir pra fechar antes de buildar/testar.
-- **Este arquivo subiu DENTRO do PR desta vez** (o Gabriel pediu), então a `main` local não deve
-  ficar à frente depois do merge.
-- **Não há Python nesta máquina**, e não há `gh` CLI: o PR é o Gabriel quem abre e mergeia.
+- **Não há Python nem `gh` CLI nesta máquina**, e a extensão do Chrome foi recusada: verificação
+  visual é do Gabriel. Para renderizar front fora do jogo dá pra servir o `wwwroot` com um servidor
+  node de 10 linhas (`type="module"` não roda em `file://`).
+- **Este arquivo sobe DENTRO do PR**, como da última vez — a `main` local não fica à frente depois do
+  merge.

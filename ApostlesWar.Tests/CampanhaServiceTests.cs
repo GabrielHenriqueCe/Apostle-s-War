@@ -6,7 +6,7 @@ namespace Tests
 {
     /// <summary>
     /// Testes do <see cref="CampanhaService"/> (a recompensa da vitória: unlock/drop/save) e do
-    /// <see cref="ArsenalService.PreverItem"/>. É PURO (sem combate/TTY), então roda headless com um
+    /// <see cref="ArsenalService"/>. É PURO (sem combate/TTY), então roda headless com um
     /// repositório fake — nenhum destes services pede tela.
     /// </summary>
     public class CampanhaServiceTests
@@ -25,7 +25,7 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             return (new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo), capitulos, apostolos);
         }
@@ -46,8 +46,10 @@ namespace Tests
             // estreia um por vez, e o time do capítulo só fecha em quatro na fase 4.
             Assert.Single(r.NovosApostolos);
             Assert.Equal("Guarda", r.NovosApostolos[0].Nome);
-            Assert.NotNull(r.Item);
-            Assert.Equal("Arma", r.Item!.Nome);
+            // A fase larga QUATRO peças do slot dela — o time inteiro armado numa corrida só.
+            Assert.Equal(ArsenalService.ItensPorFase, r.Itens.Count);
+            Assert.All(r.Itens, i => Assert.Equal("Arma", i.Nome));
+            Assert.All(r.Itens, i => Assert.Equal(1, i.Nivel));   // todo drop nasce no nível 1
             Assert.Equal(5, apostolos.ObterDesbloqueados().Count);              // 4 Humanos + 1 novo
         }
 
@@ -56,28 +58,53 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo);
 
             campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
 
             Assert.True(repo.Contem("save"));
-            Assert.True(repo.Contem("itens"));
+            Assert.True(repo.Contem("inventario"));
         }
 
+        /// <summary>
+        /// Cada peça que cai é uma INSTÂNCIA, não uma casa de catálogo: repetir a fase larga mais
+        /// quatro, e nenhuma delas é a mesma da leva anterior. É o que a forja vai consumir.
+        /// </summary>
         [Fact]
-        public void PreverItem_Deterministico_SemEfeitoColateral()
+        public void DroparItens_CadaPecaEUmaInstancia_ERepetirAFaseLargaMais()
         {
             var repo = new RepositorioFake();
-            var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), repo);
 
-            Item item = arsenal.PreverItem(Faccao.Reino, Fases.Fase1);
+            var primeira = arsenal.DroparItens(Faccao.Reino, Fases.Fase1);
+            var segunda = arsenal.DroparItens(Faccao.Reino, Fases.Fase1);
 
-            Assert.Equal("Arma", item.Nome);
-            Assert.Equal("🗡️", item.Simbolo);
-            Assert.Empty(arsenal.ObterObtidos());   // preview não dropa (não mexe em obtidos)
+            Assert.Equal(ArsenalService.ItensPorFase, primeira.Count);
+            Assert.Equal(ArsenalService.ItensPorFase * 2, arsenal.ObterObtidos().Count);
+            Assert.All(primeira, i => Assert.Equal("🗡️", i.Simbolo));
+
+            // Oito peças, oito identidades — nenhuma repetida.
+            var ids = primeira.Concat(segunda).Select(i => i.Id).ToList();
+            Assert.Equal(ids.Count, ids.Distinct().Count());
+        }
+
+        /// <summary>
+        /// O principal dos quatro slots de PERCENTUAL é sorteado; o dos três de valor cheio é fixo.
+        /// É o sorteio que faz duas cópias do mesmo slot serem duas decisões diferentes.
+        /// </summary>
+        [Fact]
+        public void DroparItens_OPrincipalSaiSempreDaListaDoSlot()
+        {
+            var repo = new RepositorioFake();
+            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), repo);
+
+            foreach (Fases fase in Enum.GetValues<Fases>())
+            {
+                var opcoes = Equipamento.OpcoesDoSlot(fase);
+                Assert.All(arsenal.DroparItens(Faccao.Reino, fase), i => Assert.Contains(i.TipoStat, opcoes));
+            }
         }
 
         /// <summary>
@@ -89,92 +116,24 @@ namespace Tests
         public void NomeDoSlot_CasaComONomeDoItemQueCaiNele()
         {
             var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), repo);
 
             foreach (Fases fase in Enum.GetValues<Fases>())
-                Assert.Equal(ArsenalService.NomeDoSlot(fase), arsenal.PreverItem(Faccao.Reino, fase).Nome);
+                Assert.All(arsenal.DroparItens(Faccao.Reino, fase),
+                    i => Assert.Equal(Equipamento.NomeDoSlot(fase), i.Nome));
         }
 
         [Fact]
         public void EquiparItem_PersisteSozinho()
         {
             var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), repo);
 
-            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase1));
+            arsenal.EquiparItem(arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0]);
 
             // Sem ninguém chamar SalvarItens: quem manda no dado decide quando ele é durável.
-            Assert.True(repo.Contem("itens"));
-        }
-
-        [Fact]
-        public void TotaisEquipados_SemNada_NaoInventaLinhaDeZero()
-        {
-            var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
-
-            Assert.Empty(arsenal.TotaisEquipados());
-        }
-
-        [Fact]
-        public void TotaisEquipados_UmaLinhaPorStatEquipado()
-        {
-            var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
-
-            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase1));   // Arma → ATK 120
-            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase2));   // Elmo → HP 550
-
-            var totais = arsenal.TotaisEquipados();
-
-            Assert.Equal(2, totais.Count);
-            Assert.Equal(120, totais.Single(b => b.Stat == TipoStat.ATKFlat).Valor);
-            Assert.Equal(550, totais.Single(b => b.Stat == TipoStat.HPFlat).Valor);
-        }
-
-        /// <summary>
-        /// O total é uma SOMA, não uma re-listagem dos slots. Hoje cada slot carrega um stat
-        /// diferente, então a distinção não aparece jogando — é por isso que o teste força o caso:
-        /// dois slots dando o MESMO stat têm que virar uma linha só, com os dois valores somados.
-        /// Sem isto, uma implementação que só percorre os 7 slots passaria igual e quebraria calada
-        /// no dia em que o segundo item de ATK existir.
-        /// </summary>
-        [Fact]
-        public void TotaisEquipados_DoisItensDoMesmoStat_SomamNumaLinhaSo()
-        {
-            var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
-
-            // Fases (= slots) diferentes, mesmo TipoStat. Reino = cap 1 → 120; Lado Sombrio = cap 2 → 240.
-            arsenal.EquiparItem(new Item("A", "🗡️", Faccao.Reino, Fases.Fase1, TipoStat.ATKFlat));
-            arsenal.EquiparItem(new Item("B", "🏹", Faccao.LadoSombrio, Fases.Fase2, TipoStat.ATKFlat));
-
-            var totais = arsenal.TotaisEquipados();
-
-            Assert.Single(totais);
-            Assert.Equal(TipoStat.ATKFlat, totais[0].Stat);
-            Assert.Equal(360, totais[0].Valor);
-        }
-
-        /// <summary>
-        /// FLAT e PCT do mesmo stat NÃO se fundem: "+550 de HP" e "+5% de HP" são coisas diferentes
-        /// até haver um apóstolo pra aplicar o percentual (o `AplicarItem` usa o HP BASE dele). O
-        /// arsenal informa o que o equipamento dá; quem soma isso a alguém é a luta.
-        /// </summary>
-        [Fact]
-        public void TotaisEquipados_FlatEPercentualDoMesmoStat_SeguemSeparados()
-        {
-            var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), repo);
-
-            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase2));   // Elmo     → HP  550
-            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase5));   // Peitoral → HP% 0,05
-
-            var totais = arsenal.TotaisEquipados();
-
-            Assert.Equal(2, totais.Count);
-            Assert.Equal(550, totais.Single(b => b.Stat == TipoStat.HPFlat).Valor);
-            Assert.Equal(0.05, totais.Single(b => b.Stat == TipoStat.HPPct).Valor, 3);
+            Assert.True(repo.Contem("inventario"));
+            Assert.True(repo.Contem("equipados"));
         }
 
         /// <summary>
@@ -257,7 +216,7 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var time = apostolos.ObterDesbloqueados().Take(3).ToList();
 

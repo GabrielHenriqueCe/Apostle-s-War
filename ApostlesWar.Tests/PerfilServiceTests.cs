@@ -36,7 +36,7 @@ namespace Tests
             ArsenalService Arsenal, CampanhaService Campanha) MontarCompleto(IRepositorioDeSave repo)
         {
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo);
             return (new PerfilService(repo, apostolos, campanha), capitulos, apostolos, arsenal, campanha);
@@ -102,7 +102,7 @@ namespace Tests
             capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
             capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
             apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
-            arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase1));
+            arsenal.EquiparItem(arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0]);
             Assert.True(apostolos.ObterDesbloqueados().Count > 4);
 
             servico.Excluir();

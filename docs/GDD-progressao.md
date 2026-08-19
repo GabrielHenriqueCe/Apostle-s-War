@@ -574,13 +574,15 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
 
 1. ✅ **Tipos + o stat base vindo do tipo** — FEITO (#228). Os 108 números soltos viraram 4 fichas +
    9 torções, o crítico saiu de constante global pra vir do tipo, e a ficha inteira chegou na tela.
-2. **Posição** (§2): o campo na horizontal com as frentes se olhando, a ordenação livre na montagem,
-   o perfil de distância dentro do pipeline de dano e o mapa de calor. **Subiu de último pra segundo**
-   *(ago/2026)* — o desempate da barra de turno é **por posição**, então ela tem que existir antes.
-3. **Velocidade + barra de turno + fila única.** Mexe em `Batalha`, `Equipe`, `TurnoDoPersonagem` —
-   hoje a ordem é um `for` sobre `Equipe1.Membros ++ Equipe2.Membros`, e é esse `Concat` que é a
-   vantagem de time que o §1 quer matar.
-4. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
+2. ✅ **Posição** (§2) — FEITO. O campo na horizontal com as frentes se olhando, a ordenação livre na
+   montagem, o perfil de distância dentro do pipeline de dano (`Arquetipos.MultiplicadorDePosicao`) e
+   o mapa de calor (#234).
+3. ✅ **Velocidade + barra de turno + fila única** — FEITO. A `FilaDeTurnos` roda o laço da batalha:
+   barra própria de 0 a 100, age quem cruzou e o mais cheio primeiro, sobra que carrega, custo da
+   ação adimensional. O `for` sobre `Equipe1.Membros ++ Equipe2.Membros` — e a vantagem de time que
+   ele dava — morreu com ela.
+4. ✅ **Precisão × Resistência** (`Combate.ChanceDeColarEm`, usada pelo `AplicarDebuff`) + a **DEF em
+   `DEF/(DEF+5000)`** (`Combate.DefesaDeMeiaReducao`) — FEITOS.
 5. ✅ **A COMPOSIÇÃO por TIPO** — FEITO (#250). As tabelas do §5 falam papel (`G`/`C`/`A`/`S`), o
    tipo ganhou emoji (🛡️ ⚔️ 🏹 💗) no card, e a fase 1 voltou a entregar um apóstolo só.
 6. ✅ **A DIFICULDADE** — FEITO. O enum (cujo valor É o multiplicador de XP), uma trilha de capítulos
@@ -590,8 +592,18 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
    (inclusive na derrota), o save que guarda **só XP** e as estrelas no card.
 8. ✅ **O NÍVEL DO INIMIGO** — FEITO. A reta e as oito âncoras; o `MultiplicadorFase` morreu, e o
    clamp de 60 do `FatorDoNivel` saiu junto (o da Velocidade ficou).
-9. **Raridade** nos apóstolos, e **raridade → passiva que escala**.
-10. **Item equipado no apóstolo.**
+9. **Raridade** nos apóstolos, e **raridade → passiva que escala**. *(Adiada por decisão do Gabriel
+   em ago/2026: o item vem antes. Ela não trava nada — a raridade do apóstolo se paga em EMBLEMA, que
+   não encosta em pó nem em alma.)*
+10. **O ITEM** — em três PRs, e a ordem é essa *(ago/2026)*:
+    - ✅ **(a) O eixo do NÍVEL.** O item virou INSTÂNCIA (`Item.Id`), a magnitude saiu da facção e
+      passou pro nível (`Equipamento.Maximo × FatorNivel`), o principal dos 4 slots de percentual é
+      sorteado no drop, a fase larga 4 peças, o uso paga por CICLO de combate (`FilaDeTurnos.Ciclos`),
+      o **pó** nasceu como irmão da alma (`Material` virou o tronco dos dois) e o pedágio da dezena é
+      pago nele. A fórmula do §A FÓRMULA entrou junto: `(base + cheios) × (1 + Σ%)`.
+    - **(b) O item vai pro APÓSTOLO**, e nasce a **raridade** com as subestatísticas — mais a tela da
+      Forja por apóstolo e o filtro do §O ACERVO.
+    - **(c) A FORJA**: sacrifício, pool de subs, 3 opções, recusa por slot, o reforge de mítico.
 
 > **A ordem de 3 e 4 continua não sendo negociável** em relação ao resto: status e turno ANTES de
 > nível e raridade. Subir status antes de mudar quem joga quando é calibrar contra uma ordem de turno

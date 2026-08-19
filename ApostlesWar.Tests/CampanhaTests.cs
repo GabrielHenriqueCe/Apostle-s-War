@@ -10,8 +10,8 @@ namespace Tests
     /// </summary>
     public class CampanhaTests
     {
-        private static IEnumerable<Fase> TodasAsFases()
-            => Enum.GetValues<Fases>().Select(f => Campanha.ObterFase((int)f));
+        private static IEnumerable<Fase> TodasAsFases(Dificuldade dificuldade)
+            => Enum.GetValues<Fases>().Select(f => Campanha.ObterFase((int)f, dificuldade));
 
         /// <summary>
         /// A tabela por PAPEL só tem resposta porque o roster é um-de-cada. Um apóstolo torto não
@@ -31,6 +31,10 @@ namespace Tests
                 }
         }
 
+        /// <summary>
+        /// O FÁCIL apresenta a facção um por fase, então a contagem cresce até o time fechar em
+        /// quatro na fase 4. É esta escada que a segunda tabela NÃO tem.
+        /// </summary>
         [Theory]
         [InlineData(Fases.Fase1, 2)]
         [InlineData(Fases.Fase2, 3)]
@@ -39,31 +43,68 @@ namespace Tests
         [InlineData(Fases.Fase5, 8)]
         [InlineData(Fases.Fase6, 8)]
         [InlineData(Fases.Fase7, 8)]
-        public void ContagemDeInimigos_PorFase(Fases fase, int esperado)
+        public void ContagemDeInimigos_NoFacil(Fases fase, int esperado)
         {
-            Fase f = Campanha.ObterFase((int)fase);
+            Fase f = Campanha.ObterFase((int)fase, Dificuldade.Facil);
             Assert.Equal(esperado, f.Rodada1.Count + f.Rodada2.Count);
+        }
+
+        /// <summary>
+        /// Da Normal pra cima são SEMPRE quatro, nas duas rodadas: lá o jogador já conhece os quatro,
+        /// e o que muda de fase pra fase é a formação, não quantos.
+        /// </summary>
+        [Theory]
+        [InlineData(Dificuldade.Normal)]
+        [InlineData(Dificuldade.Dificil)]
+        [InlineData(Dificuldade.Pesadelo)]
+        public void ContagemDeInimigos_ForaDoFacil_SempreQuatro(Dificuldade dificuldade)
+        {
+            foreach (Fase f in TodasAsFases(dificuldade))
+            {
+                Assert.Equal(4, f.Rodada1.Count);
+                Assert.Equal(4, f.Rodada2.Count);
+            }
+        }
+
+        /// <summary>
+        /// As três dificuldades acima do Fácil compartilham a MESMA tabela — se um dia uma delas
+        /// ganhar composição própria, é este teste que cai primeiro.
+        /// </summary>
+        [Fact]
+        public void NormalDificilEPesadelo_CompartilhamATabela()
+        {
+            foreach (Fases fase in Enum.GetValues<Fases>())
+            {
+                Fase normal = Campanha.ObterFase((int)fase, Dificuldade.Normal);
+                Assert.Equal(normal.Rodada2, Campanha.ObterFase((int)fase, Dificuldade.Dificil).Rodada2);
+                Assert.Equal(normal.Rodada2, Campanha.ObterFase((int)fase, Dificuldade.Pesadelo).Rodada2);
+            }
         }
 
         /// <summary>
         /// Invariante 1 do GDD §A COMPOSIÇÃO DAS FASES: a formação estreia como rodada 2 e volta como
         /// aquecimento da fase seguinte. Sem isto as sete fases viram lutas soltas.
         /// </summary>
-        [Fact]
-        public void Rodada1_RepeteARodada2_DaFaseAnterior()
+        [Theory]
+        [InlineData(Dificuldade.Facil)]
+        [InlineData(Dificuldade.Normal)]
+        public void Rodada1_RepeteARodada2_DaFaseAnterior(Dificuldade dificuldade)
         {
             for (int fase = 2; fase <= 7; fase++)
-                Assert.Equal(Campanha.ObterFase(fase - 1).Rodada2, Campanha.ObterFase(fase).Rodada1);
+                Assert.Equal(Campanha.ObterFase(fase - 1, dificuldade).Rodada2,
+                             Campanha.ObterFase(fase, dificuldade).Rodada1);
         }
 
         /// <summary>
         /// Invariante 2: G/C nas casas 1-2, A/S nas 3-4 — e a ordem da lista É a casa. Ninguém entra
         /// fora de posição; a variedade vem da composição.
         /// </summary>
-        [Fact]
-        public void NinguemEntraForaDePosicao()
+        [Theory]
+        [InlineData(Dificuldade.Facil)]
+        [InlineData(Dificuldade.Normal)]
+        public void NinguemEntraForaDePosicao(Dificuldade dificuldade)
         {
-            foreach (Fase fase in TodasAsFases())
+            foreach (Fase fase in TodasAsFases(dificuldade))
                 foreach (List<TipoDeApostolo> rodada in new[] { fase.Rodada1, fase.Rodada2 })
                 {
                     Assert.True(rodada.Count <= 4);

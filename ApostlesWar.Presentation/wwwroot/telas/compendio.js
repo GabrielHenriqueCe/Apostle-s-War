@@ -6,7 +6,7 @@
 // Duas TELAS num arquivo só: a unidade do contrato é a MENSAGEM que o C# manda, não o arquivo.
 
 import { mandar } from '../nucleo/ponte.js';
-import { marcaDeTipo } from '../ui/marcas.js';
+import { marcaDeTipo, marcaDeEstrelas, barraDeNivel } from '../ui/marcas.js';
 
 // ---------- compêndio ----------
 // Catálogo, só leitura: nenhum clique daqui muda progresso. Por isso o apóstolo TRAVADO é clicável
@@ -38,7 +38,7 @@ export const compendio = {
                 nm.className = 'ccNome';
                 nm.textContent = ch.nome;
 
-                card.append(marcaDeTipo(ch.tipoSimbolo), em, nm);
+                card.append(marcaDeTipo(ch.tipoSimbolo), marcaDeEstrelas(ch.estrelas), em, barraDeNivel(ch.nivel, ch.xpPct), nm);
                 if (!ch.desbloqueado) {
                     const cad = document.createElement('span');
                     cad.className = 'ccCadeado';
@@ -66,9 +66,13 @@ export const compendioApostolo = {
         document.getElementById('apostoloNome').textContent = c.nome;
         // O TIPO entra aqui e não na lista de stats: ele é a identidade que explica os números
         // abaixo (todo Guardião tem a mesma ficha), não mais um número entre eles.
-        const identidade = `${c.faccao} · ${c.tipoSimbolo} ${c.tipo} · nv ${c.nivel}`;
+        const identidade = `${c.faccao} · ${c.tipoSimbolo} ${c.tipo}`;
         document.getElementById('apostoloFaccao').textContent =
             c.desbloqueado ? identidade : `${identidade} · 🔒 ainda não conquistado`;
+
+        // O nível saiu da linha de identidade e virou a BARRA: ele é a única coisa ali que muda com o
+        // tempo, e como texto no meio da frase não dava pra ver o quanto falta pro próximo.
+        document.getElementById('apostoloNivel').replaceChildren(barraDeNivel(c.nivel, c.xpPct));
 
         // Números de BASE: catálogo, não simulador — arsenal, itens e buffs não entram aqui.
         // A ordem é a da tabela do GDD §2, pra conferir a ficha contra o doc de cima a baixo.

@@ -151,16 +151,10 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         public void CarregarItens()
         {
-            foreach (Capitulo cap in _capitulosService.ObterTodos())
-            {
-                foreach (Fases fase in Enum.GetValues<Fases>())
-                {
-                    if (cap.FaseConcluida[(int)fase - 1])
-                    {
-                        DroparItem(cap.Faccao, fase);
-                    }
-                }
-            }
+            // As quatro dificuldades caem aqui, e a mesma fase pode vir mais de uma vez — o item é o
+            // mesmo (`DroparItem` é por facção+fase e não duplica), então repetir não custa nada.
+            foreach (var (faccao, fase, _) in _capitulosService.FasesConcluidas())
+                DroparItem(faccao, fase);
         }
 
         /// <summary>

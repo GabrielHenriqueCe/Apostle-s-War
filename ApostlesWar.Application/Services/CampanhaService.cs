@@ -22,15 +22,18 @@ namespace ApostlesWar.Application.Services
         private readonly ApostolosService _apostolos;
         private readonly CapitulosService _capitulos;
         private readonly PersonagemService _personagens;
+        private readonly ProgressaoService _progressao;
         private readonly IRepositorioDeSave _repo;
 
         public CampanhaService(ArsenalService arsenal, ApostolosService apostolos,
-            CapitulosService capitulos, PersonagemService personagens, IRepositorioDeSave repo)
+            CapitulosService capitulos, PersonagemService personagens, ProgressaoService progressao,
+            IRepositorioDeSave repo)
         {
             _arsenal = arsenal;
             _apostolos = apostolos;
             _capitulos = capitulos;
             _personagens = personagens;
+            _progressao = progressao;
             _repo = repo;
         }
 
@@ -50,6 +53,19 @@ namespace ApostlesWar.Application.Services
         public void SalvarPosicao(int indice) => Salvar(Carregar() with { Posicao = indice });
 
         /// <summary>
+        /// A dificuldade em que o jogador estava. Cai no Fácil se a lembrada não estiver mais aberta —
+        /// só acontece depois de um wipe, e é o mesmo tratamento que a fase lembrada recebe.
+        /// </summary>
+        public Dificuldade DificuldadeAtual()
+        {
+            Dificuldade salva = Carregar().Dificuldade;
+            return _capitulos.DificuldadeDesbloqueada(salva) ? salva : Dificuldade.Facil;
+        }
+
+        public void SalvarDificuldade(Dificuldade dificuldade)
+            => Salvar(Carregar() with { Dificuldade = dificuldade });
+
+        /// <summary>
         /// A fase que abre selecionada neste capítulo: a última em que o jogador ENTROU, ou a 1 se ele
         /// nunca entrou em nenhuma. "Entrou", não "venceu" — quem apanhou numa fase quer voltar
         /// naquela fase, não na seguinte.
@@ -57,11 +73,12 @@ namespace ApostlesWar.Application.Services
         /// Por capítulo, e não uma só: o jogador vai e volta entre capítulos, e cada um tem a própria
         /// história. Se a fase lembrada tiver ficado travada (só acontece depois de um wipe), cai na 1.
         /// </summary>
-        public Fases UltimaFaseDe(Faccao faccao)
+        public Fases UltimaFaseDe(Faccao faccao, Dificuldade dificuldade)
         {
-            if (Carregar().UltimaFase.TryGetValue(faccao, out int numero)
+            if (Carregar().UltimaFase.TryGetValue(dificuldade, out var doNivel)
+                && doNivel.TryGetValue(faccao, out int numero)
                 && Enum.IsDefined(typeof(Fases), numero)
-                && _capitulos.EstaDesbloqueado(faccao, (Fases)numero))
+                && _capitulos.EstaDesbloqueado(faccao, (Fases)numero, dificuldade))
                 return (Fases)numero;
 
             return Fases.Fase1;
@@ -89,13 +106,22 @@ namespace ApostlesWar.Application.Services
         /// Registra que o jogador entrou NESTA fase com ESTE time. Um método só porque é um gesto só —
         /// "entrei pra lutar" —, e separar em dois abriria a porta pra salvar metade.
         /// </summary>
-        public void SalvarEntradaNaFase(Faccao faccao, Fases fase, List<Personagem> time)
+        public void SalvarEntradaNaFase(Faccao faccao, Fases fase, Dificuldade dificuldade, List<Personagem> time)
         {
             OndeParou onde = Carregar();
-            var fases = new Dictionary<Faccao, int>(onde.UltimaFase) { [faccao] = (int)fase };
+
+            // A memória é POR DIFICULDADE: quem volta pro Fácil pra farmar tem de cair onde estava lá,
+            // e não na fase em que parou no Pesadelo.
+            var porDificuldade = new Dictionary<Dificuldade, Dictionary<Faccao, int>>(onde.UltimaFase);
+            var doNivel = porDificuldade.TryGetValue(dificuldade, out var atual)
+                ? new Dictionary<Faccao, int>(atual) : new Dictionary<Faccao, int>();
+            doNivel[faccao] = (int)fase;
+            porDificuldade[dificuldade] = doNivel;
+
             Salvar(onde with
             {
-                UltimaFase = fases,
+                Dificuldade = dificuldade,
+                UltimaFase = porDificuldade,
                 // `Personagem.Slot` é int (1..4) e o PersonagemService pede o enum — a conversão é
                 // aqui, na fronteira do save, pra o record guardar o tipo com significado.
                 UltimoTime = time.Select(p => new ApostoloSalvo(p.Faccao, (Slot)p.Slot)).ToList(),
@@ -112,6 +138,7 @@ namespace ApostlesWar.Application.Services
             _capitulos.CarregarProgresso();
             _apostolos.CarregarApostolos();
             _arsenal.CarregarItens();
+            _progressao.Carregar();   // o nível do roster, por último: ele muta as instâncias já montadas
         }
 
         /// <summary>
@@ -129,6 +156,7 @@ namespace ApostlesWar.Application.Services
             _capitulos.Resetar();
             _apostolos.Resetar();
             _arsenal.Resetar();
+            _progressao.Resetar();
         }
 
         /// <summary>
@@ -136,15 +164,15 @@ namespace ApostlesWar.Application.Services
         /// daquela fase, dropa o item, libera a próxima facção (se completou todas) e salva os dois saves.
         /// A ORDEM é load-bearing (snapshot ANTES pra o diff dos novos). Devolve os apóstolos novos + o item.
         /// </summary>
-        public RecompensaDaFase ProcessarVitoria(Faccao faccao, Fases fase)
+        public RecompensaDaFase ProcessarVitoria(Faccao faccao, Fases fase, Dificuldade dificuldade)
         {
             var antes = _apostolos.ObterDesbloqueados().ToList();
 
-            _capitulos.DesbloquearFase(faccao, fase);
-            _capitulos.ConcluirFase(faccao, fase);
-            _apostolos.DesbloquearApostolos(faccao, fase);
+            _capitulos.DesbloquearFase(faccao, fase, dificuldade);
+            _capitulos.ConcluirFase(faccao, fase, dificuldade);
+            _apostolos.DesbloquearApostolos(faccao, fase, dificuldade);
             Item? item = _arsenal.DroparItem(faccao, fase);
-            _capitulos.DesbloquearFaccao(faccao, fase);
+            _capitulos.DesbloquearFaccao(faccao, fase, dificuldade);
             _capitulos.SalvarProgresso();
             _arsenal.SalvarItens();
 
@@ -164,16 +192,23 @@ namespace ApostlesWar.Application.Services
     public record ApostoloSalvo(Faccao Faccao, Slot Slot);
 
     /// <summary>
-    /// Onde o jogador parou na campanha: o capítulo do marcador, a última fase visitada de CADA
-    /// capítulo, e o time com que entrou por último. Um record só porque é uma pergunta só — "de onde
-    /// eu continuo?" — e três chaves de save separadas poderiam discordar entre si.
+    /// Onde o jogador parou na campanha: a dificuldade, o capítulo do marcador, a última fase visitada
+    /// de CADA capítulo e o time com que entrou por último. Um record só porque é uma pergunta só —
+    /// "de onde eu continuo?" — e quatro chaves de save separadas poderiam discordar entre si.
     /// </summary>
     public record OndeParou
     {
         public int Posicao { get; init; }
 
-        /// <summary>A última fase visitada em cada capítulo (1..7). Capítulo ausente = nunca entrou.</summary>
-        public Dictionary<Faccao, int> UltimaFase { get; init; } = new();
+        /// <summary>A dificuldade em que ele estava. Jogo novo = Fácil, a única aberta.</summary>
+        public Dificuldade Dificuldade { get; init; } = Dificuldade.Facil;
+
+        /// <summary>
+        /// A última fase visitada (1..7) em cada capítulo, POR DIFICULDADE. Ausente = nunca entrou.
+        /// O aninhamento existe porque voltar pro Fácil pra farmar é jogada legítima, e quem volta tem
+        /// de cair onde parou LÁ.
+        /// </summary>
+        public Dictionary<Dificuldade, Dictionary<Faccao, int>> UltimaFase { get; init; } = new();
 
         public List<ApostoloSalvo> UltimoTime { get; init; } = new();
     }

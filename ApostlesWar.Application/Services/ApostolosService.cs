@@ -63,9 +63,9 @@ namespace ApostlesWar.Application.Services
         public bool EstaDesbloqueado(Personagem apostolo)
             => desbloqueados.Any(p => p.Faccao == apostolo.Faccao && p.Slot == apostolo.Slot);
 
-        public void DesbloquearApostolos(Faccao faccao, Fases fase)
+        public void DesbloquearApostolos(Faccao faccao, Fases fase, Dificuldade dificuldade)
         {
-            Fase fas = Campanha.ObterFase((int)fase);
+            Fase fas = Campanha.ObterFase((int)fase, dificuldade);
 
             foreach (TipoDeApostolo tipo in fas.Rodada1.Concat(fas.Rodada2))
             {
@@ -89,18 +89,15 @@ namespace ApostlesWar.Application.Services
             return todos;
         }
 
+        /// <summary>
+        /// Reconstrói quem está liberado a partir das fases vencidas nas QUATRO trilhas — cada uma com
+        /// a composição da sua dificuldade, que é o que decide quem aquela fase apresenta. Repetição
+        /// não é problema: o <see cref="DesbloquearApostolos"/> só adiciona quem ainda não está lá.
+        /// </summary>
         public void CarregarApostolos()
         {
-            foreach (Capitulo cap in _capitulosService.ObterTodos())
-            {
-                foreach (Fases fase in Enum.GetValues<Fases>())
-                {
-                    if (cap.FaseConcluida[(int)fase - 1])
-                    {
-                        DesbloquearApostolos(cap.Faccao, fase);
-                    }
-                }
-            }
+            foreach (var (faccao, fase, dificuldade) in _capitulosService.FasesConcluidas())
+                DesbloquearApostolos(faccao, fase, dificuldade);
         }
 
         #endregion

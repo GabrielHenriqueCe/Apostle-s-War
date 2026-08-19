@@ -47,11 +47,13 @@ namespace ApostlesWar.Presentation.Front
         private readonly CapitulosService _capitulos;
         private readonly ArsenalService _arsenal;
         private readonly PersonagemService _personagens;
+        private readonly ProgressaoService _progressao;
         private readonly ConfiguracaoService _configuracao;
 
         public FluxoDoFront(PonteWebView2 ponte, CombateService combate, ApostolosService apostolos,
             PerfilService perfil, SessaoDoFront sessao, CampanhaService campanha, CapitulosService capitulos,
-            ArsenalService arsenal, PersonagemService personagens, ConfiguracaoService configuracao)
+            ArsenalService arsenal, PersonagemService personagens, ProgressaoService progressao,
+            ConfiguracaoService configuracao)
         {
             _ponte = ponte;
             _combate = combate;
@@ -62,6 +64,7 @@ namespace ApostlesWar.Presentation.Front
             _capitulos = capitulos;
             _arsenal = arsenal;
             _personagens = personagens;
+            _progressao = progressao;
             _configuracao = configuracao;
         }
 
@@ -231,7 +234,11 @@ namespace ApostlesWar.Presentation.Front
         private void MontarArena()
         {
             var pool = _apostolos.TodosOsApostolos();
-            var apostolos = pool.Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true)).ToList();
+            // O card da Arena mostra o NÍVEL 1, não o do roster: é nele que os dois lados vão lutar
+            // (ver a montagem dos times abaixo), e um card prometendo nv 27 seria a tela mentindo
+            // sobre a luta que vem.
+            var apostolos = pool.Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome,
+                Desbloqueado: true, Estrelas: 0, Nivel: Arquetipos.NivelMinimo)).ToList();
 
             _ponte.LimparPendentes();
             _ponte.EnviarMontagemArena(apostolos);
@@ -247,8 +254,11 @@ namespace ApostlesWar.Presentation.Front
                     ArenaConfig? cfg = LerConfigArena(msg.Texto);
                     if (cfg is null || !ConfigValida(cfg, pool.Count)) continue;   // config inválida: ignora
 
-                    var time1 = cfg.Time1.Select(i => pool[i]).ToList();
-                    var time2 = cfg.Time2.Select(i => pool[i]).ToList();
+                    // A Arena luta no NÍVEL 1 dos dois lados, em cópias: ela é o laboratório de
+                    // balanço (já é sem item, sem cenário e sem recompensa), e um lado nivelado pela
+                    // campanha responderia "quem eu treinei mais?" no lugar de "qual kit é melhor?".
+                    var time1 = cfg.Time1.Select(i => pool[i].ComNivel(Arquetipos.NivelMinimo)).ToList();
+                    var time2 = cfg.Time2.Select(i => pool[i].ComNivel(Arquetipos.NivelMinimo)).ToList();
 
                     _sessao.Reiniciar();       // batalha nova = tela limpa (senão os antigos acumulam)
                     _sessao.Modo = ModoDeBatalha.Arena;   // aqui sair é sair mesmo, sem desfecho
@@ -313,7 +323,8 @@ namespace ApostlesWar.Presentation.Front
             var todos = _apostolos.TodosOsApostolos();
 
             var lista = todos
-                .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, _perfil.PodeUsarAvatar(p)))
+                .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, _perfil.PodeUsarAvatar(p),
+                    Progressao.Estrelas(p.Nivel), p.Nivel, XpPct(p)))
                 .ToList();
 
             Perfil? perfil = _perfil.Carregar();
@@ -351,56 +362,99 @@ namespace ApostlesWar.Presentation.Front
             var faccoes = _capitulos.FaccoesDaCampanha();
             int posicao = _campanha.PosicaoNoMapa();   // 0 (sem save) = o primeiro capítulo
 
+            // A DIFICULDADE é do fluxo, não da tela: ela atravessa daqui até o combate (que precisa
+            // dela pra compor a fase, pagar a XP e nivelar o inimigo). Reabre onde o jogador estava.
+            Dificuldade dificuldade = _campanha.DificuldadeAtual();
+
             while (true)
             {
                 _ponte.LimparPendentes();
-                _ponte.EnviarMapa(MontarMapa(faccoes, posicao));
+                _ponte.EnviarMapa(MontarMapa(faccoes, posicao, dificuldade));
 
                 MensagemDoFront msg = _ponte.Esperar();
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
                 if (msg.Tipo == "voltar") return;   // volta pro menu principal
+
+                if (msg.Tipo == "escolherDificuldade")
+                {
+                    if (EscolhaDeDificuldade(msg.Valor) is not Dificuldade escolhida) continue;
+                    dificuldade = escolhida;
+                    _campanha.SalvarDificuldade(dificuldade);
+                }
 
                 if (msg.Tipo == "selecionarCapitulo")
                 {
                     int idx = msg.Valor;
                     if (idx < 0 || idx >= faccoes.Count) continue;
                     Faccao faccao = faccoes[idx];
-                    if (!_capitulos.EstaCapituloDesbloqueado(faccao)) continue;   // bloqueado: ignora
+                    if (!_capitulos.EstaCapituloDesbloqueado(faccao, dificuldade)) continue;   // bloqueado: ignora
 
                     posicao = idx;
                     _campanha.SalvarPosicao(posicao);   // último lugar
-                    MostrarFases(faccao);
+                    dificuldade = MostrarFases(faccao, dificuldade);   // ele pode ter trocado lá dentro
                 }
             }
         }
 
-        private MapaVista MontarMapa(List<Faccao> faccoes, int posicao)
+        /// <summary>
+        /// Traduz o clique numa dificuldade, ou <c>null</c> se ela não existe ou ainda está travada.
+        /// Quem responde "está liberada?" é sempre o back — a tela desenha o cadeado, não decide.
+        /// </summary>
+        private Dificuldade? EscolhaDeDificuldade(int valor)
+        {
+            if (!Enum.IsDefined(typeof(Dificuldade), valor)) return null;
+            var escolhida = (Dificuldade)valor;
+            return _capitulos.DificuldadeDesbloqueada(escolhida) ? escolhida : null;
+        }
+
+        /// <summary>
+        /// As quatro dificuldades pra tela, com o que falta pra destravar cada uma. Vai igual no mapa e
+        /// na tela de fases: é o mesmo controle, e o jogador troca dos dois lugares.
+        /// </summary>
+        private List<DificuldadeVista> MontarDificuldades()
+            => Enum.GetValues<Dificuldade>().Select(d => new DificuldadeVista(
+                d.Descricao(), (int)d, _capitulos.DificuldadeDesbloqueada(d),
+                _capitulos.DificuldadeDesbloqueada(d) ? null
+                    : $"feche a 8-7 no {((Dificuldade)((int)d - 1)).Descricao()}")).ToList();
+
+        private MapaVista MontarMapa(List<Faccao> faccoes, int posicao, Dificuldade dificuldade)
         {
             var capitulos = faccoes.Select(f => new CapituloVista(
                 Faccoes.Simbolo(f), f.Descricao(),
-                _capitulos.EstaCapituloDesbloqueado(f),
-                _capitulos.CapituloConcluido(f))).ToList();
-            return new MapaVista(capitulos, posicao);
+                _capitulos.EstaCapituloDesbloqueado(f, dificuldade),
+                _capitulos.CapituloConcluido(f, dificuldade))).ToList();
+            return new MapaVista(capitulos, posicao, MontarDificuldades(), (int)dificuldade);
         }
 
         /// <summary>Tela de fases de uma facção: escolhe a fase, monta o time (≤4 dos liberados) e luta.</summary>
-        private void MostrarFases(Faccao faccao)
+        /// <returns>A dificuldade em que o jogador ficou — trocar aqui dentro vale pro mapa também,
+        /// senão voltar pro mapa desfaria a escolha que ele acabou de fazer.</returns>
+        private Dificuldade MostrarFases(Faccao faccao, Dificuldade dificuldade)
         {
             while (true)
             {
                 _ponte.LimparPendentes();
-                _ponte.EnviarFases(MontarFases(faccao));
+                _ponte.EnviarFases(MontarFases(faccao, dificuldade));
 
                 MensagemDoFront msg = _ponte.Esperar();
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
-                if (msg.Tipo == "voltar") return;   // volta pro mapa
+                if (msg.Tipo == "voltar") return dificuldade;   // volta pro mapa
 
-                if (msg.Tipo == "iniciarFase" && ValidarFase(msg.Texto, faccao, out Fases fase, out var time))
+                // Trocar de dificuldade DENTRO da fase: redesenha a mesma facção na outra trilha. A
+                // fase selecionada é a última visitada LÁ (o UltimaFaseDe cai na 1 se estiver travada).
+                if (msg.Tipo == "escolherDificuldade")
+                {
+                    if (EscolhaDeDificuldade(msg.Valor) is not Dificuldade escolhida) continue;
+                    dificuldade = escolhida;
+                    _campanha.SalvarDificuldade(dificuldade);
+                }
+
+                if (msg.Tipo == "iniciarFase" && ValidarFase(msg.Texto, faccao, dificuldade, out Fases fase, out var time))
                 {
                     // O "Próxima" pode ter atravessado pro capítulo seguinte, então o laço continua
                     // ONDE O JOGADOR PAROU — e não onde ele entrou. Sem isto, quem virasse de
                     // capítulo lutando cairia de volta na lista de fases do capítulo antigo.
-                    faccao = JogarFase(faccao, fase, time);
+                    faccao = JogarFase(faccao, fase, dificuldade, time);
                 }
             }
         }
@@ -416,13 +470,13 @@ namespace ApostlesWar.Presentation.Front
         /// </summary>
         /// <returns>O capítulo em que o jogador parou — pode não ser o que ele entrou, porque
         /// continuar depois da fase 7 atravessa pro capítulo seguinte.</returns>
-        private Faccao JogarFase(Faccao faccao, Fases fase, List<Personagem> time)
+        private Faccao JogarFase(Faccao faccao, Fases fase, Dificuldade dificuldade, List<Personagem> time)
         {
             while (true)
             {
                 // Antes de lutar, não depois: se o jogo fechar no meio da luta, o jogador volta na
                 // fase em que estava e com o time que montou.
-                _campanha.SalvarEntradaNaFase(faccao, fase, time);
+                _campanha.SalvarEntradaNaFase(faccao, fase, dificuldade, time);
 
                 _sessao.Reiniciar();
                 _sessao.Modo = ModoDeBatalha.Campanha;   // aqui desistir é DERROTA, não saída
@@ -431,7 +485,8 @@ namespace ApostlesWar.Presentation.Front
                 _sessao.Tema = faccao.ToString().ToLowerInvariant();
                 _ponte.DesligarAuto();
                 _ponte.LimparPendentes();
-                bool venceu = _combate.ExecutarFaseComTime(time, faccao, fase) == ResultadoFase.Venceu;
+                ResultadoDaFase resultado = _combate.ExecutarFaseComTime(time, faccao, fase, dificuldade);
+                bool venceu = resultado.Venceu;
 
                 // A recompensa é processada ANTES de montar a tela: é ela que desbloqueia a fase
                 // seguinte, e é isso que decide se o botão "Próxima Fase" existe.
@@ -439,14 +494,15 @@ namespace ApostlesWar.Presentation.Front
                 RecompensaVista? recompensa = null;
                 if (venceu)
                 {
-                    RecompensaDaFase r = _campanha.ProcessarVitoria(faccao, fase);
+                    RecompensaDaFase r = _campanha.ProcessarVitoria(faccao, fase, dificuldade);
                     novos = r.NovosApostolos;
                     recompensa = MontarRecompensa(r);
                 }
 
-                MostrarConquistas(venceu, recompensa, faccao, fase, novos);
+                MostrarConquistas(venceu, recompensa, faccao, fase, dificuldade, novos, resultado.XpPorApostolo);
 
-                _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, comOpcoes: true));
+                _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, dificuldade,
+                    resultado.XpPorApostolo, comOpcoes: true));
                 switch (EsperarDecisao())
                 {
                     case DecisaoDeFim.JogarNovamente:
@@ -455,7 +511,7 @@ namespace ApostlesWar.Presentation.Front
                     case DecisaoDeFim.ProximaFase:
                         // Não confiamos na tela: ela só desenha o botão quando dá, mas quem responde
                         // "a próxima existe e está liberada?" é o back, aqui, de novo.
-                        var proxima = ProximaEtapa(faccao, fase);
+                        var proxima = ProximaEtapa(faccao, fase, dificuldade);
                         if (proxima is null) return faccao;
 
                         // Virou o capítulo: o marcador do mapa vai junto, senão sair depois cairia
@@ -483,11 +539,11 @@ namespace ApostlesWar.Presentation.Front
         /// precisa saber em qual tela o jogador está.
         /// </summary>
         private void MostrarConquistas(bool venceu, RecompensaVista? recompensa, Faccao faccao,
-            Fases fase, List<Personagem> novos)
+            Fases fase, Dificuldade dificuldade, List<Personagem> novos, int xp)
         {
             if (novos.Count == 0) return;
 
-            _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, comOpcoes: false));
+            _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, dificuldade, xp, comOpcoes: false));
             EsperarContinuar();
 
             foreach (Personagem novo in novos)
@@ -498,10 +554,10 @@ namespace ApostlesWar.Presentation.Front
         }
 
         private FimDeFaseVista MontarFimDeFase(bool venceu, RecompensaVista? recompensa, Faccao faccao,
-            Fases fase, bool comOpcoes)
+            Fases fase, Dificuldade dificuldade, int xp, bool comOpcoes)
         {
-            var proxima = ProximaEtapa(faccao, fase);
-            return new FimDeFaseVista(venceu, recompensa,
+            var proxima = ProximaEtapa(faccao, fase, dificuldade);
+            return new FimDeFaseVista(venceu, recompensa, xp,
                 PodeProxima: proxima is not null,
                 ProximoECapitulo: proxima is not null && proxima.Value.Faccao != faccao,
                 comOpcoes);
@@ -518,10 +574,10 @@ namespace ApostlesWar.Presentation.Front
         /// importar mais quando a DIFICULDADE existir — passar de Fácil pra Normal é decisão dele,
         /// não consequência de um clique em "continuar".
         /// </summary>
-        private (Faccao Faccao, Fases Fase)? ProximaEtapa(Faccao faccao, Fases fase)
+        private (Faccao Faccao, Fases Fase)? ProximaEtapa(Faccao faccao, Fases fase, Dificuldade dificuldade)
         {
             if (fase != Enum.GetValues<Fases>().Last())
-                return _capitulos.EstaDesbloqueado(faccao, Proxima(fase))
+                return _capitulos.EstaDesbloqueado(faccao, Proxima(fase), dificuldade)
                     ? (faccao, Proxima(fase))
                     : null;
 
@@ -529,7 +585,7 @@ namespace ApostlesWar.Presentation.Front
             int proximo = capitulos.IndexOf(faccao) + 1;
             if (proximo <= 0 || proximo >= capitulos.Count) return null;   // era o último
 
-            return _capitulos.EstaDesbloqueado(capitulos[proximo], Fases.Fase1)
+            return _capitulos.EstaDesbloqueado(capitulos[proximo], Fases.Fase1, dificuldade)
                 ? (capitulos[proximo], Fases.Fase1)
                 : null;
         }
@@ -552,12 +608,13 @@ namespace ApostlesWar.Presentation.Front
         private static IEnumerable<int> Casas() =>
             Enumerable.Range(Arquetipos.CasaDaFrente, Arquetipos.CasaDoFundo - Arquetipos.CasaDaFrente + 1);
 
-        private FasesVista MontarFases(Faccao faccao)
+        private FasesVista MontarFases(Faccao faccao, Dificuldade dificuldade)
         {
-            var fases = Enum.GetValues<Fases>().Select(f => MontarFase(faccao, f)).ToList();
+            var fases = Enum.GetValues<Fases>().Select(f => MontarFase(faccao, f, dificuldade)).ToList();
             var desbloqueados = _apostolos.ObterDesbloqueados();
             var meus = desbloqueados
-                .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true, GradeDePosicao(p)))
+                .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true,
+                    Progressao.Estrelas(p.Nivel), p.Nivel, XpPct(p), GradeDePosicao(p)))
                 .ToList();
 
             // O time salvo volta como ÍNDICES nesta lista, porque é isso que o clique devolve. A
@@ -569,36 +626,58 @@ namespace ApostlesWar.Presentation.Front
                 .ToList();
 
             return new FasesVista(faccao.Descricao(), Faccoes.Simbolo(faccao), fases, meus,
-                (int)_campanha.UltimaFaseDe(faccao), time);
+                (int)_campanha.UltimaFaseDe(faccao, dificuldade), time,
+                MontarDificuldades(), (int)dificuldade);
         }
 
-        private FaseVista MontarFase(Faccao faccao, Fases fase)
+        private FaseVista MontarFase(Faccao faccao, Fases fase, Dificuldade dificuldade)
         {
-            Fase dados = ApostlesWar.Domain.Campanha.ObterFase((int)fase);   // qualificado: o const Campanha sombreia a classe
+            // qualificado: o const Campanha sombreia a classe
+            Fase dados = ApostlesWar.Domain.Campanha.ObterFase((int)fase, dificuldade);
             Item item = _arsenal.PreverItem(faccao, fase);
+
+            // O inimigo é mostrado NO NÍVEL em que vai entrar — é a única leitura que o jogador tem
+            // do quanto aquela dificuldade pesa antes de apertar Lutar.
+            int nivel = Progressao.NivelDoInimigo(dificuldade, (int)faccao, (int)fase);
+
             return new FaseVista(
                 (int)fase, fase.Descricao(),
-                _capitulos.EstaDesbloqueado(faccao, fase),
-                _capitulos.FaseConcluida(faccao, fase),
-                Inimigos(faccao, dados.Rodada1), Inimigos(faccao, dados.Rodada2),
+                _capitulos.EstaDesbloqueado(faccao, fase, dificuldade),
+                _capitulos.FaseConcluida(faccao, fase, dificuldade),
+                Inimigos(faccao, dados.Rodada1, nivel), Inimigos(faccao, dados.Rodada2, nivel), nivel,
                 new ItemVista(item.Simbolo, item.Nome, NomeDoStat(item.TipoStat), ValorFormatado(item)));
         }
 
-        private List<ApostoloVisto> Inimigos(Faccao faccao, List<TipoDeApostolo> tipos) => tipos
+        // O inimigo vai SEM estrela de propósito: elas são o visor do nível do jogador (0 a 6), e ele
+        // passa de 400 no Pesadelo — 42 estrelas não dizem nada. O NÍVEL vai, como número, e sem
+        // trilho de XP (o -1): é a leitura do peso da dificuldade antes de apertar Lutar.
+        private List<ApostoloVisto> Inimigos(Faccao faccao, List<TipoDeApostolo> tipos, int nivel) => tipos
             .Select(t => _personagens.ObterPorTipo(faccao, t))
-            .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true))
+            .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true,
+                Estrelas: 0, Nivel: nivel))
             .ToList();
+
+        /// <summary>
+        /// O quanto da faixa do nível atual já foi paga, em 0..100 — o trilho da barrinha. No teto ela
+        /// fica cheia e para, que é o que o `FaixaDoNivel` devolve.
+        /// </summary>
+        private int XpPct(Personagem p)
+        {
+            var (feito, total) = _progressao.FaixaDoNivel(p);
+            return total <= 0 ? 100 : (int)(100L * feito / total);
+        }
 
         private static RecompensaVista MontarRecompensa(RecompensaDaFase r)
         {
-            var novos = r.NovosApostolos.Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true)).ToList();
+            var novos = r.NovosApostolos.Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome,
+                Desbloqueado: true, Progressao.Estrelas(p.Nivel), p.Nivel)).ToList();
             ItemVista? item = r.Item is null ? null
                 : new ItemVista(r.Item.Simbolo, r.Item.Nome, NomeDoStat(r.Item.TipoStat), ValorFormatado(r.Item));
             return new RecompensaVista(novos, item);
         }
 
         /// <summary>Valida o iniciarFase: fase liberada + time de 1 a 4 dos desbloqueados. Mapeia os índices.</summary>
-        private bool ValidarFase(string? texto, Faccao faccao, out Fases fase, out List<Personagem> time)
+        private bool ValidarFase(string? texto, Faccao faccao, Dificuldade dificuldade, out Fases fase, out List<Personagem> time)
         {
             fase = default;
             time = new List<Personagem>();
@@ -610,7 +689,7 @@ namespace ApostlesWar.Presentation.Front
             if (cfg is null || cfg.Fase < 1 || cfg.Fase > 7) return false;
 
             fase = (Fases)cfg.Fase;
-            if (!_capitulos.EstaDesbloqueado(faccao, fase)) return false;
+            if (!_capitulos.EstaDesbloqueado(faccao, fase, dificuldade)) return false;
 
             var pool = _apostolos.ObterDesbloqueados();
             if (cfg.Time is not { Length: >= 1 and <= 4 } || !cfg.Time.All(i => i >= 0 && i < pool.Count))
@@ -723,7 +802,7 @@ namespace ApostlesWar.Presentation.Front
         private ApostoloDetalheVista MontarDetalhe(Personagem apostolo) => new(
             apostolo.Nome, apostolo.Simbolo, apostolo.Faccao.Descricao(),
             _apostolos.EstaDesbloqueado(apostolo),
-            apostolo.Tipo.Descricao(), Tipos.Simbolo(apostolo.Tipo), apostolo.Nivel,
+            apostolo.Tipo.Descricao(), Tipos.Simbolo(apostolo.Tipo), apostolo.Nivel, XpPct(apostolo),
             apostolo.HP, apostolo.Ataque, apostolo.Defesa,
             apostolo.Velocidade, apostolo.Precisao, apostolo.Resistencia,
             // O crit vem do TIPO (o Combatente é dono dos dois), não do apóstolo.

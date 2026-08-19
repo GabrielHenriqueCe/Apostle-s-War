@@ -123,11 +123,15 @@ namespace ApostlesWar.Domain
         }
 
         /// <summary>
-        /// A curva é CONTÍNUA e vai de 1× a 30×: declaram-se as PONTAS e a taxa por nível é
+        /// A curva é CONTÍNUA e vai de 1× a 30× no nv 60: declaram-se as PONTAS e a taxa por nível é
         /// consequência, em vez de uma tabela de 60 linhas pra manter.
+        ///
+        /// <b>Só o PISO limita.</b> O teto de 60 é do JOGADOR; o inimigo da campanha passa muito dele
+        /// (428 no fim do Pesadelo, e lá o fator é 211×). Com um clamp em cima, o inimigo nv 428 seria
+        /// tratado como 60 — calado, e o Pesadelo inteiro viraria trivial.
         /// </summary>
         public static double FatorDoNivel(int nivel) =>
-            1 + 29.0 * (Math.Clamp(nivel, NivelMinimo, NivelMaximo) - 1) / (NivelMaximo - 1);
+            1 + 29.0 * (Math.Max(nivel, NivelMinimo) - 1) / (NivelMaximo - 1);
 
         public static Ficha Base(TipoDeApostolo tipo) => _fichas[tipo];
 
@@ -157,6 +161,11 @@ namespace ApostlesWar.Domain
         ///
         /// O <c>nivel / 10</c> é a MESMA expressão que conta a estrela na ficha. Trocar por uma
         /// tabela de faixas seria uma segunda fonte pra "quantas estrelas ele tem".
+        ///
+        /// <b>O clamp de 60 aqui FICA</b> — ao contrário do <see cref="FatorDoNivel"/>, que perdeu o
+        /// dele. É ele que impede o inimigo nv 428 do Pesadelo de agir quatro vezes por turno seu:
+        /// HP/ATK/DEF podem subir sem teto porque só mudam quanto dói, mas Velocidade é QUANTOS TURNOS
+        /// se joga. Tirar isto não quebra teste nenhum de dano — quebra o jogo.
         /// </summary>
         public static int Velocidade(TipoDeApostolo tipo, int nivel)
             => Base(tipo).VelocidadeNv1 + (Math.Clamp(nivel, NivelMinimo, NivelMaximo) / 10) * GanhoPorEstrela;

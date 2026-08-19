@@ -197,12 +197,16 @@ namespace ApostlesWar.Presentation.Front
     /// <see cref="TipoSimbolo"/> é o emoji do PAPEL (`Tipos.Simbolo`), que o card mostra no canto —
     /// vem pronto do C# pelo mesmo motivo da posição: tabela duplicada no front diverge.
     ///
+    /// <see cref="Nivel"/> e <see cref="XpPct"/> são a barrinha abaixo do emoji. O pct é <b>-1</b> em
+    /// quem tem nível mas não acumula XP (o inimigo da campanha): lá o trilho some e fica só o número,
+    /// porque um trilho vazio nele leria "quase subindo".
+    ///
     /// <see cref="Posicao"/> é a grade 4×4 do perfil de distância dele: <c>Posicao[minhaCasa][casaDoAlvo]</c>,
     /// as duas contadas de 0. Vem PRONTA do C# porque o front não pode ter cópia da tabela — duas
     /// cópias de uma fórmula divergem como duas cópias de um número. É `null` em toda tela que não
     /// põe apóstolo em casa nenhuma (avatar, recompensa, arena).</summary>
     internal record ApostoloVisto(string Simbolo, string TipoSimbolo, string Nome, bool Desbloqueado,
-        List<List<double>>? Posicao = null);
+        int Estrelas = 0, int Nivel = 1, int XpPct = -1, List<List<double>>? Posicao = null);
 
     /// <summary>
     /// A tela de EDITAR PERFIL: o nome atual (pra pré-preencher), o avatar atual (pra pré-selecionar
@@ -219,18 +223,28 @@ namespace ApostlesWar.Presentation.Front
 
     // ---------- Campanha ----------
 
+    /// <summary>
+    /// Uma dificuldade na barra: o nome, o valor do enum (é ele que volta no clique), se está aberta e,
+    /// quando não está, o que falta pra abrir. A travada CONTINUA NA TELA de propósito — sumir com ela
+    /// esconderia do jogador que a campanha continua depois do Fácil.
+    /// </summary>
+    internal record DificuldadeVista(string Nome, int Valor, bool Desbloqueada, string? Requisito);
+
     /// <summary>Um nó do mapa = uma facção-capítulo. Índice = posição na lista enviada (Reino..Ascendentes).</summary>
     internal record CapituloVista(string Simbolo, string Nome, bool Desbloqueado, bool Concluido);
 
-    /// <summary>O mapa: as 8 facções em ordem + a posição atual (índice) onde o marcador começa.</summary>
-    internal record MapaVista(List<CapituloVista> Capitulos, int Posicao);
+    /// <summary>O mapa: as 8 facções em ordem + a posição atual (índice) onde o marcador começa, mais
+    /// a barra de dificuldade (as quatro, com o cadeado de cada uma) e qual está ativa.</summary>
+    internal record MapaVista(List<CapituloVista> Capitulos, int Posicao,
+        List<DificuldadeVista> Dificuldades, int Dificuldade);
 
     /// <summary>Um item pra mostrar (drop da fase / recompensa).</summary>
     internal record ItemVista(string Simbolo, string Nome, string Stat, string Valor);
 
-    /// <summary>Uma fase: número (1..7), nome (do item), status, inimigos das 2 rodadas e o item que dropa.</summary>
+    /// <summary>Uma fase: número (1..7), nome (do item), status, inimigos das 2 rodadas, o NÍVEL em que
+    /// eles entram (a leitura do peso da dificuldade, antes de apertar Lutar) e o item que dropa.</summary>
     internal record FaseVista(int Numero, string Nome, bool Desbloqueado, bool Concluido,
-        List<ApostoloVisto> Rodada1, List<ApostoloVisto> Rodada2, ItemVista Item);
+        List<ApostoloVisto> Rodada1, List<ApostoloVisto> Rodada2, int NivelDoInimigo, ItemVista Item);
 
     /// <summary>
     /// A tela de fases de uma facção: as 7 fases + o pool de apóstolos desbloqueados pra montar o time.
@@ -241,7 +255,8 @@ namespace ApostlesWar.Presentation.Front
     /// clique devolve; o save guarda identidade (ver CampanhaService.UltimoTime).
     /// </summary>
     internal record FasesVista(string CapituloNome, string CapituloSimbolo, List<FaseVista> Fases,
-        List<ApostoloVisto> MeusApostolos, int FaseSelecionada, List<int> TimeMontado);
+        List<ApostoloVisto> MeusApostolos, int FaseSelecionada, List<int> TimeMontado,
+        List<DificuldadeVista> Dificuldades, int Dificuldade);
 
     /// <summary>Recompensa da vitória: os apóstolos novos desbloqueados + o item dropado (null se já tinha).</summary>
     internal record RecompensaVista(List<ApostoloVisto> Novos, ItemVista? Item);
@@ -261,7 +276,7 @@ namespace ApostlesWar.Presentation.Front
     /// pro capítulo seguinte, e prometer "Próxima Fase" quando o que vem é outro capítulo seria
     /// esconder do jogador que ele está mudando de lugar.
     /// </summary>
-    internal record FimDeFaseVista(bool Venceu, RecompensaVista? Recompensa, bool PodeProxima,
+    internal record FimDeFaseVista(bool Venceu, RecompensaVista? Recompensa, int Xp, bool PodeProxima,
         bool ProximoECapitulo, bool ComOpcoes);
 
     /// <summary>
@@ -343,7 +358,7 @@ namespace ApostlesWar.Presentation.Front
     /// catálogo que esconde o que você ainda não tem não serve pra planejar a campanha.
     /// </summary>
     internal record ApostoloDetalheVista(string Nome, string Simbolo, string Faccao, bool Desbloqueado,
-        string Tipo, string TipoSimbolo, int Nivel,
+        string Tipo, string TipoSimbolo, int Nivel, int XpPct,
         int HP, int Ataque, int Defesa, int Velocidade, int Precisao, int Resistencia,
         int TaxaCritPct, int DanoCritPct,
         List<HabilidadeDoApostoloVista> Habilidades);

@@ -20,6 +20,22 @@ namespace ApostlesWar.Domain
     public enum Slot { Slot1 = 1, Slot2 = 2, Slot3 = 3, Slot4 = 4 }
 
     /// <summary>
+    /// A dificuldade da campanha — cada uma tem a PRÓPRIA trilha de 8 capítulos, e fechar a fase 7 do
+    /// capítulo 8 abre a seguinte.
+    ///
+    /// <b>O VALOR É o multiplicador de XP</b> (docs/GDD-progressao.md §A CURVA DE XP): o pote de uma
+    /// fase é <c>72 × k × (int)dificuldade</c>. Uma segunda tabela dizendo "Pesadelo = 4×" seria uma
+    /// segunda fonte pra discordar desta — por isso reordenar este enum move a XP do jogo inteiro.
+    /// </summary>
+    public enum Dificuldade
+    {
+        [Description("Fácil")] Facil = 1,
+        [Description("Normal")] Normal = 2,
+        [Description("Difícil")] Dificil = 3,
+        [Description("Pesadelo")] Pesadelo = 4
+    }
+
+    /// <summary>
     /// O arquétipo do apóstolo, e a ÚNICA fonte do status base dele: dois apóstolos do mesmo tipo
     /// nascem com a mesma ficha, e o que os separa é o kit e o equipamento. Cada facção tem
     /// exatamente um de cada. Ver <see cref="Arquetipos"/> e docs/GDD-combate.md §2.

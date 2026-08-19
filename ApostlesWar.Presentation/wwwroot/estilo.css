@@ -296,6 +296,63 @@ body {
 .compApostolo .cantoTipo { font-size: 14px; top: 6px; left: 8px; }
 .compApostolo.travado .cantoTipo { filter: grayscale(1); opacity: .45; }
 
+/* A BARRA DE NÍVEL — o número e o quanto falta pro próximo, logo abaixo do emoji. Ela é a razão de
+   o card ter altura fixa nas duas pontas: estrela em cima, barra embaixo, e o nome no lugar de
+   sempre. O trilho some quando não há XP a mostrar (o inimigo), e só o número fica. */
+.barraNivel {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    width: 100%; min-height: 10px;
+}
+.bnRotulo {
+    font-size: 9px; line-height: 10px; color: var(--apagado);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.bnTrilho {
+    flex: 1; min-width: 0; height: 3px;
+    background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden;
+}
+.bnCheio { display: block; height: 100%; background: var(--ouro); }
+
+/* Na FICHA a barra é maior — ali há espaço, e é a tela onde se olha o apóstolo de perto. */
+#apostoloNivel { max-width: 220px; margin: 6px auto 0; }
+#apostoloNivel .bnRotulo { font-size: 12px; line-height: 14px; color: var(--ouro); }
+#apostoloNivel .bnTrilho { height: 6px; }
+
+/* AS ESTRELAS — o visor do nível, no topo do card. Altura FIXA mesmo vazia (nível 1 a 9 não tem
+   estrela): sem isso o card encolhe e a grade inteira dança quando a primeira estrela chega. */
+.cantoEstrelas {
+    display: block;
+    min-height: 12px; line-height: 12px;
+    font-size: 10px; letter-spacing: 1px;
+    color: var(--ouro);
+    text-align: center;
+}
+
+/* A BARRA DE DIFICULDADE — a mesma no mapa e nas fases. A travada fica visível e apagada: some-la
+   esconderia que a campanha continua depois do Fácil. */
+.barraDificuldade {
+    display: flex; justify-content: center; gap: 8px;
+    margin: 6px 0 10px;
+    flex-wrap: wrap;
+}
+.difBotao {
+    border: 2px solid transparent;
+    border-radius: 8px 0 8px 0; corner-shape: bevel;
+    background: var(--placa); box-shadow: var(--placa-bisel);
+    color: var(--texto); font-family: var(--titulo); font-size: 12px; letter-spacing: .06em;
+    padding: 5px 14px; cursor: pointer;
+    transition: box-shadow .15s, background .15s;
+}
+.difBotao:hover:not(:disabled) { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
+.difBotao.ativa { border-color: var(--ouro); color: var(--ouro); }
+.difBotao.travada { opacity: .4; cursor: not-allowed; }
+
+/* A XP no fim de fase — vitória e derrota, porque ela cai por inimigo morto. */
+.fimFaseXp {
+    text-align: center; font-size: 14px; font-weight: 600;
+    color: var(--ouro); margin: 6px 0;
+}
+
 /* ---------- A LETRA DE TÍTULO, aplicada ----------
    Todo nome próprio e todo título de tela em serifa. O corpo (descrição de habilidade, log, dica,
    stat) NÃO entra: Palatino a 11px vira mingau, e é onde se lê de verdade.

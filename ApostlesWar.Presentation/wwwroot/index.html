@@ -88,6 +88,9 @@
 
     <!-- Cena do MAPA da campanha: trilha horizontal de facções, marcador que caminha, arrasta pra ver mais. -->
     <section id="campanhaMapa" hidden>
+        <!-- A DIFICULDADE fica no mapa E na tela de fases: é o mesmo controle, e trocar num lugar
+             vale no outro. A travada continua à vista, com o que falta pra abrir no title. -->
+        <div id="mapaDificuldade" class="barraDificuldade"></div>
         <div id="mapaViewport">
             <div id="mapaTrilha">
                 <div id="mapaMarcador"></div>
@@ -99,6 +102,7 @@
     <!-- Cena das FASES de uma facção. -->
     <section id="campanhaFases" hidden>
         <h1 id="fasesTitulo"></h1>
+        <div id="fasesDificuldade" class="barraDificuldade"></div>
         <div id="fasesLista"></div>
         <div id="faseDetalhe" hidden>
             <!-- A preparação é um TABULEIRO, na mesma geometria da luta: o seu time à esquerda com a
@@ -189,6 +193,7 @@
                 <div id="apostoloArte"></div>
                 <div id="apostoloNome"></div>
                 <div id="apostoloFaccao"></div>
+                <div id="apostoloNivel"></div>
             </div>
             <aside id="apostoloHabilidades"></aside>
         </div>

@@ -96,6 +96,13 @@ namespace ApostlesWar.Application.Services
             }
         }
 
+        /// <summary>
+        /// O ROSTER inteiro, as instâncias de verdade — é sobre elas que o nível é aplicado. Quem quer
+        /// o pool pra montar time usa o <see cref="ApostolosService.TodosOsApostolos"/>, que responde a
+        /// mesma coisa em ordem de facção; este aqui é o dono da lista.
+        /// </summary>
+        public IReadOnlyList<Personagem> Todos() => personagens;
+
         public Personagem ObterPersonagem(Faccao faccao, Slot slot)
         {
             return personagens.First(p => p.Faccao == faccao && p.Slot == (int)slot);

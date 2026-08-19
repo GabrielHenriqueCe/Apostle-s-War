@@ -15,6 +15,7 @@ namespace ApostlesWar.Application.Services
         private readonly ArsenalService _arsenalService;
         private readonly ApostolosService _apostolosService;
         private readonly PersonagemService _personagemService;
+        private readonly ProgressaoService _progressaoService;
         private readonly ITelaDeCombate _tela;
         private readonly SelecaoDeAlvoService _selecaoDeAlvoService;
         private readonly IControladorDeTurno _controladorJogador;
@@ -29,13 +30,15 @@ namespace ApostlesWar.Application.Services
         private Dictionary<Equipe, IControladorDeTurno> _controladores = new();
 
         public CombateService(ArsenalService arsenalService,
-            ApostolosService apostolosService, PersonagemService personagemService, ITelaDeCombate tela,
+            ApostolosService apostolosService, PersonagemService personagemService,
+            ProgressaoService progressaoService, ITelaDeCombate tela,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
             IControladorDeTurno controladorBot, IApresentacao apresentacao, RelogioDoCombate relogio)
         {
             _arsenalService = arsenalService;
             _apostolosService = apostolosService;
             _personagemService = personagemService;
+            _progressaoService = progressaoService;
             _tela = tela;
             _selecaoDeAlvoService = selecaoDeAlvoService;
             _controladorJogador = controladorJogador;
@@ -619,45 +622,66 @@ namespace ApostlesWar.Application.Services
 
         /// <summary>
         /// A fase da campanha a partir de um time JÁ ESCOLHIDO — quem monta o time é problema de quem
-        /// chama (o clique no front). Roda as 2 rodadas com o multiplicador de fase e os itens
-        /// equipados. A recompensa (unlock/drop/save) é DEPOIS, no CampanhaService.
+        /// chama (o clique no front). Roda as 2 rodadas com os itens equipados, credita a XP e devolve
+        /// o que caiu. A recompensa (unlock/drop/save) é DEPOIS, no CampanhaService.
+        ///
+        /// <b>O NÚMERO DO CAPÍTULO é o valor do enum <see cref="Faccao"/></b> — Humanos = 0 (não é
+        /// capítulo) e os oito capítulos são 1..8, na ordem em que a campanha os percorre. Era assim
+        /// que o multiplicador de fase já contava; reordenar o enum move a XP e o nível do inimigo.
         /// </summary>
-        public ResultadoFase ExecutarFaseComTime(List<Personagem> time, Faccao capitulo, Fases fase)
+        public ResultadoDaFase ExecutarFaseComTime(List<Personagem> time, Faccao capitulo, Fases fase,
+            Dificuldade dificuldade)
         {
-            Fase fas = Campanha.ObterFase((int)fase);
-            MultiplicadorFase mult = new MultiplicadorFase
-            {
-                HP = (0.5f * (float)capitulo) + (0.1f * (float)fase),
-                Ataque = (0.5f * (float)capitulo) + (0.1f * (float)fase),
-                Defesa = (0.5f * (float)capitulo) + (0.1f * (float)fase)
-            };
+            Fase fas = Campanha.ObterFase((int)fase, dificuldade);
+            int nivelDoInimigo = Progressao.NivelDoInimigo(dificuldade, (int)capitulo, (int)fase);
+
+            // A XP CAI POR INIMIGO MORTO, não por vitória: quem matou dois e perdeu leva os dois. O
+            // pote da fase é dividido igual entre os inimigos das DUAS rodadas.
+            int totalDeInimigos = fas.Rodada1.Count + fas.Rodada2.Count;
+            int porInimigo = Progressao.PoteDaFase((int)capitulo, (int)fase, dificuldade) / totalDeInimigos;
 
             var jogador = time.Select(p => (Combate)new Jogador(p)).ToList();
             foreach (Combate c in jogador)
                 _arsenalService.AplicarItens(c);
 
-            // Captura HPMaximoInicial DOS JOGADORES depois de mult + itens (jogadores não recebem
-            // multiplicador de fase, mas mantemos pra simetria/consistência).
-            Posicionar(jogador);
+            Posicionar(jogador);   // captura o HPMaximoInicial DOS JOGADORES depois dos itens
 
             try
             {
-                bool venceu = ExecutarRodada(jogador, fas.Rodada1, capitulo, mult)
-                           && ExecutarRodada(jogador, fas.Rodada2, capitulo, mult);
+                bool venceu = ExecutarRodada(jogador, fas.Rodada1, capitulo, nivelDoInimigo, out int mortos);
+                if (venceu)
+                {
+                    venceu = ExecutarRodada(jogador, fas.Rodada2, capitulo, nivelDoInimigo, out int daSegunda);
+                    mortos += daSegunda;
+                }
+
                 _tela.ExibirResumoBatalha(jogador);   // resumo (vitória ou derrota; não em abandono)
-                return venceu ? ResultadoFase.Venceu : ResultadoFase.Perdeu;
+
+                int pote = mortos * porInimigo;
+                _progressaoService.Creditar(time, pote);
+                return new ResultadoDaFase(venceu ? ResultadoFase.Venceu : ResultadoFase.Perdeu,
+                    time.Count == 0 ? 0 : pote / time.Count);
             }
             catch (BatalhaAbortada)
             {
-                return ResultadoFase.Perdeu;   // encerrou a batalha no meio → derrota, sem recompensa
+                // Encerrou no meio: derrota, sem recompensa e SEM XP — desistir não paga o que a luta
+                // pagaria, senão abandonar vira estratégia de farm.
+                return new ResultadoDaFase(ResultadoFase.Perdeu, 0);
             }
         }
 
-        private bool ExecutarRodada(List<Combate> jogador, List<TipoDeApostolo> tiposInimigos, Faccao capitulo, MultiplicadorFase mult)
+        private bool ExecutarRodada(List<Combate> jogador, List<TipoDeApostolo> tiposInimigos,
+            Faccao capitulo, int nivelDoInimigo, out int mortos)
         {
             var inimigo = new List<Combate>();
             foreach (TipoDeApostolo tipo in tiposInimigos)
-                inimigo.Add(new Inimigo(_personagemService.ObterPorTipo(capitulo, tipo), mult));
+            {
+                // CÓPIA no nível da fase, e não a instância do roster: o inimigo da campanha sai do
+                // MESMO service que o time do jogador, então nivelar o original vazaria pro elenco
+                // dele — sem quebrar build e sem ninguém ver.
+                Personagem original = _personagemService.ObterPorTipo(capitulo, tipo);
+                inimigo.Add(new Inimigo(original.ComNivel(nivelDoInimigo)));
+            }
 
             Posicionar(inimigo);   // snapshot do HP máximo desta rodada + a casa de cada um
 
@@ -680,13 +704,18 @@ namespace ApostlesWar.Application.Services
                 { batalha.Equipe2, _controladorBot },
             };
 
-            return ExecutarCombate(batalha);
+            bool venceu = ExecutarCombate(batalha);
+
+            // Conta os mortos DEPOIS da rodada, inclusive quando ela foi perdida: matou um e caiu,
+            // ganhou o dele.
+            mortos = inimigo.Count(c => !c.EstaVivo());
+            return venceu;
         }
 
         /// <summary>
         /// Modo ARENA (laboratório de rebalance): duelo Equipe1 × Equipe2 a partir de times JÁ
-        /// ESCOLHIDOS, com controle configurável (bot1/bot2 = cada equipe é bot?). SEM multiplicador
-        /// de fase (luta justa, mult 1.0), SEM itens (leitura limpa de balance) e SEM recompensa/save.
+        /// ESCOLHIDOS, com controle configurável (bot1/bot2 = cada equipe é bot?). Os dois lados lutam
+        /// como estão — sem itens (leitura limpa de balance) e sem recompensa/save.
         /// Reusa o mesmo loop de combate — o seam Batalha/controlador faz tudo funcionar independente
         /// da classe. Ambos os times são Jogador (a estrutura, não o tipo, define quem é inimigo de
         /// quem). A seleção é problema de quem chama: o pick de apóstolos é TELA, e a luta não depende
@@ -725,5 +754,15 @@ namespace ApostlesWar.Application.Services
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// O que sobrou de uma fase: o desfecho e a XP que CADA apóstolo em campo levou. A XP vem junto
+    /// porque a fase é o único lugar que sabe quantos inimigos morreram — a tela só mostra o número.
+    /// Ela já foi creditada quando este record aparece.
+    /// </summary>
+    public record ResultadoDaFase(ResultadoFase Resultado, int XpPorApostolo)
+    {
+        public bool Venceu => Resultado == ResultadoFase.Venceu;
     }
 }

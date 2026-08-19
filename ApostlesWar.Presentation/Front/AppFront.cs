@@ -182,15 +182,16 @@ namespace ApostlesWar.Presentation.Front
                 var personagens = new PersonagemService();
                 var selecaoDeAlvo = new SelecaoDeAlvoService();
                 var apostolos = new ApostolosService(personagens, capitulos);
+                var progressao = new ProgressaoService(personagens, repositorio);
                 // A campanha nasce ANTES do perfil: "excluir conta" delega o wipe do progresso pra ela.
-                var campanha = new CampanhaService(arsenal, apostolos, capitulos, personagens, repositorio);
+                var campanha = new CampanhaService(arsenal, apostolos, capitulos, personagens, progressao, repositorio);
                 var perfil = new PerfilService(repositorio, apostolos, campanha);
 
                 // Dois ControladorBot: um é o adversário, o outro assume quando o jogador liga o
                 // automático. Mesmo cérebro, instâncias separadas — cada um memoriza o próprio alvo
                 // entre escolher-ação e escolher-alvo, e misturá-los seria um lado mirar pelo outro.
                 var combate = new CombateService(
-                    arsenal, apostolos, personagens, tela, selecaoDeAlvo,
+                    arsenal, apostolos, personagens, progressao, tela, selecaoDeAlvo,
                     controladorJogador: new ControladorJogadorWeb(sessao, ponte, new ControladorBot(selecaoDeAlvo)),
                     controladorBot: new ControladorBot(selecaoDeAlvo),
                     apresentacao, relogio);
@@ -198,7 +199,7 @@ namespace ApostlesWar.Presentation.Front
                 // Entra pelo MENU (não mais direto na batalha): o fluxo do front cuida do perfil,
                 // mostra o menu principal e roteia a escolha. Ver FluxoDoFront.
                 new FluxoDoFront(ponte, combate, apostolos, perfil, sessao,
-                    campanha, capitulos, arsenal, personagens, configuracao).Rodar();
+                    campanha, capitulos, arsenal, personagens, progressao, configuracao).Rodar();
             }
             catch (Exception ex)
             {

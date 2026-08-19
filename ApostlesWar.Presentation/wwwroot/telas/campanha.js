@@ -8,6 +8,7 @@ import { compendioApostolo } from './compendio.js';
 import { avatarDoJogador } from './menu.js';
 import { arrastando, configurarSlotDnD, criarCelulaPicker, criarSlot, sortearTime, tornarPickerArrastavel } from '../ui/time.js';
 import { mandar } from '../nucleo/ponte.js';
+import { montarBarraDificuldade } from '../ui/dificuldade.js';
 
 // ---------- Campanha: mapa ----------
 const ESPACO_NO = 210;   // distância horizontal entre facções
@@ -19,6 +20,7 @@ export const campanhaMapa = {
     cena: 'campanhaMapa',
     montar(m) {
         mapaSelecionado = -1;
+        montarBarraDificuldade('mapaDificuldade', m.dificuldades, m.dificuldade);
         const trilha = document.getElementById('mapaTrilha');
         mapaNodeX = m.capitulos.map((_, i) => 110 + i * ESPACO_NO);
 
@@ -111,6 +113,7 @@ export const campanhaFases = {
         (f.timeMontado || []).slice(0, 4).forEach((idx, i) => { campTime[i] = idx; });
 
         document.getElementById('fasesTitulo').textContent = `${f.capituloSimbolo} ${f.capituloNome}`;
+        montarBarraDificuldade('fasesDificuldade', f.dificuldades, f.dificuldade);
         document.getElementById('faseDetalhe').hidden = true;
         document.getElementById('fasesLutar').disabled = true;
 
@@ -318,6 +321,15 @@ export const fimDeFase = {
             p.className = 'fimFaseTexto';
             p.textContent = 'A Deusa observa em silêncio. Levante e tente de novo.';
             cont.append(p);
+        }
+
+        // A XP vem ANTES do item: ela cai por inimigo morto, então aparece também na derrota — e é a
+        // única recompensa que o jogador leva de uma fase perdida.
+        if (f.xp > 0) {
+            const xp = document.createElement('div');
+            xp.className = 'fimFaseXp';
+            xp.textContent = `+${f.xp} XP para cada apóstolo em campo`;
+            cont.append(xp);
         }
 
         const r = f.recompensa;

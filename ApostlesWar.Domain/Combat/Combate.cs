@@ -165,7 +165,8 @@ namespace ApostlesWar.Domain
 
         // === Camadas de Ataque (stat calculado) ===
         // AtaqueBase: valor cru do personagem, imutável na fase.
-        // MultiplicadorAtaque: multiplicador de fase (jogador=1.0, inimigo=mult da fase).
+        // MultiplicadorAtaque: camada multiplicativa sobre a base — hoje 1.0 pra todo mundo (o
+        //   inimigo passou a subir por NÍVEL, não por multiplicador); é o seam de item e buff.
         // ItensAtaqueFlat/Pct: contribuição de itens equipados.
         // BonusAtaquePermanente: acúmulo de stack-builders (Ambicao), some no getter.
         // BuffAtaque ativo: incide sobre (base+mult+itens+permanente).
@@ -176,7 +177,7 @@ namespace ApostlesWar.Domain
         public int BonusAtaquePermanente { get; private set; }
 
         /// <summary>
-        /// Ataque após base, multiplicador de fase e itens — SEM bônus permanente nem buffs.
+        /// Ataque após base, o multiplicador e os itens — SEM bônus permanente nem buffs.
         /// É a referência sobre a qual os stack-builders (Ambicao) calculam seu incremento.
         /// </summary>
         public int AtaqueComItens
@@ -211,7 +212,8 @@ namespace ApostlesWar.Domain
 
         // === Camadas de Defesa (stat calculado) ===
         // DefesaBase: valor cru do personagem, imutável na fase.
-        // MultiplicadorDefesa: multiplicador de fase (jogador=1.0, inimigo=mult da fase).
+        // MultiplicadorDefesa: camada multiplicativa sobre a base — hoje 1.0 pra todo mundo (ver
+        //   MultiplicadorAtaque acima); é o seam de item e buff.
         // ItensDefesaFlat/Pct: contribuição de itens equipados.
         // BonusDefesaPermanente: stack-builder de aumento (CoroaDoSoberano), soma no getter.
         // ReducaoDefesaPermanente: stack-builder de redução no alvo (Sorrateiro),
@@ -225,7 +227,7 @@ namespace ApostlesWar.Domain
         public int ReducaoDefesaPermanente { get; private set; }
 
         /// <summary>
-        /// Defesa após base, multiplicador de fase e itens — SEM stacks permanentes
+        /// Defesa após base, o multiplicador e os itens — SEM stacks permanentes
         /// nem buffs/debuffs. Referência sobre a qual os stack-builders (Rei aumenta,
         /// Sorrateiro reduz) calculam seu incremento.
         /// </summary>

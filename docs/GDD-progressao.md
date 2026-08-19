@@ -528,17 +528,15 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
    hoje a ordem é um `for` sobre `Equipe1.Membros ++ Equipe2.Membros`, e é esse `Concat` que é a
    vantagem de time que o §1 quer matar.
 4. **Precisão × Resistência** (chance de colar) + a **DEF em `DEF/(DEF+5000)`**, no lugar do cap atual.
-5. **A COMPOSIÇÃO por TIPO** — as tabelas do §5 saem de `Slot` e passam a falar em papel
-   (`G`/`C`/`A`/`S`), e o tipo ganha emoji (🛡️ ⚔️ 🏹 💗) na ficha. É o que destrava as outras
-   dificuldades, e corrige o bug de a fase 1 entregar dois apóstolos.
-6. **A DIFICULDADE** — o enum (cujo valor É o multiplicador de XP), progresso por dificuldade,
-   desbloqueio ao fechar a 8-7, e a escolha do jogador no mapa **e dentro da tela da fase**. Voltar
-   pro Fácil pra farmar é jogada legítima.
-7. **A XP e o NÍVEL do jogador** — a curva do §A CURVA DE XP, o pote por inimigo morto, o save (que
-   guarda XP; o nível é derivado) e as estrelas na ficha.
-8. **O NÍVEL DO INIMIGO** — a reta e as oito âncoras; o multiplicador de fase morre aqui. Vem DEPOIS
-   do 7 de propósito: com o jogador subindo e o inimigo ainda no multiplicador o jogo fica fácil, e
-   fácil é o intermediário aceitável — o contrário seria impossível.
+5. ✅ **A COMPOSIÇÃO por TIPO** — FEITO (#250). As tabelas do §5 falam papel (`G`/`C`/`A`/`S`), o
+   tipo ganhou emoji (🛡️ ⚔️ 🏹 💗) no card, e a fase 1 voltou a entregar um apóstolo só.
+6. ✅ **A DIFICULDADE** — FEITO. O enum (cujo valor É o multiplicador de XP), uma trilha de capítulos
+   por dificuldade, desbloqueio DERIVADO da 8-7 anterior, e a barra de escolha no mapa **e na tela da
+   fase**. Voltar pro Fácil pra farmar continua legítimo.
+7. ✅ **A XP e o NÍVEL do jogador** — FEITO. A curva do §A CURVA DE XP, o pote por inimigo morto
+   (inclusive na derrota), o save que guarda **só XP** e as estrelas no card.
+8. ✅ **O NÍVEL DO INIMIGO** — FEITO. A reta e as oito âncoras; o `MultiplicadorFase` morreu, e o
+   clamp de 60 do `FatorDoNivel` saiu junto (o da Velocidade ficou).
 9. **Raridade** nos apóstolos, e **raridade → passiva que escala**.
 10. **Item equipado no apóstolo.**
 
@@ -549,6 +547,12 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
 > **E o 5→8 é um bloco, não quatro escolhas** (ago/2026): a XP é indexada por dificuldade, o inimigo é
 > calibrado por dificuldade, e a dificuldade precisa da composição por tipo pra existir. Fazer a XP
 > antes da dificuldade é calibrar contra um eixo que ainda não tem eixo.
+>
+> **O 6→8 saiu num PR só** *(ago/2026, decisão do Gabriel)*: os três dividem o save e a mesma
+> coordenada (dificuldade, capítulo, fase), e o desbalanceamento dos estados intermediários foi
+> aceito de propósito — *"se não tiver como passar, o bloqueio seria 'sou fraco demais'"*, e o
+> material/forja que faz o teto de verdade vem logo atrás. **Falta o PEDÁGIO:** enquanto ele não
+> existe, o único teto de nível é o 60, então o Fácil deixa farmar até lá.
 
 > **O save atual é DESCARTADO** (decisão do Gabriel: *"descarta, não me importo"*). Sem migração.
 

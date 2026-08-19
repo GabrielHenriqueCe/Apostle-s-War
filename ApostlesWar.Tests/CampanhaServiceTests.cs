@@ -27,7 +27,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
-            return (new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo), capitulos, apostolos);
+            return (new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo), capitulos, apostolos);
         }
 
         [Fact]
@@ -36,12 +36,12 @@ namespace Tests
             var (campanha, capitulos, apostolos) = Montar();
 
             Assert.Equal(4, apostolos.ObterDesbloqueados().Count);              // só os 4 Humanos no começo
-            Assert.False(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2)); // fase 2 ainda travada
+            Assert.False(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2, Dificuldade.Facil)); // fase 2 ainda travada
 
-            RecompensaDaFase r = campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1);
+            RecompensaDaFase r = campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
 
-            Assert.True(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));   // marcou concluída
-            Assert.True(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2)); // liberou a próxima
+            Assert.True(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1, Dificuldade.Facil));   // marcou concluída
+            Assert.True(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2, Dificuldade.Facil)); // liberou a próxima
             // Reino fase 1: as duas rodadas são o Guardião (o Guarda) → UM apóstolo novo. A fase
             // estreia um por vez, e o time do capítulo só fecha em quatro na fase 4.
             Assert.Single(r.NovosApostolos);
@@ -58,9 +58,9 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo);
+            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo);
 
-            campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1);
+            campanha.ProcessarVitoria(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
 
             Assert.True(repo.Contem("save"));
             Assert.True(repo.Contem("itens"));
@@ -200,7 +200,7 @@ namespace Tests
         {
             var (campanha, _, _) = Montar();
 
-            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.Reino));
+            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.Reino, Dificuldade.Facil));
         }
 
         /// <summary>
@@ -212,12 +212,12 @@ namespace Tests
         public void UltimaFase_EPorCapitulo()
         {
             var (campanha, capitulos, _) = Montar();
-            capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1);   // libera a 2
+            capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);   // libera a 2
 
-            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase2, new List<Personagem>());
+            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase2, Dificuldade.Facil, new List<Personagem>());
 
-            Assert.Equal(Fases.Fase2, campanha.UltimaFaseDe(Faccao.Reino));
-            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.LadoSombrio));   // intocado
+            Assert.Equal(Fases.Fase2, campanha.UltimaFaseDe(Faccao.Reino, Dificuldade.Facil));
+            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.LadoSombrio, Dificuldade.Facil));   // intocado
         }
 
         /// <summary>
@@ -230,9 +230,9 @@ namespace Tests
         {
             var (campanha, _, _) = Montar();
 
-            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase2, new List<Personagem>());
+            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase2, Dificuldade.Facil, new List<Personagem>());
 
-            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.Reino));
+            Assert.Equal(Fases.Fase1, campanha.UltimaFaseDe(Faccao.Reino, Dificuldade.Facil));
         }
 
         [Fact]
@@ -241,7 +241,7 @@ namespace Tests
             var (campanha, _, apostolos) = Montar();
             var time = apostolos.ObterDesbloqueados().Take(2).ToList();
 
-            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, time);
+            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil, time);
 
             var voltou = campanha.UltimoTime();
             Assert.Equal(2, voltou.Count);
@@ -261,10 +261,10 @@ namespace Tests
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var time = apostolos.ObterDesbloqueados().Take(3).ToList();
 
-            new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo)
-                .SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, time);
+            new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo)
+                .SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil, time);
 
-            var outro = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo);
+            var outro = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo);
             Assert.Equal(time.Select(p => p.Nome), outro.UltimoTime().Select(p => p.Nome));
         }
 
@@ -286,7 +286,7 @@ namespace Tests
 
             Assert.False(apostolos.EstaDesbloqueado(trancado));   // a premissa do teste
 
-            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, new List<Personagem> { humano, trancado });
+            campanha.SalvarEntradaNaFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil, new List<Personagem> { humano, trancado });
 
             Personagem sobrou = Assert.Single(campanha.UltimoTime());
             Assert.Equal(humano.Nome, sobrou.Nome);

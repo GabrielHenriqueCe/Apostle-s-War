@@ -41,21 +41,45 @@
             Nome = nome;
             Simbolo = simbolo;
             Tipo = tipo;
-            Nivel = nivel;
             Habilidades = new List<Habilidade>(habilidades);
+            AplicarNivel(nivel);
+        }
 
-            var combate = Arquetipos.StatsDeCombate(tipo, faccao, nivel);
+        /// <summary>
+        /// Põe o apóstolo NESTE nível, recalculando a ficha pelo <see cref="Arquetipos"/> — o mesmo
+        /// caminho do construtor, e não uma segunda conta.
+        ///
+        /// MUTA quem recebe. Vale pro ROSTER do jogador (que é um por apóstolo e sobe com a XP); o
+        /// inimigo da campanha usa <see cref="ComNivel"/>, porque hoje ele sai do MESMO service que o
+        /// roster — nivelar a instância compartilhada vazaria pro time do jogador sem quebrar nada.
+        ///
+        /// Não faz sentido no apóstolo de ficha crua (os bonecos da bancada): lá os números são
+        /// arbitrários de propósito, e isto os substituiria pelos do arquétipo.
+        /// </summary>
+        public void AplicarNivel(int nivel)
+        {
+            Nivel = nivel;
+
+            var combate = Arquetipos.StatsDeCombate(Tipo, Faccao, nivel);
             HP = combate.HP;
             Ataque = combate.Ataque;
             Defesa = combate.Defesa;
 
-            Arquetipos.Ficha ficha = Arquetipos.Base(tipo);
-            Velocidade = Arquetipos.Velocidade(tipo, nivel);
+            Arquetipos.Ficha ficha = Arquetipos.Base(Tipo);
+            Velocidade = Arquetipos.Velocidade(Tipo, nivel);
             Precisao = ficha.Precisao;
             Resistencia = ficha.Resistencia;
             TaxaCrit = ficha.TaxaCrit;
             DanoCrit = ficha.DanoCrit;
         }
+
+        /// <summary>
+        /// Uma CÓPIA deste apóstolo no nível pedido. As habilidades são as mesmas instâncias (a lista
+        /// é que é nova) — elas já eram compartilhadas entre quem entra em campo, e o cooldown vive
+        /// no <c>Combate</c>, não nelas.
+        /// </summary>
+        public Personagem ComNivel(int nivel)
+            => new(Slot, Faccao, Nome, Simbolo, Tipo, nivel, Habilidades.ToArray());
 
         /// <summary>
         /// FICHA CRUA, com os números na mão — existe pros BONECOS: os alvos de isolamento da bancada

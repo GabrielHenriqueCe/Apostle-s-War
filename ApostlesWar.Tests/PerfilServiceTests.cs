@@ -38,7 +38,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), repo);
+            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo);
             return (new PerfilService(repo, apostolos, campanha), capitulos, apostolos, arsenal, campanha);
         }
 
@@ -99,9 +99,9 @@ namespace Tests
 
             // Uma campanha em andamento: venceu a 1ª do Reino, liberou os apóstolos e pegou o item.
             servico.CriarPerfil("Gabriel", "🕵️");
-            capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1);
-            capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1);
-            apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1);
+            capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
+            capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
+            apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
             arsenal.EquiparItem(arsenal.PreverItem(Faccao.Reino, Fases.Fase1));
             Assert.True(apostolos.ObterDesbloqueados().Count > 4);
 
@@ -109,8 +109,8 @@ namespace Tests
 
             Assert.Equal(4, apostolos.ObterDesbloqueados().Count);   // só os Humanos de volta
             Assert.All(apostolos.ObterDesbloqueados(), p => Assert.Equal(Faccao.Humanos, p.Faccao));
-            Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));
-            Assert.False(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2));
+            Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1, Dificuldade.Facil));
+            Assert.False(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2, Dificuldade.Facil));
             Assert.Empty(arsenal.ObterObtidos());
             Assert.All(arsenal.ObterEquipados(), item => Assert.Null(item));
         }
@@ -122,7 +122,7 @@ namespace Tests
             var (servico, capitulos, apostolos, arsenal, campanha) = MontarCompleto(repo);
 
             servico.CriarPerfil("Gabriel", "🕵️");
-            capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1);
+            capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
             capitulos.SalvarProgresso();
             campanha.CarregarSaves();
 
@@ -130,7 +130,7 @@ namespace Tests
             campanha.CarregarSaves();   // o boot seguinte, com o save já apagado
 
             Assert.Equal(4, apostolos.ObterDesbloqueados().Count);
-            Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));
+            Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1, Dificuldade.Facil));
             Assert.Empty(arsenal.ObterObtidos());
         }
 
@@ -173,7 +173,7 @@ namespace Tests
             Personagem doReino = personagens.ObterPorTipo(Faccao.Reino, TipoDeApostolo.Guardiao);
             Assert.False(servico.PodeUsarAvatar(doReino));
 
-            apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1);   // venceu a 1ª fase do Reino
+            apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);   // venceu a 1ª fase do Reino
 
             Assert.True(servico.PodeUsarAvatar(doReino));   // a cara do jogador é troféu de campanha
         }

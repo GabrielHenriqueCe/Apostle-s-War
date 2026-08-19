@@ -134,10 +134,11 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         public void CarregarSaves()
         {
-            _arsenal.CarregarItensEquipados();
             _capitulos.CarregarProgresso();
             _apostolos.CarregarApostolos();
-            _arsenal.CarregarItens();
+            // DEPOIS dos capítulos, e isso é load-bearing: um save antigo (sem inventário) reconstrói
+            // o acervo a partir das fases já concluídas, e antes daqui elas ainda não foram lidas.
+            _arsenal.CarregarItensEquipados();
             _progressao.Carregar();   // o nível do roster, por último: ele muta as instâncias já montadas
         }
 
@@ -171,18 +172,22 @@ namespace ApostlesWar.Application.Services
             _capitulos.DesbloquearFase(faccao, fase, dificuldade);
             _capitulos.ConcluirFase(faccao, fase, dificuldade);
             _apostolos.DesbloquearApostolos(faccao, fase, dificuldade);
-            Item? item = _arsenal.DroparItem(faccao, fase);
+            List<Item> itens = _arsenal.DroparItens(faccao, fase);
             _capitulos.DesbloquearFaccao(faccao, fase, dificuldade);
             _capitulos.SalvarProgresso();
             _arsenal.SalvarItens();
 
             var novos = _apostolos.ObterDesbloqueados().Except(antes).ToList();
-            return new RecompensaDaFase(novos, item);
+            return new RecompensaDaFase(novos, itens);
         }
     }
 
-    /// <summary>Os apóstolos desbloqueados NESTA vitória + o item dropado (null se a fase já tinha caído).</summary>
-    public record RecompensaDaFase(List<Personagem> NovosApostolos, Item? Item);
+    /// <summary>
+    /// Os apóstolos desbloqueados NESTA vitória + as peças que a fase largou. São
+    /// <see cref="ArsenalService.ItensPorFase"/> peças, e a lista nunca é nula: repetir a fase larga
+    /// mais quatro, porque a peça agora é instância e não uma casa de catálogo que já estava marcada.
+    /// </summary>
+    public record RecompensaDaFase(List<Personagem> NovosApostolos, List<Item> Itens);
 
     /// <summary>
     /// Um apóstolo no save. Facção + slot é a IDENTIDADE dele no jogo (é assim que o

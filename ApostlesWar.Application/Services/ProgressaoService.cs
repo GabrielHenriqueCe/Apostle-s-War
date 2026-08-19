@@ -97,7 +97,7 @@ namespace ApostlesWar.Application.Services
         /// <see cref="Arquetipos.Velocidade"/> lerem a estrela de fontes diferentes sem divergir.
         /// </summary>
         public bool NaParede(Personagem apostolo)
-            => EstrelasDe(apostolo) < Alma.EstrelaMaxima
+            => EstrelasDe(apostolo) < Material.EstrelaMaxima
             && Progressao.NivelPorXp(XpDe(apostolo)) > TetoDe(apostolo);
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace ApostlesWar.Application.Services
         /// </summary>
         public MotivoRecusa ComprarEstrela(Personagem apostolo)
         {
-            if (EstrelasDe(apostolo) >= Alma.EstrelaMaxima) return MotivoRecusa.NoTetoFinal;
+            if (EstrelasDe(apostolo) >= Material.EstrelaMaxima) return MotivoRecusa.NoTetoFinal;
             if (!NaParede(apostolo)) return MotivoRecusa.ForaDaParede;
 
             var receita = Alma.Receita(EstrelasDe(apostolo) + 1);

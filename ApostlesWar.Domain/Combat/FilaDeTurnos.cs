@@ -83,9 +83,23 @@ namespace ApostlesWar.Domain
         /// <c>null</c> só quando não há mais ninguém que possa agir (ver <see cref="TempoAteAlguemCruzar"/>).
         /// Não consome nada — quem consome é o <see cref="Consumir"/>, DEPOIS que a ação aconteceu.
         /// </summary>
+        /// <summary>
+        /// Quanto tempo a batalha ANDOU até agora, na unidade adimensional do medidor. Um ciclo de
+        /// referência vale <c>Limiar / VelocidadeDeReferencia</c> (ver <see cref="Ciclos"/>).
+        ///
+        /// Existe porque o nível do ITEM se paga por ciclo de combate, e não por turno do portador:
+        /// contar turno acoplaria a evolução do equipamento à Velocidade de quem o veste, e o rápido
+        /// subiria item em dobro. Tempo é a única unidade que todo mundo em campo compartilha.
+        /// </summary>
+        public double TempoDecorrido { get; private set; }
+
+        /// <summary>O tempo decorrido lido em CICLOS — a unidade em que o GDD escreve o ganho.</summary>
+        public double Ciclos => TempoDecorrido / (Limiar / VelocidadeDeReferencia);
+
         public Combate? Proximo()
         {
             double tempo = TempoAteAlguemCruzar(Retrato());
+            TempoDecorrido += tempo;
             foreach (Combate c in Vivos.Where(c => c.Velocidade > 0))
                 c.AcumularMedidor(c.Velocidade * tempo);
 

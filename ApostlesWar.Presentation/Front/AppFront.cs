@@ -178,7 +178,8 @@ namespace ApostlesWar.Presentation.Front
                 // O repositório e as configurações vêm de fora: a janela já precisou deles pra abrir
                 // no modo certo (ver RodarJanela), e duas instâncias seriam duas verdades.
                 var capitulos = new CapitulosService(repositorio);
-                var arsenal = new ArsenalService(capitulos, repositorio);
+                var po = new PoService(repositorio);
+                var arsenal = new ArsenalService(capitulos, po, repositorio);
                 var personagens = new PersonagemService();
                 var selecaoDeAlvo = new SelecaoDeAlvoService();
                 var apostolos = new ApostolosService(personagens, capitulos);

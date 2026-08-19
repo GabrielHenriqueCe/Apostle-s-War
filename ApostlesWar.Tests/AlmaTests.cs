@@ -57,7 +57,7 @@ namespace Tests
         [Fact]
         public void Estrelas_ConfereComAsCompradas()
         {
-            for (int estrelas = 0; estrelas <= Alma.EstrelaMaxima; estrelas++)
+            for (int estrelas = 0; estrelas <= Material.EstrelaMaxima; estrelas++)
             {
                 int piso = estrelas == 0 ? Arquetipos.NivelMinimo : 10 * estrelas;
                 for (int nivel = piso; nivel <= Progressao.TetoPorEstrelas(estrelas); nivel++)
@@ -225,7 +225,7 @@ namespace Tests
         [InlineData(Dificuldade.Dificil, Raridade.Lendario)]
         [InlineData(Dificuldade.Pesadelo, Raridade.Mitico)]
         public void TetoDeFusao_EAFaixaQueADificuldadeDerruba(Dificuldade dificuldade, Raridade teto)
-            => Assert.Equal(teto, Alma.TetoDeFusao(dificuldade));
+            => Assert.Equal(teto, Material.TetoDeFusao(dificuldade));
 
         [Fact]
         public void Fundir_DezViramUmEOTetoBloqueia()
@@ -292,7 +292,7 @@ namespace Tests
             Assert.All(Alma.Receita(ultimaEstrela), c =>
                 Assert.True(cai.Contains(c.Raridade), $"a {ultimaEstrela}ª estrela tem de ser pagável no {dificuldade}"));
 
-            if (ultimaEstrela < Alma.EstrelaMaxima)
+            if (ultimaEstrela < Material.EstrelaMaxima)
                 Assert.Contains(Alma.Receita(ultimaEstrela + 1), c => !cai.Contains(c.Raridade));
         }
 

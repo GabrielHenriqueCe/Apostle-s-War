@@ -591,6 +591,46 @@ da mesma sub — uma coisa que se persegue em vez de uma coisa que acontece.
 ter destinos que **competem** — vestir mais um apóstolo da frota, virar combustível do reforge, ou
 pagar a promoção de outra peça. **Por isso a taxa de drop do mítico cai:** ele deixou de ser só troféu.
 
+### O ACERVO — a tela por apóstolo, e o filtro *(desenho do Gabriel, ago/2026)*
+
+**A Forja é POR APÓSTOLO, e é assim que se entra nela:** clica no apóstolo, clica em Forja, e a tela
+mostra **os itens DELE** — cada apóstolo com os seus, nos 7 slots. Clicar num slot (a Arma, digamos)
+abre **todas as armas disponíveis** do acervo pra escolher qual vestir.
+
+> **É a consequência direta do item ser CUMULATIVO.** Com uma peça por (facção, fase) a lista cabia
+> numa tela e o filtro era desnecessário. Com 4 drops por fase, 56 fases e 4 dificuldades, o acervo
+> passa de mil peças — e escolher vira um problema de BUSCA, não de leitura.
+
+**O FILTRO tem de ser completo.** Os eixos, todos combináveis:
+
+| filtra por | o que faz |
+|---|---|
+| **nível** · **estrela** | a magnitude da peça |
+| **raridade** | quantas subs ela tem |
+| **facção** | de que conjunto ela é |
+| **stat principal** | qual dos principais do slot ela sorteou |
+| **subs, CONTENDO** | só as que têm aquela sub específica |
+| **subs, SEM CONTER** | só as que NÃO têm aquela sub |
+
+**E um filtro que ORDENA por stat somado, que é o que responde a pergunta real do jogador:** "qual
+peça me dá mais ATAQUE?" — e a conta soma **o principal com as subs juntos**, não só o principal.
+Escolhidos os stats que interessam, a lista sai pela que MAIS aumenta aquilo. **Também na ordem
+inversa** (a que menos dá), pra quem está procurando o que sacrificar.
+
+**Os conjuntos saem SEPARADOS POR FACÇÃO por padrão, nunca misturados** — é o que preserva a leitura
+de conjunto, que é a razão de a facção existir no item. **Mas há um botão que MISTURA TUDO**, e ele é
+parte do filtro: quem está atrás do maior (ou do menor) de um stat, sem se importar com conjunto,
+liga o botão e a separação some. É preferência do jogador, não regra do jogo — por isso é botão, e
+não decisão nossa.
+
+> **O LAYOUT NÃO PODE PASSAR DA TELA.** Filtro completo é fácil de transformar em painel que estoura
+> a janela e obriga a rolar — e aí ele fica feio e ninguém usa. O filtro cabe na tela, ou ele foi
+> desenhado errado.
+
+**Quando isto entra:** a tela por apóstolo é o PR do *"item vai pro apóstolo"*; os eixos de raridade e
+sub do filtro só existem depois que raridade e subs existirem. O filtro de nível, estrela, facção e
+principal já é implementável no primeiro dos dois.
+
 ### AS DUNGEONS — a fonte dos acessórios
 
 **Duas dungeons**, uma por acessório (colar, pulseira). É o que leva o conjunto a 9 peças.

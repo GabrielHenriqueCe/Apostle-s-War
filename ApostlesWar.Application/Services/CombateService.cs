@@ -121,6 +121,8 @@ namespace ApostlesWar.Application.Services
                 fila.Consumir(daVez);
             }
 
+            _relogio.AcumularCiclos(fila.Ciclos);   // a onda acabou; o que ela andou entra no total da fase
+
             return batalha.Equipe1.TemVivos();   // Equipe1 = jogador na campanha
         }
 
@@ -642,6 +644,8 @@ namespace ApostlesWar.Application.Services
             int totalDeInimigos = fas.Rodada1.Count + fas.Rodada2.Count;
             int porInimigo = Progressao.PoteDaFase((int)capitulo, (int)fase, dificuldade) / totalDeInimigos;
 
+            _relogio.ReiniciarFase();   // os ciclos que pagam o item são desta fase, não da anterior
+
             var jogador = time.Select(p => (Combate)new Jogador(p)).ToList();
             foreach (Combate c in jogador)
                 _arsenalService.AplicarItens(c);
@@ -661,6 +665,9 @@ namespace ApostlesWar.Application.Services
 
                 int pote = mortos * porInimigo;
                 _progressaoService.Creditar(time, pote);
+                // O uso paga o EQUIPAMENTO, e paga na derrota também — quem tentou a fase acima do
+                // próprio nível e caiu não sai de mãos vazias. Os ciclos são os das duas ondas.
+                _arsenalService.CreditarUso(dificuldade, _relogio.CiclosDaFase, venceu);
                 // A alma segue a MESMA regra da XP: por inimigo morto, e não dividida entre o time —
                 // é pote do jogador, não do apóstolo. Quem sobe quatro paga quatro estrelas.
                 _almaService.Creditar(dificuldade, mortos);

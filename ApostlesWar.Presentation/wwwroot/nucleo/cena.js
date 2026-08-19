@@ -43,7 +43,7 @@ export function mostrarCena(cena) {
     document.getElementById('campanhaFases').hidden = cena !== 'campanhaFases';
     document.getElementById('fimDeFase').hidden = cena !== 'fimDeFase';
     document.getElementById('conquista').hidden = cena !== 'conquista';
-    document.getElementById('arsenal').hidden = cena !== 'arsenal';
+    document.getElementById('catedral').hidden = cena !== 'catedral';
     document.getElementById('compendio').hidden = cena !== 'compendio';
     // A ficha do apóstolo tem UMA seção e dois donos: o compêndio e a conquista (o apóstolo recém-ganho
     // termina na própria ficha). Copiar o HTML pra ter duas telas iguais seria duas telas pra manter.
@@ -75,7 +75,7 @@ export function mostrarCena(cena) {
 ///                porque o Esc tem de voltar pra lugares diferentes.
 ///   `anterior` — de onde se veio, entregue ao `montar`. Sem isto, uma tela que pergunta "eu já
 ///                estava aqui?" recebe sempre "sim": quem troca a cena é esta função, ANTES do
-///                montar, e foi assim que o arsenal parou de zerar o slot aberto.
+///                montar, e foi assim que a Catedral parou de zerar o slot aberto.
 export function abrirTela(tela, dados, cena = tela.cena) {
     const anterior = cenaAgora();
     mostrarCena(cena);

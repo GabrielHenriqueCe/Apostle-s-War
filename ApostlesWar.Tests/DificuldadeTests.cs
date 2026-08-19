@@ -134,7 +134,7 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var personagens = new PersonagemService();
-            var progressao = new ProgressaoService(personagens, repo);
+            var progressao = new ProgressaoService(personagens, new AlmaService(repo), repo);
 
             var solo = new List<Personagem> { personagens.ObterPersonagem(Faccao.Reino, Slot.Slot1) };
             progressao.Creditar(solo, 4_000);
@@ -148,24 +148,30 @@ namespace Tests
         }
 
         /// <summary>
-        /// A XP vira NÍVEL na hora, e o nível vira ficha: quem sobe bate mais forte. O save guarda só a
-        /// XP — o nível é derivado dela, e é por isso que as duas nunca discordam.
+        /// A XP vira NÍVEL na hora, e o nível vira ficha: quem sobe bate mais forte. Mas ela para na
+        /// parede — quem abre a dezena seguinte é a ESTRELA, e a XP que sobrou salta assim que ela é
+        /// comprada.
         /// </summary>
         [Fact]
         public void Creditar_SobeONivelEAFicha()
         {
             var repo = new RepositorioFake();
             var personagens = new PersonagemService();
-            var progressao = new ProgressaoService(personagens, repo);
+            var alma = new AlmaService(repo);
+            var progressao = new ProgressaoService(personagens, alma, repo);
 
             Personagem p = personagens.ObterPersonagem(Faccao.Misticos, Slot.Slot1);
             int hpAntes = p.HP;
 
             progressao.Creditar(new List<Personagem> { p }, Progressao.XpParaNivel(10));
 
-            Assert.Equal(10, p.Nivel);
+            Assert.Equal(9, p.Nivel);   // XP de sobra e nenhuma estrela: para na 1ª parede
             Assert.True(p.HP > hpAntes);
             Assert.True(repo.Contem("progressao"));
+
+            alma.Creditar(Dificuldade.Facil, 100);
+            Assert.Equal(MotivoRecusa.Nenhum, progressao.ComprarEstrela(p));
+            Assert.Equal(10, p.Nivel);   // a XP guardada na parede entra de uma vez
 
             progressao.Resetar();   // devolve disco E memória: as instâncias são compartilhadas
             Assert.Equal(Arquetipos.NivelMinimo, p.Nivel);
@@ -177,15 +183,39 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var personagens = new PersonagemService();
-            var salvando = new ProgressaoService(personagens, repo);
+            var alma = new AlmaService(repo);
+            var salvando = new ProgressaoService(personagens, alma, repo);
 
             Personagem p = personagens.ObterPersonagem(Faccao.Folclore, Slot.Slot2);
+            alma.Creditar(Dificuldade.Facil, 100);
             salvando.Creditar(new List<Personagem> { p }, Progressao.XpParaNivel(20));
+            salvando.ComprarEstrela(p);   // 9 → 19
+            salvando.ComprarEstrela(p);   // 19 → 20, que é o que a XP paga
             p.AplicarNivel(Arquetipos.NivelMinimo);   // finge que o jogo reabriu com o roster cru
 
-            new ProgressaoService(personagens, repo).Carregar();
+            new ProgressaoService(personagens, new AlmaService(repo), repo).Carregar();
 
             Assert.Equal(20, p.Nivel);
+        }
+
+        /// <summary>
+        /// O save de ANTES da estrela comprada não tinha o campo. Sem a dedução do
+        /// <see cref="ProgressaoService.Carregar"/>, todo apóstolo já nivelado despencaria pro 9.
+        /// </summary>
+        [Fact]
+        public void Carregar_SaveAntigoDeduzAEstrelaDoNivel()
+        {
+            var repo = new RepositorioFake();
+            var personagens = new PersonagemService();
+
+            repo.Salvar("progressao", new List<ApostoloProgredido>
+            {
+                new(Faccao.Reino, Slot.Slot3, Progressao.XpParaNivel(34), Estrelas: null),
+            });
+
+            new ProgressaoService(personagens, new AlmaService(repo), repo).Carregar();
+
+            Assert.Equal(34, personagens.ObterPersonagem(Faccao.Reino, Slot.Slot3).Nivel);
         }
     }
 }

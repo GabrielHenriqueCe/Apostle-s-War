@@ -262,6 +262,7 @@ body {
    ========================================================================== */
 .opcaoMenu, .faseBtn, .itemCard, .habilidade,
 .avatarCelula, .compApostolo, .bonecoSlot, .apostoloHab, .itemPremio,
+.rosterCard, .afBotao, .qlBotao,
 #velocidade, #auto, #alternarLog, #alternarEstatisticas,
 #faseSortear, .setupSortear, #editarNomeBtn,
 #modalBotoes button, #fasesRodape button, #setupRodape button,
@@ -277,6 +278,7 @@ body {
 .opcaoMenu:hover:not(:disabled), .faseBtn:hover:not(:disabled),
 .habilidade:hover:not(:disabled), .avatarCelula:hover:not(.bloqueado),
 .compApostolo:hover, .bonecoSlot:hover,
+.rosterCard:hover, .afBotao:hover:not(:disabled), .qlBotao:hover:not(:disabled),
 #velocidade:hover, #auto:hover, #alternarLog:hover, #alternarEstatisticas:hover,
 #faseSortear:hover, .setupSortear:hover, #editarNomeBtn:hover,
 #modalBotoes button:hover, #fasesRodape button:hover, #setupRodape button:hover,
@@ -311,7 +313,28 @@ body {
     flex: 1; min-width: 0; height: 3px;
     background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden;
 }
-.bnCheio { display: block; height: 100%; background: var(--ouro); }
+/* O PREENCHIMENTO, e ele e UM so: a barra de nivel do card, a da ficha e a do fim de fase eram tres
+   receitas para a mesma coisa. A paleta vem do MEDIDOR DE TURNO (as paradas), que ja e a escala de
+   calor da casa — mas a ESCALA nao vem junto: o medidor mede quanto se passou de 100% e vai ate 500,
+   e nivel nao tem 500%. Copiar a rampa faria a barra dizer o que ela nao mede.
+   Comeca no ambar da parada 2, e nao no branco da 1: branco aqui e a cor do medidor pronto pra agir. */
+.bnCheio {
+    display: block; height: 100%;
+    background: linear-gradient(90deg, var(--parada-2) 0%, var(--parada-3) 100%);
+}
+/* A PREVISAO — o que a barra ficaria SE o jogador confirmasse. Brasa por cima do ambar, o mesmo par
+   quente-mais-quente das paradas 3 e 4, e listrada pra ler como 'ainda nao e teu'. */
+.bnPrevisao {
+    position: absolute; top: 0; bottom: 0;
+    background: repeating-linear-gradient(115deg,
+        var(--parada-5) 0 5px, color-mix(in srgb, var(--parada-5) 55%, #000) 5px 10px);
+    animation: previsaoPulsa 1.1s ease-in-out infinite;
+}
+@keyframes previsaoPulsa { 0%, 100% { opacity: .78; } 50% { opacity: 1; } }
+.bnTrilho { position: relative; }
+
+/* O stat que a evolucao vai mexer, na propria linha da ficha. */
+.apostoloStat.subindo .csValor { color: var(--parada-3); font-weight: 700; }
 
 /* Na FICHA a barra é maior — ali há espaço, e é a tela onde se olha o apóstolo de perto. */
 #apostoloNivel { max-width: 220px; margin: 6px auto 0; }
@@ -359,7 +382,7 @@ body {
    `letter-spacing` positivo é obrigatório aqui — serifa em caixa alta sem entreletra fica apertada
    e some a cunha, que é justamente o que dá o ar forjado. */
 #menuTitulo, #criarPerfil h1, #compendio h1, #fasesTitulo, #fimFaseTitulo,
-#apostoloNome, #conquistaNome, #arsenalSlotNome, #retratoNome,
+#apostoloNome, #conquistaNome, #forjaSlotNome, #retratoNome,
 .compFaccaoNome, .faseGrupoTitulo, .recompensaTitulo, .atTitulo,
 .opcaoMenu .opRotulo, .faseBtn .faseNome, .itemCard .icNome, .habilidade .hNome,
 .compApostolo .ccNome, .avatarCelula .aNome, .nome {
@@ -375,8 +398,9 @@ body {
 
 /* `#menuNomeBox` fica FORA: ele é pílula (`border-radius: 23px`) porque casa com a curva do círculo
    do avatar ao emergir de trás dele. Chanfro ali brigaria com o círculo — a curva é o ponto. */
-#setupPicker, #fasePicker, #arsenalDetalhe, #arsenalTotais, #modalCaixa,
+#setupPicker, #fasePicker, #forjaDetalhe, #forjaTotais, #modalCaixa,
 #apostoloArte, #apostoloStats, #apostoloHabilidades, #nomePerfil,
+#catedralFicha, #catedralEstacao, #catedralElenco, .qTrilho,
 #nomeEditar {
     border: 1px solid var(--poco-borda);
     border-radius: var(--corte) 0 var(--corte) 0;
@@ -390,7 +414,7 @@ body {
    antes da Forja, e isso está certo: uma tela tem UMA ação esperada, e ela não deve competir com o
    resto por atenção — ela vence de saída. Placa aqui rebaixaria essas quatro ao nível dos botões
    comuns. Elas levam o chanfro e nada mais muda. */
-#setupLutar, #fasesLutar, #confirmarPerfil, .noEntrar {
+#setupLutar, #fasesLutar, #confirmarPerfil, .noEntrar, .acaoConfirmar {
     border: none;
     border-radius: var(--corte) 0 var(--corte) 0;
     corner-shape: bevel;
@@ -1125,27 +1149,214 @@ body {
 #conquistaDica { color: var(--ouro); }
 
 /* ---------- Arsenal (boneco + itens) ---------- */
-#arsenal {
+#catedral {
     position: absolute; inset: 0; z-index: 30;
     display: flex; flex-direction: column; align-items: center; gap: 16px;
     padding: 20px; overflow-y: auto;
     background: var(--ceu);
 }
-#arsenal[hidden] { display: none; }
-#arsenal h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
+#catedral[hidden] { display: none; }
+#catedral h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
 
-/* Boneco à esquerda, totais à direita. O boneco continua sendo o centro da tela: a coluna dos
-   totais tem largura FIXA e o grid é `auto auto` centralizado, então ela cresce pro lado sem
-   arrastar o boneco de lugar quando um item novo entra na conta. */
-#arsenalCorpo {
+/* ---- A ALMINHA ----
+   As seis cores das faixas. Elas valem pro jogo INTEIRO (alma hoje, item e apóstolo depois), então
+   moram em variável e não no seletor da alma — a raridade é um eixo do jogo, não um enfeite dela.
+   A escada é a de sempre: cinza · verde · azul · roxo · laranja · vermelho. */
+:root {
+    --r-comum: #9aa3ad;
+    --r-incomum: #5fbf6a;
+    --r-raro: #4f8fe0;
+    --r-epico: #a86fd6;
+    --r-lendario: #e0a13c;
+    --r-mitico: #e05a5a;
+}
+
+/* A COR DA ALMINHA — matiz girado no próprio emoji.
+   Dá pra pintar emoji, e aqui dá com seguranca: o jogo roda em WebView2 no Windows, uma fonte de
+   emoji SÓ (Segoe UI Emoji), então o giro rende igual em toda máquina que roda o .exe. Num
+   navegador qualquer isso seria loteria — aqui não é.
+   O 🔥 nasce laranja (~25°), e cada faixa gira a partir DALI. O `saturate` compensa o que o giro
+   lava, e o `brightness` devolve o corpo que ele tira. */
+.alminha {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: calc(var(--alma-tam, 18px) * 1.16);
+    height: calc(var(--alma-tam, 18px) * 1.16);
+    font-size: var(--alma-tam, 18px); line-height: 1;
+}
+.alminha-comum { filter: grayscale(1) brightness(1.15); }
+.alminha-incomum { filter: hue-rotate(78deg) saturate(1.5) brightness(1.05); }
+.alminha-raro { filter: hue-rotate(175deg) saturate(1.7) brightness(1.05); }
+.alminha-epico { filter: hue-rotate(232deg) saturate(1.5) brightness(1.1); }
+/* Lendário é o 🔥 quase cru: ele já nasce da cor deles. */
+.alminha-lendario { filter: hue-rotate(-8deg) saturate(1.35) brightness(1.12); }
+.alminha-mitico { filter: hue-rotate(-28deg) saturate(2) brightness(.98); }
+/* As duas do topo brilham: são as que o jogador está caçando. */
+.alminha-lendario, .alminha-mitico { text-shadow: 0 0 8px rgba(255,180,90,.75); }
+.almaChip { display: flex; align-items: center; gap: 6px; }
+.almaChip .acQtd { margin-left: auto; }
+.acQtd { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* A faixa de saldo é PLACA (está na lista): erguida e clicável, porque ela também é a porta da
+   fusão. Aqui só o que é próprio dela — o resto vem do idioma. */
+
+/* ---- a linha de uma faixa, nos dois painéis ---- */
+.faixaLinha { display: flex; flex-direction: column; gap: 3px; }
+.faixaLinha.vazia { opacity: .45; }
+.flTopo { display: flex; align-items: center; gap: 8px; }
+.flNome { font-size: 13px; }
+.flQtd { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.flNota { margin-left: auto; font-size: 11px; color: var(--apagado); font-style: italic; }
+
+/* ---- A BARRA DE QUANTIDADE: `0 ———[ 47 ]——— 150` ----
+   O trilho é POÇO (está na lista): a barra é uma calha por onde o polegar corre, e calha é peça
+   afundada. O polegar é a peça erguida — é ele que se pega. */
+.quantidade { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
+.quantidade.vazia { opacity: .5; }
+.qPonta { font-size: 11px; color: var(--apagado); font-variant-numeric: tabular-nums; }
+.fogoContado { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.fcQtd { font-size: 12px; font-weight: 700; color: var(--texto); font-variant-numeric: tabular-nums; }
+
+.qTrilho { position: relative; padding: 14px 8px 6px; }
+.qBarra { display: block; width: 100%; margin: 0; accent-color: var(--ouro); cursor: pointer; }
+.qBarra:disabled { cursor: default; }
+
+/* A bolha ANDA com o polegar (o JS move o `left`), e o translate de -50% é o que a centra sobre
+   ele em vez de deixá-la começando nele. */
+.qBolha {
+    position: absolute; top: 0; transform: translateX(-50%);
+    padding: 0 6px; pointer-events: none;
+    font-size: 12px; font-weight: 700; color: var(--ouro);
+    font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px #000;
+}
+.quantidade.cheia .qBolha { color: var(--rotulo-aceso, var(--ouro)); }
+
+/* ---- fim de fase: o que cada apóstolo levou ---- */
+.ganhoLista { display: flex; flex-direction: column; gap: 8px; }
+.ganhoLinha {
     display: grid;
-    grid-template-columns: auto auto;
-    gap: 22px;
+    grid-template-columns: auto 1fr 56px minmax(90px, 1fr) auto;
+    align-items: center; gap: 4px 10px;
+}
+.glEmoji { font-size: 24px; line-height: 1; }
+.glNome { font-size: 13px; }
+.glNivel { font-size: 12px; color: var(--apagado); font-variant-numeric: tabular-nums; }
+/* Mais largo que o trilho do card: aqui ele é o protagonista, e é nele que se vê o enchimento. */
+.glTrilho { height: 8px; border-radius: 4px; }
+.glXp { font-size: 13px; font-weight: 700; color: var(--vida); font-variant-numeric: tabular-nums; }
+/* Cheia e ACESA = travado na parede. É o instante em que a estrela passa a fazer falta. */
+.bnCheio.travada { box-shadow: 0 0 8px var(--parada-3); }
+
+.glStats { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.glStat { display: flex; align-items: baseline; gap: 5px; font-size: 12px; }
+.gsIcone { font-size: 12px; }
+.gsRotulo { color: var(--apagado); }
+.gsValor { font-weight: 700; color: var(--vida); font-variant-numeric: tabular-nums; }
+
+.almaGanhaLista { display: flex; flex-direction: column; gap: 4px; }
+.almaGanhaLinha { display: flex; justify-content: space-between; gap: 12px; }
+.agNome { font-size: 13px; color: var(--apagado); }
+.agValor { font-size: 14px; font-weight: 700; color: var(--ouro); font-variant-numeric: tabular-nums; }
+
+/* TRÊS colunas: o roster, o apóstolo, os itens. As laterais têm largura FIXA e o centro é `auto`,
+   então trocar de apóstolo não move nada de lugar — a ficha do meio fica ancorada mesmo quando um
+   apóstolo tem nome mais longo que o outro.
+   A 3ª coluna é compartilhada: #forja e #catedralEstacao caem na MESMA célula, e só um dos
+   dois está visível por vez (ver catedral.js). */
+/* QUATRO colunas, e o apóstolo no centro óptico. O elenco (518) absorveu a coluna que estava
+   reservada e virou grade de 4 por linha; do outro lado, portas (172) + estação (330) + o vão de 16
+   dão os mesmos 518. É essa simetria que segura o apóstolo no meio.
+   TUDO FIXO: com fração o grid se redistribui a cada troca de conteúdo e a coluna da esquerda anda
+   pro lado (o "samba"). E a última coluna é compartilhada — a Forja em repouso e a estação aberta
+   caem na MESMA célula, e só uma aparece por vez. */
+#catedralCorpo {
+    display: grid;
+    grid-template-columns: 518px 330px 172px 330px;
+    gap: 16px;
     align-items: start;
     justify-content: center;
 }
+#forja, #catedralEstacao { grid-column: 4; grid-row: 1; }
+#forja[hidden], #catedralEstacao[hidden] { display: none; }
 
-#arsenalTotais {
+#forja { display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%; }
+
+/* ---- coluna 4: o saldo e as portas ---- */
+#catedralEstacoes { display: flex; flex-direction: column; gap: 10px; }
+#catedralPortas { display: flex; flex-direction: column; gap: 5px; }
+/* ---- coluna 1: o roster ---- */
+#catedralElenco {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    max-height: 74vh; overflow-y: auto;
+    padding: 8px 6px;
+}
+.rosterCard {
+    position: relative;   /* as marcas (tipo/estrelas) são absolute: sem isto elas fogem pro canto da TELA */
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 16px 4px 6px; cursor: pointer;
+    color: inherit; font: inherit;
+}
+.rosterCard.selecionado { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
+.rosterCard .rcEmoji { font-size: 28px; line-height: 1; }
+.rosterCard .rcNome { font-size: 10px; color: var(--apagado); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- coluna 2: o apostolo ---- */
+#catedralFicha {
+    width: 100%;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 10px 12px;
+}
+#catedralArte { font-size: 62px; line-height: 1; }
+.afNome { font-family: var(--titulo); font-size: 20px; letter-spacing: .06em; color: var(--ouro); }
+.afFaccao { font-size: 12px; color: var(--apagado); }
+.afNivel { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: 4px; width: 100%; }
+.afNivel .barraNivel { max-width: 260px; }
+.afNivel .bnTrilho { height: 9px; border-radius: 3px; }
+.afNivelNumero { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--apagado); }
+/* Travado fica OURO, nao vermelho: a parede nao e erro, e uma compra esperando. */
+.afNivelNumero.travado { color: var(--ouro); font-weight: 700; }
+.afNivelNumero.previsto { color: var(--parada-3); font-weight: 700; }
+.afMotivo { font-size: 12px; color: var(--apagado); font-style: italic; text-align: center; }
+
+.afAcoes { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 8px; }
+.afBotao {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; cursor: pointer;
+    color: inherit; font: inherit;
+}
+.afBotao.aberto { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
+.afBotao:disabled { opacity: .4; cursor: default; }
+/* semSaldo NAO desabilita: o painel e onde o jogador descobre o que falta, e um botao morto nao
+   ensina nada. So apaga o realce. */
+.afBotao.semSaldo .abRotulo { color: var(--apagado); }
+.abIcone { font-size: 18px; }
+.abRotulo { font-size: 13px; font-weight: 700; }
+.abNota { margin-left: auto; font-size: 11px; color: var(--apagado); font-style: italic; }
+
+/* ---- coluna 3, modo acao ---- */
+#catedralEstacao {
+    width: 100%;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 10px 12px;
+}
+.acaoRotulo {
+    font-family: var(--titulo);
+    font-size: 12px; color: var(--ouro);
+    text-transform: uppercase; letter-spacing: .13em;
+}
+.acaoAviso { font-size: 12px; color: var(--apagado); font-style: italic; }
+.almaLinha { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.alNome { font-size: 13px; color: var(--apagado); margin-right: auto; }
+.alValor { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.almaLinha.faltando .alValor { color: #d96b6b; }
+.qlMaximo { align-self: flex-end; }
+.queimaResumo { font-size: 12px; color: var(--apagado); font-variant-numeric: tabular-nums; }
+
+.qlBotao { padding: 4px 12px; cursor: pointer; font: inherit; font-size: 12px; color: inherit; }
+.acaoConfirmar { margin-top: 2px; padding: 9px 14px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.qlBotao:disabled, .acaoConfirmar:disabled { opacity: .35; cursor: default; }
+#forjaTotais {
     width: 210px;
     display: flex; flex-direction: column; gap: 6px;
     padding: 12px 14px;
@@ -1182,23 +1393,23 @@ body {
 .bonecoSlot .bsEmoji { font-size: 34px; line-height: 1; }
 .bonecoSlot .bsNome { font-size: 11px; color: var(--apagado); }
 
-#arsenalDetalhe {
-    width: min(560px, 94vw);
+#forjaDetalhe {
+    width: 100%;   /* a 3ª coluna já tem a largura; medir de novo aqui era o que fazia ela pular */
     display: flex; flex-direction: column; gap: 8px;
     padding: 12px 16px; border: 1px solid var(--borda); border-radius: 12px; background: rgba(0, 0, 0, .22);
 }
-#arsenalDetalhe[hidden] { display: none; }
-#arsenalSlotNome { font-size: 15px; font-weight: 700; color: var(--ouro); }
+#forjaDetalhe[hidden] { display: none; }
+#forjaSlotNome { font-size: 15px; font-weight: 700; color: var(--ouro); }
 
 /* Rolável: um slot com muitos itens obtidos empurrava o resto da tela pra fora (a cena inteira
    rolava, e o boneco saía de vista junto). Agora só a LISTA rola, e o boneco fica parado. */
-#arsenalItens {
+#forjaItens {
     display: flex; flex-direction: column; gap: 6px;
     max-height: 38vh;
     overflow-y: auto;
     padding-right: 4px;   /* respiro pra a barra não encostar nos cards */
 }
-.arsenalVazio { color: var(--apagado); font-size: 13px; font-style: italic; }
+.catedralVazio { color: var(--apagado); font-size: 13px; font-style: italic; }
 
 .itemCard {
     --corte: 10px;

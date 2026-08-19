@@ -16,6 +16,7 @@ namespace ApostlesWar.Application.Services
         private readonly ApostolosService _apostolosService;
         private readonly PersonagemService _personagemService;
         private readonly ProgressaoService _progressaoService;
+        private readonly AlmaService _almaService;
         private readonly ITelaDeCombate _tela;
         private readonly SelecaoDeAlvoService _selecaoDeAlvoService;
         private readonly IControladorDeTurno _controladorJogador;
@@ -31,7 +32,7 @@ namespace ApostlesWar.Application.Services
 
         public CombateService(ArsenalService arsenalService,
             ApostolosService apostolosService, PersonagemService personagemService,
-            ProgressaoService progressaoService, ITelaDeCombate tela,
+            ProgressaoService progressaoService, AlmaService almaService, ITelaDeCombate tela,
             SelecaoDeAlvoService selecaoDeAlvoService, IControladorDeTurno controladorJogador,
             IControladorDeTurno controladorBot, IApresentacao apresentacao, RelogioDoCombate relogio)
         {
@@ -39,6 +40,7 @@ namespace ApostlesWar.Application.Services
             _apostolosService = apostolosService;
             _personagemService = personagemService;
             _progressaoService = progressaoService;
+            _almaService = almaService;
             _tela = tela;
             _selecaoDeAlvoService = selecaoDeAlvoService;
             _controladorJogador = controladorJogador;
@@ -659,6 +661,9 @@ namespace ApostlesWar.Application.Services
 
                 int pote = mortos * porInimigo;
                 _progressaoService.Creditar(time, pote);
+                // A alma segue a MESMA regra da XP: por inimigo morto, e não dividida entre o time —
+                // é pote do jogador, não do apóstolo. Quem sobe quatro paga quatro estrelas.
+                _almaService.Creditar(dificuldade, mortos);
                 return new ResultadoDaFase(venceu ? ResultadoFase.Venceu : ResultadoFase.Perdeu,
                     time.Count == 0 ? 0 : pote / time.Count);
             }
@@ -706,8 +711,14 @@ namespace ApostlesWar.Application.Services
 
             bool venceu = ExecutarCombate(batalha);
 
-            // Conta os mortos DEPOIS da rodada, inclusive quando ela foi perdida: matou um e caiu,
+            // Conta os CORPOS no fim da rodada, inclusive quando ela foi perdida: matou um e caiu,
             // ganhou o dele.
+            //
+            // <b>NÃO trocar por um contador de eventos de morte.</b> Quem revive (o Zumbi, a
+            // Necromancia) morreria duas vezes e pagaria XP e alma em dobro — e derrubar-reviver-
+            // derrubar viraria a melhor fazenda do jogo. Contando corpo, o revivido só paga quando
+            // FICA caído; o preço é o inverso, e é o certo: matar e perder antes de ele cair de vez
+            // não paga, porque a morte foi desfeita.
             mortos = inimigo.Count(c => !c.EstaVivo());
             return venceu;
         }

@@ -38,7 +38,7 @@ namespace Tests
             var capitulos = new CapitulosService(repo);
             var arsenal = new ArsenalService(capitulos, repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
-            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), repo), repo);
+            var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo);
             return (new PerfilService(repo, apostolos, campanha), capitulos, apostolos, arsenal, campanha);
         }
 

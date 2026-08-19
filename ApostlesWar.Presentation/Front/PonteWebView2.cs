@@ -113,7 +113,7 @@ namespace ApostlesWar.Presentation.Front
         /// <summary>A tela de um apóstolo recém-conquistado. A resposta volta como "continuar".</summary>
         public void EnviarConquista(ApostoloDetalheVista apostolo) => Enviar("conquista", apostolo);
 
-        public void EnviarArsenal(ArsenalVista arsenal) => Enviar("arsenal", arsenal);
+        public void EnviarCatedral(CatedralVista catedral) => Enviar("catedral", catedral);
 
         // ---------- Compêndio ----------
         // Duas telas, duas mensagens: a grade e a ficha. Poderiam ser uma só (mandar o catálogo com

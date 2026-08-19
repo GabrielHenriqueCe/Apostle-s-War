@@ -221,6 +221,15 @@ namespace ApostlesWar.Presentation.Front
     /// </summary>
     internal record ArenaConfig(int[] Time1, int[] Time2, bool Bot1, bool Bot2);
 
+    /// <summary>Uma faixa de uma queima: o valor do enum <see cref="Raridade"/> e quanto dela.</summary>
+    internal record FaixaQueimada(int Raridade, int Quantidade);
+
+    /// <summary>
+    /// A queima pedida pela tela. Vem com VÁRIAS faixas porque o painel tem uma barrinha por
+    /// raridade e um botão só de confirmar — o jogador monta a mistura e manda de uma vez.
+    /// </summary>
+    internal record QueimaPedida(List<FaixaQueimada> Faixas);
+
     // ---------- Campanha ----------
 
     /// <summary>
@@ -276,7 +285,8 @@ namespace ApostlesWar.Presentation.Front
     /// pro capítulo seguinte, e prometer "Próxima Fase" quando o que vem é outro capítulo seria
     /// esconder do jogador que ele está mudando de lugar.
     /// </summary>
-    internal record FimDeFaseVista(bool Venceu, RecompensaVista? Recompensa, int Xp, bool PodeProxima,
+    internal record FimDeFaseVista(bool Venceu, RecompensaVista? Recompensa, int Xp,
+        List<GanhoVista> Ganhos, List<AlmaVista> Alma, bool PodeProxima,
         bool ProximoECapitulo, bool ComOpcoes);
 
     /// <summary>
@@ -384,9 +394,78 @@ namespace ApostlesWar.Presentation.Front
     internal record BonusVista(string Stat, string Valor);
 
     /// <summary>
-    /// O arsenal: os 7 slots (equipados), o TOTAL que eles dão e todos os itens obtidos (pra escolher
-    /// ao clicar um slot).
+    /// Uma quantia de alma: a faixa escrita, quanto, e o que UMA unidade dela vale queimada. O front
+    /// não faz essa conta — <see cref="Alma.XpPorAlma"/> é regra, e regra atravessa a ponte pronta.
     /// </summary>
-    internal record ArsenalVista(List<SlotArsenalVista> Slots, List<BonusVista> Totais,
-        List<ItemArsenalVista> Obtidos);
+    /// <summary>
+    /// Uma quantia de alma. <see cref="Raridade"/> é o VALOR do enum e não a posição na lista: as
+    /// listas de preço e de queda vêm filtradas, então índice não serve de identidade — e é por ele
+    /// que a tela escolhe a cor e o desenho da alminha.
+    /// </summary>
+    internal record AlmaVista(int Raridade, string Nome, int Quantidade, int XpPorUnidade,
+        int Max = 0, bool PodeFundir = false);
+
+    /// <summary>
+    /// Um stat que mudou de nível pra nível. Só entra na lista o que MEXEU — mostrar oito linhas com
+    /// seis delas em "+0" enterra as duas que importam.
+    /// </summary>
+    internal record DeltaStatVista(string Icone, string Rotulo, int De, int Ate);
+
+    /// <summary>
+    /// Um pedaço da barra de XP a encher, dentro de UM nível: <c>de</c> e <c>ate</c> em 0..100.
+    ///
+    /// A animação vem fatiada do C# porque atravessar nível é encher-zerar-encher, e descobrir ONDE
+    /// cada nível vira exige a curva de XP — que é regra e não pode ter cópia do outro lado da ponte
+    /// (mesmo motivo do <c>Posicao</c> do perfil de distância). O front só toca os trechos em ordem.
+    /// </summary>
+    internal record TrechoDeNivel(int Nivel, int De, int Ate);
+
+    /// <summary>
+    /// O que UM apóstolo levou da fase: a XP, os trechos de barra a animar e o que os stats ganharam
+    /// se ele subiu. <see cref="Travou"/> = terminou na parede — a barra fica cheia e acesa, que é
+    /// como o jogador descobre que agora precisa de estrela.
+    /// </summary>
+    internal record GanhoVista(string Simbolo, string TipoSimbolo, string Nome, int XpGanha,
+        List<TrechoDeNivel> Trechos, bool Travou, List<DeltaStatVista> Stats);
+
+    /// <summary>
+    /// O apóstolo selecionado na tela de aprimorar: a ficha (a mesma do compêndio) e o estado dos
+    /// eixos que se compram.
+    ///
+    /// <see cref="Teto"/> é o nível máximo que as estrelas dele permitem hoje, e ele aparece NA TELA
+    /// (<c>nv 24 / 29</c>): a parede tem de ser legível antes de o jogador bater nela.
+    /// <see cref="Motivo"/> é o texto do que está bloqueando — vazio quando dá pra agir.
+    /// </summary>
+    internal record AprimorarVista(ApostoloDetalheVista Ficha,
+        int Estrelas, int Teto, bool NaParede,
+        List<AlmaVista> Receita, List<AlmaVista> Faltando,
+        bool PodeComprarEstrela, bool PodeQueimar, string Motivo,
+        int XpAtual, int XpAteAParede, List<LimiarVista> Limiares, List<StatsDoNivel> PorNivel);
+
+    /// <summary>
+    /// A ficha dele em CADA nível que ele ainda pode alcançar. É com ela que a tela mostra o
+    /// `1.240 → 1.380` ENQUANTO o jogador arrasta a barra, antes de gastar alma nenhuma — a conta de
+    /// stat por nível é do <c>Arquetipos</c> e não pode ter cópia do outro lado da ponte.
+    /// </summary>
+    internal record StatsDoNivel(int Nivel, int HP, int Ataque, int Defesa,
+        int Velocidade, int Precisao, int Resistencia);
+
+    /// <summary>
+    /// Quanta XP ACUMULADA um nível exige. A tela usa a lista pra dizer "nv 7 → nv 9" enquanto o
+    /// jogador arrasta a barra da queima: é busca numa tabela, e não a curva copiada pro JS.
+    /// </summary>
+    internal record LimiarVista(int Nivel, int Xp);
+
+    /// <summary>
+    /// O arsenal: as três colunas. À esquerda o roster (<see cref="Roster"/> + <see cref="Selecionado"/>),
+    /// no centro o apóstolo e o que dá pra comprar nele, à direita os 7 slots e os itens obtidos.
+    ///
+    /// <b>Os slots são GLOBAIS e não do apóstolo selecionado</b> (ver <c>ArsenalService.AplicarItens</c>):
+    /// trocar quem está no centro não muda a coluna da direita. O vínculo item↔apóstolo é o passo 10
+    /// do GDD §7 e ainda não existe no modelo.
+    /// </summary>
+    internal record CatedralVista(List<SlotArsenalVista> Slots, List<BonusVista> Totais,
+        List<ItemArsenalVista> Obtidos,
+        List<ApostoloVisto> Roster, int Selecionado, AprimorarVista? Apostolo, List<AlmaVista> Alma,
+        int TetoDeFusao);
 }

@@ -7,7 +7,7 @@ using ApostlesWar.Domain;
 namespace ApostlesWar.Presentation.Front
 {
     /// <summary>
-    /// O "de fora da luta": perfil do jogador, menu principal, campanha, arena, arsenal,
+    /// O "de fora da luta": perfil do jogador, menu principal, campanha, arena, catedral,
     /// configurações — e roteia a escolha. É o irmão de menu do que o
     /// <see cref="ControladorJogadorWeb"/> é pro combate. Reaproveita os SERVICES da Application; só
     /// a casca de navegação mora aqui.
@@ -20,7 +20,7 @@ namespace ApostlesWar.Presentation.Front
         // Índices do MENU PRINCIPAL — casam com a ordem enviada em MostrarMenuPrincipal.
         private const int Campanha = 0;
         private const int Arena = 1;
-        private const int Arsenal = 2;
+        private const int Catedral = 2;
         private const int Compendio = 3;
         private const int Configuracao = 4;
 
@@ -48,12 +48,13 @@ namespace ApostlesWar.Presentation.Front
         private readonly ArsenalService _arsenal;
         private readonly PersonagemService _personagens;
         private readonly ProgressaoService _progressao;
+        private readonly AlmaService _alma;
         private readonly ConfiguracaoService _configuracao;
 
         public FluxoDoFront(PonteWebView2 ponte, CombateService combate, ApostolosService apostolos,
             PerfilService perfil, SessaoDoFront sessao, CampanhaService campanha, CapitulosService capitulos,
             ArsenalService arsenal, PersonagemService personagens, ProgressaoService progressao,
-            ConfiguracaoService configuracao)
+            AlmaService alma, ConfiguracaoService configuracao)
         {
             _ponte = ponte;
             _combate = combate;
@@ -65,6 +66,7 @@ namespace ApostlesWar.Presentation.Front
             _arsenal = arsenal;
             _personagens = personagens;
             _progressao = progressao;
+            _alma = alma;
             _configuracao = configuracao;
         }
 
@@ -91,8 +93,8 @@ namespace ApostlesWar.Presentation.Front
                             MontarArena();
                             break;
 
-                        case Arsenal:
-                            MostrarArsenal();
+                        case Catedral:
+                            MostrarCatedral();
                             break;
 
                         case Compendio:
@@ -148,7 +150,11 @@ namespace ApostlesWar.Presentation.Front
                 {
                     new("Campanha",     "🗺️", Habilitado: true),
                     new("Arena",        "⚔️", Habilitado: true),
-                    new("Arsenal",      "🎒", Habilitado: true),
+                    // A CATEDRAL abriga as quatro estações — 🎒 Forja (itens), ⬆️ Santuário
+                    // (nível), ★ Altar (estrela) e 🔥 Oferenda (fundir alma). O `ArsenalService`
+                    // manteve o nome de propósito: ele é o ACERVO de equipamento, e "arsenal"
+                    // continua sendo a palavra certa pra isso — a Forja é a estação onde ele se usa.
+                    new("Catedral",     "⛪", Habilitado: true),
                     new("Compêndio",    "📖", Habilitado: true),
                     new("Configurações", "⚙️", Habilitado: true),
                     // Não há opção "Sair" na lista: quem sai do jogo é o 🚪 do canto superior
@@ -324,7 +330,7 @@ namespace ApostlesWar.Presentation.Front
 
             var lista = todos
                 .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, _perfil.PodeUsarAvatar(p),
-                    Progressao.Estrelas(p.Nivel), p.Nivel, XpPct(p)))
+                    _progressao.EstrelasDe(p), p.Nivel, XpPct(p)))
                 .ToList();
 
             Perfil? perfil = _perfil.Carregar();
@@ -485,8 +491,20 @@ namespace ApostlesWar.Presentation.Front
                 _sessao.Tema = faccao.ToString().ToLowerInvariant();
                 _ponte.DesligarAuto();
                 _ponte.LimparPendentes();
+
+                // A foto do ANTES tem de sair daqui: quando o ExecutarFaseComTime volta, a XP já foi
+                // creditada e as instâncias do roster já subiram — não há mais "antes" pra consultar.
+                var antes = time.Select(p => (Apostolo: p, Nivel: p.Nivel, Xp: _progressao.XpDe(p))).ToList();
+                var almaAntes = _alma.Saldo().ToList();
+
                 ResultadoDaFase resultado = _combate.ExecutarFaseComTime(time, faccao, fase, dificuldade);
                 bool venceu = resultado.Venceu;
+
+                var ganhos = antes.Select(a => MontarGanho(a.Apostolo, a.Nivel, a.Xp)).ToList();
+                var almaGanha = Enum.GetValues<Raridade>()
+                    .Select(r => new AlmaVista((int)r, r.Descricao(), _alma.SaldoDe(r) - almaAntes[(int)r], Alma.XpPorAlma(r)))
+                    .Where(a => a.Quantidade > 0)
+                    .ToList();
 
                 // A recompensa é processada ANTES de montar a tela: é ela que desbloqueia a fase
                 // seguinte, e é isso que decide se o botão "Próxima Fase" existe.
@@ -499,10 +517,11 @@ namespace ApostlesWar.Presentation.Front
                     recompensa = MontarRecompensa(r);
                 }
 
-                MostrarConquistas(venceu, recompensa, faccao, fase, dificuldade, novos, resultado.XpPorApostolo);
+                MostrarConquistas(venceu, recompensa, faccao, fase, dificuldade, novos,
+                    resultado.XpPorApostolo, ganhos, almaGanha);
 
                 _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, dificuldade,
-                    resultado.XpPorApostolo, comOpcoes: true));
+                    resultado.XpPorApostolo, ganhos, almaGanha, comOpcoes: true));
                 switch (EsperarDecisao())
                 {
                     case DecisaoDeFim.JogarNovamente:
@@ -539,11 +558,13 @@ namespace ApostlesWar.Presentation.Front
         /// precisa saber em qual tela o jogador está.
         /// </summary>
         private void MostrarConquistas(bool venceu, RecompensaVista? recompensa, Faccao faccao,
-            Fases fase, Dificuldade dificuldade, List<Personagem> novos, int xp)
+            Fases fase, Dificuldade dificuldade, List<Personagem> novos, int xp,
+            List<GanhoVista> ganhos, List<AlmaVista> alma)
         {
             if (novos.Count == 0) return;
 
-            _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, dificuldade, xp, comOpcoes: false));
+            _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, dificuldade,
+                xp, ganhos, alma, comOpcoes: false));
             EsperarContinuar();
 
             foreach (Personagem novo in novos)
@@ -554,13 +575,61 @@ namespace ApostlesWar.Presentation.Front
         }
 
         private FimDeFaseVista MontarFimDeFase(bool venceu, RecompensaVista? recompensa, Faccao faccao,
-            Fases fase, Dificuldade dificuldade, int xp, bool comOpcoes)
+            Fases fase, Dificuldade dificuldade, int xp, List<GanhoVista> ganhos, List<AlmaVista> alma,
+            bool comOpcoes)
         {
             var proxima = ProximaEtapa(faccao, fase, dificuldade);
-            return new FimDeFaseVista(venceu, recompensa, xp,
+            return new FimDeFaseVista(venceu, recompensa, xp, ganhos, alma,
                 PodeProxima: proxima is not null,
                 ProximoECapitulo: proxima is not null && proxima.Value.Faccao != faccao,
                 comOpcoes);
+        }
+
+        /// <summary>
+        /// O que este apóstolo levou, já fatiado pra animação. Os trechos vão de
+        /// <paramref name="nivelAntes"/> até o nível de agora, um por nível atravessado — encher,
+        /// zerar, encher o próximo.
+        /// </summary>
+        private GanhoVista MontarGanho(Personagem p, int nivelAntes, int xpAntes)
+        {
+            int xpAgora = _progressao.XpDe(p);
+
+            var trechos = Progressao.Trechos(nivelAntes, xpAntes, p.Nivel, xpAgora)
+                .Select(t => new TrechoDeNivel(t.Nivel, t.De, t.Ate))
+                .ToList();
+
+            // Travado: a XP passou do teto e a faixa nunca fecha sozinha, então o último trecho vai a
+            // 100 e a tela ACENDE a barra cheia. É o aviso de que a estrela passou a fazer falta.
+            bool travou = _progressao.NaParede(p);
+            if (travou) trechos[^1] = trechos[^1] with { Ate = 100 };
+
+            return new GanhoVista(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, xpAgora - xpAntes,
+                trechos, travou, DeltaDeStats(p, nivelAntes, p.Nivel));
+        }
+
+        /// <summary>
+        /// O que a ficha ganhou entre dois níveis. Só o que MEXEU entra: uma lista com seis linhas
+        /// em "+0" enterra as duas que importam. O crítico fica de fora porque vem do TIPO e não
+        /// anda com o nível.
+        /// </summary>
+        private static List<DeltaStatVista> DeltaDeStats(Personagem p, int de, int ate)
+        {
+            if (ate <= de) return new List<DeltaStatVista>();
+
+            Personagem antes = p.ComNivel(de);
+            var linhas = new (string Icone, string Rotulo, int De, int Ate)[]
+            {
+                ("❤️", "HP", antes.HP, p.HP),
+                ("⚔️", "Ataque", antes.Ataque, p.Ataque),
+                ("🛡️", "Defesa", antes.Defesa, p.Defesa),
+                ("⚡", "Velocidade", antes.Velocidade, p.Velocidade),
+                ("🎯", "Precisão", antes.Precisao, p.Precisao),
+                ("🧿", "Resistência", antes.Resistencia, p.Resistencia),
+            };
+
+            return linhas.Where(l => l.Ate != l.De)
+                .Select(l => new DeltaStatVista(l.Icone, l.Rotulo, l.De, l.Ate))
+                .ToList();
         }
 
         /// <summary>
@@ -614,7 +683,7 @@ namespace ApostlesWar.Presentation.Front
             var desbloqueados = _apostolos.ObterDesbloqueados();
             var meus = desbloqueados
                 .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true,
-                    Progressao.Estrelas(p.Nivel), p.Nivel, XpPct(p), GradeDePosicao(p)))
+                    _progressao.EstrelasDe(p), p.Nivel, XpPct(p), GradeDePosicao(p)))
                 .ToList();
 
             // O time salvo volta como ÍNDICES nesta lista, porque é isso que o clique devolve. A
@@ -648,13 +717,14 @@ namespace ApostlesWar.Presentation.Front
                 new ItemVista(item.Simbolo, item.Nome, NomeDoStat(item.TipoStat), ValorFormatado(item)));
         }
 
-        // O inimigo vai SEM estrela de propósito: elas são o visor do nível do jogador (0 a 6), e ele
-        // passa de 400 no Pesadelo — 42 estrelas não dizem nada. O NÍVEL vai, como número, e sem
-        // trilho de XP (o -1): é a leitura do peso da dificuldade antes de apertar Lutar.
+        // A estrela do inimigo é CAPADA em 6: ele passa de 400 no Pesadelo, e 42 estrelas não caberiam
+        // na linha nem diriam nada. Seis é o topo do jogador, então "6★" lê como "no máximo", que é a
+        // informação certa. O NÍVEL continua indo como número, e sem trilho de XP (o -1): inimigo não
+        // acumula XP, e um trilho vazio nele leria "quase subindo".
         private List<ApostoloVisto> Inimigos(Faccao faccao, List<TipoDeApostolo> tipos, int nivel) => tipos
             .Select(t => _personagens.ObterPorTipo(faccao, t))
             .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true,
-                Estrelas: 0, Nivel: nivel))
+                Estrelas: Math.Min(Progressao.Estrelas(nivel), Alma.EstrelaMaxima), Nivel: nivel))
             .ToList();
 
         /// <summary>
@@ -667,10 +737,10 @@ namespace ApostlesWar.Presentation.Front
             return total <= 0 ? 100 : (int)(100L * feito / total);
         }
 
-        private static RecompensaVista MontarRecompensa(RecompensaDaFase r)
+        private RecompensaVista MontarRecompensa(RecompensaDaFase r)
         {
             var novos = r.NovosApostolos.Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome,
-                Desbloqueado: true, Progressao.Estrelas(p.Nivel), p.Nivel)).ToList();
+                Desbloqueado: true, _progressao.EstrelasDe(p), p.Nivel)).ToList();
             ItemVista? item = r.Item is null ? null
                 : new ItemVista(r.Item.Simbolo, r.Item.Nome, NomeDoStat(r.Item.TipoStat), ValorFormatado(r.Item));
             return new RecompensaVista(novos, item);
@@ -814,30 +884,144 @@ namespace ApostlesWar.Presentation.Front
         // ---------- Arsenal ----------
 
         /// <summary>
-        /// Arsenal: o boneco com os 7 slots equipados GLOBALMENTE ("em Mim", valem pra todos os apóstolos)
-        /// e os itens obtidos pra escolher. Quem grava é o <see cref="ArsenalService.EquiparItem"/>.
+        /// Arsenal: a tela de APRIMORAR o apóstolo. Três colunas — o roster pra escolher, o apóstolo
+        /// com o que dá pra comprar nele, e os 7 slots equipados GLOBALMENTE ("em Mim", valem pra
+        /// todos). Quem grava item é o <see cref="ArsenalService.EquiparItem"/>; quem grava
+        /// nível/estrela é o <see cref="ProgressaoService"/>.
+        ///
+        /// Toda ação re-renderiza a tela inteira, e é de propósito: comprar uma estrela mexe no nível,
+        /// na barra, na ficha e no saldo de alma ao mesmo tempo. Redesenhar tudo é o que impede um
+        /// desses quatro de ficar velho na tela.
         /// </summary>
-        private void MostrarArsenal()
+        private void MostrarCatedral()
         {
+            int selecionado = 0;
+
             while (true)
             {
+                var roster = _apostolos.ObterDesbloqueados();
+                selecionado = Math.Clamp(selecionado, 0, Math.Max(roster.Count - 1, 0));
+
                 _ponte.LimparPendentes();
-                _ponte.EnviarArsenal(MontarArsenal());
+                _ponte.EnviarCatedral(MontarCatedral(roster, selecionado));
 
                 MensagemDoFront msg = _ponte.Esperar();
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
                 if (msg.Tipo == "voltar") return;
+
+                Personagem? alvo = roster.Count > 0 ? roster[selecionado] : null;
+
                 if (msg.Tipo == "equiparItem")
                 {
                     var obtidos = _arsenal.ObterObtidos();
                     if (msg.Valor < 0 || msg.Valor >= obtidos.Count) continue;
                     _arsenal.EquiparItem(obtidos[msg.Valor]);
-                    // o while re-renderiza o arsenal atualizado
+                }
+                else if (msg.Tipo == "selecionarApostolo")
+                {
+                    if (msg.Valor >= 0 && msg.Valor < roster.Count) selecionado = msg.Valor;
+                }
+                else if (msg.Tipo == "comprarEstrela")
+                {
+                    if (alvo != null) _progressao.ComprarEstrela(alvo);
+                }
+                else if (msg.Tipo == "queimarAlma")
+                {
+                    QueimaPedida? q = LerQueima(msg.Texto);
+                    if (q != null && alvo != null)
+                        _progressao.QueimarAlma(alvo,
+                            q.Faixas.Select(f => new Custo((Raridade)f.Raridade, f.Quantidade)).ToList());
+                }
+                else if (msg.Tipo == "fundirAlma")
+                {
+                    // Vem a mesma forma da queima (o painel tem uma barra por faixa e um confirmar
+                    // só) e cada faixa é fundida por si: a de baixo primeiro, senão fundir Comum e
+                    // Incomum no mesmo gesto perderia o que acabou de nascer na de cima.
+                    QueimaPedida? q = LerQueima(msg.Texto);
+                    if (q != null)
+                        foreach (FaixaQueimada f in q.Faixas.OrderBy(f => f.Raridade))
+                            _alma.Fundir((Raridade)f.Raridade, f.Quantidade, MaiorDificuldade());
                 }
             }
         }
 
-        private ArsenalVista MontarArsenal()
+        /// <summary>
+        /// A queima carrega DOIS valores (faixa e quantidade) e a ponte só leva um int por clique —
+        /// mesmo motivo do <c>ArenaConfig</c> vir pelo campo Texto.
+        /// </summary>
+        private static QueimaPedida? LerQueima(string? texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return null;
+            try
+            {
+                QueimaPedida? q = JsonSerializer.Deserialize<QueimaPedida>(texto, ConfigJson);
+                if (q?.Faixas is null || q.Faixas.Count == 0) return null;
+
+                int faixas = Enum.GetValues<Raridade>().Length;
+                return q.Faixas.All(f => f.Raridade >= 0 && f.Raridade < faixas && f.Quantidade > 0)
+                    ? q : null;
+            }
+            catch (JsonException) { return null; }
+        }
+
+        private AprimorarVista? MontarAprimorar(Personagem? apostolo)
+        {
+            if (apostolo is null) return null;
+
+            int estrelas = _progressao.EstrelasDe(apostolo);
+            int teto = _progressao.TetoDe(apostolo);
+            bool naParede = _progressao.NaParede(apostolo);
+            bool temProxima = estrelas < Alma.EstrelaMaxima;
+
+            var receita = temProxima ? Alma.Receita(estrelas + 1) : new List<Custo>();
+            var faltando = temProxima ? _alma.Faltando(receita) : new List<Custo>();
+
+            bool podeComprar = naParede && faltando.Count == 0;
+            bool podeQueimar = !naParede && apostolo.Nivel < Arquetipos.NivelMaximo;
+
+            // O motivo é UM só e sai pronto do C#: a tela que escolhe a frase acaba tendo de saber
+            // quando cada bloqueio vale, e aí a regra estaria em dois lugares.
+            string motivo =
+                !temProxima ? "No topo: 6 estrelas e nível 60."
+                : naParede && faltando.Count > 0 ? $"Falta {Escrever(faltando)} pra próxima estrela."
+                : naParede ? $"Travado no nv {teto} — compre a estrela pra continuar."
+                : "";
+
+            // A XP que ainda cabe ANTES da parede. É ela que define o "Máximo" da queima: queimar além
+            // disso não perde XP (fica guardada), mas gasta a alma que a PRÓPRIA estrela vai cobrar.
+            int xpAtual = _progressao.XpDe(apostolo);
+            int xpAteAParede = Math.Max(Progressao.XpParaNivel(Math.Min(teto + 1, Arquetipos.NivelMaximo + 1)) - xpAtual, 0);
+
+            // Começa no nível ATUAL, e não no seguinte: a tela precisa do PISO da faixa de hoje pra
+            // saber onde a barra está, e deduzi-lo do percentual que ela já mostra era reconstruir
+            // por trás um número que o Progressao entrega de graça.
+            var limiares = new List<LimiarVista>();
+            for (int nivel = apostolo.Nivel; nivel <= Math.Min(teto + 1, Arquetipos.NivelMaximo + 1); nivel++)
+                limiares.Add(new LimiarVista(nivel, Progressao.XpParaNivel(nivel)));
+
+            // A ficha de cada nível alcançável, pra a PRÉVIA da barra. Vai a lista inteira e não só o
+            // alvo porque o alvo muda a cada pixel arrastado — uma ida à ponte por pixel seria a
+            // tela travando pra perguntar o que o C# já sabia.
+            var porNivel = new List<StatsDoNivel>();
+            for (int nivel = apostolo.Nivel; nivel <= teto; nivel++)
+            {
+                Personagem n = apostolo.ComNivel(nivel);
+                porNivel.Add(new StatsDoNivel(nivel, n.HP, n.Ataque, n.Defesa,
+                    n.Velocidade, n.Precisao, n.Resistencia));
+            }
+
+            return new AprimorarVista(MontarDetalhe(apostolo), estrelas, teto, naParede,
+                receita.Select(VistaDeAlma).ToList(), faltando.Select(VistaDeAlma).ToList(),
+                podeComprar, podeQueimar, motivo, xpAtual, xpAteAParede, limiares, porNivel);
+        }
+
+        private static AlmaVista VistaDeAlma(Custo c)
+            => new((int)c.Raridade, c.Raridade.Descricao(), c.Quantidade, Alma.XpPorAlma(c.Raridade));
+
+        private static string Escrever(IReadOnlyList<Custo> custos)
+            => string.Join(" e ", custos.Select(c => $"{c.Quantidade} de {c.Raridade.Descricao()}"));
+
+        private CatedralVista MontarCatedral(List<Personagem> roster, int selecionado)
         {
             var equipados = _arsenal.ObterEquipados();
 
@@ -863,8 +1047,41 @@ namespace ApostlesWar.Presentation.Front
                 .Select(b => new BonusVista(NomeDoStat(b.Stat), $"+{ValorFormatado(b.Stat, b.Valor)}"))
                 .ToList();
 
-            return new ArsenalVista(slots, totais, obtidos);
+            var lista = roster
+                .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true,
+                    _progressao.EstrelasDe(p), p.Nivel, XpPct(p)))
+                .ToList();
+
+            Personagem? alvo = roster.Count > 0 ? roster[selecionado] : null;
+            AprimorarVista? aprimorar = MontarAprimorar(alvo);
+
+            // O `Max` de cada faixa é quanto dela cabe ANTES da parede — é o teto da barrinha da
+            // queima, e o que impede o jogador de torrar mítico num nível que ele nem destravou.
+            var saldo = Enum.GetValues<Raridade>()
+                .Select(r =>
+                {
+                    int xp = Alma.XpPorAlma(r);
+                    int cabe = aprimorar is null || !aprimorar.PodeQueimar
+                        ? 0
+                        : (aprimorar.XpAteAParede + xp - 1) / xp;   // teto da divisão: o último pedaço conta
+                    return new AlmaVista((int)r, r.Descricao(), _alma.SaldoDe(r), xp,
+                        Math.Min(_alma.SaldoDe(r), cabe),
+                        PodeFundir: _alma.SaldoDe(r) >= Alma.PorFusao && r < Alma.TetoDeFusao(MaiorDificuldade()));
+                })
+                .ToList();
+
+            return new CatedralVista(slots, totais, obtidos, lista, selecionado, aprimorar, saldo,
+                (int)Alma.TetoDeFusao(MaiorDificuldade()));
         }
+
+        /// <summary>
+        /// A dificuldade mais alta já ABERTA. É ela que trava a fusão (<see cref="Alma.TetoDeFusao"/>):
+        /// sem isso, 10.000 Comuns farmados no Fácil viram a alma mítica que só o Pesadelo paga.
+        /// </summary>
+        private Dificuldade MaiorDificuldade() => Enum.GetValues<Dificuldade>()
+            .Where(_capitulos.DificuldadeDesbloqueada)
+            .DefaultIfEmpty(Dificuldade.Facil)
+            .Max();
 
         /// <summary>
         /// A ordem em que os totais são LIDOS — e é por isso que ela mora aqui e não no service.

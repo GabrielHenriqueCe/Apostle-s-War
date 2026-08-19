@@ -36,6 +36,23 @@ namespace ApostlesWar.Domain
     }
 
     /// <summary>
+    /// As seis faixas de qualidade do jogo — valem pra alma, pro item e pro apóstolo.
+    ///
+    /// <b>A ORDEM É a escada</b>: a queda de alma desliza uma posição por dificuldade e a receita da
+    /// estrela cobra "a faixa atual + a próxima" (docs/GDD-progressao.md §O MATERIAL). Reordenar aqui
+    /// move o teto de nível de todas as dificuldades — ver <see cref="Alma"/>.
+    /// </summary>
+    public enum Raridade
+    {
+        [Description("Comum")] Comum,
+        [Description("Incomum")] Incomum,
+        [Description("Raro")] Raro,
+        [Description("Épico")] Epico,
+        [Description("Lendário")] Lendario,
+        [Description("Mítico")] Mitico
+    }
+
+    /// <summary>
     /// O arquétipo do apóstolo, e a ÚNICA fonte do status base dele: dois apóstolos do mesmo tipo
     /// nascem com a mesma ficha, e o que os separa é o kit e o equipamento. Cada facção tem
     /// exatamente um de cada. Ver <see cref="Arquetipos"/> e docs/GDD-combate.md §2.

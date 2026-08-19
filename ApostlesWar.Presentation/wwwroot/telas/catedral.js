@@ -1,0 +1,525 @@
+// CATEDRAL — onde o apóstolo se aprimora. Quatro colunas: o ELENCO, o escolhido, as PORTAS e a
+// estação aberta.
+//
+// As quatro estações são LUGARES e não verbos — 🎒 Forja (itens), ⬆️ Santuário (nível), ★ Altar
+// (estrela) e 🔥 Oferenda (fundir alma). A Forja é o estado de repouso.
+//
+// Toda ação volta pro C# e a tela inteira é redesenhada. Não há estado de jogo aqui: o que mora
+// neste arquivo é só ONDE o jogador estava olhando.
+
+import { mandar } from '../nucleo/ponte.js';
+import { marcaDeTipo, marcaDeEstrelas, barraDeNivel } from '../ui/marcas.js';
+import { painelDeStats } from '../ui/ficha.js';
+import { almaIcone } from '../ui/alma.js';
+import { barraDeQuantidade } from '../ui/quantidade.js';
+
+const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
+const ARSENAL_ICONES = ['🗡️', '⛑️', '🛡️', '📿', '🎽', '👖', '👢'];   // ícone do tipo quando o slot está vazio
+
+let catedralDados = null;
+let catedralSlotSel = -1;
+let catedralEstacao = null;   // null = itens à mostra · 'estrela' · 'nivel' · 'almas'
+
+// O que o jogador está MONTANDO na coluna da direita, lido pela ficha do meio. As duas colunas
+// mostram partes do mesmo gesto — a direita é o quanto, o meio é o que isso vira — e é este objeto
+// que as amarra sem uma saber desenhar a outra.
+let previsao = null;   // { nivel, pct, ganho }
+
+export const catedral = {
+    cena: 'catedral',
+    montar(a, anterior) {
+        if (anterior !== 'catedral') { catedralSlotSel = -1; catedralEstacao = null; }   // entrada fresca
+        catedralDados = a;
+        previsao = null;   // toda volta da ponte apaga o que estava sendo montado
+        desenharPortas();
+        desenharRoster();
+        desenharFicha();
+        desenharBoneco();
+        desenharTotais();
+
+        if (catedralSlotSel >= 0) mostrarItensSlot(catedralSlotSel);
+        else document.getElementById('forjaDetalhe').hidden = true;
+
+        desenharAcao();
+},
+};
+
+// ---------- as ESTAÇÕES: as portas da última coluna ----------
+//
+// Cada uma é um LUGAR e não um verbo — Forja, Santuário, Altar, Oferenda —, e é isso que faz a tela
+// inteira ter nome próprio em vez de ser um painel de ações. O 🎒 Forja é o estado de repouso.
+function desenharPortas() {
+    const c = catedralDados.apostolo;
+    document.getElementById('catedralPortas').replaceChildren(
+        botaoDeAcao('🎒', 'Forja', null, true),
+        botaoDeAcao('⬆️', 'Santuário', 'nivel', !!c?.podeQueimar),
+        botaoDeAcao('★', 'Altar', 'estrela', !!c?.naParede),
+        botaoDeAcao('🔥', 'Oferenda', 'almas', true),
+        botaoDeAcao('💎', 'Raridade', 'raridade', false, 'em breve'));
+}
+
+// ---------- esquerda: quem eu estou aprimorando ----------
+
+function desenharRoster() {
+    document.getElementById('catedralElenco').replaceChildren(...catedralDados.roster.map((c, i) => {
+        const cel = document.createElement('button');
+        cel.type = 'button';
+        cel.className = 'rosterCard' + (i === catedralDados.selecionado ? ' selecionado' : '');
+
+        const em = document.createElement('span'); em.className = 'rcEmoji'; em.textContent = c.simbolo;
+        const nm = document.createElement('span'); nm.className = 'rcNome'; nm.textContent = c.nome;
+
+        cel.append(marcaDeTipo(c.tipoSimbolo), marcaDeEstrelas(c.estrelas), em, barraDeNivel(c.nivel, c.xpPct), nm);
+        cel.addEventListener('click', () => mandar('selecionarApostolo', i));
+        return cel;
+    }));
+}
+
+// ---------- centro: o apóstolo e o que dá pra comprar nele ----------
+
+function desenharFicha() {
+    const alvo = document.getElementById('catedralFicha');
+    const c = catedralDados.apostolo;
+
+    if (!c) {
+        const v = document.createElement('div');
+        v.className = 'catedralVazio';
+        v.textContent = 'Nenhum apóstolo conquistado ainda.';
+        alvo.replaceChildren(v);
+        return;
+    }
+
+    const arte = document.createElement('div'); arte.id = 'catedralArte'; arte.textContent = c.ficha.simbolo;
+    const nome = document.createElement('div'); nome.className = 'afNome'; nome.textContent = c.ficha.nome;
+
+    const ident = document.createElement('div');
+    ident.className = 'afFaccao';
+    ident.textContent = `${c.ficha.faccao} · ${c.ficha.tipoSimbolo} ${c.ficha.tipo}`;
+
+    // O TETO vai junto do nível ("nv 24 / 29"): a parede tem de ser legível ANTES de o jogador bater
+    // nela, senão a barra cheia parada parece bug. Montando uma queima, o rótulo vira o DESTINO.
+    // ATRAVESSANDO NÍVEL A BARRA ZERA. Ela passa a ser a barra do nível de DESTINO, então o que já
+    // estava preenchido é do nível anterior e não tem mais o que dizer ali — deixá-lo embaixo
+    // escondia justamente o quanto o novo enche, que é o que o jogador quer ver.
+    const p = previsao;
+    const virou = p && p.nivel > c.ficha.nivel;
+
+    const nivel = document.createElement('div');
+    nivel.className = 'afNivel';
+    const numero = document.createElement('span');
+    numero.className = 'afNivelNumero' + (c.naParede ? ' travado' : '') + (p ? ' previsto' : '');
+    numero.textContent = virou
+        ? `nv ${c.ficha.nivel} → ${p.nivel} / ${c.teto}`
+        : `nv ${c.ficha.nivel} / ${c.teto}`;
+    nivel.append(marcaDeEstrelas(c.estrelas),
+        barraDeNivel(virou ? p.nivel : c.ficha.nivel, virou ? 0 : c.ficha.xpPct, p ? p.pct : -1),
+        numero);
+
+    const filhos = [arte, nome, ident, nivel];
+
+    if (c.motivo) {
+        const m = document.createElement('div');
+        m.className = 'afMotivo';
+        m.textContent = c.motivo;
+        filhos.push(m);
+    }
+
+    const alvoDaPrevia = previsao && previsao.nivel > c.ficha.nivel
+        ? c.porNivel.find(n => n.nivel === previsao.nivel)
+        : null;
+
+    alvo.replaceChildren(...filhos, ...painelDeStats(c.ficha, alvoDaPrevia));
+}
+
+
+// `acao` null = mostra os ITENS (o estado de repouso da 3ª coluna). `habilitado` false com ação
+// não desabilita: o painel é onde o jogador descobre O QUE falta, e botão morto não ensina nada —
+// só o 💎, que ainda não existe, é de fato inerte.
+function botaoDeAcao(icone, rotulo, acao, habilitado, nota) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'afBotao' + (catedralEstacao === acao ? ' aberto' : '');
+    b.disabled = acao === 'raridade';
+
+    const ic = document.createElement('span'); ic.className = 'abIcone'; ic.textContent = icone;
+    const rot = document.createElement('span'); rot.className = 'abRotulo'; rot.textContent = rotulo;
+    b.append(ic, rot);
+
+    if (nota) {
+        const n = document.createElement('span'); n.className = 'abNota'; n.textContent = nota;
+        b.append(n);
+    }
+    if (!habilitado && !b.disabled) b.classList.add('semSaldo');
+
+    if (!b.disabled) b.addEventListener('click', () => {
+        catedralEstacao = acao;
+        previsao = null; desenharPortas(); desenharFicha(); desenharAcao();
+    });
+    return b;
+}
+
+// ---------- direita: os itens, ou o painel da ação aberta ----------
+
+function desenharAcao() {
+    const painel = document.getElementById('catedralEstacao');
+    const direita = document.getElementById('forja');
+
+    painel.hidden = !catedralEstacao;
+    direita.hidden = !!catedralEstacao;
+    if (!catedralEstacao) return;
+
+    const c = catedralDados.apostolo;
+    const nomes = { estrela: '★ Altar', nivel: '⬆️ Santuário', almas: '🔥 Oferenda' };
+
+    const titulo = document.createElement('h2');
+    titulo.className = 'apostoloSecao';
+    titulo.textContent = nomes[catedralEstacao];
+
+    const corpo = catedralEstacao === 'estrela' ? painelDaEstrela(c)
+        : catedralEstacao === 'nivel' ? painelDoNivel(c)
+            : painelDasAlmas();
+
+    painel.replaceChildren(titulo, ...corpo);
+}
+
+// A FUSÃO: 10 de uma faixa viram 1 da seguinte, e o botão morre quando a faixa alvo passa do que a
+// dificuldade mais alta já aberta derruba. Quem diz esse teto é o C# (`Alma.TetoDeFusao`) — é ele
+// que impede fabricar mítico farmando o Fácil.
+function painelDasAlmas() {
+    // A barra conta GRUPOS de 10, não unidades: é o grupo que vira uma alma da faixa seguinte, e
+    // arrastar em unidades deixaria o jogador parar num resto que não produz nada.
+    const escolha = catedralDados.alma.map(() => 0);
+    const barras = [];
+
+    const resumo = document.createElement('div'); resumo.className = 'queimaResumo';
+    const confirmar = document.createElement('button');
+    confirmar.type = 'button';
+    confirmar.className = 'acaoConfirmar';
+
+    const linhas = catedralDados.alma.map((a, raridade) => {
+        const grupos = a.podeFundir ? Math.floor(a.quantidade / 10) : 0;
+        const seguinte = catedralDados.alma[raridade + 1];
+
+        // As PONTAS contam a troca: à esquerda o fogo de origem com o que SOBRA dele, à direita o
+        // fogo de destino com o que NASCE. Arrastar move os dois números ao mesmo tempo, e é aí que
+        // a fusão deixa de precisar de legenda.
+        const barra = barraDeQuantidade({
+            max: grupos,
+            rotuloMax: a.raridade >= catedralDados.tetoDeFusao
+                ? 'vença uma dificuldade mais alta pra fundir até aqui'
+                : `cada grupo consome 10 de ${a.nome}`,
+            aoMudar: (v) => { escolha[raridade] = v; atualizar(); },
+            // A ponta ESQUERDA não repete o fogo da linha logo acima — dois iguais empilhados liam
+            // como duas coisas. Em cima fica o TOTAL que ele tem; aqui embaixo, só quanto vai
+            // queimar. A ponta direita mantém o fogo porque ali a faixa é OUTRA.
+            pontas: seguinte ? {
+                esquerda: (v) => soNumero(v * 10),
+                direita: (v) => fogoContado(seguinte, v, true),
+            } : null,
+        });
+        barras.push(barra);
+
+        const nota = a.raridade >= catedralDados.tetoDeFusao ? '🔒 travado'
+            : seguinte ? `10 → 1 ${seguinte.nome}` : 'não sobe mais';
+        return linhaDeFaixa(a, nota, barra.el);
+    });
+
+    function atualizar() {
+        const total = escolha.reduce((s, g) => s + g, 0);
+        resumo.textContent = total > 0
+            ? `${escolha.reduce((s, g) => s + g * 10, 0)} almas viram ${total}`
+            : 'Arraste uma barra pra escolher quantos grupos fundir.';
+        confirmar.textContent = total > 0 ? `Fundir (${total})` : 'Fundir';
+        confirmar.disabled = total <= 0;
+    }
+
+    confirmar.addEventListener('click', () => {
+        const faixas = escolha
+            .map((grupos, raridade) => ({ raridade, quantidade: grupos * 10 }))
+            .filter(f => f.quantidade > 0);
+        if (faixas.length) mandar('fundirAlma', 0, JSON.stringify({ faixas }));
+    });
+
+    const nota = document.createElement('div');
+    nota.className = 'acaoAviso';
+    nota.textContent = `A fusão para na faixa ${catedralDados.alma[catedralDados.tetoDeFusao].nome}: `
+        + 'é até onde a dificuldade mais alta que você abriu derruba alma.';
+
+    atualizar();
+    return [rotulo('Fundir — 10 viram 1'), ...linhas, resumo, confirmar, nota];
+}
+
+// Quanto SAI: só o número, porque o fogo dessa faixa já está na linha de cima.
+function soNumero(quantidade) {
+    const n = document.createElement('span');
+    n.className = 'fcQtd';
+    n.textContent = `−${Math.max(0, quantidade).toLocaleString('pt-BR')}`;
+    return n;
+}
+
+// O fogo com o número embaixo — é a ponta da barra da Oferenda.
+function fogoContado(a, quantidade, comMais = false) {
+    const p = document.createElement('span');
+    p.className = 'fogoContado';
+    const n = document.createElement('span');
+    n.className = 'fcQtd';
+    n.textContent = (comMais ? '+' : '') + Math.max(0, quantidade).toLocaleString('pt-BR');
+    p.append(almaIcone(a.raridade, 20), n);
+    return p;
+}
+
+// A linha de UMA faixa: alminha, nome, saldo, uma nota curta e a barra ocupando a largura inteira
+// embaixo. As duas ações (queimar e fundir) usam a mesma forma de propósito — é o mesmo gesto.
+function linhaDeFaixa(a, nota, barraEl) {
+    const linha = document.createElement('div');
+    linha.className = 'faixaLinha' + (a.quantidade > 0 ? '' : ' vazia');
+
+    const topo = document.createElement('div'); topo.className = 'flTopo';
+    const nome = document.createElement('span'); nome.className = 'flNome'; nome.textContent = a.nome;
+    const qtd = document.createElement('span'); qtd.className = 'flQtd';
+    qtd.textContent = a.quantidade.toLocaleString('pt-BR');
+    const obs = document.createElement('span'); obs.className = 'flNota'; obs.textContent = nota;
+
+    topo.append(almaIcone(a.raridade, 22), nome, qtd, obs);
+    linha.append(topo, barraEl);
+    return linha;
+}
+
+function painelDaEstrela(c) {
+    const partes = [];
+
+    // A EXIGÊNCIA DE NÍVEL vem primeiro, e é a que faltava: sem ela o jogador via um preço, juntava
+    // a alma e o botão continuava morto sem dizer por quê. A estrela só se compra COM A BARRA CHEIA
+    // no teto — juntar alma antes não adianta, e agora a tela diz isso.
+    partes.push(rotulo(`★ ${c.estrelas + 1} — encha a barra no nv ${c.teto}`));
+
+    const onde = document.createElement('div');
+    onde.className = 'acaoAviso';
+    onde.textContent = c.naParede
+        ? `O nv ${c.teto} está cheio. A estrela abre até o nv ${c.teto + 10 > 60 ? 60 : c.teto + 10}.`
+        : `Ele está no nv ${c.ficha.nivel}. Suba até o nv ${c.teto} e encha a barra pra poder comprar.`;
+    partes.push(onde);
+
+    // UMA linha por faixa, no formato `tenho/preciso` — antes eram duas listas (o preço e o que
+    // faltava) dizendo a mesma coisa com números diferentes, e o jogador tinha de subtrair de cabeça.
+    const receita = document.createElement('div');
+    receita.className = 'acaoReceita';
+    receita.replaceChildren(...c.receita.map(r => {
+        const tenho = (catedralDados.alma[r.raridade] || {}).quantidade ?? 0;
+        const linha = linhaDeAlma(r, `${Math.min(tenho, r.quantidade).toLocaleString('pt-BR')}/${r.quantidade.toLocaleString('pt-BR')}`);
+        if (tenho < r.quantidade) linha.classList.add('faltando');
+        return linha;
+    }));
+    partes.push(rotulo('Custo'), receita);
+
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'acaoConfirmar';
+    b.textContent = `Comprar ★ ${c.estrelas + 1}`;
+    b.disabled = !c.podeComprarEstrela;
+    b.addEventListener('click', () => mandar('comprarEstrela', 0));
+    partes.push(b);
+
+    return partes;
+}
+
+function painelDoNivel(c) {
+    if (!c.podeQueimar) return [aviso(c.motivo || 'Não há nível a subir agora.')];
+
+    // O que está selecionado em cada barrinha, por faixa. Vive só enquanto o painel está aberto.
+    const escolha = catedralDados.alma.map(() => 0);
+
+    const resumo = document.createElement('div'); resumo.className = 'queimaResumo';
+    const confirmar = document.createElement('button');
+    confirmar.type = 'button';
+    confirmar.className = 'acaoConfirmar';
+
+    const barras = [];
+    const linhas = catedralDados.alma.map((a, raridade) => {
+        const barra = barraDeQuantidade({
+            max: a.max,
+            rotuloMax: a.max < a.quantidade
+                ? `você tem ${a.quantidade}, mas só ${a.max} cabem até a parede`
+                : 'tudo o que você tem desta faixa',
+            aoMudar: (v) => { escolha[raridade] = v; atualizar(); },
+        });
+        barras.push(barra);
+        return linhaDeFaixa(a, `+${a.xpPorUnidade} XP cada`, barra.el);
+    });
+
+    // MÁXIMO enche até a parede gastando da faixa MAIS BARATA pra mais cara: se Comum resolve, ele
+    // não encosta no Raro — que é justamente a faixa que a próxima estrela vai cobrar.
+    const max = document.createElement('button');
+    max.type = 'button';
+    max.className = 'qlBotao qlMaximo';
+    max.textContent = 'Máximo';
+    max.addEventListener('click', () => {
+        let falta = c.xpAteAParede;
+        catedralDados.alma.forEach((a, i) => {
+            const q = falta <= 0 ? 0 : Math.min(a.max, Math.ceil(falta / a.xpPorUnidade));
+            escolha[i] = q;
+            falta -= q * a.xpPorUnidade;
+            barras[i].definir(q);
+        });
+        atualizar();
+    });
+
+    function atualizar() {
+        const ganho = escolha.reduce((s, q, i) => s + q * catedralDados.alma[i].xpPorUnidade, 0);
+        resumo.textContent = ganho > 0
+            ? `+${ganho.toLocaleString('pt-BR')} XP`
+            : 'Arraste uma barra pra escolher quanto queimar.';
+        confirmar.textContent = ganho > 0 ? `Queimar (+${ganho.toLocaleString('pt-BR')} XP)` : 'Queimar';
+        confirmar.disabled = ganho <= 0;
+
+        // O RESULTADO é desenhado no MEIO, na ficha: o nível de destino, a barra em brasa e o
+        // `x → y` na própria linha do stat. Aqui à direita fica só quanto se está gastando.
+        previsao = ganho > 0 ? projetar(c, ganho) : null;
+        desenharFicha();
+    }
+
+    confirmar.addEventListener('click', () => {
+        const faixas = escolha
+            .map((quantidade, raridade) => ({ raridade, quantidade }))
+            .filter(f => f.quantidade > 0);
+        if (faixas.length) mandar('queimarAlma', 0, JSON.stringify({ faixas }));
+    });
+
+    atualizar();
+    return [rotulo('Queimar alma como XP'), ...linhas, max, resumo, confirmar];
+}
+
+// Onde este ganho de XP para: o nível de destino e o quanto a barra DAQUELE nível encheria.
+//
+// Os dois saem da tabela de limiares que o C# manda — é busca numa lista, não a curva copiada pra
+// cá. Se o ganho atravessa nível, o `pct` é o do nível de DESTINO: a barra satura em 100 no
+// caminho e quem conta a travessia é o rótulo, e depois a animação do confirmar.
+function projetar(c, ganho) {
+    const total = c.xpAtual + ganho;
+    const nivel = nivelCom(c, ganho);
+
+    const xpDe = (n) => (c.limiares.find(l => l.nivel === n) || {}).xp;
+    const piso = xpDe(nivel);
+    const teto = xpDe(nivel + 1);
+    if (piso == null || teto == null || teto <= piso) return { nivel, pct: 100, ganho };
+
+    return { nivel, pct: Math.max(0, Math.min(100, ((total - piso) / (teto - piso)) * 100)), ganho };
+}
+
+// Onde a XP atual + `ganho` cai, procurando na tabela de limiares que o C# mandou. É BUSCA numa
+// lista, não a curva copiada pra cá — a curva mora no Progressao e não pode ter segunda cópia.
+function nivelCom(c, ganho) {
+    const total = c.xpAtual + ganho;
+    let nivel = c.ficha.nivel;
+    for (const l of c.limiares) if (total >= l.xp && l.nivel <= c.teto) nivel = l.nivel;
+    return nivel;
+}
+
+function linhaDeAlma(a, valor) {
+    const linha = document.createElement('div');
+    linha.className = 'almaLinha';
+    const n = document.createElement('span'); n.className = 'alNome'; n.textContent = a.nome;
+    const v = document.createElement('span'); v.className = 'alValor'; v.textContent = valor;
+    linha.append(almaIcone(a.raridade), n, v);
+    return linha;
+}
+
+function rotulo(texto) {
+    const d = document.createElement('div');
+    d.className = 'acaoRotulo';
+    d.textContent = texto;
+    return d;
+}
+
+function aviso(texto) {
+    const d = document.createElement('div');
+    d.className = 'acaoAviso';
+    d.textContent = texto;
+    return d;
+}
+
+// ---------- direita: o boneco e os itens (o que já existia) ----------
+
+// O que o conjunto equipado dá, somado. Quem soma e quem escreve o número é o C#
+// (ArsenalService.TotaisEquipados + ValorFormatado) — aqui só chega texto pronto, pelo mesmo motivo
+// de sempre: "0.05" virar "5%" é exibição, mas QUANTO é regra de item.
+function desenharTotais() {
+    const cont = document.getElementById('forjaTotais');
+    const titulo = document.createElement('div');
+    titulo.className = 'atTitulo';
+    titulo.textContent = 'Bônus do arsenal';
+
+    if (!catedralDados.totais.length) {
+        const v = document.createElement('div');
+        v.className = 'atVazio';
+        v.textContent = 'Nada equipado ainda.';
+        cont.replaceChildren(titulo, v);
+        return;
+    }
+
+    cont.replaceChildren(titulo, ...catedralDados.totais.map(b => {
+        const linha = document.createElement('div'); linha.className = 'atLinha';
+        const rot = document.createElement('span'); rot.className = 'atStat'; rot.textContent = b.stat;
+        const val = document.createElement('span'); val.className = 'atValor'; val.textContent = b.valor;
+        linha.append(rot, val);
+        return linha;
+    }));
+}
+
+function desenharBoneco() {
+    document.getElementById('boneco').replaceChildren(...catedralDados.slots.map(s => {
+        const div = document.createElement('div');
+        div.className = 'bonecoSlot' + (s.slot === catedralSlotSel ? ' selecionado' : '') + (s.equipado ? ' preenchido' : '');
+        div.style.gridArea = ARSENAL_AREAS[s.slot];
+        const emoji = document.createElement('div'); emoji.className = 'bsEmoji';
+        emoji.textContent = s.equipado ? s.equipado.simbolo : ARSENAL_ICONES[s.slot];
+        const nome = document.createElement('div'); nome.className = 'bsNome'; nome.textContent = s.nome;
+        div.append(emoji, nome);
+        div.addEventListener('click', () => mostrarItensSlot(s.slot));
+        return div;
+    }));
+}
+
+function mostrarItensSlot(slot) {
+    catedralSlotSel = slot;
+    desenharBoneco();
+    document.getElementById('forjaDetalhe').hidden = false;
+    document.getElementById('forjaSlotNome').textContent = catedralDados.slots[slot].nome;
+
+    const itens = catedralDados.obtidos.filter(o => o.slot === slot);
+    const equipado = itens.find(o => o.equipado);
+    const cont = document.getElementById('forjaItens');
+
+    if (!itens.length) {
+        const v = document.createElement('div'); v.className = 'catedralVazio'; v.textContent = 'Nenhum item deste tipo ainda.';
+        cont.replaceChildren(v);
+        return;
+    }
+
+    cont.replaceChildren(...itens.map(o => {
+        const card = document.createElement('div');
+        card.className = 'itemCard' + (o.equipado ? ' equipado' : '');
+
+        const em = document.createElement('span'); em.className = 'icEmoji'; em.textContent = o.simbolo;
+        const info = document.createElement('div'); info.className = 'icInfo';
+        const nm = document.createElement('div'); nm.className = 'icNome'; nm.textContent = `${o.nome} · ${o.faccao}`;
+        const st = document.createElement('div'); st.className = 'icStat'; st.textContent = `${o.stat} +${o.valor}`;
+        info.append(nm, st);
+        card.append(em, info);
+
+        if (equipado && !o.equipado) {   // seta de diferença vs o equipado
+            const diff = o.valorNum - equipado.valorNum;
+            const d = document.createElement('div');
+            d.className = 'icDiff ' + (diff > 0 ? 'sobe' : diff < 0 ? 'desce' : '');
+            d.textContent = diff > 0 ? '▲' : diff < 0 ? '▼' : '=';
+            card.append(d);
+        }
+        if (o.equipado) {
+            const tag = document.createElement('div'); tag.className = 'icTag'; tag.textContent = 'equipado';
+            card.append(tag);
+        } else {
+            card.addEventListener('click', () => mandar('equiparItem', o.indice));
+        }
+        return card;
+    }));
+}

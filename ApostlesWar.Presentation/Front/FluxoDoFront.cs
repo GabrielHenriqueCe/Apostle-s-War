@@ -231,7 +231,7 @@ namespace ApostlesWar.Presentation.Front
         private void MontarArena()
         {
             var pool = _apostolos.TodosOsApostolos();
-            var apostolos = pool.Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+            var apostolos = pool.Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true)).ToList();
 
             _ponte.LimparPendentes();
             _ponte.EnviarMontagemArena(apostolos);
@@ -313,7 +313,7 @@ namespace ApostlesWar.Presentation.Front
             var todos = _apostolos.TodosOsApostolos();
 
             var lista = todos
-                .Select(p => new ApostoloVisto(p.Simbolo, p.Nome, _perfil.PodeUsarAvatar(p)))
+                .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, _perfil.PodeUsarAvatar(p)))
                 .ToList();
 
             Perfil? perfil = _perfil.Carregar();
@@ -557,7 +557,7 @@ namespace ApostlesWar.Presentation.Front
             var fases = Enum.GetValues<Fases>().Select(f => MontarFase(faccao, f)).ToList();
             var desbloqueados = _apostolos.ObterDesbloqueados();
             var meus = desbloqueados
-                .Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true, GradeDePosicao(p)))
+                .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true, GradeDePosicao(p)))
                 .ToList();
 
             // O time salvo volta como ÍNDICES nesta lista, porque é isso que o clique devolve. A
@@ -584,14 +584,14 @@ namespace ApostlesWar.Presentation.Front
                 new ItemVista(item.Simbolo, item.Nome, NomeDoStat(item.TipoStat), ValorFormatado(item)));
         }
 
-        private List<ApostoloVisto> Inimigos(Faccao faccao, List<Slot> slots) => slots
-            .Select(s => _personagens.ObterPersonagem(faccao, s))
-            .Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true))
+        private List<ApostoloVisto> Inimigos(Faccao faccao, List<TipoDeApostolo> tipos) => tipos
+            .Select(t => _personagens.ObterPorTipo(faccao, t))
+            .Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true))
             .ToList();
 
         private static RecompensaVista MontarRecompensa(RecompensaDaFase r)
         {
-            var novos = r.NovosApostolos.Select(p => new ApostoloVisto(p.Simbolo, p.Nome, Desbloqueado: true)).ToList();
+            var novos = r.NovosApostolos.Select(p => new ApostoloVisto(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, Desbloqueado: true)).ToList();
             ItemVista? item = r.Item is null ? null
                 : new ItemVista(r.Item.Simbolo, r.Item.Nome, NomeDoStat(r.Item.TipoStat), ValorFormatado(r.Item));
             return new RecompensaVista(novos, item);
@@ -723,7 +723,7 @@ namespace ApostlesWar.Presentation.Front
         private ApostoloDetalheVista MontarDetalhe(Personagem apostolo) => new(
             apostolo.Nome, apostolo.Simbolo, apostolo.Faccao.Descricao(),
             _apostolos.EstaDesbloqueado(apostolo),
-            apostolo.Tipo.Descricao(), apostolo.Nivel,
+            apostolo.Tipo.Descricao(), Tipos.Simbolo(apostolo.Tipo), apostolo.Nivel,
             apostolo.HP, apostolo.Ataque, apostolo.Defesa,
             apostolo.Velocidade, apostolo.Precisao, apostolo.Resistencia,
             // O crit vem do TIPO (o Combatente é dono dos dois), não do apóstolo.

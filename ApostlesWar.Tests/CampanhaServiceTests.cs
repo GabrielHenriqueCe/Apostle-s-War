@@ -42,11 +42,13 @@ namespace Tests
 
             Assert.True(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1));   // marcou concluída
             Assert.True(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2)); // liberou a próxima
-            // Reino fase 1: Rodada1=[Slot1 Guarda], Rodada2=[Slot2 Ninja] → 2 apóstolos novos
-            Assert.Equal(2, r.NovosApostolos.Count);
+            // Reino fase 1: as duas rodadas são o Guardião (o Guarda) → UM apóstolo novo. A fase
+            // estreia um por vez, e o time do capítulo só fecha em quatro na fase 4.
+            Assert.Single(r.NovosApostolos);
+            Assert.Equal("Guarda", r.NovosApostolos[0].Nome);
             Assert.NotNull(r.Item);
             Assert.Equal("Arma", r.Item!.Nome);
-            Assert.Equal(6, apostolos.ObterDesbloqueados().Count);              // 4 Humanos + 2 novos
+            Assert.Equal(5, apostolos.ObterDesbloqueados().Count);              // 4 Humanos + 1 novo
         }
 
         [Fact]

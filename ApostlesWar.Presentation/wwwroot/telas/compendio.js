@@ -6,6 +6,7 @@
 // Duas TELAS num arquivo só: a unidade do contrato é a MENSAGEM que o C# manda, não o arquivo.
 
 import { mandar } from '../nucleo/ponte.js';
+import { marcaDeTipo } from '../ui/marcas.js';
 
 // ---------- compêndio ----------
 // Catálogo, só leitura: nenhum clique daqui muda progresso. Por isso o apóstolo TRAVADO é clicável
@@ -37,7 +38,7 @@ export const compendio = {
                 nm.className = 'ccNome';
                 nm.textContent = ch.nome;
 
-                card.append(em, nm);
+                card.append(marcaDeTipo(ch.tipoSimbolo), em, nm);
                 if (!ch.desbloqueado) {
                     const cad = document.createElement('span');
                     cad.className = 'ccCadeado';
@@ -65,7 +66,7 @@ export const compendioApostolo = {
         document.getElementById('apostoloNome').textContent = c.nome;
         // O TIPO entra aqui e não na lista de stats: ele é a identidade que explica os números
         // abaixo (todo Guardião tem a mesma ficha), não mais um número entre eles.
-        const identidade = `${c.faccao} · ${c.tipo} · nv ${c.nivel}`;
+        const identidade = `${c.faccao} · ${c.tipoSimbolo} ${c.tipo} · nv ${c.nivel}`;
         document.getElementById('apostoloFaccao').textContent =
             c.desbloqueado ? identidade : `${identidade} · 🔒 ainda não conquistado`;
 

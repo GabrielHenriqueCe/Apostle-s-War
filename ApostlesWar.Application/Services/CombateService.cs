@@ -653,11 +653,11 @@ namespace ApostlesWar.Application.Services
             }
         }
 
-        private bool ExecutarRodada(List<Combate> jogador, List<Slot> slotsInimigos, Faccao capitulo, MultiplicadorFase mult)
+        private bool ExecutarRodada(List<Combate> jogador, List<TipoDeApostolo> tiposInimigos, Faccao capitulo, MultiplicadorFase mult)
         {
             var inimigo = new List<Combate>();
-            foreach (Slot slot in slotsInimigos)
-                inimigo.Add(new Inimigo(_personagemService.ObterPersonagem(capitulo, slot), mult));
+            foreach (TipoDeApostolo tipo in tiposInimigos)
+                inimigo.Add(new Inimigo(_personagemService.ObterPorTipo(capitulo, tipo), mult));
 
             Posicionar(inimigo);   // snapshot do HP máximo desta rodada + a casa de cada um
 

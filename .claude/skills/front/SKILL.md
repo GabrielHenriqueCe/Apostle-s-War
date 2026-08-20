@@ -19,9 +19,15 @@ node --experimental-vm-modules ferramentas/rodar-telas.js
 node --experimental-vm-modules ferramentas/rodar-tema.js "" 120
 ```
 
-**Verde deles não é "o jogo funciona":** eles publicam mensagem, não clicam em nada. Duplo-clique,
-slot, arrastar, teclado e tudo que roda DURANTE a batalha estão fora. Na separação, quatro bugs
-saíram exatamente daí, e os quatro foram achados pelo Gabriel jogando.
+**Verde deles não é "o jogo funciona".** O `rodar-telas.js` publica as mensagens do C#, monta cada
+tela e DISPARA os gestos alcançáveis nela — clique, duplo-clique, teclado, arrastar-e-soltar e
+mouse-arrasto. Continuam fora: a batalha depois do primeiro quadro (roda contra o motor C#) e o
+markup ESTÁTICO do index.html, que o DOM de mentira não materializa — ouvinte registrado por
+`querySelectorAll` de classe no carregamento não existe ali.
+
+**Carga do harness é CONTRATO com o C#:** a fixture manda o DTO real (`FasesVista`,
+`CompendioVista`…). Chave errada não explode, só desliga o caminho — a lista de fases nascia toda
+desabilitada porque a carga dizia `liberada` e o código lê `desbloqueado`.
 
 **Terminação de linha:** o `.gitattributes` impede (LF no repo, CRLF na cópia) e o `rodar-telas.js`
 acusa. Arquivo misto não é cosmético — já grudou um `else if` num comentário.

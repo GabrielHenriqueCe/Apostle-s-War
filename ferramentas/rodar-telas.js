@@ -173,7 +173,7 @@ async function carregar(arquivo) {
 // As cargas são MÍNIMAS de propósito: o alvo é o caminho de montagem, não o conteúdo. Se a tela lê
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
 const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', simbolo: '🗡️', stat: 'ATK', valor: '+5', valorNum: 5, equipado: true };
-const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', faccao: 'Reino', tipo: 'Guardião', nivel: 1, hp: 100, hpMax: 100, ataque: 10, defesa: 10, velocidade: 85, medidor: 137, precisao: 50, resistencia: 120, taxaCrit: 15, danoCrit: 60, status: [], habilidades: [], liberado: true, vivo: true };
+const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', faccao: 'Reino', tipo: 'Guardião', nivel: 1, hp: 100, hpMax: 100, ataque: 10, defesa: 10, velocidade: 85, medidor: 137, precisao: 50, resistencia: 120, taxaCritPct: 15, danoCritPct: 60, status: [], habilidades: [], liberado: true, vivo: true };
 /// Os elementos da árvore com esta classe. O shim não tem querySelectorAll de verdade.
 function procurar(raiz, classe) {
     if (!raiz) return [];
@@ -187,6 +187,9 @@ function procurar(raiz, classe) {
 
 const ALMA = ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Mítico']
     .map((nome, i) => ({ raridade: i, nome, quantidade: 100, xpPorUnidade: 5 ** i, max: i < 3 ? 100 : 0, podeFundir: i < 3 }));
+// O PÓ com as três primeiras faixas cheias e as outras ZERADAS: a faixa de saldo só desenha as que
+// têm, então uma lista toda cheia não exercitaria o filtro que decide isso.
+const PO = ALMA.map((a, i) => ({ raridade: i, nome: a.nome, quantidade: i < 3 ? 60 : 0, pontosPorUnidade: 5 ** i }));
 const TELAS = [
     ['menu', { titulo: 'Apostle\'s War', subtitulo: '', opcoes: ['Jogar', 'Sair'], raiz: true, perfil: { nome: 'G', avatar: '🧭' } }],
     ['criarPerfil', {}],
@@ -204,7 +207,7 @@ const TELAS = [
             trechos: [{ nivel: 8, de: 40, ate: 100 }, { nivel: 9, de: 0, ate: 62 }],
             stats: [{ icone: '❤️', rotulo: 'HP', de: 1240, ate: 1380 }],
         }],
-        alma: ALMA.slice(0, 3),
+        alma: ALMA.slice(0, 3), po: PO.slice(0, 3),
     }],
     ['conquista', apostolo],
     // COM CONTEÚDO, e não vazio: um `slots: []` faz o `.map` não rodar nenhuma vez, e o corpo do
@@ -229,6 +232,22 @@ const TELAS = [
             porNivel: [8, 9].map(n => ({ nivel: n, hp: 1200 + n * 40, ataque: 200 + n * 4, defesa: 90 + n * 2, velocidade: 85, precisao: 50, resistencia: 120 })),
         },
         alma: ALMA, tetoDeFusao: 2,
+    }],
+    // A FORJA com naParede e podeQueimar LIGADOS ao mesmo tempo — estado que o C# não produz, mas
+    // que faz as três bancadas renderizarem o corpo inteiro numa corrida só. Mesma carga de
+    // cobertura da Catedral.
+    ['forja', {
+        peca: { ...item, indice: 0, nivel: 9, estrelas: 1, pct: 100, valor: '+57,5', faccaoSimbolo: '👑' },
+        slotNome: 'Arma', slotsComPeca: 3,
+        acervo: [{ ...item, indice: 0, nivel: 9, estrelas: 1, pct: 100 }, { ...item, indice: 1, equipado: false, nivel: 3, estrelas: 0, pct: 40 }],
+        teto: 9, naParede: true, pontos: 780, pontosAteAParede: 120,
+        po: PO, tetoDeFusao: 2,
+        receita: [{ raridade: 0, nome: 'Comum', quantidade: 50, pontosPorUnidade: 1 }],
+        faltando: [{ raridade: 1, nome: 'Incomum', quantidade: 30, pontosPorUnidade: 5 }],
+        podeComprarEstrela: false, podeQueimar: true, motivo: 'Falta 30 de Incomum.',
+        patamares: [9, 10].map(n => ({ nivel: n, pontos: n * 100 })),
+        porNivel: [9, 10].map(n => ({ nivel: n, valor: '+' + n, noApostolo: [{ rotulo: 'Ataque', antes: 200, depois: 214, delta: 14, sufixo: '' }] })),
+        portadorNome: 'Teste',
     }],
     ['compendio', { faccoes: [{ nome: 'Reino', simbolo: '👑', apostolos: [apostolo] }] }],
     ['compendioApostolo', apostolo],
@@ -277,7 +296,10 @@ const TELAS = [
     // eles nascem do clique num botão. Sem esta parte, "Evoluir nível" e "Evoluir estrela" chegam
     // ao jogo sem nunca terem rodado — que é o buraco que este harness existe pra não ter.
     console.log('\n  painéis por clique:');
-    for (const b of procurar(porId.get('catedralPortas'), 'afBotao')) {
+    // As duas colunas de portas: a da Catedral (estações do apóstolo) e a da Forja (bancadas da
+    // peça). Mesma forma de botão, mesmo problema — o corpo do painel só existe depois do clique.
+    for (const b of [...procurar(porId.get('catedralPortas'), 'afBotao'),
+                     ...procurar(porId.get('forjaPortas'), 'afBotao')]) {
         const rotulo = (b.children.find(f => f.className === 'abRotulo') || {}).textContent || '?';
         try {
             b.click();
@@ -285,7 +307,8 @@ const TELAS = [
             // clique, então são dois níveis de gesto — nenhum deles roda sem isto.
             let dentro = 0;
             for (const c of ['qlBotao', 'acaoConfirmar']) {
-                for (const alvo of procurar(porId.get('catedralEstacao'), c)) { alvo.click(); dentro++; }
+                for (const raiz of ['catedralEstacao', 'forjaBancada'])
+                    for (const alvo of procurar(porId.get(raiz), c)) { alvo.click(); dentro++; }
             }
             console.log(`  ✓ ${rotulo}${dentro ? ` · ${dentro} botão(ões) do painel` : ''}`);
         } catch (e) {

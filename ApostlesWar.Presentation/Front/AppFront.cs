@@ -201,7 +201,7 @@ namespace ApostlesWar.Presentation.Front
                 // Entra pelo MENU (não mais direto na batalha): o fluxo do front cuida do perfil,
                 // mostra o menu principal e roteia a escolha. Ver FluxoDoFront.
                 new FluxoDoFront(ponte, combate, apostolos, perfil, sessao,
-                    campanha, capitulos, arsenal, personagens, progressao, alma, configuracao).Rodar();
+                    campanha, capitulos, arsenal, personagens, progressao, alma, po, configuracao).Rodar();
             }
             catch (Exception ex)
             {

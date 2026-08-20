@@ -28,6 +28,7 @@ import { criarPerfil, edicaoPerfil } from './telas/perfil.js';
 import { montagemArena } from './telas/arena.js';
 import { campanhaFases, campanhaMapa, conquista, fimDeFase, fimDeFaseTemOpcoes } from './telas/campanha.js';
 import { catedral } from './telas/catedral.js';
+import { forja } from './telas/forja.js';
 import { compendio, compendioApostolo } from './telas/compendio.js';
 import { aplicarEstado, aplicarEvento, aplicarVelocidade, desarmar, desenhar, estadoAtual, nomeDaFase } from './telas/combate.js';
 
@@ -56,7 +57,7 @@ const TELAS = {
     criarPerfil, edicaoPerfil,
     montagemArena,
     campanhaMapa, campanhaFases, fimDeFase, conquista,
-    catedral,
+    catedral, forja,
     compendio, compendioApostolo,
 };
 

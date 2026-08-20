@@ -11,6 +11,7 @@ import { mandar } from '../nucleo/ponte.js';
 import { montarBarraDificuldade } from '../ui/dificuldade.js';
 import { contar, esperar } from '../ui/animacao.js';
 import { almaIcone } from '../ui/alma.js';
+import { poIcone } from '../ui/po.js';
 
 // ---------- Campanha: mapa ----------
 const ESPACO_NO = 210;   // distância horizontal entre facções
@@ -333,7 +334,7 @@ export const fimDeFase = {
         // A mesma tela é enviada DUAS vezes quando a fase solta apóstolo novo (a passagem da
         // recompensa e a tela de decisão). A assinatura evita animar o mesmo ganho de novo na
         // segunda: repetir a contagem faria parecer que ele ganhou tudo outra vez.
-        const assinatura = JSON.stringify([f.xp, f.ganhos, f.alma]);
+        const assinatura = JSON.stringify([f.xp, f.ganhos, f.alma, f.po]);
         const animar = assinatura !== ultimaAssinatura;
         ultimaAssinatura = assinatura;
 
@@ -345,7 +346,10 @@ export const fimDeFase = {
             cont.append(xp);
         }
 
-        if (f.alma && f.alma.length) cont.append(blocoDeAlmas(f.alma, animar));
+        if (f.alma && f.alma.length) cont.append(blocoDeMaterial('Almas', f.alma, almaIcone, animar));
+        // O pó vem DEPOIS da alma e só na vitória (quem decide isso é o C#): ele cai por FASE, não
+        // por inimigo, então numa derrota a lista chega vazia e o bloco não aparece.
+        if (f.po && f.po.length) cont.append(blocoDeMaterial('Pó', f.po, poIcone, animar));
 
         const r = f.recompensa;
         if (r && r.itens && r.itens.length) {
@@ -491,21 +495,23 @@ function blocoDeStats(stats) {
     return cont;
 }
 
-function blocoDeAlmas(almas, animar) {
+// O material ganho na fase — a MESMA forma pra alma e pó, porque é a mesma leitura: a faixa, o
+// nome e quanto entrou. `icone` é quem desenha a faixa (a alminha ou o pozinho).
+function blocoDeMaterial(titulo, quantias, icone, animar) {
     const bloco = document.createElement('div'); bloco.className = 'recompensaBloco';
-    const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = 'Almas';
+    const t = document.createElement('div'); t.className = 'recompensaTitulo'; t.textContent = titulo;
 
-    const lista = document.createElement('div'); lista.className = 'almaGanhaLista';
-    lista.replaceChildren(...almas.map((a, i) => {
-        const l = document.createElement('div'); l.className = 'almaGanhaLinha';
-        const n = document.createElement('span'); n.className = 'agNome'; n.textContent = a.nome;
+    const lista = document.createElement('div'); lista.className = 'ganhoLista';
+    lista.replaceChildren(...quantias.map(q => {
+        const l = document.createElement('div'); l.className = 'ganhoLinha';
+        const n = document.createElement('span'); n.className = 'agNome'; n.textContent = q.nome;
         const v = document.createElement('span'); v.className = 'agValor';
 
-        if (animar) contar(v, 0, a.quantidade, MS_DO_GANHO, x => `+${x.toLocaleString('pt-BR')}`)
+        if (animar) contar(v, 0, q.quantidade, MS_DO_GANHO, x => `+${x.toLocaleString('pt-BR')}`)
             .catch(() => { });
-        else v.textContent = `+${a.quantidade.toLocaleString('pt-BR')}`;
+        else v.textContent = `+${q.quantidade.toLocaleString('pt-BR')}`;
 
-        l.append(almaIcone(a.raridade, 22), n, v);
+        l.append(icone(q.raridade, 22), n, v);
         return l;
     }));
 

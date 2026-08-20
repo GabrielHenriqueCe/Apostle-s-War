@@ -189,6 +189,87 @@ namespace Tests
         }
 
         /// <summary>
+        /// A BIGORNA: pó vira ponto de nível, na escada 1·5·25·125·625·3.125 — o análogo exato da
+        /// alma virando XP no apóstolo.
+        /// </summary>
+        [Fact]
+        public void QueimarPo_ViraPontoDeNivel_NaEscadaDaFaixa()
+        {
+            var repo = new RepositorioFake();
+            var po = new PoService(repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, repo);
+            Item item = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
+
+            arsenal.EquiparItem(item);
+            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 0, venceu: true);   // só pra encher o bolso
+
+            int comum = po.SaldoDe(Raridade.Comum);
+            int incomum = po.SaldoDe(Raridade.Incomum);
+            item.Pontos = 0;
+
+            Assert.Equal(MotivoRecusa.Nenhum, arsenal.QueimarPo(item, new[]
+            {
+                new Custo(Raridade.Comum, 10),
+                new Custo(Raridade.Incomum, 4),
+            }));
+
+            Assert.Equal(10 * 1 + 4 * 5, item.Pontos);
+            Assert.Equal(comum - 10, po.SaldoDe(Raridade.Comum));
+            Assert.Equal(incomum - 4, po.SaldoDe(Raridade.Incomum));
+        }
+
+        /// <summary>
+        /// NA PAREDE a bigorna recusa. O ponto além do teto não se perderia (ele fica guardado na
+        /// peça), mas o pó gasto aqui é o MESMO que a têmpera vai cobrar — quem malha travado paga
+        /// duas vezes pelo mesmo nível. É a trava que o painel desenha, provada onde ela mora.
+        /// </summary>
+        [Fact]
+        public void QueimarPo_NaParede_Recusa_ESemDebito()
+        {
+            var repo = new RepositorioFake();
+            var po = new PoService(repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, repo);
+            Item item = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
+
+            arsenal.EquiparItem(item);
+            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 0, venceu: true);
+            int antes = po.SaldoDe(Raridade.Comum);
+
+            item.Pontos = Po.PontosParaNivel(20);   // travado no 9, com pontos que já pagam o 20
+
+            Assert.Equal(MotivoRecusa.NaParede, arsenal.QueimarPo(item, new[] { new Custo(Raridade.Comum, 1) }));
+            Assert.Equal(antes, po.SaldoDe(Raridade.Comum));
+        }
+
+        /// <summary>
+        /// Sem o preço INTEIRO no bolso, nada acontece — nem meio débito, nem meio ponto. Metade
+        /// cobrada com a outra metade recusada seria pó sumindo.
+        /// </summary>
+        [Fact]
+        public void QueimarPo_SemSaldo_NaoDebitaNada()
+        {
+            var repo = new RepositorioFake();
+            var po = new PoService(repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, repo);
+            Item item = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
+
+            arsenal.EquiparItem(item);
+            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 0, venceu: true);
+            int comum = po.SaldoDe(Raridade.Comum);
+            item.Pontos = 0;   // a vitória já pagou o bônus à peça vestida; aqui só a queima conta
+
+            // A faixa mítica não caiu no Fácil: o pedido inteiro cai junto com ela.
+            Assert.Equal(MotivoRecusa.SemSaldo, arsenal.QueimarPo(item, new[]
+            {
+                new Custo(Raridade.Comum, 1),
+                new Custo(Raridade.Mitico, 1),
+            }));
+
+            Assert.Equal(0, item.Pontos);
+            Assert.Equal(comum, po.SaldoDe(Raridade.Comum));
+        }
+
+        /// <summary>
         /// Ganhar uso só mexe em quem está VESTIDO. Peça no baú não sobe — é o "com o item equipado
         /// em alguém em campo" do GDD, e é o que dá peso a escolher o que levar.
         /// </summary>

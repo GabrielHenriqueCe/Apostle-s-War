@@ -295,7 +295,7 @@ namespace ApostlesWar.Presentation.Front
     /// esconder do jogador que ele está mudando de lugar.
     /// </summary>
     internal record FimDeFaseVista(bool Venceu, RecompensaVista? Recompensa, int Xp,
-        List<GanhoVista> Ganhos, List<AlmaVista> Alma, bool PodeProxima,
+        List<GanhoVista> Ganhos, List<AlmaVista> Alma, List<PoVista> Po, bool PodeProxima,
         bool ProximoECapitulo, bool ComOpcoes);
 
     /// <summary>
@@ -429,6 +429,17 @@ namespace ApostlesWar.Presentation.Front
         int Max = 0, bool PodeFundir = false);
 
     /// <summary>
+    /// Uma quantia de PÓ — a mesma forma da <see cref="AlmaVista"/>, e a raridade também é o VALOR do
+    /// enum, não a posição na lista.
+    ///
+    /// <b>Por que não é a mesma vista da alma:</b> o que uma unidade vale queimada é XP num caso e
+    /// PONTO DE NÍVEL do item no outro. São escadas diferentes com destinos diferentes, e um record
+    /// só obrigaria a tela a saber qual dos dois o número é.
+    /// </summary>
+    internal record PoVista(int Raridade, string Nome, int Quantidade, int PontosPorUnidade,
+        int Max = 0, bool PodeFundir = false);
+
+    /// <summary>
     /// Um stat que mudou de nível pra nível. Só entra na lista o que MEXEU — mostrar oito linhas com
     /// seis delas em "+0" enterra as duas que importam.
     /// </summary>
@@ -499,6 +510,39 @@ namespace ApostlesWar.Presentation.Front
     /// oito linhas com seis zeros escondem as duas que importam.
     /// </summary>
     internal record PreviaDeTrocaVista(int Indice, List<DeltaVista> Deltas);
+
+    /// <summary>
+    /// A FORJA: a tela da PEÇA, e a irmã da <see cref="AprimorarVista"/> — o que lá é apóstolo, XP e
+    /// alma, aqui é peça, ponto e pó. Os dois eixos são os mesmos (nível e estrela) e as três
+    /// bancadas espelham Santuário, Altar e Oferenda.
+    ///
+    /// <see cref="Acervo"/> são as peças do MESMO slot: é por ela que se troca quem está na bigorna
+    /// sem sair da tela e sem equipar nada — melhorar uma peça guardada é legítimo.
+    /// </summary>
+    internal record ForjaVista(ItemArsenalVista Peca, string SlotNome, List<ItemArsenalVista> Acervo,
+        /// <summary>Em quantos SLOTS o jogador tem peça. 1 = não há tipo pra onde ir, e a seta some.</summary>
+        int SlotsComPeca,
+        int Teto, bool NaParede, int Pontos, int PontosAteAParede,
+        List<PoVista> Po, int TetoDeFusao,
+        List<PoVista> Receita, List<PoVista> Faltando,
+        bool PodeComprarEstrela, bool PodeQueimar, string Motivo,
+        List<PatamarVista> Patamares, List<NivelDaPecaVista> PorNivel,
+        /// <summary>O apóstolo que veste a peça, ou vazio quando ela está no baú.</summary>
+        string PortadorNome);
+
+    /// <summary>
+    /// Quantos pontos ACUMULADOS um nível de peça exige. É a tabela que deixa a tela dizer
+    /// "nv 12 → 14" enquanto o jogador arrasta a barra — busca numa lista, nunca a curva do
+    /// <see cref="Po.PontosParaNivel"/> copiada pro JS.
+    /// </summary>
+    internal record PatamarVista(int Nivel, int Pontos);
+
+    /// <summary>
+    /// O que a peça vale em CADA nível que ela ainda alcança: o número dela e — quando está vestida —
+    /// o que isso faz na ficha de quem a veste. Os deltas vêm prontos porque o alvo muda a cada pixel
+    /// arrastado, e uma ida à ponte por pixel seria a tela travando pra perguntar o que o C# já sabe.
+    /// </summary>
+    internal record NivelDaPecaVista(int Nivel, string Valor, List<DeltaVista> NoApostolo);
 
     /// <summary>Um stat antes e depois da troca, com a diferença já feita e o sufixo de exibição.</summary>
     internal record DeltaVista(string Rotulo, int Antes, int Depois, int Delta, string Sufixo);

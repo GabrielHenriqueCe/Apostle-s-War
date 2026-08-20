@@ -384,7 +384,7 @@ body {
    `letter-spacing` positivo é obrigatório aqui — serifa em caixa alta sem entreletra fica apertada
    e some a cunha, que é justamente o que dá o ar forjado. */
 #menuTitulo, #criarPerfil h1, #compendio h1, #fasesTitulo, #fimFaseTitulo,
-#apostoloNome, #conquistaNome, #forjaSlotNome, #retratoNome,
+#apostoloNome, #conquistaNome, #armariaSlotNome, #retratoNome,
 .compFaccaoNome, .faseGrupoTitulo, .recompensaTitulo,
 .opcaoMenu .opRotulo, .faseBtn .faseNome, .itemCard .icNome, .habilidade .hNome,
 .compApostolo .ccNome, .avatarCelula .aNome, .nome {
@@ -400,9 +400,10 @@ body {
 
 /* `#menuNomeBox` fica FORA: ele é pílula (`border-radius: 23px`) porque casa com a curva do círculo
    do avatar ao emergir de trás dele. Chanfro ali brigaria com o círculo — a curva é o ponto. */
-#setupPicker, #fasePicker, #forjaDetalhe, #modalCaixa,
+#setupPicker, #fasePicker, #armariaDetalhe, #modalCaixa,
 #apostoloArte, #apostoloStats, #apostoloHabilidades, #nomePerfil,
 #catedralFicha, #catedralEstacao, #catedralElenco, .qTrilho,
+#forjaPeca, #forjaBancada, #forjaAcervo,
 #nomeEditar {
     border: 1px solid var(--poco-borda);
     border-radius: var(--corte) 0 var(--corte) 0;
@@ -1166,14 +1167,14 @@ body {
 #conquistaDica { color: var(--ouro); }
 
 /* ---------- Arsenal (boneco + itens) ---------- */
-#catedral {
+#catedral, #forja {
     position: absolute; inset: 0; z-index: 30;
     display: flex; flex-direction: column; align-items: center; gap: 16px;
     padding: 20px; overflow-y: auto;
     background: var(--ceu);
 }
-#catedral[hidden] { display: none; }
-#catedral h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
+#catedral[hidden], #forja[hidden] { display: none; }
+#catedral h1, #forja h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
 
 /* ---- A ALMINHA ----
    As seis cores das faixas. Elas valem pro jogo INTEIRO (alma hoje, item e apóstolo depois), então
@@ -1212,6 +1213,27 @@ body {
 .almaChip { display: flex; align-items: center; gap: 6px; }
 .almaChip .acQtd { margin-left: auto; }
 .acQtd { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---- O POZINHO: o 🧂 nas mesmas seis faixas ----
+   O `sepia` é OBRIGATÓRIO e vem primeiro: o saleiro é quase branco, e `hue-rotate` não move matiz
+   onde não há saturação — sem ele as seis faixas saem cinzas. O sepia dá o tom base (~40°), o
+   saturate o encorpa, e só então o hue-rotate leva à cor da faixa. */
+.pozinho {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: calc(var(--po-tam, 18px) * 1.16);
+    height: calc(var(--po-tam, 18px) * 1.16);
+    font-size: var(--po-tam, 18px); line-height: 1;
+}
+.pozinho-comum { filter: grayscale(1) brightness(1.05); }
+.pozinho-incomum { filter: grayscale(1) sepia(1) saturate(5) hue-rotate(70deg) brightness(.95); }
+.pozinho-raro { filter: grayscale(1) sepia(1) saturate(5) hue-rotate(165deg) brightness(.95); }
+.pozinho-epico { filter: grayscale(1) sepia(1) saturate(5) hue-rotate(235deg) brightness(1); }
+.pozinho-lendario { filter: grayscale(1) sepia(1) saturate(4.5) hue-rotate(5deg) brightness(1.05); }
+.pozinho-mitico { filter: grayscale(1) sepia(1) saturate(6) hue-rotate(-30deg) brightness(.95); }
+/* As duas do topo brilham, como as alminhas: são as que o jogador está caçando. */
+.pozinho-lendario, .pozinho-mitico { text-shadow: 0 0 8px rgba(255,180,90,.75); }
+.poChip { display: flex; align-items: center; gap: 6px; }
+.poChip .acQtd { margin-left: auto; }
 
 /* A faixa de saldo é PLACA (está na lista): erguida e clicável, porque ela também é a porta da
    fusão. Aqui só o que é próprio dela — o resto vem do idioma. */
@@ -1269,15 +1291,16 @@ body {
 .gsRotulo { color: var(--apagado); }
 .gsValor { font-weight: 700; color: var(--vida); font-variant-numeric: tabular-nums; }
 
-.almaGanhaLista { display: flex; flex-direction: column; gap: 4px; }
-.almaGanhaLinha { display: flex; justify-content: space-between; gap: 12px; }
+/* A lista de material ganho na fase, a mesma forma pra alma e pó. */
+.ganhoLista { display: flex; flex-direction: column; gap: 4px; }
+.ganhoLinha { display: flex; justify-content: space-between; gap: 12px; }
 .agNome { font-size: 13px; color: var(--apagado); }
 .agValor { font-size: 14px; font-weight: 700; color: var(--ouro); font-variant-numeric: tabular-nums; }
 
 /* TRÊS colunas: o roster, o apóstolo, os itens. As laterais têm largura FIXA e o centro é `auto`,
    então trocar de apóstolo não move nada de lugar — a ficha do meio fica ancorada mesmo quando um
    apóstolo tem nome mais longo que o outro.
-   A 3ª coluna é compartilhada: #forja e #catedralEstacao caem na MESMA célula, e só um dos
+   A 3ª coluna é compartilhada: #armaria e #catedralEstacao caem na MESMA célula, e só um dos
    dois está visível por vez (ver catedral.js). */
 /* QUATRO colunas, e o apóstolo no centro óptico. O elenco (518) absorveu a coluna que estava
    reservada e virou grade de 4 por linha; do outro lado, portas (172) + estação (330) + o vão de 16
@@ -1292,14 +1315,14 @@ body {
     align-items: start;
     justify-content: center;
 }
-#forja, #catedralEstacao { grid-column: 4; grid-row: 1; }
-#forja[hidden], #catedralEstacao[hidden] { display: none; }
+#armaria, #catedralEstacao { grid-column: 4; grid-row: 1; }
+#armaria[hidden], #catedralEstacao[hidden] { display: none; }
 
-#forja { display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%; }
+#armaria { display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%; }
 
 /* ---- coluna 4: o saldo e as portas ---- */
 #catedralEstacoes { display: flex; flex-direction: column; gap: 10px; }
-#catedralPortas { display: flex; flex-direction: column; gap: 5px; }
+#catedralPortas, #forjaPortas { display: flex; flex-direction: column; gap: 5px; }
 /* ---- coluna 1: o roster ---- */
 #catedralElenco {
     display: grid;
@@ -1330,7 +1353,7 @@ body {
 .rosterCard .rcNome { font-size: 10px; color: var(--apagado); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---- coluna 2: o apostolo ---- */
-#catedralFicha {
+#catedralFicha, #forjaPeca {
     width: 100%;
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     padding: 10px 12px;
@@ -1340,9 +1363,29 @@ body {
    colunas da grade não se alinham entre si — "HP 12.340" e "Precisão 100" saem tortas uma em
    relação à outra. O `stretch` devolve a largura da coluna a elas, e só a elas. */
 #catedralFicha .apostoloStat,
-#catedralFicha .apostoloSecao { align-self: stretch; }
+#catedralFicha .apostoloSecao,
+#forjaPeca .apostoloSecao,
+#forjaPeca .itemDelta { align-self: stretch; }
 #catedralArte { font-size: 62px; line-height: 1; }
 .afNome { font-family: var(--titulo); font-size: 20px; letter-spacing: .06em; color: var(--ouro); }
+/* O NAVEGADOR das setas. Elas ficam nas PONTAS de uma grade de tres colunas, e nao coladas no
+   texto: com o nome mudando de tamanho a cada apostolo, coladas elas dancariam de lugar a cada
+   troca -- e seta que anda nao se aponta sem olhar. */
+.navegador {
+    display: grid; grid-template-columns: 22px auto 22px;
+    align-items: center; justify-content: center; gap: 4px;
+}
+.navRotulo { grid-column: 2; text-align: center; }
+.navSeta {
+    border: none; background: none; padding: 0; cursor: pointer;
+    font: inherit; font-size: 18px; line-height: 1; color: var(--apagado);
+    transition: color .12s;
+}
+.navSeta:hover { color: var(--ouro); }
+/* O nome do apostolo e o titulo da coluna; o tipo da peca e rotulo, e vem menor. */
+.navApostolo .navRotulo { font-family: var(--titulo); font-size: 20px; letter-spacing: .06em; color: var(--ouro); }
+.navSlot .navRotulo { font-size: 12px; color: var(--apagado); text-transform: uppercase; letter-spacing: .12em; }
+
 .afFaccao { font-size: 12px; color: var(--apagado); }
 .afNivel { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: 4px; width: 100%; }
 .afNivel .barraNivel { max-width: 260px; }
@@ -1369,7 +1412,7 @@ body {
 .abNota { margin-left: auto; font-size: 11px; color: var(--apagado); font-style: italic; }
 
 /* ---- coluna 3, modo acao ---- */
-#catedralEstacao {
+#catedralEstacao, #forjaBancada {
     width: 100%;
     display: flex; flex-direction: column; gap: 8px;
     padding: 10px 12px;
@@ -1413,17 +1456,17 @@ body {
 .bonecoSlot .bsEmoji { font-size: 34px; line-height: 1; }
 .bonecoSlot .bsNome { font-size: 11px; color: var(--apagado); }
 
-#forjaDetalhe {
+#armariaDetalhe {
     width: 100%;   /* a 3ª coluna já tem a largura; medir de novo aqui era o que fazia ela pular */
     display: flex; flex-direction: column; gap: 8px;
     padding: 12px 16px; border: 1px solid var(--borda); border-radius: 12px; background: rgba(0, 0, 0, .22);
 }
-#forjaDetalhe[hidden] { display: none; }
-#forjaSlotNome { font-size: 15px; font-weight: 700; color: var(--ouro); }
+#armariaDetalhe[hidden] { display: none; }
+#armariaSlotNome { font-size: 15px; font-weight: 700; color: var(--ouro); }
 
 /* Rolável: um slot com muitos itens obtidos empurrava o resto da tela pra fora (a cena inteira
    rolava, e o boneco saía de vista junto). Agora só a LISTA rola, e o boneco fica parado. */
-#forjaItens {
+#armariaItens {
     display: flex; flex-direction: column; gap: 6px;
     max-height: 38vh;
     overflow-y: auto;
@@ -2389,3 +2432,40 @@ body {
 /* O antigo `#narracao.fim` morreu junto com a caixa de narração: agora o fecho da batalha é a
    última linha do log (ver .linhaLog.morte). */
 
+
+/* ==========================================================================
+   A FORJA — a oficina da peça. As quatro colunas são as MESMAS medidas da Catedral, e é isso
+   que faz entrar na Forja não parecer trocar de jogo: o centro muda de dono, a moldura não.
+   ========================================================================== */
+#forjaCorpo {
+    display: grid;
+    grid-template-columns: 518px 330px 172px 330px;
+    gap: 16px;
+    align-items: start;
+    justify-content: center;
+}
+
+/* A coluna do acervo é PILHA com altura cravada: quem rola é a lista, pra o cabeçalho ficar
+   parado. Mesma razão do `.modoAcervo` da Catedral. */
+#forjaAcervo {
+    display: flex; flex-direction: column;
+    height: 74vh; overflow: hidden;
+    padding: 8px 6px;
+}
+/* A peça VESTIDA ganha um fio de ouro: é a única do acervo que está mexendo em ficha agora. */
+.acervoItem.vestida { border-left: 2px solid var(--ouro); }
+
+#forjaPeca { align-items: center; gap: 4px; }
+#forjaArte { font-size: 62px; line-height: 1; }
+
+/* O QUE A PEÇA DÁ — o número pelo qual ela existe, então é o maior da coluna depois do nome. */
+.forjaStat {
+    display: flex; align-items: baseline; gap: 8px;
+    margin-top: 6px; font-variant-numeric: tabular-nums;
+}
+.fsStatRotulo { font-size: 12px; color: var(--apagado); text-transform: uppercase; letter-spacing: .1em; }
+.fsStatValor { font-size: 20px; font-weight: 700; color: var(--ouro); }
+.forjaStat.subindo .fsStatValor { color: var(--parada-3); }
+
+.itemAcoes { display: flex; gap: 6px; }
+.itemAcoes .trocarItem { flex: 1; }

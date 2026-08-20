@@ -238,6 +238,30 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
+        /// Queima pó como pontos de nível da peça — a Bigorna da Forja, e o análogo exato do
+        /// <see cref="ProgressaoService.QueimarAlma"/> do lado do apóstolo.
+        ///
+        /// <b>Na parede, recusa.</b> Ponto além do teto não se perde (ele fica guardado e vira nível
+        /// quando a estrela é paga), mas o pó gasto aqui é o MESMO que a estrela vai cobrar — quem
+        /// queima travado está pagando duas vezes pelo mesmo nível.
+        ///
+        /// O débito é tudo-ou-nada, pelo motivo da queima de alma: metade cobrada com a outra metade
+        /// recusada seria pó sumindo.
+        /// </summary>
+        public MotivoRecusa QueimarPo(Item item, IReadOnlyList<Custo> faixas)
+        {
+            if (faixas.Count == 0 || faixas.Any(f => f.Quantidade <= 0)) return MotivoRecusa.SemSaldo;
+            if (item.Nivel >= Arquetipos.NivelMaximo) return MotivoRecusa.NoTetoFinal;
+            if (NaParede(item)) return MotivoRecusa.NaParede;
+
+            if (!_po.Debitar(faixas)) return MotivoRecusa.SemSaldo;
+
+            item.Pontos += faixas.Sum(f => Po.PontosPorPo(f.Raridade) * f.Quantidade);
+            SalvarItens();
+            return MotivoRecusa.Nenhum;
+        }
+
+        /// <summary>
         /// O quanto falta pro próximo nível da peça, pra a barra da ficha: (o que já entrou nesta
         /// faixa, o que a faixa inteira custa). Na parede a barra enche e PARA — é ela que diz ao
         /// jogador que o pedágio está liberado.

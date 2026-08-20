@@ -1,16 +1,12 @@
-// A ALMINHA — o 🔥 num anel da cor da raridade.
+// A ALMINHA — o 🔥 pintado da cor da faixa.
 //
 // Foi SVG desenhado à mão antes, e o emoji ganhou: o desenho não sobrevivia aos 18px do chip, e o
 // 🔥 já é legível em qualquer tamanho porque a fonte do sistema resolve isso.
 //
-// O PREÇO, e ele é real: o emoji tem cor própria (laranja) e não dá pra pintar de seis cores —
-// filtro de matiz num emoji sai lavado e diferente em cada máquina. Então a raridade não está no
-// fogo, está no ANEL em volta dele. Quem lê a faixa lê o anel.
-//
-// A ORDEM é a do enum Raridade no C#. O índice que chega é o VALOR do enum, não a posição numa
-// lista filtrada — por isso ele viaja dentro do AlmaVista.
+// A cor da faixa é `filter: hue-rotate` no estilo.css, e ela só funciona porque o 🔥 já nasce
+// saturado. Emoji quase branco não aceita esse filtro — ver o `sepia` do pozinho (ui/po.js).
 
-export const FAIXAS = ['comum', 'incomum', 'raro', 'epico', 'lendario', 'mitico'];
+import { FAIXAS } from './raridade.js';
 
 export function almaIcone(raridade, tamanho = 18) {
     const el = document.createElement('span');

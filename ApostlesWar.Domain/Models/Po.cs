@@ -5,7 +5,9 @@ namespace ApostlesWar.Domain
     /// outra torneira: o pó cai por FASE concluída, não por inimigo.
     ///
     /// Aqui mora também a economia do nível do item, que a alma não tem equivalente: o item ganha
-    /// nível de USO, por ciclo de combate, e o pó só é cobrado no pedágio de cada dezena.
+    /// nível de USO, por ciclo de combate. O pó tem DOIS destinos que competem — o pedágio de cada
+    /// dezena (a têmpera) e acelerar o nível na bigorna (<see cref="PontosPorPo"/>) —, e é essa
+    /// competição que faz cada punhado de pó ser uma escolha em vez de um acúmulo.
     ///
     /// <b>A RECEITA É MAIS BARATA QUE A DA ALMA DE PROPÓSITO, e o motivo é contagem.</b> A alma paga
     /// 1 objeto por apóstolo; o pó paga 7 (um por slot), 28 pra vestir um time de quatro. Com as

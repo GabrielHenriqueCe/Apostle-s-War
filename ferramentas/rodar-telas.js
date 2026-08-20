@@ -11,23 +11,29 @@
 //   · id trocado no meio do movimento vira tela em branco sem erro; daí a conferência de ids.
 //
 // ============================================================================================
-// O QUE ELE **NÃO** COBRE — leia antes de confiar num verde daqui.
+// O QUE ELE COBRE, E O QUE NÃO — leia antes de confiar num verde daqui.
 //
-// Ele publica as 13 mensagens do C# e vê o que elas montam. **Ele não clica em nada.** Todo
-// caminho que só existe a partir de um gesto do jogador está fora:
+// Publica as mensagens do C#, monta cada tela e DISPARA os gestos: todo elemento com ouvinte
+// registrado leva o evento do tipo dele, em rondas, até parar de aparecer ouvinte novo (clique
+// abre painel, painel registra mais ouvintes). Arrastar e mouse-arrasto vão como SEQUÊNCIA
+// (dragstart→dragover→drop→dragend, mousedown→mousemove→mouseup) porque os handlers guardam
+// estado entre um e outro — disparados soltos, saem pelo `return` da primeira linha.
 //
-//   duplo-clique, clique em slot/carta/botão · arrastar-e-soltar · teclado (Esc, Enter)
-//   e tudo que roda DURANTE a batalha em resposta a isso
+// FORA, e são duas coisas:
+//   · tudo que roda contra o motor C# — a batalha depois do primeiro quadro;
+//   · o markup ESTÁTICO do index.html. O DOM daqui nasce do que o JS pede: `getElementById` e
+//     `createElement`. Elemento que só existe escrito no HTML e é achado por CLASSE nunca é
+//     materializado, então `querySelectorAll('.setupJog')` (arena.js, no carregamento) continua
+//     devolvendo vazio e aqueles ouvintes nem chegam a ser registrados. Fechar isso é construir a
+//     árvore estática a partir do index.html — outro trabalho.
 //
-// Na separação do front, QUATRO bugs saíram exatamente daí — e os quatro foram achados pelo
-// Gabriel jogando, nenhum por este arquivo:
-//   · o duplo-clique da conquista não abria a ficha (função virou tela e ninguém avisou o chamador)
-//   · o clique num slot do arsenal não mostrava item (const esquecida no arquivo antigo)
-//   · o 🎲 da campanha não sorteava (helper compartilhado foi morar numa tela só)
-//   · a batalha morria no 1º quadro (referência morta dentro do `atualizarBotaoSair`)
+// Verde aqui quer dizer "as telas montam e os gestos não explodem", nunca "o jogo funciona" —
+// isso continua sendo teste em jogo, e é do Gabriel.
 //
-// Verde aqui quer dizer "as telas MONTAM". Não quer dizer "o jogo FUNCIONA" — isso continua
-// sendo teste em jogo, e é do Gabriel.
+// A ARMADILHA: disparar ouvinte fora da ordem que um jogador produziria gera estado que o C# nunca
+// manda. Exceção daqui é PISTA, não veredito, e por isso o relatório nomeia o gesto e o elemento.
+// E o ∅ (não tocou no DOM) pesa tanto quanto o ✗: handler que depende de estado não montado sai
+// daqui calado, e calado já deixou tela passar verde estando desligada.
 // ============================================================================================
 //
 // Uso:  node --experimental-vm-modules ferramentas/rodar-telas.js
@@ -53,9 +59,119 @@ const idsPedidos = new Set();
 // era reportada como OK. Foi assim que a montagem da Arena passou verde sem estar ligada.
 let escritas = 0;
 
+// ---------- seletores ----------
+// Um seletor é uma sequência de PASSOS separados por espaço: o último casa o elemento, os
+// anteriores têm de casar algum ancestral. Entende só o que o front usa — `tag`, `#id`, `.classe`
+// (podendo repetir) e `[data-x="v"]`. Passo que ele NÃO entende vira queixa, não `false` calado:
+// seletor mudo devolveria lista vazia e a tela passaria verde com o laço nunca tendo rodado, que é
+// exatamente o buraco que a lista vazia do `querySelectorAll` antigo abria.
+const passosMemo = new Map();
+
+function analisarPasso(passo) {
+    const cond = { tag: null, id: null, classes: [], attrs: [] };
+    let resto = passo;
+    const tag = resto.match(/^[a-zA-Z][\w-]*/);
+    if (tag) { cond.tag = tag[0].toUpperCase(); resto = resto.slice(tag[0].length); }
+    const fichas = resto.match(/[.#][\w-]+|\[[^\]]+\]/g) || [];
+    if (fichas.join('').length !== resto.length) return null;   // sobrou sintaxe desconhecida
+    for (const f of fichas) {
+        if (f[0] === '.') cond.classes.push(f.slice(1));
+        else if (f[0] === '#') cond.id = f.slice(1);
+        else {
+            const m = f.slice(1, -1).match(/^([\w-]+)(?:=(?:"([^"]*)"|'([^']*)'|(.*)))?$/);
+            if (!m) return null;
+            cond.attrs.push([m[1], m[2] ?? m[3] ?? m[4] ?? null]);
+        }
+    }
+    return cond;
+}
+
+function analisar(sel) {
+    if (passosMemo.has(sel)) return passosMemo.get(sel);
+    const passos = String(sel).trim().split(/\s+/).map(analisarPasso);
+    const bom = passos.length && passos.every(Boolean) ? passos : null;
+    if (!bom) queixar(`seletor não suportado pelo shim: "${sel}" — o harness devolveria vazio calado`);
+    passosMemo.set(sel, bom);
+    return bom;
+}
+
+// `className` e `classList` são independentes neste shim, e o front usa os dois — conferir só um
+// faria `.linhaLog.atual` (posta por classList) nunca casar.
+const temClasse = (el, c) =>
+    (typeof el.className === 'string' && el.className.split(/\s+/).includes(c)) || el.classList.contains(c);
+
+function casaPasso(el, cond) {
+    if (cond.tag && el.tagName !== cond.tag) return false;
+    if (cond.id && el.id !== cond.id) return false;
+    for (const c of cond.classes) if (!temClasse(el, c)) return false;
+    for (const [k, v] of cond.attrs) {
+        const atual = el.getAttribute(k);
+        if (atual === null || (v !== null && atual !== v)) return false;
+    }
+    return true;
+}
+
+function casaSeletor(el, sel) {
+    const passos = analisar(sel);
+    if (!passos || !casaPasso(el, passos[passos.length - 1])) return false;
+    let i = passos.length - 2, pai = el._pai;
+    while (i >= 0) {
+        if (!pai) return false;
+        if (casaPasso(pai, passos[i])) i--;
+        pai = pai._pai;
+    }
+    return true;
+}
+
+/// Descendentes de `raiz` que casam `sel`. `parar` corta no primeiro (é o querySelector).
+function buscar(raiz, sel, parar) {
+    escritas++;
+    if (!analisar(sel)) return [];
+    const achados = [];
+    (function descer(el) {
+        for (const f of el.children || []) {
+            if (casaSeletor(f, sel)) { achados.push(f); if (parar) return; }
+            descer(f);
+            if (parar && achados.length) return;
+        }
+    })(raiz);
+    return achados;
+}
+
+function adotar(pai, filho) { escritas++; if (filho && typeof filho === 'object') filho._pai = pai; }
+
+// ---------- o evento de mentira ----------
+// Precisa ter FORMA: handler que lê `e.key`, `e.clientX` ou `e.dataTransfer` explodiria por falta
+// de campo, e a exceção seria do harness, não do front.
+// O `dataTransfer` é ÚNICO no módulo de propósito — o par dragstart→drop existe pra transportar
+// coisa entre os dois, e um objeto novo por evento quebraria o transporte que se quer testar.
+const TRANSFERENCIA = {
+    _d: new Map(), effectAllowed: '', dropEffect: '',
+    setData(t, v) { this._d.set(String(t), String(v)); },
+    getData(t) { return this._d.get(String(t)) ?? ''; },
+    clearData() { this._d.clear(); }, setDragImage() {},
+    get types() { return [...this._d.keys()]; },
+};
+
+function criarEvento(tipo, alvo, extra = {}) {
+    return {
+        type: tipo, target: alvo, currentTarget: alvo, srcElement: alvo,
+        bubbles: true, cancelable: true, defaultPrevented: false,
+        preventDefault() { this.defaultPrevented = true; }, stopPropagation() {},
+        stopImmediatePropagation() {},
+        button: 0, buttons: 1, detail: 1,
+        clientX: 0, clientY: 0, offsetX: 0, offsetY: 0, pageX: 0, pageY: 0, deltaY: 0,
+        key: '', code: '', shiftKey: false, ctrlKey: false, altKey: false, metaKey: false,
+        dataTransfer: TRANSFERENCIA, animationName: '', propertyName: '',
+        ...extra,
+    };
+}
+
 function criarElemento(id = '', tag = 'DIV') {
+    escritas++;
     const filhos = [];
     const el = {
+        _pai: null,
         id, tagName: tag, hidden: false, textContent: '', value: '', className: '', title: '',
         width: LARGURA, height: 700, clientWidth: LARGURA, clientHeight: 700,
         offsetWidth: LARGURA, offsetHeight: 700, scrollTop: 0, scrollHeight: 0, scrollLeft: 0,
@@ -64,27 +180,57 @@ function criarElemento(id = '', tag = 'DIV') {
             { set: (t, k, v) => (t[k] = v, true), get: (t, k) => (k in t ? t[k] : '') }),
         classList: {
             _s: new Set(),
-            add(...c) { c.forEach(x => this._s.add(x)); }, remove(...c) { c.forEach(x => this._s.delete(x)); },
-            toggle(c, f) { const v = f ?? !this._s.has(c); v ? this._s.add(c) : this._s.delete(c); return v; },
+            add(...c) { escritas++; c.forEach(x => this._s.add(x)); },
+            remove(...c) { escritas++; c.forEach(x => this._s.delete(x)); },
+            toggle(c, f) { escritas++; const v = f ?? !this._s.has(c); v ? this._s.add(c) : this._s.delete(c); return v; },
             contains(c) { return this._s.has(c); },
         },
-        // Os ouvintes ficam GUARDADOS (antes eram descartados) pra o harness poder disparar um
-        // clique — ver `clicar`. Continua não havendo varredura automática: quem clica é a tela
-        // que pediu, uma por uma.
+        // Os ouvintes ficam GUARDADOS: é deles que a varredura de gestos tira o que disparar.
         _ev: {},
         addEventListener(tipo, fn) { (el._ev[tipo] ||= []).push(fn); },
-        removeEventListener() {}, focus() {}, blur() {}, select() {},
-        click() { for (const fn of el._ev.click || []) fn({ preventDefault() {}, stopPropagation() {} }); },
+        removeEventListener(tipo, fn) {
+            const l = el._ev[tipo];
+            if (l) el._ev[tipo] = l.filter(f => f !== fn);
+        },
+        focus() {}, blur() {}, select() {},
+        disparar(tipo, extra) { for (const fn of (el._ev[tipo] || []).slice()) fn(criarEvento(tipo, el, extra)); },
+        click() { el.disparar('click'); },
         setAttribute(k, v) { if (k.startsWith('data-')) el.dataset[k.slice(5)] = v; },
-        removeAttribute(k) { if (k === 'data-tema') delete el.dataset.tema; },
-        getAttribute() { return null; }, hasAttribute() { return false; },
-        appendChild(c) { filhos.push(c); return c; },
-        append(...c) { filhos.push(...c); }, prepend(...c) { filhos.unshift(...c); },
-        replaceChildren(...c) { filhos.length = 0; filhos.push(...c); },
-        insertBefore(c) { filhos.push(c); return c; }, remove() {},
-        // Devolve elemento em vez de null: o alvo e o CAMINHO de montagem rodar inteiro, e null
-        // faria a tela parar na primeira consulta em vez de mostrar o que quebra mais adiante.
-        querySelector: (sel) => criarElemento(sel), querySelectorAll: () => [], closest: () => null,
+        removeAttribute(k) { if (k.startsWith('data-')) delete el.dataset[k.slice(5)]; },
+        // Só data-*: é o único atributo que o shim guarda, e é o que os seletores do front leem
+        // (`.combatente[data-id="…"]`). Atributo fora disso responde "não tenho", não `null` mudo.
+        getAttribute(k) { return k.startsWith('data-') ? (el.dataset[k.slice(5)] ?? null) : null; },
+        hasAttribute(k) { return el.getAttribute(k) !== null; },
+        matches(sel) { return casaSeletor(el, sel); },
+        appendChild(c) { adotar(el, c); filhos.push(c); return c; },
+        append(...c) { for (const f of c) adotar(el, f); filhos.push(...c); },
+        prepend(...c) { for (const f of c) adotar(el, f); filhos.unshift(...c); },
+        replaceChildren(...c) {
+            for (const f of filhos) if (f._pai === el) f._pai = null;
+            filhos.length = 0;
+            for (const f of c) adotar(el, f);
+            filhos.push(...c);
+        },
+        insertBefore(c) { adotar(el, c); filhos.push(c); return c; },
+        // `remove()` era no-op, e isso mentia pra varredura: elemento tirado da tela continuava na
+        // árvore e levaria gesto que o jogador não tem como dar.
+        remove() {
+            escritas++;
+            const p = el._pai;
+            if (!p) return;
+            const i = p.children.indexOf(el);
+            if (i >= 0) p.children.splice(i, 1);
+            el._pai = null;
+        },
+        querySelectorAll: (sel) => buscar(el, sel, false),
+        // Devolve elemento novo quando NÃO acha, em vez de null: o alvo é o CAMINHO de montagem
+        // rodar inteiro, e um null faria a tela parar na primeira consulta em vez de mostrar o que
+        // quebra mais adiante. Achando de verdade, devolve o de verdade.
+        querySelector: (sel) => buscar(el, sel, true)[0] || criarElemento(sel),
+        closest(sel) {
+            for (let n = el; n; n = n._pai) if (casaSeletor(n, sel)) return n;
+            return null;
+        },
         getBoundingClientRect: () => ({ left: 0, top: 0, right: LARGURA, bottom: ALTURA, width: LARGURA, height: ALTURA, x: 0, y: 0 }),
         getContext: () => ctxDeMentira(),
         scrollTo() {}, scrollIntoView() {},
@@ -117,9 +263,34 @@ const document = {
     createElement: (tag) => criarElemento('', String(tag).toUpperCase()),
     createElementNS: (ns, tag) => criarElemento('', String(tag).toUpperCase()),
     createDocumentFragment: () => criarElemento(),
-    querySelector: (sel) => criarElemento(sel), querySelectorAll: () => [],
-    addEventListener() {}, removeEventListener() {},
+    querySelectorAll: (sel) => buscarNoDoc(sel, false),
+    querySelector: (sel) => buscarNoDoc(sel, true)[0] || criarElemento(sel),
+    // O documento também GUARDA ouvinte: o `keydown` que mata o F5 e leva o Enter das telas de
+    // passagem mora aqui (jogo.js), e enquanto isto era no-op ele nunca rodava no harness.
+    _ev: {},
+    addEventListener(tipo, fn) { (document._ev[tipo] ||= []).push(fn); },
+    removeEventListener(tipo, fn) {
+        const l = document._ev[tipo];
+        if (l) document._ev[tipo] = l.filter(f => f !== fn);
+    },
+    disparar(tipo, extra) { for (const fn of (document._ev[tipo] || []).slice()) fn(criarEvento(tipo, document, extra)); },
 };
+
+// A árvore aqui é uma FLORESTA: `getElementById` cria elemento solto, sem pai, e é nele que a tela
+// pendura os filhos. Procurar só a partir do `body` acharia quase nada.
+const raizesDoDoc = () => [document.body, document.documentElement, ...porId.values()];
+
+function buscarNoDoc(sel, parar) {
+    if (!analisar(sel)) return [];
+    const achados = [];
+    for (const r of raizesDoDoc()) {
+        if (casaSeletor(r, sel) && !achados.includes(r)) achados.push(r);
+        if (parar && achados.length) return achados;
+        for (const f of buscar(r, sel, parar)) if (!achados.includes(f)) achados.push(f);
+        if (parar && achados.length) return achados;
+    }
+    return achados;
+}
 
 // ---------- a ponte ----------
 // Guardamos o ouvinte que o front registra: é por ele que as telas entram.
@@ -131,10 +302,20 @@ const janela = {
     requestAnimationFrame() { return 1; }, cancelAnimationFrame() {},
     performance: { now: () => 0 },
     getComputedStyle: () => ({ getPropertyValue: () => '' }),
-    addEventListener() {}, removeEventListener() {},
+    // A janela guarda ouvinte pelo mesmo motivo do documento: o `mousemove`/`mouseup` do pan do
+    // mapa da campanha é registrado nela, e sem isto o arrasto do mapa nunca era exercitado.
+    _ev: {},
+    addEventListener(tipo, fn) { (janela._ev[tipo] ||= []).push(fn); },
+    removeEventListener(tipo, fn) {
+        const l = janela._ev[tipo];
+        if (l) janela._ev[tipo] = l.filter(f => f !== fn);
+    },
+    disparar(tipo, extra) { for (const fn of (janela._ev[tipo] || []).slice()) fn(criarEvento(tipo, janela, extra)); },
     setTimeout: () => 0, clearTimeout() {}, setInterval: () => 0, clearInterval() {},
     chrome: { webview: {
-        postMessage: (m) => enviados.push(m),
+        // Conta como TOQUE: metade dos botões do jogo não mexe na tela, só avisa o C# (`mandar`).
+        // Sem isto eles caíam no ∅ — "não fez nada" — quando o que fizeram é exatamente o esperado.
+        postMessage: (m) => { escritas++; enviados.push(m); },
         addEventListener: (tipo, fn) => { if (tipo === 'message') ouvinte = fn; },
         removeEventListener() {},
     } },
@@ -173,16 +354,172 @@ async function carregar(arquivo) {
 // As cargas são MÍNIMAS de propósito: o alvo é o caminho de montagem, não o conteúdo. Se a tela lê
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
 const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', simbolo: '🗡️', stat: 'ATK', valor: '+5', valorNum: 5, equipado: true };
-const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', faccao: 'Reino', tipo: 'Guardião', nivel: 1, hp: 100, hpMax: 100, ataque: 10, defesa: 10, velocidade: 85, medidor: 137, precisao: 50, resistencia: 120, taxaCritPct: 15, danoCritPct: 60, status: [], habilidades: [], liberado: true, vivo: true };
-/// Os elementos da árvore com esta classe. O shim não tem querySelectorAll de verdade.
-function procurar(raiz, classe) {
-    if (!raiz) return [];
-    const achados = [];
-    (function descer(el) {
-        if (typeof el.className === 'string' && el.className.split(' ').includes(classe)) achados.push(el);
+// Um só objeto pros dois contratos que o front recebe — o `ApostoloVisto` das telas de menu e o
+// combatente do combate. Chave a mais é ignorada pelo JS; chave a MENOS é caminho que não roda.
+const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', tipoSimbolo: '🏹', faccao: 'Reino', tipo: 'Guardião', desbloqueado: true, estrelas: 2, nivel: 1, xpPct: 45, hp: 100, hpMax: 100, ataque: 10, defesa: 10, velocidade: 85, medidor: 137, precisao: 50, resistencia: 120, taxaCritPct: 15, danoCritPct: 60, status: [], habilidades: [], vivo: true };
+// `DificuldadeVista`: as quatro, com duas trancadas — a barra desenha cadeado e requisito, e uma
+// lista toda liberada não exercita esse ramo.
+const DIFICULDADES = ['Normal', 'Difícil', 'Insano', 'Apocalipse'].map((nome, i) => ({
+    nome, valor: i, desbloqueada: i < 2, requisito: i < 2 ? null : `Conclua ${['Normal', 'Difícil', 'Insano'][i - 1]}`,
+}));
+// ---------- o que o jogador ALCANÇA ----------
+// O index.html carrega TODAS as telas ao mesmo tempo e o `mostrarCena` esconde as que não são a
+// atual pondo `hidden` no contêiner. Quem varre gesto tem de respeitar isso, senão clica em tela
+// escondida — e clique em tela escondida não é bug do jogo, é bug do harness.
+//
+// O `_pai` sozinho não resolve: `getElementById` devolve elemento SOLTO, então `#catedralPortas`
+// não sabe que mora dentro de `#catedral`. O esqueleto estático vem do próprio index.html.
+const paiDeId = (() => {
+    const pai = new Map();
+    const html = fs.readFileSync(INDEX, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+    const VAZIA = new Set(['br', 'hr', 'img', 'input', 'meta', 'link', 'source', 'col', 'area', 'embed']);
+    const pilha = [];
+    for (const [, fecha, tag, attrs] of html.matchAll(/<(\/?)([a-zA-Z][\w-]*)([^>]*)>/g)) {
+        const t = tag.toLowerCase();
+        if (fecha) {
+            for (let i = pilha.length - 1; i >= 0; i--) if (pilha[i].tag === t) { pilha.length = i; break; }
+            continue;
+        }
+        const id = (attrs.match(/(?:^|[^-\w])id="([^"]+)"/) || [])[1] || null;
+        if (id) {
+            const p = [...pilha].reverse().find(x => x.id);
+            if (p) pai.set(id, p.id);
+        }
+        if (!VAZIA.has(t) && !attrs.trim().endsWith('/')) pilha.push({ tag: t, id });
+    }
+    return pai;
+})();
+
+/// Nem o elemento nem nenhum ancestral dele — vivo ou só no esqueleto do HTML — está escondido.
+function alcancavel(el) {
+    for (let n = el; n; n = n._pai) {
+        if (n.hidden === true) return false;
+        if (!n._pai && n.id) {
+            for (let id = paiDeId.get(n.id); id; id = paiDeId.get(id)) {
+                if (porId.get(id)?.hidden === true) return false;
+            }
+        }
+    }
+    return true;
+}
+
+// ---------- a varredura de gestos ----------
+// Estes NÃO vão soltos: os handlers guardam estado entre um evento e o outro (`arrastando` no
+// ui/time.js, `mapaArrastando` na campanha), então disparados avulsos saem pelo `return` da
+// primeira linha sem exercitar nada. Vão em sequência, mais abaixo. O `message` fica de fora
+// porque é a ponte do C#, não gesto de jogador.
+const SEQUENCIA = new Set(['dragstart', 'dragenter', 'dragover', 'dragleave', 'drop', 'dragend',
+                           'mousedown', 'mousemove', 'mouseup', 'message']);
+// As teclas que o front lê: Enter e Escape movem tela; F5 e Ctrl+R são o guarda que impede
+// recarregar a página (recarregar mata a partida — ver jogo.js).
+const TECLAS = [{ key: 'Enter' }, { key: 'Escape' }, { key: 'F5' }, { key: 'r', ctrlKey: true }];
+const RONDAS = 3;          // clique abre painel, painel registra ouvinte novo, e por aí
+const MAX_PARES = 40;      // teto das combinações origem×alvo do arrasto
+
+// Elemento+tipo já disparado, GLOBAL e não por tela: os elementos do shim sobrevivem à troca de
+// tela, e sem isto a varredura re-disparava tudo a cada uma das 14. Assim cada ouvinte roda uma
+// vez, logo depois da tela que o registrou.
+const jaFoi = new Map();
+const marcado = (el, tipo) => {
+    let s = jaFoi.get(el);
+    if (!s) jaFoi.set(el, s = new Set());
+    if (s.has(tipo)) return true;
+    s.add(tipo);
+    return false;
+};
+
+const temTexto = (s) => typeof s === 'string' && s.trim() !== '';
+const nomear = (el) =>
+    el === document ? 'document'
+        : el === janela ? 'window'
+            : el.id ? `#${el.id}`
+                : temTexto(el.className) ? `.${String(el.className).trim().split(/\s+/)[0]}`
+                    : String(el.tagName || '?').toLowerCase();
+
+/// Tudo que tem ouvinte, varrendo a floresta inteira (document e window entram por fora).
+function comOuvinte() {
+    const vistos = new Set(), achados = [];
+    const descer = (el) => {
+        if (!el || typeof el !== 'object' || vistos.has(el) || el.hidden === true) return;
+        vistos.add(el);
+        if (el._ev && Object.values(el._ev).some(l => l.length)) achados.push(el);
         for (const f of el.children || []) descer(f);
-    })(raiz);
+    };
+    for (const r of raizesDoDoc()) if (alcancavel(r)) descer(r);
     return achados;
+}
+
+/// Roda o gesto; devolve a queixa se explodiu, ou null. Quem julga é o `contabilizar`.
+function rodar(el, tipo, rotulo, extras = [undefined]) {
+    try {
+        for (const extra of extras) el.disparar(tipo, extra);
+        return null;
+    } catch (e) {
+        return `${rotulo} · ${nomear(el)} · ${tipo}: ${e.stack.split('\n').slice(0, 3).join(' | ')}`;
+    }
+}
+
+/// Uma linha do placar: ✓ mexeu no DOM (ou avisou o C#) · ∅ não mexeu · ✗ explodiu.
+/// Uma SEQUÊNCIA inteira vale uma linha só: os passos do meio de um arrasto (`dragstart` guarda o
+/// que está sendo arrastado, `dragend` limpa) não mexem em nada por definição, e contá-los um a um
+/// enchia o ∅ de ruído que escondia o ∅ que importa.
+function contabilizar(nome, conta, corpo) {
+    escritas = 0;
+    const erro = corpo();
+    if (erro) { conta.erro++; queixar(erro); return; }
+    if (escritas) conta.ok++;
+    else { conta.vazio++; conta.mudos.push(nome); }
+}
+
+function varrerGestos(rotulo, conta) {
+    for (let ronda = 1; ronda <= RONDAS; ronda++) {
+        let disparados = 0;
+        for (const el of [document, janela, ...comOuvinte()]) {
+            for (const [tipo, ouvintes] of Object.entries(el._ev || {})) {
+                if (!ouvintes.length || SEQUENCIA.has(tipo) || marcado(el, tipo)) continue;
+                contabilizar(`${nomear(el)}·${tipo}`, conta,
+                    () => rodar(el, tipo, rotulo, tipo === 'keydown' ? TECLAS : [undefined]));
+                disparados++;
+            }
+        }
+        if (!disparados) break;   // ponto fixo: ninguém novo apareceu
+    }
+    sequenciasDeArrasto(rotulo, conta);
+    sequenciasDeMouse(rotulo, conta);
+}
+
+// O protocolo do arrastar, na ordem que o navegador emite. Fora dela o `drop` vê `arrastando`
+// nulo e volta na primeira linha — resultado ∅, que parece cobertura e não é.
+function sequenciasDeArrasto(rotulo, conta) {
+    const todos = comOuvinte();
+    const origens = todos.filter(e => (e._ev.dragstart || []).length);
+    const alvos = todos.filter(e => (e._ev.drop || []).length);
+    let pares = 0;
+    for (const o of origens) {
+        for (let i = 0; i < alvos.length; i++) {
+            const a = alvos[i];
+            if (pares >= MAX_PARES) return;
+            if (marcado(o, `arrasto→${i}`)) continue;
+            pares++;
+            TRANSFERENCIA.clearData();
+            contabilizar(`${nomear(o)}⇢${nomear(a)}·arrasto`, conta, () =>
+                rodar(o, 'dragstart', rotulo)
+                || ['dragenter', 'dragover', 'drop', 'dragleave'].reduce((e, t) => e || rodar(a, t, rotulo), null)
+                || rodar(o, 'dragend', rotulo));
+        }
+    }
+}
+
+// mousedown no elemento → mousemove/mouseup na JANELA (é onde o pan do mapa registra), com clientX
+// andando mais que o limiar de 4px que a campanha usa pra separar arrasto de clique.
+function sequenciasDeMouse(rotulo, conta) {
+    for (const el of comOuvinte()) {
+        if (!(el._ev.mousedown || []).length || marcado(el, 'mouse-arrasto')) continue;
+        contabilizar(`${nomear(el)}·mouse-arrasto`, conta, () =>
+            rodar(el, 'mousedown', rotulo, [{ clientX: 100, clientY: 100 }])
+            || rodar(janela, 'mousemove', rotulo, [{ clientX: 160, clientY: 100 }])
+            || rodar(janela, 'mouseup', rotulo, [{ clientX: 160, clientY: 100 }]));
+    }
 }
 
 const ALMA = ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Mítico']
@@ -195,13 +532,33 @@ const TELAS = [
     ['criarPerfil', {}],
     ['edicaoPerfil', { nome: 'G', avatar: '🧭', apostolos: [apostolo] }],
     ['montagemArena', { apostolos: [apostolo, { ...apostolo, id: 2 }] }],
-    ['campanhaMapa', { capitulos: [{ nome: 'Reino', simbolo: '👑', liberado: true, fases: 7 }], atual: 0 }],
-    ['campanhaFases', { faccao: 'Reino', simbolo: '👑', fases: [{ numero: 1, nome: 'Arma', liberada: true, rodada1: [apostolo], rodada2: [apostolo], item: null }], apostolos: [apostolo], faseSelecionada: 1, time: [], meusApostolos: [apostolo] }],
+    // `MapaVista` — dois capítulos, um trancado: o nó bloqueado não ganha o botão de entrar, e é
+    // outro ramo do laço.
+    ['campanhaMapa', {
+        capitulos: [{ simbolo: '👑', nome: 'Reino', desbloqueado: true, concluido: true },
+                    { simbolo: '😈', nome: 'Decaídos', desbloqueado: false, concluido: false }],
+        posicao: 0, dificuldades: DIFICULDADES, dificuldade: 0,
+    }],
+    // `FasesVista`. O `faseSelecionada` TEM de casar o `numero` de uma fase `desbloqueado` — é o
+    // que abre o `#faseDetalhe`, e com ele fechado o 🎲, o picker e os quatro slots do time ficam
+    // escondidos e gesto nenhum os alcança.
+    ['campanhaFases', {
+        capituloNome: 'Reino', capituloSimbolo: '👑',
+        fases: [
+            { numero: 1, nome: 'Arma', desbloqueado: true, concluido: true, rodada1: [apostolo], rodada2: [{ ...apostolo, id: 2 }], nivelDoInimigo: 3, drop: { simbolo: '🗡️', nome: 'Arma', principais: 'ATK · HP', quantidade: 2 } },
+            { numero: 2, nome: 'Elmo', desbloqueado: false, concluido: false, rodada1: [], rodada2: [], nivelDoInimigo: 4, drop: { simbolo: '🪖', nome: 'Elmo', principais: 'DEF', quantidade: 1 } },
+        ],
+        meusApostolos: [apostolo, { ...apostolo, id: 2, nome: 'Outro', simbolo: '🧙' }],
+        faseSelecionada: 1, timeMontado: [0],
+        dificuldades: DIFICULDADES, dificuldade: 0,
+    }],
     // Os GANHOS com dois trechos e stats: um apóstolo que atravessou nível é o caminho longo da
     // animação (encher · zerar · encher), e é o que a carga precisa exercitar.
+    // `FimDeFaseVista`. `podeProxima` ligado é o que faz existir o botão de continuar — com ele
+    // falso, um dos três botões da tela de decisão nunca é criado nem clicado.
     ['fimDeFase', {
-        venceu: true, titulo: 'Vitória', faccao: 'Reino', fase: 1, recompensa: null,
-        temProxima: false, comOpcoes: true, xp: 2870,
+        venceu: true, recompensa: null, podeProxima: true, proximoECapitulo: false,
+        comOpcoes: true, xp: 2870,
         ganhos: [{
             simbolo: '🧙', tipoSimbolo: '🏹', nome: 'Mago', xpGanha: 2870, travou: true,
             trechos: [{ nivel: 8, de: 40, ate: 100 }, { nivel: 9, de: 0, ate: 62 }],
@@ -249,7 +606,16 @@ const TELAS = [
         porNivel: [9, 10].map(n => ({ nivel: n, valor: '+' + n, noApostolo: [{ rotulo: 'Ataque', antes: 200, depois: 214, delta: 14, sufixo: '' }] })),
         portadorNome: 'Teste',
     }],
-    ['compendio', { faccoes: [{ nome: 'Reino', simbolo: '👑', apostolos: [apostolo] }] }],
+    // `CompendioVista`: a peça é `CompendioApostoloVista` (índice + travado), não o apóstolo
+    // inteiro. Um travado junto porque a peça bloqueada é outro ramo — e é ela que NÃO abre ficha.
+    ['compendio', {
+        faccoes: [{
+            nome: 'Reino', simbolo: '👑', apostolos: [
+                { indice: 0, simbolo: '🙂', nome: 'Teste', desbloqueado: true },
+                { indice: 1, simbolo: '❔', nome: '???', desbloqueado: false },
+            ],
+        }],
+    }],
     ['compendioApostolo', apostolo],
     ['estado', { turno: 1, fase: 'Assistindo', mensagem: '', equipe1: [apostolo], equipe2: [{ ...apostolo, id: 9 }], quemAge: null, fila: [1, 9, 1, 9, 1], habilidades: [], alvosValidos: [], selecionado: null, auto: false, modo: 'Campanha', tema: 'reino' }],
     ['evento', { tipo: 'dano', alvoId: 1, valor: 10, critico: false, absorvidoPeloEscudo: 0, texto: null }],
@@ -271,50 +637,45 @@ const TELAS = [
         process.exit(1);
     }
 
-    console.log(`\n  ${TELAS.length} telas:`);
+    console.log(`\n  ${TELAS.length} telas · gestos disparados logo depois de cada uma:`);
+    const total = { ok: 0, vazio: 0, erro: 0, mudos: [] };
     for (const [tipo, conteudo] of TELAS) {
         try {
             escritas = 0;
             ouvinte({ data: JSON.stringify({ tipo, conteudo }) });
             // Mensagem que não está NEM na tabela NEM no else-if não faz nada e não lança — e o
-            // harness reportava isso como OK. Foi assim que a montagem da Arena passou verde depois
-            // de eu tirar o `else if` sem ter posto a tela na tabela. "Não explodiu" ≠ "montou".
+            // harness reportava isso como OK. "Não explodiu" ≠ "montou".
             if (escritas === 0) {
                 console.log(`  ✗ ${tipo} — não fez NADA (não está ligada em lugar nenhum)`);
                 queixar(`${tipo}: mensagem não tratada — nem na tabela TELAS nem no else-if`);
-            } else {
-                console.log(`  ✓ ${tipo}`);
+                continue;
             }
         } catch (e) {
             console.log(`  ✗ ${tipo} — ${e.message}`);
             queixar(`${tipo}: ${e.stack.split('\n').slice(0, 3).join(' | ')}`);
+            continue;
         }
+        // A varredura vem AQUI, e não no fim: os ouvintes que esta tela acabou de registrar rodam
+        // contra o estado que ela montou. No fim de tudo eles rodariam contra a última tela.
+        const conta = { ok: 0, vazio: 0, erro: 0, mudos: [], alcancaveis: comOuvinte().length };
+        varrerGestos(tipo, conta);
+        for (const k of ['ok', 'vazio', 'erro']) total[k] += conta[k];
+        total.mudos.push(...conta.mudos.map(m => `${tipo} · ${m}`));
+        const gestos = conta.ok + conta.vazio + conta.erro;
+        // `alcançáveis` é o CENSO da tela: quantos elementos com ouvinte o jogador consegue tocar
+        // com ela aberta. Tela rica em botão que mostra um número baixo aqui montou pela metade —
+        // foi assim que a carga velha da campanha (mandava `liberada`, o código lê `desbloqueado`)
+        // apareceu: a lista de fases nascia toda desabilitada e o detalhe nunca abria.
+        console.log(`  ${conta.erro ? '✗' : '✓'} ${tipo}  ${conta.alcancaveis} alcançáveis`
+            + (gestos ? ` · ${conta.ok} ✓${conta.vazio ? ` · ${conta.vazio} ∅` : ''}${conta.erro ? ` · ${conta.erro} ✗` : ''}` : ''));
     }
-
-    // ---------- os painéis que SÓ abrem por clique ----------
-    // O harness monta o que a mensagem do C# desenha, e os painéis de aprimorar não estão nisso:
-    // eles nascem do clique num botão. Sem esta parte, "Evoluir nível" e "Evoluir estrela" chegam
-    // ao jogo sem nunca terem rodado — que é o buraco que este harness existe pra não ter.
-    console.log('\n  painéis por clique:');
-    // As duas colunas de portas: a da Catedral (estações do apóstolo) e a da Forja (bancadas da
-    // peça). Mesma forma de botão, mesmo problema — o corpo do painel só existe depois do clique.
-    for (const b of [...procurar(porId.get('catedralPortas'), 'afBotao'),
-                     ...procurar(porId.get('forjaPortas'), 'afBotao')]) {
-        const rotulo = (b.children.find(f => f.className === 'abRotulo') || {}).textContent || '?';
-        try {
-            b.click();
-            // E os botões QUE O PAINEL abriu: o Máximo e o confirmar só existem depois do primeiro
-            // clique, então são dois níveis de gesto — nenhum deles roda sem isto.
-            let dentro = 0;
-            for (const c of ['qlBotao', 'acaoConfirmar']) {
-                for (const raiz of ['catedralEstacao', 'forjaBancada'])
-                    for (const alvo of procurar(porId.get(raiz), c)) { alvo.click(); dentro++; }
-            }
-            console.log(`  ✓ ${rotulo}${dentro ? ` · ${dentro} botão(ões) do painel` : ''}`);
-        } catch (e) {
-            console.log(`  ✗ ${rotulo} — ${e.message}`);
-            queixar(`${rotulo}: ${e.stack.split('\n').slice(0, 3).join(' | ')}`);
-        }
+    console.log(`\n  gestos: ${total.ok + total.vazio + total.erro} disparados`
+        + ` · ${total.ok} mexeram no DOM · ${total.vazio} não mexeram (∅) · ${total.erro} explodiram`);
+    // O ∅ não é falha: handler guardado por estado que esta tela não tem sai calado, e isso é
+    // legítimo. Vai listado porque ∅ em massa numa tela é sinal de que ela montou pela metade.
+    if (total.mudos.length) {
+        console.log('  ∅ (não tocaram no DOM): ' + total.mudos.slice(0, 12).join(', ')
+            + (total.mudos.length > 12 ? ` … +${total.mudos.length - 12}` : ''));
     }
 
     // ---------- os ids ----------

@@ -49,12 +49,13 @@ namespace ApostlesWar.Presentation.Front
         private readonly PersonagemService _personagens;
         private readonly ProgressaoService _progressao;
         private readonly AlmaService _alma;
+        private readonly PoService _po;
         private readonly ConfiguracaoService _configuracao;
 
         public FluxoDoFront(PonteWebView2 ponte, CombateService combate, ApostolosService apostolos,
             PerfilService perfil, SessaoDoFront sessao, CampanhaService campanha, CapitulosService capitulos,
             ArsenalService arsenal, PersonagemService personagens, ProgressaoService progressao,
-            AlmaService alma, ConfiguracaoService configuracao)
+            AlmaService alma, PoService po, ConfiguracaoService configuracao)
         {
             _ponte = ponte;
             _combate = combate;
@@ -67,6 +68,7 @@ namespace ApostlesWar.Presentation.Front
             _personagens = personagens;
             _progressao = progressao;
             _alma = alma;
+            _po = po;
             _configuracao = configuracao;
         }
 
@@ -496,6 +498,7 @@ namespace ApostlesWar.Presentation.Front
                 // creditada e as instâncias do roster já subiram — não há mais "antes" pra consultar.
                 var antes = time.Select(p => (Apostolo: p, Nivel: p.Nivel, Xp: _progressao.XpDe(p))).ToList();
                 var almaAntes = _alma.Saldo().ToList();
+                var poAntes = _po.Saldo().ToList();
 
                 ResultadoDaFase resultado = _combate.ExecutarFaseComTime(time, faccao, fase, dificuldade);
                 bool venceu = resultado.Venceu;
@@ -504,6 +507,14 @@ namespace ApostlesWar.Presentation.Front
                 var almaGanha = Enum.GetValues<Raridade>()
                     .Select(r => new AlmaVista((int)r, r.Descricao(), _alma.SaldoDe(r) - almaAntes[(int)r], Alma.XpPorAlma(r)))
                     .Where(a => a.Quantidade > 0)
+                    .ToList();
+
+                // O pó é lido pela DIFERENÇA de saldo, como a alma, e não pela tabela de queda: quem
+                // decide se ele caiu é o ArsenalService (só na vitória), e refazer esse `if` aqui
+                // seria a mesma regra escrita em dois lugares.
+                var poGanho = Enum.GetValues<Raridade>()
+                    .Select(r => new PoVista((int)r, r.Descricao(), _po.SaldoDe(r) - poAntes[(int)r], Po.PontosPorPo(r)))
+                    .Where(p => p.Quantidade > 0)
                     .ToList();
 
                 // A recompensa é processada ANTES de montar a tela: é ela que desbloqueia a fase
@@ -518,10 +529,10 @@ namespace ApostlesWar.Presentation.Front
                 }
 
                 MostrarConquistas(venceu, recompensa, faccao, fase, dificuldade, novos,
-                    resultado.XpPorApostolo, ganhos, almaGanha);
+                    resultado.XpPorApostolo, ganhos, almaGanha, poGanho);
 
                 _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, dificuldade,
-                    resultado.XpPorApostolo, ganhos, almaGanha, comOpcoes: true));
+                    resultado.XpPorApostolo, ganhos, almaGanha, poGanho, comOpcoes: true));
                 switch (EsperarDecisao())
                 {
                     case DecisaoDeFim.JogarNovamente:
@@ -559,12 +570,12 @@ namespace ApostlesWar.Presentation.Front
         /// </summary>
         private void MostrarConquistas(bool venceu, RecompensaVista? recompensa, Faccao faccao,
             Fases fase, Dificuldade dificuldade, List<Personagem> novos, int xp,
-            List<GanhoVista> ganhos, List<AlmaVista> alma)
+            List<GanhoVista> ganhos, List<AlmaVista> alma, List<PoVista> po)
         {
             if (novos.Count == 0) return;
 
             _ponte.EnviarFimDeFase(MontarFimDeFase(venceu, recompensa, faccao, fase, dificuldade,
-                xp, ganhos, alma, comOpcoes: false));
+                xp, ganhos, alma, po, comOpcoes: false));
             EsperarContinuar();
 
             foreach (Personagem novo in novos)
@@ -576,10 +587,10 @@ namespace ApostlesWar.Presentation.Front
 
         private FimDeFaseVista MontarFimDeFase(bool venceu, RecompensaVista? recompensa, Faccao faccao,
             Fases fase, Dificuldade dificuldade, int xp, List<GanhoVista> ganhos, List<AlmaVista> alma,
-            bool comOpcoes)
+            List<PoVista> po, bool comOpcoes)
         {
             var proxima = ProximaEtapa(faccao, fase, dificuldade);
-            return new FimDeFaseVista(venceu, recompensa, xp, ganhos, alma,
+            return new FimDeFaseVista(venceu, recompensa, xp, ganhos, alma, po,
                 PodeProxima: proxima is not null,
                 ProximoECapitulo: proxima is not null && proxima.Value.Faccao != faccao,
                 comOpcoes);
@@ -990,6 +1001,84 @@ namespace ApostlesWar.Presentation.Front
                         foreach (FaixaQueimada f in q.Faixas.OrderBy(f => f.Raridade))
                             _alma.Fundir((Raridade)f.Raridade, f.Quantidade, MaiorDificuldade());
                 }
+                else if (msg.Tipo == "abrirForja")
+                {
+                    var obtidos = _arsenal.ObterObtidos();
+                    if (msg.Valor >= 0 && msg.Valor < obtidos.Count) MostrarForja(obtidos[msg.Valor], alvo);
+                    // Voltar da Forja cai no topo do laço, que redesenha a Catedral inteira — a peça
+                    // pode ter mudado de nível lá dentro, e o boneco mostra isso.
+                }
+            }
+        }
+
+        /// <summary>
+        /// A FORJA — a tela da peça, e a irmã da Catedral: lá o centro é o apóstolo e a moeda é alma,
+        /// aqui o centro é a PEÇA e a moeda é pó. As três bancadas (⚒️ Bigorna, 💧 Têmpera,
+        /// 🏺 Caldeamento) espelham Santuário, Altar e Oferenda.
+        ///
+        /// Ela é laço PRÓPRIO dentro do laço da Catedral: enquanto o jogador forja, quem responde o
+        /// "voltar" é este `while`, e sair dele devolve o comando à Catedral — que redesenha com a
+        /// peça já mudada. É o mesmo empilhamento do compêndio → ficha do apóstolo.
+        ///
+        /// <paramref name="portador"/> é o apóstolo selecionado na Catedral; é contra a ficha DELE
+        /// que a prévia mostra o reflexo do nível novo. Nulo (ou peça no baú) apaga só esse reflexo.
+        /// </summary>
+        private void MostrarForja(Item peca, Personagem? portador)
+        {
+            while (true)
+            {
+                _ponte.LimparPendentes();
+                _ponte.EnviarForja(MontarForja(peca, portador));
+
+                MensagemDoFront msg = _ponte.Esperar();
+                if (msg.Tipo == "encerrar") throw new JogoEncerrado();
+                if (msg.Tipo == "voltar") return;
+
+                if (msg.Tipo == "trocarSlot")
+                {
+                    // Só os slots em que o jogador TEM peça. Quem ainda não achou uma bota não vê a
+                    // bota vazia no meio do giro — a Forja é sobre o que se tem, e uma tela vazia no
+                    // caminho faria a seta parecer quebrada.
+                    var comPeca = _arsenal.ObterObtidos().Select(i => i.Fase).Distinct().OrderBy(f => f).ToList();
+                    int onde = comPeca.IndexOf(peca.Fase);
+                    if (comPeca.Count > 1 && onde >= 0)
+                    {
+                        int passo = msg.Valor >= 0 ? 1 : -1;
+                        Fases destino = comPeca[((onde + passo) % comPeca.Count + comPeca.Count) % comPeca.Count];
+
+                        // Chega na peça VESTIDA daquele slot, e não na primeira do baú: é a que está
+                        // valendo em combate, e é dela que o jogador quer partir.
+                        Item? vestida = _arsenal.ObterEquipados()[(int)destino - 1];
+                        peca = vestida ?? _arsenal.ObterObtidos().First(i => i.Fase == destino);
+                    }
+                }
+                else if (msg.Tipo == "escolherPeca")
+                {
+                    // A troca é DENTRO do slot: a bigorna não vira um segundo lugar de escolher arma,
+                    // e uma peça de outro slot no centro não teria acervo nenhum à esquerda.
+                    var doSlot = _arsenal.ObterObtidos().Where(i => i.Fase == peca.Fase).ToList();
+                    if (msg.Valor >= 0 && msg.Valor < doSlot.Count) peca = doSlot[msg.Valor];
+                }
+                else if (msg.Tipo == "queimarPo")
+                {
+                    QueimaPedida? q = LerQueima(msg.Texto);
+                    if (q != null)
+                        _arsenal.QueimarPo(peca,
+                            q.Faixas.Select(f => new Custo((Raridade)f.Raridade, f.Quantidade)).ToList());
+                }
+                else if (msg.Tipo == "comprarEstrelaItem")
+                {
+                    _arsenal.ComprarEstrela(peca);
+                }
+                else if (msg.Tipo == "fundirPo")
+                {
+                    // Faixa a faixa, da mais baixa pra mais alta, pelo motivo da fusão de alma: fundir
+                    // Comum e Incomum no mesmo gesto perderia o que acabou de nascer na de cima.
+                    QueimaPedida? q = LerQueima(msg.Texto);
+                    if (q != null)
+                        foreach (FaixaQueimada f in q.Faixas.OrderBy(f => f.Raridade))
+                            _po.Fundir((Raridade)f.Raridade, f.Quantidade, MaiorDificuldade());
+                }
             }
         }
 
@@ -1069,23 +1158,139 @@ namespace ApostlesWar.Presentation.Front
         private static string Escrever(IReadOnlyList<Custo> custos)
             => string.Join(" e ", custos.Select(c => $"{c.Quantidade} de {c.Raridade.Descricao()}"));
 
+        private ForjaVista MontarForja(Item peca, Personagem? portador)
+        {
+            // O acervo é o do SLOT da peça, e o índice que a tela devolve é a posição NESTA lista —
+            // é ela que o `escolherPeca` reabre do outro lado.
+            var doSlot = _arsenal.ObterObtidos().Where(i => i.Fase == peca.Fase).ToList();
+            var acervo = doSlot.Select((it, i) => Ver(it, i, _arsenal.EstaEquipado(it))).ToList();
+
+            int teto = Progressao.TetoPorEstrelas(peca.Estrelas);
+            bool naParede = _arsenal.NaParede(peca);
+            bool temProxima = peca.Estrelas < Material.EstrelaMaxima;
+
+            var receita = temProxima ? Po.Receita(peca.Estrelas + 1) : new List<Custo>();
+            var faltando = temProxima ? _po.Faltando(receita) : new List<Custo>();
+
+            bool podeComprar = naParede && faltando.Count == 0;
+            bool podeQueimar = !naParede && peca.Nivel < Arquetipos.NivelMaximo;
+
+            string motivo =
+                !temProxima && peca.Nivel >= Arquetipos.NivelMaximo ? "No topo: 6 estrelas e nível 60."
+                : naParede && faltando.Count > 0 ? $"Falta {Escrever(faltando)} de pó pra próxima têmpera."
+                : naParede ? $"Travada no nv {teto} — a têmpera abre a dezena seguinte."
+                : "";
+
+            // Os pontos que ainda cabem ANTES da parede — é o "Máximo" da bigorna. Malhar além disso
+            // não perde ponto (ele fica guardado na peça), mas gasta o pó que a TÊMPERA vai cobrar.
+            int limite = Math.Min(teto + 1, Arquetipos.NivelMaximo);
+            int ateAParede = Math.Max(Po.PontosParaNivel(limite) - peca.Pontos, 0);
+
+            var patamares = new List<PatamarVista>();
+            for (int nivel = peca.Nivel; nivel <= limite; nivel++)
+                patamares.Add(new PatamarVista(nivel, Po.PontosParaNivel(nivel)));
+
+            // O `Max` por faixa é quanto dela cabe até a parede: é o que impede o jogador de torrar
+            // pó mítico num nível que a estrela dele nem abriu.
+            var po = Enum.GetValues<Raridade>()
+                .Select(r =>
+                {
+                    int vale = Po.PontosPorPo(r);
+                    int cabe = podeQueimar ? (ateAParede + vale - 1) / vale : 0;   // teto da divisão
+                    return new PoVista((int)r, r.Descricao(), _po.SaldoDe(r), vale,
+                        Math.Min(_po.SaldoDe(r), cabe),
+                        PodeFundir: _po.SaldoDe(r) >= Material.PorFusao && r < Material.TetoDeFusao(MaiorDificuldade()));
+                })
+                .ToList();
+
+            return new ForjaVista(Ver(peca, doSlot.FindIndex(i => i.Id == peca.Id), _arsenal.EstaEquipado(peca)),
+                Equipamento.NomeDoSlot(peca.Fase), acervo,
+                _arsenal.ObterObtidos().Select(i => i.Fase).Distinct().Count(),
+                teto, naParede, peca.Pontos, ateAParede,
+                po, (int)Material.TetoDeFusao(MaiorDificuldade()),
+                receita.Select(VistaDePo).ToList(), faltando.Select(VistaDePo).ToList(),
+                podeComprar, podeQueimar, motivo,
+                patamares, PorNivelDaPeca(peca, portador, teto),
+                _arsenal.EstaEquipado(peca) && portador != null ? portador.Nome : "");
+        }
+
+        /// <summary>
+        /// O que a peça vale em cada nível que ela ainda alcança, e o que isso faz na ficha de quem a
+        /// veste. O reflexo é a diferença entre o conjunto de hoje e o MESMO conjunto com esta peça
+        /// no nível de destino — pelo <see cref="Jogador.AplicarItens"/> da luta, e não somando o
+        /// número da peça na mão: um principal em % só vira número em cima da base de alguém.
+        /// </summary>
+        private List<NivelDaPecaVista> PorNivelDaPeca(Item peca, Personagem? portador, int teto)
+        {
+            bool vestida = _arsenal.EstaEquipado(peca);
+            Item?[] hoje = _arsenal.ObterEquipados();
+
+            List<DeltaVista> Reflexo(Item simulada)
+            {
+                if (!vestida || portador is null) return new List<DeltaVista>();
+
+                var depois = hoje.ToArray();
+                depois[(int)peca.Fase - 1] = simulada;
+
+                var antes = new Jogador(portador);
+                antes.AplicarItens(hoje.Where(i => i != null).Select(i => i!));
+
+                var com = new Jogador(portador);
+                com.AplicarItens(depois.Where(i => i != null).Select(i => i!));
+
+                return new List<DeltaVista>
+                {
+                    Delta("HP", antes.HPMaximo, com.HPMaximo),
+                    Delta("Ataque", antes.Ataque, com.Ataque),
+                    Delta("Defesa", antes.Defesa, com.Defesa),
+                    Delta("Velocidade", antes.Velocidade, com.Velocidade),
+                    Delta("Precisão", antes.Precisao, com.Precisao),
+                    Delta("Resistência", antes.Resistencia, com.Resistencia),
+                    Delta("Taxa de crítico", (int)(antes.TaxaCrit * 100), (int)(com.TaxaCrit * 100), "%"),
+                    Delta("Dano crítico", (int)(antes.DanoCrit * 100), (int)(com.DanoCrit * 100), "%"),
+                }.Where(d => d.Delta != 0).ToList();
+            }
+
+            var fora = new List<NivelDaPecaVista>();
+            for (int nivel = peca.Nivel; nivel <= teto; nivel++)
+            {
+                // Uma CÓPIA com os pontos daquele nível: simular mexendo na peça de verdade gravaria
+                // no save um nível que o jogador só estava olhando.
+                var simulada = new Item(peca.Nome, peca.Simbolo, peca.Faccao, peca.Fase, peca.TipoStat)
+                {
+                    Pontos = Po.PontosParaNivel(nivel),
+                    Estrelas = peca.Estrelas,
+                };
+                fora.Add(new NivelDaPecaVista(nivel, ValorFormatado(simulada), Reflexo(simulada)));
+            }
+            return fora;
+        }
+
+        private static PoVista VistaDePo(Custo c)
+            => new((int)c.Raridade, c.Raridade.Descricao(), c.Quantidade, Po.PontosPorPo(c.Raridade));
+
+        /// <summary>
+        /// Uma peça como a tela a lê. Mora fora do <see cref="MontarCatedral"/> porque a Forja
+        /// desenha as mesmas peças — e duas cópias divergiriam no dia em que a raridade entrar.
+        /// </summary>
+        private ItemArsenalVista Ver(Item it, int indice, bool equipado)
+        {
+            var (feito, total) = _arsenal.FaixaDoNivel(it);
+            return new(
+                indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
+                NomeDoStat(it.TipoStat), ValorFormatado(it), it.Valor, equipado,
+                it.Nivel, it.Estrelas, total <= 0 ? 100 : (int)(100L * feito / total),
+                // A CHAVE do stat vai crua junto com o rótulo: "ATK" é o que se lê, mas o filtro
+                // precisa distinguir ATKFlat de ATKPct, e os dois se escrevem "ATK".
+                it.TipoStat.ToString(), Faccoes.Simbolo(it.Faccao));
+        }
+
         private CatedralVista MontarCatedral(List<Personagem> roster, int selecionado, int candidato = -1)
         {
             var equipados = _arsenal.ObterEquipados();
 
-            ItemArsenalVista Ver(Item it, int indice, bool equipado)
-            {
-                var (feito, total) = _arsenal.FaixaDoNivel(it);
-                return new(
-                    indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
-                    NomeDoStat(it.TipoStat), ValorFormatado(it), it.Valor, equipado,
-                    it.Nivel, it.Estrelas, total <= 0 ? 100 : (int)(100L * feito / total),
-                    // A CHAVE do stat vai crua junto com o rótulo: "ATK" é o que se lê, mas o filtro
-                    // precisa distinguir ATKFlat de ATKPct, e os dois se escrevem "ATK".
-                    it.TipoStat.ToString(), Faccoes.Simbolo(it.Faccao));
-            }
-
-            var obtidos = _arsenal.ObterObtidos().Select((it, i) => Ver(it, i, _arsenal.EstaEquipado(it))).ToList();
+            var acervo = _arsenal.ObterObtidos();
+            var obtidos = acervo.Select((it, i) => Ver(it, i, _arsenal.EstaEquipado(it))).ToList();
 
             var slots = new List<SlotArsenalVista>();
             foreach (Fases fase in Enum.GetValues<Fases>())
@@ -1094,8 +1299,11 @@ namespace ApostlesWar.Presentation.Front
                 Item? eq = equipados[s];
                 // O nome do slot vem do ArsenalService: ele nomeia o slot E o item que cai nele, então
                 // um boneco vazio e o item que o preenche não podem discordar (já discordaram).
+                //
+                // A peça do slot leva o índice REAL no acervo, e não -1: é por ele que o "Melhorar"
+                // diz à Forja qual peça pôr na bigorna.
                 slots.Add(new SlotArsenalVista(s, Equipamento.NomeDoSlot(fase),
-                    eq is null ? null : Ver(eq, -1, true)));
+                    eq is null ? null : Ver(eq, acervo.FindIndex(i => i.Id == eq.Id), true)));
             }
 
             var lista = roster

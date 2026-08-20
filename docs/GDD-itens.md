@@ -493,6 +493,12 @@ pouco da próxima. Ele não é imposto — cada dezena paga **+15 pontos de prin
 compra do item. E como o material que mais acelera nível é o mesmo que o pedágio cobra, queimá-lo como
 atalho **rouba do próprio teto**: nenhuma trava anti-abuso precisa ser escrita.
 
+**A ⚒️ BIGORNA é onde essa queima acontece** (a Forja, ago/2026): pó vira ponto na escada
+1·5·25·125·625·3.125, com o mesmo painel de barras da queima de alma. **Ela RECUSA na parede** — não
+como trava anti-abuso (o parágrafo acima explica por que ela não é necessária), mas porque ali o
+ponto não vira nível nenhum: quem malha travado gasta o pó que a têmpera vai cobrar e não anda um
+degrau. É a mesma recusa que o Santuário faz do lado do apóstolo.
+
 **Os primeiros níveis têm de sair rápido**, e é o que impede a coisa de ser maçante: você vê número
 subir na primeira sessão, e como o nível é **por peça** com 9 slots, sempre há algo prestes a estourar.
 A dezena cara só aparece depois que você já escolheu o item que quer levar até o fim.
@@ -611,6 +617,21 @@ abre **todas as armas disponíveis** do acervo pra escolher qual vestir.
 | **stat principal** | qual dos principais do slot ela sorteou |
 | **subs, CONTENDO** | só as que têm aquela sub específica |
 | **subs, SEM CONTER** | só as que NÃO têm aquela sub |
+| **equipadas** | mostra também as que estão **vestidas em OUTROS apóstolos**, pra tomar a peça de um aliado |
+
+#### O que o item POR APÓSTOLO muda nas telas *(desenho do Gabriel, ago/2026 — vale quando o vínculo existir)*
+
+Hoje os itens são globais e as telas mentem um pouco por causa disso. Quando cada peça for de um
+apóstolo (o passo 10-b), três coisas mudam juntas:
+
+- **As setas `‹ Arma ›` da Forja passam a percorrer os itens DAQUELE apóstolo**, não o acervo do
+  mundo. O gesto é o mesmo; o que ele traz é que muda.
+- **A peça carrega um emoji pequeno do apóstolo num canto** — é o que responde "de quem é isso?" sem
+  abrir nada. Vale no cartão do acervo e na peça do centro.
+- **O filtro de EQUIPADAS existe pra roubar de aliado.** Vestir em B uma peça que está em A tira ela
+  de A — isso o modelo já permite —, e **é justamente por isso que o emoji do portador é obrigatório
+  ali**: sem ele o jogador desnuda um aliado sem perceber, e só descobre na fase seguinte. A tela tem
+  de dizer DE QUEM está tirando antes do clique, não depois.
 
 **E um filtro que ORDENA por stat somado, que é o que responde a pergunta real do jogador:** "qual
 peça me dá mais ATAQUE?" — e a conta soma **o principal com as subs juntos**, não só o principal.

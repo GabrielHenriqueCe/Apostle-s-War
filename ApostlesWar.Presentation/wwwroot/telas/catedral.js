@@ -1,8 +1,11 @@
 // CATEDRAL — onde o apóstolo se aprimora. Quatro colunas: o ELENCO, o escolhido, as PORTAS e a
 // estação aberta.
 //
-// As quatro estações são LUGARES e não verbos — 🎒 Forja (itens), ⬆️ Santuário (nível), ★ Altar
-// (estrela) e 🔥 Oferenda (fundir alma). A Forja é o estado de repouso.
+// As estações são LUGARES e não verbos — 🎒 Armaria (vestir), ⬆️ Santuário (nível), ★ Altar
+// (estrela) e 🔥 Oferenda (fundir alma). A Armaria é o estado de repouso.
+//
+// A ⚒️ Forja é a única que NÃO abre aqui: ela é tela própria, porque lá o centro é a PEÇA e não o
+// apóstolo. A porta dela só acende com um slot escolhido — sem peça não há o que forjar.
 //
 // Toda ação volta pro C# e a tela inteira é redesenhada. Não há estado de jogo aqui: o que mora
 // neste arquivo é só ONDE o jogador estava olhando.
@@ -11,6 +14,9 @@ import { mandar } from '../nucleo/ponte.js';
 import { marcaDeTipo, marcaDeEstrelas, barraDeNivel } from '../ui/marcas.js';
 import { painelDeStats } from '../ui/ficha.js';
 import { almaIcone } from '../ui/alma.js';
+import { blocoDeDelta } from '../ui/delta.js';
+import { cardDePeca } from '../ui/peca.js';
+import { navegador } from '../ui/navegador.js';
 import { barraDeQuantidade } from '../ui/quantidade.js';
 
 const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
@@ -60,7 +66,7 @@ export const catedral = {
         desenharBoneco();
 
         if (catedralSlotSel >= 0) desenharSlot(catedralSlotSel);
-        else document.getElementById('forjaDetalhe').hidden = true;
+        else document.getElementById('armariaDetalhe').hidden = true;
 
         desenharAcao();
 },
@@ -68,12 +74,12 @@ export const catedral = {
 
 // ---------- as ESTAÇÕES: as portas da última coluna ----------
 //
-// Cada uma é um LUGAR e não um verbo — Forja, Santuário, Altar, Oferenda —, e é isso que faz a tela
-// inteira ter nome próprio em vez de ser um painel de ações. O 🎒 Forja é o estado de repouso.
+// Cada uma é um LUGAR e não um verbo — Armaria, Santuário, Altar, Oferenda —, e é isso que faz a
+// tela ter nome próprio em vez de ser um painel de ações. A 🎒 Armaria é o estado de repouso.
 function desenharPortas() {
     const c = catedralDados.apostolo;
     document.getElementById('catedralPortas').replaceChildren(
-        botaoDeAcao('🎒', 'Forja', null, true),
+        botaoDeAcao('🎒', 'Armaria', null, true),
         botaoDeAcao('⬆️', 'Santuário', 'nivel', !!c?.podeQueimar),
         botaoDeAcao('★', 'Altar', 'estrela', !!c?.naParede),
         botaoDeAcao('🔥', 'Oferenda', 'almas', true),
@@ -123,7 +129,17 @@ function desenharFicha() {
     }
 
     const arte = document.createElement('div'); arte.id = 'catedralArte'; arte.textContent = c.ficha.simbolo;
-    const nome = document.createElement('div'); nome.className = 'afNome'; nome.textContent = c.ficha.nome;
+
+    // O nome COM as setas do elenco — o mesmo gesto que troca o tipo da peça na Forja (ui/navegador.js).
+    // Aqui ele é atalho e não necessidade (o elenco está todo à esquerda), mas gesto que só existe em
+    // uma tela ninguém aprende. Circula: do último volta pro primeiro.
+    const total = catedralDados.roster.length;
+    const nome = navegador(c.ficha.nome, {
+        ha: total > 1,
+        aoAnterior: () => mandar('selecionarApostolo', (catedralDados.selecionado - 1 + total) % total),
+        aoProximo: () => mandar('selecionarApostolo', (catedralDados.selecionado + 1) % total),
+        classe: 'navApostolo',
+    });
 
     const ident = document.createElement('div');
     ident.className = 'afFaccao';
@@ -197,7 +213,7 @@ function botaoDeAcao(icone, rotulo, acao, habilitado, nota) {
 
 function desenharAcao() {
     const painel = document.getElementById('catedralEstacao');
-    const direita = document.getElementById('forja');
+    const direita = document.getElementById('armaria');
 
     painel.hidden = !catedralEstacao;
     direita.hidden = !!catedralEstacao;
@@ -569,25 +585,13 @@ function desenharAcervo() {
     col.replaceChildren(topo, desenharFiltro(), corpo);
 }
 
-// O cartão da peça, na mesma peça do cartão de apóstolo: emoji grande, a estrela e o nível — e MAIS
-// NADA. Um acervo de centenas não se lê por ficha; se lê por grade, batendo o olho na estrela.
-// Quem quer o número da peça clica nela, e ele abre na comparação ao lado.
-function cardDeAcervo(o) {
-    const card = document.createElement('button');
-    card.type = 'button';
-    const olhando = catedralDados.previa && catedralDados.previa.indice === o.indice;
-    card.className = 'acervoItem' + (olhando ? ' olhando' : '');
-    card.title = `${o.nome} · ${o.faccao} · ${o.stat} +${o.valor}`;   // o resto fica no hover
-
-    const em = document.createElement('span'); em.className = 'aiEmoji'; em.textContent = o.simbolo;
-    const es = document.createElement('span'); es.className = 'aiEstrelas';
-    es.textContent = '★'.repeat(o.estrelas) + '☆'.repeat(6 - o.estrelas);
-    const lv = document.createElement('span'); lv.className = 'aiLv'; lv.textContent = `nv ${o.nivel}`;
-
-    card.append(em, es, lv);
-    card.addEventListener('click', () => mandar('preverItem', o.indice));
-    return card;
-}
+// O cartão da peça mora em `ui/peca.js`, porque a Forja mostra o MESMO acervo — desenhá-lo duas
+// vezes é como as duas telas começam a discordar. Aqui fica só o que é da Catedral: quem está
+// marcado é a peça sendo comparada, e o clique abre essa comparação.
+const cardDeAcervo = (o) => cardDePeca(o, {
+    marcada: !!catedralDados.previa && catedralDados.previa.indice === o.indice,
+    aoClicar: () => mandar('preverItem', o.indice),
+});
 
 // O FILTRO, em CHIPS e não em formulário. `<select>` e `<checkbox>` nativos aparecem com a cara do
 // Windows — caixa branca, borda cinza — e num painel escuro isso lê como planilha, não como jogo.
@@ -665,10 +669,10 @@ function grupo(rotulo, valor, opcoes, aoMudar) {
 function desenharSlot(slot) {
     catedralSlotSel = slot;
     desenharBoneco();
-    document.getElementById('forjaDetalhe').hidden = false;
-    document.getElementById('forjaSlotNome').textContent = catedralDados.slots[slot].nome;
+    document.getElementById('armariaDetalhe').hidden = false;
+    document.getElementById('armariaSlotNome').textContent = catedralDados.slots[slot].nome;
 
-    const cont = document.getElementById('forjaItens');
+    const cont = document.getElementById('armariaItens');
     const equipada = catedralDados.slots[slot].equipado;
 
     // A candidata só vale se for DESTE slot. Sem esta trava, sair da Arma pro Bracelete mantinha a
@@ -685,6 +689,9 @@ function desenharSlot(slot) {
         ? fichaDeItem(equipada, 'equipada')
         : vazio('Nenhuma peça neste slot.'));
 
+    const acoes = document.createElement('div');
+    acoes.className = 'itemAcoes';
+
     const trocar = document.createElement('button');
     trocar.type = 'button';
     trocar.className = 'trocarItem' + (catedralTrocando ? ' ativo' : '');
@@ -695,7 +702,21 @@ function desenharSlot(slot) {
         desenharColunaEsquerda();
         desenharSlot(slot);
     });
-    filhos.push(trocar);
+    acoes.append(trocar);
+
+    // A porta da FORJA, e ela só existe com peça no slot: forjar o vazio não quer dizer nada. O
+    // índice viaja porque é a PEÇA que abre a tela, não o slot — lá dentro dá pra pular pras outras
+    // do mesmo slot, inclusive as guardadas.
+    if (equipada) {
+        const melhorar = document.createElement('button');
+        melhorar.type = 'button';
+        melhorar.className = 'trocarItem melhorarItem';
+        melhorar.textContent = '⚒️ Melhorar';
+        melhorar.addEventListener('click', () => mandar('abrirForja', equipada.indice));
+        acoes.append(melhorar);
+    }
+
+    filhos.push(acoes);
 
     // A candidata entra ABAIXO da equipada, no mesmo lugar onde a lista morava. As duas fichas lado
     // a lado na vertical são a comparação — o delta é o que sobra de olhar as duas.
@@ -750,33 +771,3 @@ function fichaDeItem(o, papel) {
     card.append(tag, topo, st, nv, trilho);
     return card;
 }
-
-// A DIFERENÇA, já resolvida contra o apóstolo selecionado pelo C#: só as linhas que mudam, e o
-// número é o da FICHA dele (não o da peça), porque é ele que decide se a troca vale.
-function blocoDeDelta(deltas) {
-    const box = document.createElement('div');
-    box.className = 'itemDelta';
-
-    if (!deltas.length) {
-        box.append(vazio('Não muda nada na ficha dele.'));
-        return box;
-    }
-
-    box.replaceChildren(...deltas.map(d => {
-        const linha = document.createElement('div');
-        linha.className = 'idLinha ' + (d.delta > 0 ? 'sobe' : 'desce');
-        const r = document.createElement('span'); r.className = 'idRotulo'; r.textContent = d.rotulo;
-        const a = document.createElement('span'); a.className = 'idAntes';
-        a.textContent = `${d.antes.toLocaleString('pt-BR')}${d.sufixo}`;
-        const seta = document.createElement('span'); seta.className = 'idSeta'; seta.textContent = '→';
-        const p = document.createElement('span'); p.className = 'idDepois';
-        p.textContent = `${d.depois.toLocaleString('pt-BR')}${d.sufixo}`;
-        const dl = document.createElement('span'); dl.className = 'idDelta';
-        dl.textContent = `${d.delta > 0 ? '+' : ''}${d.delta.toLocaleString('pt-BR')}${d.sufixo}`;
-        linha.append(r, a, seta, p, dl);
-        return linha;
-    }));
-
-    return box;
-}
-

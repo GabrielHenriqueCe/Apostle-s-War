@@ -44,6 +44,7 @@ export function mostrarCena(cena) {
     document.getElementById('fimDeFase').hidden = cena !== 'fimDeFase';
     document.getElementById('conquista').hidden = cena !== 'conquista';
     document.getElementById('catedral').hidden = cena !== 'catedral';
+    document.getElementById('forja').hidden = cena !== 'forja';
     document.getElementById('compendio').hidden = cena !== 'compendio';
     // A ficha do apóstolo tem UMA seção e dois donos: o compêndio e a conquista (o apóstolo recém-ganho
     // termina na própria ficha). Copiar o HTML pra ter duas telas iguais seria duas telas pra manter.

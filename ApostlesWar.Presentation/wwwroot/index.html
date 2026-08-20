@@ -163,13 +163,13 @@
 
     <!-- Cena do ARSENAL: a bancada de APRIMORAR o apóstolo, em três colunas — o roster pra escolher,
          o escolhido no meio com o que dá pra comprar nele, e os itens à direita.
-         O #catedralEstacao ocupa a MESMA célula do #forja: abrir uma ação esconde os itens, que
+         O #catedralEstacao ocupa a MESMA célula do #armaria: abrir uma ação esconde os itens, que
          não têm o que dizer naquele momento. -->
     <section id="catedral" hidden>
         <h1>⛪ Catedral</h1>
         <!-- QUATRO colunas, com o apóstolo no centro óptico: o elenco de um lado, as portas e a estação
              do outro, somando a mesma largura.
-             A última é compartilhada: #forja (a Forja, em repouso) e #catedralEstacao (a
+             A última é compartilhada: #armaria (a Forja, em repouso) e #catedralEstacao (a
              estação aberta) caem na MESMA célula, e só um dos dois aparece por vez. -->
         <div id="catedralCorpo">
             <aside id="catedralElenco"></aside>
@@ -177,14 +177,26 @@
             <div id="catedralEstacoes">
                 <div id="catedralPortas"></div>
             </div>
-            <div id="forja">
+            <div id="armaria">
                 <div id="boneco"></div>
-                <div id="forjaDetalhe" hidden>
-                    <div id="forjaSlotNome"></div>
-                    <div id="forjaItens"></div>
+                <div id="armariaDetalhe" hidden>
+                    <div id="armariaSlotNome"></div>
+                    <div id="armariaItens"></div>
                 </div>
             </div>
             <div id="catedralEstacao" hidden></div>
+        </div>
+    </section>
+
+    <!-- Cena da FORJA: a oficina da PEÇA, e a irmã da Catedral — mesmas quatro colunas, outro
+         centro. Entra-se pelo ⚒️ Melhorar de um slot da Armaria; o Esc volta pra lá. -->
+    <section id="forja" hidden>
+        <h1>⚒️ Forja</h1>
+        <div id="forjaCorpo">
+            <aside id="forjaAcervo"></aside>
+            <div id="forjaPeca"></div>
+            <div id="forjaPortas"></div>
+            <div id="forjaBancada"></div>
         </div>
     </section>
 

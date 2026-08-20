@@ -115,6 +115,9 @@ namespace ApostlesWar.Presentation.Front
 
         public void EnviarCatedral(CatedralVista catedral) => Enviar("catedral", catedral);
 
+        /// <summary>A Forja: a tela da PEÇA. Sai da Catedral e volta pra ela pelo "voltar".</summary>
+        public void EnviarForja(ForjaVista forja) => Enviar("forja", forja);
+
         // ---------- Compêndio ----------
         // Duas telas, duas mensagens: a grade e a ficha. Poderiam ser uma só (mandar o catálogo com
         // as fichas dentro e deixar o JS navegar), mas aí o C# perderia de vista em que tela o

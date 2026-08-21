@@ -17,6 +17,7 @@
 *.md    text eol=crlf
 *.csproj text eol=crlf
 *.sln   text eol=crlf
+*.yml   text eol=crlf
 
 # Binários: o git não deve tocar.
 *.png binary

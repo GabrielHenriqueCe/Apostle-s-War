@@ -1,0 +1,51 @@
+# O CI roda numa máquina LIMPA o que eu já rodo na minha. O ganho não é "rodar os testes" — é
+# rodar num Windows que não tem meu `bin/obj`, meu cache e meu CRLF, que é onde metade das
+# armadilhas deste repo se esconde. Ele não confere nada por conta própria: só chama as
+# ferramentas que moram em `ferramentas/`.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verificar:
+    # Obrigatório, não preferência: a `Presentation` é `net10.0-windows`.
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # O `conferir-docs.js` lê o histórico INTEIRO (`git log --format=%s`) pra saber quais
+          # `#NNN` foram mergeados. Com o `fetch-depth: 1` do padrão ele veria UM commit, acharia
+          # zero PR, e acusaria toda citação de PR nos docs de não-mergeada.
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+
+      - name: build
+        run: dotnet build
+
+      # Sem a variável `BANCADA` a bancada de dano é PULADA (`FatoDaBancadaAttribute`), e é de
+      # propósito: ela gera relatório em vez de afirmar algo, e reescreveria um arquivo versionado.
+      - name: testes
+        run: dotnet test --no-build
+
+      - name: harness — telas
+        run: node --experimental-vm-modules ferramentas/rodar-telas.js
+
+      # SEM argumento de propósito. O script lê `argv[2]` como caminho e `argv[3]` como segundos; a
+      # forma `"" 120` dos docs depende de o shell preservar a string vazia, e o PowerShell do
+      # runner a engole — aí o `120` viraria o CAMINHO. Sem argumento os dois padrões valem.
+      - name: harness — temas
+        run: node --experimental-vm-modules ferramentas/rodar-tema.js
+
+      - name: harness — docs
+        run: node ferramentas/conferir-docs.js

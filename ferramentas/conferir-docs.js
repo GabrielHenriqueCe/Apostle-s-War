@@ -7,7 +7,7 @@
 // o cabeçalho do `rodar-telas.js` dizia "não clica em nada" enquanto clicava, e nada aqui pegaria.
 //
 // Ele NÃO reescreve nada. O que fazer com a deriva é decisão de quem lê — script que edita doc é
-// como o `dotnet test` reescrevendo o `bancada-dano.md`.
+// como o `dotnet test` reescrevia o `bancada-dano.md` a cada corrida (hoje a bancada é opt-in).
 //
 // ============================================================================================
 // O QUE DERRUBA E O QUE NÃO. Só as conferências 1, 2 e 4 mexem no código de saída. A 3 (símbolos)

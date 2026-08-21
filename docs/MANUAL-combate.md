@@ -302,7 +302,8 @@ revide e passivas de apanhar (Herói, Operário, Zumbi, Troll) medem ZERO. É ba
 de duelo — apóstolo com número baixo pode ser reativo, não fraco. A coluna **Usos** é diagnóstico do BOT:
 habilidade que dispara 0× no apóstolo inteiro mas pontua alto isolada acusa a fila do bot, não o balanço.
 
-Roda em ~37s dentro do `dotnet test`.
+**Ela é OPT-IN e o `dotnet test` comum a PULA** — só roda com `$env:BANCADA=1` (ver
+`FatoDaBancadaAttribute`). Uma corrida custa ~63 s e reescreve o relatório; sem ela a suíte leva 0,6 s.
 
 ---
 

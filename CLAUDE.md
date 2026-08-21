@@ -57,7 +57,7 @@ algum passar de 20% fora. Documento que engorda em silêncio é orçamento que m
   certo no dia. `grep` o nome VELHO em `docs/`, `CLAUDE.md`, `.claude/skills/`, `ferramentas/` (as
   cargas dos harnesses) e a memória; corrigir ou apagar cada acerto. Quem descreve no PRESENTE
   vira erro; quem descreve no PASSADO ("era X", "morreu no #NNN") é história e FICA.
-  Antes de commitar, junto com `dotnet build`/`dotnet test`: `node ferramentas/conferir-docs.js`.
+  Antes de commitar, junto com `dotnet build`/`dotnet test`: **os três harnesses** (§Comandos).
 
 ## Comentário: cada coisa em UM lugar só (ago/2026)
 Nasceu de uma medição: no PR da cura em área eu escrevi **28 linhas de comentário pra 11 de código**
@@ -91,7 +91,16 @@ destrói o melhor primeiro.
 comentário dele no MESMO PR. É só isso que sobra, e é o que impede a gordura de voltar.
 
 ## Comandos
-- Build: `dotnet build`  ·  Testes: `dotnet test` (xUnit em `ApostlesWar.Tests/`).
+- Build: `dotnet build`  ·  Testes: `dotnet test` (xUnit em `ApostlesWar.Tests/`), ~0,6 s.
+  A **bancada de dano é OPT-IN** e fica fora disso: `$env:BANCADA=1; dotnet test` (~63 s, reescreve o
+  `docs/bancada-dano.md`). Ela não afirma nada sobre o motor — GERA relatório.
+- **Os TRÊS harnesses, antes de mexer E antes de commitar** — rodar antes também é o que evita herdar
+  vermelho de outra sessão como se fosse meu (o `rodar-telas` já esteve vermelho na `main` sem ninguém ver):
+  ```
+  node --experimental-vm-modules ferramentas/rodar-telas.js
+  node --experimental-vm-modules ferramentas/rodar-tema.js "" 120
+  node ferramentas/conferir-docs.js
+  ```
 - **Gotcha:** o jogo ABERTO trava o build (lock do `.exe`/`.dll`) — pedir pra fechar antes de buildar/testar.
 - Combate NÃO roda headless (o loop chama a tela) → verificação em jogo é do Gabriel; testo só o que é
   PURO (motor, capacidades, `Batalha`, services). Com `ITelaDeCombate` injetável, uma tela no-op no

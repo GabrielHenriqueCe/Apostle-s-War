@@ -204,7 +204,7 @@ PRs #204–#213, que guardam melhor e datado. O mapa e o contrato finais do fron
    MORTO **e** duplicava o `[Description]` do enum `Faccao` (que o `Helper.GetDescricao` já lê) →
    deletado; sobrou só o Símbolo. Program.cs enxugou 2 instâncias + args de 3 ctors.
 6. ✅ **Porta de persistência `IRepositorioDeSave` + `SaveLocal`** — o IO de arquivo saiu de
-   `CapitulosService`/`ArsenalService` pra trás da porta (`Services/IRepositorioDeSave.cs`). **Corte
+   `CapitulosService`/`ArsenalService` pra trás da porta (`Portas/IRepositorioDeSave.cs`). **Corte
    typed:** a porta é dona do JSON + IO + tratamento de corrupção; os services entregam/recebem OBJETO
    (`_repo.Salvar("save", capitulos)` / `_repo.Carregar<List<Capitulo>>("save")`). `chave`→`save.txt`/
    `itens.txt` (compat). **Aviso de save-corrompido DROPADO** (corrompido → default silencioso). Os 2
@@ -822,16 +822,16 @@ envelheceu).
 nesses stats) viraram observáveis ao vivo.
 
 ### Testes automatizados (xUnit na lógica de domínio)
-**Status:** ✅ **xUnit JÁ RODA** — o projeto `Tests/` existe com `MotorDeHabilidadesTests.cs` +
-`NavegacaoTests.cs` (~30 testes verdes, somados facção a facção durante o sweep). A antiga nota
-"nunca usou xUnit / adiado" ficou desatualizada (drift corrigido jul/2026). O que segue **PENDENTE
-(FILA A #12) é AMPLIAR a cobertura** pra além do motor/navegação: a **ordem crítica de morte**
-(Guarda→Vilão→Necromancia) e o `ReceberDano` ponta-a-ponta — os pontos onde bug sério já apareceu
-(StackOverflow de proteção mútua, crítico-exige-dano, dispatch dual-source). É a rede de segurança
-antes do Rebalanceamento e diferencial de portfólio.
+**Status:** ✅ **xUnit JÁ RODA** — o projeto `Tests/` tem 25 arquivos e **332 testes verdes**
+(ago/2026). O `NavegacaoTests.cs` que esta nota citava morreu junto com a pele de console no #179:
+ele testava navegação de menu por teclado, que não existe mais. **O que segue PENDENTE (FILA A #14)
+é a ordem crítica de morte** (Guarda→Vilão→Necromancia): o `ReceberDano`
+ponta-a-ponta já caiu no próprio #14 (`Tests/ReceberDanoTests.cs`, 14 testes). Sobra o que precisa
+rodar o FLUXO, e o fluxo chama a tela — destrava com uma tela no-op sobre `ITelaDeCombate`. É a rede
+de segurança antes do Rebalanceamento e diferencial de portfólio.
 
 ### Persistência — porta `IRepositorioDeSave` (Steam/Play cloud save, NÃO SQL)
-**Status:** ✅ **PORTA FEITA (FILA A #6, jul/2026)** — `Services/IRepositorioDeSave.cs` (corte typed:
+**Status:** ✅ **PORTA FEITA (FILA A #6, jul/2026)** — `Portas/IRepositorioDeSave.cs` (corte typed:
 dona do JSON+IO+corrupção) + `SaveLocal`. O SQL/servidor-próprio foi **DESCARTADO** (Unity
 single-player). O save fica **local** (JSON em `Save/`), mas precisa sincronizar com **Steam Cloud** e
 **Google Play Saved Games** — que são **SDK de plataforma, não backend seu** (Steam Auto-Cloud =
@@ -867,7 +867,7 @@ aviso de inventário vazio) migrou pra `MenuView` (`ExibirConfirmacaoSaida`/`Exi
 MenuView). O Gerenciador ficou com **ZERO `Console.*`/`Thread.*`** — orquestração pura (decide QUANDO,
 a View faz COMO; o cálculo de domínio "quem é novo" fica no Gerenciador). ✅ **FEITO (jul/2026) a
 faxina de modelos/nomes:** auditadas `Campaingn/` e `Combat/` — NADA fora de lugar (tudo domínio, zero
-Console/IO, zero dependência das camadas de cima). `Capitulos.cs`+`Fase.cs` migraram pra `Models/`
+Console/IO, zero dependência das camadas de cima). `Capitulo.cs`+`Fase.cs` migraram pra `Models/`
 (gêmeos de Item/Personagem, namespace-raiz → zero mudança de using) e a pasta typo `Campaingn/` SUMIU.
 Classe `Capitulos`→`Capitulo` (era plural num modelo singular; save intacto, JSON é por propriedade).
 Enum morto `OpcoesMenu` deletado; `using System.Text.Json` morto do Capitulo removido. **Deixados de

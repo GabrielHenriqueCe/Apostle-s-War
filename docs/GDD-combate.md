@@ -305,8 +305,9 @@ regra é o revive:
 versão *antes* da situação. E **não recompensa apanhar de propósito**, que é o que um efeito extra
 qualquer faria.
 
-> **O motor já tem o gancho:** é um `StatusEffect` com `IReageAntesDeMorrer`, o primeiro elo da ordem
-> crítica de morte (`IReageAntesDeMorrer` → `IReageAoMatar` → `IReageAoMorrer`). Zero mecânica nova.
+> **O motor já tem o gancho:** é um `StatusEffect` com `IPrevineMorte`, o primeiro elo da ordem
+> crítica de morte (`IPrevineMorte` → `IReageAoMatar` → `IReageAoMorrer`), consultado pelo
+> `Combate.ConfirmarMorte` no golpe fatal. Zero mecânica nova.
 
 O mesmo desenho vale pro resto do kit condicional: limpar malefício vira **imunidade curta** quando não
 há o que limpar; escudar quem vai morrer vira **escudo em quem vai apanhar**. A situacional continua

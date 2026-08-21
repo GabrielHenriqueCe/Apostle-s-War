@@ -29,6 +29,9 @@ process.chdir(RAIZ);
 const ALVOS = [
     ...fs.readdirSync('docs').filter(f => f.endsWith('.md')).map(f => 'docs/' + f),
     'CLAUDE.md',
+    // O README é a vitrine e envelhece igual ao resto — ficou de fora até o #258 deixar uma frase
+    // falsa nele sem nada acusar. É o único doc que quem chega lê primeiro.
+    'README.md',
     ...fs.readdirSync('.claude/skills').map(d => `.claude/skills/${d}/SKILL.md`),
 ];
 
@@ -37,6 +40,9 @@ const ALVOS = [
 const DE_FORA = new Set([
     'CancellationToken', 'WindowsBase', 'LoadRawString', 'ReadKey', 'InternalsVisibleTo',
     'Grep', 'GHUtils', 'System', 'Task', 'List', 'Dictionary', 'Console',
+    // Conceitos de C# em prosa, não símbolos daqui — o §Conceitos do README é uma vitrine de
+    // estudo e escreve todos em crase, que é o que a conferência 3 lê como nome de código.
+    'Encapsulamento', 'Polimorfismo', 'Interfaces', 'Generics',
 ]);
 
 const problemas = [];       // derrubam

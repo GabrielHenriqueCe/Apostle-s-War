@@ -54,9 +54,10 @@ algum passar de 20% fora. Documento que engorda em silêncio é orçamento que m
   branch nem de adiantar o tema seguinte no working tree enquanto um PR espera. Avisar ao criar a branch.
 - **RENOMEOU, MOVEU, APAGOU ou CONCLUIU? varre no MESMO PR.** Toda deriva que as ferramentas acharam
   em ago/2026 nasceu num desses quatro instantes — nenhuma nasceu de escrever mal, o texto estava
-  certo no dia. `grep` o nome VELHO em `docs/`, `CLAUDE.md`, `.claude/skills/`, `ferramentas/` (as
-  cargas dos harnesses) e a memória; corrigir ou apagar cada acerto. Quem descreve no PRESENTE
-  vira erro; quem descreve no PASSADO ("era X", "morreu no #NNN") é história e FICA.
+  certo no dia. `grep` o nome VELHO em `docs/`, `CLAUDE.md`, **`README.md`**, `.claude/skills/`,
+  `ferramentas/` (as cargas dos harnesses) e a memória; corrigir ou apagar cada acerto. Quem
+  descreve no PRESENTE vira erro; quem descreve no PASSADO ("era X", "morreu no #NNN") é história
+  e FICA.
   Antes de commitar, junto com `dotnet build`/`dotnet test`: **os três harnesses** (§Comandos).
 
 ## Comentário: cada coisa em UM lugar só (ago/2026)

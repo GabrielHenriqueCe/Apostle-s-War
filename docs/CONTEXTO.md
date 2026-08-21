@@ -79,7 +79,19 @@ palavra é dele.**
    raridade + subs + o filtro completo, desenho do Gabriel no `GDD-itens.md`; a **batalha que não
    termina** (169.430 ciclos medidos, decisão dele: sair da batalha, sem limite de turnos); e o
    **FILA A #14**, o teste da ordem crítica de morte, que destrava com uma tela no-op sobre
-   `ITelaDeCombate`.
+   `ITelaDeCombate`. Enquanto raridade e subestatísticas não existirem, a **♻️ Reforja segue inerte**
+   (`forja.js:152`, botão `'em breve'`) — é a única bancada da Forja sem função.
+6. **A ordenação por valor no acervo, e um comentário que MENTE sobre ela.** Comparar `valorNum`
+   entre stats diferentes não diz nada (57,5 de ATK contra 0,0575 de HP%), então a ordem só é honesta
+   com o filtro de stat ligado. O comentário em `catedral.js:535` afirma que *"a lista avisa isso"* —
+   **e não avisa: não existe esse texto em tela nenhuma.** Duas coisas a resolver, e a segunda antes
+   da primeira: apagar a mentira do comentário, e decidir se a tela passa a avisar.
+7. **Dois nomes citados em doc que NUNCA foram código** — `ControladorAutomatico`
+   (`GDD-expansao.md`) e `AdicionarBonusHPPermanente` (`ROADMAP-refatoracao.md`). Saem na seção de
+   leitura do `conferir-docs.js`. São proposta não construída ou typo; ninguém checou qual.
+8. **Os ~23 gestos ∅ do `rodar-telas.js` não foram auditados um a um.** ∅ = o handler rodou e não
+   tocou no DOM nem avisou o C#. A maioria é legítima (o `mouseenter` de prévia sem nada pra prever,
+   o `#setupLutar` desabilitado sem time), mas isso é uma impressão, não uma conferência.
 
 ## Verificação em jogo — o que ainda não foi conferido
 
@@ -106,3 +118,8 @@ cards de recompensa, e o que acontece **ao abrir com o save antigo**.
 - O jogo ABERTO trava o build (lock do `.exe`) — pedir pra fechar antes de buildar/testar.
 - **Não há Python nem `gh` CLI nesta máquina**, e a extensão do Chrome foi recusada: verificação
   visual é do Gabriel.
+- **Ao reescrever ESTE arquivo, auditar item por item o que estava "no ar" antes.** Nesta sessão eu
+  reescrevi do zero e sumi com três: a ordenação do acervo (que segue aberta), a Reforja inerte e o
+  11,5% do teto. Só o 11,5% podia sair mesmo — ele passou a morar no `Equipamento.cs`. Foto nova não
+  é licença pra esquecer: item some daqui quando FOI RESOLVIDO ou quando mudou de casa, e as duas
+  coisas se PROVAM abrindo o alvo, não se presumem.

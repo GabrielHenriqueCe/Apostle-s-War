@@ -6,7 +6,7 @@ ponta a ponta: menu, perfil, campanha, arena, arsenal. Projeto de estudo/portfó
 ## Abertura — o protocolo, e ele é ORÇAMENTO, não checklist
 Oriente-se sozinho, sem o Gabriel pedir — e **pare quando o protocolo acabar**:
 
-1. **`docs/CONTEXTO.md`, inteiro** (~1k tokens). É a foto da última sessão: onde paramos, o que está
+1. **`docs/CONTEXTO.md`, inteiro** (~2k tokens). É a foto da última sessão: onde paramos, o que está
    no ar, o que foi decidido e as armadilhas que acabaram de morder. É reescrito do zero ao FIM de
    cada sessão, e é o **ÚNICO dono do estado** — não existe segunda foto, nem aqui nem na memória.
 2. **NÃO abrir os documentos que ele cita.** Ler o ponteiro não é ler o alvo; o alvo se abre quando

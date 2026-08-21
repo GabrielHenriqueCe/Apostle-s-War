@@ -20,8 +20,9 @@ O DESENHO de cada decisão está nos `docs/ADR-*.md`; o vocabulário de Ações 
 `docs/CATALOGO-de-acoes.md` (ler antes de criar habilidade nova — verbo compartilhado primeiro,
 bespoke só no 2º cliente).
 
-**Números que mudarem: rodar `dotnet test`** — a bancada escreve `docs/bancada-dano.md`, versionado,
-e o `git diff` dele é o relatório. O jogo ABERTO trava o build; pedir pra fechar antes.
+**Números que mudarem: rodar a bancada** — `$env:BANCADA=1; dotnet test`. Ela é OPT-IN: o `dotnet test`
+comum a pula, e sem a variável nenhum número novo sai. Escreve `docs/bancada-dano.md`, versionado, e o
+`git diff` dele é o relatório. O jogo ABERTO trava o build; pedir pra fechar antes.
 
 **Combate não roda headless** (o loop chama a tela): a verificação em jogo é do Gabriel. Testar aqui
 só o que é PURO — motor, capacidades, `Batalha`, services.

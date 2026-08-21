@@ -10,6 +10,8 @@ namespace Tests.Bancada
     /// pancada padronizado e escreve <c>docs/bancada-dano.md</c>, que é VERSIONADO: cada tweak de
     /// número vira um `git diff` legível, que é a entrega de verdade (não "ajustar valores").
     ///
+    /// Por isso ela NÃO roda no <c>dotnet test</c> comum — é opt-in, ver <see cref="FatoDaBancadaAttribute"/>.
+    ///
     /// **O desenho é do Gabriel, e cada escolha tem um porquê:**
     /// - **Stats iguais pra todos** — a bancada mede a HABILIDADE, não o personagem. Se um apóstolo tem
     ///   que ser mais forte, isso se resolve no ataque DELE, depois.
@@ -185,7 +187,7 @@ namespace Tests.Bancada
 
         // ---------- o relatório ----------
 
-        [Fact]
+        [FatoDaBancada]
         public void GerarRelatorio()
         {
             var apostolos = new ApostolosService(new PersonagemService(), new CapitulosService(new SaveEmMemoria()));

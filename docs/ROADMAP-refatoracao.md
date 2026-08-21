@@ -91,7 +91,7 @@ sem HTTP). O **motor da luta ficou INTOCADO** — só as telas trocam, pelos sea
 mora na Application (`CampanhaService`), nunca no front.
 
 **REBALANCE (#16): EM ITERAÇÃO, não fechado.** A bancada é o instrumento e a 1ª passada (#189) já
-entrou; o trabalho agora é o laço `editar número → dotnet test → git diff docs/bancada-dano.md`,
+entrou; o trabalho agora é o laço `editar número → BANCADA=1 dotnet test → git diff docs/bancada-dano.md`,
 quantas voltas o Gabriel achar que precisa. Os fios de combate que este parágrafo listava como
 abertos (sweep de composição, turno-resto, passiva-conta-mortos) estão TODOS fechados — ver
 §ONDE ESTÁ CADA COISA, que é o índice do que resta.

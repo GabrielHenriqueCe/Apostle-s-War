@@ -14,70 +14,95 @@
 
 ## Onde paramos (20/ago/2026)
 
-**A branch `feat/forja-e-po` está no GitHub**, 22 arquivos. O Gabriel abre e mergeia; depois é a
-limpeza de sempre (`git checkout main && git pull && git branch -d … && git fetch --prune`).
+**A sessão inteira foi TRILHA DE FERRAMENTA**, não jogo. Três PRs mergeados — **#255** (o
+`rodar-telas.js` passou a disparar gestos), **#256** (`conferir-docs.js` + a regra nova no
+`CLAUDE.md`) e **#257** (a carga do harness conferida contra o DTO do C#). O que cada um fez está na
+mensagem de commit; **não repetir aqui**.
 
-**O tema foi a ⚒️ FORJA e o 🧂 pó que ela gasta.** O `docs/GDD-itens.md` já tem o que ficou decidido
-(a Bigorna e a recusa na parede, no §Como o nível sobe; o item por apóstolo, no §O ACERVO). **Não
-repetir aqui o que está lá.**
+O que nasceu disso e vale saber: as ferramentas acharam **~12 derivas**, e todas nasceram no mesmo
+instante — rename, move, delete ou conclusão. Nenhuma nasceu de escrever mal. Daí a regra do
+`CLAUDE.md` §Como trabalhamos ser *varrer no MESMO PR*, e não "escrever com mais cuidado".
 
-O que precisa ser sabido e NÃO está nos docs:
+**Este arquivo foi commitado DIRETO NA MAIN, sem PR** — pedido do Gabriel.
 
-- **O PR (b) é o PRÓXIMO e o desenho dele já existe:** o item vai pro apóstolo + raridade + subs + o
-  filtro completo. O que o Gabriel desenhou nesta sessão está no `GDD-itens.md` §O que o item POR
-  APÓSTOLO muda nas telas — as setas por apóstolo, o emoji do portador na peça, o filtro de
-  equipadas pra tomar peça de aliado. **É desenho dele, não sugestão minha.**
-- **Os nomes são dele e foram escolhidos um a um:** Armaria (vestir) · Bigorna (nível) · Têmpera
-  (estrela) · Caldeamento (fundir). "Cadinho" foi recusado por ser o VASO e não o ato; "Refino" e
-  "Destilação" perderam para o termo de ferreiro.
-- **O pó já era creditado desde o #253** — o que não existia era saída de dados: nenhum DTO o levava
-  pro front. Por isso ele parecia não cair.
-- **O saldo de pó NÃO fica à mostra numa faixa.** Cheguei a pôr uma na coluna das peças e o Gabriel
-  cortou: *"deve mostrar onde precisa, igual a alma já faz"* — ou seja, dentro das bancadas e no fim
-  da fase.
+## A DECISÃO EM ABERTO — a bancada de dano
+
+É o assunto que a sessão terminou no meio, e é design de instrumento, não encanamento.
+
+**O que foi medido (20/ago/2026):**
+
+| | tempo | escreve no repo? |
+|---|---:|---|
+| os 331 testes de verdade | **434 ms** | não |
+| a bancada (1 `[Fact]`) | **83 s** | sim, 28 linhas por corrida |
+
+Ou seja: **99,5% do `dotnet test` é gerar relatório**, e a bancada não testa nada — os dois `Assert`
+dela são `36 == count` e `dir != null`. Se o motor de dano quebrasse, ela passaria verde.
+
+**O ruído entre duas corridas:** 28 linhas mudam, 48 números — 6 acima de 1%, 4 acima de 3%, o maior
+**3,92%**. Consequência: o `bancada-dano.md` commitado é UMA jogada de dado apresentada como o número
+do motor, e o instrumento **não enxerga uma mudança de balanceamento de 3%** — o ruído é maior que o
+sinal.
+
+**Os três movimentos propostos, e onde cada um parou:**
+
+1. **Tirar a bancada do `dotnet test`** — via um `FatoDaBancadaAttribute : FactAttribute` que põe
+   `Skip` quando `BANCADA != 1` (xUnit aqui é 2.9.3, não tem `Assert.Skip`). `dotnet test` vira
+   434 ms e árvore limpa. **Ganho puro, não depende de decisão nenhuma. NÃO COMEÇADO.**
+2. **Solta, a bancada pode ficar cara** — `Repeticoes` sai de 10; 100 custam ~14 min, irrelevante
+   pra algo que se roda ao mexer em balanceamento. Encolhe o ruído por 1/√N.
+3. **Aí o CI pode regerar e falhar se o commitado for diferente** — o relatório fica incapaz de
+   mentir, igual ao que o `conferir-docs` faz com os caminhos.
+
+**A parte que é decisão do Gabriel, e reabre o #235:** repetição ENCOLHE o ruído, nunca ZERA — o diff
+segue sujo. Zerar exige **rodízio pelas 4 casas** em vez de sortear uma, nas habilidades de alvo
+aleatório. O #235 descartou semear o RNG (*"travar o dado esconderia o que ela mede"*); o argumento a
+favor do rodízio é que o multiplicador por casa é propriedade do DESENHO, e a média sobre as casas é
+o número procurado — sortear é só um jeito impreciso de estimá-la. **Contraria decisão dele; a
+palavra é dele.**
 
 ## O que está no ar
 
-1. **Os itens continuam GLOBAIS**, não por apóstolo — é o PR (b). Na Forja, a seta `‹ Arma ›` traz a
-   peça vestida do slot, que hoje é a mesma pra qualquer apóstolo.
-2. **Raridade e subestatísticas não existem**, então dois eixos do filtro faltam, e a ♻️ Reforja é a
-   única bancada inerte da Forja.
-3. **A ordenação "quanto dá" só é honesta dentro do MESMO stat** — está comentado no código; a tela
-   ainda não avisa isso ao jogador.
-4. **Existe batalha que NÃO TERMINA.** 169.430 ciclos medidos numa fase do capítulo 4, bot × bot.
-   **Decisão do Gabriel: NÃO pôr limite de turnos; sair da batalha quando não dá pra vencer.** Item
-   próprio, não começado. O teto de 60 ciclos por fase já impede o exploit de nível de item.
-5. **A campanha ficou mais dura** desde o #253: todo item nasce valendo 11,5% do teto.
+1. **CI — combinado, não começado.** Repo é PÚBLICO → Actions de graça, inclusive `windows-latest`
+   (obrigatório: a `Presentation` é `net10.0-windows`). Rodaria `dotnet build`, `dotnet test` e os
+   três harnesses. **Depende do movimento 1 acima** — CI não deve rodar um relatório de 83 s que suja
+   a árvore. CD tem alvo já desenhado no `CLAUDE.md` (`dotnet publish` → `.exe` na Release).
+2. **Skill `depurar`** (o método de 4 fases aterrado nas armadilhas daqui) — planejada, não começada.
+3. **Statusline:** `effort.level` e `fast_mode` existem no payload e a linha ignora. ~6 linhas em
+   `~/.claude/statusline.js`, fora do repo. *Block timer já existe; uso semanal por modelo o payload
+   não traz.*
+4. **Buraco conhecido do harness:** o DOM de mentira só materializa o que o JS pede, então
+   `querySelectorAll('.setupJog')` do `arena.js` (no carregamento) segue vazio e aqueles ouvintes nem
+   são registrados. Fechar = construir a árvore estática do `index.html`. Está escrito no cabeçalho
+   do `rodar-telas.js`.
+5. **A fila do JOGO, parada desde que a trilha começou:** o **PR (b)** — item por apóstolo +
+   raridade + subs + o filtro completo, desenho do Gabriel no `GDD-itens.md`; a **batalha que não
+   termina** (169.430 ciclos medidos, decisão dele: sair da batalha, sem limite de turnos); e o
+   **FILA A #14**, o teste da ordem crítica de morte, que destrava com uma tela no-op sobre
+   `ITelaDeCombate`.
 
 ## Verificação em jogo — o que ainda não foi conferido
 
-**Nada da Forja foi visto em jogo ainda.** O que mais pede olho:
-
-- **As seis cores do 🧂.** O saleiro é quase branco, então o filtro precisa de `sepia+saturate` antes
-  do `hue-rotate` (a alminha não precisa: o 🔥 já nasce saturado). O resultado depende da fonte de
-  emoji do Windows.
-- A Forja inteira: a previsão da Bigorna com uma peça equipada (é onde o reflexo no apóstolo
-  aparece), as setas `‹ Arma ›`, e o Esc voltando pra Catedral com a peça já mudada.
-- Da sessão anterior, ainda em aberto: a tela de FASE, os quatro cards de recompensa, e o que
-  acontece **ao abrir com o save antigo**.
+**Nada da Forja foi visto em jogo ainda**, e agora tem mais: as seis cores do 🧂, a Forja inteira
+(previsão da Bigorna, as setas `‹ Arma ›`, o Esc voltando pra Catedral), a tela de FASE, os quatro
+cards de recompensa, e o que acontece **ao abrir com o save antigo**.
 
 ## Gotchas que continuam valendo
 
-- **O `rodar-telas.js` estava VERMELHO na `main`** e ninguém tinha notado: o fixture mandava
-  `taxaCrit`/`danoCrit` e a ficha lê `taxaCritPct`/`danoCritPct`. Corrigido aqui. **Rodar o harness
-  ANTES de mexer, pra saber o que já estava quebrado** — senão a falha herdada vira a sua.
-- **Tela nova precisa da MOLDURA da seção, não só do corpo.** Criei o `#forjaCorpo` e esqueci o
-  `#forja`: sem `position:absolute; inset:0` + coluna flex centrada, o `<h1>` não centraliza. A Forja
-  agora entra nos MESMOS seletores do `#catedral`, e não numa cópia deles.
-- **Elemento novo tem de ENTRAR na lista de seletores da placa/poço** (`estilo.css`), senão vira
-  caixa branca do Windows.
-- **Nada de crase (`` ` ``) dentro de `node -e "..."` no bash** — vira substituição de comando e come
-  o texto. Aconteceu duas vezes nesta sessão; a segunda quebrou o comando inteiro.
+- **Rodar os três antes de mexer:** `node --experimental-vm-modules ferramentas/rodar-telas.js`,
+  `ferramentas/rodar-tema.js "" 120` e `node ferramentas/conferir-docs.js`. O `rodar-telas` já esteve
+  vermelho na `main` sem ninguém notar — falha herdada vira a sua.
+- **Sabotagem para provar ferramenta: restaurar por substituição INVERSA, nunca `git checkout --`.**
+  Ele volta pro HEAD e leva junto a edição não commitada do mesmo arquivo — apagou três edições do
+  `CLAUDE.md` nesta sessão.
+- **`split('\n')` em arquivo CRLF deixa o `\r` no fim da linha, e o `$` do regex não casa.** Foi assim
+  que o strip de comentário do parser de DTO silenciosamente não fez nada. Usar `split(/\r?\n/)`.
+- **Nada de crase (`` ` ``) dentro de `node -e "..."` no bash** — vira substituição de comando. Script
+  que precisa de crase vai pra arquivo.
 - **`sed -i` reescreve CRLF→LF em TODO arquivo que toca**, e arquivo NOVO escrito pela ferramenta
-  nasce LF. Converter (`perl -pi -e 's/(?<!\r)\n/\r\n/'`) — quem acusa é o `rodar-telas.js`.
-- **`dotnet test` reescreve o `docs/bancada-dano.md`** e cinco linhas oscilam entre corridas →
-  `git checkout -- docs/bancada-dano.md`.
+  nasce LF. Converter e conferir; quem acusa é o `rodar-telas.js`.
+- **`dotnet test` reescreve o `docs/bancada-dano.md`** → `git checkout -- docs/bancada-dano.md`.
+  (É exatamente o que o movimento 1 acaba.)
 - O jogo ABERTO trava o build (lock do `.exe`) — pedir pra fechar antes de buildar/testar.
 - **Não há Python nem `gh` CLI nesta máquina**, e a extensão do Chrome foi recusada: verificação
   visual é do Gabriel.
-- **Este arquivo sobe DENTRO do PR** — a `main` local não fica à frente depois do merge.

@@ -88,6 +88,7 @@ const EXT = /\.(cs|md|js|css|html|json|csproj|sln)$/;
 const CITADO_DE_PROPOSITO = new Map([
     ['MEMORY.md', 'mora em ~/.claude, fora do repo'],
     ['memory/', 'mora em ~/.claude, fora do repo'],
+    ['~/.claude/statusline.js', 'a statusline do Claude Code, fora do repo'],
     ['Save/', 'pasta de RUNTIME (onde o save cai), não caminho de código'],
     ['cenarios/arena/', 'caminho PLANEJADO — a pele da Arena ainda não existe'],
     ['View/', 'estrutura da pele de console, removida no #179; o doc conta a história'],

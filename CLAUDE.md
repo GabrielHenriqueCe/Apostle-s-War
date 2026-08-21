@@ -28,7 +28,10 @@ seção deste arquivo.
 | `bancada-dano.md` | 13k | é RELATÓRIO gerado — ler o `git diff`, não o arquivo |
 | `GDD-itens.md` | 12k | o passo mais distante da fila |
 | `ADR-composicao-de-acoes.md` | 10k | mexendo em Ação/habilidade |
-| `GDD-combate.md` · `GDD-progressao.md` · `MANUAL-combate.md` | 9k · 8k · 7k | pelo § do assunto |
+| `GDD-progressao.md` · `GDD-combate.md` · `MANUAL-combate.md` | 12k · 9k · 7k | pelo § do assunto |
+
+Os números são medidos, não chutados: `node ferramentas/conferir-docs.js` remede e **derruba** se
+algum passar de 20% fora. Documento que engorda em silêncio é orçamento que mente.
 
 ## Como trabalhamos
 - **Design primeiro, JUNTO.** Discutir a arquitetura com o Gabriel — opinião real, trade-offs, questionar
@@ -49,13 +52,19 @@ seção deste arquivo.
   no GDD, no ROADMAP ou numa mensagem de commit não se repete lá.
 - **1 PR, 1 tema.** Mergeado antes do próximo começar — e **uma branch por vez**: nada de empilhar
   branch nem de adiantar o tema seguinte no working tree enquanto um PR espera. Avisar ao criar a branch.
+- **RENOMEOU, MOVEU, APAGOU ou CONCLUIU? varre no MESMO PR.** Toda deriva que as ferramentas acharam
+  em ago/2026 nasceu num desses quatro instantes — nenhuma nasceu de escrever mal, o texto estava
+  certo no dia. `grep` o nome VELHO em `docs/`, `CLAUDE.md`, `.claude/skills/`, `ferramentas/` (as
+  cargas dos harnesses) e a memória; corrigir ou apagar cada acerto. Quem descreve no PRESENTE
+  vira erro; quem descreve no PASSADO ("era X", "morreu no #NNN") é história e FICA.
+  Antes de commitar, junto com `dotnet build`/`dotnet test`: `node ferramentas/conferir-docs.js`.
 
 ## Comentário: cada coisa em UM lugar só (ago/2026)
 Nasceu de uma medição: no PR da cura em área eu escrevi **28 linhas de comentário pra 11 de código**
-(70%, contra 26% de média do repo). Esta regra é a metade da VAZÃO — **a faxina do estoque (#15) VAI
-acontecer**, e a ordem é do Gabriel: primeiro separar o `jogo.js` (cada cenário que se move já sai
-reduzido), **depois voltar nos outros arquivos e ajustar**. Sem a regra, a faxina se refaz sozinha;
-sem a faxina, a regra só segura o que vier de novo.
+(70%, contra 26% de média do repo). Esta regra é a metade da VAZÃO — **a faxina do estoque já
+ACONTECEU**, nas duas metades (ago/2026, ver ROADMAP §Faxina de comentários), na ordem que o Gabriel
+deu: primeiro separar o `jogo.js`, depois os outros arquivos. Sem a regra, a faxina se refaria; sem
+a faxina, a regra só seguraria o que viesse de novo.
 
 | o que eu quero dizer | onde mora |
 |---|---|
@@ -78,10 +87,8 @@ dano. Isso não é história, é mina. Corta-se a moral e o adjetivo, nunca o fa
 (`IPulaTurno`: 2 linhas de código, 11 de doc), onde o comentário É o produto. Faxinar por ranking
 destrói o melhor primeiro.
 
-**Como se aplica:** (1) boy-scout — mexeu no arquivo, ajusta o comentário dele no MESMO PR; (2) na
-separação do `jogo.js`, cada cenário que se move **já sai reduzido** (*"vamos movendo e já
-reduzindo"*); (3) **depois disso, a faxina dos OUTROS arquivos**, como trabalho próprio, fatiada por
-camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição de briefing.
+**Como se aplica hoje, com as duas passadas feitas:** boy-scout — mexeu no arquivo, ajusta o
+comentário dele no MESMO PR. É só isso que sobra, e é o que impede a gordura de voltar.
 
 ## Comandos
 - Build: `dotnet build`  ·  Testes: `dotnet test` (xUnit em `ApostlesWar.Tests/`).
@@ -112,6 +119,10 @@ camada/pasta — ver ROADMAP §Faxina de comentários, que já tem a medição d
   VS faria o `git mv` da pasta inteira falhar no meio) e apagar a pasta velha depois — ela reaparece
   enquanto o VS estiver com a solução antiga carregada.
 - Superfície pública = contrato entre camadas (sem `InternalsVisibleTo`); quebra de camada nem compila.
+- **Doc envelhece MENTINDO, e isso é pior que doc ausente.** `node ferramentas/conferir-docs.js`
+  confere a metade mecânica (caminho que sumiu, `#NNN` que não foi mergeado, orçamento fora de
+  20%) e lista à parte os símbolos sem ocorrência no código, que ele NÃO julga — doc contando o que
+  morreu está certo. Rodar ao mexer em doc.
 - Docs: `docs/ROADMAP-refatoracao.md`, `docs/ADR-*.md`, `docs/CATALOGO-de-acoes.md`, `docs/GDD-expansao.md`,
   `docs/GDD-progressao.md` + `GDD-combate.md` + `GDD-itens.md` (o modelo que muda quase todo
   número), **`docs/LORE.md`**.

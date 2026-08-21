@@ -353,10 +353,16 @@ async function carregar(arquivo) {
 // ---------- as telas, uma mensagem cada ----------
 // As cargas são MÍNIMAS de propósito: o alvo é o caminho de montagem, não o conteúdo. Se a tela lê
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
-const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', simbolo: '🗡️', stat: 'ATK', valor: '+5', valorNum: 5, equipado: true };
+const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', faccaoSimbolo: '👑', simbolo: '🗡️', stat: 'ATK', statChave: 'ataque', valor: '+5', valorNum: 5, equipado: true, nivel: 3, estrelas: 1, pct: 40 };
 // Um só objeto pros dois contratos que o front recebe — o `ApostoloVisto` das telas de menu e o
 // combatente do combate. Chave a mais é ignorada pelo JS; chave a MENOS é caminho que não roda.
-const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', tipoSimbolo: '🏹', faccao: 'Reino', tipo: 'Guardião', desbloqueado: true, estrelas: 2, nivel: 1, xpPct: 45, hp: 100, hpMax: 100, ataque: 10, defesa: 10, velocidade: 85, medidor: 137, precisao: 50, resistencia: 120, taxaCritPct: 15, danoCritPct: 60, status: [], habilidades: [], vivo: true };
+// O `bonus` vem SEMPRE do C# (é a tela que decide se mostra a conta aberta), e a ficha lê
+// `c.bonus` — sem ele o painel de equipamento nunca desenha no harness.
+const BONUS = { hp: 40, ataque: 6, defesa: 3, velocidade: 0, precisao: 2, resistencia: 0, taxaCritPct: 1, danoCritPct: 5 };
+// A vida do COMBATE é `hpAtual`/`hpMaximo`/`escudo` (CombatenteVisto) — não `hp`, que é o HP de
+// BASE da ficha (ApostoloDetalheVista). Mandar só `hp` deixava o `hpMaximo` undefined e a barra de
+// vida calculava 0% sem erro nenhum na tela.
+const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', tipoSimbolo: '🏹', faccao: 'Reino', tipo: 'Guardião', desbloqueado: true, estrelas: 2, nivel: 1, xpPct: 45, posicao: [[0.3, 0.5], [0.7, 0.5]], hp: 100, hpAtual: 72, hpMaximo: 100, escudo: 15, ataque: 10, defesa: 10, velocidade: 85, medidor: 137, precisao: 50, resistencia: 120, taxaCritPct: 15, danoCritPct: 60, status: [], habilidades: [], bonus: BONUS, vivo: true };
 // `DificuldadeVista`: as quatro, com duas trancadas — a barra desenha cadeado e requisito, e uma
 // lista toda liberada não exercita esse ramo.
 const DIFICULDADES = ['Normal', 'Difícil', 'Insano', 'Apocalipse'].map((nome, i) => ({
@@ -526,9 +532,15 @@ const ALMA = ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Mítico']
     .map((nome, i) => ({ raridade: i, nome, quantidade: 100, xpPorUnidade: 5 ** i, max: i < 3 ? 100 : 0, podeFundir: i < 3 }));
 // O PÓ com as três primeiras faixas cheias e as outras ZERADAS: a faixa de saldo só desenha as que
 // têm, então uma lista toda cheia não exercitaria o filtro que decide isso.
-const PO = ALMA.map((a, i) => ({ raridade: i, nome: a.nome, quantidade: i < 3 ? 60 : 0, pontosPorUnidade: 5 ** i }));
+const PO = ALMA.map((a, i) => ({ raridade: i, nome: a.nome, quantidade: i < 3 ? 60 : 0, pontosPorUnidade: 5 ** i, max: i < 3 ? 100 : 0, podeFundir: i < 3 }));
 const TELAS = [
-    ['menu', { titulo: 'Apostle\'s War', subtitulo: '', opcoes: ['Jogar', 'Sair'], raiz: true, perfil: { nome: 'G', avatar: '🧭' } }],
+    // `MenuVisto`: avatar e nome vêm SOLTOS, não embrulhados num `perfil` — o menu desenha o canto
+    // do jogador a partir do `m.avatar`, e o mapa da campanha usa esse mesmo avatar como marcador.
+    ['menu', {
+        titulo: 'Apostle\'s War', subtitulo: '', raiz: true, avatar: '🧭', nome: 'G',
+        opcoes: [{ rotulo: 'Jogar', icone: '⚔️', habilitado: true, confirmar: null, marcado: null },
+                 { rotulo: 'Excluir conta', icone: '🗑️', habilitado: true, confirmar: 'Apagar tudo?', marcado: null }],
+    }],
     ['criarPerfil', {}],
     ['edicaoPerfil', { nome: 'G', avatar: '🧭', apostolos: [apostolo] }],
     ['montagemArena', { apostolos: [apostolo, { ...apostolo, id: 2 }] }],
@@ -573,7 +585,9 @@ const TELAS = [
     ['catedral', {
         slots: [0, 1, 2, 3, 4, 5, 6].map(s => ({ slot: s, nome: `Slot ${s}`, equipado: s === 0 ? item : null })),
         obtidos: [item, { ...item, equipado: false, valorNum: 3 }],
-        totais: [{ stat: 'ATK', valor: '+10' }],
+        // A prévia LIGADA: é ela que marca a peça em comparação no acervo e desenha as linhas que
+        // mudariam. Com `null` (o estado mais comum) esses dois trechos não rodam.
+        previa: { indice: 0, deltas: [{ rotulo: 'Ataque', antes: 200, depois: 214, delta: 14, sufixo: '' }] },
         roster: [apostolo, { ...apostolo, id: 2 }],
         selecionado: 0,
         // naParede E podeQueimar ligados ao mesmo tempo NÃO é um estado que o C# produz — é o que
@@ -581,8 +595,8 @@ const TELAS = [
         // quem diz quando cada um vale é o ProgressaoService, e isso tem teste em C#.
         apostolo: {
             ficha: { ...apostolo, nivel: 8 }, estrelas: 2, teto: 9, naParede: true,
-            receita: [{ raridade: 1, nome: 'Incomum', quantidade: 150, xpPorUnidade: 5 }],
-            faltando: [{ raridade: 2, nome: 'Raro', quantidade: 72, xpPorUnidade: 25 }],
+            receita: [{ raridade: 1, nome: 'Incomum', quantidade: 150, xpPorUnidade: 5, max: 100, podeFundir: true }],
+            faltando: [{ raridade: 2, nome: 'Raro', quantidade: 72, xpPorUnidade: 25, max: 0, podeFundir: false }],
             podeComprarEstrela: false, podeQueimar: true, motivo: 'Falta 72 de Raro.',
             xpAtual: 3600, xpAteAParede: 900,
             limiares: [{ nivel: 9, xp: 3600 }, { nivel: 10, xp: 4500 }],
@@ -599,8 +613,8 @@ const TELAS = [
         acervo: [{ ...item, indice: 0, nivel: 9, estrelas: 1, pct: 100 }, { ...item, indice: 1, equipado: false, nivel: 3, estrelas: 0, pct: 40 }],
         teto: 9, naParede: true, pontos: 780, pontosAteAParede: 120,
         po: PO, tetoDeFusao: 2,
-        receita: [{ raridade: 0, nome: 'Comum', quantidade: 50, pontosPorUnidade: 1 }],
-        faltando: [{ raridade: 1, nome: 'Incomum', quantidade: 30, pontosPorUnidade: 5 }],
+        receita: [{ raridade: 0, nome: 'Comum', quantidade: 50, pontosPorUnidade: 1, max: 100, podeFundir: true }],
+        faltando: [{ raridade: 1, nome: 'Incomum', quantidade: 30, pontosPorUnidade: 5, max: 0, podeFundir: false }],
         podeComprarEstrela: false, podeQueimar: true, motivo: 'Falta 30 de Incomum.',
         patamares: [9, 10].map(n => ({ nivel: n, pontos: n * 100 })),
         porNivel: [9, 10].map(n => ({ nivel: n, valor: '+' + n, noApostolo: [{ rotulo: 'Ataque', antes: 200, depois: 214, delta: 14, sufixo: '' }] })),
@@ -617,9 +631,149 @@ const TELAS = [
         }],
     }],
     ['compendioApostolo', apostolo],
-    ['estado', { turno: 1, fase: 'Assistindo', mensagem: '', equipe1: [apostolo], equipe2: [{ ...apostolo, id: 9 }], quemAge: null, fila: [1, 9, 1, 9, 1], habilidades: [], alvosValidos: [], selecionado: null, auto: false, modo: 'Campanha', tema: 'reino' }],
+    ['estado', { turno: 1, fase: 'Assistindo', mensagem: '', equipe1: [apostolo], equipe2: [{ ...apostolo, id: 9 }], quemAge: null, fila: [1, 9, 1, 9, 1], habilidades: [], alvosValidos: [], ladoVencedor: 0, auto: false, focoId: 0, modo: 'Campanha', tema: 'reino' }],
     ['evento', { tipo: 'dano', alvoId: 1, valor: 10, critico: false, absorvidoPeloEscudo: 0, texto: null }],
 ];
+
+// ---------- ler os DTOs do C# ----------
+const PONTE = path.resolve(__dirname, '../ApostlesWar.Presentation/Front/PonteWebView2.cs');
+const DTOS = path.resolve(__dirname, '../ApostlesWar.Presentation/Front/EstadoDeBatalha.cs');
+
+// O camelCase do System.Text.Json (`JsonNamingPolicy.CamelCase`, ligado no PonteWebView2): minuscula
+// a corrida inicial de MAIÚSCULAS, parando antes da última se ela vier seguida de minúscula.
+// `HP`→`hp` · `HPMax`→`hpMax` · `XpPct`→`xpPct` · `TaxaCritPct`→`taxaCritPct`.
+function camel(nome) {
+    const c = [...nome];
+    for (let i = 0; i < c.length && c[i] === c[i].toUpperCase() && /[A-Z]/.test(c[i]); i++) {
+        if (i > 0 && i + 1 < c.length && !/[A-Z]/.test(c[i + 1])) break;
+        c[i] = c[i].toLowerCase();
+    }
+    return c.join('');
+}
+
+/// Os parâmetros de um `internal record Nome(...)`, já em camelCase. Todos os DTOs do front são
+/// record POSICIONAL, então a lista de parâmetros É a lista de propriedades.
+function propsDoRecord(fonte, tipo) {
+    const inicio = fonte.indexOf(`internal record ${tipo}(`);
+    if (inicio < 0) return null;
+    let i = fonte.indexOf('(', inicio), profundidade = 0, fim = i;
+    for (; fim < fonte.length; fim++) {
+        if (fonte[fim] === '(') profundidade++;
+        else if (fonte[fim] === ')' && --profundidade === 0) break;
+    }
+    // Comentário some ANTES de qualquer coisa: o `///` aparece no meio da lista (o
+    // ApostoloDetalheVista e o EstadoDeBatalha documentam parâmetros assim) e o `//` de fim de linha
+    // carrega parêntese no texto (`// índice global (Id) de quem está agindo`), que desalinharia a
+    // contagem de profundidade e viraria "propriedade" chamada `(Id`.
+    // O `\r?` do split não é decoração: com `split('\n')` sobra um `\r` no fim de cada linha, e o
+    // `$` do regex de comentário deixa de casar — o `//` passava inteiro e virava "propriedade".
+    const corpo = fonte.slice(i + 1, fim).split(/\r?\n/)
+        .filter(l => !l.trim().startsWith('///'))
+        .map(l => l.replace(/\/\/.*$/, ''))
+        .join('\n');
+
+    const partes = [];
+    let atual = '', nivel = 0;
+    for (const ch of corpo) {
+        if ('<([' .includes(ch)) nivel++;
+        else if ('>)]'.includes(ch)) nivel--;
+        if (ch === ',' && nivel === 0) { partes.push(atual); atual = ''; continue; }
+        atual += ch;
+    }
+    partes.push(atual);
+
+    return partes.map(p => {
+        const semPadrao = p.split('=')[0].trim();          // tira o valor default
+        const tokens = semPadrao.split(/\s+/).filter(Boolean);
+        if (!tokens.length) return null;
+        // O TIPO importa tanto quanto o nome: é por ele que a conferência DESCE nos aninhados, e o
+        // erro que motivou tudo isto (`liberada` no lugar de `desbloqueado`) mora dentro de um
+        // `List<FaseVista>` — no topo ele passa despercebido.
+        const bruto = tokens.slice(0, -1).join(' ');
+        const interno = bruto.match(/^(?:List|IReadOnlyList|IEnumerable)<(.+)>\??$/);
+        return { nome: camel(tokens[tokens.length - 1]), tipo: (interno ? interno[1] : bruto).replace(/[?\[\]]/g, '').trim() };
+    }).filter(Boolean);
+}
+
+/// tipo da mensagem → as propriedades que o C# manda nela.
+function contratosDaPonte() {
+    const ponte = fs.readFileSync(PONTE, 'utf8');
+    const dtos = fs.readFileSync(DTOS, 'utf8');
+    const mapa = new Map();
+    for (const m of ponte.matchAll(/public void \w+\(([^)]*)\)\s*=>\s*Enviar\("(\w+)",\s*([^;]+)\);/g)) {
+        const [, params, tipo, carga] = m;
+        const anonimo = carga.trim().match(/^new\s*\{([^}]*)\}$/);
+        if (anonimo) {
+            // `new { apostolos }` — as propriedades do anônimo são os nomes das variáveis, e o tipo
+            // de cada uma vem da assinatura (`List<ApostoloVisto> apostolos` → `ApostoloVisto`).
+            const props = anonimo[1].split(',').map(s => s.trim()).filter(Boolean).map(nome => {
+                const par = params.split(',').map(p => p.trim()).find(p => p.endsWith(' ' + nome));
+                const interno = par && par.match(/<(.+)>\??\s+\w+$/);
+                return { nome, tipo: interno ? interno[1] : '' };
+            });
+            mapa.set(tipo, { nome: tipo, props });
+            continue;
+        }
+        const nomeVar = carga.trim();
+        const par = params.split(',').map(p => p.trim().split(/\s+/)).find(p => p[p.length - 1] === nomeVar);
+        const nomeRecord = par && par.slice(0, -1).join(' ').replace(/\?$/, '');
+        const props = nomeRecord && propsDoRecord(dtos, nomeRecord);
+        if (props) mapa.set(tipo, { nome: nomeRecord, props });
+    }
+    return mapa;
+}
+
+function conferirCargas() {
+    const dtos = fs.readFileSync(DTOS, 'utf8');
+    const contratos = contratosDaPonte();
+    const extras = [];
+    let conferidas = 0, faltando = 0, sobrando = 0;
+
+    // Agrupa por RECORD, não por caminho: o mesmo `apostolo` aparece em cinco lugares da carga, e
+    // sem isto uma propriedade faltando vira cinco queixas idênticas com endereço diferente.
+    const vistos = new Set();
+
+    function descer(caminho, valor, record, profundidade) {
+        if (Array.isArray(valor)) {
+            valor.forEach((v, i) => descer(`${caminho}[${i}]`, v, record, profundidade));
+            return;
+        }
+        if (!valor || typeof valor !== 'object') return;
+        const tem = new Set(Object.keys(valor));
+        for (const { nome, tipo } of record.props) {
+            if (!tem.has(nome)) {
+                const chave = `${record.nome}.${nome}`;
+                if (!vistos.has(chave)) {
+                    vistos.add(chave);
+                    faltando++;
+                    queixar(`${record.nome}: a carga não manda \`${nome}\` (ex.: ${caminho}) — o caminho que a lê não roda`);
+                }
+                continue;
+            }
+            // Aninhado: só desce quando o tipo declarado é um record DESTE arquivo. Enum, int e
+            // string param aqui, e é o que impede a recursão de virar passeio.
+            const filhos = profundidade < 4 && tipo ? propsDoRecord(dtos, tipo) : null;
+            if (filhos && filhos.length) {
+                descer(`${caminho}.${nome}`, valor[nome], { nome: tipo, props: filhos }, profundidade + 1);
+            }
+        }
+        const aMais = [...tem].filter(k => !record.props.some(p => p.nome === k));
+        const chaveExtra = `${record.nome}:${aMais.join(',')}`;
+        if (aMais.length && !vistos.has(chaveExtra)) {
+            vistos.add(chaveExtra);
+            sobrando += aMais.length;
+            extras.push(`${record.nome} recebe ${aMais.length} chave(s) que o C# não manda: ${aMais.join(', ')}`);
+        }
+    }
+
+    for (const [tipo, conteudo] of TELAS) {
+        const contrato = contratos.get(tipo);
+        if (!contrato || !contrato.props.length) continue;   // mensagem sem corpo (`criarPerfil`)
+        conferidas++;
+        descer(`"${tipo}"`, conteudo, contrato, 0);
+    }
+    return { conferidas, faltando, sobrando, extras };
+}
 
 (async () => {
     let mod;
@@ -677,6 +831,20 @@ const TELAS = [
         console.log('  ∅ (não tocaram no DOM): ' + total.mudos.slice(0, 12).join(', ')
             + (total.mudos.length > 12 ? ` … +${total.mudos.length - 12}` : ''));
     }
+
+    // ---------- as cargas contra os DTOs do C# ----------
+    // A carga é CONTRATO, e contrato só vale se alguém confere. Chave errada não explode: ela
+    // desliga o caminho em silêncio e a tela passa verde pela metade. Já mordeu duas vezes — o
+    // `taxaCrit` que a ficha lê como `taxaCritPct` (#254) e o `liberada` que o código lê como
+    // `desbloqueado`, que deixou a campanha inteira sem UM gesto alcançável.
+    //
+    // O que DERRUBA é a propriedade do record que a carga NÃO manda: é ela que apaga um caminho.
+    // Chave a mais é só ruído (o `apostolo` daqui serve a dois contratos de propósito), então vai
+    // listada e não derruba.
+    const props = conferirCargas();
+    console.log(`\n  cargas: ${props.conferidas} conferidas contra o C# · ${props.faltando} propriedade(s) faltando`
+        + `${props.sobrando ? ` · ${props.sobrando} chave(s) a mais` : ''}`);
+    for (const l of props.extras) console.log('  · ' + l);
 
     // ---------- os ids ----------
     // Estatico, varrendo o FONTE de todos os .js — e nao so os ids que esta corrida pediu. A

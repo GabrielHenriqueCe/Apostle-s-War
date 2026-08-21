@@ -36,7 +36,11 @@ ApostlesWar.Infrastructure/  implementação das portas de dados (save local em 
 
 ApostlesWar.Presentation/    a única pele: WinForms + WebView2 (net10.0-windows)
   Front/                       composition root, ponte C# ⇄ JS, estado da batalha
-  wwwroot/                     index.html · estilo.css · jogo.js (telas, animação e cenários)
+  wwwroot/                     index.html · estilo.css · jogo.js (só o arranque, 193 linhas)
+    nucleo/                      ponte com o C#, laço de animação, ar do tema
+    telas/                       uma por tela: menu, perfil, campanha, arena, catedral, forja, compêndio, combate
+    ui/                          peças reusadas entre telas: ficha, modal, alma, raridade, navegador…
+    cenarios/                    o fundo animado de cada facção, um módulo por capítulo
 
 ApostlesWar.Tests/           xUnit — motor, capacidades, services, bot, e a Bancada de dano
 ```
@@ -54,9 +58,13 @@ incluindo as descartadas, como o modelo gacha/live-service abandonado.
 
 Balancear 36 personagens à mão é chute. Então a suíte de testes virou instrumento de medição.
 
-A cada `dotnet test`, a Bancada roda **o motor de verdade** — não um mock — mede as 36 fichas e
-reescreve `docs/bancada-dano.md`. O relatório é **versionado de propósito**: cada ajuste de número
-vira um `git diff` legível, e dá pra ver o que um buff em um personagem fez com a curva dos outros.
+A Bancada roda **o motor de verdade** — não um mock — mede as 36 fichas e reescreve
+`docs/bancada-dano.md`. O relatório é **versionado de propósito**: cada ajuste de número vira um
+`git diff` legível, e dá pra ver o que um buff em um personagem fez com a curva dos outros.
+
+Ela é **opt-in** (`$env:BANCADA=1; dotnet test`), porque gerar relatório não é testar: a corrida
+custa ~63 s e reescreve um arquivo versionado, enquanto a suíte de verdade leva 0,6 s e não escreve
+nada.
 
 O desenho da bancada foi corrigido antes de existir: a primeira proposta media dano contra um alvo
 com DEF 0, o que tornaria invisível qualquer passiva de penetração de defesa. Está registrado em ADR.

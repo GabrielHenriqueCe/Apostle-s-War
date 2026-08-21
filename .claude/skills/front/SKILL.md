@@ -25,9 +25,14 @@ mouse-arrasto. Continuam fora: a batalha depois do primeiro quadro (roda contra 
 markup ESTÁTICO do index.html, que o DOM de mentira não materializa — ouvinte registrado por
 `querySelectorAll` de classe no carregamento não existe ali.
 
-**Carga do harness é CONTRATO com o C#:** a fixture manda o DTO real (`FasesVista`,
-`CompendioVista`…). Chave errada não explode, só desliga o caminho — a lista de fases nascia toda
-desabilitada porque a carga dizia `liberada` e o código lê `desbloqueado`.
+**Carga do harness é CONTRATO com o C#, e agora é CONFERIDA.** O `rodar-telas.js` lê o
+`PonteWebView2.cs` (qual `record` vai em cada mensagem) e o `EstadoDeBatalha.cs` (as propriedades
+dele), desce nos aninhados, e **derruba** quando a carga não manda algo que o C# manda. Chave errada
+não explode: ela desliga o caminho em silêncio — a campanha inteira ficou sem um gesto alcançável
+porque a carga dizia `liberada` e o código lê `desbloqueado`, e a barra de vida do combate calculava
+0% porque a carga mandava `hpMax` e o `CombatenteVisto` manda `hpMaximo`.
+
+Chave a MAIS não derruba: o `apostolo` da fixture serve a três contratos de propósito.
 
 **Terminação de linha:** o `.gitattributes` impede (LF no repo, CRLF na cópia) e o `rodar-telas.js`
 acusa. Arquivo misto não é cosmético — já grudou um `else if` num comentário.

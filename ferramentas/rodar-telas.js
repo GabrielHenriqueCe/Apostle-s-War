@@ -353,7 +353,7 @@ async function carregar(arquivo) {
 // ---------- as telas, uma mensagem cada ----------
 // As cargas são MÍNIMAS de propósito: o alvo é o caminho de montagem, não o conteúdo. Se a tela lê
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
-const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', faccaoSimbolo: '👑', simbolo: '🗡️', stat: 'ATK', statChave: 'ataque', valor: '+5', valorNum: 5, equipado: true, nivel: 3, estrelas: 1, pct: 40 };
+const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', faccaoSimbolo: '👑', simbolo: '🗡️', stat: 'ATK', statChave: 'ataque', valor: '+5', valorNum: 5, equipado: true, portadorSimbolo: '', nivel: 3, estrelas: 1, pct: 40 };
 // Um só objeto pros dois contratos que o front recebe — o `ApostoloVisto` das telas de menu e o
 // combatente do combate. Chave a mais é ignorada pelo JS; chave a MENOS é caminho que não roda.
 // O `bonus` vem SEMPRE do C# (é a tela que decide se mostra a conta aberta), e a ficha lê
@@ -584,7 +584,10 @@ const TELAS = [
     // `ARSENAL_AREAS` esquecido no jogo.js — lista vazia não exercita nada.
     ['catedral', {
         slots: [0, 1, 2, 3, 4, 5, 6].map(s => ({ slot: s, nome: `Slot ${s}`, equipado: s === 0 ? item : null })),
-        obtidos: [item, { ...item, equipado: false, valorNum: 3 }],
+        // A terceira está VESTIDA NUM ALIADO: é ela que faz o emoji do portador e o chip "Vestidas"
+        // rodarem. Sem uma peça assim na carga, os dois caminhos ficam mortos no harness.
+        obtidos: [item, { ...item, equipado: false, valorNum: 3 },
+            { ...item, equipado: false, valorNum: 4, portadorSimbolo: '🥷' }],
         // A prévia LIGADA: é ela que marca a peça em comparação no acervo e desenha as linhas que
         // mudariam. Com `null` (o estado mais comum) esses dois trechos não rodam.
         previa: { indice: 0, deltas: [{ rotulo: 'Ataque', antes: 200, depois: 214, delta: 14, sufixo: '' }] },

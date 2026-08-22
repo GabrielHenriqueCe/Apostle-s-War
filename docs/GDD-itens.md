@@ -619,10 +619,10 @@ abre **todas as armas disponíveis** do acervo pra escolher qual vestir.
 | **subs, SEM CONTER** | só as que NÃO têm aquela sub |
 | **equipadas** | mostra também as que estão **vestidas em OUTROS apóstolos**, pra tomar a peça de um aliado |
 
-#### O que o item POR APÓSTOLO muda nas telas *(desenho do Gabriel, ago/2026 — vale quando o vínculo existir)*
+#### O que o item POR APÓSTOLO muda nas telas *(desenho do Gabriel, ago/2026 — ✅ no ar)*
 
-Hoje os itens são globais e as telas mentem um pouco por causa disso. Quando cada peça for de um
-apóstolo (o passo 10-b), três coisas mudam juntas:
+Até ago/2026 os itens eram globais e as telas mentiam um pouco por causa disso. Com o vínculo (o
+passo 10-b1), três coisas mudaram juntas:
 
 - **As setas `‹ Arma ›` da Forja passam a percorrer os itens DAQUELE apóstolo**, não o acervo do
   mundo. O gesto é o mesmo; o que ele traz é que muda.

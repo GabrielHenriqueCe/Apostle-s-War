@@ -22,12 +22,15 @@ namespace ApostlesWar.Application.Services
 
         private readonly CapitulosService _capitulosService;
         private readonly PoService _po;
+        private readonly PersonagemService _personagens;
         private readonly IRepositorioDeSave _repo;
 
-        // Os slots de save deste service. O "itens" é o formato ANTIGO (um Item?[7] com o objeto
-        // dentro) e só é citado pra ser APAGADO na migração — ver Carregar.
+        // Os slots de save deste service. Os dois últimos são formatos ANTIGOS e só são citados pra
+        // ser APAGADOS na migração — ver Carregar: o "itens" guardava um Item?[7] com o objeto
+        // dentro, e o "equipados" guardava os 7 IDs que valiam pro jogo INTEIRO.
         private const string ChaveInventario = "inventario";
-        private const string ChaveEquipados = "equipados";
+        private const string ChaveVestidos = "vestidos";
+        private const string ChaveEquipadosGlobais = "equipados";
         private const string ChaveLegado = "itens";
 
         /// <summary>
@@ -38,18 +41,28 @@ namespace ApostlesWar.Application.Services
 
         private const int Slots = 7;
 
-        // 7 slots de equipamento (um por fase), null = vazio. Em MEMÓRIA são as mesmas referências do
-        // inventário — é isso que faz o uso subir o nível de UMA peça só. No DISCO vira ID
-        // (ver SalvarItens): gravar o objeto nos dois lugares faria a peça existir duas vezes, e as
-        // duas cópias divergiriam no primeiro combate.
-        private Item?[] equipados = new Item?[Slots];
+        // QUEM VESTE O QUÊ. A chave é `(Facção, Slot)`, a mesma identidade de apóstolo que o
+        // `ProgressaoService` grava — índice no roster apontaria pra outra pessoa assim que a lista
+        // crescesse. O valor é o boneco dele: 7 slots (um por fase), null = vazio.
+        //
+        // Em MEMÓRIA são as mesmas referências do inventário — é isso que faz o uso subir o nível de
+        // UMA peça só. No DISCO vira ID (ver SalvarItens): gravar o objeto nos dois lugares faria a
+        // peça existir duas vezes, e as duas cópias divergiriam no primeiro combate.
+        //
+        // <b>A peça é de UM apóstolo só.</b> O dicionário não garante isso sozinho (nada impede o
+        // mesmo objeto em dois bonecos), e quem garante é o <see cref="EquiparItem"/>, que tira a
+        // peça do portador anterior antes de vesti-la. Ver o §O ACERVO do GDD-itens: tomar a peça de
+        // um aliado é o gesto, e desnudá-lo sem avisar é o defeito que a tela tem de evitar.
+        private Dictionary<(Faccao, Slot), Item?[]> vestidos = new();
 
         private List<Item> inventario = new();
 
-        public ArsenalService(CapitulosService capitulosService, PoService po, IRepositorioDeSave repo)
+        public ArsenalService(CapitulosService capitulosService, PoService po,
+            PersonagemService personagens, IRepositorioDeSave repo)
         {
             _capitulosService = capitulosService;
             _po = po;
+            _personagens = personagens;
             _repo = repo;
         }
 
@@ -126,10 +139,18 @@ namespace ApostlesWar.Application.Services
 
             // O ID volta a ser a REFERÊNCIA do inventário: sem isso o slot teria uma cópia própria e
             // o uso subiria o nível de uma só. ID órfão (peça que sumiu do acervo) deixa o slot vazio.
-            var ids = _repo.Carregar<Guid?[]>(ChaveEquipados);
-            if (ids != null)
-                for (int i = 0; i < ids.Length && i < equipados.Length; i++)
-                    equipados[i] = ids[i] == null ? null : inventario.FirstOrDefault(it => it.Id == ids[i]);
+            foreach (VestidoPeloApostolo v in _repo.Carregar<List<VestidoPeloApostolo>>(ChaveVestidos) ?? new())
+            {
+                Item?[] boneco = Boneco(v.Faccao, v.Slot);
+                for (int i = 0; i < v.Ids.Length && i < boneco.Length; i++)
+                    boneco[i] = v.Ids[i] == null ? null : inventario.FirstOrDefault(it => it.Id == v.Ids[i]);
+            }
+
+            // <b>Save de antes do vínculo: o que estava vestido DESVESTE.</b> Lá os 7 slots valiam pro
+            // jogo inteiro, e não há de quem eles eram — dar tudo a um apóstolo escolhido por nós
+            // inventaria uma decisão do jogador, e num apóstolo que pode nem estar no time. O acervo
+            // fica intacto: ninguém perde peça, só reescolhe quem veste o quê.
+            _repo.Excluir(ChaveEquipadosGlobais);
         }
 
         private void Migrar()
@@ -146,28 +167,80 @@ namespace ApostlesWar.Application.Services
             SalvarItens();
         }
 
+        /// <summary>O boneco daquele apóstolo — 7 slots, criado vazio na primeira vez que se olha.</summary>
+        private Item?[] Boneco(Faccao faccao, Slot slot)
+        {
+            if (!vestidos.TryGetValue((faccao, slot), out Item?[]? boneco))
+                vestidos[(faccao, slot)] = boneco = new Item?[Slots];
+            return boneco;
+        }
+
+        private Item?[] Boneco(Personagem apostolo) => Boneco(apostolo.Faccao, (Slot)apostolo.Slot);
+
         /// <summary>
-        /// Equipa a peça no slot da fase dela, substituindo a anterior — e PERSISTE.
+        /// Veste a peça NESTE apóstolo, no slot da fase dela — e PERSISTE.
+        ///
+        /// <b>Tira ela de quem a estivesse usando</b>, porque a peça é uma só: é o "tomar do aliado"
+        /// do §O ACERVO, e o modelo o permite de propósito. Quem tem de avisar ANTES do clique é a
+        /// tela (o emoji do portador no cartão) — aqui embaixo o gesto já foi decidido.
         ///
         /// O save vem junto de propósito: "equipou, está equipado da próxima vez que abrir" é regra,
         /// não escolha de tela. Quando eram duas cascas, cada uma escolheu a sua (uma salvava só ao
         /// vencer uma fase, a outra na hora) — mesmo dado, duas políticas. Quem manda no dado é quem
         /// decide quando ele é durável.
         /// </summary>
-        public void EquiparItem(Item item)
+        public void EquiparItem(Personagem apostolo, Item item)
         {
-            equipados[(int)item.Fase - 1] = item;
+            int slot = (int)item.Fase - 1;
+
+            foreach (Item?[] outro in vestidos.Values)
+                if (outro[slot] != null && outro[slot]!.Id == item.Id) outro[slot] = null;
+
+            Boneco(apostolo)[slot] = item;
             SalvarItens();
         }
 
-        /// <summary>As peças vestidas, uma por slot.</summary>
-        public Item?[] ObterEquipados() => equipados;
+        /// <summary>
+        /// Tira do apóstolo a peça daquele slot — e PERSISTE, pela mesma regra do
+        /// <see cref="EquiparItem"/>: desvestir também é estado durável.
+        ///
+        /// <b>A peça volta pro baú, não some.</b> Descartar peça é a Forja quem faz (o sacrifício),
+        /// e nunca um botão de armaria: quem tira o elmo pra experimentar outro não está jogando o
+        /// elmo fora.
+        /// </summary>
+        public void DesequiparItem(Personagem apostolo, Fases fase)
+        {
+            Boneco(apostolo)[(int)fase - 1] = null;
+            SalvarItens();
+        }
 
         /// <summary>
-        /// Esta peça está vestida? Casa por <see cref="Item.Id"/>, não por (facção, fase): duas
-        /// Manoplas do Reino são peças DIFERENTES agora, e comparar pelo slot marcaria as duas.
+        /// As peças que ESTE apóstolo veste, uma por slot. Não cria boneco: perguntar o que alguém
+        /// veste não pode gravar uma entrada vazia no save — e quem pergunta são as telas, o tempo
+        /// todo, por 36 apóstolos.
         /// </summary>
-        public bool EstaEquipado(Item item) => equipados.Any(e => e != null && e.Id == item.Id);
+        public Item?[] ObterEquipados(Personagem apostolo)
+            => vestidos.TryGetValue((apostolo.Faccao, (Slot)apostolo.Slot), out Item?[]? boneco)
+                ? boneco
+                : new Item?[Slots];
+
+        /// <summary>
+        /// De quem é esta peça — nulo se ela está no baú. Casa por <see cref="Item.Id"/>, não por
+        /// (facção, fase): duas Manoplas do Reino são peças DIFERENTES agora, e comparar pelo slot
+        /// marcaria as duas.
+        ///
+        /// É ele que responde o "de quem estou tirando isso?" da tela, e por isso devolve o apóstolo
+        /// e não um bool: o emoji do portador é o que impede o jogador de desnudar um aliado sem
+        /// perceber e só descobrir na fase seguinte.
+        /// </summary>
+        public Personagem? PortadorDe(Item item)
+        {
+            int slot = (int)item.Fase - 1;
+            foreach (var ((faccao, apostolo), boneco) in vestidos)
+                if (boneco[slot] != null && boneco[slot]!.Id == item.Id)
+                    return _personagens.ObterPersonagem(faccao, apostolo);
+            return null;
+        }
 
         /// <summary>Todo o acervo, na ordem em que caiu.</summary>
         public List<Item> ObterObtidos() => inventario;
@@ -178,10 +251,15 @@ namespace ApostlesWar.Application.Services
         // somado, e quem o produz é o mesmo caminho da luta (`FluxoDoFront.BonusDe`).
 
         /// <summary>
-        /// Aplica os stats dos itens equipados ao combatente informado
+        /// Aplica ao combatente os stats das peças QUE ELE VESTE — as do apóstolo por trás do
+        /// <see cref="Combate.Personagem"/>, e não um conjunto global que valia pra todo mundo.
+        ///
+        /// <b>Só se chama isto sobre um <see cref="Jogador"/>.</b> O inimigo da campanha é CÓPIA de um
+        /// apóstolo de verdade (`Personagem.ComNivel`) e carrega a mesma `(Facção, Slot)`: chamar aqui
+        /// com ele vestiria o inimigo com as peças do jogador, e a chave não teria como perceber.
         /// </summary>
         public void AplicarItens(Combate combate)
-            => combate.AplicarItens(ObterEquipados().Where(i => i != null).Select(i => i!));
+            => combate.AplicarItens(ObterEquipados(combate.Personagem).Where(i => i != null).Select(i => i!));
 
         #endregion
 
@@ -193,12 +271,15 @@ namespace ApostlesWar.Application.Services
         /// <b>Só quem estava em campo ganha</b> — peça no baú não sobe. E o ganho é por CICLO de
         /// combate, não por turno do portador: contar turno faria o apóstolo rápido subir equipamento
         /// em dobro, e a Velocidade viraria duplamente dominante (§Contar rodada, não ação).
+        ///
+        /// <b>"Em campo" é o TIME que lutou</b>, e passou a ser verdade com o vínculo: enquanto os
+        /// slots eram globais, quem lutasse pagava as mesmas 7 peças, e a peça do banco subia junto.
         /// </summary>
-        public void CreditarUso(Dificuldade dificuldade, double ciclos, bool venceu)
+        public void CreditarUso(IEnumerable<Personagem> time, Dificuldade dificuldade, double ciclos, bool venceu)
         {
             int pontos = Po.PontosDaFase(dificuldade, ciclos, venceu);
 
-            foreach (Item? item in ObterEquipados())
+            foreach (Item? item in time.SelectMany(ObterEquipados))
             {
                 if (item == null) continue;
                 item.Pontos += pontos;
@@ -280,11 +361,19 @@ namespace ApostlesWar.Application.Services
 
         #region Save
 
-        /// <summary>Persiste o acervo e o que está vestido. Os dois andam juntos, sempre.</summary>
+        /// <summary>
+        /// Persiste o acervo e quem veste o quê. Os dois andam juntos, sempre.
+        ///
+        /// Boneco inteiro vazio não vai pro disco: apóstolo que nunca vestiu nada não precisa de
+        /// linha no save, e são 36 deles contra os 4 que costumam lutar.
+        /// </summary>
         public void SalvarItens()
         {
             _repo.Salvar(ChaveInventario, inventario);
-            _repo.Salvar(ChaveEquipados, equipados.Select(i => i?.Id).ToArray());
+            _repo.Salvar(ChaveVestidos, vestidos
+                .Where(v => v.Value.Any(i => i != null))
+                .Select(v => new VestidoPeloApostolo(v.Key.Item1, v.Key.Item2, v.Value.Select(i => i?.Id).ToArray()))
+                .ToList());
         }
 
         /// <summary>
@@ -294,13 +383,21 @@ namespace ApostlesWar.Application.Services
         public void Resetar()
         {
             _repo.Excluir(ChaveInventario);
-            _repo.Excluir(ChaveEquipados);
+            _repo.Excluir(ChaveVestidos);
+            _repo.Excluir(ChaveEquipadosGlobais);
             _repo.Excluir(ChaveLegado);
-            equipados = new Item?[Slots];
+            vestidos = new();
             inventario.Clear();
             _po.Resetar();
         }
 
         #endregion
     }
+
+    /// <summary>
+    /// O boneco de um apóstolo no save: a identidade dele e os IDs das 7 peças (null = slot vazio).
+    /// Mesma forma do <see cref="ApostoloProgredido"/>, e pelo mesmo motivo — `(Facção, Slot)` é o
+    /// que sobrevive a um roster que cresce.
+    /// </summary>
+    public record VestidoPeloApostolo(Faccao Faccao, Slot Slot, Guid?[] Ids);
 }

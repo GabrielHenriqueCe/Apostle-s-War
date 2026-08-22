@@ -1177,19 +1177,13 @@ body {
 #catedral h1, #forja h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
 
 /* ---- A ALMINHA ----
-   As seis cores das faixas. Elas valem pro jogo INTEIRO (alma hoje, item e apóstolo depois), então
-   moram em variável e não no seletor da alma — a raridade é um eixo do jogo, não um enfeite dela.
-   A escada é a de sempre: cinza · verde · azul · roxo · laranja · vermelho. */
-:root {
-    --r-comum: #9aa3ad;
-    --r-incomum: #5fbf6a;
-    --r-raro: #4f8fe0;
-    --r-epico: #a86fd6;
-    --r-lendario: #e0a13c;
-    --r-mitico: #e05a5a;
-}
+   A escada das seis faixas é a de sempre: cinza · verde · azul · roxo · laranja · vermelho. Ela
+   mora nos FILTROS dos dois emojis (aqui e no pozinho), e não numa paleta de variáveis: houve um
+   `--r-comum`…`--r-mitico` declarado aqui que ninguém nunca leu, e paleta que ninguém consome é
+   uma segunda fonte esperando pra discordar desta. Quando a raridade da PEÇA existir e precisar de
+   cor em borda ou texto, a variável nasce junto com quem a lê.
 
-/* A COR DA ALMINHA — matiz girado no próprio emoji.
+   A COR DA ALMINHA — matiz girado no próprio emoji.
    Dá pra pintar emoji, e aqui dá com seguranca: o jogo roda em WebView2 no Windows, uma fonte de
    emoji SÓ (Segoe UI Emoji), então o giro rende igual em toda máquina que roda o .exe. Num
    navegador qualquer isso seria loteria — aqui não é.
@@ -1201,13 +1195,13 @@ body {
     height: calc(var(--alma-tam, 18px) * 1.16);
     font-size: var(--alma-tam, 18px); line-height: 1;
 }
-.alminha-comum { filter: grayscale(1) brightness(1.15); }
-.alminha-incomum { filter: hue-rotate(78deg) saturate(1.5) brightness(1.05); }
-.alminha-raro { filter: hue-rotate(175deg) saturate(1.7) brightness(1.05); }
-.alminha-epico { filter: hue-rotate(232deg) saturate(1.5) brightness(1.1); }
+.alminha-comum { filter: grayscale(1) brightness(1.12) contrast(1.1); }
+.alminha-incomum { filter: hue-rotate(78deg) saturate(2.8) contrast(1.1) brightness(1.02); }
+.alminha-raro { filter: hue-rotate(175deg) saturate(3) contrast(1.1) brightness(1.02); }
+.alminha-epico { filter: hue-rotate(232deg) saturate(2.8) contrast(1.1) brightness(1.06); }
 /* Lendário é o 🔥 quase cru: ele já nasce da cor deles. */
-.alminha-lendario { filter: hue-rotate(-8deg) saturate(1.35) brightness(1.12); }
-.alminha-mitico { filter: hue-rotate(-28deg) saturate(2) brightness(.98); }
+.alminha-lendario { filter: hue-rotate(-8deg) saturate(2) contrast(1.08) brightness(1.08); }
+.alminha-mitico { filter: hue-rotate(-28deg) saturate(3.2) contrast(1.1) brightness(.98); }
 /* As duas do topo brilham: são as que o jogador está caçando. */
 .alminha-lendario, .alminha-mitico { text-shadow: 0 0 8px rgba(255,180,90,.75); }
 .almaChip { display: flex; align-items: center; gap: 6px; }
@@ -1217,19 +1211,24 @@ body {
 /* ---- O POZINHO: o 🧂 nas mesmas seis faixas ----
    O `sepia` é OBRIGATÓRIO e vem primeiro: o saleiro é quase branco, e `hue-rotate` não move matiz
    onde não há saturação — sem ele as seis faixas saem cinzas. O sepia dá o tom base (~40°), o
-   saturate o encorpa, e só então o hue-rotate leva à cor da faixa. */
+   saturate o encorpa, e só então o hue-rotate leva à cor da faixa.
+
+   E o `brightness` BAIXO vem ANTES do sepia, que é o que separa cor viva de cor lavada: sepia sobre
+   branco devolve um bege claríssimo, e saturar bege claro não produz cor — produz bege. Escurecendo
+   primeiro, o sepia cai num tom médio que TEM croma pra saturar, e o brightness do fim devolve o
+   corpo. Foi assim que as seis faixas saíram do pastel. */
 .pozinho {
     display: inline-flex; align-items: center; justify-content: center; flex: none;
     width: calc(var(--po-tam, 18px) * 1.16);
     height: calc(var(--po-tam, 18px) * 1.16);
     font-size: var(--po-tam, 18px); line-height: 1;
 }
-.pozinho-comum { filter: grayscale(1) brightness(1.05); }
-.pozinho-incomum { filter: grayscale(1) sepia(1) saturate(5) hue-rotate(70deg) brightness(.95); }
-.pozinho-raro { filter: grayscale(1) sepia(1) saturate(5) hue-rotate(165deg) brightness(.95); }
-.pozinho-epico { filter: grayscale(1) sepia(1) saturate(5) hue-rotate(235deg) brightness(1); }
-.pozinho-lendario { filter: grayscale(1) sepia(1) saturate(4.5) hue-rotate(5deg) brightness(1.05); }
-.pozinho-mitico { filter: grayscale(1) sepia(1) saturate(6) hue-rotate(-30deg) brightness(.95); }
+.pozinho-comum { filter: grayscale(1) brightness(1.02) contrast(1.15); }
+.pozinho-incomum { filter: grayscale(1) brightness(.6) sepia(1) saturate(14) hue-rotate(70deg) brightness(1.15); }
+.pozinho-raro { filter: grayscale(1) brightness(.6) sepia(1) saturate(14) hue-rotate(165deg) brightness(1.15); }
+.pozinho-epico { filter: grayscale(1) brightness(.6) sepia(1) saturate(13) hue-rotate(235deg) brightness(1.2); }
+.pozinho-lendario { filter: grayscale(1) brightness(.62) sepia(1) saturate(12) hue-rotate(5deg) brightness(1.2); }
+.pozinho-mitico { filter: grayscale(1) brightness(.58) sepia(1) saturate(15) hue-rotate(-30deg) brightness(1.12); }
 /* As duas do topo brilham, como as alminhas: são as que o jogador está caçando. */
 .pozinho-lendario, .pozinho-mitico { text-shadow: 0 0 8px rgba(255,180,90,.75); }
 .poChip { display: flex; align-items: center; gap: 6px; }
@@ -1525,7 +1524,6 @@ body {
     padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 700;
     color: inherit; cursor: pointer;
 }
-.trocarItem.ativo { color: var(--ouro); }
 
 /* A DIFERENÇA na ficha do apóstolo. Grade de cinco colunas fixas pelo mesmo motivo da conta do
    equipamento: em flex, "HP" e "Velocidade" empurram os números pra posições diferentes e a coluna
@@ -1622,6 +1620,15 @@ body {
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     --corte: 8px; padding: 7px 3px; cursor: pointer;
     font: inherit; color: inherit;
+    /* O `relative` é o que ancora o `.aiDono` no canto: sem ele o emoji do portador se posiciona
+       contra a lista inteira e sobe pro topo da coluna. */
+    position: relative;
+}
+/* Quem veste a peça. Fica NO CARTÃO e não numa linha à parte porque a pergunta ("de quem estou
+   tirando isso?") tem de ser respondida no mesmo olhar que escolhe. */
+.aiDono {
+    position: absolute; top: 2px; right: 2px;
+    font-size: 11px; line-height: 1;
 }
 .acervoItem.olhando { background: var(--placa-acesa); box-shadow: var(--placa-brilho); }
 .aiEmoji { font-size: 26px; line-height: 1; }

@@ -16,6 +16,17 @@ export function cardDePeca(o, { marcada = false, aoClicar }) {
     const lv = document.createElement('span'); lv.className = 'aiLv'; lv.textContent = `nv ${o.nivel}`;
 
     card.append(em, es, lv);
+
+    // O emoji de QUEM veste, no canto. Vestir aqui uma peça que está num aliado TIRA dela — sem este
+    // aviso o jogador desnuda o aliado sem perceber e só descobre na fase seguinte.
+    if (o.portadorSimbolo) {
+        const dono = document.createElement('span');
+        dono.className = 'aiDono';
+        dono.textContent = o.portadorSimbolo;
+        card.append(dono);
+        card.title += ` · vestida em ${o.portadorSimbolo}`;
+    }
+
     card.addEventListener('click', aoClicar);
     return card;
 }

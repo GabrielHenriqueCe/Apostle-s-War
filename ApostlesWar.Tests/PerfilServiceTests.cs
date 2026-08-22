@@ -13,6 +13,11 @@ namespace Tests
     /// </summary>
     public class PerfilServiceTests
     {
+        // Um apóstolo qualquer pra vestir as peças: com o vínculo, equipar exige DE QUEM.
+        // A identidade é (Facção, Slot), então a instância deste roster serve pra qualquer service.
+        private static readonly Personagem Portador =
+            new PersonagemService().ObterPersonagem(Faccao.Reino, Slot.Slot1);
+
         // Porta de save fake: um dicionário em memória (a impl real, SaveLocal, mora na Infrastructure,
         // que o projeto de teste não referencia — e nem precisa: aqui só interessa a LÓGICA de chaves).
         private sealed class RepositorioFake : IRepositorioDeSave
@@ -36,7 +41,7 @@ namespace Tests
             ArsenalService Arsenal, CampanhaService Campanha) MontarCompleto(IRepositorioDeSave repo)
         {
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), new PersonagemService(), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo);
             return (new PerfilService(repo, apostolos, campanha), capitulos, apostolos, arsenal, campanha);
@@ -102,7 +107,7 @@ namespace Tests
             capitulos.ConcluirFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
             capitulos.DesbloquearFase(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
             apostolos.DesbloquearApostolos(Faccao.Reino, Fases.Fase1, Dificuldade.Facil);
-            arsenal.EquiparItem(arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0]);
+            arsenal.EquiparItem(Portador, arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0]);
             Assert.True(apostolos.ObterDesbloqueados().Count > 4);
 
             servico.Excluir();
@@ -112,7 +117,7 @@ namespace Tests
             Assert.False(capitulos.FaseConcluida(Faccao.Reino, Fases.Fase1, Dificuldade.Facil));
             Assert.False(capitulos.EstaDesbloqueado(Faccao.Reino, Fases.Fase2, Dificuldade.Facil));
             Assert.Empty(arsenal.ObterObtidos());
-            Assert.All(arsenal.ObterEquipados(), item => Assert.Null(item));
+            Assert.All(arsenal.ObterEquipados(Portador), item => Assert.Null(item));
         }
 
         [Fact]

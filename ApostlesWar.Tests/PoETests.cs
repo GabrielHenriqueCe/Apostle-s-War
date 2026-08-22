@@ -12,6 +12,11 @@ namespace Tests
     /// </summary>
     public class PoETests
     {
+        // Um apóstolo qualquer pra vestir as peças: com o vínculo, equipar exige DE QUEM.
+        // A identidade é (Facção, Slot), então a instância deste roster serve pra qualquer service.
+        private static readonly Personagem Portador =
+            new PersonagemService().ObterPersonagem(Faccao.Reino, Slot.Slot1);
+
         private sealed class RepositorioFake : IRepositorioDeSave
         {
             private readonly Dictionary<string, object?> _dados = new();
@@ -22,7 +27,7 @@ namespace Tests
         }
 
         private static ArsenalService Montar(IRepositorioDeSave repo)
-            => new(new CapitulosService(repo), new PoService(repo), repo);
+            => new(new CapitulosService(repo), new PoService(repo), new PersonagemService(), repo);
 
         // ---------- a curva ----------
 
@@ -197,11 +202,11 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var po = new PoService(repo);
-            var arsenal = new ArsenalService(new CapitulosService(repo), po, repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, new PersonagemService(), repo);
             Item item = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
 
-            arsenal.EquiparItem(item);
-            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 0, venceu: true);   // só pra encher o bolso
+            arsenal.EquiparItem(Portador, item);
+            arsenal.CreditarUso(new[] { Portador }, Dificuldade.Facil, ciclos: 0, venceu: true);   // só pra encher o bolso
 
             int comum = po.SaldoDe(Raridade.Comum);
             int incomum = po.SaldoDe(Raridade.Incomum);
@@ -228,11 +233,11 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var po = new PoService(repo);
-            var arsenal = new ArsenalService(new CapitulosService(repo), po, repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, new PersonagemService(), repo);
             Item item = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
 
-            arsenal.EquiparItem(item);
-            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 0, venceu: true);
+            arsenal.EquiparItem(Portador, item);
+            arsenal.CreditarUso(new[] { Portador }, Dificuldade.Facil, ciclos: 0, venceu: true);
             int antes = po.SaldoDe(Raridade.Comum);
 
             item.Pontos = Po.PontosParaNivel(20);   // travado no 9, com pontos que já pagam o 20
@@ -250,11 +255,11 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var po = new PoService(repo);
-            var arsenal = new ArsenalService(new CapitulosService(repo), po, repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, new PersonagemService(), repo);
             Item item = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
 
-            arsenal.EquiparItem(item);
-            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 0, venceu: true);
+            arsenal.EquiparItem(Portador, item);
+            arsenal.CreditarUso(new[] { Portador }, Dificuldade.Facil, ciclos: 0, venceu: true);
             int comum = po.SaldoDe(Raridade.Comum);
             item.Pontos = 0;   // a vitória já pagou o bônus à peça vestida; aqui só a queima conta
 
@@ -280,8 +285,8 @@ namespace Tests
             var arsenal = Montar(repo);
             var caidos = arsenal.DroparItens(Faccao.Reino, Fases.Fase1);
 
-            arsenal.EquiparItem(caidos[0]);
-            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 31, venceu: true);
+            arsenal.EquiparItem(Portador, caidos[0]);
+            arsenal.CreditarUso(new[] { Portador }, Dificuldade.Facil, ciclos: 31, venceu: true);
 
             Assert.Equal(36, caidos[0].Pontos);
             Assert.All(caidos.Skip(1), i => Assert.Equal(0, i.Pontos));
@@ -297,11 +302,11 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var po = new PoService(repo);
-            var arsenal = new ArsenalService(new CapitulosService(repo), po, repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, new PersonagemService(), repo);
             Item item = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
-            arsenal.EquiparItem(item);
+            arsenal.EquiparItem(Portador, item);
 
-            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 20, venceu: false);
+            arsenal.CreditarUso(new[] { Portador }, Dificuldade.Facil, ciclos: 20, venceu: false);
 
             Assert.Equal(20, item.Pontos);                       // o acumulado, sem o bônus de vitória
             Assert.All(Enum.GetValues<Raridade>(), r => Assert.Equal(0, po.SaldoDe(r)));
@@ -367,13 +372,13 @@ namespace Tests
             var repo = new RepositorioFake();
             var arsenal = Montar(repo);
             Item original = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
-            arsenal.EquiparItem(original);
-            arsenal.CreditarUso(Dificuldade.Facil, ciclos: 31, venceu: true);
+            arsenal.EquiparItem(Portador, original);
+            arsenal.CreditarUso(new[] { Portador }, Dificuldade.Facil, ciclos: 31, venceu: true);
 
             var recarregado = Montar(repo);
             recarregado.CarregarItensEquipados();
 
-            Item? vestido = recarregado.ObterEquipados()[0];
+            Item? vestido = recarregado.ObterEquipados(Portador)[0];
             Assert.NotNull(vestido);
             Assert.Equal(original.Id, vestido!.Id);
             Assert.Equal(36, vestido.Pontos);

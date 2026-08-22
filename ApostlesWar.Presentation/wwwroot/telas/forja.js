@@ -17,9 +17,18 @@ import { barraDeQuantidade } from '../ui/quantidade.js';
 import { blocoDeDelta } from '../ui/delta.js';
 import { cardDePeca } from '../ui/peca.js';
 import { navegador } from '../ui/navegador.js';
+import { filtroLimpo, aplicar, agrupar, painelDeFiltro } from '../ui/filtro.js';
 
 let dados = null;
 let bancada = 'nivel';   // 'nivel' = Bigorna · 'estrela' = Têmpera · 'fundir' = Caldeamento
+
+// O MESMO filtro do acervo da Catedral (ui/filtro.js) — com o acervo passando de mil peças, achar a
+// que vai pra bigorna é problema de BUSCA aqui também.
+//
+// SEM o eixo "Vestidas", e com ele ligado de saída: na Catedral esconder as peças de aliado protege
+// de um roubo sem querer, mas aqui toda peça do slot é forjável — e a primeira que o filtro
+// esconderia seria justamente a peça vestida por onde se ENTROU na tela.
+let filtro = filtroLimpo({ deAliados: true });
 
 // O que está sendo MONTADO na bancada, lido pela peça do meio: as duas colunas são partes do mesmo
 // gesto — a direita é o quanto, o meio é o que isso vira.
@@ -45,29 +54,50 @@ export const forja = {
 // isso acontece. Só o slot da peça aberta — a bigorna não é um segundo lugar de escolher arma.
 function desenharAcervo() {
     const col = document.getElementById('forjaAcervo');
+    const itens = aplicar(dados.acervo, filtro);
 
     const topo = document.createElement('div');
     topo.className = 'acervoTopo';
     const titulo = document.createElement('span');
     titulo.className = 'acervoTitulo';
-    titulo.textContent = `${dados.slotNome} · ${dados.acervo.length}`;
+    // Com filtro ligado, o número é o que PASSOU dele — dizer o total escondendo metade da lista
+    // faria o jogador procurar uma peça que a tela sabe estar filtrada.
+    titulo.textContent = `${dados.slotNome} · ${itens.length}`;
     topo.append(titulo);
 
     // O MESMO cartão e a MESMA grade do acervo da Catedral (ui/peca.js): trocar de tela não pode
     // trocar o jeito de a peça se parecer. O que muda é só o que a marca quer dizer — lá é a peça
     // comparada, aqui é a que está na bigorna — e o que o clique manda.
-    const lista = document.createElement('div');
-    lista.className = 'acervoLista';
-    lista.replaceChildren(...dados.acervo.map(o => {
+    const carta = (o) => {
         const card = cardDePeca(o, {
             marcada: o.indice === dados.peca.indice,
             aoClicar: () => mandar('escolherPeca', o.indice),
         });
         if (o.equipado) card.classList.add('vestida');   // a que está mexendo em ficha agora
         return card;
-    }));
+    };
 
-    col.replaceChildren(topo, lista);
+    const lista = document.createElement('div');
+    lista.className = 'acervoLista';
+
+    if (!itens.length) {
+        const v = document.createElement('div');
+        v.className = 'catedralVazio';
+        v.textContent = 'Nenhuma peça passa neste filtro.';
+        lista.append(v);
+    } else {
+        for (const g of agrupar(itens, filtro)) {
+            if (g.cabecalho) {
+                const cab = document.createElement('div');
+                cab.className = 'acervoGrupo';
+                cab.textContent = g.cabecalho;
+                lista.append(cab);
+            }
+            lista.append(...g.itens.map(carta));
+        }
+    }
+
+    col.replaceChildren(topo, painelDeFiltro(dados.acervo, filtro, desenharAcervo, { comVestidas: false }), lista);
 }
 
 // ---------- centro: a peça, e o que a bancada faria com ela ----------
@@ -129,7 +159,9 @@ function desenharPeca() {
     if (dados.portadorNome) {
         const quem = document.createElement('div');
         quem.className = 'acaoRotulo';
-        quem.textContent = `em ${dados.portadorNome}`;
+        // O emoji junto do nome: é o MESMO sinal que marca a peça no acervo, e ver os dois iguais é
+        // o que liga "esta é a peça do Ninja" lá com "estou forjando a peça do Ninja" aqui.
+        quem.textContent = `em ${dados.peca.portadorSimbolo} ${dados.portadorNome}`.trim();
         filhos.push(quem, blocoDeDelta(destino ? destino.noApostolo : [],
             'Arraste o pó pra ver o que muda na ficha dele.'));
     } else {

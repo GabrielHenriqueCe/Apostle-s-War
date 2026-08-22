@@ -601,8 +601,13 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
       sorteado no drop, a fase larga 4 peças, o uso paga por CICLO de combate (`FilaDeTurnos.Ciclos`),
       o **pó** nasceu como irmão da alma (`Material` virou o tronco dos dois) e o pedágio da dezena é
       pago nele. A fórmula do §A FÓRMULA entrou junto: `(base + cheios) × (1 + Σ%)`.
-    - **(b) O item vai pro APÓSTOLO**, e nasce a **raridade** com as subestatísticas — mais a tela da
-      Forja por apóstolo e o filtro do §O ACERVO.
+    - ✅ **(b1) O item vai pro APÓSTOLO.** Cada um tem o próprio boneco de 7 slots (`(Facção, Slot)`
+      é a chave, a mesma da progressão), a peça é de UM só e vestir no aliado TIRA do dono anterior —
+      com o emoji do portador no cartão, que é o que avisa antes do clique. O uso passou a pagar só
+      quem lutou. As setas da Forja giram pelo boneco de quem a abriu, e o acervo ganhou o eixo
+      *Vestidas* pra tomar peça de aliado. **Save de antes disso desveste tudo** e não perde peça.
+    - **(b2) A RARIDADE** e as subestatísticas — e com elas os eixos de sub do filtro do §O ACERVO, a
+      💎 Raridade da Catedral e a ♻️ Reforja da Forja, hoje as duas bancadas desenhadas e travadas.
     - **(c) A FORJA**: sacrifício, pool de subs, 3 opções, recusa por slot, o reforge de mítico.
 
 > **A ordem de 3 e 4 continua não sendo negociável** em relação ao resto: status e turno ANTES de

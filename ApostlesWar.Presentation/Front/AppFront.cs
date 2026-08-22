@@ -179,8 +179,10 @@ namespace ApostlesWar.Presentation.Front
                 // no modo certo (ver RodarJanela), e duas instâncias seriam duas verdades.
                 var capitulos = new CapitulosService(repositorio);
                 var po = new PoService(repositorio);
-                var arsenal = new ArsenalService(capitulos, po, repositorio);
+                // O roster vem ANTES do arsenal: o arsenal guarda quem veste o quê por `(Facção, Slot)`
+                // e é o PersonagemService que devolve o apóstolo por trás dessa chave.
                 var personagens = new PersonagemService();
+                var arsenal = new ArsenalService(capitulos, po, personagens, repositorio);
                 var selecaoDeAlvo = new SelecaoDeAlvoService();
                 var apostolos = new ApostolosService(personagens, capitulos);
                 var alma = new AlmaService(repositorio);

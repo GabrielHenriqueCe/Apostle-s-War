@@ -19,6 +19,7 @@ import { cardDePeca } from '../ui/peca.js';
 import { navegador } from '../ui/navegador.js';
 import { barraDeQuantidade } from '../ui/quantidade.js';
 import { filtroLimpo, aplicar, agrupar, painelDeFiltro } from '../ui/filtro.js';
+import { saldoDeAlma, saldoDePo } from '../ui/saldo.js';
 
 const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
 const ARSENAL_ICONES = ['🗡️', '⛑️', '🛡️', '📿', '🎽', '👖', '👢'];   // ícone do tipo quando o slot está vazio
@@ -51,6 +52,11 @@ export const catedral = {
         catedralDados = a;
         previsao = null;   // toda volta da ponte apaga o que estava sendo montado
         document.getElementById('catedralIrForja').disabled = !a.obtidos.length;
+
+        // O saldo das duas moedas, um em cada ponta do par de abas — a alma é a desta tela, o pó é o
+        // da porta ao lado.
+        saldoDeAlma('catedralSaldoAlma', a.alma);
+        saldoDePo('catedralSaldoPo', a.po);
         desenharPortas();
         desenharColunaEsquerda();
         desenharFicha();

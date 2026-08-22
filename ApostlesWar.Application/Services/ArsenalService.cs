@@ -137,6 +137,12 @@ namespace ApostlesWar.Application.Services
 
             inventario = salvo;
 
+            // A PAREDE corta o que já estava gravado. Save de antes de ago/2026 tem ponto empoçado
+            // acima dela, e sem este corte a primeira têmpera nele ainda cairia no meio da dezena —
+            // que é exatamente o que a regra nova desfaz (ver Item.Creditar).
+            foreach (Item peca in inventario)
+                peca.Pontos = Math.Min(peca.Pontos, Po.PontosNaParede(peca.Estrelas));
+
             // O ID volta a ser a REFERÊNCIA do inventário: sem isso o slot teria uma cópia própria e
             // o uso subiria o nível de uma só. ID órfão (peça que sumiu do acervo) deixa o slot vazio.
             foreach (VestidoPeloApostolo v in _repo.Carregar<List<VestidoPeloApostolo>>(ChaveVestidos) ?? new())
@@ -282,7 +288,7 @@ namespace ApostlesWar.Application.Services
             foreach (Item? item in time.SelectMany(ObterEquipados))
             {
                 if (item == null) continue;
-                item.Pontos += pontos;
+                item.Creditar(pontos);
             }
 
             // O PÓ é recompensa de fase, e cai só na VITÓRIA — junto com as peças, como o §O MATERIAL
@@ -341,9 +347,9 @@ namespace ApostlesWar.Application.Services
         /// Queima pó como pontos de nível da peça — a Bigorna da Forja, e o análogo exato do
         /// <see cref="ProgressaoService.QueimarAlma"/> do lado do apóstolo.
         ///
-        /// <b>Na parede, recusa.</b> Ponto além do teto não se perde (ele fica guardado e vira nível
-        /// quando a estrela é paga), mas o pó gasto aqui é o MESMO que a estrela vai cobrar — quem
-        /// queima travado está pagando duas vezes pelo mesmo nível.
+        /// <b>Na parede, recusa</b>, e a regra nova deixou a recusa mais dura do que era: ponto além
+        /// da parede agora é DESCARTADO, então queimar travado destruiria o pó em troca de nada — e o
+        /// pó destruído é o MESMO que a estrela vai cobrar.
         ///
         /// O débito é tudo-ou-nada, pelo motivo da queima de alma: metade cobrada com a outra metade
         /// recusada seria pó sumindo.
@@ -356,7 +362,7 @@ namespace ApostlesWar.Application.Services
 
             if (!_po.Debitar(faixas)) return MotivoRecusa.SemSaldo;
 
-            item.Pontos += faixas.Sum(f => Po.PontosPorPo(f.Raridade) * f.Quantidade);
+            item.Creditar(faixas.Sum(f => Po.PontosPorPo(f.Raridade) * f.Quantidade));
             SalvarItens();
             return MotivoRecusa.Nenhum;
         }

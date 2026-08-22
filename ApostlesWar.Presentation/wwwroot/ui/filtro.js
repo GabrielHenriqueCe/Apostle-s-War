@@ -17,7 +17,7 @@ export function filtroLimpo({ deAliados = false } = {}) {
         stat: '',          // '' = qualquer principal (a chave crua, não o rótulo)
         nivelMin: 0,
         estrelaMin: 0,
-        ordem: 'valor',    // 'valor' = o que mais dá do stat · 'nivel' · 'estrela'
+        ordem: 'nivel',    // 'nivel' · 'estrela'
         crescente: false,  // o menor primeiro — pra achar o que sacrificar
         misturar: false,   // junta as facções numa lista só, sem separar por conjunto
         deAliados,         // mostra TAMBÉM as peças vestidas em outros apóstolos, pra tomá-las
@@ -30,9 +30,8 @@ export function filtroLimpo({ deAliados = false } = {}) {
 export const base = (itens, filtro) =>
     filtro.deAliados ? itens : itens.filter(o => !o.portadorSimbolo);
 
-/// Filtra e ORDENA. A ordem "quanto dá" compara `valorNum`, e comparar valorNum entre stats
-/// diferentes não diz nada — 57,5 de ATK contra 0,0575 de HP% —, então ela só significa alguma
-/// coisa com o Principal escolhido. Dentro do mesmo stat ela é exata.
+/// Filtra e ORDENA. As duas ordens comparam número da MESMA escada (nível e estrela), então ambas
+/// dizem a verdade em qualquer lista.
 export function aplicar(itens, filtro) {
     let fora = base(itens, filtro);
 
@@ -41,9 +40,7 @@ export function aplicar(itens, filtro) {
     if (filtro.nivelMin) fora = fora.filter(o => o.nivel >= filtro.nivelMin);
     if (filtro.estrelaMin) fora = fora.filter(o => o.estrelas >= filtro.estrelaMin);
 
-    const chave = o => filtro.ordem === 'nivel' ? o.nivel
-        : filtro.ordem === 'estrela' ? o.estrelas
-        : o.valorNum;
+    const chave = o => filtro.ordem === 'estrela' ? o.estrelas : o.nivel;
 
     fora.sort((a, b) => (chave(a) - chave(b)) * (filtro.crescente ? 1 : -1));
     return fora;
@@ -100,8 +97,12 @@ export function painelDeFiltro(itens, filtro, aoMudar, { comVestidas = true } = 
     box.append(
         grupo('Nível ≥', String(filtro.nivelMin), degraus(0, 60, 10), v => filtro.nivelMin = Number(v)),
         grupo('Estrela ≥', String(filtro.estrelaMin), degraus(0, 6, 1), v => filtro.estrelaMin = Number(v)),
+        // A ordem "quanto dá" MORREU (decisão do Gabriel, ago/2026): ela comparava o valor cru do
+        // principal, e 57,5 de ATK contra 0,0575 de HP% não é comparação — só significava algo com
+        // o Principal já escolhido, e a tela nunca disse isso. Quem entra no lugar dela é a
+        // raridade, quando o eixo existir (o passo 10-b2).
         grupo('Ordenar', filtro.ordem,
-            [['valor', 'quanto dá'], ['nivel', 'nível'], ['estrela', 'estrela']],
+            [['nivel', 'nível'], ['estrela', 'estrela']],
             v => filtro.ordem = v),
         grupo('Sentido', filtro.crescente ? 'sim' : 'nao',
             [['nao', 'maior 1º'], ['sim', 'menor 1º']],

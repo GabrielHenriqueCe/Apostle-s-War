@@ -86,7 +86,7 @@ descreve uma pasta que mudou de nome três PRs atrás. Então cada um ganhou um 
 
 | ferramenta | o que ela responde |
 |---|---|
-| `rodar-telas.js` | Carrega o front inteiro num navegador de mentira, publica em cada tela a mesma mensagem que o C# publicaria e **dispara os gestos** — clique, hover, arrasto em sequência — até parar de aparecer ouvinte novo. Confere ainda os `getElementById` do JS contra o `index.html`, as terminações de linha, e **as cargas de tela contra os DTOs do C#**: propriedade que o front lê e o C# não manda aparece na corrida. |
+| `rodar-telas.js` | Constrói a árvore do `index.html` num navegador de mentira, carrega o front inteiro por cima, publica em cada tela a mesma mensagem que o C# publicaria e **dispara os gestos** — clique, hover, arrasto em sequência — até parar de aparecer ouvinte novo. Confere ainda os `getElementById` do JS contra o `index.html`, as terminações de linha, e **as cargas de tela contra os DTOs do C#**: propriedade que o front lê e o C# não manda aparece na corrida. |
 | `rodar-tema.js` | Roda os oito cenários animados por 120 s simulados cada — 7.200 quadros — pelo caminho de verdade, o `aplicarTema` do jogo e não um mock, e queixa de `NaN`, `Infinity` e exceção. Existe porque uma colisão de chave entre dois cenários já deixou a cena em branco **sem erro visível**. |
 | `conferir-docs.js` | Confere se os 22 documentos ainda descrevem o repositório que existe: caminho que sumiu, `#NNN` citado que nunca foi mergeado, orçamento de tokens que ficou pra trás. Símbolo sem ocorrência no código sai numa lista à parte, **sem derrubar** — documento que conta o que morreu está certo. |
 

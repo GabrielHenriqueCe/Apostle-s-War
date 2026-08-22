@@ -182,8 +182,8 @@ namespace ApostlesWar.Domain
 
         /// <summary>
         /// Que nível <paramref name="pontos"/> pagam, preso ao <paramref name="teto"/> que as
-        /// estrelas abriram. Ponto que passa do teto não se perde — fica guardado no item e vira
-        /// nível assim que o pedágio seguinte for pago (é o mesmo desenho da XP na parede).
+        /// estrelas abriram. Na parede o ponto não passa daqui — quem o segura é o
+        /// <see cref="PontosNaParede"/>, no crédito (é o mesmo desenho da XP do apóstolo).
         /// </summary>
         public static int NivelPorPontos(int pontos, int teto)
         {
@@ -191,5 +191,17 @@ namespace ApostlesWar.Domain
             while (nivel < teto && pontos >= PontosParaNivel(nivel + 1)) nivel++;
             return nivel;
         }
+
+        /// <summary>
+        /// O TETO DURO dos pontos com estas estrelas — o irmão do <see cref="Progressao.XpNaParede"/>,
+        /// com a curva do pó no lugar da curva de XP. O ponto que passaria daqui é DESCARTADO.
+        ///
+        /// <b>Isto substitui o excedente guardado</b> (decisão do Gabriel, ago/2026). Uma fase paga
+        /// 15 pontos de uma vez e o nível 10 do item tem 20 de largura, então a MESMA fase que enchia
+        /// o nível 9 já ultrapassava a parede — e a têmpera caía na metade do 10 sem o jogador ter
+        /// feito nada por aquele meio nível. Agora ela para na parede e a estrela entrega o 10 zerado.
+        /// </summary>
+        public static int PontosNaParede(int estrelas)
+            => PontosParaNivel(Math.Min(Progressao.TetoPorEstrelas(estrelas) + 1, Arquetipos.NivelMaximo));
     }
 }

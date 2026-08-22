@@ -28,8 +28,7 @@ namespace ApostlesWar.Domain
         /// O nível que esta XP paga, preso ao <paramref name="teto"/> que as estrelas compradas
         /// permitem (<see cref="TetoPorEstrelas"/>).
         ///
-        /// A XP que passa do teto NÃO se perde: quem guarda é o save, que grava a XP crua. Parar aqui
-        /// é só deixar de APLICAR — comprar a estrela reaplica e o nível salta de uma vez.
+        /// Na parede a XP não passa daqui: quem a segura é o <see cref="XpNaParede"/>, no crédito.
         ///
         /// LAÇO INTEIRO, e não a inversa da quadrática: com `q = 19` a passada do Fácil erra o nível
         /// 28 por 28 pontos de XP, e nessa margem um `sqrt` em ponto flutuante decide o teto pelo
@@ -52,6 +51,24 @@ namespace ApostlesWar.Domain
         /// </summary>
         public static int TetoPorEstrelas(int estrelas)
             => Math.Min(10 * Math.Max(estrelas, 0) + 9, Arquetipos.NivelMaximo);
+
+        /// <summary>
+        /// O TETO DURO da XP com estas estrelas: exatamente o piso do primeiro nível que a estrela
+        /// ainda não abriu. A XP que passaria daqui é DESCARTADA no crédito.
+        ///
+        /// <b>Isto substitui o excedente guardado</b> (decisão do Gabriel, ago/2026). Antes a XP crua
+        /// continuava subindo na parede e a estrela comprada aplicava tudo de uma vez — o jogador
+        /// pagava o pedágio e caía no meio do nível 10, às vezes três níveis acima. Agora a parede é
+        /// parede: encheu, para; a estrela abre a dezena e ele entra no 10 ZERADO.
+        ///
+        /// É o piso do teto+1 e não o topo do teto: o `NaParede` do serviço pergunta se a XP já paga
+        /// um nível ACIMA do teto, e com um ponto a menos a parede nunca seria alcançada.
+        ///
+        /// No <see cref="Arquetipos.NivelMaximo"/> não há teto+1 pra apontar — e nem precisa: ali
+        /// acabou a escada, e o piso do 60 já é tudo que a XP consegue comprar.
+        /// </summary>
+        public static int XpNaParede(int estrelas)
+            => XpParaNivel(Math.Min(TetoPorEstrelas(estrelas) + 1, Arquetipos.NivelMaximo));
 
         /// <summary>Onde <paramref name="xp"/> cai DENTRO da faixa deste nível, em 0..100.</summary>
         public static int PctNaFaixa(int nivel, int xp)

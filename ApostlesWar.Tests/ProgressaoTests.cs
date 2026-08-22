@@ -36,6 +36,9 @@ namespace Tests
         /// jogador entra em cada capítulo nos níveis 1·5·9·12·15·18·21·24 e termina no 27 — três
         /// níveis abaixo do teto, que só a repetição paga.
         ///
+        /// É a XP CRUA, sem parede: o jogo de verdade termina a mesma passada no 26, porque cada
+        /// parede descarta o que passa dela (ver <c>AlmaTests.PassadaDoFacil_ParaNa3aParede…</c>).
+        ///
         /// Se alguém mexer no 72 (o `q = 18` × 4 em campo), é aqui que aparece.
         /// </summary>
         [Fact]

@@ -204,6 +204,22 @@ namespace ApostlesWar.Presentation.Front
             return LerEscolha();
         }
 
+        /// <summary>
+        /// O saldo CRU de alma, pra a aba que não é a desta tela. As seis faixas, sem filtrar: quem
+        /// decide que faixa zerada não vira chip é o `ui/saldo.js`, e a regra fica num lugar só.
+        ///
+        /// O `Max` e o `PodeFundir` ficam no default porque aqui não se gasta nada — eles são o teto
+        /// da barrinha de queima, e a barrinha pertence à estação, não à aba.
+        /// </summary>
+        private List<AlmaVista> SaldoDeAlma() => Enum.GetValues<Raridade>()
+            .Select(r => new AlmaVista((int)r, r.Descricao(), _alma.SaldoDe(r), Alma.XpPorAlma(r)))
+            .ToList();
+
+        /// <summary>O mesmo saldo do lado do pó — ver <see cref="SaldoDeAlma"/>.</summary>
+        private List<PoVista> SaldoDePo() => Enum.GetValues<Raridade>()
+            .Select(r => new PoVista((int)r, r.Descricao(), _po.SaldoDe(r), Po.PontosPorPo(r)))
+            .ToList();
+
         /// <returns>true se a conta foi EXCLUÍDA aqui dentro (o chamador deve repedir o perfil).</returns>
         private bool MostrarConfiguracao()
         {
@@ -649,34 +665,7 @@ namespace ApostlesWar.Presentation.Front
             if (travou) trechos[^1] = trechos[^1] with { Ate = 100 };
 
             return new GanhoVista(p.Simbolo, Tipos.Simbolo(p.Tipo), p.Nome, xpAgora - xpAntes,
-                trechos, travou, DeltaDeStats(p, nivelAntes, p.Nivel));
-        }
-
-        /// <summary>
-        /// A ficha do apóstolo no fim da fase — <b>os seis stats, SEMPRE</b>, subindo ou não. Quem
-        /// mostra o <c>→</c> só onde mudou é a tela.
-        ///
-        /// Antes só entrava o que tinha MEXIDO, e o efeito era a tela dançar: a linha de um apóstolo
-        /// tinha seis campos quando ele subia de nível e nenhum quando não subia, então o bloco mudava
-        /// de tamanho a cada vitória. Lista de tamanho fixo se lê de relance; lista que aparece e some
-        /// obriga a reler. É pedido do Gabriel (ago/2026).
-        ///
-        /// O crítico fica de fora porque vem do TIPO e não anda com o nível.
-        /// </summary>
-        private static List<DeltaStatVista> DeltaDeStats(Personagem p, int de, int ate)
-        {
-            Personagem antes = p.ComNivel(de);
-            var linhas = new (string Icone, string Rotulo, int De, int Ate)[]
-            {
-                ("❤️", "HP", antes.HP, p.HP),
-                ("⚔️", "Ataque", antes.Ataque, p.Ataque),
-                ("🛡️", "Defesa", antes.Defesa, p.Defesa),
-                ("⚡", "Velocidade", antes.Velocidade, p.Velocidade),
-                ("🎯", "Precisão", antes.Precisao, p.Precisao),
-                ("🧿", "Resistência", antes.Resistencia, p.Resistencia),
-            };
-
-            return linhas.Select(l => new DeltaStatVista(l.Icone, l.Rotulo, l.De, l.Ate)).ToList();
+                trechos, travou);
         }
 
         /// <summary>
@@ -1285,7 +1274,7 @@ namespace ApostlesWar.Presentation.Front
                     ? _arsenal.ObterObtidos().Select(i => i.Fase).Distinct().Count()
                     : _arsenal.ObterEquipados(portador).Count(i => i != null),
                 teto, naParede, peca.Pontos, ateAParede,
-                po, (int)Material.TetoDeFusao(MaiorDificuldade()),
+                po, SaldoDeAlma(), (int)Material.TetoDeFusao(MaiorDificuldade()),
                 receita.Select(VistaDePo).ToList(), faltando.Select(VistaDePo).ToList(),
                 podeComprar, podeQueimar, motivo,
                 patamares, PorNivelDaPeca(peca, portador, teto),
@@ -1365,7 +1354,7 @@ namespace ApostlesWar.Presentation.Front
             var (feito, total) = _arsenal.FaixaDoNivel(it);
             return new(
                 indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
-                NomeDoStat(it.TipoStat), ValorFormatado(it), it.Valor, equipado,
+                NomeDoStat(it.TipoStat), ValorFormatado(it), equipado,
                 _arsenal.PortadorDe(it)?.Simbolo ?? "",
                 it.Nivel, it.Estrelas, total <= 0 ? 100 : (int)(100L * feito / total),
                 // A CHAVE do stat vai crua junto com o rótulo: "ATK" é o que se lê, mas o filtro
@@ -1425,6 +1414,7 @@ namespace ApostlesWar.Presentation.Front
                 .ToList();
 
             return new CatedralVista(slots, obtidos, lista, selecionado, aprimorar, saldo,
+                SaldoDePo(),
                 (int)Material.TetoDeFusao(MaiorDificuldade()),
                 PreviaDeTroca(candidato, escolhido));
         }

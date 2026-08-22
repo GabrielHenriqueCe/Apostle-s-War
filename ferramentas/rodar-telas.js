@@ -19,21 +19,30 @@
 // (dragstart→dragover→drop→dragend, mousedown→mousemove→mouseup) porque os handlers guardam
 // estado entre um e outro — disparados soltos, saem pelo `return` da primeira linha.
 //
-// FORA, e são duas coisas:
-//   · tudo que roda contra o motor C# — a batalha depois do primeiro quadro;
-//   · o markup ESTÁTICO do index.html. O DOM daqui nasce do que o JS pede: `getElementById` e
-//     `createElement`. Elemento que só existe escrito no HTML e é achado por CLASSE nunca é
-//     materializado, então `querySelectorAll('.setupJog')` (arena.js, no carregamento) continua
-//     devolvendo vazio e aqueles ouvintes nem chegam a ser registrados. Fechar isso é construir a
-//     árvore estática a partir do index.html — outro trabalho.
+// O markup ESTÁTICO do index.html ENTRA (ago/2026): a árvore é construída antes do boot, então
+// elemento escrito no HTML e achado por CLASSE existe de verdade — o `querySelectorAll('.setupJog')`
+// do arena.js, que roda no CARREGAMENTO, achou os dois botões e a Arena ganhou 4 elementos
+// alcançáveis e 6 gestos que antes nem nasciam.
+//
+// FORA segue: tudo que roda contra o motor C# — a batalha depois do primeiro quadro.
 //
 // Verde aqui quer dizer "as telas montam e os gestos não explodem", nunca "o jogo funciona" —
 // isso continua sendo teste em jogo, e é do Gabriel.
 //
 // A ARMADILHA: disparar ouvinte fora da ordem que um jogador produziria gera estado que o C# nunca
 // manda. Exceção daqui é PISTA, não veredito, e por isso o relatório nomeia o gesto e o elemento.
-// E o ∅ (não tocou no DOM) pesa tanto quanto o ✗: handler que depende de estado não montado sai
-// daqui calado, e calado já deixou tela passar verde estando desligada.
+// E o ∅ (não tocou no DOM nem falou com o C#) pesa tanto quanto o ✗: handler que depende de estado
+// não montado sai daqui calado, e calado já deixou tela passar verde estando desligada.
+//
+// OS ∅ FORAM AUDITADOS UM A UM (ago/2026) — os 21 são legítimos, em três famílias, e a lista
+// inteira sai com :
+//   · GUARD de estado que a carga não monta (15): #setupLutar sem time montado, .slot·mouseenter em
+//     casa vazia (12), .acaoConfirmar sem barra arrastada (2);
+//   · a ORDEM da varredura já consumiu o estado (4): .avatarCelula·click com o time cheio,
+//     #conquistaCorpo·animationend depois do duplo-clique que pula a animação, #fimDeFase·click com
+//     as opções à mostra;
+//   · handler que só grava VARIÁVEL de módulo (2): #log·scroll e #arena·click sem nada armado.
+// Se o número mudar, é gesto novo ou tela montando pela metade — e aí vale reauditar.
 // ============================================================================================
 //
 // Uso:  node --experimental-vm-modules ferramentas/rodar-telas.js
@@ -353,7 +362,7 @@ async function carregar(arquivo) {
 // ---------- as telas, uma mensagem cada ----------
 // As cargas são MÍNIMAS de propósito: o alvo é o caminho de montagem, não o conteúdo. Se a tela lê
 // um campo que não veio, isso aparece como exceção — que é exatamente o que se quer saber.
-const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', faccaoSimbolo: '👑', simbolo: '🗡️', stat: 'ATK', statChave: 'ataque', valor: '+5', valorNum: 5, equipado: true, portadorSimbolo: '', nivel: 3, estrelas: 1, pct: 40 };
+const item = { indice: 0, slot: 0, nome: 'Espada', faccao: 'Reino', faccaoSimbolo: '👑', simbolo: '🗡️', stat: 'ATK', statChave: 'ataque', valor: '+5', equipado: true, portadorSimbolo: '', nivel: 3, estrelas: 1, pct: 40 };
 // Um só objeto pros dois contratos que o front recebe — o `ApostoloVisto` das telas de menu e o
 // combatente do combate. Chave a mais é ignorada pelo JS; chave a MENOS é caminho que não roda.
 // O `bonus` vem SEMPRE do C# (é a tela que decide se mostra a conta aberta), e a ficha lê
@@ -368,44 +377,65 @@ const apostolo = { id: 1, nome: 'Teste', simbolo: '🙂', tipoSimbolo: '🏹', f
 const DIFICULDADES = ['Normal', 'Difícil', 'Insano', 'Apocalipse'].map((nome, i) => ({
     nome, valor: i, desbloqueada: i < 2, requisito: i < 2 ? null : `Conclua ${['Normal', 'Difícil', 'Insano'][i - 1]}`,
 }));
-// ---------- o que o jogador ALCANÇA ----------
-// O index.html carrega TODAS as telas ao mesmo tempo e o `mostrarCena` esconde as que não são a
-// atual pondo `hidden` no contêiner. Quem varre gesto tem de respeitar isso, senão clica em tela
-// escondida — e clique em tela escondida não é bug do jogo, é bug do harness.
+// ---------- a ÁRVORE ESTÁTICA do index.html ----------
+// O DOM deste harness costumava nascer só do que o JS PEDIA (`getElementById` + `createElement`), e
+// isso deixava um buraco de forma: elemento escrito no HTML e achado por CLASSE nunca era
+// materializado. O `querySelectorAll('.setupJog')` do arena.js, que roda no CARREGAMENTO, devolvia
+// vazio, e aqueles ouvintes nem chegavam a ser registrados — a tela passava verde com o gesto morto.
 //
-// O `_pai` sozinho não resolve: `getElementById` devolve elemento SOLTO, então `#catedralPortas`
-// não sabe que mora dentro de `#catedral`. O esqueleto estático vem do próprio index.html.
-const paiDeId = (() => {
-    const pai = new Map();
+// Agora o markup do index.html é CONSTRUÍDO antes do boot. Os elementos com id entram no mesmo
+// `porId` que o `getElementById` consulta, então o front recebe o elemento DA ÁRVORE (com pai, com
+// irmãos) em vez de um solto — e o `alcancavel` passa a subir por `_pai` de verdade.
+//
+// O parser entende o que este index.html usa: tag, id, class, hidden e data-*. Ele não é um parser
+// de HTML — é o suficiente pra este arquivo, e falhar aqui é falhar barulhento (a conferência de
+// ids logo abaixo acusa id que não nasceu).
+const VAZIAS = new Set(['br', 'hr', 'img', 'input', 'meta', 'link', 'source', 'col', 'area', 'embed']);
+
+(function montarArvoreEstatica() {
     const html = fs.readFileSync(INDEX, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
-    const VAZIA = new Set(['br', 'hr', 'img', 'input', 'meta', 'link', 'source', 'col', 'area', 'embed']);
     const pilha = [];
+
     for (const [, fecha, tag, attrs] of html.matchAll(/<(\/?)([a-zA-Z][\w-]*)([^>]*)>/g)) {
         const t = tag.toLowerCase();
+
         if (fecha) {
             for (let i = pilha.length - 1; i >= 0; i--) if (pilha[i].tag === t) { pilha.length = i; break; }
             continue;
         }
-        const id = (attrs.match(/(?:^|[^-\w])id="([^"]+)"/) || [])[1] || null;
-        if (id) {
-            const p = [...pilha].reverse().find(x => x.id);
-            if (p) pai.set(id, p.id);
+        if (t === 'html' || t === 'head' || t === 'title' || t === 'script' || t === 'style') {
+            if (!VAZIAS.has(t) && !attrs.trim().endsWith('/')) pilha.push({ tag: t, el: null });
+            continue;
         }
-        if (!VAZIA.has(t) && !attrs.trim().endsWith('/')) pilha.push({ tag: t, id });
+
+        const id = (attrs.match(/(?:^|[^-\w])id="([^"]+)"/) || [])[1] || '';
+
+        // O `body` já existe no shim (é a raiz que o front pendura coisa), então ele não nasce de
+        // novo: a árvore inteira se pendura NELE.
+        const el = t === 'body' ? document.body : criarElemento(id, t.toUpperCase());
+        el.className = (attrs.match(/(?:^|[^-\w])class="([^"]*)"/) || [])[1] || '';
+        for (const c of el.className.split(/\s+/)) if (c) el.classList.add(c);
+        if (/(?:^|\s)hidden(?:[=\s>]|$)/.test(attrs)) el.hidden = true;
+        for (const [, chave, valor] of attrs.matchAll(/data-([\w-]+)="([^"]*)"/g)) el.dataset[chave] = valor;
+
+        if (id) porId.set(id, el);
+
+        const pai = [...pilha].reverse().find(x => x.el)?.el;
+        if (pai && el !== document.body) pai.appendChild(el);
+
+        if (!VAZIAS.has(t) && !attrs.trim().endsWith('/')) pilha.push({ tag: t, el });
     }
-    return pai;
 })();
 
-/// Nem o elemento nem nenhum ancestral dele — vivo ou só no esqueleto do HTML — está escondido.
+// ---------- o que o jogador ALCANÇA ----------
+// O index.html carrega TODAS as telas ao mesmo tempo e o `mostrarCena` esconde as que não são a
+// atual pondo `hidden` no contêiner. Quem varre gesto tem de respeitar isso, senão clica em tela
+// escondida — e clique em tela escondida não é bug do jogo, é bug do harness.
+
+/// Nem o elemento nem nenhum ancestral dele está escondido. Com a árvore estática montada, o `_pai`
+/// basta: quem veio do index.html já nasce dentro da `<section>` da tela dele.
 function alcancavel(el) {
-    for (let n = el; n; n = n._pai) {
-        if (n.hidden === true) return false;
-        if (!n._pai && n.id) {
-            for (let id = paiDeId.get(n.id); id; id = paiDeId.get(id)) {
-                if (porId.get(id)?.hidden === true) return false;
-            }
-        }
-    }
+    for (let n = el; n; n = n._pai) if (n.hidden === true) return false;
     return true;
 }
 
@@ -574,7 +604,6 @@ const TELAS = [
         ganhos: [{
             simbolo: '🧙', tipoSimbolo: '🏹', nome: 'Mago', xpGanha: 2870, travou: true,
             trechos: [{ nivel: 8, de: 40, ate: 100 }, { nivel: 9, de: 0, ate: 62 }],
-            stats: [{ icone: '❤️', rotulo: 'HP', de: 1240, ate: 1380 }],
         }],
         alma: ALMA.slice(0, 3), po: PO.slice(0, 3),
     }],
@@ -586,8 +615,8 @@ const TELAS = [
         slots: [0, 1, 2, 3, 4, 5, 6].map(s => ({ slot: s, nome: `Slot ${s}`, equipado: s === 0 ? item : null })),
         // A terceira está VESTIDA NUM ALIADO: é ela que faz o emoji do portador e o chip "Vestidas"
         // rodarem. Sem uma peça assim na carga, os dois caminhos ficam mortos no harness.
-        obtidos: [item, { ...item, equipado: false, valorNum: 3 },
-            { ...item, equipado: false, valorNum: 4, portadorSimbolo: '🥷' }],
+        obtidos: [item, { ...item, equipado: false, nivel: 7 },
+            { ...item, equipado: false, estrelas: 0, portadorSimbolo: '🥷' }],
         // A prévia LIGADA: é ela que marca a peça em comparação no acervo e desenha as linhas que
         // mudariam. Com `null` (o estado mais comum) esses dois trechos não rodam.
         previa: { indice: 0, deltas: [{ rotulo: 'Ataque', antes: 200, depois: 214, delta: 14, sufixo: '' }] },
@@ -605,7 +634,8 @@ const TELAS = [
             limiares: [{ nivel: 9, xp: 3600 }, { nivel: 10, xp: 4500 }],
             porNivel: [8, 9].map(n => ({ nivel: n, hp: 1200 + n * 40, ataque: 200 + n * 4, defesa: 90 + n * 2, velocidade: 85, precisao: 50, resistencia: 120 })),
         },
-        alma: ALMA, tetoDeFusao: 2,
+        // O PÓ na Catedral (e a ALMA na Forja) é o saldo da OUTRA aba — a moeda da porta ao lado.
+        alma: ALMA, po: PO, tetoDeFusao: 2,
     }],
     // A FORJA com naParede e podeQueimar LIGADOS ao mesmo tempo — estado que o C# não produz, mas
     // que faz as três bancadas renderizarem o corpo inteiro numa corrida só. Mesma carga de
@@ -615,7 +645,7 @@ const TELAS = [
         slotNome: 'Arma', slotsComPeca: 3,
         acervo: [{ ...item, indice: 0, nivel: 9, estrelas: 1, pct: 100 }, { ...item, indice: 1, equipado: false, nivel: 3, estrelas: 0, pct: 40 }],
         teto: 9, naParede: true, pontos: 780, pontosAteAParede: 120,
-        po: PO, tetoDeFusao: 2,
+        po: PO, alma: ALMA, tetoDeFusao: 2,
         receita: [{ raridade: 0, nome: 'Comum', quantidade: 50, pontosPorUnidade: 1, max: 100, podeFundir: true }],
         faltando: [{ raridade: 1, nome: 'Incomum', quantidade: 30, pontosPorUnidade: 5, max: 0, podeFundir: false }],
         podeComprarEstrela: false, podeQueimar: true, motivo: 'Falta 30 de Incomum.',
@@ -835,6 +865,9 @@ function conferirCargas() {
     // O ∅ não é falha: handler guardado por estado que esta tela não tem sai calado, e isso é
     // legítimo. Vai listado porque ∅ em massa numa tela é sinal de que ela montou pela metade.
     if (total.mudos.length) {
+        // A lista INTEIRA sai com MUDOS=1. O relatório corta em 12 porque ∅ é para ser lido de
+        // relance; auditar um a um é outra tarefa, e ela precisa da lista toda.
+        if (process.env.MUDOS) for (const m of total.mudos) console.log(`     ∅ ${m}`);
         console.log('  ∅ (não tocaram no DOM): ' + total.mudos.slice(0, 12).join(', ')
             + (total.mudos.length > 12 ? ` … +${total.mudos.length - 12}` : ''));
     }

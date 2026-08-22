@@ -707,7 +707,9 @@ apóstolos):** mesmo TEMA, gatilho/persistência diferentes.
   Ex.: `c => c.AdicionarBonusAtaquePermanente((int)(c.AtaqueComItens * 0.10))`.
 - **GAP a resolver na impl:** HP/vida NÃO tem `AdicionarBonusHPPermanente` (HP é HPMaximo, mexido só
   no IniciarCombate/itens) — escalar HP por abate precisa de método novo (mexe no HPMaximo e/ou HPAtual?).
-  ATK/DEF/DanoCrit/TaxaCrit já têm método.
+  ATK/DEF/DanoCrit/TaxaCrit já têm método. *(Este nome é a AUSÊNCIA sendo nomeada, não um ponteiro
+  quebrado: ele sai na seção "pra conferir" do `conferir-docs.js` justamente por não existir, e é
+  para continuar assim até alguém escrever o método.)*
 - Aberto: cap (Ambição tem 25% via `ObterEstado`) vs sem cap (abates são finitos). Default sugerido: sem cap.
 
 ---
@@ -822,13 +824,20 @@ envelheceu).
 nesses stats) viraram observáveis ao vivo.
 
 ### Testes automatizados (xUnit na lógica de domínio)
-**Status:** ✅ **xUnit JÁ RODA** — o projeto `Tests/` tem 25 arquivos e **332 testes verdes**
-(ago/2026). O `NavegacaoTests.cs` que esta nota citava morreu junto com a pele de console no #179:
-ele testava navegação de menu por teclado, que não existe mais. **O que segue PENDENTE (FILA A #14)
-é a ordem crítica de morte** (Guarda→Vilão→Necromancia): o `ReceberDano`
-ponta-a-ponta já caiu no próprio #14 (`Tests/ReceberDanoTests.cs`, 14 testes). Sobra o que precisa
-rodar o FLUXO, e o fluxo chama a tela — destrava com uma tela no-op sobre `ITelaDeCombate`. É a rede
-de segurança antes do Rebalanceamento e diferencial de portfólio.
+**Status:** ✅ **FEITO (ago/2026).** O `NavegacaoTests.cs` que esta nota citava morreu junto com a
+pele de console no #179: ele testava navegação de menu por teclado, que não existe mais.
+
+A **ordem crítica de morte** (Guarda→Vilão→Necromancia) era o que faltava, e fechou: o `ReceberDano`
+ponta-a-ponta já tinha caído no próprio #14 (`Tests/ReceberDanoTests.cs`, 14 testes), e agora o FLUXO
+tem `Tests/OrdemDeMorteTests.cs` — três provas rodando uma batalha de verdade contra uma tela no-op
+sobre `ITelaDeCombate`, que ESCUTA as mensagens de passiva; a ordem da lista é a ordem das reações.
+Determinístico sem semear `Random`: o algoz bate muito acima do HP da vítima e o controlador fecha o
+horizonte em um golpe (`null` → `BatalhaAbortada`, o truque da bancada).
+
+**Provado por sabotagem:** invertidas as duas chamadas no `CombateService`, o teste do Vilão cai — e
+cai pelo motivo certo, "a Sentença não disparou", porque a Necromância revive primeiro e o
+`ProcessarReacoesAtacanteMorte` encontra o alvo Vivo e volta calado. É a rede de segurança antes do
+Rebalanceamento.
 
 ### Persistência — porta `IRepositorioDeSave` (Steam/Play cloud save, NÃO SQL)
 **Status:** ✅ **PORTA FEITA (FILA A #6, jul/2026)** — `Portas/IRepositorioDeSave.cs` (corte typed:
@@ -916,9 +925,9 @@ vocabulário do domínio mede a língua, não a gordura.**
   `DeveAgir` (deletado da interface e das 6 impls) citado em 4 comentários; e **13 comentários
   descrevendo a pele de CONSOLE**, removida no #179, dois deles afirmando comportamento dela
   ("no console é no-op") ao lado da única impl que existe.
-- **O obstáculo errado** — três testes diziam não rodar headless "sem Console". Não é o Console, é
-  a TELA; e como o `ITelaDeCombate` já é injetável, o comentário escondia que o teste de fluxo que
-  falta (a ordem crítica de morte) está ao alcance.
+- **O obstáculo errado** — três testes diziam não rodar headless "sem Console". Não era o Console,
+  era a TELA; e como o `ITelaDeCombate` já é injetável, o comentário escondia que o teste de fluxo
+  então faltante (a ordem crítica de morte) estava ao alcance. Ele foi escrito em ago/2026.
 - **DUPLICAÇÃO, que a 1ª passada não procurava** — o mesmo parágrafo em NOVE lugares (os 8 cenários
   + `nucleo/ar.js`) e a mesma frase NOVE vezes no `PersonagemService`. O dono ficou com a regra em
   forma de mina; as cópias saíram.

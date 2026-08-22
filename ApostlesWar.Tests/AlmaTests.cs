@@ -107,7 +107,37 @@ namespace Tests
             // XP de sobra pro jogo inteiro e nenhuma estrela: ele para na 1ª parede. É esta
             // propriedade que deixa a queima ser generosa sem furar o teto de dificuldade.
             Assert.Equal(9, p.Nivel);
-            Assert.True(progressao.XpDe(p) > Progressao.XpParaNivel(Arquetipos.NivelMaximo));
+
+            // E o que passou da parede foi DESCARTADO: a XP encosta nela CRAVADA, e não guarda
+            // excedente nenhum pra despejar quando a estrela for paga.
+            Assert.Equal(Progressao.XpNaParede(0), progressao.XpDe(p));
+        }
+
+        /// <summary>
+        /// A PAREDE É PAREDE: XP que passa dela some, e a estrela comprada entrega a dezena seguinte
+        /// ZERADA. Antes o excedente ficava guardado no save e entrava todo de uma vez — o jogador
+        /// pagava o pedágio e caía no meio do 10, às vezes três níveis acima, sem ter feito nada por
+        /// aquele pedaço. É pedido do Gabriel (ago/2026).
+        /// </summary>
+        [Fact]
+        public void NaParede_OExcedenteEDescartado_EAEstrelaEntregaADezenaZerada()
+        {
+            var (personagens, alma, progressao) = Montar();
+            Personagem p = personagens.ObterPersonagem(Faccao.Ascendentes, Slot.Slot3);
+            alma.Creditar(Dificuldade.Facil, 100);
+
+            // Muito além da parede, de uma vez só — é o que uma fase faz ao atravessá-la.
+            progressao.Creditar(new List<Personagem> { p }, Progressao.XpParaNivel(30));
+            Assert.True(progressao.NaParede(p));
+            Assert.Equal(Progressao.XpNaParede(0), progressao.XpDe(p));
+
+            // Mais fase nenhuma move a XP enquanto ele estiver travado.
+            progressao.Creditar(new List<Personagem> { p }, 5_000);
+            Assert.Equal(Progressao.XpNaParede(0), progressao.XpDe(p));
+
+            Assert.Equal(MotivoRecusa.Nenhum, progressao.ComprarEstrela(p));
+            Assert.Equal(10, p.Nivel);
+            Assert.Equal(0, progressao.FaixaDoNivel(p).Feito);   // entra no 10 ZERADO
         }
 
         [Fact]
@@ -171,7 +201,7 @@ namespace Tests
 
             alma.Creditar(Dificuldade.Facil, 100);
             Assert.Equal(MotivoRecusa.Nenhum, progressao.ComprarEstrela(p));
-            Assert.Equal(19, p.Nivel);   // a XP guardada entra até a parede seguinte
+            Assert.Equal(10, p.Nivel);   // a estrela abre a dezena, e ele entra nela zerado
             Assert.Equal(1, progressao.EstrelasDe(p));
         }
 
@@ -301,9 +331,10 @@ namespace Tests
         /// teste de calibragem: se alguém mexer no <see cref="Alma.CustoDaProxima"/>, na queda por
         /// inimigo ou na composição das fases, o número da parede muda aqui.
         ///
-        /// Os 328 inimigos são a soma das duas rodadas das 56 fases; o nível 27 é o mesmo que o
-        /// <c>PassadaSuaveDoFacil_ParaNo27</c> afirma, e ele NÃO muda com o teto — as paredes só
-        /// atrasam a aplicação da XP, não a produção dela.
+        /// Os 328 inimigos são a soma das duas rodadas das 56 fases. O nível 26 fica UM ABAIXO do que
+        /// o <c>PassadaSuaveDoFacil_ParaNo27</c> afirma, e a diferença é o preço da parede: aquele
+        /// conta a XP CRUA, este conta a que sobrou depois de cada parede descartar o excedente. Um
+        /// nível na passada inteira é o que custa "encheu, para" (ago/2026).
         /// </summary>
         [Fact]
         public void PassadaDoFacil_ParaNa3aParedeFaltando72DeRaro()
@@ -330,7 +361,7 @@ namespace Tests
                 }
 
             Assert.Equal(328, inimigos);
-            Assert.All(time, p => Assert.Equal(27, p.Nivel));
+            Assert.All(time, p => Assert.Equal(26, p.Nivel));
             Assert.All(time, p => Assert.Equal(2, progressao.EstrelasDe(p)));
 
             // A 3ª parede não chega pela XP: a passada suave morre no 27, e o 29 só sai repetindo.

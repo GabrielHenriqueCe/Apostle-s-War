@@ -1178,6 +1178,15 @@ body {
    gesto mais repetido da progressão. A aberta é o `h1` (é ela que nomeia a página); a outra é um
    botão, e fica apagada pra que o par se leia como "estou aqui, posso ir ali". */
 .tituloAbas { display: flex; align-items: baseline; justify-content: center; gap: 22px; }
+
+/* O SALDO nas duas pontas do par: alma à esquerda da Catedral, pó à direita da Forja. As duas pontas
+   têm a MESMA base flex, e é isso que mantém o par de títulos no centro óptico mesmo quando um lado
+   tem três faixas e o outro tem uma. `justify-content` opostos empurram cada faixa pra a sua ponta. */
+.abaSaldo { flex: 1 1 0; display: flex; align-items: center; gap: 12px; min-width: 0; }
+#catedralSaldoAlma, #forjaSaldoAlma { justify-content: flex-end; }
+#catedralSaldoPo, #forjaSaldoPo { justify-content: flex-start; }
+.asChip { display: flex; align-items: center; gap: 4px; }
+.asQtd { font-size: 13px; font-weight: 700; color: var(--apagado); font-variant-numeric: tabular-nums; }
 .abaTitulo {
     margin: 0; padding: 0; border: 0; background: none;
     font: inherit; font-size: 30px; font-weight: 800;
@@ -1295,22 +1304,6 @@ button.abaTitulo:not(:disabled):hover { color: var(--vida); }
 .glXp { font-size: 13px; font-weight: 700; color: var(--vida); font-variant-numeric: tabular-nums; }
 /* Cheia e ACESA = travado na parede. É o instante em que a estrela passa a fazer falta. */
 .bnCheio.travada { box-shadow: 0 0 8px var(--parada-3); }
-
-/* A ficha do apóstolo no fim de fase: TRÊS COLUNAS FIXAS, e os seis stats aparecem sempre.
-   `flex-wrap` deixava a quebra depender do texto — "Resistência 1.204 → 1.310" é o dobro de
-   "HP 900" —, e aí a mesma ficha se arrumava diferente a cada vitória. Grade fixa não dança. */
-.glStats {
-    grid-column: 1 / -1;
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 4px 14px;
-}
-.glStat { display: flex; align-items: baseline; gap: 5px; font-size: 12px; }
-.gsIcone { font-size: 12px; }
-.gsRotulo { color: var(--apagado); }
-/* Quem NÃO subiu fica apagado: o número continua na tela (é a ficha inteira, sempre), mas quem
-   puxa o olho é o que mudou nesta fase. */
-.gsValor { font-weight: 700; color: var(--apagado); font-variant-numeric: tabular-nums; }
-.glStat.subiu .gsValor { color: var(--vida); }
 
 /* Alma e pó lado a lado. `auto-fit` é o que faz a coluna sozinha ocupar a largura toda quando a
    outra não existe — na derrota o pó não cai, e uma coluna vazia deixaria um buraco. */

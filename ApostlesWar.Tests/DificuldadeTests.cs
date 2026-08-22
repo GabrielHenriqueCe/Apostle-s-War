@@ -188,9 +188,13 @@ namespace Tests
 
             Personagem p = personagens.ObterPersonagem(Faccao.Folclore, Slot.Slot2);
             alma.Creditar(Dificuldade.Facil, 100);
+
+            // Uma parede por vez, que é como o jogo anda: a XP para em cada uma e a estrela abre a
+            // dezena seguinte ZERADA — despejar a XP do 20 de uma vez não passaria do 10.
             salvando.Creditar(new List<Personagem> { p }, Progressao.XpParaNivel(20));
-            salvando.ComprarEstrela(p);   // 9 → 19
-            salvando.ComprarEstrela(p);   // 19 → 20, que é o que a XP paga
+            salvando.ComprarEstrela(p);   // 9 → 10
+            salvando.Creditar(new List<Personagem> { p }, Progressao.XpParaNivel(20));
+            salvando.ComprarEstrela(p);   // 19 → 20
             p.AplicarNivel(Arquetipos.NivelMinimo);   // finge que o jogo reabriu com o roster cru
 
             new ProgressaoService(personagens, new AlmaService(repo), repo).Carregar();

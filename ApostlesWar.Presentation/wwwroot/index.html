@@ -168,9 +168,13 @@
     <section id="catedral" hidden>
         <!-- O título é um PAR de abas: Catedral e Forja são telas irmãs, e trocar entre elas é o gesto
              mais repetido da progressão. Quem está aberta fica acesa; a outra é a porta. -->
+        <!-- Cada aba tem o SALDO da moeda dela do lado de fora do par: alma à esquerda da Catedral,
+             pó à direita da Forja. Ficam nas PONTAS pra que o par de títulos siga sendo o centro. -->
         <div class="tituloAbas">
+            <span id="catedralSaldoAlma" class="abaSaldo"></span>
             <h1 class="abaTitulo aberta">⛪ Catedral</h1>
             <button type="button" id="catedralIrForja" class="abaTitulo">⚒️ Forja</button>
+            <span id="catedralSaldoPo" class="abaSaldo"></span>
         </div>
         <!-- QUATRO colunas, com o apóstolo no centro óptico: o elenco de um lado, as portas e a estação
              do outro, somando a mesma largura.
@@ -197,8 +201,10 @@
          centro. Entra-se pelo ⚒️ Melhorar de um slot da Armaria; o Esc volta pra lá. -->
     <section id="forja" hidden>
         <div class="tituloAbas">
+            <span id="forjaSaldoAlma" class="abaSaldo"></span>
             <button type="button" id="forjaIrCatedral" class="abaTitulo">⛪ Catedral</button>
             <h1 class="abaTitulo aberta">⚒️ Forja</h1>
+            <span id="forjaSaldoPo" class="abaSaldo"></span>
         </div>
         <div id="forjaCorpo">
             <aside id="forjaAcervo"></aside>

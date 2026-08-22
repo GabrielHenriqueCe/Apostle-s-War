@@ -448,10 +448,6 @@ function linhaDeGanho(g, animar, atraso) {
 
     linha.append(em, nome, nivel, trilho, xp);
 
-    // Os stats entram como filhos da MESMA linha e só existem se algo mudou — a lista vem do C# já
-    // filtrada, então uma linha sem subida de nível não ganha bloco vazio.
-    if (g.stats && g.stats.length) linha.append(blocoDeStats(g.stats));
-
     if (!animar) {
         nivel.textContent = `nv ${ultimo.nivel}`;
         cheio.style.width = `${ultimo.ate}%`;
@@ -490,27 +486,6 @@ async function animarGanho(el, g, atraso, sufixo = ' XP') {
     // Travado = a barra fica cheia e ACESA. É aqui que o jogador descobre que agora precisa de
     // estrela, no instante em que isso passou a valer pra ele.
     if (g.travou) el.cheio.classList.add('travada');
-}
-
-// A ficha do apóstolo, em COLUNAS e SEMPRE INTEIRA (pedido do Gabriel): os seis stats aparecem em
-// toda vitória, e o `→` marca só os que subiram. Antes só vinha o que tinha mudado, e o bloco
-// aparecia e sumia entre uma fase e outra — lista de tamanho fixo se lê de relance, lista que dança
-// obriga a reler. Quem manda os seis é o C#; aqui se decide como cada um se escreve.
-function blocoDeStats(stats) {
-    const cont = document.createElement('div'); cont.className = 'glStats';
-    cont.replaceChildren(...stats.map(s => {
-        const subiu = s.ate !== s.de;
-        const l = document.createElement('span'); l.className = 'glStat' + (subiu ? ' subiu' : '');
-        const ic = document.createElement('span'); ic.className = 'gsIcone'; ic.textContent = s.icone;
-        const rot = document.createElement('span'); rot.className = 'gsRotulo'; rot.textContent = s.rotulo;
-        const v = document.createElement('span'); v.className = 'gsValor';
-        v.textContent = subiu
-            ? `${s.de.toLocaleString('pt-BR')} → ${s.ate.toLocaleString('pt-BR')}`
-            : s.ate.toLocaleString('pt-BR');
-        l.append(ic, rot, v);
-        return l;
-    }));
-    return cont;
 }
 
 // O material ganho na fase — a MESMA forma pra alma e pó, porque é a mesma leitura: a faixa, o

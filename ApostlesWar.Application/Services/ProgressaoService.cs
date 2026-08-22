@@ -39,6 +39,11 @@ namespace ApostlesWar.Application.Services
         /// <b>Save sem `Estrelas` é save ANTIGO</b> (de antes da estrela virar compra) e a estrela
         /// dele se deduz do nível que a XP pagava — a identidade do <see cref="Progressao.Estrelas"/>.
         /// Sem essa dedução, todo apóstolo já nivelado despencaria pro teto 9 na primeira abertura.
+        ///
+        /// <b>A parede corta também O QUE JÁ ESTAVA GRAVADO.</b> Save feito antes de ago/2026 tem
+        /// excedente empoçado na parede — e sem o corte aqui a primeira estrela comprada nele ainda
+        /// saltaria pro meio da dezena, exatamente o que a regra nova desfaz. O corte é a regra sendo
+        /// verdadeira sobre o save inteiro, e não só sobre a XP que entrar daqui pra frente.
         /// </summary>
         public void Carregar()
         {
@@ -49,7 +54,11 @@ namespace ApostlesWar.Application.Services
             var lido = _repo.Carregar<List<ApostoloProgredido>>(ChaveProgressao) ?? new();
 
             progresso = lido
-                .Select(p => p with { Estrelas = p.Estrelas ?? Progressao.Estrelas(Progressao.NivelPorXp(p.Xp)) })
+                .Select(p =>
+                {
+                    int estrelas = p.Estrelas ?? Progressao.Estrelas(Progressao.NivelPorXp(p.Xp));
+                    return p with { Estrelas = estrelas, Xp = Math.Min(p.Xp, Progressao.XpNaParede(estrelas)) };
+                })
                 .ToList();
 
             foreach (ApostoloProgredido p in progresso)
@@ -61,8 +70,9 @@ namespace ApostlesWar.Application.Services
         /// quem bateu. Sozinho leva tudo; em quatro, cada um leva um quarto — é isso que faz do solo o
         /// jeito rápido de subir UM e do time cheio o jeito de subir quatro, sem regra nova.
         ///
-        /// A XP que passa do teto simplesmente se perde: quem concentra troca alcance por velocidade e
-        /// paga em desperdício.
+        /// A XP que passa da parede simplesmente se perde (<see cref="Progressao.XpNaParede"/>): quem
+        /// deixa um apóstolo travado em campo troca a XP dele por nada, e a saída é comprar a estrela
+        /// ou trocar quem luta.
         /// </summary>
         public void Creditar(List<Personagem> time, int pote)
         {
@@ -104,9 +114,8 @@ namespace ApostlesWar.Application.Services
         /// O quanto falta pro próximo nível, pra a barra da ficha: (o que já entrou nesta faixa, o que
         /// a faixa inteira custa).
         ///
-        /// Na parede a barra continua sendo a barra de verdade e só PARA de encher quando a XP chega —
-        /// é ela que diz ao jogador que a compra está liberada. Daí o clamp em vez de um atalho pra
-        /// (1,1): a XP acumulada passa do topo da faixa, e sem o clamp a barra vazaria pra fora.
+        /// Na parede a barra fica CHEIA e para — é ela que diz ao jogador que a compra está liberada.
+        /// O `Math.Min` encosta exatamente no topo ali, porque a XP não passa mais da parede.
         /// </summary>
         public (int Feito, int Total) FaixaDoNivel(Personagem apostolo)
         {
@@ -166,9 +175,19 @@ namespace ApostlesWar.Application.Services
         private ApostoloProgredido? Registro(Personagem apostolo)
             => progresso.FirstOrDefault(a => a.Faccao == apostolo.Faccao && (int)a.Slot == apostolo.Slot);
 
-        /// <summary>Reescreve o registro e reaplica o nível — o único lugar que mexe nos dois.</summary>
+        /// <summary>
+        /// Reescreve o registro e reaplica o nível — o único lugar que mexe nos dois.
+        ///
+        /// <b>É AQUI que a parede corta</b> (<see cref="Progressao.XpNaParede"/>), e é aqui porque é o
+        /// único choke point da escrita: fosse no crédito da fase, a queima e a compra da estrela
+        /// precisariam repetir o clamp, e o dia em que nascesse a terceira fonte de XP ela nasceria
+        /// sem. Comprar a estrela passa por aqui de novo com o teto JÁ maior, então o corte não morde
+        /// o que a estrela acabou de abrir.
+        /// </summary>
         private void Gravar(Personagem apostolo, int xp, int estrelas)
         {
+            xp = Math.Min(xp, Progressao.XpNaParede(estrelas));
+
             progresso.RemoveAll(a => a.Faccao == apostolo.Faccao && (int)a.Slot == apostolo.Slot);
             var novo = new ApostoloProgredido(apostolo.Faccao, (Slot)apostolo.Slot, xp, estrelas);
             progresso.Add(novo);

@@ -51,10 +51,12 @@ node --experimental-vm-modules ferramentas/rodar-tema.js "" 120   # 8 temas x 12
 Mais `ferramentas/medir-donos.js` (grafo de donos, com `--porque <tema> <funcao>`) quando for mover
 função de cenário.
 
-**O QUE OS HARNESSES NÃO COBREM — e verde deles não é "o jogo funciona":** eles publicam mensagem,
-**não clicam em nada.** Duplo-clique, clique em slot, arrastar, teclado e tudo que roda DURANTE a
-batalha em resposta a isso estão fora. Na separação, QUATRO bugs saíram exatamente daí e os quatro
-foram achados pelo Gabriel jogando. **Conferência em jogo continua sendo dele, sempre.**
+**O QUE OS HARNESSES NÃO COBREM — e verde deles não é "o jogo funciona".** Eles JÁ clicam: a
+varredura de gestos dispara clique, duplo-clique, teclado, arrastar-e-soltar e mouse-arrasto em todo
+elemento alcançável, e o markup estático do index.html entrou na árvore em ago/2026. O que fica fora
+é a batalha depois do primeiro quadro (roda contra o motor C#) — e, acima de tudo, o PIXEL: nada aqui
+vê layout, animação ou cor. Na separação, QUATRO bugs saíram exatamente daí e os quatro foram achados
+pelo Gabriel jogando. **Conferência em jogo continua sendo dele, sempre.**
 
 **Terminação de linha:** o `.gitattributes` IMPEDE (LF no repo, CRLF na cópia de trabalho) e o
 `rodar-telas.js` ACUSA se algo escapar. Arquivo misto não é cosmético — já grudou um `else if` num

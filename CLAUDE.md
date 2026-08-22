@@ -103,9 +103,10 @@ comentário dele no MESMO PR. É só isso que sobra, e é o que impede a gordura
   node ferramentas/conferir-docs.js
   ```
 - **Gotcha:** o jogo ABERTO trava o build (lock do `.exe`/`.dll`) — pedir pra fechar antes de buildar/testar.
-- Combate NÃO roda headless (o loop chama a tela) → verificação em jogo é do Gabriel; testo só o que é
-  PURO (motor, capacidades, `Batalha`, services). Com `ITelaDeCombate` injetável, uma tela no-op no
-  projeto de Tests destrava testes de FLUXO (candidato: a ordem crítica de morte, #14 do ROADMAP).
+- **Combate RODA headless** — a tela é porta (`ITelaDeCombate`), e uma no-op no projeto de Tests dá
+  uma batalha inteira em memória (`OrdemDeMorteTests.cs`, o molde: tela que escuta + controlador que
+  fecha o horizonte em N golpes → `BatalhaAbortada`). O que continua sendo do Gabriel é a verificação
+  em JOGO: nenhum teste vê pixel, animação nem clique.
 - Distribuição futura: `dotnet publish -c Release -r <rid> --self-contained` → `.exe` no GitHub Releases.
 
 ## Mapa rápido — Clean Architecture, 1 PROJETO por camada (a dependência aponta pra dentro)
@@ -158,5 +159,6 @@ tarefa é daquele assunto. Ponteiro aqui não bastava: punha em mim a decisão d
 | `wwwroot/`, telas, a ponte C#↔JS | `docs/MANUAL-front.md` |
 | motor de combate: dano, reações, turno, bot, bancada | `docs/MANUAL-combate.md` |
 | implementar um passo da progressão | `docs/GDD-progressao.md` §7, depois o `GDD-combate.md` |
+| caçar a causa de um defeito | a skill `depurar` (reproduzir → instrumentar → prender → varrer) |
 | o desenho de uma decisão grande | os `docs/ADR-*.md` |
 | o que foi tentado e MORREU | `git log` |

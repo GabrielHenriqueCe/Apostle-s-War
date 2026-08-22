@@ -344,18 +344,23 @@ Esta é a conexão entre a mecânica de morte (fio técnico) e o design da Arena
 
 ---
 
-## 9. Modo Automático (ideia jul/2026 — NEAR-TERM)
+## 9. Modo Automático — ✅ FEITO (ago/2026)
 
-> Diferente do resto deste GDD (que é pós-porte): o auto-battle é near-term e cabe já no console
-> ou no Unity. **Pré-requisito PARCIALMENTE FEITO:** o refactor do `ExecutarTurno` separou o CONTROLE
-> (quem decide ação/alvo) da execução via `IControladorDeTurno` (jul/2026) — o auto-mode é só um
-> `ControladorAutomatico` novo trocado no composition root, sem tocar no loop. Falta: a implementação
-> do controlador automático + o balanceamento da base.
+> **Existe e é jogável**: o botão ⏩ do painel de combate liga e desliga, e ao desligar a ação em
+> curso termina antes de o controle voltar.
+>
+> **Saiu diferente do que esta seção projetava, e a diferença vale ficar registrada.** O plano de
+> jul/2026 era um `ControladorAutomatico` novo, trocado no composition root — classe que nunca foi
+> escrita. O que a webview pediu foi outra coisa: o auto liga NO MEIO de uma batalha já rodando, e
+> trocar o controlador ali significaria remontar o dicionário de controladores durante o loop. Então
+> quem decide é o `ControladorJogadorWeb`: ele consulta o `PonteWebView2.AutoLigado` a cada turno e,
+> ligado, DELEGA ao `ControladorBot` — o mesmo cérebro que joga a Arena. Uma classe a menos, e o
+> flag serve também pra acordar a espera que já estava pendurada num clique.
+>
+> O seam `IControladorDeTurno` ainda foi o que pagou a conta: sem ele, o auto-mode mexeria no loop.
 
-- Botão **auto liga/desliga**; ao desligar, completa a ação atual e volta ao manual.
-- Implementação: no console, um flag consultado entre turnos (como o cancelamento de batalha, Forma 1
-  — ver ROADMAP). No **Unity**, o natural é poll-por-frame/coroutine (não favorece `CancellationToken`).
-  O seam `IControladorDeTurno` já isola o auto-mode do loop nos dois casos.
+- Falta só o **balanceamento da base** — o cérebro do bot é o mesmo dos dois lados, e o que ele
+  escolhe é assunto do `MANUAL-combate.md` §O cérebro do bot.
 
 ---
 

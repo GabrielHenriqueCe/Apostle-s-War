@@ -346,10 +346,21 @@ export const fimDeFase = {
             cont.append(xp);
         }
 
-        if (f.alma && f.alma.length) cont.append(blocoDeMaterial('Almas', f.alma, almaIcone, animar));
-        // O pó vem DEPOIS da alma e só na vitória (quem decide isso é o C#): ele cai por FASE, não
-        // por inimigo, então numa derrota a lista chega vazia e o bloco não aparece.
-        if (f.po && f.po.length) cont.append(blocoDeMaterial('Pó', f.po, poIcone, animar));
+        // Alma e pó LADO A LADO, não empilhados (pedido do Gabriel): são duas listas curtas da mesma
+        // forma, e uma embaixo da outra empurrava o resto da tela pra fora. A coluna que não tem o
+        // que mostrar simplesmente não nasce, e a outra ocupa a largura.
+        const materiais = [];
+        if (f.alma && f.alma.length) materiais.push(blocoDeMaterial('Almas', f.alma, almaIcone, animar));
+        // O pó só cai na vitória (quem decide é o C#): ele vem por FASE e não por inimigo, então numa
+        // derrota a lista chega vazia e a coluna não aparece.
+        if (f.po && f.po.length) materiais.push(blocoDeMaterial('Pó', f.po, poIcone, animar));
+
+        if (materiais.length) {
+            const colunas = document.createElement('div');
+            colunas.className = 'recompensaColunas';
+            colunas.append(...materiais);
+            cont.append(colunas);
+        }
 
         const r = f.recompensa;
         if (r && r.itens && r.itens.length) {
@@ -458,11 +469,11 @@ function linhaDeGanho(g, animar, atraso) {
 
 // Encher · zerar · encher o próximo, um trecho por nível atravessado. Os trechos vêm PRONTOS do C#
 // (`TrechoDeNivel`) — descobrir onde cada nível vira exige a curva de XP, que não tem cópia aqui.
-async function animarGanho(el, g, atraso) {
+async function animarGanho(el, g, atraso, sufixo = ' XP') {
     await esperar(atraso);
 
     const fatia = MS_DO_GANHO / Math.max(g.trechos.length, 1);
-    contar(el.xp, 0, g.xpGanha, MS_DO_GANHO, v => `+${v.toLocaleString('pt-BR')} XP`);
+    contar(el.xp, 0, g.xpGanha, MS_DO_GANHO, v => `+${v.toLocaleString('pt-BR')}${sufixo}`);
 
     for (const t of g.trechos) {
         el.nivel.textContent = `nv ${t.nivel}`;
@@ -481,14 +492,21 @@ async function animarGanho(el, g, atraso) {
     if (g.travou) el.cheio.classList.add('travada');
 }
 
+// A ficha do apóstolo, em COLUNAS e SEMPRE INTEIRA (pedido do Gabriel): os seis stats aparecem em
+// toda vitória, e o `→` marca só os que subiram. Antes só vinha o que tinha mudado, e o bloco
+// aparecia e sumia entre uma fase e outra — lista de tamanho fixo se lê de relance, lista que dança
+// obriga a reler. Quem manda os seis é o C#; aqui se decide como cada um se escreve.
 function blocoDeStats(stats) {
     const cont = document.createElement('div'); cont.className = 'glStats';
     cont.replaceChildren(...stats.map(s => {
-        const l = document.createElement('span'); l.className = 'glStat';
+        const subiu = s.ate !== s.de;
+        const l = document.createElement('span'); l.className = 'glStat' + (subiu ? ' subiu' : '');
         const ic = document.createElement('span'); ic.className = 'gsIcone'; ic.textContent = s.icone;
         const rot = document.createElement('span'); rot.className = 'gsRotulo'; rot.textContent = s.rotulo;
         const v = document.createElement('span'); v.className = 'gsValor';
-        v.textContent = `${s.de.toLocaleString('pt-BR')} → ${s.ate.toLocaleString('pt-BR')}`;
+        v.textContent = subiu
+            ? `${s.de.toLocaleString('pt-BR')} → ${s.ate.toLocaleString('pt-BR')}`
+            : s.ate.toLocaleString('pt-BR');
         l.append(ic, rot, v);
         return l;
     }));

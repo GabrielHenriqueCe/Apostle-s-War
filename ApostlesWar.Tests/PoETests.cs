@@ -274,6 +274,65 @@ namespace Tests
             Assert.Equal(comum, po.SaldoDe(Raridade.Comum));
         }
 
+        // ---------- o ⚙️ Esmeril ----------
+
+        /// <summary>
+        /// A tabela do esmeril, e ela é UMA regra: a peça devolve pó DA FAIXA DELA. A quantidade cai
+        /// conforme a faixa sobe, porque a escada de valor já multiplica por 5 a cada degrau — é o
+        /// número que segura o mítico, não uma exceção pra ele.
+        /// </summary>
+        [Theory]
+        [InlineData(Raridade.Comum, 5)]
+        [InlineData(Raridade.Incomum, 4)]
+        [InlineData(Raridade.Raro, 3)]
+        [InlineData(Raridade.Epico, 2)]
+        [InlineData(Raridade.Lendario, 1)]
+        [InlineData(Raridade.Mitico, 1)]
+        public void Esmerilhar_DevolvePoDaFaixaDaPeca(Raridade daPeca, int quantidade)
+            => Assert.Equal(new Custo(daPeca, quantidade), Po.Esmerilhar(daPeca));
+
+        /// <summary>
+        /// Moer TIRA a peça do acervo e credita o pó. <b>Os pontos não voltam</b>: uma peça no nível
+        /// 9 devolve o mesmo que uma no nível 1, senão o esmeril transferiria progresso de graça
+        /// entre peças e a peça upada viraria banco.
+        /// </summary>
+        [Fact]
+        public void Esmerilhar_TiraDoAcervo_ECreditaSoOPoDaFaixa()
+        {
+            var repo = new RepositorioFake();
+            var po = new PoService(repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, new PersonagemService(), repo);
+
+            var caidos = arsenal.DroparItens(Faccao.Reino, Fases.Fase1);
+            Item peca = caidos[0];
+            peca.Pontos = Po.PontosParaNivel(9);   // uma peça já subida: o nível dela vai embora junto
+
+            Assert.Equal(MotivoRecusa.Nenhum, arsenal.Esmerilhar(peca));
+
+            Assert.DoesNotContain(peca, arsenal.ObterObtidos());
+            Assert.Equal(caidos.Count - 1, arsenal.ObterObtidos().Count);
+            Assert.Equal(5, po.SaldoDe(Raridade.Comum));
+        }
+
+        /// <summary>
+        /// Peça VESTIDA não entra no esmeril: ele não desnuda apóstolo por conta própria. Tirar é o
+        /// ✕ Remover da Armaria, e é uma decisão à parte.
+        /// </summary>
+        [Fact]
+        public void Esmerilhar_RecusaPecaVestida_ESemMexerNoAcervo()
+        {
+            var repo = new RepositorioFake();
+            var po = new PoService(repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), po, new PersonagemService(), repo);
+
+            Item peca = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
+            arsenal.EquiparItem(Portador, peca);
+
+            Assert.Equal(MotivoRecusa.Vestida, arsenal.Esmerilhar(peca));
+            Assert.Contains(peca, arsenal.ObterObtidos());
+            Assert.Equal(0, po.SaldoDe(Raridade.Comum));
+        }
+
         /// <summary>
         /// Ganhar uso só mexe em quem está VESTIDO. Peça no baú não sobe — é o "com o item equipado
         /// em alguém em campo" do GDD, e é o que dá peso a escolher o que levar.

@@ -50,6 +50,7 @@ export const catedral = {
         }
         catedralDados = a;
         previsao = null;   // toda volta da ponte apaga o que estava sendo montado
+        document.getElementById('catedralIrForja').disabled = !a.obtidos.length;
         desenharPortas();
         desenharColunaEsquerda();
         desenharFicha();
@@ -61,6 +62,15 @@ export const catedral = {
         desenharAcao();
 },
 };
+
+// A aba do título: a Forja é tela IRMÃ, e daqui ela abre pela peça que o apóstolo selecionado veste
+// — é a que está valendo. Sem nenhuma vestida, pela primeira do acervo; com o acervo vazio não há o
+// que forjar, e o botão fica desabilitado em vez de abrir uma tela sem peça.
+document.getElementById('catedralIrForja').addEventListener('click', () => {
+    const doBoneco = catedralDados.slots.find(s => s.equipado);
+    const alvo = doBoneco ? doBoneco.equipado : catedralDados.obtidos[0];
+    if (alvo) mandar('abrirForja', alvo.indice);
+});
 
 // ---------- as ESTAÇÕES: as portas da última coluna ----------
 //
@@ -596,30 +606,35 @@ function desenharSlot(slot) {
     // Não há mais botão pra ABRIR a lista — ela já está aberta à esquerda desde o clique no slot. O
     // único botão de troca é o que TROCA, e ele nasce lá embaixo, junto da peça escolhida.
 
-    // A porta da FORJA, e ela só existe com peça no slot: forjar o vazio não quer dizer nada. O
-    // índice viaja porque é a PEÇA que abre a tela, não o slot — lá dentro dá pra pular pras outras
-    // do mesmo slot, inclusive as guardadas.
-    if (equipada) {
+    // A porta da FORJA. Ela abre pela peça VESTIDA quando há uma — é a que está valendo, e é dela
+    // que o jogador quer partir —, e pela primeira do baú quando o slot está vazio: sem isso, quem
+    // não veste bota nenhuma não teria caminho até as botas guardadas, e o ⚙️ Esmeril nunca
+    // alcançaria justamente as peças que ele existe pra moer. O índice viaja porque é a PEÇA que
+    // abre a tela, não o slot.
+    const primeiraDoSlot = equipada || catedralDados.obtidos.find(o => o.slot === slot);
+    if (primeiraDoSlot) {
         const melhorar = document.createElement('button');
         melhorar.type = 'button';
         melhorar.className = 'trocarItem melhorarItem';
         melhorar.textContent = '⚒️ Melhorar';
-        melhorar.addEventListener('click', () => mandar('abrirForja', equipada.indice));
+        melhorar.addEventListener('click', () => mandar('abrirForja', primeiraDoSlot.indice));
+        acoes.append(melhorar);
+    }
 
-        // TIRAR a peça. Ela volta pro baú — sacrificar peça é assunto da Forja, e um botão que
-        // apagasse equipamento no meio da armaria seria a mesma tecla pra dois destinos diferentes.
-        // Manda o SLOT, não o índice no acervo: o que se esvazia é o slot.
+    // TIRAR a peça, e só com peça VESTIDA — no slot vazio não há o que remover. Ela volta pro baú:
+    // moer é assunto da Forja, e um botão com dois destinos possíveis seria a mesma tecla pra duas
+    // coisas. Manda o SLOT, não o índice no acervo: o que se esvazia é o slot.
+    if (equipada) {
         const remover = document.createElement('button');
         remover.type = 'button';
         remover.className = 'trocarItem';
         remover.textContent = '✕ Remover';
         remover.addEventListener('click', () => mandar('desequiparItem', slot));
-
-        acoes.append(melhorar, remover);
+        acoes.append(remover);
     }
 
-    // Slot vazio não tem ação nenhuma agora que o "Trocar item" saiu — e uma fileira vazia abre um
-    // buraco entre a ficha e a candidata.
+    // Sem peça vestida NEM guardada o slot não tem ação nenhuma — e uma fileira vazia abre um buraco
+    // entre a ficha e a candidata.
     if (acoes.childElementCount > 0) filhos.push(acoes);
 
     // A candidata entra ABAIXO da equipada, no mesmo lugar onde a lista morava. As duas fichas lado

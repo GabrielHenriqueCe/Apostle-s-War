@@ -74,8 +74,56 @@ namespace ApostlesWar.Domain
         /// <summary>O que custa a <paramref name="estrela"/>-ésima estrela do item (1 a 6).</summary>
         public static IReadOnlyList<Custo> Receita(int estrela) => Material.Receita(Tabela, estrela);
 
+        // Quantas unidades o ⚙️ Esmeril devolve, por faixa da peça (docs/GDD-itens.md §O ESMERIL).
+        //
+        // A QUANTIDADE CAI conforme a faixa sobe, e é de propósito: a escada de valor já multiplica
+        // por 5 a cada degrau (1·5·25·125·625), então contagem fixa faria a peça rara pagar sozinha
+        // uma curva inteira de nível. Assim ela paga mais que a comum sem virar atalho.
+        private static readonly int[] PorEsmeril = { 5, 4, 3, 2, 1, 1 };
+
+        /// <summary>
+        /// O que uma peça daquela faixa devolve ao ser esmerilhada — a peça deixa de existir e vira
+        /// pó (docs/GDD-itens.md §O ESMERIL).
+        ///
+        /// <b>UMA regra, sem exceção no topo:</b> a peça mítica devolve pó MÍTICO, e o esmeril fica
+        /// competindo com a ⚗️ Amálgama pelo mesmo item. É decisão do Gabriel (ago/2026) e é questão
+        /// de BALANCEAMENTO, não de estrutura — moer mítico ser bom ou ruim é o número da tabela, e o
+        /// mítico vai cair nas fases do Pesadelo de qualquer jeito. Houve uma versão em que o mítico
+        /// descia um degrau; ela morreu por criar exceção onde cabia um número.
+        ///
+        /// <b>Os <see cref="Item.Pontos"/> NÃO voltam.</b> Devolver o nível investido faria o esmeril
+        /// transferir progresso de uma peça pra outra de graça, e a peça upada viraria banco.
+        /// </summary>
+        public static Custo Esmerilhar(Raridade raridade)
+            => new(raridade, PorEsmeril[(int)raridade]);
+
         /// <summary>Quantos pontos de nível uma unidade de pó vale queimada: 1, 5, 25, 125, 625, 3.125.</summary>
         public static int PontosPorPo(Raridade raridade) => Material.ValorQueimado(raridade);
+
+        /// <summary>Onde <paramref name="pontos"/> cai DENTRO da faixa deste nível, em 0..100.</summary>
+        public static int PctNaFaixa(int nivel, int pontos)
+        {
+            int piso = PontosParaNivel(nivel);
+            int total = PontosParaNivel(nivel + 1) - piso;
+            if (total <= 0) return 100;
+            return Math.Clamp((int)(100L * (pontos - piso) / total), 0, 100);
+        }
+
+        /// <summary>
+        /// A subida da PEÇA fatiada por nível, pra a barra do fim de fase animar — o irmão do
+        /// <see cref="Progressao.Trechos"/>, com a curva do pó no lugar da curva de XP.
+        ///
+        /// Mora aqui pelo mesmo motivo que o do apóstolo mora lá: saber ONDE um nível vira é a curva,
+        /// e uma segunda cópia dela do outro lado da ponte divergiria como duas cópias de um número.
+        /// </summary>
+        public static List<(int Nivel, int De, int Ate)> Trechos(
+            int nivelAntes, int pontosAntes, int nivelDepois, int pontosDepois)
+        {
+            var trechos = new List<(int, int, int)>();
+            for (int nivel = nivelAntes; nivel <= nivelDepois; nivel++)
+                trechos.Add((nivel, PctNaFaixa(nivel, pontosAntes), PctNaFaixa(nivel, pontosDepois)));
+            return trechos;
+        }
 
         /// <summary>
         /// Quantos pontos um CICLO de combate paga. É o valor do enum da dificuldade (1·2·3·4), e a

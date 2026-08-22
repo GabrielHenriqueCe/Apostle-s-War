@@ -622,6 +622,10 @@ const TELAS = [
         patamares: [9, 10].map(n => ({ nivel: n, pontos: n * 100 })),
         porNivel: [9, 10].map(n => ({ nivel: n, valor: '+' + n, noApostolo: [{ rotulo: 'Ataque', antes: 200, depois: 214, delta: 14, sufixo: '' }] })),
         portadorNome: 'Teste',
+        // O ⚙️ Esmeril PODENDO moer: com `podeEsmerilhar: false` o painel sai pelo aviso na primeira
+        // linha, e o botão de confirmação — o único gesto destrutivo da tela — nunca seria montado.
+        esmeril: { raridade: 0, nome: 'Comum', quantidade: 5, pontosPorUnidade: 1, max: 0, podeFundir: false },
+        podeEsmerilhar: true,
     }],
     // `CompendioVista`: a peça é `CompendioApostoloVista` (índice + travado), não o apóstolo
     // inteiro. Um travado junto porque a peça bloqueada é outro ramo — e é ela que NÃO abre ficha.

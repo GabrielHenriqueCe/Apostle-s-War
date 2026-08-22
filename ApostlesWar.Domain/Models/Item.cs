@@ -53,6 +53,17 @@ namespace ApostlesWar.Domain
         public int Estrelas { get; set; }
 
         /// <summary>
+        /// O SEGUNDO eixo: quantas subestatísticas a peça tem. <b>Hoje toda peça é Comum</b>, e isso
+        /// não é lacuna disfarçada — é o estado de verdade do jogo: as subs não existem, então não há
+        /// faixa a sortear no drop. O campo já existe porque o ⚙️ Esmeril paga POR FAIXA
+        /// (<see cref="Po.Esmerilhar"/>), e a regra dele é a mesma no dia em que a raridade chegar.
+        ///
+        /// Quem passa a mexer aqui é o passo 10-b2 (GDD-progressao §7): o drop sorteia a faixa dentro
+        /// do teto da dificuldade, e a ⚗️ Amálgama sobe um degrau consumindo peças iguais.
+        /// </summary>
+        public Raridade Raridade { get; set; } = Raridade.Comum;
+
+        /// <summary>
         /// O nível de hoje: o que os <see cref="Pontos"/> pagam, preso ao teto que as
         /// <see cref="Estrelas"/> abriram. Os pontos continuam ACUMULANDO na parede — é o que faz a
         /// estrela comprada mover o nível de uma vez, sem estado novo.

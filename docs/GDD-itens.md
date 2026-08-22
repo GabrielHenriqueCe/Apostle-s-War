@@ -529,7 +529,55 @@ consertá-las custa o reforge. É pouco o bastante pra a caixa de surpresa conti
 bastante pra o item antigo ter alma — que é o *"o mais fraco sempre pode virar o mais forte"* sem matar
 o drop.
 
-#### A FORJA — o custo, e a escolha das subestatísticas
+#### O ESMERIL — a peça vira pó *(nomeado em ago/2026)*
+
+**⚙️ Esmeril é a bancada que DESFAZ.** O rebolo é a única máquina da forja que produz pó de verdade —
+faísca e limalha —, e é a única bancada que destrói: as outras três gastam material, esta gasta a
+peça. Ela existe porque a fase larga 4 peças e ninguém veste 4: sem um destino, o drop vira lixo.
+
+> **Por que "Esmeril" e não "Refusão" ou "Reforja".** *Refusão* vive do mesmo radical de FUNDIR, que já
+> é o 10:1 do material (Caldeamento e Oferenda); *Reforja* descreve desfazer-pra-refazer, que é esta
+> bancada e não a de raridade. E o Esmeril emparelha com a **Bigorna**: a forja fica com duas
+> MÁQUINAS (bigorna, esmeril) e dois atos de FOGO (têmpera, caldeamento). O "Cadinho" foi recusado
+> por ser o vaso ONDE a coisa acontece — o esmeril é a máquina que FAZ, como a bigorna.
+
+**O que devolve, pela faixa da peça** — e devolve na PRÓPRIA faixa, que é o que faz uma peça rara
+valer algo mesmo sem ser vestida:
+
+| faixa da peça | devolve | vale em pontos |
+|---|---:|---:|
+| Comum | 5 | 5 |
+| Incomum | 4 | 20 |
+| Raro | 3 | 75 |
+| Épico | 2 | 250 |
+| Lendário | 1 | 625 |
+| Mítico | 1 | 3.125 |
+
+**A quantidade CAI conforme a faixa sobe** porque a escada de valor já multiplica por 5 a cada degrau
+(1 · 5 · 25 · 125 · 625 · 3.125): contagem fixa faria um mítico pagar 3.125 pontos, metade da curva
+1→60 de uma peça inteira.
+
+> **Moer um mítico é permitido, e é questão de NÚMERO e não de estrutura** *(decisão do Gabriel,
+> ago/2026)*: o esmeril compete com a ⚗️ Amálgama pelo mesmo item, e se moer pagar bem demais quem
+> muda é a quantidade da tabela. Houve uma versão em que o mítico devolvia lendário — ela morreu por
+> criar exceção onde cabia um número.
+
+**Os `Pontos` NÃO voltam.** Devolver o nível investido faria o esmeril transferir progresso de uma
+peça pra outra de graça, e a peça upada viraria banco. Perder o nível ao moer é também o que dá
+motivo pra não subir lixo.
+
+**Peça VESTIDA não entra no esmeril** — ele não desnuda apóstolo por conta própria. Tirar é o
+✕ Remover da Armaria, e é uma decisão à parte.
+
+**Calibragem:** uma fase no Fácil já derruba 260 pontos de pó; as 4 peças dela passadas no esmeril
+somam 20–60. **O Esmeril é bônus, não torneira**, e é isso que ele tem de continuar sendo.
+
+#### A AMÁLGAMA — o custo, e a escolha das subestatísticas
+
+**⚗️ Amálgama é a bancada que FUNDE peças numa melhor** *(nomeada em ago/2026)*. Amálgama é liga
+metalúrgica: muitos viram um **sem apagar o que entrou** — que é exatamente a mecânica, já que as subs
+das peças sacrificadas viram o pool de 3 opções. *Fusão* seria o 10:1 do material outra vez, e
+*Refino* diria "subiu de qualidade" sem dizer com o quê.
 
 Subir a raridade custa **sacrificar outros itens mais material**, e o sacrifício é o que decide as
 opções:

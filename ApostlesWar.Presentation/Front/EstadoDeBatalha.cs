@@ -465,6 +465,7 @@ namespace ApostlesWar.Presentation.Front
     internal record GanhoVista(string Simbolo, string TipoSimbolo, string Nome, int XpGanha,
         List<TrechoDeNivel> Trechos, bool Travou, List<DeltaStatVista> Stats);
 
+
     /// <summary>
     /// O apóstolo selecionado na tela de aprimorar: a ficha (a mesma do compêndio) e o estado dos
     /// eixos que se compram.
@@ -531,7 +532,13 @@ namespace ApostlesWar.Presentation.Front
         bool PodeComprarEstrela, bool PodeQueimar, string Motivo,
         List<PatamarVista> Patamares, List<NivelDaPecaVista> PorNivel,
         /// <summary>O apóstolo que veste a peça, ou vazio quando ela está no baú.</summary>
-        string PortadorNome);
+        string PortadorNome,
+        /// <summary>
+        /// O ⚙️ Esmeril: o que ESTA peça devolve de pó se for moída, e se dá pra moer. Não dá quando
+        /// ela está vestida — o esmeril não desnuda apóstolo por conta própria, e é o
+        /// <see cref="PortadorNome"/> que a tela usa pra dizer de quem tirar primeiro.
+        /// </summary>
+        PoVista Esmeril, bool PodeEsmerilhar);
 
     /// <summary>
     /// Quantos pontos ACUMULADOS um nível de peça exige. É a tabela que deixa a tela dizer

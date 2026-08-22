@@ -294,6 +294,25 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
+        /// O ⚙️ ESMERIL: a peça deixa de existir e vira pó (docs/GDD-itens.md §O ESMERIL).
+        ///
+        /// <b>Recusa peça VESTIDA.</b> Moer o que alguém está usando desnudaria um apóstolo sem que o
+        /// gesto tenha dito isso — tirar é o ✕ Remover da Armaria, e é uma decisão à parte.
+        ///
+        /// Quanto devolve é <see cref="Po.Esmerilhar"/>, pela faixa da peça; os pontos de nível dela
+        /// não voltam, e é o que impede o esmeril de transferir progresso de uma peça pra outra.
+        /// </summary>
+        public MotivoRecusa Esmerilhar(Item peca)
+        {
+            if (PortadorDe(peca) != null) return MotivoRecusa.Vestida;
+            if (!inventario.Remove(peca)) return MotivoRecusa.ForaDoAcervo;
+
+            _po.Creditar(Po.Esmerilhar(peca.Raridade));
+            SalvarItens();
+            return MotivoRecusa.Nenhum;
+        }
+
+        /// <summary>
         /// A peça bateu na parede: os pontos dela JÁ PAGAM um nível acima do teto das estrelas, e
         /// ainda há estrela a comprar. Mesmo critério do apóstolo (<see cref="ProgressaoService.NaParede"/>)
         /// e pelo mesmo motivo: estar no nível 9 com a barra pela metade é estar subindo, não travado.

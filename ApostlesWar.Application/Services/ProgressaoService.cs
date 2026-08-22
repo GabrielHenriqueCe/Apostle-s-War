@@ -214,6 +214,10 @@ namespace ApostlesWar.Application.Services
         NaParede,
         /// <summary>Nível 60 ou 6 estrelas: não há mais o que comprar.</summary>
         NoTetoFinal,
-        SemSaldo
+        SemSaldo,
+        /// <summary>A peça está vestida em alguém — o esmeril não desnuda apóstolo por conta própria.</summary>
+        Vestida,
+        /// <summary>A peça não está no acervo (já foi moída, ou o índice envelheceu).</summary>
+        ForaDoAcervo
     }
 }

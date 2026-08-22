@@ -1174,7 +1174,19 @@ body {
     background: var(--ceu);
 }
 #catedral[hidden], #forja[hidden] { display: none; }
-#catedral h1, #forja h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--ouro); text-shadow: 0 2px 3px #000; }
+/* O título das duas telas é um PAR DE ABAS: Catedral e Forja são irmãs, e trocar entre elas é o
+   gesto mais repetido da progressão. A aberta é o `h1` (é ela que nomeia a página); a outra é um
+   botão, e fica apagada pra que o par se leia como "estou aqui, posso ir ali". */
+.tituloAbas { display: flex; align-items: baseline; justify-content: center; gap: 22px; }
+.abaTitulo {
+    margin: 0; padding: 0; border: 0; background: none;
+    font: inherit; font-size: 30px; font-weight: 800;
+    color: var(--apagado); text-shadow: 0 2px 3px #000;
+    cursor: pointer;
+}
+.abaTitulo.aberta { color: var(--ouro); cursor: default; }
+.abaTitulo:disabled { opacity: .4; cursor: default; }
+button.abaTitulo:not(:disabled):hover { color: var(--vida); }
 
 /* ---- A ALMINHA ----
    A escada das seis faixas é a de sempre: cinza · verde · azul · roxo · laranja · vermelho. Ela
@@ -1284,11 +1296,28 @@ body {
 /* Cheia e ACESA = travado na parede. É o instante em que a estrela passa a fazer falta. */
 .bnCheio.travada { box-shadow: 0 0 8px var(--parada-3); }
 
-.glStats { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+/* A ficha do apóstolo no fim de fase: TRÊS COLUNAS FIXAS, e os seis stats aparecem sempre.
+   `flex-wrap` deixava a quebra depender do texto — "Resistência 1.204 → 1.310" é o dobro de
+   "HP 900" —, e aí a mesma ficha se arrumava diferente a cada vitória. Grade fixa não dança. */
+.glStats {
+    grid-column: 1 / -1;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 4px 14px;
+}
 .glStat { display: flex; align-items: baseline; gap: 5px; font-size: 12px; }
 .gsIcone { font-size: 12px; }
 .gsRotulo { color: var(--apagado); }
-.gsValor { font-weight: 700; color: var(--vida); font-variant-numeric: tabular-nums; }
+/* Quem NÃO subiu fica apagado: o número continua na tela (é a ficha inteira, sempre), mas quem
+   puxa o olho é o que mudou nesta fase. */
+.gsValor { font-weight: 700; color: var(--apagado); font-variant-numeric: tabular-nums; }
+.glStat.subiu .gsValor { color: var(--vida); }
+
+/* Alma e pó lado a lado. `auto-fit` é o que faz a coluna sozinha ocupar a largura toda quando a
+   outra não existe — na derrota o pó não cai, e uma coluna vazia deixaria um buraco. */
+.recompensaColunas {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
 
 /* A lista de material ganho na fase, a mesma forma pra alma e pó. */
 .ganhoLista { display: flex; flex-direction: column; gap: 4px; }

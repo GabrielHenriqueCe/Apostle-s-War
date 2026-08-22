@@ -121,12 +121,17 @@ namespace ApostlesWar.Application.Services
         }
 
         /// <summary>
-        /// Desbloqueia a próxima facção se todas as fases do capítulo atual estiverem concluídas
+        /// Desbloqueia a próxima facção se todas as fases do capítulo atual estiverem CONCLUÍDAS.
+        ///
+        /// <b>Concluída, não desbloqueada</b> — e a diferença é uma fase inteira: vencer a 2-6
+        /// DESBLOQUEIA a 2-7, então perguntar por `FaseDesblock` abria o capítulo 3 no instante em que
+        /// o jogador chegava na última fase do 2, sem ter lutado nela. Foi assim até ago/2026, quando
+        /// o Gabriel viu o capítulo 3 aberto parado na 2-7.
         /// </summary>
         public void DesbloquearFaccao(Faccao faccao, Fases fase, Dificuldade dificuldade)
         {
             Capitulo cap = ObterCapitulo(faccao, dificuldade);
-            if (cap.FaseDesblock.All(f => f))
+            if (cap.FaseConcluida.All(f => f))
             {
                 Faccao ultima = Enum.GetValues<Faccao>().Last();
                 if (faccao == ultima) return;

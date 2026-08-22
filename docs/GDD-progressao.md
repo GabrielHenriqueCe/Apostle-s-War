@@ -607,7 +607,7 @@ mudar quem joga quando é calibrar contra uma ordem de turno que ainda vai mudar
       quem lutou. As setas da Forja giram pelo boneco de quem a abriu, e o acervo ganhou o eixo
       *Vestidas* pra tomar peça de aliado. **Save de antes disso desveste tudo** e não perde peça.
     - **(b2) A RARIDADE** e as subestatísticas — e com elas os eixos de sub do filtro do §O ACERVO, a
-      💎 Raridade da Catedral e a ♻️ Reforja da Forja, hoje as duas bancadas desenhadas e travadas.
+      💎 Raridade da Catedral e a ⚗️ Amálgama da Forja, hoje as duas bancadas desenhadas e travadas.
     - **(c) A FORJA**: sacrifício, pool de subs, 3 opções, recusa por slot, o reforge de mítico.
 
 > **A ordem de 3 e 4 continua não sendo negociável** em relação ao resto: status e turno ANTES de

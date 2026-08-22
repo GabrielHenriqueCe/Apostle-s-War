@@ -11,6 +11,11 @@ namespace Tests
     /// </summary>
     public class CampanhaServiceTests
     {
+        // Um apóstolo qualquer pra vestir as peças: com o vínculo, equipar exige DE QUEM.
+        // A identidade é (Facção, Slot), então a instância deste roster serve pra qualquer service.
+        private static readonly Personagem Portador =
+            new PersonagemService().ObterPersonagem(Faccao.Reino, Slot.Slot1);
+
         private sealed class RepositorioFake : IRepositorioDeSave
         {
             private readonly Dictionary<string, object?> _dados = new();
@@ -25,7 +30,7 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), new PersonagemService(), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             return (new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo), capitulos, apostolos);
         }
@@ -58,7 +63,7 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), new PersonagemService(), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo);
 
@@ -76,7 +81,7 @@ namespace Tests
         public void DroparItens_CadaPecaEUmaInstancia_ERepetirAFaseLargaMais()
         {
             var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), new PersonagemService(), repo);
 
             var primeira = arsenal.DroparItens(Faccao.Reino, Fases.Fase1);
             var segunda = arsenal.DroparItens(Faccao.Reino, Fases.Fase1);
@@ -98,7 +103,7 @@ namespace Tests
         public void DroparItens_OPrincipalSaiSempreDaListaDoSlot()
         {
             var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), new PersonagemService(), repo);
 
             foreach (Fases fase in Enum.GetValues<Fases>())
             {
@@ -116,7 +121,7 @@ namespace Tests
         public void NomeDoSlot_CasaComONomeDoItemQueCaiNele()
         {
             var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), new PersonagemService(), repo);
 
             foreach (Fases fase in Enum.GetValues<Fases>())
                 Assert.All(arsenal.DroparItens(Faccao.Reino, fase),
@@ -127,13 +132,13 @@ namespace Tests
         public void EquiparItem_PersisteSozinho()
         {
             var repo = new RepositorioFake();
-            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), repo);
+            var arsenal = new ArsenalService(new CapitulosService(repo), new PoService(repo), new PersonagemService(), repo);
 
-            arsenal.EquiparItem(arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0]);
+            arsenal.EquiparItem(Portador, arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0]);
 
             // Sem ninguém chamar SalvarItens: quem manda no dado decide quando ele é durável.
             Assert.True(repo.Contem("inventario"));
-            Assert.True(repo.Contem("equipados"));
+            Assert.True(repo.Contem("vestidos"));
         }
 
         /// <summary>
@@ -216,7 +221,7 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), new PersonagemService(), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var time = apostolos.ObterDesbloqueados().Take(3).ToList();
 

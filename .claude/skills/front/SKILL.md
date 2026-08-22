@@ -1,6 +1,6 @@
 ---
 name: front
-description: Ler ANTES de tocar em `wwwroot/` ou na ponte C#↔JS do Apostle's War — telas (menu, perfil, arena, campanha, arsenal, compêndio, combate), `nucleo/`, `ui/`, o contrato de tela, `abrirTela`, a ponte WebView2, `IApresentacao`/`ITelaDeCombate`, ou regra que a tela parece "saber".
+description: Ler ANTES de tocar em `wwwroot/` ou na ponte C#↔JS do Apostle's War — telas (menu, perfil, arena, campanha, catedral, forja, compêndio, combate), `nucleo/`, `ui/`, o contrato de tela, `abrirTela`, a ponte WebView2, `IApresentacao`/`ITelaDeCombate`, ou regra que a tela parece "saber".
 ---
 
 # O front

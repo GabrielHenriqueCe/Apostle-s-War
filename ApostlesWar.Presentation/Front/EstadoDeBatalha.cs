@@ -404,8 +404,11 @@ namespace ApostlesWar.Presentation.Front
     /// clique devolve pra equipar). <see cref="Slot"/> = qual dos 7 slots ele ocupa (0..6 = Fase-1).
     /// <see cref="ValorNum"/> = valor cru pra a diferença (equipado × novo) ser calculada no front.
     /// </summary>
+    /// <see cref="PortadorSimbolo"/> é o emoji de QUEM veste a peça, e vazio quando ela está no baú.
+    /// Ele é obrigatório na lista de troca: vestir em B uma peça que está em A tira ela de A, e sem o
+    /// emoji o jogador desnuda um aliado sem perceber — descobrindo só na fase seguinte.
     internal record ItemArsenalVista(int Indice, string Simbolo, string Nome, string Faccao, int Slot,
-        string Stat, string Valor, double ValorNum, bool Equipado,
+        string Stat, string Valor, double ValorNum, bool Equipado, string PortadorSimbolo,
         /// <summary>
         /// O eixo do NÍVEL da peça: em que nível está, quantas estrelas já foram pagas e o quanto da
         /// faixa atual encheu (0..100). Sem os três na tela o eixo é invisível — o jogador veria dois
@@ -494,9 +497,9 @@ namespace ApostlesWar.Presentation.Front
     /// O arsenal: as três colunas. À esquerda o roster (<see cref="Roster"/> + <see cref="Selecionado"/>),
     /// no centro o apóstolo e o que dá pra comprar nele, à direita os 7 slots e os itens obtidos.
     ///
-    /// <b>Os slots são GLOBAIS e não do apóstolo selecionado</b> (ver <c>ArsenalService.AplicarItens</c>):
-    /// trocar quem está no centro não muda a coluna da direita. O vínculo item↔apóstolo é o passo 10
-    /// do GDD §7 e ainda não existe no modelo.
+    /// <b>Os slots são DO APÓSTOLO SELECIONADO</b> (o passo 10-b do GDD §7): trocar quem está no
+    /// centro troca a coluna da direita inteira. Até ago/2026 eles eram globais e valiam pra todo
+    /// mundo, e era isso que fazia a ficha prometer um bônus que só um conjunto tinha.
     /// </summary>
     internal record CatedralVista(List<SlotArsenalVista> Slots,
         List<ItemArsenalVista> Obtidos,

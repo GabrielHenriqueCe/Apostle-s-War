@@ -17,8 +17,9 @@ wwwroot/
   index.html · estilo.css
   nucleo/   ponte.js (o único que sabe do C#) · cena.js (quem está na tela + abrirTela)
             ar.js (canvas, maestro, laço, aplicarTema)
-  ui/       modal.js · time.js (picker+slots+arrastar) · animacao.js
-  telas/    menu · perfil · arena · campanha · arsenal · compendio · combate
+  ui/       13 módulos reusados entre telas: modal.js · time.js (picker+slots+arrastar) ·
+            animacao.js · ficha.js · peca.js · alma.js · po.js · navegador.js · …
+  telas/    menu · perfil · arena · campanha · catedral · forja · compendio · combate
   cenarios/ comum/ + 8 facções (cada pasta: <faccao>.js + <faccao>.css)
 ```
 

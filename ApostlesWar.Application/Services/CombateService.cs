@@ -667,7 +667,7 @@ namespace ApostlesWar.Application.Services
                 _progressaoService.Creditar(time, pote);
                 // O uso paga o EQUIPAMENTO, e paga na derrota também — quem tentou a fase acima do
                 // próprio nível e caiu não sai de mãos vazias. Os ciclos são os das duas ondas.
-                _arsenalService.CreditarUso(dificuldade, _relogio.CiclosDaFase, venceu);
+                _arsenalService.CreditarUso(time, dificuldade, _relogio.CiclosDaFase, venceu);
                 // A alma segue a MESMA regra da XP: por inimigo morto, e não dividida entre o time —
                 // é pote do jogador, não do apóstolo. Quem sobe quatro paga quatro estrelas.
                 _almaService.Creditar(dificuldade, mortos);

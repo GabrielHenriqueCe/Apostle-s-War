@@ -966,9 +966,18 @@ namespace ApostlesWar.Presentation.Front
                 if (msg.Tipo == "equiparItem")
                 {
                     var obtidos = _arsenal.ObterObtidos();
-                    if (msg.Valor < 0 || msg.Valor >= obtidos.Count) continue;
-                    _arsenal.EquiparItem(obtidos[msg.Valor]);
+                    if (alvo == null || msg.Valor < 0 || msg.Valor >= obtidos.Count) continue;
+                    // Veste no SELECIONADO. Se a peça estava em outro apóstolo, ela sai de lá — o
+                    // roubo é o gesto, e quem avisa antes do clique é o emoji do portador no cartão.
+                    _arsenal.EquiparItem(alvo, obtidos[msg.Valor]);
                     candidato = -1;   // vestiu: não há mais o que comparar
+                }
+                else if (msg.Tipo == "desequiparItem")
+                {
+                    // O valor é o SLOT (0..6), e não o índice no acervo: o botão nasce do boneco, e
+                    // slot vazio é a única coisa que ele pode produzir.
+                    if (alvo != null && msg.Valor >= 0 && msg.Valor < Enum.GetValues<Fases>().Length)
+                        _arsenal.DesequiparItem(alvo, (Fases)(msg.Valor + 1));
                 }
                 else if (msg.Tipo == "preverItem")
                 {
@@ -1038,10 +1047,21 @@ namespace ApostlesWar.Presentation.Front
 
                 if (msg.Tipo == "trocarSlot")
                 {
-                    // Só os slots em que o jogador TEM peça. Quem ainda não achou uma bota não vê a
-                    // bota vazia no meio do giro — a Forja é sobre o que se tem, e uma tela vazia no
-                    // caminho faria a seta parecer quebrada.
-                    var comPeca = _arsenal.ObterObtidos().Select(i => i.Fase).Distinct().OrderBy(f => f).ToList();
+                    // As setas percorrem OS ITENS DAQUELE APÓSTOLO (GDD-itens §O que o item por
+                    // apóstolo muda nas telas): entrou pelo boneco dele, gira pelo boneco dele.
+                    //
+                    // Sem portador — peça aberta do baú — o giro é pelos slots em que o jogador tem
+                    // ALGUMA peça. Nos dois casos o slot vazio fica de fora: quem ainda não achou uma
+                    // bota não vê a bota vazia no meio do giro, e uma tela vazia no caminho faria a
+                    // seta parecer quebrada.
+                    Item?[] boneco = portador == null
+                        ? new Item?[Enum.GetValues<Fases>().Length]
+                        : _arsenal.ObterEquipados(portador);
+                    var comPeca = (portador == null
+                            ? _arsenal.ObterObtidos().Select(i => i.Fase)
+                            : boneco.Where(i => i != null).Select(i => i!.Fase))
+                        .Distinct().OrderBy(f => f).ToList();
+
                     int onde = comPeca.IndexOf(peca.Fase);
                     if (comPeca.Count > 1 && onde >= 0)
                     {
@@ -1050,7 +1070,7 @@ namespace ApostlesWar.Presentation.Front
 
                         // Chega na peça VESTIDA daquele slot, e não na primeira do baú: é a que está
                         // valendo em combate, e é dela que o jogador quer partir.
-                        Item? vestida = _arsenal.ObterEquipados()[(int)destino - 1];
+                        Item? vestida = boneco[(int)destino - 1];
                         peca = vestida ?? _arsenal.ObterObtidos().First(i => i.Fase == destino);
                     }
                 }
@@ -1165,7 +1185,7 @@ namespace ApostlesWar.Presentation.Front
             // O acervo é o do SLOT da peça, e o índice que a tela devolve é a posição NESTA lista —
             // é ela que o `escolherPeca` reabre do outro lado.
             var doSlot = _arsenal.ObterObtidos().Where(i => i.Fase == peca.Fase).ToList();
-            var acervo = doSlot.Select((it, i) => Ver(it, i, _arsenal.EstaEquipado(it))).ToList();
+            var acervo = doSlot.Select((it, i) => Ver(it, i, Veste(portador, it))).ToList();
 
             int teto = Progressao.TetoPorEstrelas(peca.Estrelas);
             bool naParede = _arsenal.NaParede(peca);
@@ -1205,16 +1225,26 @@ namespace ApostlesWar.Presentation.Front
                 })
                 .ToList();
 
-            return new ForjaVista(Ver(peca, doSlot.FindIndex(i => i.Id == peca.Id), _arsenal.EstaEquipado(peca)),
+            return new ForjaVista(Ver(peca, doSlot.FindIndex(i => i.Id == peca.Id), Veste(portador, peca)),
                 Equipamento.NomeDoSlot(peca.Fase), acervo,
-                _arsenal.ObterObtidos().Select(i => i.Fase).Distinct().Count(),
+                // Em quantos slots a SETA tem pra onde ir, e por isso conta o mesmo conjunto que o
+                // `trocarSlot` percorre: o boneco do portador, ou o acervo quando a peça é do baú.
+                portador == null
+                    ? _arsenal.ObterObtidos().Select(i => i.Fase).Distinct().Count()
+                    : _arsenal.ObterEquipados(portador).Count(i => i != null),
                 teto, naParede, peca.Pontos, ateAParede,
                 po, (int)Material.TetoDeFusao(MaiorDificuldade()),
                 receita.Select(VistaDePo).ToList(), faltando.Select(VistaDePo).ToList(),
                 podeComprar, podeQueimar, motivo,
                 patamares, PorNivelDaPeca(peca, portador, teto),
-                _arsenal.EstaEquipado(peca) && portador != null ? portador.Nome : "");
+                // Quem veste a peça DE VERDADE, e não o apóstolo por onde se entrou: abrir a Forja e
+                // ver o nome de outro é a resposta certa quando a peça está no aliado.
+                _arsenal.PortadorDe(peca)?.Nome ?? "");
         }
+
+        /// <summary>Este apóstolo veste ESTA peça? Nulo não veste nada — peça no baú.</summary>
+        private bool Veste(Personagem? apostolo, Item peca)
+            => apostolo != null && _arsenal.ObterEquipados(apostolo).Any(i => i != null && i.Id == peca.Id);
 
         /// <summary>
         /// O que a peça vale em cada nível que ela ainda alcança, e o que isso faz na ficha de quem a
@@ -1224,8 +1254,10 @@ namespace ApostlesWar.Presentation.Front
         /// </summary>
         private List<NivelDaPecaVista> PorNivelDaPeca(Item peca, Personagem? portador, int teto)
         {
-            bool vestida = _arsenal.EstaEquipado(peca);
-            Item?[] hoje = _arsenal.ObterEquipados();
+            // O reflexo é sempre contra o conjunto DO PORTADOR: subir uma peça que ele não veste não
+            // muda ficha nenhuma dele, e mostrar delta ali seria promessa falsa.
+            bool vestida = Veste(portador, peca);
+            Item?[] hoje = portador is null ? new Item?[Enum.GetValues<Fases>().Length] : _arsenal.ObterEquipados(portador);
 
             List<DeltaVista> Reflexo(Item simulada)
             {
@@ -1281,6 +1313,7 @@ namespace ApostlesWar.Presentation.Front
             return new(
                 indice, it.Simbolo, it.Nome, it.Faccao.Descricao(), (int)it.Fase - 1,
                 NomeDoStat(it.TipoStat), ValorFormatado(it), it.Valor, equipado,
+                _arsenal.PortadorDe(it)?.Simbolo ?? "",
                 it.Nivel, it.Estrelas, total <= 0 ? 100 : (int)(100L * feito / total),
                 // A CHAVE do stat vai crua junto com o rótulo: "ATK" é o que se lê, mas o filtro
                 // precisa distinguir ATKFlat de ATKPct, e os dois se escrevem "ATK".
@@ -1289,10 +1322,18 @@ namespace ApostlesWar.Presentation.Front
 
         private CatedralVista MontarCatedral(List<Personagem> roster, int selecionado, int candidato = -1)
         {
-            var equipados = _arsenal.ObterEquipados();
+            Personagem? escolhido = roster.Count > 0 ? roster[selecionado] : null;
+
+            // O boneco é o DELE. Trocar quem está no centro troca a coluna inteira — e é por isso que
+            // a tela toda se redesenha ao selecionar outro apóstolo.
+            Item?[] equipados = escolhido is null
+                ? new Item?[Enum.GetValues<Fases>().Length]
+                : _arsenal.ObterEquipados(escolhido);
 
             var acervo = _arsenal.ObterObtidos();
-            var obtidos = acervo.Select((it, i) => Ver(it, i, _arsenal.EstaEquipado(it))).ToList();
+            // `Equipado` aqui é "vestida POR ELE": é o que marca a peça como já dele. A que está num
+            // aliado não é marcada — ela leva o emoji do portador, que é o aviso antes do roubo.
+            var obtidos = acervo.Select((it, i) => Ver(it, i, Veste(escolhido, it))).ToList();
 
             var slots = new List<SlotArsenalVista>();
             foreach (Fases fase in Enum.GetValues<Fases>())
@@ -1313,8 +1354,7 @@ namespace ApostlesWar.Presentation.Front
                     _progressao.EstrelasDe(p), p.Nivel, XpPct(p)))
                 .ToList();
 
-            Personagem? alvo = roster.Count > 0 ? roster[selecionado] : null;
-            AprimorarVista? aprimorar = MontarAprimorar(alvo);
+            AprimorarVista? aprimorar = MontarAprimorar(escolhido);
 
             // O `Max` de cada faixa é quanto dela cabe ANTES da parede — é o teto da barrinha da
             // queima, e o que impede o jogador de torrar mítico num nível que ele nem destravou.
@@ -1333,7 +1373,7 @@ namespace ApostlesWar.Presentation.Front
 
             return new CatedralVista(slots, obtidos, lista, selecionado, aprimorar, saldo,
                 (int)Material.TetoDeFusao(MaiorDificuldade()),
-                PreviaDeTroca(candidato, roster.Count > 0 ? roster[selecionado] : null));
+                PreviaDeTroca(candidato, escolhido));
         }
 
         /// <summary>
@@ -1354,9 +1394,11 @@ namespace ApostlesWar.Presentation.Front
             if (candidato >= obtidos.Count) return null;
 
             Item nova = obtidos[candidato];
-            if (_arsenal.EstaEquipado(nova)) return null;   // comparar a peça consigo mesma não diz nada
+            // Comparar a peça consigo mesma não diz nada — mas só se ELE já a veste. A que está num
+            // aliado tem prévia sim: é exatamente a conta que o roubo pede antes do clique.
+            if (Veste(apostolo, nova)) return null;
 
-            Item?[] hoje = _arsenal.ObterEquipados();
+            Item?[] hoje = _arsenal.ObterEquipados(apostolo);
             var depois = hoje.ToArray();
             depois[(int)nova.Fase - 1] = nova;
 

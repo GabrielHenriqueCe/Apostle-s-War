@@ -140,7 +140,7 @@ namespace Tests.Bancada
                 tela, new ControladorBot(selecao), habIsolada, espera, Turnos);
 
             var combate = new CombateService(
-                new ArsenalService(capitulos, new PoService(repo), repo),
+                new ArsenalService(capitulos, new PoService(repo), new PersonagemService(), repo),
                 new ApostolosService(personagens, capitulos),
                 personagens, new ProgressaoService(personagens, new AlmaService(repo), repo),
                 new AlmaService(repo), tela, selecao,

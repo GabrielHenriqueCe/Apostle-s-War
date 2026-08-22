@@ -18,6 +18,7 @@ import { blocoDeDelta } from '../ui/delta.js';
 import { cardDePeca } from '../ui/peca.js';
 import { navegador } from '../ui/navegador.js';
 import { barraDeQuantidade } from '../ui/quantidade.js';
+import { filtroLimpo, aplicar, agrupar, painelDeFiltro } from '../ui/filtro.js';
 
 const ARSENAL_AREAS = ['arma', 'elmo', 'escudo', 'acess', 'peito', 'calca', 'bota'];   // slot índice → grid-area
 const ARSENAL_ICONES = ['🗡️', '⛑️', '🛡️', '📿', '🎽', '👖', '👢'];   // ícone do tipo quando o slot está vazio
@@ -31,21 +32,10 @@ let catedralEstacao = null;   // null = itens à mostra · 'estrela' · 'nivel' 
 // o filtro caber sem estourar o layout, que era o risco de pôr as duas lado a lado.
 let catedralTrocando = false;
 
-// O FILTRO da troca. Mora só aqui porque é preferência de quem olha, não estado de jogo: o C# não
-// precisa saber que você escondeu os comuns.
+// O FILTRO da troca. O estado mora aqui porque é preferência de quem olha, não estado de jogo (o C#
+// não precisa saber que você escondeu os comuns); a MECÂNICA dele mora em `ui/filtro.js`, porque a
+// Forja filtra o mesmo acervo e duas cópias divergiriam.
 let filtro = filtroLimpo();
-
-function filtroLimpo() {
-    return {
-        faccao: '',        // '' = todas
-        stat: '',          // '' = qualquer principal (a chave crua, não o rótulo)
-        nivelMin: 0,
-        estrelaMin: 0,
-        ordem: 'valor',    // 'valor' = o que mais dá do stat · 'nivel' · 'estrela'
-        crescente: false,  // o menor primeiro — pra achar o que sacrificar
-        misturar: false,   // junta as facções numa lista só, sem separar por conjunto
-    };
-}
 
 // O que o jogador está MONTANDO na coluna da direita, lido pela ficha do meio. As duas colunas
 // mostram partes do mesmo gesto — a direita é o quanto, o meio é o que isso vira — e é este objeto
@@ -504,10 +494,11 @@ function desenharBoneco() {
         // comparada e limpa o filtro. O filtro é por SLOT — um "principal: Taxa Crítica" vindo da
         // Manopla esvaziaria a lista da Bota, e a tela pareceria vazia sem dizer por quê.
         div.addEventListener('click', () => {
-            if (s.slot !== catedralSlotSel) {
-                catedralTrocando = false;
-                filtro = filtroLimpo();
-            }
+            // O acervo abre JUNTO com o slot: escolher a peça é a razão de clicar aqui, e pedir um
+            // segundo clique ("Trocar item") só pra revelar a lista era uma etapa sem decisão dentro.
+            // Quem quiser o elenco de volta tem o "← elenco" no topo da coluna.
+            if (s.slot !== catedralSlotSel) filtro = filtroLimpo();
+            catedralTrocando = true;
             desenharSlot(s.slot);
             desenharColunaEsquerda();
         });
@@ -517,31 +508,17 @@ function desenharBoneco() {
 
 // ---------- o ACERVO: a lista de peças do slot, com o filtro ----------
 
-// As peças daquele slot já passadas pelo filtro e pela ordem. A EQUIPADA nunca entra: ela está
-// desenhada em cima, no painel de comparação, e repetida na lista viraria uma troca por si mesma.
-function acervoFiltrado() {
-    let itens = catedralDados.obtidos.filter(o => o.slot === catedralSlotSel && !o.equipado);
-
-    if (filtro.faccao) itens = itens.filter(o => o.faccao === filtro.faccao);
-    if (filtro.stat) itens = itens.filter(o => o.statChave === filtro.stat);
-    if (filtro.nivelMin) itens = itens.filter(o => o.nivel >= filtro.nivelMin);
-    if (filtro.estrelaMin) itens = itens.filter(o => o.estrelas >= filtro.estrelaMin);
-
-    const chave = o => filtro.ordem === 'nivel' ? o.nivel
-        : filtro.ordem === 'estrela' ? o.estrelas
-        : o.valorNum;
-
-    // Comparar `valorNum` entre stats DIFERENTES não diz nada (57,5 de ATK contra 0,0575 de HP%), e
-    // é por isso que a ordem por valor só é honesta com o filtro de stat ligado — a lista avisa isso
-    // em vez de fingir um ranking. Dentro do mesmo stat ela é exata.
-    itens.sort((a, b) => (chave(a) - chave(b)) * (filtro.crescente ? 1 : -1));
-
-    return itens;
-}
+// As peças daquele slot já passadas pelo filtro e pela ordem. A que o SELECIONADO já veste nunca
+// entra: ela está desenhada em cima, no painel de comparação, e repetida na lista viraria uma troca
+// por si mesma. A que está num ALIADO entra só com o filtro `deAliados` ligado — tomar a peça de um
+// aliado é gesto de propósito, não descuido, e por isso se pede por ele.
+const doSlotSelecionado = () =>
+    catedralDados.obtidos.filter(o => o.slot === catedralSlotSel && !o.equipado);
 
 function desenharAcervo() {
     const col = document.getElementById('catedralElenco');
-    const itens = acervoFiltrado();
+    const doSlot = doSlotSelecionado();
+    const itens = aplicar(doSlot, filtro);
 
     const topo = document.createElement('div');
     topo.className = 'acervoTopo';
@@ -561,28 +538,19 @@ function desenharAcervo() {
         v.className = 'catedralVazio';
         v.textContent = 'Nenhuma peça passa neste filtro.';
         corpo.append(v);
-    } else if (filtro.misturar) {
-        corpo.append(...itens.map(cardDeAcervo));
     } else {
-        // SEPARADO POR FACÇÃO por padrão: é o conjunto que dá sentido à facção no item, e uma lista
-        // misturada apaga essa leitura. Quem não se importa liga o botão "misturar".
-        const porFaccao = new Map();
-        for (const o of itens) {
-            if (!porFaccao.has(o.faccao)) porFaccao.set(o.faccao, []);
-            porFaccao.get(o.faccao).push(o);
-        }
-        for (const [faccao, doGrupo] of porFaccao) {
-            const cab = document.createElement('div');
-            cab.className = 'acervoGrupo';
-            // O símbolo vem junto do nome: é como a facção se identifica em toda outra tela (mapa,
-            // compêndio, fases), e sem ele o cabeçalho aqui seria o único lugar que a chama só pelo
-            // nome.
-            cab.textContent = `${doGrupo[0].faccaoSimbolo} ${faccao} · ${doGrupo.length}`;
-            corpo.append(cab, ...doGrupo.map(cardDeAcervo));
+        for (const g of agrupar(itens, filtro)) {
+            if (g.cabecalho) {
+                const cab = document.createElement('div');
+                cab.className = 'acervoGrupo';
+                cab.textContent = g.cabecalho;
+                corpo.append(cab);
+            }
+            corpo.append(...g.itens.map(cardDeAcervo));
         }
     }
 
-    col.replaceChildren(topo, desenharFiltro(), corpo);
+    col.replaceChildren(topo, painelDeFiltro(doSlot, filtro, desenharAcervo), corpo);
 }
 
 // O cartão da peça mora em `ui/peca.js`, porque a Forja mostra o MESMO acervo — desenhá-lo duas
@@ -593,73 +561,6 @@ const cardDeAcervo = (o) => cardDePeca(o, {
     aoClicar: () => mandar('preverItem', o.indice),
 });
 
-// O FILTRO, em CHIPS e não em formulário. `<select>` e `<checkbox>` nativos aparecem com a cara do
-// Windows — caixa branca, borda cinza — e num painel escuro isso lê como planilha, não como jogo.
-// Chip é o mesmo botão-placa do resto da tela, e ainda mostra as opções TODAS de uma vez, sem abrir
-// menu nenhum. Cabe na coluna porque cada grupo quebra linha sozinho.
-function desenharFiltro() {
-    const box = document.createElement('div');
-    box.className = 'acervoFiltro';
-
-    const doSlot = catedralDados.obtidos.filter(o => o.slot === catedralSlotSel && !o.equipado);
-    const faccoes = [...new Set(doSlot.map(o => o.faccao))].sort();
-    const stats = [...new Map(doSlot.map(o => [o.statChave, o.stat])).entries()];
-
-    // Conjunto e Principal só aparecem quando há o que escolher: com uma facção só no acervo, uma
-    // fileira de um chip é ruído. O filtro encolhe com o acervo em vez de ficar sempre do tamanho
-    // do pior caso — é o que o mantém dentro da coluna.
-    if (faccoes.length > 1)
-        box.append(grupo('Conjunto', filtro.faccao, [['', 'todos'], ...faccoes.map(f => [f, f])],
-            v => filtro.faccao = v));
-
-    if (stats.length > 1)
-        box.append(grupo('Principal', filtro.stat, [['', 'qualquer'], ...stats],
-            v => filtro.stat = v));
-
-    box.append(
-        grupo('Nível ≥', String(filtro.nivelMin), degraus(0, 60, 10), v => filtro.nivelMin = Number(v)),
-        grupo('Estrela ≥', String(filtro.estrelaMin), degraus(0, 6, 1), v => filtro.estrelaMin = Number(v)),
-        grupo('Ordenar', filtro.ordem,
-            [['valor', 'quanto dá'], ['nivel', 'nível'], ['estrela', 'estrela']],
-            v => filtro.ordem = v),
-        grupo('Sentido', filtro.crescente ? 'sim' : 'nao',
-            [['nao', 'maior 1º'], ['sim', 'menor 1º']],
-            v => filtro.crescente = v === 'sim'),
-        grupo('Conjuntos', filtro.misturar ? 'sim' : 'nao',
-            [['nao', 'separados'], ['sim', 'misturados']],
-            v => filtro.misturar = v === 'sim'));
-
-    return box;
-}
-
-function degraus(de, ate, passo) {
-    const fora = [];
-    for (let n = de; n <= ate; n += passo) fora.push([String(n), n === 0 ? '—' : String(n)]);
-    return fora;
-}
-
-// Um grupo do filtro: o rótulo e a fileira de chips. Só redesenha a COLUNA — mexer no filtro é
-// preferência de quem olha, não ação de jogo, então não vale uma volta à ponte; e uma volta
-// apagaria a peça que está sendo comparada ao lado.
-function grupo(rotulo, valor, opcoes, aoMudar) {
-    const bloco = document.createElement('div');
-    bloco.className = 'flGrupo';
-
-    const r = document.createElement('div'); r.className = 'flRotulo'; r.textContent = rotulo;
-
-    const fila = document.createElement('div'); fila.className = 'flFila';
-    fila.replaceChildren(...opcoes.map(([v, t]) => {
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'flChip' + (v === valor ? ' ligado' : '');
-        chip.textContent = t;
-        chip.addEventListener('click', () => { aoMudar(v); desenharAcervo(); });
-        return chip;
-    }));
-
-    bloco.append(r, fila);
-    return bloco;
-}
 
 // ---------- o painel do SLOT: a peça de hoje, e a que você está pensando em pôr ----------
 //
@@ -692,17 +593,8 @@ function desenharSlot(slot) {
     const acoes = document.createElement('div');
     acoes.className = 'itemAcoes';
 
-    const trocar = document.createElement('button');
-    trocar.type = 'button';
-    trocar.className = 'trocarItem' + (catedralTrocando ? ' ativo' : '');
-    trocar.textContent = catedralTrocando ? 'escolhendo…' : 'Trocar item';
-    trocar.addEventListener('click', () => {
-        catedralTrocando = !catedralTrocando;
-        if (!catedralTrocando) { mandar('preverItem', -1); return; }   // fechou: some a comparação
-        desenharColunaEsquerda();
-        desenharSlot(slot);
-    });
-    acoes.append(trocar);
+    // Não há mais botão pra ABRIR a lista — ela já está aberta à esquerda desde o clique no slot. O
+    // único botão de troca é o que TROCA, e ele nasce lá embaixo, junto da peça escolhida.
 
     // A porta da FORJA, e ela só existe com peça no slot: forjar o vazio não quer dizer nada. O
     // índice viaja porque é a PEÇA que abre a tela, não o slot — lá dentro dá pra pular pras outras
@@ -713,20 +605,34 @@ function desenharSlot(slot) {
         melhorar.className = 'trocarItem melhorarItem';
         melhorar.textContent = '⚒️ Melhorar';
         melhorar.addEventListener('click', () => mandar('abrirForja', equipada.indice));
-        acoes.append(melhorar);
+
+        // TIRAR a peça. Ela volta pro baú — sacrificar peça é assunto da Forja, e um botão que
+        // apagasse equipamento no meio da armaria seria a mesma tecla pra dois destinos diferentes.
+        // Manda o SLOT, não o índice no acervo: o que se esvazia é o slot.
+        const remover = document.createElement('button');
+        remover.type = 'button';
+        remover.className = 'trocarItem';
+        remover.textContent = '✕ Remover';
+        remover.addEventListener('click', () => mandar('desequiparItem', slot));
+
+        acoes.append(melhorar, remover);
     }
 
-    filhos.push(acoes);
+    // Slot vazio não tem ação nenhuma agora que o "Trocar item" saiu — e uma fileira vazia abre um
+    // buraco entre a ficha e a candidata.
+    if (acoes.childElementCount > 0) filhos.push(acoes);
 
     // A candidata entra ABAIXO da equipada, no mesmo lugar onde a lista morava. As duas fichas lado
     // a lado na vertical são a comparação — o delta é o que sobra de olhar as duas.
     if (candidata) {
         filhos.push(fichaDeItem(candidata, 'candidata'), blocoDeDelta(previa.deltas));
 
+        // A ÚNICA tecla da troca, e ela troca de fato. "Equipar" quando o slot está vazio: não há o
+        // que trocar por nada.
         const equipar = document.createElement('button');
         equipar.type = 'button';
         equipar.className = 'acaoConfirmar';
-        equipar.textContent = 'Equipar esta';
+        equipar.textContent = equipada ? 'Trocar' : 'Equipar';
         equipar.addEventListener('click', () => mandar('equiparItem', candidata.indice));
         filhos.push(equipar);
     }

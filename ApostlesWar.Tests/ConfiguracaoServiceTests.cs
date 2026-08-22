@@ -67,7 +67,7 @@ namespace Tests
         {
             var repo = new RepositorioFake();
             var capitulos = new CapitulosService(repo);
-            var arsenal = new ArsenalService(capitulos, new PoService(repo), repo);
+            var arsenal = new ArsenalService(capitulos, new PoService(repo), new PersonagemService(), repo);
             var apostolos = new ApostolosService(new PersonagemService(), capitulos);
             var campanha = new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo);
             var perfil = new PerfilService(repo, apostolos, campanha);

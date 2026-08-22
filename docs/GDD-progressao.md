@@ -157,8 +157,14 @@ paga alma, e ele entra no 10: `teto = 10 × estrelas + 9`. Seis estrelas, **seis
 > comprar é a única forma de passar da parede. É isso que deixa a `Arquetipos.Velocidade` seguir
 > contando o degrau com a mesma expressão sem virar segunda fonte. Há teste em C# só pra isso.
 
-- **A XP ACUMULA na parede.** O save guarda a XP crua e só deixa de APLICAR o nível; comprar a
-  estrela reaplica, e ele salta de uma vez. Farmar travado nunca é tempo jogado fora.
+- **A XP PARA na parede** *(decisão do Gabriel, ago/2026)*. Encheu a faixa do teto, acabou: o que
+  passaria dela é DESCARTADO, e a estrela comprada entrega a dezena seguinte **zerada**. Vale igual
+  pro pó do item. Antes o save guardava a XP crua e a compra reaplicava tudo de uma vez — o jogador
+  pagava o pedágio e caía no meio do 10 (às vezes três níveis acima) sem ter feito nada por aquele
+  pedaço, porque **a mesma fase que enche a faixa já a ultrapassa**: uma fase paga 15 pontos de uma
+  vez e o nível 10 do item tem 20 de largura. O preço: farmar travado passa a ser tempo jogado fora,
+  e é isso que faz a parede pedir a estrela em vez de sugerir. Custa **um nível** na passada do Fácil
+  (27 → 26), medido em teste.
 - **Queimar alma como XP é RECUSADO na parede** (§O MATERIAL): ali a XP não move nível nenhum, e a
   alma queimada é a mesma que a estrela cobra.
 - **O time de 4 bate nos muros na MESMA fase**, porque o pote de XP é dividido igual entre quem está

@@ -21,9 +21,9 @@ node --experimental-vm-modules ferramentas/rodar-tema.js "" 120
 
 **Verde deles não é "o jogo funciona".** O `rodar-telas.js` publica as mensagens do C#, monta cada
 tela e DISPARA os gestos alcançáveis nela — clique, duplo-clique, teclado, arrastar-e-soltar e
-mouse-arrasto. Continuam fora: a batalha depois do primeiro quadro (roda contra o motor C#) e o
-markup ESTÁTICO do index.html, que o DOM de mentira não materializa — ouvinte registrado por
-`querySelectorAll` de classe no carregamento não existe ali.
+mouse-arrasto. O markup ESTÁTICO do index.html ENTRA (ago/2026): a árvore é construída antes do
+boot, então ouvinte registrado por `querySelectorAll` de classe no carregamento existe de verdade.
+Continua fora: a batalha depois do primeiro quadro, que roda contra o motor C#.
 
 **Carga do harness é CONTRATO com o C#, e agora é CONFERIDA.** O `rodar-telas.js` lê o
 `PonteWebView2.cs` (qual `record` vai em cada mensagem) e o `EstadoDeBatalha.cs` (as propriedades

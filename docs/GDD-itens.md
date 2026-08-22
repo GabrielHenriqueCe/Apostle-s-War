@@ -496,8 +496,8 @@ atalho **rouba do próprio teto**: nenhuma trava anti-abuso precisa ser escrita.
 **A ⚒️ BIGORNA é onde essa queima acontece** (a Forja, ago/2026): pó vira ponto na escada
 1·5·25·125·625·3.125, com o mesmo painel de barras da queima de alma. **Ela RECUSA na parede** — não
 como trava anti-abuso (o parágrafo acima explica por que ela não é necessária), mas porque ali o
-ponto não vira nível nenhum: quem malha travado gasta o pó que a têmpera vai cobrar e não anda um
-degrau. É a mesma recusa que o Santuário faz do lado do apóstolo.
+ponto é DESCARTADO (`GDD-progressao.md` §A ESTRELA): quem malha travado destrói o pó que a têmpera
+vai cobrar e não anda um degrau. É a mesma recusa que o Santuário faz do lado do apóstolo.
 
 **Os primeiros níveis têm de sair rápido**, e é o que impede a coisa de ser maçante: você vê número
 subir na primeira sessão, e como o nível é **por peça** com 9 slots, sempre há algo prestes a estourar.

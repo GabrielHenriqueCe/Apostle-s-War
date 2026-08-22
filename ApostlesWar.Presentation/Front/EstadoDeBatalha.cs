@@ -402,13 +402,12 @@ namespace ApostlesWar.Presentation.Front
     /// <summary>
     /// Um item obtido, pra o arsenal. <see cref="Indice"/> = posição na lista de obtidos (é o que o
     /// clique devolve pra equipar). <see cref="Slot"/> = qual dos 7 slots ele ocupa (0..6 = Fase-1).
-    /// <see cref="ValorNum"/> = valor cru pra a diferença (equipado × novo) ser calculada no front.
     /// </summary>
     /// <see cref="PortadorSimbolo"/> é o emoji de QUEM veste a peça, e vazio quando ela está no baú.
     /// Ele é obrigatório na lista de troca: vestir em B uma peça que está em A tira ela de A, e sem o
     /// emoji o jogador desnuda um aliado sem perceber — descobrindo só na fase seguinte.
     internal record ItemArsenalVista(int Indice, string Simbolo, string Nome, string Faccao, int Slot,
-        string Stat, string Valor, double ValorNum, bool Equipado, string PortadorSimbolo,
+        string Stat, string Valor, bool Equipado, string PortadorSimbolo,
         /// <summary>
         /// O eixo do NÍVEL da peça: em que nível está, quantas estrelas já foram pagas e o quanto da
         /// faixa atual encheu (0..100). Sem os três na tela o eixo é invisível — o jogador veria dois
@@ -443,12 +442,6 @@ namespace ApostlesWar.Presentation.Front
         int Max = 0, bool PodeFundir = false);
 
     /// <summary>
-    /// Um stat que mudou de nível pra nível. Só entra na lista o que MEXEU — mostrar oito linhas com
-    /// seis delas em "+0" enterra as duas que importam.
-    /// </summary>
-    internal record DeltaStatVista(string Icone, string Rotulo, int De, int Ate);
-
-    /// <summary>
     /// Um pedaço da barra de XP a encher, dentro de UM nível: <c>de</c> e <c>ate</c> em 0..100.
     ///
     /// A animação vem fatiada do C# porque atravessar nível é encher-zerar-encher, e descobrir ONDE
@@ -458,12 +451,16 @@ namespace ApostlesWar.Presentation.Front
     internal record TrechoDeNivel(int Nivel, int De, int Ate);
 
     /// <summary>
-    /// O que UM apóstolo levou da fase: a XP, os trechos de barra a animar e o que os stats ganharam
-    /// se ele subiu. <see cref="Travou"/> = terminou na parede — a barra fica cheia e acesa, que é
-    /// como o jogador descobre que agora precisa de estrela.
+    /// O que UM apóstolo levou da fase: a XP e os trechos de barra a animar. <see cref="Travou"/> =
+    /// terminou na parede — a barra fica cheia e acesa, que é como o jogador descobre que agora
+    /// precisa de estrela.
+    ///
+    /// <b>A ficha de stats NÃO vem aqui</b> (decisão do Gabriel, ago/2026): a pergunta do fim de
+    /// fase é "quanto andei", e o nível já responde. Quanto ele TEM de HP é pergunta da Catedral,
+    /// onde há tempo de ler.
     /// </summary>
     internal record GanhoVista(string Simbolo, string TipoSimbolo, string Nome, int XpGanha,
-        List<TrechoDeNivel> Trechos, bool Travou, List<DeltaStatVista> Stats);
+        List<TrechoDeNivel> Trechos, bool Travou);
 
 
     /// <summary>
@@ -505,6 +502,11 @@ namespace ApostlesWar.Presentation.Front
     internal record CatedralVista(List<SlotArsenalVista> Slots,
         List<ItemArsenalVista> Obtidos,
         List<ApostoloVisto> Roster, int Selecionado, AprimorarVista? Apostolo, List<AlmaVista> Alma,
+        /// <summary>
+        /// O saldo de PÓ, que esta tela não gasta: ele é o que aparece ao lado da aba ⚒️ Forja, e a
+        /// aba é uma porta — quem vê quanto tem antes de atravessar decide se vale atravessar.
+        /// </summary>
+        List<PoVista> Po,
         int TetoDeFusao,
         /// <summary>A peça que o jogador está comparando na troca, ou null quando não há nenhuma.</summary>
         PreviaDeTrocaVista? Previa);
@@ -527,7 +529,10 @@ namespace ApostlesWar.Presentation.Front
         /// <summary>Em quantos SLOTS o jogador tem peça. 1 = não há tipo pra onde ir, e a seta some.</summary>
         int SlotsComPeca,
         int Teto, bool NaParede, int Pontos, int PontosAteAParede,
-        List<PoVista> Po, int TetoDeFusao,
+        List<PoVista> Po,
+        /// <summary>O saldo de ALMA, ao lado da aba ⛪ Catedral — o espelho do `Po` da Catedral.</summary>
+        List<AlmaVista> Alma,
+        int TetoDeFusao,
         List<PoVista> Receita, List<PoVista> Faltando,
         bool PodeComprarEstrela, bool PodeQueimar, string Motivo,
         List<PatamarVista> Patamares, List<NivelDaPecaVista> PorNivel,

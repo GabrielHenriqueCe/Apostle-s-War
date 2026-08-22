@@ -24,6 +24,7 @@ import { cardDePeca } from '../ui/peca.js';
 import { navegador } from '../ui/navegador.js';
 import { filtroLimpo, aplicar, agrupar, painelDeFiltro } from '../ui/filtro.js';
 import { confirmar } from '../ui/modal.js';
+import { saldoDeAlma, saldoDePo } from '../ui/saldo.js';
 
 let dados = null;
 let bancada = 'nivel';   // 'nivel' = Bigorna · 'estrela' = Têmpera · 'fundir' = Caldeamento
@@ -46,6 +47,11 @@ export const forja = {
         // A Bigorna é o repouso: é a bancada que se usa toda hora, e a têmpera só uma vez por dezena.
         if (anterior !== 'forja') bancada = 'nivel';
         dados = f;
+
+        // O mesmo par de saldos da Catedral, nas mesmas pontas: as duas telas mostram o mesmo par de
+        // abas, e trocar de tela não pode trocar o saldo de lugar.
+        saldoDeAlma('forjaSaldoAlma', f.alma);
+        saldoDePo('forjaSaldoPo', f.po);
         previsao = null;   // toda volta da ponte apaga o que estava sendo montado
         desenharAcervo();
         desenharPeca();

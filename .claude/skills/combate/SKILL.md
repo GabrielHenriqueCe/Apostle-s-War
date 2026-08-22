@@ -24,5 +24,8 @@ bespoke só no 2º cliente).
 comum a pula, e sem a variável nenhum número novo sai. Escreve `docs/bancada-dano.md`, versionado, e o
 `git diff` dele é o relatório. O jogo ABERTO trava o build; pedir pra fechar antes.
 
-**Combate não roda headless** (o loop chama a tela): a verificação em jogo é do Gabriel. Testar aqui
-só o que é PURO — motor, capacidades, `Batalha`, services.
+**Combate RODA headless** — a tela é porta, e uma no-op dá a batalha inteira em memória. O molde é o
+`Tests/OrdemDeMorteTests.cs`: tela que ESCUTA (as mensagens de passiva saem na ordem das reações) +
+controlador que fecha o horizonte em N golpes (`null` → `BatalhaAbortada`). Determinismo sem semear
+`Random`: dano muito acima do HP do alvo. A verificação em JOGO segue sendo do Gabriel — nenhum teste
+vê pixel, animação nem clique.

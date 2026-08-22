@@ -169,8 +169,9 @@ namespace Tests
         }
 
         /// <summary>
-        /// A estrela só se compra NA PAREDE, e ela move o nível de uma vez — os pontos continuam
-        /// acumulando travados, que é o que faz a compra valer a pena na hora em que aparece.
+        /// A estrela só se compra NA PAREDE. O `item.Pontos` aqui é escrito à mão de propósito — é o
+        /// setter cru, e é ele que o save desserializa; quem corta na parede é o
+        /// <see cref="Item.Creditar"/>, e o corte tem teste próprio logo abaixo.
         /// </summary>
         [Fact]
         public void ComprarEstrela_SoNaParede_EComPoNoBolso()
@@ -191,6 +192,35 @@ namespace Tests
             // Sem pó, a compra é recusada — e o item NÃO se move.
             Assert.Equal(MotivoRecusa.SemSaldo, arsenal.ComprarEstrela(item));
             Assert.Equal(9, item.Nivel);
+        }
+
+        /// <summary>
+        /// A PAREDE É PAREDE do lado da peça também: ponto que passa dela some, e a têmpera entrega a
+        /// dezena seguinte ZERADA.
+        ///
+        /// É o caso que o Gabriel viu em jogo (ago/2026): a peça no 9 com a barra cheia caía na
+        /// METADE do nível 10 ao pagar a 1ª estrela. Uma fase paga 15 pontos de uma vez e o nível 10
+        /// tem 20 de largura, então a mesma fase que enchia o 9 já ultrapassava a parede em 10 —
+        /// exatamente a metade que aparecia do outro lado.
+        /// </summary>
+        [Fact]
+        public void NaParede_OExcedenteEDescartado_EATemperaEntregaADezenaZerada()
+        {
+            var repo = new RepositorioFake();
+            var arsenal = Montar(repo);
+            Item item = arsenal.DroparItens(Faccao.Reino, Fases.Fase1)[0];
+
+            item.Creditar(Po.PontosParaNivel(30));   // muito além da parede, de uma vez só
+            Assert.Equal(Po.PontosNaParede(0), item.Pontos);
+            Assert.Equal(9, item.Nivel);
+            Assert.True(arsenal.NaParede(item));
+
+            item.Creditar(500);                      // travado: fase nenhuma move mais o ponto
+            Assert.Equal(Po.PontosNaParede(0), item.Pontos);
+
+            item.Estrelas++;                         // a têmpera, sem passar pelo preço
+            Assert.Equal(10, item.Nivel);
+            Assert.Equal(Po.PontosParaNivel(10), item.Pontos);   // entra no 10 ZERADO
         }
 
         /// <summary>

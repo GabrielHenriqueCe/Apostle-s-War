@@ -65,8 +65,8 @@ namespace ApostlesWar.Domain
 
         /// <summary>
         /// O nível de hoje: o que os <see cref="Pontos"/> pagam, preso ao teto que as
-        /// <see cref="Estrelas"/> abriram. Os pontos continuam ACUMULANDO na parede — é o que faz a
-        /// estrela comprada mover o nível de uma vez, sem estado novo.
+        /// <see cref="Estrelas"/> abriram. Na parede os pontos PARAM (ver <see cref="Creditar"/>), e
+        /// a estrela comprada entrega a dezena seguinte zerada.
         /// </summary>
         public int Nivel => Po.NivelPorPontos(Pontos, Progressao.TetoPorEstrelas(Estrelas));
 
@@ -75,6 +75,18 @@ namespace ApostlesWar.Domain
         /// liberou. É a única fonte do número — nada mais multiplica item.
         /// </summary>
         public double Valor => Equipamento.Maximo(TipoStat) * Equipamento.FatorNivel(Nivel);
+
+        /// <summary>
+        /// Põe pontos na peça e PARA NA PAREDE (<see cref="Po.PontosNaParede"/>) — o que passaria dela
+        /// é descartado.
+        ///
+        /// É o único caminho de entrada dos pontos, e é o que mantém a regra numa linha só: o uso da
+        /// fase e a bigorna da Forja chegam os dois por aqui. O <see cref="Pontos"/> segue com setter
+        /// público porque o save o desserializa direto, e o corte de um save antigo é do
+        /// `ArsenalService` ao carregar.
+        /// </summary>
+        public void Creditar(int pontos)
+            => Pontos = Math.Min(Pontos + pontos, Po.PontosNaParede(Estrelas));
 
         public Item(string nome, string simbolo, Faccao faccao, Fases fase, TipoStat tipoStat)
         {

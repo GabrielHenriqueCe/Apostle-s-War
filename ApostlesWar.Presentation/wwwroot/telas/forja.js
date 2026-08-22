@@ -6,6 +6,11 @@
 //   ⚒️ Bigorna     malha pó em pontos de nível — golpe a golpe, é a que mais se usa
 //   💧 Têmpera     o mergulho que fixa a dureza: paga a estrela e abre a dezena seguinte
 //   🏺 Caldeamento caldear é unir metais aquecidos num só — 10 de uma faixa viram 1 da seguinte
+//   ⚙️ Esmeril     o rebolo que desfaz a peça em limalha: ela vira pó e deixa de existir
+//   ⚗️ Amálgama    (em breve) várias peças viram uma de raridade acima, e as subs delas viram o pool
+//
+// As duas máquinas da oficina são a Bigorna e o Esmeril; as duas de fogo são a Têmpera e o
+// Caldeamento. O Esmeril é a ÚNICA que destrói, e por isso a única com confirmação.
 //
 // Entra-se pela Catedral (o ⚒️ Melhorar de um slot) e o Esc volta pra lá. Não há estado de jogo
 // aqui: o que mora neste arquivo é só qual bancada está aberta e o que está sendo montado nela.
@@ -18,6 +23,7 @@ import { blocoDeDelta } from '../ui/delta.js';
 import { cardDePeca } from '../ui/peca.js';
 import { navegador } from '../ui/navegador.js';
 import { filtroLimpo, aplicar, agrupar, painelDeFiltro } from '../ui/filtro.js';
+import { confirmar } from '../ui/modal.js';
 
 let dados = null;
 let bancada = 'nivel';   // 'nivel' = Bigorna · 'estrela' = Têmpera · 'fundir' = Caldeamento
@@ -47,6 +53,10 @@ export const forja = {
         desenharBancada();
     },
 };
+
+// A aba do título. Ela NÃO é o "voltar" do Esc: entrando pelo menu, voltar devolve ao menu, e um
+// botão escrito "Catedral" que leva pro menu é rótulo mentindo. O C# distingue os dois.
+document.getElementById('forjaIrCatedral').addEventListener('click', () => mandar('irParaCatedral', 0));
 
 // ---------- esquerda: as peças DAQUELE slot ----------
 //
@@ -181,7 +191,8 @@ function desenharPortas() {
         botao('⚒️', 'Bigorna', 'nivel', dados.podeQueimar),
         botao('💧', 'Têmpera', 'estrela', dados.naParede),
         botao('🏺', 'Caldeamento', 'fundir', true),
-        botao('♻️', 'Reforja', null, false, 'em breve'));
+        botao('⚙️', 'Esmeril', 'esmeril', dados.podeEsmerilhar),
+        botao('⚗️', 'Amálgama', null, false, 'em breve'));
 }
 
 // `acao` null = a bancada que ainda não existe. `habilitado` false NÃO desabilita: a bancada é onde
@@ -212,7 +223,7 @@ function botao(icone, rotulo, acao, habilitado, nota) {
 
 function desenharBancada() {
     const painel = document.getElementById('forjaBancada');
-    const nomes = { nivel: '⚒️ Bigorna', estrela: '💧 Têmpera', fundir: '🏺 Caldeamento' };
+    const nomes = { nivel: '⚒️ Bigorna', estrela: '💧 Têmpera', fundir: '🏺 Caldeamento', esmeril: '⚙️ Esmeril' };
 
     const titulo = document.createElement('h2');
     titulo.className = 'apostoloSecao';
@@ -220,7 +231,8 @@ function desenharBancada() {
 
     const corpo = bancada === 'estrela' ? painelDaTempera()
         : bancada === 'fundir' ? painelDoCaldeamento()
-            : painelDaBigorna();
+            : bancada === 'esmeril' ? painelDoEsmeril()
+                : painelDaBigorna();
 
     painel.replaceChildren(titulo, ...corpo);
 }
@@ -331,6 +343,39 @@ function painelDaTempera() {
 
 // O CALDEAMENTO: 10 de uma faixa viram 1 da seguinte. A barra conta GRUPOS de 10, não unidades — é
 // o grupo que produz alguma coisa, e arrastar em unidades deixaria o jogador parar num resto.
+// O ESMERIL: a peça vira pó e DEIXA DE EXISTIR. É a única bancada que destrói, e por isso é a única
+// com confirmação — as outras três gastam material, esta gasta a peça.
+//
+// Peça vestida não entra no esmeril: a bancada diz de quem tirar primeiro, em vez de desnudar o
+// apóstolo por conta própria. Quem tira é o ✕ Remover da Armaria.
+function painelDoEsmeril() {
+    const p = dados.peca;
+    const partes = [rotulo('Moer a peça em pó')];
+
+    if (!dados.podeEsmerilhar) {
+        partes.push(aviso(`Está vestida em ${dados.portadorNome}. Remova na Armaria pra poder moer.`));
+        return partes;
+    }
+
+    partes.push(aviso(`${p.simbolo} ${p.nome} nv ${p.nivel} deixa de existir. O nível dela não volta.`));
+
+    const ganho = document.createElement('div');
+    ganho.className = 'acaoReceita';
+    ganho.append(linhaDePo(dados.esmeril, `+${dados.esmeril.quantidade.toLocaleString('pt-BR')}`));
+    partes.push(rotulo('Devolve'), ganho);
+
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'acaoConfirmar';
+    b.textContent = 'Esmerilhar';
+    b.addEventListener('click', () => confirmar(
+        `Moer ${p.nome} nv ${p.nivel}? A peça deixa de existir.`,
+        () => mandar('esmerilharPeca', 0)));
+    partes.push(b);
+
+    return partes;
+}
+
 function painelDoCaldeamento() {
     const escolha = dados.po.map(() => 0);
 

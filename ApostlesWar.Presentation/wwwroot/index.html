@@ -166,7 +166,12 @@
          O #catedralEstacao ocupa a MESMA célula do #armaria: abrir uma ação esconde os itens, que
          não têm o que dizer naquele momento. -->
     <section id="catedral" hidden>
-        <h1>⛪ Catedral</h1>
+        <!-- O título é um PAR de abas: Catedral e Forja são telas irmãs, e trocar entre elas é o gesto
+             mais repetido da progressão. Quem está aberta fica acesa; a outra é a porta. -->
+        <div class="tituloAbas">
+            <h1 class="abaTitulo aberta">⛪ Catedral</h1>
+            <button type="button" id="catedralIrForja" class="abaTitulo">⚒️ Forja</button>
+        </div>
         <!-- QUATRO colunas, com o apóstolo no centro óptico: o elenco de um lado, as portas e a estação
              do outro, somando a mesma largura.
              A última é compartilhada: #armaria (a Forja, em repouso) e #catedralEstacao (a
@@ -191,7 +196,10 @@
     <!-- Cena da FORJA: a oficina da PEÇA, e a irmã da Catedral — mesmas quatro colunas, outro
          centro. Entra-se pelo ⚒️ Melhorar de um slot da Armaria; o Esc volta pra lá. -->
     <section id="forja" hidden>
-        <h1>⚒️ Forja</h1>
+        <div class="tituloAbas">
+            <button type="button" id="forjaIrCatedral" class="abaTitulo">⛪ Catedral</button>
+            <h1 class="abaTitulo aberta">⚒️ Forja</h1>
+        </div>
         <div id="forjaCorpo">
             <aside id="forjaAcervo"></aside>
             <div id="forjaPeca"></div>

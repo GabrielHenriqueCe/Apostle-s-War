@@ -21,8 +21,9 @@ namespace ApostlesWar.Presentation.Front
         private const int Campanha = 0;
         private const int Arena = 1;
         private const int Catedral = 2;
-        private const int Compendio = 3;
-        private const int Configuracao = 4;
+        private const int Forja = 3;
+        private const int Compendio = 4;
+        private const int Configuracao = 5;
 
         // Índices do menu de CONFIGURAÇÃO.
         private const int CfgTelaCheia = 1;
@@ -99,6 +100,10 @@ namespace ApostlesWar.Presentation.Front
                             MostrarCatedral();
                             break;
 
+                        case Forja:
+                            AbrirForjaDoMenu();
+                            break;
+
                         case Compendio:
                             MostrarCompendio();
                             break;
@@ -117,6 +122,28 @@ namespace ApostlesWar.Presentation.Front
             {
                 // Janela fechada ou Esc-sair: a thread do jogo só precisa desenrolar e terminar.
             }
+        }
+
+        /// <summary>
+        /// A Forja aberta DIRETO do menu. Ela é tela da PEÇA, então precisa de uma — e de um portador
+        /// pra o reflexo na ficha fazer sentido.
+        ///
+        /// Escolhe a primeira peça VESTIDA do primeiro apóstolo do roster; sem nenhuma vestida, a
+        /// primeira do acervo, e aí sem portador (a peça está no baú, e não há ficha a mexer). Com o
+        /// acervo vazio a opção do menu nem está habilitada, mas a checagem fica: quem responde "dá
+        /// pra abrir?" é o back, sempre de novo, e não a tela que desenhou o botão.
+        /// </summary>
+        private void AbrirForjaDoMenu()
+        {
+            var acervo = _arsenal.ObterObtidos();
+            if (acervo.Count == 0) return;
+
+            Personagem? alvo = _apostolos.ObterDesbloqueados().FirstOrDefault();
+            Item? vestida = alvo == null ? null : _arsenal.ObterEquipados(alvo).FirstOrDefault(i => i != null);
+
+            // Pediu a Catedral pela aba: quem a abre é este caminho, porque o laço da Forja aqui
+            // não tem uma Catedral em volta pra onde voltar.
+            if (MostrarForja(vestida ?? acervo[0], vestida == null ? null : alvo)) MostrarCatedral();
         }
 
         /// <summary>1ª vez (sem save de perfil): pede o nome e sorteia um avatar. Já tem perfil → volta na hora.</summary>
@@ -159,6 +186,11 @@ namespace ApostlesWar.Presentation.Front
                     // e "arsenal" continua sendo a palavra certa pra isso — a Armaria é a estação
                     // onde ele se veste.
                     new("Catedral",     "⛪", Habilitado: true),
+                    // A FORJA tem porta própria no menu (pedido do Gabriel, ago/2026): ela é tela
+                    // irmã da Catedral, não uma estação dela, e chegar nela custava três cliques
+                    // (Catedral → slot → Melhorar). Desabilitada com o acervo vazio: sem peça não
+                    // há o que forjar, e a porta diria isso tarde demais.
+                    new("Forja",        "⚒️", Habilitado: _arsenal.ObterObtidos().Count > 0),
                     new("Compêndio",    "📖", Habilitado: true),
                     new("Configurações", "⚙️", Habilitado: true),
                     // Não há opção "Sair" na lista: quem sai do jogo é o 🚪 do canto superior
@@ -621,14 +653,18 @@ namespace ApostlesWar.Presentation.Front
         }
 
         /// <summary>
-        /// O que a ficha ganhou entre dois níveis. Só o que MEXEU entra: uma lista com seis linhas
-        /// em "+0" enterra as duas que importam. O crítico fica de fora porque vem do TIPO e não
-        /// anda com o nível.
+        /// A ficha do apóstolo no fim da fase — <b>os seis stats, SEMPRE</b>, subindo ou não. Quem
+        /// mostra o <c>→</c> só onde mudou é a tela.
+        ///
+        /// Antes só entrava o que tinha MEXIDO, e o efeito era a tela dançar: a linha de um apóstolo
+        /// tinha seis campos quando ele subia de nível e nenhum quando não subia, então o bloco mudava
+        /// de tamanho a cada vitória. Lista de tamanho fixo se lê de relance; lista que aparece e some
+        /// obriga a reler. É pedido do Gabriel (ago/2026).
+        ///
+        /// O crítico fica de fora porque vem do TIPO e não anda com o nível.
         /// </summary>
         private static List<DeltaStatVista> DeltaDeStats(Personagem p, int de, int ate)
         {
-            if (ate <= de) return new List<DeltaStatVista>();
-
             Personagem antes = p.ComNivel(de);
             var linhas = new (string Icone, string Rotulo, int De, int Ate)[]
             {
@@ -640,9 +676,7 @@ namespace ApostlesWar.Presentation.Front
                 ("🧿", "Resistência", antes.Resistencia, p.Resistencia),
             };
 
-            return linhas.Where(l => l.Ate != l.De)
-                .Select(l => new DeltaStatVista(l.Icone, l.Rotulo, l.De, l.Ate))
-                .ToList();
+            return linhas.Select(l => new DeltaStatVista(l.Icone, l.Rotulo, l.De, l.Ate)).ToList();
         }
 
         /// <summary>
@@ -1034,7 +1068,12 @@ namespace ApostlesWar.Presentation.Front
         /// <paramref name="portador"/> é o apóstolo selecionado na Catedral; é contra a ficha DELE
         /// que a prévia mostra o reflexo do nível novo. Nulo (ou peça no baú) apaga só esse reflexo.
         /// </summary>
-        private void MostrarForja(Item peca, Personagem? portador)
+        /// <returns>
+        /// true quando o jogador pediu a CATEDRAL pela aba do título — quem entrou pela Catedral já
+        /// volta pra lá de qualquer jeito, mas quem entrou pelo MENU precisa que alguém a abra. Sem
+        /// isso a aba escrita "Catedral" devolveria ao menu, e o rótulo estaria mentindo.
+        /// </returns>
+        private bool MostrarForja(Item peca, Personagem? portador)
         {
             while (true)
             {
@@ -1043,7 +1082,8 @@ namespace ApostlesWar.Presentation.Front
 
                 MensagemDoFront msg = _ponte.Esperar();
                 if (msg.Tipo == "encerrar") throw new JogoEncerrado();
-                if (msg.Tipo == "voltar") return;
+                if (msg.Tipo == "voltar") return false;
+                if (msg.Tipo == "irParaCatedral") return true;
 
                 if (msg.Tipo == "trocarSlot")
                 {
@@ -1100,6 +1140,18 @@ namespace ApostlesWar.Presentation.Front
                     if (q != null)
                         foreach (FaixaQueimada f in q.Faixas.OrderBy(f => f.Raridade))
                             _po.Fundir((Raridade)f.Raridade, f.Quantidade, MaiorDificuldade());
+                }
+                else if (msg.Tipo == "esmerilharPeca")
+                {
+                    if (_arsenal.Esmerilhar(peca) != MotivoRecusa.Nenhum) continue;
+
+                    // A peça do centro ACABOU DE SUMIR, e a Forja não existe sem uma. Cai na peça
+                    // vestida do slot (é a que está valendo), senão na primeira que sobrou dele — e
+                    // se não sobrou nenhuma, sai pra Catedral: o acervo daquele slot zerou.
+                    Item? proxima = portador == null ? null : _arsenal.ObterEquipados(portador)[(int)peca.Fase - 1];
+                    proxima ??= _arsenal.ObterObtidos().FirstOrDefault(i => i.Fase == peca.Fase);
+                    if (proxima == null) return true;
+                    peca = proxima;
                 }
             }
         }
@@ -1239,7 +1291,8 @@ namespace ApostlesWar.Presentation.Front
                 patamares, PorNivelDaPeca(peca, portador, teto),
                 // Quem veste a peça DE VERDADE, e não o apóstolo por onde se entrou: abrir a Forja e
                 // ver o nome de outro é a resposta certa quando a peça está no aliado.
-                _arsenal.PortadorDe(peca)?.Nome ?? "");
+                _arsenal.PortadorDe(peca)?.Nome ?? "",
+                VistaDePo(Po.Esmerilhar(peca.Raridade)), _arsenal.PortadorDe(peca) == null);
         }
 
         /// <summary>Este apóstolo veste ESTA peça? Nulo não veste nada — peça no baú.</summary>

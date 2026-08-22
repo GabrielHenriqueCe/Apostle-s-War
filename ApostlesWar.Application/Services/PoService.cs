@@ -20,5 +20,12 @@ namespace ApostlesWar.Application.Services
         /// a diferença contra a alma, que cai por inimigo morto mesmo na derrota.
         /// </summary>
         public void Creditar(Dificuldade dificuldade) => Depositar(Po.QuedaPorFase(dificuldade), vezes: 1);
+
+        /// <summary>
+        /// A SEGUNDA torneira do pó: o que o ⚙️ Esmeril devolveu por uma peça moída. Entra por aqui e
+        /// não pelo <see cref="Creditar(Dificuldade)"/> porque a fase paga três faixas de uma vez e o
+        /// esmeril paga uma só — a da peça.
+        /// </summary>
+        public void Creditar(Custo ganho) => Depositar(new[] { ganho }, vezes: 1);
     }
 }

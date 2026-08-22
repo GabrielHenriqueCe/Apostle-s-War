@@ -35,6 +35,30 @@ namespace Tests
             return (new CampanhaService(arsenal, apostolos, capitulos, new PersonagemService(), new ProgressaoService(new PersonagemService(), new AlmaService(repo), repo), repo), capitulos, apostolos);
         }
 
+        /// <summary>
+        /// O capítulo seguinte abre com a ÚLTIMA FASE VENCIDA, não com ela alcançada. Vencer a 6
+        /// desbloqueia a 7, e a pergunta errada (<c>FaseDesblock</c>, "todas liberadas") dava o
+        /// capítulo de presente a quem tinha acabado de CHEGAR na 7 — bug visto em jogo em ago/2026,
+        /// parado na 2-7 com o capítulo 3 aberto.
+        /// </summary>
+        [Fact]
+        public void ProximoCapitulo_SoAbreComAUltimaFaseVENCIDA()
+        {
+            var (campanha, capitulos, _) = Montar();
+            Fases ultima = Enum.GetValues<Fases>().Last();
+
+            foreach (Fases f in Enum.GetValues<Fases>().Where(f => f != ultima))
+                campanha.ProcessarVitoria(Faccao.Reino, f, Dificuldade.Facil);
+
+            // Chegou na última fase do Reino: ela está aberta, mas não foi lutada.
+            Assert.True(capitulos.EstaDesbloqueado(Faccao.Reino, ultima, Dificuldade.Facil));
+            Assert.False(capitulos.EstaCapituloDesbloqueado(Faccao.LadoSombrio, Dificuldade.Facil));
+
+            campanha.ProcessarVitoria(Faccao.Reino, ultima, Dificuldade.Facil);
+
+            Assert.True(capitulos.EstaCapituloDesbloqueado(Faccao.LadoSombrio, Dificuldade.Facil));
+        }
+
         [Fact]
         public void ProcessarVitoria_Reino1_DesbloqueiaProximaFase_ApostolosEItem()
         {

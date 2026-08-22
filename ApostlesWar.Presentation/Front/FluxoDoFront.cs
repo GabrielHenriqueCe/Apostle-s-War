@@ -152,10 +152,12 @@ namespace ApostlesWar.Presentation.Front
                 {
                     new("Campanha",     "🗺️", Habilitado: true),
                     new("Arena",        "⚔️", Habilitado: true),
-                    // A CATEDRAL abriga as quatro estações — 🎒 Forja (itens), ⬆️ Santuário
-                    // (nível), ★ Altar (estrela) e 🔥 Oferenda (fundir alma). O `ArsenalService`
-                    // manteve o nome de propósito: ele é o ACERVO de equipamento, e "arsenal"
-                    // continua sendo a palavra certa pra isso — a Forja é a estação onde ele se usa.
+                    // A CATEDRAL abriga as quatro estações — 🎒 Armaria (vestir), ⬆️ Santuário
+                    // (nível), ★ Altar (estrela) e 🔥 Oferenda (fundir alma). A ⚒️ Forja NÃO é uma
+                    // delas: é tela própria, porque lá o centro é a peça e não o apóstolo. O
+                    // `ArsenalService` manteve o nome de propósito: ele é o ACERVO de equipamento,
+                    // e "arsenal" continua sendo a palavra certa pra isso — a Armaria é a estação
+                    // onde ele se veste.
                     new("Catedral",     "⛪", Habilitado: true),
                     new("Compêndio",    "📖", Habilitado: true),
                     new("Configurações", "⚙️", Habilitado: true),
